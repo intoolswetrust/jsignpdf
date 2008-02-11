@@ -7,7 +7,10 @@ import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.net.URL;
 
+import javax.swing.JButton;
+import javax.swing.JComponent;
 import javax.swing.JFileChooser;
+import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
@@ -53,22 +56,43 @@ public class SignPdfForm extends javax.swing.JFrame implements SignResultListene
 	 */
 	private void translateLabels() {
 		setTitle(res.get("gui.title", new String[] {Constants.VERSION}));
-		lblKeystoreType.setText(res.get("gui.keystoreType.label"));
-		lblKeystoreFile.setText(res.get("gui.keystoreFile.label"));
-		lblPassword.setText(res.get("gui.keystorePassword.label"));
-		lblInPdfFile.setText(res.get("gui.inPdfFile.label"));
-		lblOutPdfFile.setText(res.get("gui.outPdfFile.label"));
-		lblReason.setText(res.get("gui.reason.label"));
-		lblLocation.setText(res.get("gui.location.label"));
+		setLabelAndMnemonic(lblKeystoreType, "gui.keystoreType.label");
+		setLabelAndMnemonic(lblKeystoreFile, "gui.keystoreFile.label");
+		setLabelAndMnemonic(lblPassword, "gui.keystorePassword.label");
+		setLabelAndMnemonic(lblInPdfFile, "gui.inPdfFile.label");
+		setLabelAndMnemonic(lblOutPdfFile, "gui.outPdfFile.label");
+		setLabelAndMnemonic(lblReason, "gui.reason.label");
+		setLabelAndMnemonic(lblLocation, "gui.location.label");
 
 		btnKeystoreFile.setText(res.get("gui.browse.button"));
 		btnInPdfFile.setText(res.get("gui.browse.button"));
 		btnOutPdfFile.setText(res.get("gui.browse.button"));
 
-		btnSignIt.setText(res.get("gui.signIt.button"));
+		setLabelAndMnemonic(btnSignIt,"gui.signIt.button");
 
 		infoDialog.setTitle(res.get("gui.info.title"));
 		btnInfoClose.setText(res.get("gui.info.close.button"));
+	}
+
+	private void setLabelAndMnemonic(final JComponent aComponent, final String aKey) {
+		final String tmpLabelText = res.get(aKey);
+		final int tmpMnemIndex = res.getMnemonicIndex(aKey);
+		if (aComponent instanceof JLabel) {
+			final JLabel tmpLabel = (JLabel) aComponent;
+			tmpLabel.setText(tmpLabelText);
+			if (tmpMnemIndex>-1) {
+				tmpLabel.setDisplayedMnemonic(tmpLabelText.toLowerCase().charAt(tmpMnemIndex));
+				tmpLabel.setDisplayedMnemonicIndex(tmpMnemIndex);
+			}
+		} else if (aComponent instanceof JButton) {
+			final JButton tmpBtn = (JButton) aComponent;
+			tmpBtn.setText(tmpLabelText);
+			if (tmpMnemIndex>-1) {
+				tmpBtn.setMnemonic(tmpLabelText.toLowerCase().charAt(tmpMnemIndex));
+			}
+		} else {
+			throw new IllegalArgumentException();
+		}
 	}
 
 	/**
