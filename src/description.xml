@@ -2,4 +2,10 @@
 <description xmlns="http://openoffice.org/extensions/description/2006" xmlns:xlink="http://www.w3.org/1999/xlink">
     <version value="0.2.0"/>
     <identifier value="net.sf.jsignpdf.JSignPdf"/>
+    <registration>
+        <simple-license accept-by="user" default-license-id="mpl">
+            <license-text lang="en" license-id="mpl" xlink:href="licenses/MPL-1.1.txt"/>
+            <license-text lang="en" license-id="lgpl" xlink:href="licenses/lgpl-2.1.txt"/>
+        </simple-license>
+    </registration>
 </description>
