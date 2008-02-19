@@ -1,6 +1,10 @@
 package net.sf.jsignpdf;
 
+import java.io.FileInputStream;
+import java.io.InputStream;
+import java.security.KeyStore;
 import java.util.ArrayList;
+import java.util.Enumeration;
 import java.util.List;
 import java.util.Set;
 
@@ -31,14 +35,34 @@ public class KeyStoreUtils {
 
 	/**
 	 * Loads key names (aliases) from the keystore
-	 * @return
+	 * @param aType KeyStore type
+	 * @return array of key aliasis in given keystore
 	 */
-	public String[] getAliases() {
+	public String[] getAliases(final String aType) {
 		if (options==null) {
 			throw new NullPointerException("Options are empty.");
 		}
-		//TODO implement
-		return null;
+		final List<String> tmpResult = new ArrayList<String>();
+		try {
+			final KeyStore tmpKs = KeyStore.getInstance(aType);
+			InputStream tmpIS = null;
+			char[] tmpPass = null;
+			if (!StringUtils.isEmpty(options.ksFile)) {
+				tmpIS = new FileInputStream(options.ksFile);
+			}
+			if (options.ksPasswd!=null && options.ksPasswd.length>0) {
+				tmpPass = options.ksPasswd;
+			}
+			tmpKs.load(tmpIS, tmpPass);
+			Enumeration<String> tmpAliases = tmpKs.aliases();
+			while (tmpAliases.hasMoreElements()) {
+				tmpResult.add(tmpAliases.nextElement());
+			}
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return tmpResult.toArray(new String[tmpResult.size()]);
 	}
 
 	public SignerOptions getOptions() {
