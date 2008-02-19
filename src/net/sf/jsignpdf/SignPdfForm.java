@@ -31,6 +31,8 @@ public class SignPdfForm extends javax.swing.JFrame implements SignResultListene
 
 	private PrintWriter infoWriter;
 	private TextAreaStream infoStream;
+	private SignerOptions signerOptions = new SignerOptions();
+	private SignerLogic signerLogic = new SignerLogic(signerOptions);
 
 	/** Creates new form SignPdfForm */
 	public SignPdfForm(int aCloseOperation) {
@@ -49,6 +51,10 @@ public class SignPdfForm extends javax.swing.JFrame implements SignResultListene
 		infoDialog.setIconImage(getIconImage());
 
 		infoDialog.pack();
+
+		signerOptions.setPrintWriter(infoWriter);
+		signerOptions.setListener(this);
+
 	}
 
 	/**
@@ -116,7 +122,9 @@ public class SignPdfForm extends javax.swing.JFrame implements SignResultListene
 	void showFileChooser(final JTextField aFileField, final FileFilter aFilter, final int aType) {
 		fc.setDialogType(aType);
 		fc.resetChoosableFileFilters();
-		fc.setFileFilter(aFilter);
+		if (aFilter!=null) {
+			fc.setFileFilter(aFilter);
+		}
 		String tmpFileName = aFileField.getText();
 		if (tmpFileName==null || tmpFileName.length()==0) {
 			fc.setSelectedFile(null);
@@ -492,25 +500,22 @@ public class SignPdfForm extends javax.swing.JFrame implements SignResultListene
 			setVisible(false);
 			infoDialog.setDefaultCloseOperation(javax.swing.WindowConstants.DO_NOTHING_ON_CLOSE);
 			infoWriter.println(res.get("console.starting"));
-			final SignerOptions tmpOpts = new SignerOptions();
-			tmpOpts.setOutWriter(infoWriter);
-			tmpOpts.setKsType(cbKeystoreType.getSelectedIndex()==0?Constants.KS_TYPE_PKCS12:Constants.KS_TYPE_JKS);
-			tmpOpts.setKsFile(tfKeystoreFile.getText());
-			tmpOpts.setKsPasswd(pfPassword.getPassword());
-			tmpOpts.setKeyPasswd(pfPassword.getPassword());
-			tmpOpts.setInFile(tfInPdfFile.getText());
-			tmpOpts.setOutFile(tfOutPdfFile.getText());
-			tmpOpts.setReason(tfReason.getText());
-			tmpOpts.setLocation(tfLocation.getText());
-			tmpOpts.setListener(this);
+			signerOptions.setKsType((String) cbKeystoreType.getSelectedItem());
+			signerOptions.setKsFile(tfKeystoreFile.getText());
+			signerOptions.setKsPasswd(pfPassword.getPassword());
+			signerOptions.setKeyPasswd(pfPassword.getPassword());
+			signerOptions.setInFile(tfInPdfFile.getText());
+			signerOptions.setOutFile(tfOutPdfFile.getText());
+			signerOptions.setReason(tfReason.getText());
+			signerOptions.setLocation(tfLocation.getText());
 			//Let's do it
-			final Thread tmpST = new Thread(new SignerLogic(tmpOpts));
+			final Thread tmpST = new Thread(signerLogic);
 			tmpST.start();
 		}
 	}//GEN-LAST:event_btnSignItActionPerformed
 
 	private void formWindowClosing(java.awt.event.WindowEvent evt) {//GEN-FIRST:event_formWindowClosing
-		props.setProperty(Constants.PROPERTY_KSTYPE, String.valueOf(cbKeystoreType.getSelectedIndex()));
+		props.setProperty(Constants.PROPERTY_KSTYPE, (String) cbKeystoreType.getSelectedItem());
 		props.setProperty(Constants.PROPERTY_KEYSTORE, tfKeystoreFile.getText());
 		props.setProperty(Constants.PROPERTY_INPDF, tfInPdfFile.getText());
 		props.setProperty(Constants.PROPERTY_OUTPDF, tfOutPdfFile.getText());
@@ -530,8 +535,7 @@ public class SignPdfForm extends javax.swing.JFrame implements SignResultListene
 
 	private void btnKeystoreFileActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnKeystoreFileActionPerformed
 		final FileFilter tmpFilter = cbKeystoreType.getSelectedIndex()==0
-		?SignerFileChooser.FILEFILTER_PKCS12
-				:SignerFileChooser.FILEFILTER_JKS;
+			?SignerFileChooser.FILEFILTER_PKCS12:null;
 		showFileChooser(tfKeystoreFile, tmpFilter, JFileChooser.OPEN_DIALOG);
 	}//GEN-LAST:event_btnKeystoreFileActionPerformed
 

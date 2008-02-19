@@ -20,14 +20,13 @@ public class SignerLogic implements Runnable {
 
 	private SignerOptions options;
 
+	public SignerLogic() {}
+
 	/**
 	 * Constructor with all necessary parameters.
 	 * @param anOptions options of signer
 	 */
 	public SignerLogic(final SignerOptions anOptions) {
-		if (anOptions==null) {
-			throw new NullPointerException("Options has to be filled.");
-		}
 		options = anOptions;
 	}
 
@@ -54,12 +53,22 @@ public class SignerLogic implements Runnable {
 	 * @param anArgs message parameters
 	 */
 	void log(final String aKey, final String[] anArgs) {
-		options.getOutWriter().println(res.get(aKey, anArgs));
+		if (options.getPrintWriter()!=null) {
+			options.getPrintWriter().println(res.get(aKey, anArgs));
+		}
 	}
 
+	/* (non-Javadoc)
+	 * @see java.lang.Runnable#run()
+	 */
 	public void run() {
+		if (options==null) {
+			throw new NullPointerException("Options has to be filled.");
+		}
+
 		boolean tmpResult = false;
 		try {
+
 			log("console.getKeystoreType", options.getKsType());
 			final KeyStore ks = KeyStore.getInstance(options.getKsType());
 			log("console.loadKeystore", options.getKsFile());
@@ -93,9 +102,9 @@ public class SignerLogic implements Runnable {
 			tmpResult = true;
 		} catch (Exception e) {
 			log("console.exception");
-			e.printStackTrace(options.getOutWriter());
+			e.printStackTrace(options.getPrintWriter());
 		} catch (OutOfMemoryError e) {
-			e.printStackTrace(options.getOutWriter());
+			e.printStackTrace(options.getPrintWriter());
 			log("console.memoryError");
 		}
 		log("console.finished." + (tmpResult?"ok":"error"));

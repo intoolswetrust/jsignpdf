@@ -8,23 +8,25 @@ import java.io.PrintWriter;
  */
 public class SignerOptions {
 
-	protected volatile PrintWriter outWriter;
+	protected volatile PrintWriter printWriter;
 	protected volatile String ksType;
 	protected volatile String ksFile;
 	protected volatile char[] ksPasswd;
+	protected volatile String keyAlias;
 	protected volatile char[] keyPasswd;
 	protected volatile String inFile;
 	protected volatile String outFile;
 	protected volatile String reason;
 	protected volatile String location;
 	protected volatile SignResultListener listener;
+	protected volatile boolean append;
 
 
-	public PrintWriter getOutWriter() {
-		return outWriter;
+	public PrintWriter getPrintWriter() {
+		return printWriter;
 	}
-	public void setOutWriter(PrintWriter outWriter) {
-		this.outWriter = outWriter;
+	public void setPrintWriter(PrintWriter outWriter) {
+		this.printWriter = outWriter;
 	}
 	public String getKsType() {
 		return ksType;
@@ -79,6 +81,18 @@ public class SignerOptions {
 	}
 	public void setKeyPasswd(char[] keyPasswd) {
 		this.keyPasswd = keyPasswd;
+	}
+	public String getKeyAlias() {
+		return keyAlias;
+	}
+	public void setKeyAlias(String keyAlias) {
+		this.keyAlias = keyAlias;
+	}
+	public boolean isAppend() {
+		return append;
+	}
+	public void setAppend(boolean append) {
+		this.append = append;
 	}
 
 }

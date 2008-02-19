@@ -41,19 +41,6 @@ public class SignerFileChooser extends JFileChooser {
 	};
 
 	/**
-	 * File filter for Java Key Store files (*.jks)
-	 */
-	static final FileFilter FILEFILTER_JKS = new FileFilter() {
-	    public boolean accept(File f) {
-	        return f.isDirectory()
-	            || f.getName().toLowerCase().endsWith(".jks");
-	    }
-	    public String getDescription() {
-	        return ResourceProvider.getInstance().get("filefilter.jks");
-	    }
-	};
-
-	/**
 	 * Shows rewrite confirmation dialog for SAVE_DIALOGs, when the selected
 	 * file already exists.
 	 * @see javax.swing.JFileChooser#approveSelection()

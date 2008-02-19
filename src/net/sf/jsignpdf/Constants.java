@@ -44,10 +44,10 @@ public class Constants {
     /**
      * Keystore type name for PKCS#12
      */
-    public static final String KS_TYPE_PKCS12 = "pkcs12";
+    public static final String KS_TYPE_PKCS12 = "PKCS12";
     /**
      * Keystore type name for Java Key Store
      */
-    public static final String KS_TYPE_JKS = "jks";
+    public static final String KS_TYPE_JKS = "JKS";
 
 }
