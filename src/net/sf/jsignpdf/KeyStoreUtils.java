@@ -39,11 +39,13 @@ public class KeyStoreUtils {
 	 * @return array of key aliasis in given keystore
 	 */
 	public String[] getAliases(final String aType) {
+		//jaka je performance? nemel by to byt take specialni thread?
 		if (options==null) {
 			throw new NullPointerException("Options are empty.");
 		}
 		final List<String> tmpResult = new ArrayList<String>();
 		try {
+			options.log("console.getKeystoreType", options.getKsType());
 			final KeyStore tmpKs = KeyStore.getInstance(aType);
 			InputStream tmpIS = null;
 			char[] tmpPass = null;
@@ -53,14 +55,18 @@ public class KeyStoreUtils {
 			if (options.ksPasswd!=null && options.ksPasswd.length>0) {
 				tmpPass = options.ksPasswd;
 			}
+			options.log("console.loadKeystore", options.getKsFile());
 			tmpKs.load(tmpIS, tmpPass);
+			options.log("console.getAliases");
 			Enumeration<String> tmpAliases = tmpKs.aliases();
 			while (tmpAliases.hasMoreElements()) {
 				tmpResult.add(tmpAliases.nextElement());
 			}
+			options.fireSignerFinishedEvent(true);
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			options.log("console.exception");
+			e.printStackTrace(options.getPrintWriter());
+			options.fireSignerFinishedEvent(false);
 		}
 		return tmpResult.toArray(new String[tmpResult.size()]);
 	}

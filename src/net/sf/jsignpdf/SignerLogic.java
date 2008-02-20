@@ -16,8 +16,6 @@ import com.lowagie.text.pdf.PdfStamper;
  */
 public class SignerLogic implements Runnable {
 
-	protected final ResourceProvider res = ResourceProvider.getInstance();
-
 	private SignerOptions options;
 
 	public SignerLogic() {}
@@ -28,34 +26,6 @@ public class SignerLogic implements Runnable {
 	 */
 	public SignerLogic(final SignerOptions anOptions) {
 		options = anOptions;
-	}
-
-	/**
-	 * Logs localized message to PrintWriter
-	 * @param aKey message key
-	 */
-	void log(final String aKey) {
-		log(aKey, (String[]) null);
-	}
-
-	/**
-	 * Logs localized message to PrintWriter
-	 * @param aKey message key
-	 * @param anArg message parameter
-	 */
-	void log(final String aKey, final String anArg) {
-		log(aKey, anArg==null? null: new String[] {anArg});
-	}
-
-	/**
-	 * Logs localized message to PrintWriter
-	 * @param aKey message key
-	 * @param anArgs message parameters
-	 */
-	void log(final String aKey, final String[] anArgs) {
-		if (options.getPrintWriter()!=null) {
-			options.getPrintWriter().println(res.get(aKey, anArgs));
-		}
 	}
 
 	/* (non-Javadoc)
@@ -69,48 +39,46 @@ public class SignerLogic implements Runnable {
 		boolean tmpResult = false;
 		try {
 
-			log("console.getKeystoreType", options.getKsType());
+			options.log("console.getKeystoreType", options.getKsType());
 			final KeyStore ks = KeyStore.getInstance(options.getKsType());
-			log("console.loadKeystore", options.getKsFile());
+			options.log("console.loadKeystore", options.getKsFile());
 			ks.load(new FileInputStream(options.getKsFile()),options.getKsPasswd());
-			log("console.getAliases");
+			options.log("console.getAliases");
 			final String alias = (String) ks.aliases().nextElement();
-			log("console.getPrivateKey");
+			options.log("console.getPrivateKey");
 			final PrivateKey key = (PrivateKey) ks.getKey(alias, options.getKeyPasswd());
-			log("console.getCertChain");
+			options.log("console.getCertChain");
 			final Certificate[] chain = ks.getCertificateChain(alias);
-			log("console.createPdfReader", options.getInFile());
+			options.log("console.createPdfReader", options.getInFile());
 			final PdfReader reader = new PdfReader(options.getInFile());
-			log("console.createOutPdf", options.getOutFile());
+			options.log("console.createOutPdf", options.getOutFile());
 			final FileOutputStream fout = new FileOutputStream(options.getOutFile());
 
-			log("console.createSignature");
+			options.log("console.createSignature");
 			final PdfStamper stp =
 				PdfStamper.createSignature(reader, fout, '\0');
 			final PdfSignatureAppearance sap = stp.getSignatureAppearance();
 
 			sap.setCrypto(key, chain, null, PdfSignatureAppearance.WINCER_SIGNED);
-			log("console.setReason", options.getReason());
+			options.log("console.setReason", options.getReason());
 			sap.setReason(options.getReason());
-			log("console.setLocation", options.getLocation());
+			options.log("console.setLocation", options.getLocation());
 			sap.setLocation(options.getLocation());
 
-			log("console.processing");
+			options.log("console.processing");
 			stp.close();
 			fout.close();
 
 			tmpResult = true;
 		} catch (Exception e) {
-			log("console.exception");
+			options.log("console.exception");
 			e.printStackTrace(options.getPrintWriter());
 		} catch (OutOfMemoryError e) {
 			e.printStackTrace(options.getPrintWriter());
-			log("console.memoryError");
+			options.log("console.memoryError");
 		}
-		log("console.finished." + (tmpResult?"ok":"error"));
-		if (options.getListener() != null) {
-			options.getListener().signerFinishedEvent(tmpResult);
-		}
+		options.log("console.finished." + (tmpResult?"ok":"error"));
+		options.fireSignerFinishedEvent(tmpResult);
 	}
 
 	public SignerOptions getOptions() {

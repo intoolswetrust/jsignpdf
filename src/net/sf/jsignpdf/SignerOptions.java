@@ -8,6 +8,8 @@ import java.io.PrintWriter;
  */
 public class SignerOptions {
 
+	protected final ResourceProvider res = ResourceProvider.getInstance();
+
 	protected volatile PrintWriter printWriter;
 	protected volatile String ksType;
 	protected volatile String ksFile;
@@ -21,6 +23,44 @@ public class SignerOptions {
 	protected volatile SignResultListener listener;
 	protected volatile boolean append;
 
+	/**
+	 * Logs localized message to PrintWriter
+	 * @param aKey message key
+	 */
+	void log(final String aKey) {
+		log(aKey, (String[]) null);
+	}
+
+	/**
+	 * Logs localized message to PrintWriter
+	 * @param aKey message key
+	 * @param anArg message parameter
+	 */
+	void log(final String aKey, final String anArg) {
+		log(aKey, anArg==null? null: new String[] {anArg});
+	}
+
+	/**
+	 * Logs localized message to PrintWriter
+	 * @param aKey message key
+	 * @param anArgs message parameters
+	 */
+	void log(final String aKey, final String[] anArgs) {
+		if (printWriter!=null) {
+			printWriter.println(res.get(aKey, anArgs));
+		}
+	}
+
+	/**
+	 * Fires event listener
+	 * @param aResult
+	 * @see #getListener()
+	 */
+	public void fireSignerFinishedEvent(boolean aResult) {
+		if (listener != null) {
+			listener.signerFinishedEvent(aResult);
+		}
+	}
 
 	public PrintWriter getPrintWriter() {
 		return printWriter;
