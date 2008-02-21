@@ -28,19 +28,6 @@ public class SignerFileChooser extends JFileChooser {
 	};
 
 	/**
-	 * File filter for PKCS12 files (*.pfx, *.p12)
-	 */
-	static final FileFilter FILEFILTER_PKCS12 = new FileFilter() {
-	    public boolean accept(File f) {
-	        return f.isDirectory()
-	            || f.getName().toLowerCase().endsWith(".pfx") || f.getName().toLowerCase().endsWith(".p12");
-	    }
-	    public String getDescription() {
-	        return ResourceProvider.getInstance().get("filefilter.pkcs12");
-	    }
-	};
-
-	/**
 	 * Shows rewrite confirmation dialog for SAVE_DIALOGs, when the selected
 	 * file already exists.
 	 * @see javax.swing.JFileChooser#approveSelection()

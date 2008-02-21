@@ -6,6 +6,7 @@ import java.io.File;
 import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.net.URL;
+import javax.swing.DefaultComboBoxModel;
 
 import javax.swing.JButton;
 import javax.swing.JComponent;
@@ -34,11 +35,13 @@ public class SignPdfForm extends javax.swing.JFrame implements SignResultListene
 	private boolean autoclose = false;
 	private SignerOptions signerOptions = new SignerOptions();
 	private SignerLogic signerLogic = new SignerLogic(signerOptions);
+	private KeyStoreUtils ksUtils = new KeyStoreUtils(signerOptions);
 
 	/** Creates new form SignPdfForm */
 	public SignPdfForm(int aCloseOperation) {
 		initComponents();
-		loadProperties();
+		signerOptions.loadOptions();
+		updateFromOptions();
 		translateLabels();
 
 		setDefaultCloseOperation(aCloseOperation);
@@ -56,6 +59,11 @@ public class SignPdfForm extends javax.swing.JFrame implements SignResultListene
 		signerOptions.setPrintWriter(infoWriter);
 		signerOptions.setListener(this);
 
+		cbKeystoreType.setModel(new DefaultComboBoxModel(ksUtils.getKeyStrores()));
+		cbCertLevel.setModel(new DefaultComboBoxModel(CertificationLevel.values()));
+
+		chkbAdvancedActionPerformed(null);
+		chkbPdfEncryptedActionPerformed(null);
 	}
 
 	/**
@@ -105,13 +113,49 @@ public class SignPdfForm extends javax.swing.JFrame implements SignResultListene
 	/**
 	 * Loads properties saved by previous run of application
 	 */
-	private void loadProperties() {
-		cbKeystoreType.setSelectedIndex(props.getAsInt(Constants.PROPERTY_KSTYPE));
-		tfKeystoreFile.setText(props.getProperty(Constants.PROPERTY_KEYSTORE));
-		tfInPdfFile.setText(props.getProperty(Constants.PROPERTY_INPDF));
-		tfOutPdfFile.setText(props.getProperty(Constants.PROPERTY_OUTPDF));
-		tfReason.setText(props.getProperty(Constants.PROPERTY_REASON));
-		tfLocation.setText(props.getProperty(Constants.PROPERTY_LOCATION));
+	private void updateFromOptions() {
+//		updateOption
+//		cbKeystoreType.setSelectedItem(props.getProperty(Constants.PROPERTY_KSTYPE));
+//		chkbAdvanced.setSelected(props.getAsBool(Constants.PROPERTY_ADVANCED));
+//		tfKeystoreFile.setText(props.getProperty(Constants.PROPERTY_KEYSTORE));
+//		cbAlias.setSelectedItem(props.getProperty(Constants.PROPERTY_ALIAS));
+//		tfInPdfFile.setText(props.getProperty(Constants.PROPERTY_INPDF));
+//		tfOutPdfFile.setText(props.getProperty(Constants.PROPERTY_OUTPDF));
+//		tfReason.setText(props.getProperty(Constants.PROPERTY_REASON));
+//		tfLocation.setText(props.getProperty(Constants.PROPERTY_LOCATION));
+	}
+
+	private void storeToOptions() {
+//		props.setProperty(Constants.PROPERTY_KSTYPE, (String) cbKeystoreType.getSelectedItem());
+//		props.setProperty(Constants.PROPERTY_ADVANCED, String.valueOf(chkbAdvanced.isSelected()));
+//		props.setProperty(Constants.PROPERTY_KEYSTORE, tfKeystoreFile.getText());
+//		props.setProperty(Constants.PROPERTY_ALIAS, (String) cbAlias.getSelectedItem());
+//		props.setProperty(Constants.PROPERTY_INPDF, tfInPdfFile.getText());
+//		props.setProperty(Constants.PROPERTY_OUTPDF, tfOutPdfFile.getText());
+//		props.setProperty(Constants.PROPERTY_REASON, tfReason.getText());
+//		props.setProperty(Constants.PROPERTY_LOCATION, tfLocation.getText());
+		props.saveDefault();
+	}
+
+	private void switchAdvancedView(boolean anAdvanced) {
+		btnLoadAliases.setVisible(anAdvanced);
+		lblAlias.setVisible(anAdvanced);
+		cbAlias.setVisible(anAdvanced);
+		lblKeyPwd.setVisible(anAdvanced);
+		pfKeyPwd.setVisible(anAdvanced);
+		chkbPdfEncrypted.setVisible(anAdvanced);
+		lblPdfOwnerPwd.setVisible(anAdvanced);
+		pfPdfOwnerPwd.setVisible(anAdvanced);
+		lblPdfUserPwd.setVisible(anAdvanced);
+		pfPdfUserPwd.setVisible(anAdvanced);
+		lblCertLevel.setVisible(anAdvanced);
+		cbCertLevel.setVisible(anAdvanced);
+		chkbAppendSignature.setVisible(anAdvanced);
+	}
+
+	private void switchEncryptedPdf(boolean anEnabled) {
+		pfPdfOwnerPwd.setEnabled(anEnabled);
+		pfPdfUserPwd.setEnabled(anEnabled);
 	}
 
 	/**
@@ -159,9 +203,10 @@ public class SignPdfForm extends javax.swing.JFrame implements SignResultListene
         btnKeystoreFile = new javax.swing.JButton();
         lblKeystorePwd = new javax.swing.JLabel();
         pfKeystorePwd = new javax.swing.JPasswordField();
-        btnLoadAliases = new javax.swing.JButton();
+        chkbStorePwd = new javax.swing.JCheckBox();
         lblAlias = new javax.swing.JLabel();
         cbAlias = new javax.swing.JComboBox();
+        btnLoadAliases = new javax.swing.JButton();
         lblKeyPwd = new javax.swing.JLabel();
         pfKeyPwd = new javax.swing.JPasswordField();
         lblInPdfFile = new javax.swing.JLabel();
@@ -183,6 +228,7 @@ public class SignPdfForm extends javax.swing.JFrame implements SignResultListene
         cbCertLevel = new javax.swing.JComboBox();
         chkbAppendSignature = new javax.swing.JCheckBox();
         btnSignIt = new javax.swing.JButton();
+        chkbAdvanced = new javax.swing.JCheckBox();
 
         infoDialog.setTitle("PDF Signer Output");
         infoDialog.addWindowListener(new java.awt.event.WindowAdapter() {
@@ -295,14 +341,16 @@ public class SignPdfForm extends javax.swing.JFrame implements SignResultListene
         gridBagConstraints.insets = new java.awt.Insets(2, 0, 2, 0);
         getContentPane().add(pfKeystorePwd, gridBagConstraints);
 
-        btnLoadAliases.setText("Load keys");
+        chkbStorePwd.setText("Store passwords");
+        chkbStorePwd.setBorder(javax.swing.BorderFactory.createEmptyBorder(0, 0, 0, 0));
+        chkbStorePwd.setMargin(new java.awt.Insets(0, 0, 0, 0));
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 2;
         gridBagConstraints.gridy = 2;
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
         gridBagConstraints.insets = new java.awt.Insets(1, 5, 1, 5);
-        getContentPane().add(btnLoadAliases, gridBagConstraints);
+        getContentPane().add(chkbStorePwd, gridBagConstraints);
 
         lblAlias.setText("Key alias");
         gridBagConstraints = new java.awt.GridBagConstraints();
@@ -312,6 +360,7 @@ public class SignPdfForm extends javax.swing.JFrame implements SignResultListene
         gridBagConstraints.insets = new java.awt.Insets(2, 5, 2, 10);
         getContentPane().add(lblAlias, gridBagConstraints);
 
+        cbAlias.setEditable(true);
         cbAlias.setMinimumSize(new java.awt.Dimension(150, 20));
         cbAlias.setPreferredSize(new java.awt.Dimension(150, 20));
         gridBagConstraints = new java.awt.GridBagConstraints();
@@ -321,6 +370,15 @@ public class SignPdfForm extends javax.swing.JFrame implements SignResultListene
         gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
         gridBagConstraints.insets = new java.awt.Insets(2, 0, 2, 0);
         getContentPane().add(cbAlias, gridBagConstraints);
+
+        btnLoadAliases.setText("Load keys");
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 2;
+        gridBagConstraints.gridy = 3;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+        gridBagConstraints.insets = new java.awt.Insets(1, 5, 1, 5);
+        getContentPane().add(btnLoadAliases, gridBagConstraints);
 
         lblKeyPwd.setText("Key password");
         gridBagConstraints = new java.awt.GridBagConstraints();
@@ -377,6 +435,12 @@ public class SignPdfForm extends javax.swing.JFrame implements SignResultListene
         chkbPdfEncrypted.setText("Encrypted");
         chkbPdfEncrypted.setBorder(javax.swing.BorderFactory.createEmptyBorder(0, 0, 0, 0));
         chkbPdfEncrypted.setMargin(new java.awt.Insets(0, 0, 0, 0));
+        chkbPdfEncrypted.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                chkbPdfEncryptedActionPerformed(evt);
+            }
+        });
+
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
         gridBagConstraints.gridy = 6;
@@ -540,8 +604,34 @@ public class SignPdfForm extends javax.swing.JFrame implements SignResultListene
         gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
         getContentPane().add(btnSignIt, gridBagConstraints);
 
+        chkbAdvanced.setText("Advanced view");
+        chkbAdvanced.setBorder(javax.swing.BorderFactory.createEmptyBorder(0, 0, 0, 0));
+        chkbAdvanced.setMargin(new java.awt.Insets(0, 0, 0, 0));
+        chkbAdvanced.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                chkbAdvancedActionPerformed(evt);
+            }
+        });
+
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 2;
+        gridBagConstraints.gridy = 0;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+        gridBagConstraints.insets = new java.awt.Insets(1, 5, 1, 5);
+        getContentPane().add(chkbAdvanced, gridBagConstraints);
+
         pack();
     }// </editor-fold>//GEN-END:initComponents
+
+	private void chkbPdfEncryptedActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_chkbPdfEncryptedActionPerformed
+		switchEncryptedPdf(chkbPdfEncrypted.isSelected());
+	}//GEN-LAST:event_chkbPdfEncryptedActionPerformed
+
+	private void chkbAdvancedActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_chkbAdvancedActionPerformed
+		switchAdvancedView(chkbAdvanced.isSelected());
+		pack();
+	}//GEN-LAST:event_chkbAdvancedActionPerformed
 
 	private void infoDialogWindowClosing(java.awt.event.WindowEvent evt) {//GEN-FIRST:event_infoDialogWindowClosing
 		if (btnInfoClose.isEnabled()) {
@@ -583,7 +673,7 @@ public class SignPdfForm extends javax.swing.JFrame implements SignResultListene
 		} catch (Exception e) {}
 
 		final String tmpMsg = res.get("gui.fileNotExists.error",
-				new String[] {res.get(aFileDescKey)});
+			new String[] {res.get(aFileDescKey)});
 		JOptionPane.showMessageDialog(this, tmpMsg, res.get("gui.check.error.title"), JOptionPane.ERROR_MESSAGE);
 		return false;
 	}
@@ -600,7 +690,7 @@ public class SignPdfForm extends javax.swing.JFrame implements SignResultListene
 			return true;
 		}
 		final String tmpMsg = res.get("gui.valueNotFilled.error",
-				new String[] {res.get(aDescKey)});
+			new String[] {res.get(aDescKey)});
 		JOptionPane.showMessageDialog(this,tmpMsg, res.get("gui.check.error.title"), JOptionPane.ERROR_MESSAGE);
 		return false;
 	}
@@ -620,9 +710,9 @@ public class SignPdfForm extends javax.swing.JFrame implements SignResultListene
 				if (tmpInFile.equals(tmpOutFile)) {
 					tmpResult = false;
 					JOptionPane.showMessageDialog(this,
-							res.get("gui.filesEqual.error"),
-							res.get("gui.check.error.title"),
-							JOptionPane.ERROR_MESSAGE);
+						res.get("gui.filesEqual.error"),
+						res.get("gui.check.error.title"),
+						JOptionPane.ERROR_MESSAGE);
 				}
 			} catch (Exception e) {
 				tmpResult = false;
@@ -658,13 +748,8 @@ public class SignPdfForm extends javax.swing.JFrame implements SignResultListene
 	}//GEN-LAST:event_btnSignItActionPerformed
 
 	private void formWindowClosing(java.awt.event.WindowEvent evt) {//GEN-FIRST:event_formWindowClosing
-		props.setProperty(Constants.PROPERTY_KSTYPE, (String) cbKeystoreType.getSelectedItem());
-		props.setProperty(Constants.PROPERTY_KEYSTORE, tfKeystoreFile.getText());
-		props.setProperty(Constants.PROPERTY_INPDF, tfInPdfFile.getText());
-		props.setProperty(Constants.PROPERTY_OUTPDF, tfOutPdfFile.getText());
-		props.setProperty(Constants.PROPERTY_REASON, tfReason.getText());
-		props.setProperty(Constants.PROPERTY_LOCATION, tfLocation.getText());
-		props.saveDefault();
+		storeToOptions();
+		signerOptions.storeOptions();
 	}//GEN-LAST:event_formWindowClosing
 
 	private void btnOutPdfFileActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnOutPdfFileActionPerformed
@@ -677,9 +762,7 @@ public class SignPdfForm extends javax.swing.JFrame implements SignResultListene
 	}//GEN-LAST:event_btnInPdfFileActionPerformed
 
 	private void btnKeystoreFileActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnKeystoreFileActionPerformed
-		final FileFilter tmpFilter = cbKeystoreType.getSelectedIndex()==0
-			?SignerFileChooser.FILEFILTER_PKCS12:null;
-		showFileChooser(tfKeystoreFile, tmpFilter, JFileChooser.OPEN_DIALOG);
+		showFileChooser(tfKeystoreFile, null, JFileChooser.OPEN_DIALOG);
 	}//GEN-LAST:event_btnKeystoreFileActionPerformed
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
@@ -692,8 +775,10 @@ public class SignPdfForm extends javax.swing.JFrame implements SignResultListene
     private javax.swing.JComboBox cbAlias;
     private javax.swing.JComboBox cbCertLevel;
     private javax.swing.JComboBox cbKeystoreType;
+    private javax.swing.JCheckBox chkbAdvanced;
     private javax.swing.JCheckBox chkbAppendSignature;
     private javax.swing.JCheckBox chkbPdfEncrypted;
+    private javax.swing.JCheckBox chkbStorePwd;
     private javax.swing.JFrame infoDialog;
     private javax.swing.JScrollPane infoScrollPane;
     private javax.swing.JTextArea infoTextArea;

@@ -30,7 +30,7 @@ public class PropertyProvider {
      * <code>PROPERTY_FILE</code> contains default filename for property file.
      */
     public static final String PROPERTY_FILE =
-            System.getProperty("user.home") + "/" +
+            Constants.USER_HOME + "/" +
             ".JSignPdf";
 
     /**
@@ -132,6 +132,14 @@ public class PropertyProvider {
      */
     public void setProperty(String aKey, String aValue) {
         properties.setProperty(aKey, aValue);
+    }
+
+    /**
+     * Removes property.
+     * @param aKey property name
+     */
+    public void removeProperty(final String aKey) {
+    	properties.remove(aKey);
     }
 
     /**

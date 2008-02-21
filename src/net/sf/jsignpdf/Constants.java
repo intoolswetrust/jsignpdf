@@ -9,7 +9,9 @@ public class Constants {
 	/**
 	 * Version of JSignPdf
 	 */
-	public static final String VERSION = "0.2";
+	public static final String VERSION = "0.3";
+
+	public static final String USER_HOME = System.getProperty("user.home");
 
 	/**
 	 * Name (path) of resource bundle
@@ -19,7 +21,14 @@ public class Constants {
     /**
      * Property name.
      */
+    public static final String PROPERTY_USERHOME = "enc.home";
+
     public static final String PROPERTY_KSTYPE = "keystore.type";
+
+    public static final String PROPERTY_ADVANCED = "view.advanced";
+    public static final String PROPERTY_ALIAS = "keystore.alias";
+    public static final String PROPERTY_STOREPWD = "store.passwords";
+
     /**
      * Property name.
      */
@@ -40,14 +49,5 @@ public class Constants {
      * Property name.
      */
     public static final String PROPERTY_LOCATION = "signature.location";
-
-    /**
-     * Keystore type name for PKCS#12
-     */
-    public static final String KS_TYPE_PKCS12 = "PKCS12";
-    /**
-     * Keystore type name for Java Key Store
-     */
-    public static final String KS_TYPE_JKS = "JKS";
 
 }
