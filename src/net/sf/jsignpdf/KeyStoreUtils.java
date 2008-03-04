@@ -35,10 +35,9 @@ public class KeyStoreUtils {
 
 	/**
 	 * Loads key names (aliases) from the keystore
-	 * @param aType KeyStore type
-	 * @return array of key aliasis in given keystore
+	 * @return array of key aliases
 	 */
-	public String[] getAliases(final String aType) {
+	public String[] getAliases() {
 		//jaka je performance? nemel by to byt take specialni thread?
 		if (options==null) {
 			throw new NullPointerException("Options are empty.");
@@ -46,7 +45,7 @@ public class KeyStoreUtils {
 		final List<String> tmpResult = new ArrayList<String>();
 		try {
 			options.log("console.getKeystoreType", options.getKsType());
-			final KeyStore tmpKs = KeyStore.getInstance(aType);
+			final KeyStore tmpKs = KeyStore.getInstance(options.getKsType());
 			InputStream tmpIS = null;
 			char[] tmpPass = null;
 			if (!StringUtils.isEmpty(options.getKsFile())) {
