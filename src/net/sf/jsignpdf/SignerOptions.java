@@ -12,8 +12,7 @@ public class SignerOptions {
 
 	protected final PropertyProvider props = PropertyProvider.getInstance();
 	protected final ResourceProvider res = ResourceProvider.getInstance();
-
-	private final JSignEncryptor encryptor = new JSignEncryptor();
+	protected final JSignEncryptor encryptor = new JSignEncryptor();
 
 	private volatile PrintWriter printWriter;
 	private volatile String ksType;
@@ -32,6 +31,7 @@ public class SignerOptions {
 	private volatile boolean storePasswords;
 	private volatile char[] pdfOwnerPwd;
 	private volatile char[] pdfUserPwd;
+	private volatile CertificationLevel certLevel;
 
 	/**
 	 * Logs localized message to PrintWriter
@@ -61,6 +61,10 @@ public class SignerOptions {
 		}
 	}
 
+	private String charArrToStr(final char[] aCharArr) {
+		return aCharArr==null?"":new String(aCharArr);
+	}
+
 	/**
 	 * Returns decrypted property
 	 * @param aProperty
@@ -83,7 +87,7 @@ public class SignerOptions {
 	private void setEncrypted(String aProperty, String aValue) {
 		try {
 			props.setProperty(aProperty,
-				encryptor.encryptString(props.getProperty(aProperty)));
+					encryptor.encryptString(props.getProperty(aProperty)));
 		} catch (CryptoException e) {
 			e.printStackTrace();
 			props.removeProperty(aProperty);
@@ -91,31 +95,76 @@ public class SignerOptions {
 	}
 
 
+	/**
+	 * Loads options from PropertyProvider
+	 */
 	public void loadOptions() {
-		final String tmpHome = getDecrypted(Constants.PROPERTY_STOREPWD);
 		ksType = props.getProperty(Constants.PROPERTY_KSTYPE);
 		advanced = props.getAsBool(Constants.PROPERTY_ADVANCED);
 		storePasswords = props.getAsBool(Constants.PROPERTY_STOREPWD);
+		keyAlias = props.getProperty(Constants.PROPERTY_ALIAS);
+		inFile = props.getProperty(Constants.PROPERTY_INPDF);
+		outFile = props.getProperty(Constants.PROPERTY_OUTPDF);
+		reason = props.getProperty(Constants.PROPERTY_REASON);
+		location = props.getProperty(Constants.PROPERTY_LOCATION);
+		append = props.getAsBool(Constants.PROPERTY_APPEND);
+		encrypted = props.getAsBool(Constants.PROPERTY_ENCRYPTED_PDF);
+		final String tmpLevel = props.getProperty(Constants.PROPERTY_CERT_LEVEL);
+		if (tmpLevel != null) {
+			certLevel = CertificationLevel.valueOf(tmpLevel);
+		}
+		if (certLevel==null) {
+				certLevel = CertificationLevel.NOT_CERTIFIED;
+		}
+		final String tmpHome = getDecrypted(Constants.EPROPERTY_USERHOME);
 		boolean tmpPasswords = storePasswords &&
 			Constants.USER_HOME!=null &&
 			Constants.USER_HOME.equals(tmpHome);
 		if (tmpPasswords) {
-			//TODO load pwds here
+			ksPasswd = getDecrypted(Constants.EPROPERTY_KS_PWD).toCharArray();
+			keyPasswd = getDecrypted(Constants.EPROPERTY_KEY_PWD).toCharArray();
+			if (encrypted) {
+				pdfOwnerPwd = getDecrypted(Constants.EPROPERTY_OWNER_PWD).toCharArray();
+				pdfUserPwd = getDecrypted(Constants.EPROPERTY_USER_PWD).toCharArray();
+			}
 		}
-
-		//
-//		tfKeystoreFile.setText(props.getProperty(Constants.PROPERTY_KEYSTORE));
-//		cbAlias.setSelectedItem(props.getProperty(Constants.PROPERTY_ALIAS));
-//		tfInPdfFile.setText(props.getProperty(Constants.PROPERTY_INPDF));
-//		tfOutPdfFile.setText(props.getProperty(Constants.PROPERTY_OUTPDF));
-//		tfReason.setText(props.getProperty(Constants.PROPERTY_REASON));
-//		tfLocation.setText(props.getProperty(Constants.PROPERTY_LOCATION));
-
 	}
 
+	/**
+	 * Stores options to PropertyProvider
+	 */
 	public void storeOptions() {
-		setEncrypted(Constants.PROPERTY_USERHOME, Constants.USER_HOME);
-		//TODO
+		props.setProperty(Constants.PROPERTY_KSTYPE, ksType);
+		props.setProperty(Constants.PROPERTY_ADVANCED, advanced);
+		props.setProperty(Constants.PROPERTY_STOREPWD, storePasswords);
+		props.setProperty(Constants.PROPERTY_ALIAS, keyAlias);
+		props.setProperty(Constants.PROPERTY_INPDF, inFile);
+		props.setProperty(Constants.PROPERTY_OUTPDF, outFile);
+		props.setProperty(Constants.PROPERTY_REASON, reason);
+		props.setProperty(Constants.PROPERTY_LOCATION, location);
+		props.setProperty(Constants.PROPERTY_APPEND, append);
+		props.setProperty(Constants.PROPERTY_ENCRYPTED_PDF, encrypted);
+		if (certLevel!=null) {
+			props.setProperty(Constants.PROPERTY_CERT_LEVEL, certLevel.name());
+		} else {
+			props.removeProperty(Constants.PROPERTY_CERT_LEVEL);
+		}
+
+		setEncrypted(Constants.EPROPERTY_USERHOME, Constants.USER_HOME);
+		if (storePasswords) {
+			setEncrypted(Constants.EPROPERTY_KS_PWD, new String(ksPasswd));
+			setEncrypted(Constants.EPROPERTY_KEY_PWD, new String(keyPasswd));
+			if (encrypted) {
+				setEncrypted(Constants.EPROPERTY_OWNER_PWD, new String(pdfOwnerPwd));
+				setEncrypted(Constants.EPROPERTY_USER_PWD, new String(pdfUserPwd));
+			}
+		} else {
+			props.removeProperty(Constants.EPROPERTY_KS_PWD);
+			props.removeProperty(Constants.EPROPERTY_KEY_PWD);
+			props.removeProperty(Constants.EPROPERTY_OWNER_PWD);
+			props.removeProperty(Constants.EPROPERTY_USER_PWD);
+		}
+		props.saveDefault();
 	}
 
 	/**
@@ -150,6 +199,10 @@ public class SignerOptions {
 	public char[] getKsPasswd() {
 		return ksPasswd;
 	}
+	public String getKsPasswdStr() {
+		return charArrToStr(ksPasswd);
+	}
+	
 	public void setKsPasswd(char[] passwd) {
 		this.ksPasswd = passwd;
 	}
@@ -185,6 +238,9 @@ public class SignerOptions {
 	}
 	public char[] getKeyPasswd() {
 		return keyPasswd;
+	}
+	public String getKeyPasswdStr() {
+		return charArrToStr(keyPasswd);
 	}
 	public void setKeyPasswd(char[] keyPasswd) {
 		this.keyPasswd = keyPasswd;
@@ -229,6 +285,9 @@ public class SignerOptions {
 	public char[] getPdfOwnerPwd() {
 		return pdfOwnerPwd;
 	}
+	public String getPdfOwnerPwdStr() {
+		return charArrToStr(pdfOwnerPwd);
+	}
 
 	public void setPdfOwnerPwd(char[] pdfOwnerPwd) {
 		this.pdfOwnerPwd = pdfOwnerPwd;
@@ -237,9 +296,20 @@ public class SignerOptions {
 	public char[] getPdfUserPwd() {
 		return pdfUserPwd;
 	}
+	public String getPdfUserPwdStr() {
+		return charArrToStr(pdfUserPwd);
+	}
 
 	public void setPdfUserPwd(char[] pdfUserPwd) {
 		this.pdfUserPwd = pdfUserPwd;
+	}
+
+	public CertificationLevel getCertLevel() {
+		return certLevel;
+	}
+
+	public void setCertLevel(CertificationLevel certLevel) {
+		this.certLevel = certLevel;
 	}
 
 }

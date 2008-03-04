@@ -33,14 +33,14 @@ public class SignPdfForm extends javax.swing.JFrame implements SignResultListene
 	private PrintWriter infoWriter;
 	private TextAreaStream infoStream;
 	private boolean autoclose = false;
-	private SignerOptions signerOptions = new SignerOptions();
-	private SignerLogic signerLogic = new SignerLogic(signerOptions);
-	private KeyStoreUtils ksUtils = new KeyStoreUtils(signerOptions);
+	private SignerOptions options = new SignerOptions();
+	private SignerLogic signerLogic = new SignerLogic(options);
+	private KeyStoreUtils ksUtils = new KeyStoreUtils(options);
 
 	/** Creates new form SignPdfForm */
 	public SignPdfForm(int aCloseOperation) {
 		initComponents();
-		signerOptions.loadOptions();
+		options.loadOptions();
 		updateFromOptions();
 		translateLabels();
 
@@ -56,8 +56,8 @@ public class SignPdfForm extends javax.swing.JFrame implements SignResultListene
 
 		infoDialog.pack();
 
-		signerOptions.setPrintWriter(infoWriter);
-		signerOptions.setListener(this);
+		options.setPrintWriter(infoWriter);
+		options.setListener(this);
 
 		cbKeystoreType.setModel(new DefaultComboBoxModel(ksUtils.getKeyStrores()));
 		cbCertLevel.setModel(new DefaultComboBoxModel(CertificationLevel.values()));
@@ -114,27 +114,44 @@ public class SignPdfForm extends javax.swing.JFrame implements SignResultListene
 	 * Loads properties saved by previous run of application
 	 */
 	private void updateFromOptions() {
-//		updateOption
-//		cbKeystoreType.setSelectedItem(props.getProperty(Constants.PROPERTY_KSTYPE));
-//		chkbAdvanced.setSelected(props.getAsBool(Constants.PROPERTY_ADVANCED));
-//		tfKeystoreFile.setText(props.getProperty(Constants.PROPERTY_KEYSTORE));
-//		cbAlias.setSelectedItem(props.getProperty(Constants.PROPERTY_ALIAS));
-//		tfInPdfFile.setText(props.getProperty(Constants.PROPERTY_INPDF));
-//		tfOutPdfFile.setText(props.getProperty(Constants.PROPERTY_OUTPDF));
-//		tfReason.setText(props.getProperty(Constants.PROPERTY_REASON));
-//		tfLocation.setText(props.getProperty(Constants.PROPERTY_LOCATION));
+		cbKeystoreType.setSelectedItem(options.getKsType());
+		chkbAdvanced.setSelected(options.isAdvanced());
+		tfKeystoreFile.setText(options.getKsFile());
+		pfKeystorePwd.setText(options.getKsPasswdStr());
+		chkbStorePwd.setSelected(options.isStorePasswords());
+		cbAlias.setSelectedItem(options.getKeyAlias());
+		pfKeyPwd.setText(options.getKeyPasswdStr());
+		tfInPdfFile.setText(options.getInFile());
+		chkbPdfEncrypted.setSelected(options.isEncrypted());
+		pfPdfOwnerPwd.setText(options.getPdfOwnerPwdStr());
+		pfPdfUserPwd.setText(options.getPdfUserPwdStr());
+		tfOutPdfFile.setText(options.getOutFile());
+		tfReason.setText(options.getReason());
+		tfLocation.setText(options.getLocation());
+		cbCertLevel.setSelectedItem(options.getCertLevel());
+		chkbAppendSignature.setSelected(options.isAppend());
+		switchAdvancedView(options.isAdvanced());
+		switchEncryptedPdf(options.isEncrypted());
+		pack();
 	}
 
 	private void storeToOptions() {
-//		props.setProperty(Constants.PROPERTY_KSTYPE, (String) cbKeystoreType.getSelectedItem());
-//		props.setProperty(Constants.PROPERTY_ADVANCED, String.valueOf(chkbAdvanced.isSelected()));
-//		props.setProperty(Constants.PROPERTY_KEYSTORE, tfKeystoreFile.getText());
-//		props.setProperty(Constants.PROPERTY_ALIAS, (String) cbAlias.getSelectedItem());
-//		props.setProperty(Constants.PROPERTY_INPDF, tfInPdfFile.getText());
-//		props.setProperty(Constants.PROPERTY_OUTPDF, tfOutPdfFile.getText());
-//		props.setProperty(Constants.PROPERTY_REASON, tfReason.getText());
-//		props.setProperty(Constants.PROPERTY_LOCATION, tfLocation.getText());
-		props.saveDefault();
+		options.setKsType((String) cbKeystoreType.getSelectedItem());
+		options.setAdvanced(chkbAdvanced.isSelected());
+		options.setKsFile(tfKeystoreFile.getText());
+		options.setKsPasswd(pfKeystorePwd.getPassword());
+		options.setStorePasswords(chkbStorePwd.isSelected());
+		options.setKeyAlias((String) cbAlias.getSelectedItem());
+		options.setKeyPasswd(pfKeyPwd.getPassword());
+		options.setInFile(tfInPdfFile.getText());
+		options.setEncrypted(chkbPdfEncrypted.isSelected());
+		options.setPdfOwnerPwd(pfPdfOwnerPwd.getPassword());
+		options.setPdfUserPwd(pfPdfUserPwd.getPassword());
+		options.setOutFile(tfOutPdfFile.getText());
+		options.setReason(tfReason.getText());
+		options.setLocation(tfLocation.getText());
+		options.setCertLevel((CertificationLevel) cbCertLevel.getSelectedItem());
+		options.setAppend(chkbAppendSignature.isSelected());
 	}
 
 	private void switchAdvancedView(boolean anAdvanced) {
@@ -733,14 +750,14 @@ public class SignPdfForm extends javax.swing.JFrame implements SignResultListene
 			setVisible(false);
 			infoDialog.setDefaultCloseOperation(javax.swing.WindowConstants.DO_NOTHING_ON_CLOSE);
 			infoWriter.println(res.get("console.starting"));
-			signerOptions.setKsType((String) cbKeystoreType.getSelectedItem());
-			signerOptions.setKsFile(tfKeystoreFile.getText());
-			signerOptions.setKsPasswd(pfKeystorePwd.getPassword());
-			signerOptions.setKeyPasswd(pfKeystorePwd.getPassword());
-			signerOptions.setInFile(tfInPdfFile.getText());
-			signerOptions.setOutFile(tfOutPdfFile.getText());
-			signerOptions.setReason(tfReason.getText());
-			signerOptions.setLocation(tfLocation.getText());
+			options.setKsType((String) cbKeystoreType.getSelectedItem());
+			options.setKsFile(tfKeystoreFile.getText());
+			options.setKsPasswd(pfKeystorePwd.getPassword());
+			options.setKeyPasswd(pfKeystorePwd.getPassword());
+			options.setInFile(tfInPdfFile.getText());
+			options.setOutFile(tfOutPdfFile.getText());
+			options.setReason(tfReason.getText());
+			options.setLocation(tfLocation.getText());
 			//Let's do it
 			final Thread tmpST = new Thread(signerLogic);
 			tmpST.start();
@@ -749,7 +766,7 @@ public class SignPdfForm extends javax.swing.JFrame implements SignResultListene
 
 	private void formWindowClosing(java.awt.event.WindowEvent evt) {//GEN-FIRST:event_formWindowClosing
 		storeToOptions();
-		signerOptions.storeOptions();
+		options.storeOptions();
 	}//GEN-LAST:event_formWindowClosing
 
 	private void btnOutPdfFileActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnOutPdfFileActionPerformed

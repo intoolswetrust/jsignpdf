@@ -21,13 +21,22 @@ public class Constants {
     /**
      * Property name.
      */
-    public static final String PROPERTY_USERHOME = "enc.home";
+    public static final String EPROPERTY_USERHOME = "enc.home";
+    public static final String EPROPERTY_KS_PWD = "enc.keystorePwd";
+    public static final String EPROPERTY_KEY_PWD = "enc.keyPwd";
+    public static final String EPROPERTY_OWNER_PWD = "enc.pdfOwnerPwd";
+    public static final String EPROPERTY_USER_PWD = "enc.pdfUserPwd";
 
     public static final String PROPERTY_KSTYPE = "keystore.type";
-
     public static final String PROPERTY_ADVANCED = "view.advanced";
     public static final String PROPERTY_ALIAS = "keystore.alias";
     public static final String PROPERTY_STOREPWD = "store.passwords";
+
+    public static final String PROPERTY_APPEND = "signature.append";
+    public static final String PROPERTY_ENCRYPTED_PDF = "inpdf.encrypted";
+
+    public static final String PROPERTY_CERT_LEVEL = "certification.level";
+
 
     /**
      * Property name.

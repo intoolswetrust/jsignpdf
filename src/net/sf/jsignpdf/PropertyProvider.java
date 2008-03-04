@@ -131,8 +131,18 @@ public class PropertyProvider {
      * @param aValue value of a property
      */
     public void setProperty(String aKey, String aValue) {
-        properties.setProperty(aKey, aValue);
+        properties.setProperty(aKey, aValue==null?"":aValue);
     }
+
+    /**
+     * Sets boolean property with given name to given value
+     * @param aKey name of a property
+     * @param aValue value of a property
+     */
+    public void setProperty(String aKey, boolean aValue) {
+        properties.setProperty(aKey, String.valueOf(aValue));
+    }
+
 
     /**
      * Removes property.
