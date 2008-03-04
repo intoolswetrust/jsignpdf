@@ -84,10 +84,10 @@ public class SignerOptions {
 	 * @param aProperty
 	 * @return
 	 */
-	private void setEncrypted(String aProperty, String aValue) {
+	private void setEncrypted(final String aProperty, final String aValue) {
 		try {
 			props.setProperty(aProperty,
-					encryptor.encryptString(props.getProperty(aProperty)));
+					encryptor.encryptString(aValue));
 		} catch (CryptoException e) {
 			e.printStackTrace();
 			props.removeProperty(aProperty);
@@ -202,7 +202,7 @@ public class SignerOptions {
 	public String getKsPasswdStr() {
 		return charArrToStr(ksPasswd);
 	}
-	
+
 	public void setKsPasswd(char[] passwd) {
 		this.ksPasswd = passwd;
 	}
