@@ -6,9 +6,9 @@ import java.io.File;
 import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.net.URL;
-import javax.swing.DefaultComboBoxModel;
 
-import javax.swing.JButton;
+import javax.swing.AbstractButton;
+import javax.swing.DefaultComboBoxModel;
 import javax.swing.JComponent;
 import javax.swing.JFileChooser;
 import javax.swing.JLabel;
@@ -41,7 +41,6 @@ public class SignPdfForm extends javax.swing.JFrame implements SignResultListene
 	public SignPdfForm(int aCloseOperation) {
 		initComponents();
 		options.loadOptions();
-		updateFromOptions();
 		translateLabels();
 
 		setDefaultCloseOperation(aCloseOperation);
@@ -62,6 +61,8 @@ public class SignPdfForm extends javax.swing.JFrame implements SignResultListene
 		cbKeystoreType.setModel(new DefaultComboBoxModel(ksUtils.getKeyStrores()));
 		cbCertLevel.setModel(new DefaultComboBoxModel(CertificationLevel.values()));
 
+		updateFromOptions();
+
 		chkbAdvancedActionPerformed(null);
 		chkbPdfEncryptedActionPerformed(null);
 	}
@@ -72,12 +73,22 @@ public class SignPdfForm extends javax.swing.JFrame implements SignResultListene
 	private void translateLabels() {
 		setTitle(res.get("gui.title", new String[] {Constants.VERSION}));
 		setLabelAndMnemonic(lblKeystoreType, "gui.keystoreType.label");
+		setLabelAndMnemonic(chkbAdvanced, "gui.advancedView.checkbox");
 		setLabelAndMnemonic(lblKeystoreFile, "gui.keystoreFile.label");
 		setLabelAndMnemonic(lblKeystorePwd, "gui.keystorePassword.label");
+		setLabelAndMnemonic(chkbStorePwd, "gui.storePasswords.checkbox");
+		setLabelAndMnemonic(lblAlias, "gui.alias.label");
+		setLabelAndMnemonic(btnLoadAliases, "gui.loadAliases.label");
+		setLabelAndMnemonic(lblKeyPwd, "gui.keyPassword.label");
 		setLabelAndMnemonic(lblInPdfFile, "gui.inPdfFile.label");
+		setLabelAndMnemonic(chkbPdfEncrypted, "gui.pdfEncrypted.checkbox");
+		setLabelAndMnemonic(lblPdfOwnerPwd, "gui.pdfOwnerPwd.label");
+		setLabelAndMnemonic(lblPdfUserPwd, "gui.pdfUserPwd.label");
 		setLabelAndMnemonic(lblOutPdfFile, "gui.outPdfFile.label");
 		setLabelAndMnemonic(lblReason, "gui.reason.label");
 		setLabelAndMnemonic(lblLocation, "gui.location.label");
+		setLabelAndMnemonic(lblCertLevel, "gui.certLevel.label");
+		setLabelAndMnemonic(chkbAppendSignature, "gui.appendSignature.checkbox");
 
 		btnKeystoreFile.setText(res.get("gui.browse.button"));
 		btnInPdfFile.setText(res.get("gui.browse.button"));
@@ -99,8 +110,9 @@ public class SignPdfForm extends javax.swing.JFrame implements SignResultListene
 				tmpLabel.setDisplayedMnemonic(tmpLabelText.toLowerCase().charAt(tmpMnemIndex));
 				tmpLabel.setDisplayedMnemonicIndex(tmpMnemIndex);
 			}
-		} else if (aComponent instanceof JButton) {
-			final JButton tmpBtn = (JButton) aComponent;
+		} else if (aComponent instanceof AbstractButton) {
+			//handles Buttons, Checkboxes and Radiobuttons
+			final AbstractButton tmpBtn = (AbstractButton) aComponent;
 			tmpBtn.setText(tmpLabelText);
 			if (tmpMnemIndex>-1) {
 				tmpBtn.setMnemonic(tmpLabelText.toLowerCase().charAt(tmpMnemIndex));
@@ -369,6 +381,7 @@ public class SignPdfForm extends javax.swing.JFrame implements SignResultListene
 		gridBagConstraints.insets = new java.awt.Insets(1, 5, 1, 5);
 		getContentPane().add(chkbStorePwd, gridBagConstraints);
 
+		lblAlias.setLabelFor(cbAlias);
 		lblAlias.setText("Key alias");
 		gridBagConstraints = new java.awt.GridBagConstraints();
 		gridBagConstraints.gridx = 0;
@@ -403,6 +416,7 @@ public class SignPdfForm extends javax.swing.JFrame implements SignResultListene
 		gridBagConstraints.insets = new java.awt.Insets(1, 5, 1, 5);
 		getContentPane().add(btnLoadAliases, gridBagConstraints);
 
+		lblKeyPwd.setLabelFor(pfKeyPwd);
 		lblKeyPwd.setText("Key password");
 		gridBagConstraints = new java.awt.GridBagConstraints();
 		gridBagConstraints.gridx = 0;
@@ -472,6 +486,7 @@ public class SignPdfForm extends javax.swing.JFrame implements SignResultListene
 		gridBagConstraints.insets = new java.awt.Insets(2, 0, 2, 0);
 		getContentPane().add(chkbPdfEncrypted, gridBagConstraints);
 
+		lblPdfOwnerPwd.setLabelFor(pfPdfOwnerPwd);
 		lblPdfOwnerPwd.setText("Owner password");
 		gridBagConstraints = new java.awt.GridBagConstraints();
 		gridBagConstraints.gridx = 0;
@@ -491,6 +506,7 @@ public class SignPdfForm extends javax.swing.JFrame implements SignResultListene
 		gridBagConstraints.insets = new java.awt.Insets(2, 0, 2, 0);
 		getContentPane().add(pfPdfOwnerPwd, gridBagConstraints);
 
+		lblPdfUserPwd.setLabelFor(pfPdfUserPwd);
 		lblPdfUserPwd.setText("User password");
 		gridBagConstraints = new java.awt.GridBagConstraints();
 		gridBagConstraints.gridx = 0;
@@ -582,6 +598,7 @@ public class SignPdfForm extends javax.swing.JFrame implements SignResultListene
 		gridBagConstraints.insets = new java.awt.Insets(2, 0, 2, 0);
 		getContentPane().add(tfLocation, gridBagConstraints);
 
+		lblCertLevel.setLabelFor(cbCertLevel);
 		lblCertLevel.setText("Certification level");
 		gridBagConstraints = new java.awt.GridBagConstraints();
 		gridBagConstraints.gridx = 0;

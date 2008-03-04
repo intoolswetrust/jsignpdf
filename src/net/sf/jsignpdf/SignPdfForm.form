@@ -201,6 +201,9 @@
     </Component>
     <Component class="javax.swing.JLabel" name="lblAlias">
       <Properties>
+        <Property name="labelFor" type="java.awt.Component" editor="org.netbeans.modules.form.ComponentChooserEditor">
+          <ComponentRef name="cbAlias"/>
+        </Property>
         <Property name="text" type="java.lang.String" value="Key alias"/>
       </Properties>
       <Constraints>
@@ -243,6 +246,9 @@
     </Component>
     <Component class="javax.swing.JLabel" name="lblKeyPwd">
       <Properties>
+        <Property name="labelFor" type="java.awt.Component" editor="org.netbeans.modules.form.ComponentChooserEditor">
+          <ComponentRef name="pfKeyPwd"/>
+        </Property>
         <Property name="text" type="java.lang.String" value="Key password"/>
       </Properties>
       <Constraints>
@@ -330,6 +336,9 @@
     </Component>
     <Component class="javax.swing.JLabel" name="lblPdfOwnerPwd">
       <Properties>
+        <Property name="labelFor" type="java.awt.Component" editor="org.netbeans.modules.form.ComponentChooserEditor">
+          <ComponentRef name="pfPdfOwnerPwd"/>
+        </Property>
         <Property name="text" type="java.lang.String" value="Owner password"/>
       </Properties>
       <Constraints>
@@ -356,6 +365,9 @@
     </Component>
     <Component class="javax.swing.JLabel" name="lblPdfUserPwd">
       <Properties>
+        <Property name="labelFor" type="java.awt.Component" editor="org.netbeans.modules.form.ComponentChooserEditor">
+          <ComponentRef name="pfPdfUserPwd"/>
+        </Property>
         <Property name="text" type="java.lang.String" value="User password"/>
       </Properties>
       <Constraints>
@@ -479,6 +491,9 @@
     </Component>
     <Component class="javax.swing.JLabel" name="lblCertLevel">
       <Properties>
+        <Property name="labelFor" type="java.awt.Component" editor="org.netbeans.modules.form.ComponentChooserEditor">
+          <ComponentRef name="cbCertLevel"/>
+        </Property>
         <Property name="text" type="java.lang.String" value="Certification level"/>
       </Properties>
       <Constraints>

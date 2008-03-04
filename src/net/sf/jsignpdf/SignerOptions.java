@@ -101,6 +101,7 @@ public class SignerOptions {
 	public void loadOptions() {
 		ksType = props.getProperty(Constants.PROPERTY_KSTYPE);
 		advanced = props.getAsBool(Constants.PROPERTY_ADVANCED);
+		ksFile = props.getProperty(Constants.PROPERTY_KEYSTORE);
 		storePasswords = props.getAsBool(Constants.PROPERTY_STOREPWD);
 		keyAlias = props.getProperty(Constants.PROPERTY_ALIAS);
 		inFile = props.getProperty(Constants.PROPERTY_INPDF);
@@ -136,6 +137,7 @@ public class SignerOptions {
 	public void storeOptions() {
 		props.setProperty(Constants.PROPERTY_KSTYPE, ksType);
 		props.setProperty(Constants.PROPERTY_ADVANCED, advanced);
+		props.setProperty(Constants.PROPERTY_KEYSTORE, ksFile);
 		props.setProperty(Constants.PROPERTY_STOREPWD, storePasswords);
 		props.setProperty(Constants.PROPERTY_ALIAS, keyAlias);
 		props.setProperty(Constants.PROPERTY_INPDF, inFile);
