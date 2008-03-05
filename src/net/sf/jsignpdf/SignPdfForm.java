@@ -78,7 +78,7 @@ public class SignPdfForm extends javax.swing.JFrame implements SignResultListene
 		setLabelAndMnemonic(lblKeystorePwd, "gui.keystorePassword.label");
 		setLabelAndMnemonic(chkbStorePwd, "gui.storePasswords.checkbox");
 		setLabelAndMnemonic(lblAlias, "gui.alias.label");
-		setLabelAndMnemonic(btnLoadAliases, "gui.loadAliases.label");
+		setLabelAndMnemonic(btnLoadAliases, "gui.loadAliases.button");
 		setLabelAndMnemonic(lblKeyPwd, "gui.keyPassword.label");
 		setLabelAndMnemonic(lblInPdfFile, "gui.inPdfFile.label");
 		setLabelAndMnemonic(chkbPdfEncrypted, "gui.pdfEncrypted.checkbox");
