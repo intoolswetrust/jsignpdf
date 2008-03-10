@@ -241,6 +241,9 @@ public class SignerOptions {
 	public char[] getKeyPasswd() {
 		return keyPasswd;
 	}
+	public char[] getKeyPasswdX() {
+		return (advanced && keyPasswd.length>0)?keyPasswd:ksPasswd;
+	}	
 	public String getKeyPasswdStr() {
 		return charArrToStr(keyPasswd);
 	}
@@ -250,11 +253,17 @@ public class SignerOptions {
 	public String getKeyAlias() {
 		return keyAlias;
 	}
+	public String getKeyAliasX() {
+		return advanced?keyAlias:null;
+	}
 	public void setKeyAlias(String keyAlias) {
 		this.keyAlias = keyAlias;
 	}
 	public boolean isAppend() {
 		return append;
+	}
+	public boolean isAppendX() {
+		return advanced && append;
 	}
 	public void setAppend(boolean append) {
 		this.append = append;
@@ -270,6 +279,9 @@ public class SignerOptions {
 
 	public boolean isEncrypted() {
 		return encrypted;
+	}
+	public boolean isEncryptedX() {
+		return advanced && encrypted;
 	}
 
 	public void setEncrypted(boolean encrypted) {
@@ -287,6 +299,9 @@ public class SignerOptions {
 	public char[] getPdfOwnerPwd() {
 		return pdfOwnerPwd;
 	}
+	public char[] getPdfOwnerPwdX() {
+		return advanced?pdfOwnerPwd:null;
+	}
 	public String getPdfOwnerPwdStr() {
 		return charArrToStr(pdfOwnerPwd);
 	}
@@ -298,6 +313,9 @@ public class SignerOptions {
 	public char[] getPdfUserPwd() {
 		return pdfUserPwd;
 	}
+	public char[] getPdfUserPwdX() {
+		return advanced?pdfUserPwd:null;
+	}
 	public String getPdfUserPwdStr() {
 		return charArrToStr(pdfUserPwd);
 	}
@@ -308,6 +326,9 @@ public class SignerOptions {
 
 	public CertificationLevel getCertLevel() {
 		return certLevel;
+	}
+	public CertificationLevel getCertLevelX() {
+		return advanced?certLevel:CertificationLevel.NOT_CERTIFIED;
 	}
 
 	public void setCertLevel(CertificationLevel certLevel) {

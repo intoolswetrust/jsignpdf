@@ -44,13 +44,24 @@ public class SignerLogic implements Runnable {
 			options.log("console.loadKeystore", options.getKsFile());
 			ks.load(new FileInputStream(options.getKsFile()),options.getKsPasswd());
 			options.log("console.getAliases");
-			final String alias = (String) ks.aliases().nextElement();
+			String tmpAlias = options.getKeyAliasX();
+			if (tmpAlias==null || tmpAlias.length()==0) {
+				tmpAlias = (String) ks.aliases().nextElement();
+			}
 			options.log("console.getPrivateKey");
-			final PrivateKey key = (PrivateKey) ks.getKey(alias, options.getKeyPasswd());
+			final PrivateKey key = (PrivateKey) ks.getKey(tmpAlias, options.getKeyPasswdX());
 			options.log("console.getCertChain");
-			final Certificate[] chain = ks.getCertificateChain(alias);
+			final Certificate[] chain = ks.getCertificateChain(tmpAlias);
 			options.log("console.createPdfReader", options.getInFile());
-			final PdfReader reader = new PdfReader(options.getInFile());
+			PdfReader reader;
+			try {
+				//try to read without password
+				reader = new PdfReader(options.getInFile());
+			} catch (Exception e) {
+				reader = new PdfReader(options.getInFile(), 
+						new String(options.getPdfOwnerPwdX()).getBytes());
+			}
+			
 			options.log("console.createOutPdf", options.getOutFile());
 			final FileOutputStream fout = new FileOutputStream(options.getOutFile());
 
