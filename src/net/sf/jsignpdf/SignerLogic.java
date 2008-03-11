@@ -58,8 +58,13 @@ public class SignerLogic implements Runnable {
 				//try to read without password
 				reader = new PdfReader(options.getInFile());
 			} catch (Exception e) {
-				reader = new PdfReader(options.getInFile(), 
-						new String(options.getPdfOwnerPwdX()).getBytes());
+				try {
+					reader = new PdfReader(options.getInFile(), 
+							new byte[0]);					
+				} catch (Exception e2) {
+					reader = new PdfReader(options.getInFile(), 
+							new String(options.getPdfOwnerPwdX()).getBytes());
+				}
 			}
 			
 			options.log("console.createOutPdf", options.getOutFile());
