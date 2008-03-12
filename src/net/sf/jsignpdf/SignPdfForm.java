@@ -768,6 +768,7 @@ public class SignPdfForm extends javax.swing.JFrame implements SignResultListene
 	}
 
 	private void btnSignItActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSignItActionPerformed
+		storeToOptions();
 		if (checkFileExists(tfInPdfFile, "gui.inPdfFile.label")
 				&& checkFileExists(tfKeystoreFile, "gui.keystoreFile.label")
 				&& checkFilled(tfOutPdfFile, "gui.outPdfFile.label")

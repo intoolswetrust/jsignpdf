@@ -9,6 +9,7 @@ import java.security.cert.Certificate;
 import com.lowagie.text.pdf.PdfReader;
 import com.lowagie.text.pdf.PdfSignatureAppearance;
 import com.lowagie.text.pdf.PdfStamper;
+import com.lowagie.text.pdf.PdfWriter;
 
 /**
  * Main logic of signer application. It uses iText to create signature in PDF.
@@ -63,7 +64,7 @@ public class SignerLogic implements Runnable {
 							new byte[0]);					
 				} catch (Exception e2) {
 					reader = new PdfReader(options.getInFile(), 
-							new String(options.getPdfOwnerPwdX()).getBytes());
+							options.getPdfOwnerPwdStr().getBytes());
 				}
 			}
 			
@@ -72,9 +73,20 @@ public class SignerLogic implements Runnable {
 
 			options.log("console.createSignature");
 			final PdfStamper stp =
-				PdfStamper.createSignature(reader, fout, '\0');
-			final PdfSignatureAppearance sap = stp.getSignatureAppearance();
+				PdfStamper.createSignature(reader, fout, '\0', null, options.isAppendX());
+			
+			if (options.isEncryptedX()) {
+				stp.setEncryption(true,
+					options.getPdfUserPwdStr(),
+					options.getPdfOwnerPwdStr(), 
+					PdfWriter.ALLOW_ASSEMBLY | PdfWriter.ALLOW_COPY |
+					PdfWriter.ALLOW_DEGRADED_PRINTING | PdfWriter.ALLOW_FILL_IN |
+					PdfWriter.ALLOW_MODIFY_ANNOTATIONS | PdfWriter.ALLOW_MODIFY_CONTENTS |
+					PdfWriter.ALLOW_PRINTING | PdfWriter.ALLOW_SCREENREADERS
+					);
+			}
 
+			final PdfSignatureAppearance sap = stp.getSignatureAppearance();
 			sap.setCrypto(key, chain, null, PdfSignatureAppearance.WINCER_SIGNED);
 			options.log("console.setReason", options.getReason());
 			sap.setReason(options.getReason());

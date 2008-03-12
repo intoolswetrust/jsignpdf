@@ -299,9 +299,6 @@ public class SignerOptions {
 	public char[] getPdfOwnerPwd() {
 		return pdfOwnerPwd;
 	}
-	public char[] getPdfOwnerPwdX() {
-		return advanced?pdfOwnerPwd:null;
-	}
 	public String getPdfOwnerPwdStr() {
 		return charArrToStr(pdfOwnerPwd);
 	}
@@ -312,9 +309,6 @@ public class SignerOptions {
 
 	public char[] getPdfUserPwd() {
 		return pdfUserPwd;
-	}
-	public char[] getPdfUserPwdX() {
-		return advanced?pdfUserPwd:null;
 	}
 	public String getPdfUserPwdStr() {
 		return charArrToStr(pdfUserPwd);
