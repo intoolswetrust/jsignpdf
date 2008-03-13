@@ -100,6 +100,11 @@ public class SignPdfForm extends javax.swing.JFrame implements SignResultListene
 		btnInfoClose.setText(res.get("gui.info.close.button"));
 	}
 
+	/**
+	 * Sets translations and mnemonics for labels and different kind of buttons
+	 * @param aComponent component in which should be label set
+	 * @param aKey message key
+	 */
 	private void setLabelAndMnemonic(final JComponent aComponent, final String aKey) {
 		final String tmpLabelText = res.get(aKey);
 		final int tmpMnemIndex = res.getMnemonicIndex(aKey);
@@ -147,6 +152,9 @@ public class SignPdfForm extends javax.swing.JFrame implements SignResultListene
 		pack();
 	}
 
+	/**
+	 * stores values from this Form to the instance of {@link SignerOptions}
+	 */
 	private void storeToOptions() {
 		options.setKsType((String) cbKeystoreType.getSelectedItem());
 		options.setAdvanced(chkbAdvanced.isSelected());
@@ -166,6 +174,11 @@ public class SignPdfForm extends javax.swing.JFrame implements SignResultListene
 		options.setAppend(chkbAppendSignature.isSelected());
 	}
 
+	/**
+	 * Handles switching Advanced checkbox. Sets some components visible/hidden
+	 * depending on given status flag.
+	 * @param anAdvanced flag - advanced view is enabled
+	 */
 	private void switchAdvancedView(boolean anAdvanced) {
 		btnLoadAliases.setVisible(anAdvanced);
 		lblAlias.setVisible(anAdvanced);
@@ -182,9 +195,16 @@ public class SignPdfForm extends javax.swing.JFrame implements SignResultListene
 		chkbAppendSignature.setVisible(anAdvanced);
 	}
 
+	/**
+	 * Handles switching Encrypted checkbox.
+	 * Sets some components enabled/disabled
+	 * depending on given status flag.
+	 * @param anAdvanced flag - encrypted view is enabled
+	 */
 	private void switchEncryptedPdf(boolean anEnabled) {
 		pfPdfOwnerPwd.setEnabled(anEnabled);
 		pfPdfUserPwd.setEnabled(anEnabled);
+		chkbAppendSignature.setEnabled(!anEnabled);
 	}
 
 	/**
@@ -767,10 +787,15 @@ public class SignPdfForm extends javax.swing.JFrame implements SignResultListene
 		return tmpResult;
 	}
 
+	/**
+	 * Handles pressing of "Sign It" button. Creates and runs SignerLogic instance
+	 * in a new thread.
+	 * @param evt event
+	 */
 	private void btnSignItActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSignItActionPerformed
 		storeToOptions();
 		if (checkFileExists(tfInPdfFile, "gui.inPdfFile.label")
-				&& checkFileExists(tfKeystoreFile, "gui.keystoreFile.label")
+//				&& checkFileExists(tfKeystoreFile, "gui.keystoreFile.label")
 				&& checkFilled(tfOutPdfFile, "gui.outPdfFile.label")
 				&& checkInOutDiffers()) {
 			infoStream.clear();
@@ -779,14 +804,6 @@ public class SignPdfForm extends javax.swing.JFrame implements SignResultListene
 			setVisible(false);
 			infoDialog.setDefaultCloseOperation(javax.swing.WindowConstants.DO_NOTHING_ON_CLOSE);
 			infoWriter.println(res.get("console.starting"));
-			options.setKsType((String) cbKeystoreType.getSelectedItem());
-			options.setKsFile(tfKeystoreFile.getText());
-			options.setKsPasswd(pfKeystorePwd.getPassword());
-			options.setKeyPasswd(pfKeystorePwd.getPassword());
-			options.setInFile(tfInPdfFile.getText());
-			options.setOutFile(tfOutPdfFile.getText());
-			options.setReason(tfReason.getText());
-			options.setLocation(tfLocation.getText());
 			//Let's do it
 			final Thread tmpST = new Thread(signerLogic);
 			tmpST.start();

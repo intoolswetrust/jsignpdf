@@ -2,6 +2,7 @@ package net.sf.jsignpdf;
 
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.InputStream;
 import java.security.KeyStore;
 import java.security.PrivateKey;
 import java.security.cert.Certificate;
@@ -43,7 +44,11 @@ public class SignerLogic implements Runnable {
 			options.log("console.getKeystoreType", options.getKsType());
 			final KeyStore ks = KeyStore.getInstance(options.getKsType());
 			options.log("console.loadKeystore", options.getKsFile());
-			ks.load(new FileInputStream(options.getKsFile()),options.getKsPasswd());
+			InputStream ksInputStream = null;
+			if (!StringUtils.isEmpty(options.getKsFile())) {
+				ksInputStream = new FileInputStream(options.getKsFile());
+			}
+			ks.load(ksInputStream,options.getKsPasswd());
 			options.log("console.getAliases");
 			String tmpAlias = options.getKeyAliasX();
 			if (tmpAlias==null || tmpAlias.length()==0) {
@@ -60,25 +65,26 @@ public class SignerLogic implements Runnable {
 				reader = new PdfReader(options.getInFile());
 			} catch (Exception e) {
 				try {
-					reader = new PdfReader(options.getInFile(), 
-							new byte[0]);					
+					reader = new PdfReader(options.getInFile(),
+							new byte[0]);
 				} catch (Exception e2) {
-					reader = new PdfReader(options.getInFile(), 
+					reader = new PdfReader(options.getInFile(),
 							options.getPdfOwnerPwdStr().getBytes());
 				}
 			}
-			
+
 			options.log("console.createOutPdf", options.getOutFile());
 			final FileOutputStream fout = new FileOutputStream(options.getOutFile());
 
 			options.log("console.createSignature");
 			final PdfStamper stp =
 				PdfStamper.createSignature(reader, fout, '\0', null, options.isAppendX());
-			
+
 			if (options.isEncryptedX()) {
+				options.log("console.setEncryption");
 				stp.setEncryption(true,
 					options.getPdfUserPwdStr(),
-					options.getPdfOwnerPwdStr(), 
+					options.getPdfOwnerPwdStr(),
 					PdfWriter.ALLOW_ASSEMBLY | PdfWriter.ALLOW_COPY |
 					PdfWriter.ALLOW_DEGRADED_PRINTING | PdfWriter.ALLOW_FILL_IN |
 					PdfWriter.ALLOW_MODIFY_ANNOTATIONS | PdfWriter.ALLOW_MODIFY_CONTENTS |
@@ -92,6 +98,8 @@ public class SignerLogic implements Runnable {
 			sap.setReason(options.getReason());
 			options.log("console.setLocation", options.getLocation());
 			sap.setLocation(options.getLocation());
+			options.log("console.setCertificationLevel");
+			sap.setCertificationLevel(options.getCertLevelX().getLevel());
 
 			options.log("console.processing");
 			stp.close();

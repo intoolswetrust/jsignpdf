@@ -263,7 +263,7 @@ public class SignerOptions {
 		return append;
 	}
 	public boolean isAppendX() {
-		return advanced && append;
+		return advanced && append && !encrypted;
 	}
 	public void setAppend(boolean append) {
 		this.append = append;
