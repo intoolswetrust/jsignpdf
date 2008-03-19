@@ -11,7 +11,18 @@ public class Constants {
 	 */
 	public static final String VERSION = "0.3";
 
+	/**
+	 * Home directory of current user. It's not a real constant
+	 * it only holds value of <code>System.getProperty("user.home")</code>
+	 */
 	public static final String USER_HOME = System.getProperty("user.home");
+
+	/**
+	 * Filename (in USER_HOME), where filled values from JSign application
+	 * are stored.
+	 * @see #USER_HOME
+	 */
+	public static final String PROPERTIES_FILE = ".JSignPdf";
 
 	/**
 	 * Name (path) of resource bundle

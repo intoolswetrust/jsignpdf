@@ -31,7 +31,7 @@ public class PropertyProvider {
      */
     public static final String PROPERTY_FILE =
             Constants.USER_HOME + "/" +
-            ".JSignPdf";
+            Constants.PROPERTIES_FILE;
 
     /**
      * Singleton instance
