@@ -9,7 +9,7 @@ public class Constants {
 	/**
 	 * Version of JSignPdf
 	 */
-	public static final String VERSION = "0.3";
+	public static final String VERSION = "0.5";
 
 	/**
 	 * Home directory of current user. It's not a real constant
