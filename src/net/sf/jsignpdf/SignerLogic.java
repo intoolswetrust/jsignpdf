@@ -82,13 +82,18 @@ public class SignerLogic implements Runnable {
 
 			if (options.isEncryptedX()) {
 				options.log("console.setEncryption");
+				final int tmpRight = options.getRightPrinting().getRight()
+					| (options.isRightCopy() ? PdfWriter.ALLOW_COPY: 0)
+					| (options.isRightAssembly() ? PdfWriter.ALLOW_ASSEMBLY: 0)
+					| (options.isRightFillIn() ? PdfWriter.ALLOW_FILL_IN: 0)
+					| (options.isRightScreanReaders() ? PdfWriter.ALLOW_SCREENREADERS: 0)
+					| (options.isRightModifyAnnotations() ? PdfWriter.ALLOW_MODIFY_ANNOTATIONS: 0)
+					| (options.isRightModifyContents() ? PdfWriter.ALLOW_MODIFY_CONTENTS: 0)
+					;
 				stp.setEncryption(true,
 					options.getPdfUserPwdStr(),
 					options.getPdfOwnerPwdStr(),
-					PdfWriter.ALLOW_ASSEMBLY | PdfWriter.ALLOW_COPY |
-					PdfWriter.ALLOW_DEGRADED_PRINTING | PdfWriter.ALLOW_FILL_IN |
-					PdfWriter.ALLOW_MODIFY_ANNOTATIONS | PdfWriter.ALLOW_MODIFY_CONTENTS |
-					PdfWriter.ALLOW_PRINTING | PdfWriter.ALLOW_SCREENREADERS
+					tmpRight
 					);
 			}
 

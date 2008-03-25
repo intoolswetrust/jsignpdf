@@ -55,11 +55,15 @@ public class SignPdfForm extends javax.swing.JFrame implements SignResultListene
 
 		infoDialog.pack();
 
+		rightsDialog.setIconImage(getIconImage());
+		rightsDialog.pack();
+
 		options.setPrintWriter(infoWriter);
 		options.setListener(this);
 
 		cbKeystoreType.setModel(new DefaultComboBoxModel(ksUtils.getKeyStrores()));
 		cbCertLevel.setModel(new DefaultComboBoxModel(CertificationLevel.values()));
+		cbPrinting.setModel(new DefaultComboBoxModel(PrintRight.values()));
 
 		updateFromOptions();
 
@@ -82,6 +86,7 @@ public class SignPdfForm extends javax.swing.JFrame implements SignResultListene
 		setLabelAndMnemonic(lblKeyPwd, "gui.keyPassword.label");
 		setLabelAndMnemonic(lblInPdfFile, "gui.inPdfFile.label");
 		setLabelAndMnemonic(chkbPdfEncrypted, "gui.pdfEncrypted.checkbox");
+		setLabelAndMnemonic(btnRights, "gui.rights.button");
 		setLabelAndMnemonic(lblPdfOwnerPwd, "gui.pdfOwnerPwd.label");
 		setLabelAndMnemonic(lblPdfUserPwd, "gui.pdfUserPwd.label");
 		setLabelAndMnemonic(lblOutPdfFile, "gui.outPdfFile.label");
@@ -98,6 +103,16 @@ public class SignPdfForm extends javax.swing.JFrame implements SignResultListene
 
 		infoDialog.setTitle(res.get("gui.info.title"));
 		btnInfoClose.setText(res.get("gui.info.close.button"));
+
+		rightsDialog.setTitle(res.get("gui.rights.title"));
+		setLabelAndMnemonic(lblPrinting, "gui.rights.printing.label");
+		setLabelAndMnemonic(lblRights, "gui.rights.rights.label");
+		setLabelAndMnemonic(chkbAllowCopy, "gui.rights.copy.checkbox");
+		setLabelAndMnemonic(chkbAllowAssembly, "gui.rights.assembly.checkbox");
+		setLabelAndMnemonic(chkbAllowFillIn, "gui.rights.fillIn.checkbox");
+		setLabelAndMnemonic(chkbAllowScreenReaders, "gui.rights.screenReaders.checkbox");
+		setLabelAndMnemonic(chkbAllowModifyAnnotations, "gui.rights.modifyAnnotations.checkbox");
+		setLabelAndMnemonic(chkbAllowModifyContent, "gui.rights.modifyContents.checkbox");
 	}
 
 	/**
@@ -147,6 +162,15 @@ public class SignPdfForm extends javax.swing.JFrame implements SignResultListene
 		tfLocation.setText(options.getLocation());
 		cbCertLevel.setSelectedItem(options.getCertLevel());
 		chkbAppendSignature.setSelected(options.isAppend());
+
+		cbPrinting.setSelectedItem(options.getRightPrinting());
+		chkbAllowCopy.setSelected(options.isRightCopy());
+		chkbAllowAssembly.setSelected(options.isRightAssembly());
+		chkbAllowFillIn.setSelected(options.isRightFillIn());
+		chkbAllowScreenReaders.setSelected(options.isRightScreanReaders());
+		chkbAllowModifyAnnotations.setSelected(options.isRightModifyAnnotations());
+		chkbAllowModifyContent.setSelected(options.isRightModifyContents());
+
 		switchAdvancedView(options.isAdvanced());
 		switchEncryptedPdf(options.isEncrypted());
 		pack();
@@ -172,6 +196,14 @@ public class SignPdfForm extends javax.swing.JFrame implements SignResultListene
 		options.setLocation(tfLocation.getText());
 		options.setCertLevel((CertificationLevel) cbCertLevel.getSelectedItem());
 		options.setAppend(chkbAppendSignature.isSelected());
+
+		options.setRightPrinting((PrintRight) cbPrinting.getSelectedItem());
+		options.setRightCopy(chkbAllowCopy.isSelected());
+		options.setRightAssembly(chkbAllowAssembly.isSelected());
+		options.setRightFillIn(chkbAllowFillIn.isSelected());
+		options.setRightScreanReaders(chkbAllowScreenReaders.isSelected());
+		options.setRightModifyAnnotations(chkbAllowModifyAnnotations.isSelected());
+		options.setRightModifyContents(chkbAllowModifyContent.isSelected());
 	}
 
 	/**
@@ -186,10 +218,6 @@ public class SignPdfForm extends javax.swing.JFrame implements SignResultListene
 		lblKeyPwd.setVisible(anAdvanced);
 		pfKeyPwd.setVisible(anAdvanced);
 		chkbPdfEncrypted.setVisible(anAdvanced);
-		lblPdfOwnerPwd.setVisible(anAdvanced);
-		pfPdfOwnerPwd.setVisible(anAdvanced);
-		lblPdfUserPwd.setVisible(anAdvanced);
-		pfPdfUserPwd.setVisible(anAdvanced);
 		lblCertLevel.setVisible(anAdvanced);
 		cbCertLevel.setVisible(anAdvanced);
 		chkbAppendSignature.setVisible(anAdvanced);
@@ -199,11 +227,16 @@ public class SignPdfForm extends javax.swing.JFrame implements SignResultListene
 	 * Handles switching Encrypted checkbox.
 	 * Sets some components enabled/disabled
 	 * depending on given status flag.
-	 * @param anAdvanced flag - encrypted view is enabled
+	 * @param anEnabled flag - encrypted view is enabled
 	 */
 	private void switchEncryptedPdf(boolean anEnabled) {
-		pfPdfOwnerPwd.setEnabled(anEnabled);
-		pfPdfUserPwd.setEnabled(anEnabled);
+		final boolean tmpEncrypted = chkbAdvanced.isSelected() && anEnabled;
+		lblPdfOwnerPwd.setVisible(tmpEncrypted);
+		pfPdfOwnerPwd.setVisible(tmpEncrypted);
+		lblPdfUserPwd.setVisible(tmpEncrypted);
+		pfPdfUserPwd.setVisible(tmpEncrypted);
+		btnRights.setVisible(tmpEncrypted);
+
 		chkbAppendSignature.setEnabled(!anEnabled);
 	}
 
@@ -237,452 +270,592 @@ public class SignPdfForm extends javax.swing.JFrame implements SignResultListene
 	 * WARNING: Do NOT modify this code. The content of this method is
 	 * always regenerated by the Form Editor.
 	 */
-	// <editor-fold defaultstate="collapsed" desc=" Generated Code ">//GEN-BEGIN:initComponents
-	private void initComponents() {
-		java.awt.GridBagConstraints gridBagConstraints;
+    // <editor-fold defaultstate="collapsed" desc=" Generated Code ">//GEN-BEGIN:initComponents
+    private void initComponents() {
+        java.awt.GridBagConstraints gridBagConstraints;
 
-		infoDialog = new javax.swing.JFrame();
-		infoScrollPane = new javax.swing.JScrollPane();
-		infoTextArea = new javax.swing.JTextArea();
-		btnInfoClose = new javax.swing.JButton();
-		lblKeystoreType = new javax.swing.JLabel();
-		cbKeystoreType = new javax.swing.JComboBox();
-		lblKeystoreFile = new javax.swing.JLabel();
-		tfKeystoreFile = new javax.swing.JTextField();
-		btnKeystoreFile = new javax.swing.JButton();
-		lblKeystorePwd = new javax.swing.JLabel();
-		pfKeystorePwd = new javax.swing.JPasswordField();
-		chkbStorePwd = new javax.swing.JCheckBox();
-		lblAlias = new javax.swing.JLabel();
-		cbAlias = new javax.swing.JComboBox();
-		btnLoadAliases = new javax.swing.JButton();
-		lblKeyPwd = new javax.swing.JLabel();
-		pfKeyPwd = new javax.swing.JPasswordField();
-		lblInPdfFile = new javax.swing.JLabel();
-		tfInPdfFile = new javax.swing.JTextField();
-		btnInPdfFile = new javax.swing.JButton();
-		chkbPdfEncrypted = new javax.swing.JCheckBox();
-		lblPdfOwnerPwd = new javax.swing.JLabel();
-		pfPdfOwnerPwd = new javax.swing.JPasswordField();
-		lblPdfUserPwd = new javax.swing.JLabel();
-		pfPdfUserPwd = new javax.swing.JPasswordField();
-		lblOutPdfFile = new javax.swing.JLabel();
-		tfOutPdfFile = new javax.swing.JTextField();
-		btnOutPdfFile = new javax.swing.JButton();
-		lblReason = new javax.swing.JLabel();
-		tfReason = new javax.swing.JTextField();
-		lblLocation = new javax.swing.JLabel();
-		tfLocation = new javax.swing.JTextField();
-		lblCertLevel = new javax.swing.JLabel();
-		cbCertLevel = new javax.swing.JComboBox();
-		chkbAppendSignature = new javax.swing.JCheckBox();
-		btnSignIt = new javax.swing.JButton();
-		chkbAdvanced = new javax.swing.JCheckBox();
+        infoDialog = new javax.swing.JFrame();
+        infoScrollPane = new javax.swing.JScrollPane();
+        infoTextArea = new javax.swing.JTextArea();
+        btnInfoClose = new javax.swing.JButton();
+        rightsDialog = new javax.swing.JDialog();
+        lblPrinting = new javax.swing.JLabel();
+        cbPrinting = new javax.swing.JComboBox();
+        lblRights = new javax.swing.JLabel();
+        chkbAllowCopy = new javax.swing.JCheckBox();
+        chkbAllowAssembly = new javax.swing.JCheckBox();
+        chkbAllowFillIn = new javax.swing.JCheckBox();
+        chkbAllowScreenReaders = new javax.swing.JCheckBox();
+        chkbAllowModifyAnnotations = new javax.swing.JCheckBox();
+        chkbAllowModifyContent = new javax.swing.JCheckBox();
+        btnRightsOK = new javax.swing.JButton();
+        lblKeystoreType = new javax.swing.JLabel();
+        cbKeystoreType = new javax.swing.JComboBox();
+        lblKeystoreFile = new javax.swing.JLabel();
+        tfKeystoreFile = new javax.swing.JTextField();
+        btnKeystoreFile = new javax.swing.JButton();
+        lblKeystorePwd = new javax.swing.JLabel();
+        pfKeystorePwd = new javax.swing.JPasswordField();
+        chkbStorePwd = new javax.swing.JCheckBox();
+        lblAlias = new javax.swing.JLabel();
+        cbAlias = new javax.swing.JComboBox();
+        btnLoadAliases = new javax.swing.JButton();
+        lblKeyPwd = new javax.swing.JLabel();
+        pfKeyPwd = new javax.swing.JPasswordField();
+        lblInPdfFile = new javax.swing.JLabel();
+        tfInPdfFile = new javax.swing.JTextField();
+        btnInPdfFile = new javax.swing.JButton();
+        chkbPdfEncrypted = new javax.swing.JCheckBox();
+        lblPdfOwnerPwd = new javax.swing.JLabel();
+        pfPdfOwnerPwd = new javax.swing.JPasswordField();
+        lblPdfUserPwd = new javax.swing.JLabel();
+        pfPdfUserPwd = new javax.swing.JPasswordField();
+        lblOutPdfFile = new javax.swing.JLabel();
+        tfOutPdfFile = new javax.swing.JTextField();
+        btnOutPdfFile = new javax.swing.JButton();
+        lblReason = new javax.swing.JLabel();
+        tfReason = new javax.swing.JTextField();
+        lblLocation = new javax.swing.JLabel();
+        tfLocation = new javax.swing.JTextField();
+        lblCertLevel = new javax.swing.JLabel();
+        cbCertLevel = new javax.swing.JComboBox();
+        chkbAppendSignature = new javax.swing.JCheckBox();
+        btnSignIt = new javax.swing.JButton();
+        chkbAdvanced = new javax.swing.JCheckBox();
+        btnRights = new javax.swing.JButton();
 
-		infoDialog.setTitle("PDF Signer Output");
-		infoDialog.addWindowListener(new java.awt.event.WindowAdapter() {
-			public void windowClosing(java.awt.event.WindowEvent evt) {
-				infoDialogWindowClosing(evt);
-			}
-		});
+        infoDialog.setTitle("PDF Signer Output");
+        infoDialog.addWindowListener(new java.awt.event.WindowAdapter() {
+            public void windowClosing(java.awt.event.WindowEvent evt) {
+                infoDialogWindowClosing(evt);
+            }
+        });
 
-		infoTextArea.setColumns(80);
-		infoTextArea.setEditable(false);
-		infoTextArea.setFont(new java.awt.Font("Courier New", 1, 10));
-		infoTextArea.setRows(25);
-		infoTextArea.setMinimumSize(new java.awt.Dimension(200, 180));
-		infoScrollPane.setViewportView(infoTextArea);
+        infoTextArea.setColumns(80);
+        infoTextArea.setEditable(false);
+        infoTextArea.setFont(new java.awt.Font("Courier New", 1, 10));
+        infoTextArea.setRows(25);
+        infoTextArea.setMinimumSize(new java.awt.Dimension(200, 180));
+        infoScrollPane.setViewportView(infoTextArea);
 
-		infoDialog.getContentPane().add(infoScrollPane, java.awt.BorderLayout.CENTER);
+        infoDialog.getContentPane().add(infoScrollPane, java.awt.BorderLayout.CENTER);
 
-		btnInfoClose.setText("Close");
-		btnInfoClose.setMinimumSize(new java.awt.Dimension(50, 20));
-		btnInfoClose.addActionListener(new java.awt.event.ActionListener() {
-			public void actionPerformed(java.awt.event.ActionEvent evt) {
-				btnInfoCloseActionPerformed(evt);
-			}
-		});
+        btnInfoClose.setText("Close");
+        btnInfoClose.setMinimumSize(new java.awt.Dimension(50, 20));
+        btnInfoClose.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnInfoCloseActionPerformed(evt);
+            }
+        });
 
-		infoDialog.getContentPane().add(btnInfoClose, java.awt.BorderLayout.SOUTH);
+        infoDialog.getContentPane().add(btnInfoClose, java.awt.BorderLayout.SOUTH);
 
-		getContentPane().setLayout(new java.awt.GridBagLayout());
+        rightsDialog.getContentPane().setLayout(new java.awt.GridBagLayout());
 
-		setTitle("SignPdf");
-		addWindowListener(new java.awt.event.WindowAdapter() {
-			public void windowClosing(java.awt.event.WindowEvent evt) {
-				formWindowClosing(evt);
-			}
-		});
+        rightsDialog.setModal(true);
+        lblPrinting.setText("Printing");
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+        gridBagConstraints.insets = new java.awt.Insets(2, 5, 2, 5);
+        rightsDialog.getContentPane().add(lblPrinting, gridBagConstraints);
 
-		lblKeystoreType.setLabelFor(cbKeystoreType);
-		lblKeystoreType.setText("Keystore type");
-		gridBagConstraints = new java.awt.GridBagConstraints();
-		gridBagConstraints.gridx = 0;
-		gridBagConstraints.gridy = 0;
-		gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-		gridBagConstraints.insets = new java.awt.Insets(2, 5, 2, 10);
-		getContentPane().add(lblKeystoreType, gridBagConstraints);
+        cbPrinting.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Allow", "Allow Degraded", "Disallow" }));
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+        gridBagConstraints.insets = new java.awt.Insets(2, 5, 2, 5);
+        rightsDialog.getContentPane().add(cbPrinting, gridBagConstraints);
 
-		cbKeystoreType.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "PKCS#12", "JKS" }));
-		cbKeystoreType.setMinimumSize(new java.awt.Dimension(150, 20));
-		cbKeystoreType.setPreferredSize(new java.awt.Dimension(150, 20));
-		gridBagConstraints = new java.awt.GridBagConstraints();
-		gridBagConstraints.gridx = 1;
-		gridBagConstraints.gridy = 0;
-		gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-		gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-		gridBagConstraints.insets = new java.awt.Insets(2, 0, 2, 0);
-		getContentPane().add(cbKeystoreType, gridBagConstraints);
+        lblRights.setText("Rights");
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 1;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+        gridBagConstraints.insets = new java.awt.Insets(2, 5, 2, 5);
+        rightsDialog.getContentPane().add(lblRights, gridBagConstraints);
 
-		lblKeystoreFile.setLabelFor(tfKeystoreFile);
-		lblKeystoreFile.setText("Keystore file");
-		gridBagConstraints = new java.awt.GridBagConstraints();
-		gridBagConstraints.gridx = 0;
-		gridBagConstraints.gridy = 1;
-		gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-		gridBagConstraints.weightx = 1.0;
-		gridBagConstraints.insets = new java.awt.Insets(2, 5, 2, 10);
-		getContentPane().add(lblKeystoreFile, gridBagConstraints);
+        chkbAllowCopy.setText("Copy");
+        chkbAllowCopy.setBorder(javax.swing.BorderFactory.createEmptyBorder(0, 0, 0, 0));
+        chkbAllowCopy.setMargin(new java.awt.Insets(0, 0, 0, 0));
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 2;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+        gridBagConstraints.insets = new java.awt.Insets(2, 5, 2, 5);
+        rightsDialog.getContentPane().add(chkbAllowCopy, gridBagConstraints);
 
-		tfKeystoreFile.setMinimumSize(new java.awt.Dimension(250, 20));
-		tfKeystoreFile.setPreferredSize(new java.awt.Dimension(250, 20));
-		gridBagConstraints = new java.awt.GridBagConstraints();
-		gridBagConstraints.gridx = 1;
-		gridBagConstraints.gridy = 1;
-		gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-		gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-		gridBagConstraints.weightx = 4.0;
-		gridBagConstraints.insets = new java.awt.Insets(2, 0, 2, 0);
-		getContentPane().add(tfKeystoreFile, gridBagConstraints);
+        chkbAllowAssembly.setText("Assembly");
+        chkbAllowAssembly.setBorder(javax.swing.BorderFactory.createEmptyBorder(0, 0, 0, 0));
+        chkbAllowAssembly.setMargin(new java.awt.Insets(0, 0, 0, 0));
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 1;
+        gridBagConstraints.gridy = 2;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+        gridBagConstraints.insets = new java.awt.Insets(2, 5, 2, 5);
+        rightsDialog.getContentPane().add(chkbAllowAssembly, gridBagConstraints);
 
-		btnKeystoreFile.setText("Browse...");
-		btnKeystoreFile.addActionListener(new java.awt.event.ActionListener() {
-			public void actionPerformed(java.awt.event.ActionEvent evt) {
-				btnKeystoreFileActionPerformed(evt);
-			}
-		});
+        chkbAllowFillIn.setText("Fill In");
+        chkbAllowFillIn.setBorder(javax.swing.BorderFactory.createEmptyBorder(0, 0, 0, 0));
+        chkbAllowFillIn.setMargin(new java.awt.Insets(0, 0, 0, 0));
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 3;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+        gridBagConstraints.insets = new java.awt.Insets(2, 5, 2, 5);
+        rightsDialog.getContentPane().add(chkbAllowFillIn, gridBagConstraints);
 
-		gridBagConstraints = new java.awt.GridBagConstraints();
-		gridBagConstraints.gridx = 2;
-		gridBagConstraints.gridy = 1;
-		gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-		gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-		gridBagConstraints.weightx = 1.0;
-		gridBagConstraints.insets = new java.awt.Insets(1, 5, 1, 5);
-		getContentPane().add(btnKeystoreFile, gridBagConstraints);
+        chkbAllowScreenReaders.setText("Screen readers");
+        chkbAllowScreenReaders.setBorder(javax.swing.BorderFactory.createEmptyBorder(0, 0, 0, 0));
+        chkbAllowScreenReaders.setMargin(new java.awt.Insets(0, 0, 0, 0));
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 1;
+        gridBagConstraints.gridy = 3;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+        gridBagConstraints.insets = new java.awt.Insets(2, 5, 2, 5);
+        rightsDialog.getContentPane().add(chkbAllowScreenReaders, gridBagConstraints);
 
-		lblKeystorePwd.setLabelFor(pfKeystorePwd);
-		lblKeystorePwd.setText("Keystore password");
-		gridBagConstraints = new java.awt.GridBagConstraints();
-		gridBagConstraints.gridx = 0;
-		gridBagConstraints.gridy = 2;
-		gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-		gridBagConstraints.insets = new java.awt.Insets(2, 5, 2, 10);
-		getContentPane().add(lblKeystorePwd, gridBagConstraints);
+        chkbAllowModifyAnnotations.setText("Modify annotations");
+        chkbAllowModifyAnnotations.setBorder(javax.swing.BorderFactory.createEmptyBorder(0, 0, 0, 0));
+        chkbAllowModifyAnnotations.setMargin(new java.awt.Insets(0, 0, 0, 0));
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 4;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+        gridBagConstraints.insets = new java.awt.Insets(2, 5, 2, 5);
+        rightsDialog.getContentPane().add(chkbAllowModifyAnnotations, gridBagConstraints);
 
-		pfKeystorePwd.setMinimumSize(new java.awt.Dimension(150, 20));
-		pfKeystorePwd.setPreferredSize(new java.awt.Dimension(150, 20));
-		gridBagConstraints = new java.awt.GridBagConstraints();
-		gridBagConstraints.gridx = 1;
-		gridBagConstraints.gridy = 2;
-		gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-		gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-		gridBagConstraints.insets = new java.awt.Insets(2, 0, 2, 0);
-		getContentPane().add(pfKeystorePwd, gridBagConstraints);
+        chkbAllowModifyContent.setText("Modify contents");
+        chkbAllowModifyContent.setBorder(javax.swing.BorderFactory.createEmptyBorder(0, 0, 0, 0));
+        chkbAllowModifyContent.setMargin(new java.awt.Insets(0, 0, 0, 0));
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 1;
+        gridBagConstraints.gridy = 4;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+        gridBagConstraints.insets = new java.awt.Insets(2, 5, 2, 5);
+        rightsDialog.getContentPane().add(chkbAllowModifyContent, gridBagConstraints);
 
-		chkbStorePwd.setText("Store passwords");
-		chkbStorePwd.setBorder(javax.swing.BorderFactory.createEmptyBorder(0, 0, 0, 0));
-		chkbStorePwd.setMargin(new java.awt.Insets(0, 0, 0, 0));
-		gridBagConstraints = new java.awt.GridBagConstraints();
-		gridBagConstraints.gridx = 2;
-		gridBagConstraints.gridy = 2;
-		gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-		gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-		gridBagConstraints.insets = new java.awt.Insets(1, 5, 1, 5);
-		getContentPane().add(chkbStorePwd, gridBagConstraints);
+        btnRightsOK.setText("OK");
+        btnRightsOK.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnRightsOKActionPerformed(evt);
+            }
+        });
 
-		lblAlias.setLabelFor(cbAlias);
-		lblAlias.setText("Key alias");
-		gridBagConstraints = new java.awt.GridBagConstraints();
-		gridBagConstraints.gridx = 0;
-		gridBagConstraints.gridy = 3;
-		gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-		gridBagConstraints.insets = new java.awt.Insets(2, 5, 2, 10);
-		getContentPane().add(lblAlias, gridBagConstraints);
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 1;
+        gridBagConstraints.gridy = 5;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+        gridBagConstraints.insets = new java.awt.Insets(7, 5, 2, 5);
+        rightsDialog.getContentPane().add(btnRightsOK, gridBagConstraints);
 
-		cbAlias.setEditable(true);
-		cbAlias.setMinimumSize(new java.awt.Dimension(150, 20));
-		cbAlias.setPreferredSize(new java.awt.Dimension(150, 20));
-		gridBagConstraints = new java.awt.GridBagConstraints();
-		gridBagConstraints.gridx = 1;
-		gridBagConstraints.gridy = 3;
-		gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-		gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-		gridBagConstraints.insets = new java.awt.Insets(2, 0, 2, 0);
-		getContentPane().add(cbAlias, gridBagConstraints);
+        getContentPane().setLayout(new java.awt.GridBagLayout());
 
-		btnLoadAliases.setText("Load keys");
-		btnLoadAliases.addActionListener(new java.awt.event.ActionListener() {
-			public void actionPerformed(java.awt.event.ActionEvent evt) {
-				btnLoadAliasesActionPerformed(evt);
-			}
-		});
+        setTitle("SignPdf");
+        addWindowListener(new java.awt.event.WindowAdapter() {
+            public void windowClosing(java.awt.event.WindowEvent evt) {
+                formWindowClosing(evt);
+            }
+        });
 
-		gridBagConstraints = new java.awt.GridBagConstraints();
-		gridBagConstraints.gridx = 2;
-		gridBagConstraints.gridy = 3;
-		gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-		gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-		gridBagConstraints.insets = new java.awt.Insets(1, 5, 1, 5);
-		getContentPane().add(btnLoadAliases, gridBagConstraints);
+        lblKeystoreType.setLabelFor(cbKeystoreType);
+        lblKeystoreType.setText("Keystore type");
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 0;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+        gridBagConstraints.insets = new java.awt.Insets(2, 5, 2, 10);
+        getContentPane().add(lblKeystoreType, gridBagConstraints);
 
-		lblKeyPwd.setLabelFor(pfKeyPwd);
-		lblKeyPwd.setText("Key password");
-		gridBagConstraints = new java.awt.GridBagConstraints();
-		gridBagConstraints.gridx = 0;
-		gridBagConstraints.gridy = 4;
-		gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-		gridBagConstraints.insets = new java.awt.Insets(2, 5, 2, 10);
-		getContentPane().add(lblKeyPwd, gridBagConstraints);
+        cbKeystoreType.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "PKCS#12", "JKS" }));
+        cbKeystoreType.setMinimumSize(new java.awt.Dimension(150, 20));
+        cbKeystoreType.setPreferredSize(new java.awt.Dimension(150, 20));
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 1;
+        gridBagConstraints.gridy = 0;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+        gridBagConstraints.insets = new java.awt.Insets(2, 0, 2, 0);
+        getContentPane().add(cbKeystoreType, gridBagConstraints);
 
-		pfKeyPwd.setMinimumSize(new java.awt.Dimension(150, 20));
-		pfKeyPwd.setPreferredSize(new java.awt.Dimension(150, 20));
-		gridBagConstraints = new java.awt.GridBagConstraints();
-		gridBagConstraints.gridx = 1;
-		gridBagConstraints.gridy = 4;
-		gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-		gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-		gridBagConstraints.insets = new java.awt.Insets(2, 0, 2, 0);
-		getContentPane().add(pfKeyPwd, gridBagConstraints);
+        lblKeystoreFile.setLabelFor(tfKeystoreFile);
+        lblKeystoreFile.setText("Keystore file");
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 1;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+        gridBagConstraints.weightx = 1.0;
+        gridBagConstraints.insets = new java.awt.Insets(2, 5, 2, 10);
+        getContentPane().add(lblKeystoreFile, gridBagConstraints);
 
-		lblInPdfFile.setLabelFor(tfInPdfFile);
-		lblInPdfFile.setText("Input PDF file");
-		gridBagConstraints = new java.awt.GridBagConstraints();
-		gridBagConstraints.gridx = 0;
-		gridBagConstraints.gridy = 5;
-		gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-		gridBagConstraints.insets = new java.awt.Insets(2, 5, 2, 10);
-		getContentPane().add(lblInPdfFile, gridBagConstraints);
+        tfKeystoreFile.setMinimumSize(new java.awt.Dimension(250, 20));
+        tfKeystoreFile.setPreferredSize(new java.awt.Dimension(250, 20));
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 1;
+        gridBagConstraints.gridy = 1;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+        gridBagConstraints.weightx = 4.0;
+        gridBagConstraints.insets = new java.awt.Insets(2, 0, 2, 0);
+        getContentPane().add(tfKeystoreFile, gridBagConstraints);
 
-		tfInPdfFile.setMinimumSize(new java.awt.Dimension(150, 20));
-		tfInPdfFile.setPreferredSize(new java.awt.Dimension(150, 20));
-		gridBagConstraints = new java.awt.GridBagConstraints();
-		gridBagConstraints.gridx = 1;
-		gridBagConstraints.gridy = 5;
-		gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-		gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-		gridBagConstraints.insets = new java.awt.Insets(2, 0, 2, 0);
-		getContentPane().add(tfInPdfFile, gridBagConstraints);
+        btnKeystoreFile.setText("Browse...");
+        btnKeystoreFile.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnKeystoreFileActionPerformed(evt);
+            }
+        });
 
-		btnInPdfFile.setText("Browse...");
-		btnInPdfFile.addActionListener(new java.awt.event.ActionListener() {
-			public void actionPerformed(java.awt.event.ActionEvent evt) {
-				btnInPdfFileActionPerformed(evt);
-			}
-		});
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 2;
+        gridBagConstraints.gridy = 1;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+        gridBagConstraints.weightx = 1.0;
+        gridBagConstraints.insets = new java.awt.Insets(1, 5, 1, 5);
+        getContentPane().add(btnKeystoreFile, gridBagConstraints);
 
-		gridBagConstraints = new java.awt.GridBagConstraints();
-		gridBagConstraints.gridx = 2;
-		gridBagConstraints.gridy = 5;
-		gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-		gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-		gridBagConstraints.insets = new java.awt.Insets(1, 5, 1, 5);
-		getContentPane().add(btnInPdfFile, gridBagConstraints);
+        lblKeystorePwd.setLabelFor(pfKeystorePwd);
+        lblKeystorePwd.setText("Keystore password");
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 2;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+        gridBagConstraints.insets = new java.awt.Insets(2, 5, 2, 10);
+        getContentPane().add(lblKeystorePwd, gridBagConstraints);
 
-		chkbPdfEncrypted.setText("Encrypted");
-		chkbPdfEncrypted.setBorder(javax.swing.BorderFactory.createEmptyBorder(0, 0, 0, 0));
-		chkbPdfEncrypted.setMargin(new java.awt.Insets(0, 0, 0, 0));
-		chkbPdfEncrypted.addActionListener(new java.awt.event.ActionListener() {
-			public void actionPerformed(java.awt.event.ActionEvent evt) {
-				chkbPdfEncryptedActionPerformed(evt);
-			}
-		});
+        pfKeystorePwd.setMinimumSize(new java.awt.Dimension(150, 20));
+        pfKeystorePwd.setPreferredSize(new java.awt.Dimension(150, 20));
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 1;
+        gridBagConstraints.gridy = 2;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+        gridBagConstraints.insets = new java.awt.Insets(2, 0, 2, 0);
+        getContentPane().add(pfKeystorePwd, gridBagConstraints);
 
-		gridBagConstraints = new java.awt.GridBagConstraints();
-		gridBagConstraints.gridx = 1;
-		gridBagConstraints.gridy = 6;
-		gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-		gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-		gridBagConstraints.insets = new java.awt.Insets(2, 0, 2, 0);
-		getContentPane().add(chkbPdfEncrypted, gridBagConstraints);
+        chkbStorePwd.setText("Store passwords");
+        chkbStorePwd.setBorder(javax.swing.BorderFactory.createEmptyBorder(0, 0, 0, 0));
+        chkbStorePwd.setMargin(new java.awt.Insets(0, 0, 0, 0));
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 2;
+        gridBagConstraints.gridy = 2;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+        gridBagConstraints.insets = new java.awt.Insets(1, 5, 1, 5);
+        getContentPane().add(chkbStorePwd, gridBagConstraints);
 
-		lblPdfOwnerPwd.setLabelFor(pfPdfOwnerPwd);
-		lblPdfOwnerPwd.setText("Owner password");
-		gridBagConstraints = new java.awt.GridBagConstraints();
-		gridBagConstraints.gridx = 0;
-		gridBagConstraints.gridy = 7;
-		gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-		gridBagConstraints.insets = new java.awt.Insets(2, 5, 2, 10);
-		getContentPane().add(lblPdfOwnerPwd, gridBagConstraints);
+        lblAlias.setLabelFor(cbAlias);
+        lblAlias.setText("Key alias");
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 3;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+        gridBagConstraints.insets = new java.awt.Insets(2, 5, 2, 10);
+        getContentPane().add(lblAlias, gridBagConstraints);
 
-		pfPdfOwnerPwd.setEnabled(false);
-		pfPdfOwnerPwd.setMinimumSize(new java.awt.Dimension(150, 20));
-		pfPdfOwnerPwd.setPreferredSize(new java.awt.Dimension(150, 20));
-		gridBagConstraints = new java.awt.GridBagConstraints();
-		gridBagConstraints.gridx = 1;
-		gridBagConstraints.gridy = 7;
-		gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-		gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-		gridBagConstraints.insets = new java.awt.Insets(2, 0, 2, 0);
-		getContentPane().add(pfPdfOwnerPwd, gridBagConstraints);
+        cbAlias.setEditable(true);
+        cbAlias.setMinimumSize(new java.awt.Dimension(150, 20));
+        cbAlias.setPreferredSize(new java.awt.Dimension(150, 20));
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 1;
+        gridBagConstraints.gridy = 3;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+        gridBagConstraints.insets = new java.awt.Insets(2, 0, 2, 0);
+        getContentPane().add(cbAlias, gridBagConstraints);
 
-		lblPdfUserPwd.setLabelFor(pfPdfUserPwd);
-		lblPdfUserPwd.setText("User password");
-		gridBagConstraints = new java.awt.GridBagConstraints();
-		gridBagConstraints.gridx = 0;
-		gridBagConstraints.gridy = 8;
-		gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-		gridBagConstraints.insets = new java.awt.Insets(2, 5, 2, 10);
-		getContentPane().add(lblPdfUserPwd, gridBagConstraints);
+        btnLoadAliases.setText("Load keys");
+        btnLoadAliases.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnLoadAliasesActionPerformed(evt);
+            }
+        });
 
-		pfPdfUserPwd.setEnabled(false);
-		pfPdfUserPwd.setMinimumSize(new java.awt.Dimension(150, 20));
-		pfPdfUserPwd.setPreferredSize(new java.awt.Dimension(150, 20));
-		gridBagConstraints = new java.awt.GridBagConstraints();
-		gridBagConstraints.gridx = 1;
-		gridBagConstraints.gridy = 8;
-		gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-		gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-		gridBagConstraints.insets = new java.awt.Insets(2, 0, 2, 0);
-		getContentPane().add(pfPdfUserPwd, gridBagConstraints);
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 2;
+        gridBagConstraints.gridy = 3;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+        gridBagConstraints.insets = new java.awt.Insets(1, 5, 1, 5);
+        getContentPane().add(btnLoadAliases, gridBagConstraints);
 
-		lblOutPdfFile.setLabelFor(tfOutPdfFile);
-		lblOutPdfFile.setText("Output PDF file");
-		gridBagConstraints = new java.awt.GridBagConstraints();
-		gridBagConstraints.gridx = 0;
-		gridBagConstraints.gridy = 9;
-		gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-		gridBagConstraints.insets = new java.awt.Insets(2, 5, 2, 10);
-		getContentPane().add(lblOutPdfFile, gridBagConstraints);
+        lblKeyPwd.setLabelFor(pfKeyPwd);
+        lblKeyPwd.setText("Key password");
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 4;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+        gridBagConstraints.insets = new java.awt.Insets(2, 5, 2, 10);
+        getContentPane().add(lblKeyPwd, gridBagConstraints);
 
-		tfOutPdfFile.setMinimumSize(new java.awt.Dimension(150, 20));
-		tfOutPdfFile.setPreferredSize(new java.awt.Dimension(150, 20));
-		gridBagConstraints = new java.awt.GridBagConstraints();
-		gridBagConstraints.gridx = 1;
-		gridBagConstraints.gridy = 9;
-		gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-		gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-		gridBagConstraints.insets = new java.awt.Insets(2, 0, 2, 0);
-		getContentPane().add(tfOutPdfFile, gridBagConstraints);
+        pfKeyPwd.setMinimumSize(new java.awt.Dimension(150, 20));
+        pfKeyPwd.setPreferredSize(new java.awt.Dimension(150, 20));
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 1;
+        gridBagConstraints.gridy = 4;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+        gridBagConstraints.insets = new java.awt.Insets(2, 0, 2, 0);
+        getContentPane().add(pfKeyPwd, gridBagConstraints);
 
-		btnOutPdfFile.setText("Browse...");
-		btnOutPdfFile.addActionListener(new java.awt.event.ActionListener() {
-			public void actionPerformed(java.awt.event.ActionEvent evt) {
-				btnOutPdfFileActionPerformed(evt);
-			}
-		});
+        lblInPdfFile.setLabelFor(tfInPdfFile);
+        lblInPdfFile.setText("Input PDF file");
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 5;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+        gridBagConstraints.insets = new java.awt.Insets(2, 5, 2, 10);
+        getContentPane().add(lblInPdfFile, gridBagConstraints);
 
-		gridBagConstraints = new java.awt.GridBagConstraints();
-		gridBagConstraints.gridx = 2;
-		gridBagConstraints.gridy = 9;
-		gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-		gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-		gridBagConstraints.insets = new java.awt.Insets(1, 5, 1, 5);
-		getContentPane().add(btnOutPdfFile, gridBagConstraints);
+        tfInPdfFile.setMinimumSize(new java.awt.Dimension(150, 20));
+        tfInPdfFile.setPreferredSize(new java.awt.Dimension(150, 20));
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 1;
+        gridBagConstraints.gridy = 5;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+        gridBagConstraints.insets = new java.awt.Insets(2, 0, 2, 0);
+        getContentPane().add(tfInPdfFile, gridBagConstraints);
 
-		lblReason.setLabelFor(tfReason);
-		lblReason.setText("Reason");
-		gridBagConstraints = new java.awt.GridBagConstraints();
-		gridBagConstraints.gridx = 0;
-		gridBagConstraints.gridy = 10;
-		gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-		gridBagConstraints.insets = new java.awt.Insets(2, 5, 2, 10);
-		getContentPane().add(lblReason, gridBagConstraints);
+        btnInPdfFile.setText("Browse...");
+        btnInPdfFile.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnInPdfFileActionPerformed(evt);
+            }
+        });
 
-		tfReason.setMinimumSize(new java.awt.Dimension(150, 20));
-		tfReason.setPreferredSize(new java.awt.Dimension(150, 20));
-		gridBagConstraints = new java.awt.GridBagConstraints();
-		gridBagConstraints.gridx = 1;
-		gridBagConstraints.gridy = 10;
-		gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-		gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-		gridBagConstraints.insets = new java.awt.Insets(2, 0, 2, 0);
-		getContentPane().add(tfReason, gridBagConstraints);
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 2;
+        gridBagConstraints.gridy = 5;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+        gridBagConstraints.insets = new java.awt.Insets(1, 5, 1, 5);
+        getContentPane().add(btnInPdfFile, gridBagConstraints);
 
-		lblLocation.setLabelFor(tfLocation);
-		lblLocation.setText("Location");
-		gridBagConstraints = new java.awt.GridBagConstraints();
-		gridBagConstraints.gridx = 0;
-		gridBagConstraints.gridy = 11;
-		gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-		gridBagConstraints.insets = new java.awt.Insets(2, 5, 2, 10);
-		getContentPane().add(lblLocation, gridBagConstraints);
+        chkbPdfEncrypted.setText("Encrypted");
+        chkbPdfEncrypted.setBorder(javax.swing.BorderFactory.createEmptyBorder(0, 0, 0, 0));
+        chkbPdfEncrypted.setMargin(new java.awt.Insets(0, 0, 0, 0));
+        chkbPdfEncrypted.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                chkbPdfEncryptedActionPerformed(evt);
+            }
+        });
 
-		tfLocation.setMinimumSize(new java.awt.Dimension(150, 20));
-		tfLocation.setPreferredSize(new java.awt.Dimension(150, 20));
-		gridBagConstraints = new java.awt.GridBagConstraints();
-		gridBagConstraints.gridx = 1;
-		gridBagConstraints.gridy = 11;
-		gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-		gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-		gridBagConstraints.insets = new java.awt.Insets(2, 0, 2, 0);
-		getContentPane().add(tfLocation, gridBagConstraints);
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 1;
+        gridBagConstraints.gridy = 6;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+        gridBagConstraints.insets = new java.awt.Insets(2, 0, 2, 0);
+        getContentPane().add(chkbPdfEncrypted, gridBagConstraints);
 
-		lblCertLevel.setLabelFor(cbCertLevel);
-		lblCertLevel.setText("Certification level");
-		gridBagConstraints = new java.awt.GridBagConstraints();
-		gridBagConstraints.gridx = 0;
-		gridBagConstraints.gridy = 12;
-		gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-		gridBagConstraints.insets = new java.awt.Insets(2, 5, 2, 10);
-		getContentPane().add(lblCertLevel, gridBagConstraints);
+        lblPdfOwnerPwd.setLabelFor(pfPdfOwnerPwd);
+        lblPdfOwnerPwd.setText("Owner password");
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 7;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+        gridBagConstraints.insets = new java.awt.Insets(2, 5, 2, 10);
+        getContentPane().add(lblPdfOwnerPwd, gridBagConstraints);
 
-		cbCertLevel.setMinimumSize(new java.awt.Dimension(150, 20));
-		cbCertLevel.setPreferredSize(new java.awt.Dimension(150, 20));
-		gridBagConstraints = new java.awt.GridBagConstraints();
-		gridBagConstraints.gridx = 1;
-		gridBagConstraints.gridy = 12;
-		gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-		gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-		gridBagConstraints.insets = new java.awt.Insets(2, 0, 2, 0);
-		getContentPane().add(cbCertLevel, gridBagConstraints);
+        pfPdfOwnerPwd.setMinimumSize(new java.awt.Dimension(150, 20));
+        pfPdfOwnerPwd.setPreferredSize(new java.awt.Dimension(150, 20));
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 1;
+        gridBagConstraints.gridy = 7;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+        gridBagConstraints.insets = new java.awt.Insets(2, 0, 2, 0);
+        getContentPane().add(pfPdfOwnerPwd, gridBagConstraints);
 
-		chkbAppendSignature.setText("Append signature");
-		chkbAppendSignature.setBorder(javax.swing.BorderFactory.createEmptyBorder(0, 0, 0, 0));
-		chkbAppendSignature.setMargin(new java.awt.Insets(0, 0, 0, 0));
-		gridBagConstraints = new java.awt.GridBagConstraints();
-		gridBagConstraints.gridx = 2;
-		gridBagConstraints.gridy = 12;
-		gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-		gridBagConstraints.insets = new java.awt.Insets(1, 5, 1, 5);
-		getContentPane().add(chkbAppendSignature, gridBagConstraints);
+        lblPdfUserPwd.setLabelFor(pfPdfUserPwd);
+        lblPdfUserPwd.setText("User password");
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 8;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+        gridBagConstraints.insets = new java.awt.Insets(2, 5, 2, 10);
+        getContentPane().add(lblPdfUserPwd, gridBagConstraints);
 
-		btnSignIt.setFont(new java.awt.Font("Tahoma", 1, 12));
-		btnSignIt.setIcon(new javax.swing.ImageIcon(getClass().getResource("/signedpdf26.png")));
-		btnSignIt.setText("Sign It");
-		btnSignIt.addActionListener(new java.awt.event.ActionListener() {
-			public void actionPerformed(java.awt.event.ActionEvent evt) {
-				btnSignItActionPerformed(evt);
-			}
-		});
+        pfPdfUserPwd.setMinimumSize(new java.awt.Dimension(150, 20));
+        pfPdfUserPwd.setPreferredSize(new java.awt.Dimension(150, 20));
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 1;
+        gridBagConstraints.gridy = 8;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+        gridBagConstraints.insets = new java.awt.Insets(2, 0, 2, 0);
+        getContentPane().add(pfPdfUserPwd, gridBagConstraints);
 
-		gridBagConstraints = new java.awt.GridBagConstraints();
-		gridBagConstraints.gridx = 2;
-		gridBagConstraints.gridy = 13;
-		gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-		gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-		gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
-		getContentPane().add(btnSignIt, gridBagConstraints);
+        lblOutPdfFile.setLabelFor(tfOutPdfFile);
+        lblOutPdfFile.setText("Output PDF file");
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 9;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+        gridBagConstraints.insets = new java.awt.Insets(2, 5, 2, 10);
+        getContentPane().add(lblOutPdfFile, gridBagConstraints);
 
-		chkbAdvanced.setText("Advanced view");
-		chkbAdvanced.setBorder(javax.swing.BorderFactory.createEmptyBorder(0, 0, 0, 0));
-		chkbAdvanced.setMargin(new java.awt.Insets(0, 0, 0, 0));
-		chkbAdvanced.addActionListener(new java.awt.event.ActionListener() {
-			public void actionPerformed(java.awt.event.ActionEvent evt) {
-				chkbAdvancedActionPerformed(evt);
-			}
-		});
+        tfOutPdfFile.setMinimumSize(new java.awt.Dimension(150, 20));
+        tfOutPdfFile.setPreferredSize(new java.awt.Dimension(150, 20));
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 1;
+        gridBagConstraints.gridy = 9;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+        gridBagConstraints.insets = new java.awt.Insets(2, 0, 2, 0);
+        getContentPane().add(tfOutPdfFile, gridBagConstraints);
 
-		gridBagConstraints = new java.awt.GridBagConstraints();
-		gridBagConstraints.gridx = 2;
-		gridBagConstraints.gridy = 0;
-		gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-		gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-		gridBagConstraints.insets = new java.awt.Insets(1, 5, 1, 5);
-		getContentPane().add(chkbAdvanced, gridBagConstraints);
+        btnOutPdfFile.setText("Browse...");
+        btnOutPdfFile.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnOutPdfFileActionPerformed(evt);
+            }
+        });
 
-		pack();
-	}// </editor-fold>//GEN-END:initComponents
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 2;
+        gridBagConstraints.gridy = 9;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+        gridBagConstraints.insets = new java.awt.Insets(1, 5, 1, 5);
+        getContentPane().add(btnOutPdfFile, gridBagConstraints);
+
+        lblReason.setLabelFor(tfReason);
+        lblReason.setText("Reason");
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 10;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+        gridBagConstraints.insets = new java.awt.Insets(2, 5, 2, 10);
+        getContentPane().add(lblReason, gridBagConstraints);
+
+        tfReason.setMinimumSize(new java.awt.Dimension(150, 20));
+        tfReason.setPreferredSize(new java.awt.Dimension(150, 20));
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 1;
+        gridBagConstraints.gridy = 10;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+        gridBagConstraints.insets = new java.awt.Insets(2, 0, 2, 0);
+        getContentPane().add(tfReason, gridBagConstraints);
+
+        lblLocation.setLabelFor(tfLocation);
+        lblLocation.setText("Location");
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 11;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+        gridBagConstraints.insets = new java.awt.Insets(2, 5, 2, 10);
+        getContentPane().add(lblLocation, gridBagConstraints);
+
+        tfLocation.setMinimumSize(new java.awt.Dimension(150, 20));
+        tfLocation.setPreferredSize(new java.awt.Dimension(150, 20));
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 1;
+        gridBagConstraints.gridy = 11;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+        gridBagConstraints.insets = new java.awt.Insets(2, 0, 2, 0);
+        getContentPane().add(tfLocation, gridBagConstraints);
+
+        lblCertLevel.setLabelFor(cbCertLevel);
+        lblCertLevel.setText("Certification level");
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 12;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+        gridBagConstraints.insets = new java.awt.Insets(2, 5, 2, 10);
+        getContentPane().add(lblCertLevel, gridBagConstraints);
+
+        cbCertLevel.setMinimumSize(new java.awt.Dimension(150, 20));
+        cbCertLevel.setPreferredSize(new java.awt.Dimension(150, 20));
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 1;
+        gridBagConstraints.gridy = 12;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+        gridBagConstraints.insets = new java.awt.Insets(2, 0, 2, 0);
+        getContentPane().add(cbCertLevel, gridBagConstraints);
+
+        chkbAppendSignature.setText("Append signature");
+        chkbAppendSignature.setBorder(javax.swing.BorderFactory.createEmptyBorder(0, 0, 0, 0));
+        chkbAppendSignature.setMargin(new java.awt.Insets(0, 0, 0, 0));
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 2;
+        gridBagConstraints.gridy = 12;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        gridBagConstraints.insets = new java.awt.Insets(1, 5, 1, 5);
+        getContentPane().add(chkbAppendSignature, gridBagConstraints);
+
+        btnSignIt.setFont(new java.awt.Font("Tahoma", 1, 12));
+        btnSignIt.setIcon(new javax.swing.ImageIcon(getClass().getResource("/signedpdf26.png")));
+        btnSignIt.setText("Sign It");
+        btnSignIt.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnSignItActionPerformed(evt);
+            }
+        });
+
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 2;
+        gridBagConstraints.gridy = 13;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+        gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
+        getContentPane().add(btnSignIt, gridBagConstraints);
+
+        chkbAdvanced.setText("Advanced view");
+        chkbAdvanced.setBorder(javax.swing.BorderFactory.createEmptyBorder(0, 0, 0, 0));
+        chkbAdvanced.setMargin(new java.awt.Insets(0, 0, 0, 0));
+        chkbAdvanced.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                chkbAdvancedActionPerformed(evt);
+            }
+        });
+
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 2;
+        gridBagConstraints.gridy = 0;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+        gridBagConstraints.insets = new java.awt.Insets(1, 5, 1, 5);
+        getContentPane().add(chkbAdvanced, gridBagConstraints);
+
+        btnRights.setText("Rights");
+        btnRights.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnRightsActionPerformed(evt);
+            }
+        });
+
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 2;
+        gridBagConstraints.gridy = 6;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+        gridBagConstraints.insets = new java.awt.Insets(1, 5, 1, 5);
+        getContentPane().add(btnRights, gridBagConstraints);
+
+        pack();
+    }// </editor-fold>//GEN-END:initComponents
+
+    private void btnRightsOKActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnRightsOKActionPerformed
+    	rightsDialog.setVisible(false);
+    }//GEN-LAST:event_btnRightsOKActionPerformed
+
+	private void btnRightsActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnRightsActionPerformed
+		rightsDialog.setVisible(true);
+	}//GEN-LAST:event_btnRightsActionPerformed
 
 	private void btnLoadAliasesActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnLoadAliasesActionPerformed
 		storeToOptions();
@@ -691,10 +864,12 @@ public class SignPdfForm extends javax.swing.JFrame implements SignResultListene
 
 	private void chkbPdfEncryptedActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_chkbPdfEncryptedActionPerformed
 		switchEncryptedPdf(chkbPdfEncrypted.isSelected());
+		pack();
 	}//GEN-LAST:event_chkbPdfEncryptedActionPerformed
 
 	private void chkbAdvancedActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_chkbAdvancedActionPerformed
 		switchAdvancedView(chkbAdvanced.isSelected());
+		switchEncryptedPdf(chkbPdfEncrypted.isSelected());
 		pack();
 	}//GEN-LAST:event_chkbAdvancedActionPerformed
 
@@ -738,7 +913,7 @@ public class SignPdfForm extends javax.swing.JFrame implements SignResultListene
 		} catch (Exception e) {}
 
 		final String tmpMsg = res.get("gui.fileNotExists.error",
-				new String[] {res.get(aFileDescKey)});
+			new String[] {res.get(aFileDescKey)});
 		JOptionPane.showMessageDialog(this, tmpMsg, res.get("gui.check.error.title"), JOptionPane.ERROR_MESSAGE);
 		return false;
 	}
@@ -755,7 +930,7 @@ public class SignPdfForm extends javax.swing.JFrame implements SignResultListene
 			return true;
 		}
 		final String tmpMsg = res.get("gui.valueNotFilled.error",
-				new String[] {res.get(aDescKey)});
+			new String[] {res.get(aDescKey)});
 		JOptionPane.showMessageDialog(this,tmpMsg, res.get("gui.check.error.title"), JOptionPane.ERROR_MESSAGE);
 		return false;
 	}
@@ -775,9 +950,9 @@ public class SignPdfForm extends javax.swing.JFrame implements SignResultListene
 				if (tmpInFile.equals(tmpOutFile)) {
 					tmpResult = false;
 					JOptionPane.showMessageDialog(this,
-							res.get("gui.filesEqual.error"),
-							res.get("gui.check.error.title"),
-							JOptionPane.ERROR_MESSAGE);
+						res.get("gui.filesEqual.error"),
+						res.get("gui.check.error.title"),
+						JOptionPane.ERROR_MESSAGE);
 				}
 			} catch (Exception e) {
 				tmpResult = false;
@@ -828,45 +1003,57 @@ public class SignPdfForm extends javax.swing.JFrame implements SignResultListene
 		showFileChooser(tfKeystoreFile, null, JFileChooser.OPEN_DIALOG);
 	}//GEN-LAST:event_btnKeystoreFileActionPerformed
 
-	// Variables declaration - do not modify//GEN-BEGIN:variables
-	private javax.swing.JButton btnInPdfFile;
-	private javax.swing.JButton btnInfoClose;
-	private javax.swing.JButton btnKeystoreFile;
-	private javax.swing.JButton btnLoadAliases;
-	private javax.swing.JButton btnOutPdfFile;
-	private javax.swing.JButton btnSignIt;
-	private javax.swing.JComboBox cbAlias;
-	private javax.swing.JComboBox cbCertLevel;
-	private javax.swing.JComboBox cbKeystoreType;
-	private javax.swing.JCheckBox chkbAdvanced;
-	private javax.swing.JCheckBox chkbAppendSignature;
-	private javax.swing.JCheckBox chkbPdfEncrypted;
-	private javax.swing.JCheckBox chkbStorePwd;
-	private javax.swing.JFrame infoDialog;
-	private javax.swing.JScrollPane infoScrollPane;
-	private javax.swing.JTextArea infoTextArea;
-	private javax.swing.JLabel lblAlias;
-	private javax.swing.JLabel lblCertLevel;
-	private javax.swing.JLabel lblInPdfFile;
-	private javax.swing.JLabel lblKeyPwd;
-	private javax.swing.JLabel lblKeystoreFile;
-	private javax.swing.JLabel lblKeystorePwd;
-	private javax.swing.JLabel lblKeystoreType;
-	private javax.swing.JLabel lblLocation;
-	private javax.swing.JLabel lblOutPdfFile;
-	private javax.swing.JLabel lblPdfOwnerPwd;
-	private javax.swing.JLabel lblPdfUserPwd;
-	private javax.swing.JLabel lblReason;
-	private javax.swing.JPasswordField pfKeyPwd;
-	private javax.swing.JPasswordField pfKeystorePwd;
-	private javax.swing.JPasswordField pfPdfOwnerPwd;
-	private javax.swing.JPasswordField pfPdfUserPwd;
-	private javax.swing.JTextField tfInPdfFile;
-	private javax.swing.JTextField tfKeystoreFile;
-	private javax.swing.JTextField tfLocation;
-	private javax.swing.JTextField tfOutPdfFile;
-	private javax.swing.JTextField tfReason;
-	// End of variables declaration//GEN-END:variables
+    // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton btnInPdfFile;
+    private javax.swing.JButton btnInfoClose;
+    private javax.swing.JButton btnKeystoreFile;
+    private javax.swing.JButton btnLoadAliases;
+    private javax.swing.JButton btnOutPdfFile;
+    private javax.swing.JButton btnRights;
+    private javax.swing.JButton btnRightsOK;
+    private javax.swing.JButton btnSignIt;
+    private javax.swing.JComboBox cbAlias;
+    private javax.swing.JComboBox cbCertLevel;
+    private javax.swing.JComboBox cbKeystoreType;
+    private javax.swing.JComboBox cbPrinting;
+    private javax.swing.JCheckBox chkbAdvanced;
+    private javax.swing.JCheckBox chkbAllowAssembly;
+    private javax.swing.JCheckBox chkbAllowCopy;
+    private javax.swing.JCheckBox chkbAllowFillIn;
+    private javax.swing.JCheckBox chkbAllowModifyAnnotations;
+    private javax.swing.JCheckBox chkbAllowModifyContent;
+    private javax.swing.JCheckBox chkbAllowScreenReaders;
+    private javax.swing.JCheckBox chkbAppendSignature;
+    private javax.swing.JCheckBox chkbPdfEncrypted;
+    private javax.swing.JCheckBox chkbStorePwd;
+    private javax.swing.JFrame infoDialog;
+    private javax.swing.JScrollPane infoScrollPane;
+    private javax.swing.JTextArea infoTextArea;
+    private javax.swing.JLabel lblAlias;
+    private javax.swing.JLabel lblCertLevel;
+    private javax.swing.JLabel lblInPdfFile;
+    private javax.swing.JLabel lblKeyPwd;
+    private javax.swing.JLabel lblKeystoreFile;
+    private javax.swing.JLabel lblKeystorePwd;
+    private javax.swing.JLabel lblKeystoreType;
+    private javax.swing.JLabel lblLocation;
+    private javax.swing.JLabel lblOutPdfFile;
+    private javax.swing.JLabel lblPdfOwnerPwd;
+    private javax.swing.JLabel lblPdfUserPwd;
+    private javax.swing.JLabel lblPrinting;
+    private javax.swing.JLabel lblReason;
+    private javax.swing.JLabel lblRights;
+    private javax.swing.JPasswordField pfKeyPwd;
+    private javax.swing.JPasswordField pfKeystorePwd;
+    private javax.swing.JPasswordField pfPdfOwnerPwd;
+    private javax.swing.JPasswordField pfPdfUserPwd;
+    private javax.swing.JDialog rightsDialog;
+    private javax.swing.JTextField tfInPdfFile;
+    private javax.swing.JTextField tfKeystoreFile;
+    private javax.swing.JTextField tfLocation;
+    private javax.swing.JTextField tfOutPdfFile;
+    private javax.swing.JTextField tfReason;
+    // End of variables declaration//GEN-END:variables
 
 
 }

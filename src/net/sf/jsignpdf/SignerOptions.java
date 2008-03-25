@@ -33,6 +33,15 @@ public class SignerOptions {
 	private volatile char[] pdfUserPwd;
 	private volatile CertificationLevel certLevel;
 
+	private volatile PrintRight rightPrinting;
+	private volatile boolean rightCopy;
+	private volatile boolean rightAssembly;
+	private volatile boolean rightFillIn;
+	private volatile boolean rightScreanReaders;
+	private volatile boolean rightModifyAnnotations;
+	private volatile boolean rightModifyContents;
+
+
 	/**
 	 * Logs localized message to PrintWriter
 	 * @param aKey message key
@@ -129,6 +138,21 @@ public class SignerOptions {
 				pdfUserPwd = getDecrypted(Constants.EPROPERTY_USER_PWD).toCharArray();
 			}
 		}
+
+		final String tmpRight = props.getProperty(Constants.PROPERTY_RIGHT_PRINT);
+		if (tmpRight != null) {
+			rightPrinting = PrintRight.valueOf(tmpRight);
+		}
+		if (rightPrinting==null) {
+			rightPrinting = PrintRight.DISALLOW_PRINTING;
+		}
+		rightCopy = props.getAsBool(Constants.PROPERTY_RIGHT_COPY);
+		rightAssembly = props.getAsBool(Constants.PROPERTY_RIGHT_ASSEMBLY);
+		rightFillIn = props.getAsBool(Constants.PROPERTY_RIGHT_FILL_IN);
+		rightScreanReaders = props.getAsBool(Constants.PROPERTY_RIGHT_SCR_READ);
+		rightModifyAnnotations = props.getAsBool(Constants.PROPERTY_RIGHT_MOD_ANNOT);
+		rightModifyContents = props.getAsBool(Constants.PROPERTY_RIGHT_MOD_CONT);
+
 	}
 
 	/**
@@ -166,6 +190,15 @@ public class SignerOptions {
 			props.removeProperty(Constants.EPROPERTY_OWNER_PWD);
 			props.removeProperty(Constants.EPROPERTY_USER_PWD);
 		}
+
+		props.setProperty(Constants.PROPERTY_RIGHT_PRINT, rightPrinting.name());
+		props.setProperty(Constants.PROPERTY_RIGHT_COPY, rightCopy);
+		props.setProperty(Constants.PROPERTY_RIGHT_ASSEMBLY, rightAssembly);
+		props.setProperty(Constants.PROPERTY_RIGHT_FILL_IN, rightFillIn);
+		props.setProperty(Constants.PROPERTY_RIGHT_SCR_READ, rightScreanReaders);
+		props.setProperty(Constants.PROPERTY_RIGHT_MOD_ANNOT, rightModifyAnnotations);
+		props.setProperty(Constants.PROPERTY_RIGHT_MOD_CONT, rightModifyContents);
+
 		props.saveDefault();
 	}
 
@@ -243,7 +276,7 @@ public class SignerOptions {
 	}
 	public char[] getKeyPasswdX() {
 		return (advanced && keyPasswd.length>0)?keyPasswd:ksPasswd;
-	}	
+	}
 	public String getKeyPasswdStr() {
 		return charArrToStr(keyPasswd);
 	}
@@ -327,6 +360,62 @@ public class SignerOptions {
 
 	public void setCertLevel(CertificationLevel certLevel) {
 		this.certLevel = certLevel;
+	}
+
+	public boolean isRightCopy() {
+		return rightCopy;
+	}
+
+	public void setRightCopy(boolean rightCopy) {
+		this.rightCopy = rightCopy;
+	}
+
+	public boolean isRightAssembly() {
+		return rightAssembly;
+	}
+
+	public void setRightAssembly(boolean rightAssembly) {
+		this.rightAssembly = rightAssembly;
+	}
+
+	public boolean isRightFillIn() {
+		return rightFillIn;
+	}
+
+	public void setRightFillIn(boolean rightFillIn) {
+		this.rightFillIn = rightFillIn;
+	}
+
+	public boolean isRightScreanReaders() {
+		return rightScreanReaders;
+	}
+
+	public void setRightScreanReaders(boolean rightScreanReaders) {
+		this.rightScreanReaders = rightScreanReaders;
+	}
+
+	public boolean isRightModifyAnnotations() {
+		return rightModifyAnnotations;
+	}
+
+	public void setRightModifyAnnotations(boolean rightModifyAnnotations) {
+		this.rightModifyAnnotations = rightModifyAnnotations;
+	}
+
+	public boolean isRightModifyContents() {
+		return rightModifyContents;
+	}
+
+	public void setRightModifyContents(boolean rightModifyContents) {
+		this.rightModifyContents = rightModifyContents;
+	}
+
+	public PrintRight getRightPrinting() {
+		return rightPrinting;
+	}
+
+	public void setRightPrinting(PrintRight rightPrinting) {
+		this.rightPrinting = rightPrinting;
 	}
 
 }

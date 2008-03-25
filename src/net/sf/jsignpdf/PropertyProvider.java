@@ -143,6 +143,15 @@ public class PropertyProvider {
         properties.setProperty(aKey, String.valueOf(aValue));
     }
 
+    /**
+     * Sets integer property with given name to given value
+     * @param aKey name of a property
+     * @param aValue value of a property
+     */
+	public void setProperty(String aKey, int aValue) {
+        properties.setProperty(aKey, String.valueOf(aValue));
+	}
+
 
     /**
      * Removes property.
@@ -313,4 +322,5 @@ public class PropertyProvider {
     public String getProperty(String aKey, String aDefault) {
         return properties.getProperty(aKey, aDefault);
     }
+
 }

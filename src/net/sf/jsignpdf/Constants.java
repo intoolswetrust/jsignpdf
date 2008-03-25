@@ -48,6 +48,14 @@ public class Constants {
 
     public static final String PROPERTY_CERT_LEVEL = "certification.level";
 
+    public static final String PROPERTY_RIGHT_PRINT = "right.printing";
+    public static final String PROPERTY_RIGHT_COPY = "right.copy";
+    public static final String PROPERTY_RIGHT_ASSEMBLY = "right.assembly";
+    public static final String PROPERTY_RIGHT_FILL_IN = "right.fillIn";
+    public static final String PROPERTY_RIGHT_SCR_READ = "right.screenReaders";
+    public static final String PROPERTY_RIGHT_MOD_ANNOT = "right.modify.annotations";
+    public static final String PROPERTY_RIGHT_MOD_CONT = "right.modify.contents";
+
 
     /**
      * Property name.
