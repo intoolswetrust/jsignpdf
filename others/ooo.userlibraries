@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<eclipse-userlibraries version="2">
+<library name="OOo" systemlibrary="false">
+<archive path="C:/Programme/OpenOffice.org 2.3/program/classes/officebean.jar"/>
+<archive path="C:/Programme/OpenOffice.org 2.3/program/classes/ridl.jar"/>
+<archive path="C:/Programme/OpenOffice.org 2.3/program/classes/unoil.jar"/>
+<archive path="C:/Programme/OpenOffice.org 2.3/program/classes/juh.jar"/>
+<archive path="C:/Programme/OpenOffice.org 2.3/program/classes/jurt.jar"/>
+<archive path="C:/Programme/OpenOffice.org 2.3/program/classes/jut.jar"/>
+</library>
+</eclipse-userlibraries>

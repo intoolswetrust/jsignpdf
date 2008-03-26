@@ -6,6 +6,7 @@ end;
 
 [Files]
 Source: dist\*; DestDir: {app}; Flags: recursesubdirs; Components: base
+Source: others\JSignPdf.exe; DestDir: {app}; Components: base
 Source: doc\JSignPdf.pdf; DestDir: {app}\docs; Components: base
 Source: licenses\*.txt; DestDir: {app}\docs; Components: base
 Source: C:\install\Java & Eclipse\JDK\jre-6u5-windows-i586-p.exe; DestDir: {tmp}; Flags: deleteafterinstall; Components: java
@@ -28,7 +29,7 @@ DefaultDirName={pf}\JSignPdf
 DefaultGroupName=JSignPdf
 LicenseFile=licenses\MPL-1.1.txt
 ;OutputDir=C:\TEMP
-OutputBaseFilename=JSignPdf_setup_{code:MyAppVersion}
+OutputBaseFilename=JSignPdf_setup_0.5
 VersionInfoVersion=0.5.0.0
 VersionInfoCompany=Josef Cacek
 VersionInfoDescription=JSignPdf adds digital signatures to PDF documents

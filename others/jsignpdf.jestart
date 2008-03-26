@@ -1,0 +1,18 @@
+#XenoageJavaExeStarter_2
+C:\Java\Projects\jsignpdf\dist\JSignPdf.jar
+C:\Java\Projects\jsignpdf\doc\icon\icon32.ico
+C:\Java\Projects\jsignpdf\doc\icon\icon16.ico
+0
+-Xmx512m -classpath %path%
+%args%
+1
+1.5
+1
+0
+0
+JSignPdf.tmp
+1
+No Java Runtime Environment was detected on your system!\nDownload and install the latest JRE at http://java.sun.com
+Sorry, no suitable JRE version was found on your system! You need at least version %jre%.\nDownload and install the latest JRE at http://java.sun.com
+Something is wrong with your JRE configuration!\nDownload and install the latest JRE at http://java.sun.com
+Temporary Jar could not be extracted! Exe file is corrupt!
