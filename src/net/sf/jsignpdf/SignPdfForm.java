@@ -859,6 +859,9 @@ public class SignPdfForm extends javax.swing.JFrame implements SignResultListene
 
 	private void btnLoadAliasesActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnLoadAliasesActionPerformed
 		storeToOptions();
+		btnInfoClose.setEnabled(true);
+		infoDialog.setVisible(true);
+		infoDialog.setDefaultCloseOperation(javax.swing.WindowConstants.HIDE_ON_CLOSE);
 		cbAlias.setModel(new DefaultComboBoxModel(ksUtils.getAliases()));
 	}//GEN-LAST:event_btnLoadAliasesActionPerformed
 
