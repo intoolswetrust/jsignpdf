@@ -1,0 +1,12 @@
+2008-03-26 Josef Cacek
+  * support for encrypted documents
+  * setting rights in the encrypted result PDFs 
+  * multiple keys in keystore support
+  * append signature support
+  * windows installer
+  * updated guide
+
+2008-02-11 Josef Cacek
+  * signing PDF documents
+  * OpenOffice.org Add-On
+  * English & Czech language

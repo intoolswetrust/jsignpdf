@@ -1,0 +1,13 @@
+Version 0.5
+-----------
+  * support for PDF security (encryption, rights)
+  * certification level support
+  * "append signature" support
+  * windows installer (with bundled JRE)
+
+Version 0.2
+-----------
+  * initial release
+  * Adding digitally signatures to (not encrypted) PDFs
+  * OpenOffice.org Add-On
+  * Swing UI
