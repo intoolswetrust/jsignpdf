@@ -8,6 +8,7 @@ end;
 Source: dist\*; DestDir: {app}; Flags: recursesubdirs; Components: base
 Source: others\JSignPdf.exe; DestDir: {app}; Components: base
 Source: doc\JSignPdf.pdf; DestDir: {app}\docs; Components: base
+Source: doc\*.txt; DestDir: {app}\docs; Components: base
 Source: licenses\*.txt; DestDir: {app}\docs; Components: base
 Source: C:\install\Java & Eclipse\JDK\jre-6u5-windows-i586-p.exe; DestDir: {tmp}; Flags: deleteafterinstall; Components: java
 
