@@ -1,7 +1,7 @@
 [Code]
 function MyAppVersion(Param: String) : String;
 begin
-  Result := '0.5';
+  Result := '0.5.1';
 end;
 
 [Files]
@@ -30,8 +30,8 @@ DefaultDirName={pf}\JSignPdf
 DefaultGroupName=JSignPdf
 LicenseFile=licenses\MPL-1.1.txt
 ;OutputDir=C:\TEMP
-OutputBaseFilename=JSignPdf_setup_0.5
-VersionInfoVersion=0.5.0.0
+OutputBaseFilename=JSignPdf_setup_0.5.1
+VersionInfoVersion=0.5.1.0
 VersionInfoCompany=Josef Cacek
 VersionInfoDescription=JSignPdf adds digital signatures to PDF documents
 AppPublisher=Josef Cacek
