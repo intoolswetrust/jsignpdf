@@ -1,3 +1,7 @@
+Version 0.5.1
+-------------
+  * fix for Java 5 (version 0.5 used feature available only in Java 6)
+
 Version 0.5
 -----------
   * support for PDF security (encryption, rights)

@@ -1,6 +1,9 @@
+2008-03-27 Josef Cacek
+  * fix for Java 5 (disable JDialog.setIconImage)
+
 2008-03-26 Josef Cacek
   * support for encrypted documents
-  * setting rights in the encrypted result PDFs 
+  * setting rights in the encrypted result PDFs
   * multiple keys in keystore support
   * append signature support
   * windows installer
