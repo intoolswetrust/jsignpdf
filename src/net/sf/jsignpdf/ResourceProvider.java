@@ -3,14 +3,18 @@ package net.sf.jsignpdf;
 import java.text.MessageFormat;
 import java.util.ResourceBundle;
 
+import javax.swing.AbstractButton;
+import javax.swing.JComponent;
+import javax.swing.JLabel;
+
 /**
  * Entry point to internationalization.
  * Resource bundles has base "translation/messages".
  *
  * @author Josef Cacek [josef.cacek (at) gmail.com]
  * @author $Author: kwart $
- * @version $Revision: 1.2 $
- * @created $Date: 2008/02/11 20:36:59 $
+ * @version $Revision: 1.3 $
+ * @created $Date: 2008/04/10 15:38:12 $
  */
 public class ResourceProvider {
 
@@ -31,6 +35,34 @@ public class ResourceProvider {
 	public static ResourceProvider getInstance() {
 		return provider;
 	}
+
+	/**
+	 * Sets translations and mnemonics for labels and different kind of buttons
+	 * @param aComponent component in which should be label set
+	 * @param aKey message key
+	 */
+	public void setLabelAndMnemonic(final JComponent aComponent, final String aKey) {
+		final String tmpLabelText = provider.get(aKey);
+		final int tmpMnemIndex = provider.getMnemonicIndex(aKey);
+		if (aComponent instanceof JLabel) {
+			final JLabel tmpLabel = (JLabel) aComponent;
+			tmpLabel.setText(tmpLabelText);
+			if (tmpMnemIndex>-1) {
+				tmpLabel.setDisplayedMnemonic(tmpLabelText.toLowerCase().charAt(tmpMnemIndex));
+				tmpLabel.setDisplayedMnemonicIndex(tmpMnemIndex);
+			}
+		} else if (aComponent instanceof AbstractButton) {
+			//handles Buttons, Checkboxes and Radiobuttons
+			final AbstractButton tmpBtn = (AbstractButton) aComponent;
+			tmpBtn.setText(tmpLabelText);
+			if (tmpMnemIndex>-1) {
+				tmpBtn.setMnemonic(tmpLabelText.toLowerCase().charAt(tmpMnemIndex));
+			}
+		} else {
+			throw new IllegalArgumentException();
+		}
+	}
+
 
 	/**
 	 * Returns message for given key from active ResourceBundle

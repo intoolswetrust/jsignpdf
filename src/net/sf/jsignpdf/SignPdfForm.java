@@ -7,11 +7,9 @@ import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.net.URL;
 
-import javax.swing.AbstractButton;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JComponent;
 import javax.swing.JFileChooser;
-import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
@@ -122,25 +120,7 @@ public class SignPdfForm extends javax.swing.JFrame implements SignResultListene
 	 * @param aKey message key
 	 */
 	private void setLabelAndMnemonic(final JComponent aComponent, final String aKey) {
-		final String tmpLabelText = res.get(aKey);
-		final int tmpMnemIndex = res.getMnemonicIndex(aKey);
-		if (aComponent instanceof JLabel) {
-			final JLabel tmpLabel = (JLabel) aComponent;
-			tmpLabel.setText(tmpLabelText);
-			if (tmpMnemIndex>-1) {
-				tmpLabel.setDisplayedMnemonic(tmpLabelText.toLowerCase().charAt(tmpMnemIndex));
-				tmpLabel.setDisplayedMnemonicIndex(tmpMnemIndex);
-			}
-		} else if (aComponent instanceof AbstractButton) {
-			//handles Buttons, Checkboxes and Radiobuttons
-			final AbstractButton tmpBtn = (AbstractButton) aComponent;
-			tmpBtn.setText(tmpLabelText);
-			if (tmpMnemIndex>-1) {
-				tmpBtn.setMnemonic(tmpLabelText.toLowerCase().charAt(tmpMnemIndex));
-			}
-		} else {
-			throw new IllegalArgumentException();
-		}
+		res.setLabelAndMnemonic(aComponent, aKey);
 	}
 
 	/**
@@ -225,6 +205,14 @@ public class SignPdfForm extends javax.swing.JFrame implements SignResultListene
 	}
 
 	/**
+	 * Handles switching Visible signature checkbox. Sets button Settings enabled/disabled
+	 * @param anVisible flag - visible signature is enabled
+	 */
+	private void switchVisibleSignature(boolean anVisible) {
+	    btnVisibleSigSettings.setEnabled(anVisible);
+	}
+
+	/**
 	 * Handles switching Encrypted checkbox.
 	 * Sets some components enabled/disabled
 	 * depending on given status flag.
@@ -293,6 +281,7 @@ public class SignPdfForm extends javax.swing.JFrame implements SignResultListene
         lblKeystoreType = new javax.swing.JLabel();
         cbKeystoreType = new javax.swing.JComboBox();
         lblKeystoreFile = new javax.swing.JLabel();
+        btnVisibleSigSettings = new javax.swing.JButton();
         tfKeystoreFile = new javax.swing.JTextField();
         btnKeystoreFile = new javax.swing.JButton();
         lblKeystorePwd = new javax.swing.JLabel();
@@ -324,6 +313,7 @@ public class SignPdfForm extends javax.swing.JFrame implements SignResultListene
         btnSignIt = new javax.swing.JButton();
         chkbAdvanced = new javax.swing.JCheckBox();
         btnRights = new javax.swing.JButton();
+        chkbVisibleSig = new javax.swing.JCheckBox();
 
         infoDialog.setTitle("PDF Signer Output");
         infoDialog.addWindowListener(new java.awt.event.WindowAdapter() {
@@ -496,6 +486,14 @@ public class SignPdfForm extends javax.swing.JFrame implements SignResultListene
         gridBagConstraints.weightx = 1.0;
         gridBagConstraints.insets = new java.awt.Insets(2, 5, 2, 10);
         getContentPane().add(lblKeystoreFile, gridBagConstraints);
+
+        btnVisibleSigSettings.setText("Settings");
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 2;
+        gridBagConstraints.gridy = 13;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        gridBagConstraints.insets = new java.awt.Insets(1, 5, 1, 5);
+        getContentPane().add(btnVisibleSigSettings, gridBagConstraints);
 
         tfKeystoreFile.setMinimumSize(new java.awt.Dimension(250, 20));
         tfKeystoreFile.setPreferredSize(new java.awt.Dimension(250, 20));
@@ -809,7 +807,7 @@ public class SignPdfForm extends javax.swing.JFrame implements SignResultListene
 
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 2;
-        gridBagConstraints.gridy = 13;
+        gridBagConstraints.gridy = 14;
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
         gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
@@ -824,13 +822,7 @@ public class SignPdfForm extends javax.swing.JFrame implements SignResultListene
             }
         });
 
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 2;
-        gridBagConstraints.gridy = 0;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-        gridBagConstraints.insets = new java.awt.Insets(1, 5, 1, 5);
-        getContentPane().add(chkbAdvanced, gridBagConstraints);
+        getContentPane().add(chkbAdvanced, new java.awt.GridBagConstraints());
 
         btnRights.setText("Rights");
         btnRights.addActionListener(new java.awt.event.ActionListener() {
@@ -847,8 +839,28 @@ public class SignPdfForm extends javax.swing.JFrame implements SignResultListene
         gridBagConstraints.insets = new java.awt.Insets(1, 5, 1, 5);
         getContentPane().add(btnRights, gridBagConstraints);
 
+        chkbVisibleSig.setText("Visible signature");
+        chkbVisibleSig.setBorder(javax.swing.BorderFactory.createEmptyBorder(0, 0, 0, 0));
+        chkbVisibleSig.setMargin(new java.awt.Insets(0, 0, 0, 0));
+        chkbVisibleSig.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                chkbVisibleSigActionPerformed(evt);
+            }
+        });
+
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 1;
+        gridBagConstraints.gridy = 13;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        gridBagConstraints.insets = new java.awt.Insets(2, 0, 2, 0);
+        getContentPane().add(chkbVisibleSig, gridBagConstraints);
+
         pack();
     }// </editor-fold>//GEN-END:initComponents
+
+    private void chkbVisibleSigActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_chkbVisibleSigActionPerformed
+	switchVisibleSignature(chkbVisibleSig.isSelected());
+    }//GEN-LAST:event_chkbVisibleSigActionPerformed
 
     private void btnRightsOKActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnRightsOKActionPerformed
     	rightsDialog.setVisible(false);
@@ -1016,6 +1028,7 @@ public class SignPdfForm extends javax.swing.JFrame implements SignResultListene
     private javax.swing.JButton btnRights;
     private javax.swing.JButton btnRightsOK;
     private javax.swing.JButton btnSignIt;
+    private javax.swing.JButton btnVisibleSigSettings;
     private javax.swing.JComboBox cbAlias;
     private javax.swing.JComboBox cbCertLevel;
     private javax.swing.JComboBox cbKeystoreType;
@@ -1030,6 +1043,7 @@ public class SignPdfForm extends javax.swing.JFrame implements SignResultListene
     private javax.swing.JCheckBox chkbAppendSignature;
     private javax.swing.JCheckBox chkbPdfEncrypted;
     private javax.swing.JCheckBox chkbStorePwd;
+    private javax.swing.JCheckBox chkbVisibleSig;
     private javax.swing.JFrame infoDialog;
     private javax.swing.JScrollPane infoScrollPane;
     private javax.swing.JTextArea infoTextArea;

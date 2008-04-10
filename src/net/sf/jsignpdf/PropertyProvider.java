@@ -152,6 +152,14 @@ public class PropertyProvider {
         properties.setProperty(aKey, String.valueOf(aValue));
 	}
 
+    /**
+     * Sets integer property with given name to given value
+     * @param aKey name of a property
+     * @param aValue value of a property
+     */
+	public void setProperty(String aKey, float aValue) {
+        properties.setProperty(aKey, String.valueOf(aValue));
+	}
 
     /**
      * Removes property.
@@ -248,12 +256,43 @@ public class PropertyProvider {
         int tmpResult = aDefault;
         synchronized (properties) {
 	        if (properties.containsKey(aKey)) {
-	            tmpResult = Integer.parseInt(properties.getProperty(aKey));
-	        }
+	        	try {
+	        		tmpResult = Integer.parseInt(properties.getProperty(aKey));
+	        	} catch (NumberFormatException nfe) {}
+        	}
         }
         return tmpResult;
     }
 
+    /**
+     * Returns value for given key converted to float;
+     * @param aKey
+     * @return value from properties converted to integer (if value doesn't exist, 0 is returned)
+     * @see #exists(String)
+     */
+    public float getAsFloat(String aKey) {
+        return getAsFloat(aKey,0f);
+    }
+
+
+    /**
+     * Returns value for given key converted to float; If property doesn't exist default
+     * value is returned.
+     * @param aKey
+     * @param aDefault
+     * @return value for given key as integer
+     */
+    public float getAsFloat(String aKey, float aDefault) {
+    	float tmpResult = aDefault;
+        synchronized (properties) {
+	        if (properties.containsKey(aKey)) {
+	        	try {
+	        		tmpResult = Float.parseFloat(properties.getProperty(aKey));
+	        	} catch (NumberFormatException nfe) {}
+	        }
+        }
+        return tmpResult;
+    }
 
     /**
      * Returns value for given key converted to long;

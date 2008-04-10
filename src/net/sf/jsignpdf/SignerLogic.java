@@ -7,6 +7,8 @@ import java.security.KeyStore;
 import java.security.PrivateKey;
 import java.security.cert.Certificate;
 
+import com.lowagie.text.Image;
+import com.lowagie.text.Rectangle;
 import com.lowagie.text.pdf.PdfReader;
 import com.lowagie.text.pdf.PdfSignatureAppearance;
 import com.lowagie.text.pdf.PdfStamper;
@@ -105,6 +107,17 @@ public class SignerLogic implements Runnable {
 			sap.setLocation(options.getLocation());
 			options.log("console.setCertificationLevel");
 			sap.setCertificationLevel(options.getCertLevelX().getLevel());
+
+			//TODO visible signature
+			sap.setAcro6Layers(true);
+			Image img = Image.getInstance("images/signedpdf26.png");
+//			sap.setSignatureGraphic(img);
+			sap.setImage(img);
+			sap.setImageScale(-1f);
+			sap.setLayer2Text("Layer 2 (description)");
+			sap.setLayer4Text("Layer 4 (status)");
+			sap.setRender(PdfSignatureAppearance.SignatureRenderNameAndDescription);
+			sap.setVisibleSignature(new Rectangle(0, 0, 50, 50), 1, null);
 
 			options.log("console.processing");
 			stp.close();

@@ -33,6 +33,7 @@ public class SignerOptions {
 	private volatile char[] pdfUserPwd;
 	private volatile CertificationLevel certLevel;
 
+	//options from rights dialog
 	private volatile PrintRight rightPrinting;
 	private volatile boolean rightCopy;
 	private volatile boolean rightAssembly;
@@ -40,6 +41,21 @@ public class SignerOptions {
 	private volatile boolean rightScreanReaders;
 	private volatile boolean rightModifyAnnotations;
 	private volatile boolean rightModifyContents;
+
+
+	//options from visible signature settings dialog
+	private volatile boolean visible;
+	private volatile int page;
+	private volatile float positionLLX;
+	private volatile float positionLLY;
+	private volatile float positionURX;
+	private volatile float positionURY;
+	private volatile float bgImgScale;
+	private volatile RenderMode renderMode;
+	private volatile String l2Text;
+	private volatile String l4Text;
+	private volatile String imgPath;
+	private volatile String bgImgPath;
 
 
 	/**
@@ -153,6 +169,26 @@ public class SignerOptions {
 		rightModifyAnnotations = props.getAsBool(Constants.PROPERTY_RIGHT_MOD_ANNOT);
 		rightModifyContents = props.getAsBool(Constants.PROPERTY_RIGHT_MOD_CONT);
 
+		//visible signature options
+		visible = props.getAsBool(Constants.PROPERTY_VISIBLE_ENABLED);
+		page = props.getAsInt(Constants.PROPERTY_VISIBLE_PAGE, 1);
+		positionLLX = props.getAsFloat(Constants.PROPERTY_VISIBLE_POS_LLX, 0f);
+		positionLLY = props.getAsFloat(Constants.PROPERTY_VISIBLE_POS_LLY, 0f);
+		positionURX = props.getAsFloat(Constants.PROPERTY_VISIBLE_POS_URX, 100f);
+		positionURY = props.getAsFloat(Constants.PROPERTY_VISIBLE_POS_URY, 100f);
+		bgImgScale = props.getAsFloat(Constants.PROPERTY_VISIBLE_BGSCALE, -1f);
+		final String tmpRendMode = props.getProperty(Constants.PROPERTY_VISIBLE_RENDER);
+		if (tmpRendMode != null) {
+			renderMode = RenderMode.valueOf(tmpRendMode);
+		}
+		if (renderMode==null) {
+			renderMode = RenderMode.GRAPHIC_AND_DESCRIPTION;
+		}
+		l2Text = props.getProperty(Constants.PROPERTY_VISIBLE_L2TEXT);
+		l4Text = props.getProperty(Constants.PROPERTY_VISIBLE_L4TEXT);
+		imgPath = props.getProperty(Constants.PROPERTY_VISIBLE_IMG);
+		bgImgPath = props.getProperty(Constants.PROPERTY_VISIBLE_BGIMG);
+
 	}
 
 	/**
@@ -198,6 +234,20 @@ public class SignerOptions {
 		props.setProperty(Constants.PROPERTY_RIGHT_SCR_READ, rightScreanReaders);
 		props.setProperty(Constants.PROPERTY_RIGHT_MOD_ANNOT, rightModifyAnnotations);
 		props.setProperty(Constants.PROPERTY_RIGHT_MOD_CONT, rightModifyContents);
+
+		//visible signature options
+		props.setProperty(Constants.PROPERTY_VISIBLE_ENABLED, visible);
+		props.setProperty(Constants.PROPERTY_VISIBLE_PAGE, page);
+		props.setProperty(Constants.PROPERTY_VISIBLE_POS_LLX, positionLLX);
+		props.setProperty(Constants.PROPERTY_VISIBLE_POS_LLY, positionLLY);
+		props.setProperty(Constants.PROPERTY_VISIBLE_POS_URX, positionURX);
+		props.setProperty(Constants.PROPERTY_VISIBLE_POS_URY, positionURY);
+		props.setProperty(Constants.PROPERTY_VISIBLE_BGSCALE, bgImgScale);
+		props.setProperty(Constants.PROPERTY_VISIBLE_RENDER, renderMode.name());
+		props.setProperty(Constants.PROPERTY_VISIBLE_L2TEXT, l2Text);
+		props.setProperty(Constants.PROPERTY_VISIBLE_L4TEXT, l4Text);
+		props.setProperty(Constants.PROPERTY_VISIBLE_IMG, imgPath);
+		props.setProperty(Constants.PROPERTY_VISIBLE_BGIMG, bgImgPath);
 
 		props.saveDefault();
 	}
@@ -416,6 +466,102 @@ public class SignerOptions {
 
 	public void setRightPrinting(PrintRight rightPrinting) {
 		this.rightPrinting = rightPrinting;
+	}
+
+	public boolean isVisible() {
+		return visible;
+	}
+
+	public void setVisible(boolean visible) {
+		this.visible = visible;
+	}
+
+	public int getPage() {
+		return page;
+	}
+
+	public void setPage(int page) {
+		this.page = page;
+	}
+
+	public float getPositionLLX() {
+		return positionLLX;
+	}
+
+	public void setPositionLLX(float positionLLX) {
+		this.positionLLX = positionLLX;
+	}
+
+	public float getPositionLLY() {
+		return positionLLY;
+	}
+
+	public void setPositionLLY(float positionLLY) {
+		this.positionLLY = positionLLY;
+	}
+
+	public float getPositionURX() {
+		return positionURX;
+	}
+
+	public void setPositionURX(float positionURX) {
+		this.positionURX = positionURX;
+	}
+
+	public float getPositionURY() {
+		return positionURY;
+	}
+
+	public void setPositionURY(float positionURY) {
+		this.positionURY = positionURY;
+	}
+
+	public float getBgImgScale() {
+		return bgImgScale;
+	}
+
+	public void setBgImgScale(float bgImgScale) {
+		this.bgImgScale = bgImgScale;
+	}
+
+	public RenderMode getRenderMode() {
+		return renderMode;
+	}
+
+	public void setRenderMode(RenderMode renderMode) {
+		this.renderMode = renderMode;
+	}
+
+	public String getL2Text() {
+		return l2Text;
+	}
+
+	public void setL2Text(String text) {
+		l2Text = text;
+	}
+
+	public String getL4Text() {
+		return l4Text;
+	}
+
+	public void setL4Text(String text) {
+		l4Text = text;
+	}
+
+	public String getImgPath() {
+		return imgPath;
+	}
+
+	public void setImgPath(String imgPath) {
+		this.imgPath = imgPath;
+	}
+
+	public String getBgImgPath() {
+		return bgImgPath;
+	}
+
+	public void setBgImgPath(String bgImgPath) {
+		this.bgImgPath = bgImgPath;
 	}
 
 }
