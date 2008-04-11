@@ -14,6 +14,12 @@ import java.util.Properties;
  */
 public class PropertyProvider {
 
+
+	/**
+	 * Value used as replacement for null in Null Sensitive properties
+	 */
+	public static final String NS_NULL_VALUE = "$$NULL$$";
+
     /**
      * Unchecked exception used in PropertyProviders check.
      * @author Josef Cacek
@@ -134,6 +140,15 @@ public class PropertyProvider {
         properties.setProperty(aKey, aValue==null?"":aValue);
     }
 
+	/**
+	 * Sets null sensitive property.
+	 * @param aKey property name
+	 * @param aValue property value
+	 */
+	public void setPropNullSensitive(final String aKey, final String aValue) {
+		setProperty(aKey, aValue==null?NS_NULL_VALUE:aValue);
+	}
+
     /**
      * Sets boolean property with given name to given value
      * @param aKey name of a property
@@ -177,6 +192,16 @@ public class PropertyProvider {
     public String getProperty(String aKey) {
         return properties.getProperty(aKey);
     }
+
+	/**
+	 * Gets null sensitive property
+	 * @param aKey name of property
+	 * @return value of property. If value doesn't exist null is returned
+	 */
+	public String getPropNullSensitive(final String aKey) {
+		final String tmpValue = getProperty(aKey);
+		return NS_NULL_VALUE.equals(tmpValue)?null:tmpValue;
+	}
 
     /**
      * Deletes all properties from PropertyProvider.
@@ -256,9 +281,7 @@ public class PropertyProvider {
         int tmpResult = aDefault;
         synchronized (properties) {
 	        if (properties.containsKey(aKey)) {
-	        	try {
-	        		tmpResult = Integer.parseInt(properties.getProperty(aKey));
-	        	} catch (NumberFormatException nfe) {}
+	        	tmpResult = ConvertUtils.toInt(properties.getProperty(aKey), aDefault);
         	}
         }
         return tmpResult;
@@ -286,9 +309,7 @@ public class PropertyProvider {
     	float tmpResult = aDefault;
         synchronized (properties) {
 	        if (properties.containsKey(aKey)) {
-	        	try {
-	        		tmpResult = Float.parseFloat(properties.getProperty(aKey));
-	        	} catch (NumberFormatException nfe) {}
+	        	tmpResult = ConvertUtils.toFloat(properties.getProperty(aKey), aDefault);
 	        }
         }
         return tmpResult;
@@ -323,10 +344,10 @@ public class PropertyProvider {
      * @see #exists(String)
      */
     public boolean getAsBool(String aKey, boolean aDefault) {
-        boolean tmpResult = aDefault;
+    	boolean tmpResult = aDefault;
         synchronized (properties) {
 	        if (properties.containsKey(aKey)) {
-	            tmpResult = Boolean.valueOf(properties.getProperty(aKey))==Boolean.TRUE;
+	        	tmpResult = ConvertUtils.toBoolean(properties.getProperty(aKey), aDefault);
 	        }
         }
         return tmpResult;

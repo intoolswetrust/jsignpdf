@@ -171,12 +171,12 @@ public class SignerOptions {
 
 		//visible signature options
 		visible = props.getAsBool(Constants.PROPERTY_VISIBLE_ENABLED);
-		page = props.getAsInt(Constants.PROPERTY_VISIBLE_PAGE, 1);
-		positionLLX = props.getAsFloat(Constants.PROPERTY_VISIBLE_POS_LLX, 0f);
-		positionLLY = props.getAsFloat(Constants.PROPERTY_VISIBLE_POS_LLY, 0f);
-		positionURX = props.getAsFloat(Constants.PROPERTY_VISIBLE_POS_URX, 100f);
-		positionURY = props.getAsFloat(Constants.PROPERTY_VISIBLE_POS_URY, 100f);
-		bgImgScale = props.getAsFloat(Constants.PROPERTY_VISIBLE_BGSCALE, -1f);
+		page = props.getAsInt(Constants.PROPERTY_VISIBLE_PAGE, Constants.DEFVAL_PAGE);
+		positionLLX = props.getAsFloat(Constants.PROPERTY_VISIBLE_POS_LLX, Constants.DEFVAL_LLX);
+		positionLLY = props.getAsFloat(Constants.PROPERTY_VISIBLE_POS_LLY, Constants.DEFVAL_LLY);
+		positionURX = props.getAsFloat(Constants.PROPERTY_VISIBLE_POS_URX, Constants.DEFVAL_URX);
+		positionURY = props.getAsFloat(Constants.PROPERTY_VISIBLE_POS_URY, Constants.DEFVAL_URY);
+		bgImgScale = props.getAsFloat(Constants.PROPERTY_VISIBLE_BGSCALE, Constants.DEFVAL_BG_SCALE);
 		final String tmpRendMode = props.getProperty(Constants.PROPERTY_VISIBLE_RENDER);
 		if (tmpRendMode != null) {
 			renderMode = RenderMode.valueOf(tmpRendMode);
@@ -184,8 +184,8 @@ public class SignerOptions {
 		if (renderMode==null) {
 			renderMode = RenderMode.GRAPHIC_AND_DESCRIPTION;
 		}
-		l2Text = props.getProperty(Constants.PROPERTY_VISIBLE_L2TEXT);
-		l4Text = props.getProperty(Constants.PROPERTY_VISIBLE_L4TEXT);
+		l2Text = props.getPropNullSensitive(Constants.PROPERTY_VISIBLE_L2TEXT);
+		l4Text = props.getPropNullSensitive(Constants.PROPERTY_VISIBLE_L4TEXT);
 		imgPath = props.getProperty(Constants.PROPERTY_VISIBLE_IMG);
 		bgImgPath = props.getProperty(Constants.PROPERTY_VISIBLE_BGIMG);
 
@@ -244,8 +244,8 @@ public class SignerOptions {
 		props.setProperty(Constants.PROPERTY_VISIBLE_POS_URY, positionURY);
 		props.setProperty(Constants.PROPERTY_VISIBLE_BGSCALE, bgImgScale);
 		props.setProperty(Constants.PROPERTY_VISIBLE_RENDER, renderMode.name());
-		props.setProperty(Constants.PROPERTY_VISIBLE_L2TEXT, l2Text);
-		props.setProperty(Constants.PROPERTY_VISIBLE_L4TEXT, l4Text);
+		props.setPropNullSensitive(Constants.PROPERTY_VISIBLE_L2TEXT, l2Text);
+		props.setPropNullSensitive(Constants.PROPERTY_VISIBLE_L4TEXT, l4Text);
 		props.setProperty(Constants.PROPERTY_VISIBLE_IMG, imgPath);
 		props.setProperty(Constants.PROPERTY_VISIBLE_BGIMG, bgImgPath);
 
@@ -480,8 +480,11 @@ public class SignerOptions {
 		return page;
 	}
 
-	public void setPage(int page) {
-		this.page = page;
+	public void setPage(int aPage) {
+		if (aPage<1) {
+			aPage = 1;
+		}
+		this.page = aPage;
 	}
 
 	public float getPositionLLX() {
@@ -549,7 +552,7 @@ public class SignerOptions {
 	}
 
 	public String getImgPath() {
-		return imgPath;
+		return (imgPath = StringUtils.emptyNull(imgPath));
 	}
 
 	public void setImgPath(String imgPath) {
@@ -557,7 +560,7 @@ public class SignerOptions {
 	}
 
 	public String getBgImgPath() {
-		return bgImgPath;
+		return (bgImgPath = StringUtils.emptyNull(bgImgPath));
 	}
 
 	public void setBgImgPath(String bgImgPath) {

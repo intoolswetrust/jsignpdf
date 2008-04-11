@@ -411,4 +411,13 @@ public class StringUtils {
 	public static boolean isEmpty(final Object anObj) {
 		return emptyNull(anObj)==null;
 	}
+
+	/**
+	 * Returns not null String representation of given parameter.
+	 * @param anObj object
+	 * @return trimmed toString() or null
+	 */
+	public static String toNotNull(final Object anObj) {
+		return anObj==null?"":anObj.toString();
+	}
 }

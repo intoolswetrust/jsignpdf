@@ -108,19 +108,47 @@ public class SignerLogic implements Runnable {
 			options.log("console.setCertificationLevel");
 			sap.setCertificationLevel(options.getCertLevelX().getLevel());
 
-			//TODO visible signature
-			sap.setAcro6Layers(true);
-			Image img = Image.getInstance("images/signedpdf26.png");
-//			sap.setSignatureGraphic(img);
-			sap.setImage(img);
-			sap.setImageScale(-1f);
-			sap.setLayer2Text("Layer 2 (description)");
-			sap.setLayer4Text("Layer 4 (status)");
-			sap.setRender(PdfSignatureAppearance.SignatureRenderNameAndDescription);
-			sap.setVisibleSignature(new Rectangle(0, 0, 50, 50), 1, null);
+			if (options.isVisible()) {
+				//visible signature is enabled
+				options.log("console.configureVisible");
+				options.log("console.setAcro6Layers");
+				sap.setAcro6Layers(true);
 
+				final String tmpImgPath = options.getImgPath();
+				if (tmpImgPath != null) {
+					options.log("console.createImage", tmpImgPath);
+					final Image img = Image.getInstance(tmpImgPath);
+					options.log("console.setSignatureGraphic");
+					sap.setSignatureGraphic(img);
+				}
+				final String tmpBgImgPath = options.getBgImgPath();
+				if (tmpBgImgPath != null) {
+					options.log("console.createImage", tmpBgImgPath);
+					final Image img = Image.getInstance(tmpBgImgPath);
+					options.log("console.setImage");
+					sap.setImage(img);
+				}
+				options.log("console.setImageScale");
+				sap.setImageScale(options.getBgImgScale());
+				options.log("console.setL2Text");
+				sap.setLayer2Text(options.getL2Text());
+				options.log("console.setL4Text");
+				sap.setLayer4Text(options.getL4Text());
+				options.log("console.setRender");
+				sap.setRender(options.getRenderMode().getRender());
+				options.log("console.setVisibleSignature");
+				sap.setVisibleSignature(
+					new Rectangle(
+						options.getPositionLLX(),
+						options.getPositionLLY(),
+						options.getPositionURX(),
+						options.getPositionURY()),
+					options.getPage(),
+					null);
+			}
 			options.log("console.processing");
 			stp.close();
+			options.log("console.closeStream");
 			fout.close();
 
 			tmpResult = true;

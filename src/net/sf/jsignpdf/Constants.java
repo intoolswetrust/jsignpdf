@@ -90,4 +90,13 @@ public class Constants {
      */
     public static final String PROPERTY_LOCATION = "signature.location";
 
+
+    public static final int DEFVAL_PAGE = 1;
+    public static final float DEFVAL_LLX = 0f;
+    public static final float DEFVAL_LLY = 0f;
+    public static final float DEFVAL_URX = 100f;
+    public static final float DEFVAL_URY = 100f;
+    public static final float DEFVAL_BG_SCALE = -1f;
+
+
 }
