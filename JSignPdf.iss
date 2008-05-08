@@ -1,14 +1,15 @@
 [Code]
 function MyAppVersion(Param: String) : String;
 begin
-  Result := '0.5.1';
+  Result := '0.7';
 end;
 
 [Files]
 Source: dist\*; DestDir: {app}; Flags: recursesubdirs; Components: base
 Source: others\JSignPdf.exe; DestDir: {app}; Components: base
 Source: doc\JSignPdf.pdf; DestDir: {app}\docs; Components: base
-Source: doc\*.txt; DestDir: {app}\docs; Components: base
+Source: doc\ChangeLog.txt; DestDir: {app}\docs; Components: base
+Source: doc\ReleaseNotes.txt; DestDir: {app}\docs; Components: base
 Source: licenses\*.txt; DestDir: {app}\docs; Components: base
 Source: C:\install\Java & Eclipse\JDK\jre-6u5-windows-i586-p.exe; DestDir: {tmp}; Flags: deleteafterinstall; Components: java
 
@@ -30,8 +31,8 @@ DefaultDirName={pf}\JSignPdf
 DefaultGroupName=JSignPdf
 LicenseFile=licenses\MPL-1.1.txt
 ;OutputDir=C:\TEMP
-OutputBaseFilename=JSignPdf_setup_0.5.1
-VersionInfoVersion=0.5.1.0
+OutputBaseFilename=JSignPdf_setup_0.7
+VersionInfoVersion=0.7.0.0
 VersionInfoCompany=Josef Cacek
 VersionInfoDescription=JSignPdf adds digital signatures to PDF documents
 AppPublisher=Josef Cacek
@@ -40,8 +41,8 @@ AppVersion={code:MyAppVersion}
 
 [Icons]
 Name: {group}\JSignPdf {code:MyAppVersion}; Filename: {app}\JSignPdf.exe; Components: ; WorkingDir: {app}
-Name: {group}\JSignPdf Guide; Filename: {app}\docs\JSignPdf.pdf; Components: 
-Name: {group}\Uninstall; Filename: {uninstallexe}; Components: 
+Name: {group}\JSignPdf Guide; Filename: {app}\docs\JSignPdf.pdf; Components:
+Name: {group}\Uninstall; Filename: {uninstallexe}; Components:
 
 [UninstallDelete]
-Name: {%USERPROFILE}\.JSignPdf; Type: files; Components: 
+Name: {%USERPROFILE}\.JSignPdf; Type: files; Components:

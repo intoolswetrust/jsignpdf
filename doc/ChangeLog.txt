@@ -1,3 +1,9 @@
+2008-05-08 Josef Cacek
+  * show page bounds in visible signature
+
+2008-04 Josef Cacek
+  * implementing visible signature
+
 2008-03-27 Josef Cacek
   * fix for Java 5 (disable JDialog.setIconImage)
 
