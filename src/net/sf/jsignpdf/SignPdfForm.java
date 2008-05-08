@@ -860,6 +860,7 @@ public class SignPdfForm extends javax.swing.JFrame implements SignResultListene
 	}// </editor-fold>//GEN-END:initComponents
 
 	private void btnVisibleSigSettingsActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnVisibleSigSettingsActionPerformed
+		storeToOptions();
 		vsDialog.pack();
 		vsDialog.setVisible(true);
 	}//GEN-LAST:event_btnVisibleSigSettingsActionPerformed
