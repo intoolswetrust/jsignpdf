@@ -1,3 +1,6 @@
+2008-05-20 Josef Cacek
+  * update documentation
+
 2008-05-08 Josef Cacek
   * show page bounds in visible signature
 
