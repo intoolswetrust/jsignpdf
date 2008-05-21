@@ -1,4 +1,5 @@
 2008-05-20 Josef Cacek
+  * enable/disable image field in visible signatures - depends on rendering mode
   * update documentation
 
 2008-05-08 Josef Cacek
