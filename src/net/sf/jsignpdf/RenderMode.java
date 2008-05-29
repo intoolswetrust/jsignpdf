@@ -26,6 +26,7 @@ public enum RenderMode {
 	/**
 	 * Returns internationalized description of a right.
 	 */
+	@Override
 	public String toString() {
 		return ResourceProvider.getInstance().get(msgKey);
 	}

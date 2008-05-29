@@ -27,7 +27,7 @@ public class Constants {
 	/**
 	 * Name (path) of resource bundle
 	 */
-	public static final String RESOURCE_BUNDLE_BASE = "translations.messages";
+	public static final String RESOURCE_BUNDLE_BASE = "net.sf.jsignpdf.translations.messages";
 
     /**
      * Property name.
