@@ -41,6 +41,9 @@
         </Container>
         <Component class="javax.swing.JButton" name="btnInfoClose">
           <Properties>
+            <Property name="icon" type="javax.swing.Icon" editor="org.netbeans.modules.form.editors2.IconEditor">
+              <Image iconType="3" name="/net/sf/jsignpdf/back16.png"/>
+            </Property>
             <Property name="text" type="java.lang.String" value="Close"/>
             <Property name="minimumSize" type="java.awt.Dimension" editor="org.netbeans.beaninfo.editors.DimensionEditor">
               <Dimension value="[50, 20]"/>
@@ -210,6 +213,9 @@
         </Component>
         <Component class="javax.swing.JButton" name="btnRightsOK">
           <Properties>
+            <Property name="icon" type="javax.swing.Icon" editor="org.netbeans.modules.form.editors2.IconEditor">
+              <Image iconType="3" name="/net/sf/jsignpdf/back16.png"/>
+            </Property>
             <Property name="text" type="java.lang.String" value="OK"/>
           </Properties>
           <Events>
