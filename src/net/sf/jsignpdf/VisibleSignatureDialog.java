@@ -113,7 +113,7 @@ public class VisibleSignatureDialog extends javax.swing.JDialog {
 	private void updateFromOptions() {
 		tfPage.setText(ConvertUtils.toString(options.getPage()));
 		tfPosLLX.setText(ConvertUtils.toString(options.getPositionLLX()));
-		tfPosLLX.setText(ConvertUtils.toString(options.getPositionLLY()));
+		tfPosLLY.setText(ConvertUtils.toString(options.getPositionLLY()));
 		tfPosURX.setText(ConvertUtils.toString(options.getPositionURX()));
 		tfPosURY.setText(ConvertUtils.toString(options.getPositionURY()));
 		tfBgImgScale.setText(ConvertUtils.toString(options.getBgImgScale()));
