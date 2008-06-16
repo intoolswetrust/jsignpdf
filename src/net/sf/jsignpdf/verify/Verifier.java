@@ -19,8 +19,8 @@ import org.apache.commons.cli.PosixParser;
  * Entry point (i.e. main class) to PDF signature verifications.
  * @author Josef Cacek
  * @author $Author: kwart $
- * @version $Revision: 1.1 $
- * @created $Date: 2008/06/16 13:07:14 $
+ * @version $Revision: 1.2 $
+ * @created $Date: 2008/06/16 15:00:12 $
  */
 public class Verifier {
 
@@ -33,7 +33,7 @@ public class Verifier {
 		// create the Options
 		Option help = new Option("h", "help", false, "print this message");
 //		Option version = new Option("v", "version", false, "print version info");
-		Option certificates = new Option("c", "cert", true, "use external colon-separated X.509 certificate files"); 
+		Option certificates = new Option("c", "cert", true, "use external semicolon separated X.509 certificate files"); 
 		certificates.setArgName("certificates");
 		Option password = new Option("p", "password", true, "sets password for opening PDF"); 
 		password.setArgName("password");
@@ -68,7 +68,7 @@ public class Verifier {
 			
 			if (line.hasOption("c")) {
 				String tmpCertFiles = line.getOptionValue("c");
-				for (String tmpCFile : tmpCertFiles.split("[:;]")) {
+				for (String tmpCFile : tmpCertFiles.split(";")) {
 					tmpLogic.addX509CertFile(tmpCFile);
 				}
 			}
