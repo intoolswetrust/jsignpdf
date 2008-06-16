@@ -21,8 +21,8 @@ import com.lowagie.text.pdf.PdfPKCS7.X509Name;
  * certificates from external files using {@link #addX509CertFile(String)} method.
  * @author Josef Cacek
  * @author $Author: kwart $
- * @version $Revision: 1.1 $
- * @created $Date: 2008/06/13 13:27:45 $
+ * @version $Revision: 1.2 $
+ * @created $Date: 2008/06/16 08:07:37 $
  */
 public class VerifierLogic {
 
@@ -94,6 +94,7 @@ public class VerifierLogic {
 				tmpVerif.setModified(!pk.verify());
 				//TODO revocation list and date to which should be verified?
 				tmpVerif.setFails(PdfPKCS7.verifyCertificates(pkc, kall, null, tmpVerif.getDate()));
+				tmpResult.addVerification(tmpVerif);
 			}
 		} catch (Exception e) {
 			tmpResult.setException(e);
