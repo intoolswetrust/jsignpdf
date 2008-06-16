@@ -1,13 +1,14 @@
 package net.sf.jsignpdf.verify;
 
+import java.util.Arrays;
 import java.util.Calendar;
 
 /**
  * This class represents a result of a single signature verification.
  * @author Josef Cacek
  * @author $Author: kwart $
- * @version $Revision: 1.1 $
- * @created $Date: 2008/06/13 13:27:45 $
+ * @version $Revision: 1.2 $
+ * @created $Date: 2008/06/16 08:07:04 $
  */
 public class SignatureVerification {
 	
@@ -76,5 +77,17 @@ public class SignatureVerification {
 	}
 	public void setFails(Object[] fails) {
 		this.fails = fails;
+	}
+	
+	public String toString() {
+		return 	"Signature verification [" 
+				+ "\n name=" + name 
+				+ "\n subject=" + subject 
+				+ "\n revision=" + revision 
+				+ "\n wholeDocument=" + wholeDocument 
+				+ "\n date=" + date.getTime() 
+				+ "\n modified=" + modified 
+				+ "\n fails=" + (fails==null?"no":Arrays.asList(fails)) 
+				+ "\n]";
 	}
 }
