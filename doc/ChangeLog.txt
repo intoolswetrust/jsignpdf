@@ -1,3 +1,6 @@
+2008-06-16 Josef Cacek
+  * basic support for PDF signature verification (command line controlled)
+
 2008-05-20 Josef Cacek
   * enable/disable image field in visible signatures - depends on rendering mode
   * update documentation
