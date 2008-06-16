@@ -7,11 +7,12 @@ import java.util.Calendar;
  * This class represents a result of a single signature verification.
  * @author Josef Cacek
  * @author $Author: kwart $
- * @version $Revision: 1.2 $
- * @created $Date: 2008/06/16 08:07:04 $
+ * @version $Revision: 1.3 $
+ * @created $Date: 2008/06/16 12:32:31 $
  */
 public class SignatureVerification {
 	
+	private String signName;
 	private String name;
 	private String subject;
 	private int revision;
@@ -19,6 +20,8 @@ public class SignatureVerification {
 	private Calendar date;
 	private boolean modified;
 	private Object[] fails;
+	private String reason;
+	private String location;
 	
 	
 	/**
@@ -78,16 +81,43 @@ public class SignatureVerification {
 	public void setFails(Object[] fails) {
 		this.fails = fails;
 	}
+
+	public String getLocation() {
+		return location;
+	}
+
+	public void setLocation(String location) {
+		this.location = location;
+	}
+
+	public String getReason() {
+		return reason;
+	}
+
+	public void setReason(String reason) {
+		this.reason = reason;
+	}
 	
 	public String toString() {
 		return 	"Signature verification [" 
+				+ "\n signName=" + signName 
 				+ "\n name=" + name 
 				+ "\n subject=" + subject 
+				+ "\n date=" + date.getTime() 
+				+ "\n reason=" + reason 
+				+ "\n location=" + location 
 				+ "\n revision=" + revision 
 				+ "\n wholeDocument=" + wholeDocument 
-				+ "\n date=" + date.getTime() 
 				+ "\n modified=" + modified 
 				+ "\n fails=" + (fails==null?"no":Arrays.asList(fails)) 
 				+ "\n]";
+	}
+
+	public String getSignName() {
+		return signName;
+	}
+
+	public void setSignName(String signName) {
+		this.signName = signName;
 	}
 }

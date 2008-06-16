@@ -21,8 +21,8 @@ import com.lowagie.text.pdf.PdfPKCS7.X509Name;
  * certificates from external files using {@link #addX509CertFile(String)} method.
  * @author Josef Cacek
  * @author $Author: kwart $
- * @version $Revision: 1.2 $
- * @created $Date: 2008/06/16 08:07:37 $
+ * @version $Revision: 1.3 $
+ * @created $Date: 2008/06/16 12:32:31 $
  */
 public class VerifierLogic {
 
@@ -87,6 +87,9 @@ public class VerifierLogic {
 				tmpVerif.setRevision(tmpAcroFields.getRevision(name));
 				final PdfPKCS7 pk = tmpAcroFields.verifySignature(name);
 				tmpVerif.setDate(pk.getSignDate());
+				tmpVerif.setLocation(pk.getLocation());
+				tmpVerif.setReason(pk.getReason());
+				tmpVerif.setSignName(pk.getSignName());
 				final Certificate pkc[] = pk.getCertificates();
 				final X509Name tmpX509Name = PdfPKCS7.getSubjectFields(pk.getSigningCertificate());
 				//TODO read more details from X509Name ?
