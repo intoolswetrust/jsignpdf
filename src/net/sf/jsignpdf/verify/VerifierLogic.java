@@ -10,6 +10,8 @@ import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Collection;
 
+import net.sf.jsignpdf.KeyStoreUtils;
+
 import com.lowagie.text.pdf.AcroFields;
 import com.lowagie.text.pdf.PdfPKCS7;
 import com.lowagie.text.pdf.PdfReader;
@@ -21,8 +23,8 @@ import com.lowagie.text.pdf.PdfPKCS7.X509Name;
  * certificates from external files using {@link #addX509CertFile(String)} method.
  * @author Josef Cacek
  * @author $Author: kwart $
- * @version $Revision: 1.3 $
- * @created $Date: 2008/06/16 12:32:31 $
+ * @version $Revision: 1.4 $
+ * @created $Date: 2008/06/26 15:37:49 $
  */
 public class VerifierLogic {
 
@@ -31,8 +33,9 @@ public class VerifierLogic {
 	/**
 	 * Constructor. It initializes default keystore.
 	 */
-	public VerifierLogic() {
-		reinitKeystore();
+	public VerifierLogic(final String aType, final String aKeyStore, 
+		final String aPasswd) {
+		reinitKeystore(aType, aKeyStore, aPasswd);
 	}
 
 	/**
@@ -61,8 +64,9 @@ public class VerifierLogic {
 	 * Initializes keystore (load certificates from default keystore). 
 	 * All previously added certificates from external files are forgotten.
 	 */
-	public void reinitKeystore() {
-		kall = PdfPKCS7.loadCacertsKeyStore();
+	public void reinitKeystore(String aKsType, final String aKeyStore, 
+		final String aPasswd) {
+		kall = KeyStoreUtils.loadKeyStore(aKsType, aKeyStore, aPasswd);
 	}
 
 	/**
@@ -80,7 +84,7 @@ public class VerifierLogic {
 			final AcroFields tmpAcroFields = tmpReader.getAcroFields();
 			final ArrayList<String> tmpNames = tmpAcroFields.getSignatureNames();
 			tmpResult.setTotalRevisions(tmpAcroFields.getTotalRevisions());
-			
+
 			for (String name : tmpNames) {
 				final SignatureVerification tmpVerif = new SignatureVerification(name);
 				tmpVerif.setWholeDocument(tmpAcroFields.signatureCoversWholeDocument(name));
@@ -146,5 +150,5 @@ public class VerifierLogic {
 		}
 		return tmpReader;
 	}
-	
+
 }

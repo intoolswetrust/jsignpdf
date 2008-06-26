@@ -33,7 +33,6 @@ public class SignPdfForm extends javax.swing.JFrame implements SignResultListene
 	private boolean autoclose = false;
 	private SignerOptions options = new SignerOptions();
 	private SignerLogic signerLogic = new SignerLogic(options);
-	private KeyStoreUtils ksUtils = new KeyStoreUtils(options);
 	private VisibleSignatureDialog vsDialog = new VisibleSignatureDialog(this, true, options, fc);
 
 	/** Creates new form SignPdfForm */
@@ -61,7 +60,7 @@ public class SignPdfForm extends javax.swing.JFrame implements SignResultListene
 		options.setPrintWriter(infoWriter);
 		options.setListener(this);
 
-		cbKeystoreType.setModel(new DefaultComboBoxModel(ksUtils.getKeyStrores()));
+		cbKeystoreType.setModel(new DefaultComboBoxModel(KeyStoreUtils.getKeyStores()));
 		cbCertLevel.setModel(new DefaultComboBoxModel(CertificationLevel.values()));
 		cbPrinting.setModel(new DefaultComboBoxModel(PrintRight.values()));
 
@@ -883,10 +882,10 @@ public class SignPdfForm extends javax.swing.JFrame implements SignResultListene
 
 	private void btnLoadAliasesActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnLoadAliasesActionPerformed
 		storeToOptions();
-		btnInfoClose.setEnabled(true);
-		infoDialog.setVisible(true);
-		infoDialog.setDefaultCloseOperation(javax.swing.WindowConstants.HIDE_ON_CLOSE);
-		cbAlias.setModel(new DefaultComboBoxModel(ksUtils.getAliases()));
+//		btnInfoClose.setEnabled(true);
+//		infoDialog.setVisible(true);
+//		infoDialog.setDefaultCloseOperation(javax.swing.WindowConstants.HIDE_ON_CLOSE);
+		cbAlias.setModel(new DefaultComboBoxModel(KeyStoreUtils.getKeyAliases(options)));
 	}//GEN-LAST:event_btnLoadAliasesActionPerformed
 
 	private void chkbPdfEncryptedActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_chkbPdfEncryptedActionPerformed

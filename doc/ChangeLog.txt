@@ -1,5 +1,9 @@
+2008-06-26 Josef Cacek
+  * loading certificates from KeyStores (e.g. WINDOWS-ROOT in Java 6)
+
 2008-06-16 Josef Cacek
   * basic support for PDF signature verification (command line controlled)
+  * loading certificates from X.509 certification files
 
 2008-05-20 Josef Cacek
   * enable/disable image field in visible signatures - depends on rendering mode

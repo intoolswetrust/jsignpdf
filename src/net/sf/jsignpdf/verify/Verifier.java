@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.io.InputStream;
 
 import net.sf.jsignpdf.IOUtils;
+import net.sf.jsignpdf.KeyStoreUtils;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
@@ -19,8 +20,8 @@ import org.apache.commons.cli.PosixParser;
  * Entry point (i.e. main class) to PDF signature verifications.
  * @author Josef Cacek
  * @author $Author: kwart $
- * @version $Revision: 1.2 $
- * @created $Date: 2008/06/16 15:00:12 $
+ * @version $Revision: 1.3 $
+ * @created $Date: 2008/06/26 15:37:49 $
  */
 public class Verifier {
 
@@ -31,21 +32,35 @@ public class Verifier {
 
 
 		// create the Options
-		Option help = new Option("h", "help", false, "print this message");
-//		Option version = new Option("v", "version", false, "print version info");
-		Option certificates = new Option("c", "cert", true, "use external semicolon separated X.509 certificate files"); 
-		certificates.setArgName("certificates");
-		Option password = new Option("p", "password", true, "sets password for opening PDF"); 
-		password.setArgName("password");
-		Option export = new Option("e", "extract", true, "extracts signed PDF revisions to given folder");
-		export.setArgName("folder");
+		Option optHelp = new Option("h", "help", false, "print this message");
+//		Option optVersion = new Option("v", "version", false, "print version info");
+		Option optCerts = new Option("c", "cert", true, "use external semicolon separated X.509 certificate files"); 
+		optCerts.setArgName("certificates");
+		Option optPasswd = new Option("p", "password", true, "set password for opening PDF"); 
+		optPasswd.setArgName("password");
+		Option optExtract = new Option("e", "extract", true, "extract signed PDF revisions to given folder");
+		optExtract.setArgName("folder");
+		Option optListKs = new Option("lk", "list-keystore-types", false, "list keystore types provided by java");
+		Option optListCert = new Option("lc", "list-certificates", false, "list certificate aliases in a KeyStore");
+		Option optKsType = new Option("kt", "keystore-type", true, "use keystore type with given name");
+		optKsType.setArgName("keystore_type");
+		Option optKsFile = new Option("kf", "keystore-file", true, "use given keystore file");
+		optKsFile.setArgName("file");
+		Option optKsPass = new Option("kp", "keystore-password", true, "password for keystore file (look on -kf option)");
+		optKsPass.setArgName("password");
+
 		
 		final Options options = new Options();
-		options.addOption(help);
-//		options.addOption(version);
-		options.addOption(certificates);
-		options.addOption(password);
-		options.addOption(export);
+		options.addOption(optHelp);
+//		options.addOption(optVersion);
+		options.addOption(optCerts);
+		options.addOption(optPasswd);
+		options.addOption(optExtract);
+		options.addOption(optListKs);
+		options.addOption(optListCert);
+		options.addOption(optKsType);
+		options.addOption(optKsFile);
+		options.addOption(optKsPass);
 
 		CommandLine line = null;
 		try {
@@ -62,9 +77,28 @@ public class Verifier {
 		if (line.hasOption("h") || tmpArgs == null || tmpArgs.length==0) {
 			// automatically generate the help statement
 			HelpFormatter formatter = new HelpFormatter();
-			formatter.printHelp(70, "java -jar verify.jar [-c <certificates>] [-h] [-v] <PDF_file(s)>", "//TODO header", options, "//TODO footer"); 
+//			formatter.printHelp(70, "java -jar verify.jar [-c <certificates>] [-h] [-v] <PDF_file(s)>", "//TODO header", options, "//TODO footer");
+			formatter.printHelp(70, "java -jar verify.jar ", "//TODO header", options, "//TODO footer", true);
+		} else if (line.hasOption("lk")) {
+			//list keystores
+			for (String tmpKsType : KeyStoreUtils.getKeyStores()) {
+				System.out.println(tmpKsType);
+			}
+		} else if (line.hasOption("lc")) {
+			//list certificate aliases in the keystore
+			for (String tmpCert : KeyStoreUtils.getCertAliases(
+				line.getOptionValue("kt"),
+				line.getOptionValue("kf"),
+				line.getOptionValue("kp"))) {
+
+				System.out.println(tmpCert);
+			}
+			
 		} else {
-			final VerifierLogic tmpLogic = new VerifierLogic();
+			final VerifierLogic tmpLogic = new VerifierLogic(
+				line.getOptionValue("kt"),
+				line.getOptionValue("kf"),
+				line.getOptionValue("kp"));
 			
 			if (line.hasOption("c")) {
 				String tmpCertFiles = line.getOptionValue("c");
