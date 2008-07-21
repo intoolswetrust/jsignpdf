@@ -3,8 +3,8 @@
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="src" path="res"/>
 	<classpathentry kind="lib" path="lib/bcprov-jdk15-138.jar"/>
-	<classpathentry kind="lib" path="lib/iText-2.0.8.jar"/>
 	<classpathentry kind="lib" path="lib/commons-cli-1.1.jar"/>
+	<classpathentry kind="lib" path="lib/iText-2.1.3.jar"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.USER_LIBRARY/OOo"/>
 	<classpathentry kind="output" path="build/classes"/>
