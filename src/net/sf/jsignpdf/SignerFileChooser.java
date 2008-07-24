@@ -19,7 +19,7 @@ public class SignerFileChooser extends JFileChooser {
 	/**
 	 * File filter for PDF files
 	 */
-	static final FileFilter FILEFILTER_PDF = new FileFilter() {
+	public static final FileFilter FILEFILTER_PDF = new FileFilter() {
 		public boolean accept(File f) {
 			return f.isDirectory() || f.getName().toLowerCase().endsWith(".pdf");
 		}
@@ -33,6 +33,7 @@ public class SignerFileChooser extends JFileChooser {
 	 * file already exists.
 	 * @see javax.swing.JFileChooser#approveSelection()
 	 */
+	@Override
 	public void approveSelection() {
 		if (getDialogType() == SAVE_DIALOG) {
 			File file = getSelectedFile();
@@ -77,8 +78,8 @@ public class SignerFileChooser extends JFileChooser {
 		// safety check
 		if (getUI() instanceof BasicFileChooserUI) {
 			// grab the ui and set the filename
-			BasicFileChooserUI ui = (BasicFileChooserUI) getUI();
-			ui.setFileName(file == null ? "" : file.getName());
+			BasicFileChooserUI tmpUi = (BasicFileChooserUI) getUI();
+			tmpUi.setFileName(file == null ? "" : file.getName());
 		}
 	}
 
