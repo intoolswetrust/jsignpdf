@@ -23,8 +23,8 @@ import com.lowagie.text.pdf.PdfPKCS7.X509Name;
  * certificates from external files using {@link #addX509CertFile(String)} method.
  * @author Josef Cacek
  * @author $Author: kwart $
- * @version $Revision: 1.4 $
- * @created $Date: 2008/06/26 15:37:49 $
+ * @version $Revision: 1.5 $
+ * @created $Date: 2008/08/01 10:17:19 $
  */
 public class VerifierLogic {
 
@@ -151,4 +151,11 @@ public class VerifierLogic {
 		return tmpReader;
 	}
 
+	/**
+	 * Returns keystore used in verifier.
+	 * @return used keystore
+	 */
+	public KeyStore getKeyStore() {
+		return kall;
+	}
 }
