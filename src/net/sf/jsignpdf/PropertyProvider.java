@@ -24,7 +24,7 @@ public class PropertyProvider {
      * Unchecked exception used in PropertyProviders check.
      * @author Josef Cacek
      */
-    public class ProperyProviderException extends RuntimeException {
+    public static class ProperyProviderException extends RuntimeException {
 		private static final long serialVersionUID = 1L;
 		public ProperyProviderException() { super(); }
         public ProperyProviderException(String aMessage) { super(aMessage); }

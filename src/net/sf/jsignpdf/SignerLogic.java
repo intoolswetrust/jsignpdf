@@ -20,7 +20,7 @@ import com.lowagie.text.pdf.PdfWriter;
  */
 public class SignerLogic implements Runnable {
 
-	private SignerOptions options;
+	private BasicSignerOptions options;
 
 	public SignerLogic() {}
 
@@ -28,7 +28,7 @@ public class SignerLogic implements Runnable {
 	 * Constructor with all necessary parameters.
 	 * @param anOptions options of signer
 	 */
-	public SignerLogic(final SignerOptions anOptions) {
+	public SignerLogic(final BasicSignerOptions anOptions) {
 		options = anOptions;
 	}
 
@@ -163,11 +163,11 @@ public class SignerLogic implements Runnable {
 		options.fireSignerFinishedEvent(tmpResult);
 	}
 
-	public SignerOptions getOptions() {
+	public BasicSignerOptions getOptions() {
 		return options;
 	}
 
-	public void setOptions(SignerOptions options) {
+	public void setOptions(BasicSignerOptions options) {
 		this.options = options;
 	}
 

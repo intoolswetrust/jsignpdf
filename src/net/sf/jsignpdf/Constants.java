@@ -1,5 +1,6 @@
 package net.sf.jsignpdf;
 
+
 /**
  * Constants used in PDF signer application.
  * @author Josef Cacek
@@ -9,7 +10,7 @@ public class Constants {
 	/**
 	 * Version of JSignPdf
 	 */
-	public static final String VERSION = "0.7";
+	public static final String VERSION = "0.8";
 
 	/**
 	 * Home directory of current user. It's not a real constant
@@ -98,5 +99,86 @@ public class Constants {
     public static final float DEFVAL_URY = 100f;
     public static final float DEFVAL_BG_SCALE = -1f;
 
+    public static final int EXIT_CODE_PARSE_ERR = -1;
+    public static final int EXIT_CODE_NO_COMMAND = -1;
 
+    public static final String ARG_HELP_LONG = "help";
+    public static final String ARG_HELP = "h";
+
+    public static final String ARG_VERSION_LONG = "version";
+    public static final String ARG_VERSION = "v";
+
+    public static final String ARG_LIST_KS_TYPES = "lkt";
+    public static final String ARG_LIST_KS_TYPES_LONG = "list-keystore-types";
+
+    public static final String ARG_LIST_KEYS = "lk";
+    public static final String ARG_LIST_KEYS_LONG = "list-keys";
+
+    public static final String ARG_KS_TYPE_LONG = "keystore-type";
+    public static final String ARG_KS_TYPE = "kst";
+
+    public static final String ARG_KS_FILE_LONG = "keystore-file";
+    public static final String ARG_KS_FILE = "ksf";
+
+    public static final String ARG_KS_PWD_LONG = "keystore-password";
+    public static final String ARG_KS_PWD = "ksp";
+
+    public static final String ARG_KEY_PWD_LONG = "key-password";
+    public static final String ARG_KEY_PWD = "kp";
+
+    public static final String ARG_KEY_ALIAS_LONG = "key-alias";
+    public static final String ARG_KEY_ALIAS = "ka";
+
+    public static final String ARG_OPREFIX = "op";
+    public static final String ARG_OPREFIX_LONG = "out-prefix";
+
+    public static final String ARG_OSUFFIX = "os";
+    public static final String ARG_OSUFFIX_LONG = "out-suffix";
+
+    public static final String ARG_REASON = "r";
+    public static final String ARG_REASON_LONG = "reason";
+
+    public static final String ARG_LOCATION = "l";
+    public static final String ARG_LOCATION_LONG = "location";
+
+    public static final String ARG_APPEND = "a";
+    public static final String ARG_APPEND_LONG = "append";
+
+    public static final String ARG_CERT_LEVEL = "cl";
+    public static final String ARG_CERT_LEVEL_LONG = "certification-level";
+
+    public static final String ARG_ENCRYPTED = "e";
+    public static final String ARG_ENCRYPTED_LONG = "encrypted";
+
+    public static final String ARG_PWD_OWNER = "opwd";
+    public static final String ARG_PWD_OWNER_LONG = "owner-password";
+
+    public static final String ARG_PWD_USER = "upwd";
+    public static final String ARG_PWD_USER_LONG = "user-password";
+
+    public static final String ARG_RIGHT_PRINT = "rp";
+    public static final String ARG_RIGHT_PRINT_LONG = "right-print";
+
+    public static final String ARG_DISABLE_COPY_LONG = "disable-copy";
+    public static final String ARG_DISABLE_ASSEMBLY_LONG = "disable-assembly";
+    public static final String ARG_DISABLE_FILL_LONG = "disable-fill";
+    public static final String ARG_DISABLE_SCREEN_READERS_LONG = "disable-screen-readers";
+    public static final String ARG_DISABLE_MODIFY_ANNOT_LONG = "disable-modify-annotations";
+    public static final String ARG_DISABLE_MODIFY_CONTENT_LONG = "disable-modify-content";
+
+    public static final String ARG_VISIBLE = "V";
+    public static final String ARG_VISIBLE_LONG = "visible-signature";
+    public static final String ARG_PAGE = "pg";
+    public static final String ARG_PAGE_LONG = "page";
+
+    public static final String ARG_POS_LLX = "llx";
+    public static final String ARG_POS_LLY = "lly";
+    public static final String ARG_POS_URX = "urx";
+    public static final String ARG_POS_URY = "ury";
+    public static final String ARG_BG_SCALE = "bg-scale";
+    public static final String ARG_RENDER_MODE = "render-mode";
+    public static final String ARG_L2_TEXT = "l2-text";
+    public static final String ARG_L4_TEXT = "l4-text";
+    public static final String ARG_IMG_PATH = "img-path";
+    public static final String ARG_BG_PATH = "bg-path";
 }
