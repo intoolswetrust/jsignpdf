@@ -45,9 +45,9 @@ public class SignerLogic implements Runnable {
 
 			options.log("console.getKeystoreType", options.getKsType());
 			final KeyStore ks = KeyStore.getInstance(options.getKsType());
-			options.log("console.loadKeystore", options.getKsFile());
 			InputStream ksInputStream = null;
 			if (!StringUtils.isEmpty(options.getKsFile())) {
+				options.log("console.loadKeystore", options.getKsFile());
 				ksInputStream = new FileInputStream(options.getKsFile());
 			}
 			ks.load(ksInputStream,options.getKsPasswd());
@@ -101,10 +101,14 @@ public class SignerLogic implements Runnable {
 
 			final PdfSignatureAppearance sap = stp.getSignatureAppearance();
 			sap.setCrypto(key, chain, null, PdfSignatureAppearance.WINCER_SIGNED);
-			options.log("console.setReason", options.getReason());
-			sap.setReason(options.getReason());
-			options.log("console.setLocation", options.getLocation());
-			sap.setLocation(options.getLocation());
+			if (!StringUtils.isEmpty(options.getReason())) {
+				options.log("console.setReason", options.getReason());
+				sap.setReason(options.getReason());
+			}
+			if (!StringUtils.isEmpty(options.getLocation())) {
+				options.log("console.setLocation", options.getLocation());
+				sap.setLocation(options.getLocation());
+			}
 			options.log("console.setCertificationLevel");
 			sap.setCertificationLevel(options.getCertLevelX().getLevel());
 

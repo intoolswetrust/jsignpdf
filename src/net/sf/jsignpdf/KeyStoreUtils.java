@@ -29,7 +29,7 @@ public class KeyStoreUtils {
 	 * Loads key names (aliases) from the keystore
 	 * @return array of key aliases
 	 */
-	public static String[] getKeyAliases(final SignerOptions options) {
+	public static String[] getKeyAliases(final BasicSignerOptions options) {
 		if (options==null) {
 			throw new NullPointerException("Options are empty.");
 		}
@@ -47,7 +47,7 @@ public class KeyStoreUtils {
 				if (tmpKs.isKeyEntry(tmpAlias)) {
 					tmpResult.add(tmpAlias);
 				}
-			}			
+			}
 			options.fireSignerFinishedEvent(true);
 		} catch (Exception e) {
 			options.log("console.exception");
@@ -71,13 +71,13 @@ public class KeyStoreUtils {
 				if (tmpKs.isCertificateEntry(tmpAlias)) {
 					tmpResult.add(tmpAlias);
 				}
-			}			
+			}
 		} catch (Exception e) {
 			e.printStackTrace();
 			return null;
 		}
 		return tmpResult.toArray(new String[tmpResult.size()]);
-	}	
+	}
 
 	/**
 	 * Loads certificate names (aliases) from the given keystore
@@ -97,12 +97,12 @@ public class KeyStoreUtils {
 	 * @param aKsPasswd
 	 * @return
 	 */
-	public static KeyStore loadKeyStore(String aKsType, 
+	public static KeyStore loadKeyStore(String aKsType,
 		final String aKsFile, final String aKsPasswd) {
 		char[] tmpPass = null;
 		if (aKsPasswd!=null) {
 			tmpPass = aKsPasswd.toCharArray();
-		}			
+		}
 		return loadKeyStore(aKsType, aKsFile, tmpPass);
 	}
 
@@ -113,7 +113,7 @@ public class KeyStoreUtils {
 	 * @param aKsPasswd
 	 * @return
 	 */
-	public static KeyStore loadKeyStore(String aKsType, 
+	public static KeyStore loadKeyStore(String aKsType,
 		final String aKsFile, final char[] aKsPasswd) {
 
 		if (StringUtils.isEmpty(aKsType) && StringUtils.isEmpty(aKsFile)) {
@@ -146,7 +146,7 @@ public class KeyStoreUtils {
 	 * Loads the default root certificates at &lt;java.home&gt;/lib/security/cacerts.
 	 * @param provider the provider or <code>null</code> for the default provider
 	 * @return a <CODE>KeyStore</CODE>
-	 */    
+	 */
 	public static KeyStore loadCacertsKeyStore(String provider) {
 		File file = new File(System.getProperty("java.home"), "lib");
 		file = new File(file, "security");

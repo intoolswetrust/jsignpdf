@@ -2,6 +2,8 @@ package net.sf.jsignpdf;
 
 import static net.sf.jsignpdf.Constants.*;
 
+import java.io.File;
+
 import javax.swing.UIManager;
 import javax.swing.WindowConstants;
 
@@ -9,18 +11,20 @@ import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.ParseException;
 
 /**
- * Simple main class - it sets system Look&Feel and creates SignPdfForm GUI
+ * JSignPdf main class - it either process command line or if no argument is given,
+ * sets system Look&Feel and creates SignPdfForm GUI.
  * @author Josef Cacek
  */
 public class Signer {
 
 	private static void printHelp() {
 		final HelpFormatter formatter = new HelpFormatter();
-		formatter.printHelp(70,
+		final ResourceProvider res = ResourceProvider.getInstance();
+		formatter.printHelp(80,
 				"JSignPdf.bat ",
-				"//TODO header",
+				res.get("hlp.header"),
 				SignerOptionsFromCmdLine.OPTS,
-				"//TODO footer",
+				res.get("hlp.footer"),
 				true);
 	}
 
@@ -46,19 +50,17 @@ public class Signer {
 				printHelp();
 			}
 			if (tmpOpts.isListKeyStores()) {
-				System.out.println("KeyStores:");
-				for (String tmpKsType : KeyStoreUtils.getKeyStores()) {
+				final String[] tmpKeyStores = KeyStoreUtils.getKeyStores();
+				tmpOpts.log("console.keystores");
+				for (String tmpKsType : tmpKeyStores) {
 					System.out.println(tmpKsType);
 				}
 			}
 			if (tmpOpts.isListKeys()) {
-				System.out.println("Keys:");
+				final String[] tmpKeyAliases = KeyStoreUtils.getKeyAliases(tmpOpts);
+				tmpOpts.log("console.keys");
 				//list certificate aliases in the keystore
-				for (String tmpCert : KeyStoreUtils.getCertAliases(
-					tmpOpts.getKsType(),
-					tmpOpts.getKsFile(),
-					tmpOpts.getKsPasswdStr())) {
-
+				for (String tmpCert : tmpKeyAliases) {
 					System.out.println(tmpCert);
 				}
 			}
@@ -86,21 +88,36 @@ public class Signer {
 		}
 	}
 
+	/**
+	 * Sign the files
+	 * @param anOpts
+	 */
 	private static void signFiles(SignerOptionsFromCmdLine anOpts) {
-		for (String tmpFile : anOpts.getFiles()) {
+		final SignerLogic tmpLogic = new SignerLogic(anOpts);
+		for (final String tmpInFile : anOpts.getFiles()) {
+			final File tmpFile = new File(tmpInFile);
+			if (! tmpFile.canRead()) {
+				System.err.println(ResourceProvider.getInstance().get("file.notReadable", new String[] {tmpInFile}));
+				continue;
+			}
+			anOpts.setInFile(tmpInFile);
 			String tmpNameBase, tmpSuffix;
-			//TODO remove directory from name base
-			// add argument for directory
-			if (tmpFile.toUpperCase().endsWith(".pdf")) {
-				tmpSuffix = tmpFile.substring(tmpFile.length() - 4);
-				tmpNameBase = tmpFile.substring(0, tmpFile.length() - 4);
+			if (tmpInFile.toLowerCase().endsWith(".pdf")) {
+				tmpSuffix = tmpInFile.substring(tmpInFile.length() - 4);
+				tmpNameBase = tmpInFile.substring(0, tmpInFile.length() - 4);
 			} else {
 				tmpSuffix = ".pdf";
-				tmpNameBase = tmpFile;
+				tmpNameBase = tmpInFile;
 			}
-			final StringBuilder tmpName = new StringBuilder(anOpts.getOutPrefix());
+			int tmpPos = tmpNameBase.replaceAll("\\\\", "/").lastIndexOf('/');
+			if (tmpPos>-1) {
+				tmpNameBase = tmpNameBase.substring(tmpPos + 1);
+			}
+			final StringBuilder tmpName = new StringBuilder(anOpts.getOutPath());
+			tmpName.append(anOpts.getOutPrefix());
 			tmpName.append(tmpNameBase).append(anOpts.getOutSuffix()).append(tmpSuffix);
 			anOpts.setOutFile(tmpName.toString());
+			tmpLogic.run();
 		}
 
 	}

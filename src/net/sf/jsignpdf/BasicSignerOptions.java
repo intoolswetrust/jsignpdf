@@ -8,7 +8,7 @@ import java.io.PrintWriter;
  */
 public class BasicSignerOptions {
 
-	protected final ResourceProvider res = ResourceProvider.getInstance();
+	protected final static ResourceProvider res = ResourceProvider.getInstance();
 
 	private volatile PrintWriter printWriter;
 	private volatile String ksType;
@@ -167,7 +167,8 @@ public class BasicSignerOptions {
 		return keyPasswd;
 	}
 	public char[] getKeyPasswdX() {
-		return (advanced && keyPasswd.length>0)?keyPasswd:ksPasswd;
+		if (keyPasswd == null || keyPasswd.length==0) return null;
+		return advanced?keyPasswd:ksPasswd;
 	}
 	public String getKeyPasswdStr() {
 		return charArrToStr(keyPasswd);
@@ -260,7 +261,7 @@ public class BasicSignerOptions {
 	}
 
 	public void setCertLevel(String aCertLevel) {
-		setCertLevel(aCertLevel==null?null:CertificationLevel.valueOf(aCertLevel));
+		setCertLevel(aCertLevel==null?null:CertificationLevel.valueOf(aCertLevel.toUpperCase()));
 	}
 
 	public boolean isRightCopy() {
@@ -317,12 +318,12 @@ public class BasicSignerOptions {
 
 	public void setRightPrinting(PrintRight rightPrinting) {
 		if (getRightPrinting()==null) {
-			rightPrinting = PrintRight.DISALLOW_PRINTING;
+			rightPrinting = PrintRight.ALLOW_PRINTING;
 		}
 		this.rightPrinting = rightPrinting;
 	}
 	public void setRightPrinting(String aValue) {
-		setRightPrinting(aValue==null?null:PrintRight.valueOf(aValue));
+		setRightPrinting(aValue==null?null:PrintRight.valueOf(aValue.toUpperCase()));
 	}
 
 	public boolean isVisible() {
@@ -386,7 +387,7 @@ public class BasicSignerOptions {
 
 	public RenderMode getRenderMode() {
 		if (renderMode==null) {
-			renderMode = RenderMode.GRAPHIC_AND_DESCRIPTION;
+			renderMode = RenderMode.DESCRTIPTION_ONLY;
 		}
 		return renderMode;
 	}
@@ -396,7 +397,7 @@ public class BasicSignerOptions {
 	}
 
 	public void setRenderMode(String aValue) {
-		setRenderMode(aValue==null?null:RenderMode.valueOf(aValue));
+		setRenderMode(aValue==null?null:RenderMode.valueOf(aValue.toUpperCase()));
 	}
 
 	public String getL2Text() {

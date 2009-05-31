@@ -129,6 +129,9 @@ public class Constants {
     public static final String ARG_KEY_ALIAS_LONG = "key-alias";
     public static final String ARG_KEY_ALIAS = "ka";
 
+    public static final String ARG_OUTPATH = "d";
+    public static final String ARG_OUTPATH_LONG = "out-directory";
+
     public static final String ARG_OPREFIX = "op";
     public static final String ARG_OPREFIX_LONG = "out-prefix";
 
@@ -143,6 +146,9 @@ public class Constants {
 
     public static final String ARG_APPEND = "a";
     public static final String ARG_APPEND_LONG = "append";
+
+    public static final String ARG_QUIET_LONG = "quiet";
+    public static final String ARG_QUIET = "q";
 
     public static final String ARG_CERT_LEVEL = "cl";
     public static final String ARG_CERT_LEVEL_LONG = "certification-level";
