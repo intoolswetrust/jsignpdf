@@ -34,7 +34,6 @@ public class SignerOptionsFromCmdLine extends BasicSignerOptions {
 	//parse command line using CLI here
 	public void loadCmdLine(final String[] anArgs) throws ParseException {
 		if (anArgs == null) return;
-		setPrintWriter(new PrintWriter(System.out));
 		setAdvanced(true);
 
 		// create the command line parser
@@ -42,12 +41,13 @@ public class SignerOptionsFromCmdLine extends BasicSignerOptions {
 		// parse the command line arguments
 		final CommandLine line = parser.parse(OPTS, anArgs);
 
+		//enable logging if not quiet run
+		if (! line.hasOption(ARG_QUIET)) {
+			setPrintWriter(new PrintWriter(System.out));
+		}
+
 		//the arguments, which are not options or option-values should be the files
 		setFiles(line.getArgs());
-
-		if (line.hasOption(ARG_QUIET)) {
-			setPrintWriter(null);
-		}
 
 		//commands
 		setPrintHelp(line.hasOption(ARG_HELP));
@@ -403,7 +403,7 @@ public class SignerOptionsFromCmdLine extends BasicSignerOptions {
 
 		OPTS.addOption(
 				OptionBuilder
-				.withDescription(res.get("hlp.renderMode"))
+				.withDescription(res.get("hlp.renderMode", getEnumValues(RenderMode.values())))
 				.withLongOpt(ARG_RENDER_MODE)
 				.hasArg()
 				.withArgName("mode")
