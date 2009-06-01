@@ -40,7 +40,6 @@ public class KeyStoreUtils {
 				options.getKsFile(), options.getKsPasswd());
 
 			options.log("console.getAliases");
-//			tmpResult.addAll(Collections.list(tmpKs.aliases()));
 			final Enumeration<String> tmpAliases = tmpKs.aliases();
 			while (tmpAliases.hasMoreElements()) {
 				final String tmpAlias = tmpAliases.nextElement();
