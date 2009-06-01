@@ -162,8 +162,8 @@ public class Constants {
     public static final String ARG_PWD_USER = "upwd";
     public static final String ARG_PWD_USER_LONG = "user-password";
 
-    public static final String ARG_RIGHT_PRINT = "rp";
-    public static final String ARG_RIGHT_PRINT_LONG = "right-print";
+    public static final String ARG_RIGHT_PRINT = "pr";
+    public static final String ARG_RIGHT_PRINT_LONG = "print-right";
 
     public static final String ARG_DISABLE_COPY_LONG = "disable-copy";
     public static final String ARG_DISABLE_ASSEMBLY_LONG = "disable-assembly";
