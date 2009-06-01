@@ -54,7 +54,10 @@ public class SignerLogic implements Runnable {
 			options.log("console.getAliases");
 			String tmpAlias = options.getKeyAliasX();
 			if (tmpAlias==null || tmpAlias.length()==0) {
-				tmpAlias = (String) ks.aliases().nextElement();
+				final String tmpAliases[] = KeyStoreUtils.getKeyAliases(options);
+				if (tmpAliases!=null && tmpAliases.length>0) {
+					tmpAlias = tmpAliases[0];
+				}
 			}
 			options.log("console.getPrivateKey");
 			final PrivateKey key = (PrivateKey) ks.getKey(tmpAlias, options.getKeyPasswdX());
