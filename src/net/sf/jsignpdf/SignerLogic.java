@@ -6,6 +6,7 @@ import java.io.InputStream;
 import java.security.KeyStore;
 import java.security.PrivateKey;
 import java.security.cert.Certificate;
+import java.util.Enumeration;
 
 import com.lowagie.text.Image;
 import com.lowagie.text.Rectangle;
@@ -54,9 +55,13 @@ public class SignerLogic implements Runnable {
 			options.log("console.getAliases");
 			String tmpAlias = options.getKeyAliasX();
 			if (tmpAlias==null || tmpAlias.length()==0) {
-				final String tmpAliases[] = KeyStoreUtils.getKeyAliases(options);
-				if (tmpAliases!=null && tmpAliases.length>0) {
-					tmpAlias = tmpAliases[0];
+				final Enumeration<String> tmpAliases = ks.aliases();
+				while (tmpAliases.hasMoreElements()) {
+					tmpAlias = tmpAliases.nextElement();
+					if (ks.isKeyEntry(tmpAlias)) {
+						break;
+					}
+					tmpAlias = null;
 				}
 			}
 			options.log("console.getPrivateKey");
