@@ -557,8 +557,8 @@ public class SignerOptionsFromCmdLine extends BasicSignerOptions {
 		if (StringUtils.isEmpty(outPath)) {
 			tmpResult = "./";
 		} else {
-			tmpResult = outPath.replaceAll("\\", "/");
-			if (tmpResult.endsWith("/")) {
+			tmpResult = outPath.replaceAll("\\\\", "/");
+			if (! tmpResult.endsWith("/")) {
 				tmpResult = tmpResult + "/";
 			}
 		}

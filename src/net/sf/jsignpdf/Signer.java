@@ -21,7 +21,7 @@ public class Signer {
 		final HelpFormatter formatter = new HelpFormatter();
 		final ResourceProvider res = ResourceProvider.getInstance();
 		formatter.printHelp(80,
-				"JSignPdf.bat ",
+				"JSignPdf ",
 				res.get("hlp.header"),
 				SignerOptionsFromCmdLine.OPTS,
 				res.get("hlp.footer"),
