@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <description xmlns="http://openoffice.org/extensions/description/2006" xmlns:xlink="http://www.w3.org/1999/xlink">
-    <version value="0.7.0"/>
+    <version value="@JSIGNPDF_VERSION@"/>
     <identifier value="net.sf.jsignpdf.JSignPdf"/>
     <!--
     <registration>
@@ -11,3 +11,4 @@
     </registration>
      -->
 </description>
+<!--Created with OpenOffice.org API plug-in for NetBeans Version 2.0.4-->

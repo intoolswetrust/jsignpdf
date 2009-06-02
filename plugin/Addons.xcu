@@ -22,12 +22,6 @@
 				<prop oor:name="Target" oor:type="xs:string">
 					<value>_self</value>
 				</prop>
-<!--
-				<node oor:name="Submenu">
-					<node oor:name="m1" oor:op="replace">
-					</node>
-				</node>
--->
 			</node>
 		</node>
 
