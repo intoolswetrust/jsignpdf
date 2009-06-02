@@ -8,7 +8,7 @@
 	<property name="res.dir" value="${basedir}/res" />
 	<property name="plugin.dir" value="${basedir}/plugin" />
 
-	<property name="dist.doc.dir" value="${dist.dir}/doc" />
+	<property name="dist.doc.dir" value="${dist.dir}/docs" />
 	<property name="bin.dir" value="${build.dir}/bin" />
 	<property name="src.filtered.dir" value="${build.dir}/src" />
 	<property name="bin.plugin.dir" value="${build.dir}/oxt" />
@@ -22,7 +22,7 @@
 	<property file="${user.home}/.build.properties" />
 	<property file="build.properties" />
 
-	<property name="jsignpdf.filename" value="JSignPdf-${jsignpdf.version}" />
+	<property name="jsignpdf.filename" value="JSignPdf" />
 
 	<!-- Default options for compiling -->
 	<property name="compile.deprecation" value="false" />
