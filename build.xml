@@ -60,10 +60,6 @@
 			</fileset>
 			<filterset refid="jsignpdf.filterset"/>
 		</copy>
-		<copy todir="${build.dir}">
-			<fileset dir="others" includes="JSignPdf.iss"/>
-			<filterset refid="jsignpdf.filterset"/>
-		</copy>
 
 		<copy todir="${bin.plugin.dir}">
 			<fileset dir=".">
