@@ -216,6 +216,7 @@
 	</target>
 
 	<target name="installer" depends="oxt,launcher,doc">
+		<echo message="Creating a windows setup" />
 		<exec failonerror="false"
 				executable="${innosetup.dir}\iscc.exe">
 			<arg line="JSignPdf.iss"/>
@@ -225,9 +226,18 @@
 			<arg line="/dMyAppId=JSignPdf"/>
 			<arg line="/dJreInstaller=${jre.installer}"/>
 			<arg line="/dMyAppFilename=${jsignpdf.filename}"/>
+			<arg line="/dDistDir=${dist.dir}"/>
 		</exec>
 	</target>
 
-	<target name="all" depends="installer"/>
+	<target name="zip" depends="oxt,launcher,doc">
+		<echo message="Creating a zip release" />
+
+		<zip destfile="Output/JSignPdf-${jsignpdf.version}.zip">
+			<fileset dir="${build.dir}" includes="${app.dir}/**"/>
+		</zip>
+	</target>
+
+	<target name="all" depends="installer,zip"/>
 
 </project>

@@ -1,5 +1,5 @@
 [Files]
-Source: dist\*; DestDir: {app}; Flags: recursesubdirs; Components: base
+Source: {#DistDir}\*; DestDir: {app}; Flags: recursesubdirs; Components: base
 Source: {#JreInstaller}; DestDir: {tmp}; DestName: java_setup.exe; Flags: deleteafterinstall; Components: java
 
 [Components]
