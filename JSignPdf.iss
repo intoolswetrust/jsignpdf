@@ -1,16 +1,6 @@
-#define MyAppName "JSignPdf"
-#define MyAppVersion "0.7"
-#define MyAppVersionWin "0.7.0.0"
-#define MyAppId "JSignPdf"
-
 [Files]
 Source: dist\*; DestDir: {app}; Flags: recursesubdirs; Components: base
-Source: others\JSignPdf.exe; DestDir: {app}; Components: base
-Source: doc\JSignPdf.pdf; DestDir: {app}\docs; Components: base
-Source: doc\ChangeLog.txt; DestDir: {app}\docs; Components: base
-Source: doc\ReleaseNotes.txt; DestDir: {app}\docs; Components: base
-Source: licenses\*.txt; DestDir: {app}\docs; Components: base
-Source: c:\install\Java & Eclipse\JDK\jre-6u6-windows-i586-p.exe; DestDir: {tmp}; DestName: java_setup.exe; Flags: deleteafterinstall; Components: java
+Source: {#JreInstaller}; DestDir: {tmp}; DestName: java_setup.exe; Flags: deleteafterinstall; Components: java
 
 [Components]
 Name: base; Description: Program files; Flags: fixed; Types: custom compact full
@@ -39,7 +29,7 @@ AppVersion={#MyAppVersion}
 
 [Icons]
 Name: {group}\JSignPdf {#MyAppVersion}; Filename: {app}\JSignPdf.exe; Components: ; WorkingDir: {app}
-Name: {group}\JSignPdf Guide; Filename: {app}\docs\JSignPdf.pdf; Components: 
+Name: {group}\JSignPdf Guide; Filename: {app}\docs\JSignPdf_signed.pdf; Components: 
 Name: {group}\Uninstall {#MyAppName}; Filename: {uninstallexe}; Components: 
 
 [UninstallDelete]

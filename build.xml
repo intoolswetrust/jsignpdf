@@ -1,79 +1,235 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- You may freely edit this file. See commented blocks below for -->
-<!-- some examples of how to customize the build. -->
-<!-- (If you delete it and reopen the project it will be recreated.) -->
-<project name="JSignPdf" default="default" basedir=".">
-    <description>Builds, tests, and runs the project Addin.</description>
-    <import file="nbproject/build-uno-impl.xml"/>
-    <!--
 
-    There exist several targets which are by default empty and which can be
-    used for execution of your tasks. These targets are usually executed
-    before and after some main targets. They are:
+<project name="JSignPdf" default="all" basedir=".">
 
-      -pre-init:                 called before initialization of project properties
-      -post-init:                called after initialization of project properties
-      -pre-compile:              called before javac compilation
-      -post-compile:             called after javac compilation
-      -pre-compile-single:       called before javac compilation of single file
-      -post-compile-single:      called after javac compilation of single file
-      -pre-compile-test:         called before javac compilation of JUnit tests
-      -post-compile-test:        called after javac compilation of JUnit tests
-      -pre-compile-test-single:  called before javac compilation of single JUnit test
-      -post-compile-test-single: called after javac compilation of single JUunit test
-      -pre-jar:                  called before JAR building
-      -post-jar:                 called after JAR building
-      -pre-uno-package:          called before OXT creation
-      -post-uno-package:         called after OXT creation
-      -post-clean:               called after cleaning build products
+	<description>Builds JSignPdf project</description>
 
-    (Targets beginning with '-' are not intended to be called on their own.)
+	<!-- import properties -->
+	<import file="properties.xml"/>
 
-    Example of inserting an obfuscator after compilation could look like this:
-
-        <target name="-post-compile">
-            <obfuscate>
-                <fileset dir="${build.classes.dir}"/>
-            </obfuscate>
-        </target>
-
-    For list of available properties check the imported
-    nbproject/build-impl.xml file.
+	<filterset id="jsignpdf.filterset">
+		<filter token="JSIGNPDF_VERSION" value="${jsignpdf.version}"/>
+		<filter token="JSIGNPDF_FILENAME" value="${jsignpdf.filename}"/>
+	</filterset>
 
 
-    Another way to customize the build is by overriding existing main targets.
-    The targets of interest are:
+	<path id="project.classpath">
+		<path refid="ooo.classpath"/>
 
-      -init-macrodef-javac:     defines macro for javac compilation
-      -init-macrodef-junit:     defines macro for junit execution
-      -init-macrodef-debug:     defines macro for class debugging
-      -init-macrodef-java:      defines macro for class execution
-      -do-jar-with-manifest:    JAR building (if you are using a manifest)
-      -do-jar-without-manifest: JAR building (if you are not using a manifest)
-      run:                      execution of project
-      -javadoc-build:           Javadoc generation
-      test-report:              JUnit report generation
+		<fileset dir="${lib.dir}">
+			<include name="*.jar" />
+		</fileset>
+	</path>
 
-    An example of overriding the target for project execution could look like this:
+	<target name="_check_sf_ready_file">
+		<condition property="sfProjectReady">
+			<available file="${sfProjectArchive}"/>
+		</condition>
+	</target>
+	<target name="_get_sf_archive" depends="_check_sf_ready_file" unless="sfProjectReady">
+		<get src="http://mesh.dl.sourceforge.net/sourceforge/${sfProject}/${sfProjectArchive}"
+			dest="${sfProjectArchive}"/>
+	</target>
 
-        <target name="run" depends="TypeBrowser2-impl.jar">
-            <exec dir="bin" executable="launcher.exe">
-                <arg file="${dist.jar}"/>
-            </exec>
-        </target>
 
-    Notice that the overridden target depends on the jar target and not only on
-    the compile target as the regular run target does. Again, for a list of available
-    properties which you can use, check the target you are overriding in the
-    nbproject/build-impl.xml file.
+	<!-- Clean build - removes directories created during build (except checkout) -->
+	<target name="clean">
+		<echo message="Cleaning build" />
+		<delete dir="${build.dir}"/>
+		<delete dir="${dist.dir}"/>
+	</target>
 
-    -->
+	<!-- Prepare directory structure for the build -->
+	<target name="prepare">
+		<echo message="Preparing directory structure for the build" />
+		<mkdir dir="${bin.dir}"/>
+		<mkdir dir="${src.filtered.dir}"/>
+		<mkdir dir="${dist.dir}"/>
+		<mkdir dir="${dist.doc.dir}"/>
 
-    <target name="-post-jar">
-	    <echo>Adding Main-Class to MANIFEST.MF</echo>
-	    <manifest file="${build.dir}/MANIFEST.MF" mode="update">
-	    	<attribute name="Main-Class" value="${main.class}"/>
-	    </manifest>
-    </target>
+		<echo message="Copying sources and resources with filter" />
+		<copy todir="${src.filtered.dir}">
+			<fileset dir="${src.dir}">
+				<include name="**"/>
+			</fileset>
+			<filterset refid="jsignpdf.filterset"/>
+		</copy>
+		<copy todir="${bin.plugin.dir}">
+			<fileset dir="${plugin.dir}">
+				<include name="**"/>
+			</fileset>
+			<filterset refid="jsignpdf.filterset"/>
+		</copy>
+		<copy todir="${build.dir}">
+			<fileset dir="others" includes="JSignPdf.iss"/>
+			<filterset refid="jsignpdf.filterset"/>
+		</copy>
+
+		<copy todir="${bin.plugin.dir}">
+			<fileset dir=".">
+				<include name="images/**"/>
+				<include name="lib/*.jar"/>
+				<include name="licenses/*.txt"/>
+			</fileset>
+		</copy>
+		<copy todir="${bin.dir}">
+			<fileset dir="${res.dir}">
+				<include name="**"/>
+			</fileset>
+		</copy>
+
+		<copy todir="${dist.dir}">
+			<fileset dir=".">
+				<include name="lib/*.jar"/>
+			</fileset>
+		</copy>
+
+		<copy todir="${dist.doc.dir}">
+			<fileset dir="licenses">
+				<include name="*.txt"/>
+			</fileset>
+			<fileset dir="doc">
+				<include name="*.txt"/>
+			</fileset>
+		</copy>
+	</target>
+
+	<!-- Compile sources -->
+	<target name="compile" depends="prepare">
+		<echo message="Compiling sources" />
+		<javac srcdir="${src.filtered.dir}" nowarn="${compile.nowarn}"
+			destdir="${bin.dir}" debug="${compile.debug}"
+			deprecation="${compile.deprecation}" optimize="${compile.optimize}"
+			source="${compile.source}" target="${compile.target}"
+			classpathref="project.classpath">
+		</javac>
+	</target>
+
+	<!-- Create jar for the project -->
+	<target name="jar" depends="compile">
+		<echo message="Creating JAR file" />
+		<!-- create Class-Path attribute value for MANIFEST.MF -->
+		<pathconvert property="manifest.classpath" pathsep=" ">
+			<path>
+				<fileset dir="lib">
+					<include name="*.jar" />
+				</fileset>
+			</path>
+			<mapper>
+			<chainedmapper>
+				<!-- remove absolute path -->
+				<flattenmapper />
+
+				<!-- add lib/ prefix -->
+				<globmapper from="*" to="lib/*" />
+			</chainedmapper>
+			</mapper>
+		</pathconvert>
+
+		<jar destfile="${dist.dir}/${jsignpdf.filename}.jar">
+			<manifest>
+				<!-- attribute name="Built-By" value="${user.name}"/ -->
+				<attribute name="Main-Class" value="net.sf.jsignpdf.Signer"/>
+				<attribute name="Class-Path" value="${manifest.classpath}" />
+				<attribute name="RegistrationClassName" value="net.sf.jsignpdf.CentralRegistrationClass" />
+				<attribute name="Implementation-Vendor" value="Josef Cacek"/>
+				<attribute name="Implementation-Title" value="JSignPdf"/>
+				<attribute name="Implementation-Version" value="${jsignpdf.version} ${build.timestamp}"/>
+
+				<section name="net/sf/jsignpdf/CentralRegistrationClass.class">
+					<attribute name="RegistrationClasses" value="net.sf.jsignpdf.JSignPdf" />
+				</section>
+			</manifest>
+			<fileset dir="${bin.dir}"/>
+		</jar>
+	</target>
+
+	<target name="oxt" depends="jar">
+		<echo message="Creating OpenOffice.org plugin (oxt)" />
+		<zip destfile="${dist.dir}/${jsignpdf.filename}.oxt">
+			<fileset dir="${bin.plugin.dir}"/>
+			<fileset dir="${dist.dir}" includes="${jsignpdf.filename}.jar"/>
+		</zip>
+	</target>
+
+	<target name="launcher" depends="prepare">
+		<echo message="Creating windows launcher (EXE)" />
+
+		<antcall target="_get_sf_archive">
+			<param name="sfProject" value="${launch4j.project}"/>
+			<param name="sfProjectArchive" value="${launch4j.zip}"/>
+		</antcall>
+		<unzip src="${launch4j.zip}" dest="${build.dir}"/>
+
+		<taskdef name="launch4j"
+			classname="net.sf.launch4j.ant.Launch4jTask"
+			classpath="${build.dir}/${launch4j.dir}/launch4j.jar
+				:${build.dir}/${launch4j.dir}/lib/xstream.jar" />
+
+		<launch4j>
+			<config headerType="gui" outfile="${dist.dir}/JSignPdf.exe"
+					dontWrapJar="true" jarPath="${jsignpdf.filename}.jar"
+					icon="doc/icon/icons.ico">
+				<jre minVersion="1.5.0" maxHeapSize="512"/>
+				<splash file="doc/icon/splash08.bmp"/>
+				<versionInfo fileVersion="${jsignpdf.version}.0"
+					txtFileVersion="JSignPdf launcher v. ${jsignpdf.version}"
+					fileDescription="Adds digital signatures to PDF files"
+					copyright="Josef Cacek"
+					productVersion="${jsignpdf.version}.0"
+					txtProductVersion="Adds digital signatures to PDF files"
+					productName="JSignPdf"
+					internalName="JSignPdf"
+					originalFilename="JSignPdf.exe" />
+			</config>
+		</launch4j>
+	</target>
+
+	<target name="ooo_start">
+		<echo>Opening Open Office</echo>
+		<exec failonerror="false" spawn="true"
+				executable="${ooo.dir}\program\soffice.exe">
+			<arg line="-headless"/>
+			<arg line="-accept='socket,port=8100;urp;'"/>
+		</exec>
+		<echo>Open Office open</echo>
+	</target>
+
+	<target name="doc" depends="jar,ooo_start">
+		<echo message="Converting documentation (odt->pdf)" />
+
+		<antcall target="_get_sf_archive">
+			<param name="sfProject" value="${jodconverter.project}"/>
+			<param name="sfProjectArchive" value="${jodconverter.zip}"/>
+		</antcall>
+		<unzip src="${jodconverter.zip}" dest="${build.dir}"/>
+
+		<java jar="${build.dir}/${jodconverter.dir}/lib/jodconverter-cli-${jodconverter.version}.jar" fork="true">
+			<arg value="doc/JSignPdf.odt"/>
+			<arg value="${dist.doc.dir}/JSignPdf.pdf"/>
+		</java>
+
+		<java jar="${dist.dir}/${jsignpdf.filename}.jar" fork="true">
+			<arg value="-kst"/>
+			<arg value="WINDOWS-MY"/>
+			<arg value="-d"/>
+			<arg value="${dist.doc.dir}"/>
+			<arg value="${dist.doc.dir}/JSignPdf.pdf"/>
+		</java>
+	</target>
+
+	<target name="installer" depends="oxt,launcher,doc">
+		<exec failonerror="false"
+				executable="${innosetup.dir}\iscc.exe">
+			<arg line="JSignPdf.iss"/>
+			<arg line="/dMyAppName=JSignPdf"/>
+			<arg line="/dMyAppVersion=${jsignpdf.version}"/>
+			<arg line="/dMyAppVersionWin=${jsignpdf.version}.0"/>
+			<arg line="/dMyAppId=JSignPdf"/>
+			<arg line="/dJreInstaller=${jre.installer}"/>
+		</exec>
+	</target>
+
+	<target name="all" depends="installer"/>
 
 </project>

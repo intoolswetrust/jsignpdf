@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project>
+
+	<property name="build.dir" value="${basedir}/build" />
+	<property name="dist.dir" value="${basedir}/dist" />
+	<property name="lib.dir" value="${basedir}/lib" />
+	<property name="src.dir" value="${basedir}/src" />
+	<property name="res.dir" value="${basedir}/res" />
+	<property name="plugin.dir" value="${basedir}/plugin" />
+
+	<property name="dist.doc.dir" value="${dist.dir}/doc" />
+	<property name="bin.dir" value="${build.dir}/bin" />
+	<property name="src.filtered.dir" value="${build.dir}/src" />
+	<property name="bin.plugin.dir" value="${build.dir}/oxt" />
+
+	<tstamp>
+		<format property="build.timestamp" pattern="yyyyMMddHHmm"/>
+	</tstamp>
+
+	<!-- Load user overrides -->
+	<property file="${user.home}/.${ant.project.name}-build.properties" />
+	<property file="${user.home}/.build.properties" />
+	<property file="build.properties" />
+
+	<property name="jsignpdf.filename" value="JSignPdf-${jsignpdf.version}" />
+
+	<!-- Default options for compiling -->
+	<property name="compile.deprecation" value="false" />
+	<property name="compile.debug" value="true" />
+	<property name="compile.optimize" value="false" />
+	<property name="compile.nowarn" value="true" />
+	<property name="compile.source" value="1.5" />
+	<property name="compile.target" value="1.5" />
+
+
+	<!-- OpenOffice properties -->
+	<property name="ooo.dir" value="c:/Program Files/OpenOffice.org 3" />
+
+	<path id="ooo.classpath">
+		<fileset dir="${ooo.dir}/URE/java">
+			<include name="*.jar" />
+		</fileset>
+		<fileset dir="${ooo.dir}/Basis/program/classes">
+			<include name="unoil.jar" />
+		</fileset>
+	</path>
+
+	<!-- Launch4j properties -->
+	<property name="launch4j.project" value="launch4j" />
+	<property name="launch4j.version" value="3.0.1" />
+	<property name="launch4j.zip" value="launch4j-${launch4j.version}-win32.zip" />
+	<property name="launch4j.dir" value="launch4j" />
+
+	<!-- JODConverter properties -->
+	<property name="jodconverter.project" value="jodconverter" />
+	<property name="jodconverter.version" value="2.2.2" />
+	<property name="jodconverter.zip" value="jodconverter-${jodconverter.version}.zip" />
+	<property name="jodconverter.dir" value="jodconverter-${jodconverter.version}" />
+
+</project>
