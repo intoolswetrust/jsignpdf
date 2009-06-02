@@ -21,7 +21,7 @@ public class Signer {
 		final HelpFormatter formatter = new HelpFormatter();
 		final ResourceProvider res = ResourceProvider.getInstance();
 		formatter.printHelp(80,
-				"JSignPdf ",
+				"java -jar JSignPdf.jar [file1.pdf [file2.pdf ...]]",
 				res.get("hlp.header"),
 				SignerOptionsFromCmdLine.OPTS,
 				res.get("hlp.footer"),
@@ -78,10 +78,10 @@ public class Signer {
 			}
 		} else {
 			try {
-		        UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-		    } catch (Exception e) {
-		        System.err.println("Can't set Look&Feel.");
-		    }
+				UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+			} catch (Exception e) {
+				System.err.println("Can't set Look&Feel.");
+			}
 			SignPdfForm tmpForm = new SignPdfForm(WindowConstants.EXIT_ON_CLOSE);
 			tmpForm.pack();
 			tmpForm.setVisible(true);
