@@ -1,10 +1,10 @@
-2008-06-02 Josef Cacek
+2009-06-02 Josef Cacek
   * redesign of build process
   * launch4j used to generate exe for Windows
   * splash screen (in exe file)
   * JRE 6u14
 
-2008-05-28 Josef Cacek
+2009-05-28 Josef Cacek
   * command-line support (batch processing)
 
 2008-06-26 Josef Cacek
