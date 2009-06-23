@@ -90,8 +90,9 @@ public class SignerOptionsFromCmdLine extends BasicSignerOptions {
 		setPositionURY(getFloat(line.getParsedOptionValue(ARG_POS_URY), getPositionURY()));
 		setBgImgScale(getFloat(line.getParsedOptionValue(ARG_BG_SCALE), getBgImgScale()));
 		setRenderMode(line.getOptionValue(ARG_RENDER_MODE));
-		setL2Text(line.getOptionValue(ARG_L2_TEXT));
-		setL4Text(line.getOptionValue(ARG_L4_TEXT));
+		setL2Text(line.getOptionValue(ARG_L2_TEXT_LONG));
+		setL2TextFontSize(getFloat(line.getParsedOptionValue(ARG_L2TEXT_FONT_SIZE), getL2TextFontSize()));
+		setL4Text(line.getOptionValue(ARG_L4_TEXT_LONG));
 		setImgPath(line.getOptionValue(ARG_IMG_PATH));
 		setBgImgPath(line.getOptionValue(ARG_BG_PATH));
 
@@ -413,15 +414,24 @@ public class SignerOptionsFromCmdLine extends BasicSignerOptions {
 		OPTS.addOption(
 				OptionBuilder
 				.withDescription(res.get("hlp.l2Text"))
-				.withLongOpt(ARG_L2_TEXT)
+				.withLongOpt(ARG_L2_TEXT_LONG)
 				.hasArg()
 				.withArgName("text")
 				.create()
 		);
 		OPTS.addOption(
 				OptionBuilder
+				.withDescription(res.get("hlp.l2TextFontSize"))
+				.withLongOpt(ARG_L2TEXT_FONT_SIZE_LONG)
+				.hasArg()
+				.withType(Number.class)
+				.withArgName("size")
+				.create(ARG_L2TEXT_FONT_SIZE)
+		);
+		OPTS.addOption(
+				OptionBuilder
 				.withDescription(res.get("hlp.l4Text"))
-				.withLongOpt(ARG_L4_TEXT)
+				.withLongOpt(ARG_L4_TEXT_LONG)
 				.hasArg()
 				.withArgName("text")
 				.create()

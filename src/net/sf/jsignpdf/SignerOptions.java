@@ -92,6 +92,7 @@ public class SignerOptions extends BasicSignerOptions {
 		setBgImgScale(props.getAsFloat(Constants.PROPERTY_VISIBLE_BGSCALE, Constants.DEFVAL_BG_SCALE));
 		setRenderMode(props.getProperty(Constants.PROPERTY_VISIBLE_RENDER));
 		setL2Text(props.getPropNullSensitive(Constants.PROPERTY_VISIBLE_L2TEXT));
+		setL2TextFontSize(props.getAsFloat(Constants.PROPERTY_VISIBLE_L2TEXT_FONT_SIZE, Constants.DEFVAL_L2_FONT_SIZE));
 		setL4Text(props.getPropNullSensitive(Constants.PROPERTY_VISIBLE_L4TEXT));
 		setImgPath(props.getProperty(Constants.PROPERTY_VISIBLE_IMG));
 		setBgImgPath(props.getProperty(Constants.PROPERTY_VISIBLE_BGIMG));
@@ -148,6 +149,7 @@ public class SignerOptions extends BasicSignerOptions {
 		props.setProperty(Constants.PROPERTY_VISIBLE_BGSCALE, getBgImgScale());
 		props.setProperty(Constants.PROPERTY_VISIBLE_RENDER, getRenderMode().name());
 		props.setPropNullSensitive(Constants.PROPERTY_VISIBLE_L2TEXT, getL2Text());
+		props.setProperty(Constants.PROPERTY_VISIBLE_L2TEXT_FONT_SIZE, getL2TextFontSize());
 		props.setPropNullSensitive(Constants.PROPERTY_VISIBLE_L4TEXT, getL4Text());
 		props.setProperty(Constants.PROPERTY_VISIBLE_IMG, getImgPath());
 		props.setProperty(Constants.PROPERTY_VISIBLE_BGIMG, getBgImgPath());

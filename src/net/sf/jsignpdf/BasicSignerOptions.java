@@ -49,6 +49,7 @@ public class BasicSignerOptions {
 	private volatile RenderMode renderMode;
 	private volatile String l2Text;
 	private volatile String l4Text;
+	private volatile float l2TextFontSize = Constants.DEFVAL_L2_FONT_SIZE;
 	private volatile String imgPath;
 	private volatile String bgImgPath;
 
@@ -430,6 +431,23 @@ public class BasicSignerOptions {
 
 	public void setBgImgPath(String bgImgPath) {
 		this.bgImgPath = bgImgPath;
+	}
+
+	/**
+	 * @return the l2TextFontSize
+	 */
+	public float getL2TextFontSize() {
+		if (l2TextFontSize<=0f) {
+			l2TextFontSize = Constants.DEFVAL_L2_FONT_SIZE;
+		}
+		return l2TextFontSize;
+	}
+
+	/**
+	 * @param textFontSize the l2TextFontSize to set
+	 */
+	public void setL2TextFontSize(float textFontSize) {
+		l2TextFontSize = textFontSize;
 	}
 
 }

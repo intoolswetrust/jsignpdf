@@ -30,6 +30,9 @@ public class Constants {
 	 */
 	public static final String RESOURCE_BUNDLE_BASE = "net.sf.jsignpdf.translations.messages";
 
+	public static final String L2TEXT_FONT_PATH = "/net/sf/jsignpdf/fonts/pokrytie.ttf";
+	public static final String L2TEXT_FONT_NAME = "pokrytie.ttf";
+
 	/**
 	 * Property name.
 	 */
@@ -66,6 +69,7 @@ public class Constants {
 	public static final String PROPERTY_VISIBLE_BGSCALE = "visibleSignature.bgScale";
 	public static final String PROPERTY_VISIBLE_RENDER = "visibleSignature.render";
 	public static final String PROPERTY_VISIBLE_L2TEXT = "visibleSignature.l2text";
+	public static final String PROPERTY_VISIBLE_L2TEXT_FONT_SIZE = "visibleSignature.l2textFontSize";
 	public static final String PROPERTY_VISIBLE_L4TEXT = "visibleSignature.l4text";
 	public static final String PROPERTY_VISIBLE_IMG = "visibleSignature.img";
 	public static final String PROPERTY_VISIBLE_BGIMG = "visibleSignature.bgImg";
@@ -97,6 +101,7 @@ public class Constants {
 	public static final float DEFVAL_LLY = 0f;
 	public static final float DEFVAL_URX = 100f;
 	public static final float DEFVAL_URY = 100f;
+	public static final float DEFVAL_L2_FONT_SIZE = 10f;
 	public static final float DEFVAL_BG_SCALE = -1f;
 
 	public static final int EXIT_CODE_PARSE_ERR = -1;
@@ -183,8 +188,12 @@ public class Constants {
 	public static final String ARG_POS_URY = "ury";
 	public static final String ARG_BG_SCALE = "bg-scale";
 	public static final String ARG_RENDER_MODE = "render-mode";
-	public static final String ARG_L2_TEXT = "l2-text";
-	public static final String ARG_L4_TEXT = "l4-text";
+	public static final String ARG_L2_TEXT_LONG = "l2-text";
+
+	public static final String ARG_L2TEXT_FONT_SIZE = "fs";
+	public static final String ARG_L2TEXT_FONT_SIZE_LONG = "font-size";
+
+	public static final String ARG_L4_TEXT_LONG = "l4-text";
 	public static final String ARG_IMG_PATH = "img-path";
 	public static final String ARG_BG_PATH = "bg-path";
 }
