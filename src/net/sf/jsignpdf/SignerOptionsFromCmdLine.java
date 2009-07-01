@@ -421,7 +421,9 @@ public class SignerOptionsFromCmdLine extends BasicSignerOptions {
 		);
 		OPTS.addOption(
 				OptionBuilder
-				.withDescription(res.get("hlp.l2TextFontSize"))
+				.withDescription(
+						res.get("hlp.l2TextFontSize", 
+								new String[] { String.valueOf(Constants.DEFVAL_L2_FONT_SIZE)}))
 				.withLongOpt(ARG_L2TEXT_FONT_SIZE_LONG)
 				.hasArg()
 				.withType(Number.class)

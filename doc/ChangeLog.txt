@@ -1,3 +1,7 @@
+2009-06-25 Josef Cacek
+  * embedded Unicode font for Layer 2 texts in visible signature 
+  * additional option for setting font size in visible signature
+
 2009-06-02 Josef Cacek
   * redesign of build process
   * launch4j used to generate exe for Windows
