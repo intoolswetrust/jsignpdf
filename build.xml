@@ -240,4 +240,20 @@
 
 	<target name="all" depends="installer,zip"/>
 
+	<target name="sources-cvs-export">
+		<echo message="Exporting sources from CVS" />
+		<mkdir dir="${build.dir}/export"/>
+		<cvs cvsroot=":pserver:anonymous@jsignpdf.cvs.sourceforge.net:/cvsroot/jsignpdf"
+			dest="${build.dir}/export">
+		    <commandline>
+		        <argument line="export -r ${jsignpdf.cvs.tag} jsignpdf"/>
+		    </commandline>
+		</cvs>
+		<zip destfile="Output/JSignPdf-${jsignpdf.version}.src.zip">
+			<fileset dir="${build.dir}/export"/>
+		</zip>
+	</target>
+
+	<target name="all-src" depends="all,sources-cvs-export"/>
+	
 </project>
