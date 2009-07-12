@@ -1,3 +1,8 @@
+Version 0.9
+-------------
+  * embedded Unicode font for Layer 2 texts in visible signature (fix for i18n and PDF/A specification) 
+  * additional option for setting font size in visible signature
+  
 Version 0.8
 -------------
   * command line support (batch mode)
