@@ -5,7 +5,7 @@
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="lib" path="lib/bcprov-jdk15-143.jar"/>
 	<classpathentry kind="lib" path="lib/commons-cli-1.2.jar"/>
-	<classpathentry kind="lib" path="lib/iText-2.1.6.jar"/>
+	<classpathentry kind="lib" path="lib/iText-2.1.7.jar"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.USER_LIBRARY/OOo"/>
 	<classpathentry kind="output" path="build/classes"/>
 </classpath>
