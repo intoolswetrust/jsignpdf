@@ -2,6 +2,8 @@ package net.sf.jsignpdf;
 
 import java.io.PrintWriter;
 
+import org.bouncycastle.crypto.CryptoException;
+
 /**
  * Options for PDF signer.
  * @author Josef Cacek
@@ -9,17 +11,21 @@ import java.io.PrintWriter;
 public class BasicSignerOptions {
 
 	protected final static ResourceProvider res = ResourceProvider.getInstance();
+	protected final PropertyProvider props = PropertyProvider.getInstance();
+	protected final JSignEncryptor encryptor = new JSignEncryptor();
 
 	private volatile PrintWriter printWriter;
 	private volatile String ksType;
 	private volatile String ksFile;
 	private volatile char[] ksPasswd;
 	private volatile String keyAlias;
+	private volatile int keyIndex = Constants.DEFVAL_KEY_INDEX;
 	private volatile char[] keyPasswd;
 	private volatile String inFile;
 	private volatile String outFile;
 	private volatile String reason;
 	private volatile String location;
+	private volatile String contact;
 	private volatile SignResultListener listener;
 	private volatile boolean append;
 	private volatile boolean advanced;
@@ -27,6 +33,8 @@ public class BasicSignerOptions {
 	private volatile char[] pdfOwnerPwd;
 	private volatile char[] pdfUserPwd;
 	private volatile CertificationLevel certLevel;
+
+	protected volatile boolean storePasswords;
 
 	//options from rights dialog
 	private volatile PrintRight rightPrinting;
@@ -52,6 +60,149 @@ public class BasicSignerOptions {
 	private volatile float l2TextFontSize = Constants.DEFVAL_L2_FONT_SIZE;
 	private volatile String imgPath;
 	private volatile String bgImgPath;
+
+	//options for timestamps (provided by external TSA)
+	private volatile boolean timestamp;
+	private volatile String tsaUrl;
+	private volatile String tsaUser;
+	private volatile String tsaPasswd;
+
+	//options for timestamps (provided by external TSA)
+	private volatile boolean ocspEnabled;
+
+	/**
+	 * Loads options from PropertyProvider
+	 */
+	public void loadOptions() {
+		setKsType(props.getProperty(Constants.PROPERTY_KSTYPE));
+		setAdvanced(props.getAsBool(Constants.PROPERTY_ADVANCED));
+		setKsFile(props.getProperty(Constants.PROPERTY_KEYSTORE));
+		setKeyAlias(props.getProperty(Constants.PROPERTY_ALIAS));
+		setKeyIndex(props.getAsInt(Constants.PROPERTY_KEY_INDEX, Constants.DEFVAL_KEY_INDEX));
+		setInFile(props.getProperty(Constants.PROPERTY_INPDF));
+		setOutFile(props.getProperty(Constants.PROPERTY_OUTPDF));
+		setReason(props.getProperty(Constants.PROPERTY_REASON));
+		setLocation(props.getProperty(Constants.PROPERTY_LOCATION));
+		setContact(props.getProperty(Constants.PROPERTY_CONTACT));
+		setAppend(props.getAsBool(Constants.PROPERTY_APPEND));
+		setEncrypted(props.getAsBool(Constants.PROPERTY_ENCRYPTED_PDF));
+		setCertLevel(props.getProperty(Constants.PROPERTY_CERT_LEVEL));
+
+		setRightPrinting(props.getProperty(Constants.PROPERTY_RIGHT_PRINT));
+		setRightCopy(props.getAsBool(Constants.PROPERTY_RIGHT_COPY));
+		setRightAssembly(props.getAsBool(Constants.PROPERTY_RIGHT_ASSEMBLY));
+		setRightFillIn(props.getAsBool(Constants.PROPERTY_RIGHT_FILL_IN));
+		setRightScreanReaders(props.getAsBool(Constants.PROPERTY_RIGHT_SCR_READ));
+		setRightModifyAnnotations(props.getAsBool(Constants.PROPERTY_RIGHT_MOD_ANNOT));
+		setRightModifyContents(props.getAsBool(Constants.PROPERTY_RIGHT_MOD_CONT));
+
+		//visible signature options
+		setVisible(props.getAsBool(Constants.PROPERTY_VISIBLE_ENABLED));
+		setPage(props.getAsInt(Constants.PROPERTY_VISIBLE_PAGE, Constants.DEFVAL_PAGE));
+		setPositionLLX(props.getAsFloat(Constants.PROPERTY_VISIBLE_POS_LLX, Constants.DEFVAL_LLX));
+		setPositionLLY(props.getAsFloat(Constants.PROPERTY_VISIBLE_POS_LLY, Constants.DEFVAL_LLY));
+		setPositionURX(props.getAsFloat(Constants.PROPERTY_VISIBLE_POS_URX, Constants.DEFVAL_URX));
+		setPositionURY(props.getAsFloat(Constants.PROPERTY_VISIBLE_POS_URY, Constants.DEFVAL_URY));
+		setBgImgScale(props.getAsFloat(Constants.PROPERTY_VISIBLE_BGSCALE, Constants.DEFVAL_BG_SCALE));
+		setRenderMode(props.getProperty(Constants.PROPERTY_VISIBLE_RENDER));
+		setL2Text(props.getPropNullSensitive(Constants.PROPERTY_VISIBLE_L2TEXT));
+		setL2TextFontSize(props.getAsFloat(Constants.PROPERTY_VISIBLE_L2TEXT_FONT_SIZE, Constants.DEFVAL_L2_FONT_SIZE));
+		setL4Text(props.getPropNullSensitive(Constants.PROPERTY_VISIBLE_L4TEXT));
+		setImgPath(props.getProperty(Constants.PROPERTY_VISIBLE_IMG));
+		setBgImgPath(props.getProperty(Constants.PROPERTY_VISIBLE_BGIMG));
+
+		//TSA
+		setTimestamp(props.getAsBool(Constants.PROPERTY_TSA_ENABLED));
+		setTsaUrl(props.getProperty(Constants.PROPERTY_TSA_URL));
+		setTsaUser(props.getProperty(Constants.PROPERTY_TSA_USER));
+
+		//OCSP
+		setOcspEnabled(props.getAsBool(Constants.PROPERTY_OCSP_ENABLED));
+
+		//passwords
+		storePasswords = props.getAsBool(Constants.PROPERTY_STOREPWD);
+		final String tmpHome = getDecrypted(Constants.EPROPERTY_USERHOME);
+		boolean tmpPasswords = storePasswords &&
+			Constants.USER_HOME!=null &&
+			Constants.USER_HOME.equals(tmpHome);
+		if (tmpPasswords) {
+			setKsPasswd(getDecrypted(Constants.EPROPERTY_KS_PWD));
+			setKeyPasswd(getDecrypted(Constants.EPROPERTY_KEY_PWD));
+			if (isEncrypted()) {
+				setPdfOwnerPwd(getDecrypted(Constants.EPROPERTY_OWNER_PWD));
+				setPdfUserPwd(getDecrypted(Constants.EPROPERTY_USER_PWD));
+			}
+			setTsaPasswd(getDecrypted(Constants.EPROPERTY_TSA_PWD));
+		}
+
+	}
+
+	/**
+	 * Stores options to PropertyProvider
+	 */
+	public void storeOptions() {
+		props.setProperty(Constants.PROPERTY_KSTYPE, getKsType());
+		props.setProperty(Constants.PROPERTY_ADVANCED, isAdvanced());
+		props.setProperty(Constants.PROPERTY_KEYSTORE, getKsFile());
+		props.setProperty(Constants.PROPERTY_ALIAS, getKeyAlias());
+		props.setProperty(Constants.PROPERTY_KEY_INDEX, getKeyIndex());
+		props.setProperty(Constants.PROPERTY_INPDF, getInFile());
+		props.setProperty(Constants.PROPERTY_OUTPDF, getOutFile());
+		props.setProperty(Constants.PROPERTY_REASON, getReason());
+		props.setProperty(Constants.PROPERTY_LOCATION, getLocation());
+		props.setProperty(Constants.PROPERTY_CONTACT, getContact());
+		props.setProperty(Constants.PROPERTY_APPEND, isAppend());
+		props.setProperty(Constants.PROPERTY_ENCRYPTED_PDF, isEncrypted());
+		props.setProperty(Constants.PROPERTY_CERT_LEVEL, getCertLevel().name());
+
+		props.setProperty(Constants.PROPERTY_RIGHT_PRINT, getRightPrinting().name());
+		props.setProperty(Constants.PROPERTY_RIGHT_COPY, isRightCopy());
+		props.setProperty(Constants.PROPERTY_RIGHT_ASSEMBLY, isRightAssembly());
+		props.setProperty(Constants.PROPERTY_RIGHT_FILL_IN, isRightFillIn());
+		props.setProperty(Constants.PROPERTY_RIGHT_SCR_READ, isRightScreanReaders());
+		props.setProperty(Constants.PROPERTY_RIGHT_MOD_ANNOT, isRightModifyAnnotations());
+		props.setProperty(Constants.PROPERTY_RIGHT_MOD_CONT, isRightModifyContents());
+
+		//visible signature options
+		props.setProperty(Constants.PROPERTY_VISIBLE_ENABLED, isVisible());
+		props.setProperty(Constants.PROPERTY_VISIBLE_PAGE, getPage());
+		props.setProperty(Constants.PROPERTY_VISIBLE_POS_LLX, getPositionLLX());
+		props.setProperty(Constants.PROPERTY_VISIBLE_POS_LLY, getPositionLLY());
+		props.setProperty(Constants.PROPERTY_VISIBLE_POS_URX, getPositionURX());
+		props.setProperty(Constants.PROPERTY_VISIBLE_POS_URY, getPositionURY());
+		props.setProperty(Constants.PROPERTY_VISIBLE_BGSCALE, getBgImgScale());
+		props.setProperty(Constants.PROPERTY_VISIBLE_RENDER, getRenderMode().name());
+		props.setPropNullSensitive(Constants.PROPERTY_VISIBLE_L2TEXT, getL2Text());
+		props.setProperty(Constants.PROPERTY_VISIBLE_L2TEXT_FONT_SIZE, getL2TextFontSize());
+		props.setPropNullSensitive(Constants.PROPERTY_VISIBLE_L4TEXT, getL4Text());
+		props.setProperty(Constants.PROPERTY_VISIBLE_IMG, getImgPath());
+		props.setProperty(Constants.PROPERTY_VISIBLE_BGIMG, getBgImgPath());
+
+		props.setProperty(Constants.PROPERTY_TSA_ENABLED, isTimestamp());
+		props.setProperty(Constants.PROPERTY_TSA_URL, getTsaUrl());
+		props.setProperty(Constants.PROPERTY_TSA_USER, getTsaUser());
+		props.setProperty(Constants.PROPERTY_OCSP_ENABLED, isOcspEnabled());
+
+		props.setProperty(Constants.PROPERTY_STOREPWD, isStorePasswords());
+		setEncrypted(Constants.EPROPERTY_USERHOME, Constants.USER_HOME);
+		if (isStorePasswords()) {
+			setEncrypted(Constants.EPROPERTY_KS_PWD, new String(getKsPasswd()));
+			setEncrypted(Constants.EPROPERTY_KEY_PWD, new String(getKeyPasswd()));
+			if (isEncrypted()) {
+				setEncrypted(Constants.EPROPERTY_OWNER_PWD, new String(getPdfOwnerPwd()));
+				setEncrypted(Constants.EPROPERTY_USER_PWD, new String(getPdfUserPwd()));
+			}
+			setEncrypted(Constants.EPROPERTY_TSA_PWD, getTsaPasswd());
+		} else {
+			props.removeProperty(Constants.EPROPERTY_KS_PWD);
+			props.removeProperty(Constants.EPROPERTY_KEY_PWD);
+			props.removeProperty(Constants.EPROPERTY_OWNER_PWD);
+			props.removeProperty(Constants.EPROPERTY_USER_PWD);
+			props.removeProperty(Constants.EPROPERTY_TSA_PWD);
+		}
+
+		props.saveDefault();
+	}
 
 
 	/**
@@ -190,6 +341,19 @@ public class BasicSignerOptions {
 	public void setKeyAlias(String keyAlias) {
 		this.keyAlias = keyAlias;
 	}
+
+	public int getKeyIndex() {
+		return keyIndex;
+	}
+	public int getKeyIndexX() {
+		return advanced?keyIndex:Constants.DEFVAL_KEY_INDEX;
+	}
+	public void setKeyIndex(int anIndex) {
+		this.keyIndex = anIndex;
+		if (keyIndex<0) keyIndex = Constants.DEFVAL_KEY_INDEX;
+	}
+
+
 	public boolean isAppend() {
 		return append;
 	}
@@ -448,6 +612,136 @@ public class BasicSignerOptions {
 	 */
 	public void setL2TextFontSize(float textFontSize) {
 		l2TextFontSize = textFontSize;
+	}
+
+	/**
+	 * Returns decrypted property
+	 * @param aProperty
+	 * @return
+	 */
+	protected String getDecrypted(String aProperty) {
+		try {
+			return encryptor.decryptString(props.getProperty(aProperty));
+		} catch (CryptoException e) {
+			e.printStackTrace();
+		}
+		return null;
+	}
+
+	/**
+	 * Sets encrypted property
+	 * @param aProperty
+	 * @return
+	 */
+	protected void setEncrypted(final String aProperty, final String aValue) {
+		try {
+			props.setProperty(aProperty,
+					encryptor.encryptString(aValue));
+		} catch (CryptoException e) {
+			e.printStackTrace();
+			props.removeProperty(aProperty);
+		}
+	}
+
+	/**
+	 * @return the timestamp
+	 */
+	public boolean isTimestamp() {
+		return timestamp;
+	}
+
+	public boolean isTimestampX() {
+		return advanced && timestamp;
+	}
+
+	/**
+	 * @param timestamp the timestamp to set
+	 */
+	public void setTimestamp(boolean timestamp) {
+		this.timestamp = timestamp;
+	}
+
+	/**
+	 * @return the tsaUrl
+	 */
+	public String getTsaUrl() {
+		return tsaUrl;
+	}
+
+	/**
+	 * @param tsaUrl the tsaUrl to set
+	 */
+	public void setTsaUrl(String tsaUrl) {
+		this.tsaUrl = tsaUrl;
+	}
+
+	/**
+	 * @return the tsaUser
+	 */
+	public String getTsaUser() {
+		return tsaUser;
+	}
+
+	/**
+	 * @param tsaUser the tsaUser to set
+	 */
+	public void setTsaUser(String tsaUser) {
+		this.tsaUser = tsaUser;
+	}
+
+	/**
+	 * @return the tsaPasswd
+	 */
+	public String getTsaPasswd() {
+		return tsaPasswd;
+	}
+
+	/**
+	 * @param tsaPasswd the tsaPasswd to set
+	 */
+	public void setTsaPasswd(String tsaPasswd) {
+		this.tsaPasswd = tsaPasswd;
+	}
+
+	/**
+	 * @return the ocspEnabled
+	 */
+	public boolean isOcspEnabled() {
+		return ocspEnabled;
+	}
+
+	public boolean isOcspEnabledX() {
+		return advanced && ocspEnabled;
+	}
+
+	/**
+	 * @param ocspEnabled the ocspEnabled to set
+	 */
+	public void setOcspEnabled(boolean ocspEnabled) {
+		this.ocspEnabled = ocspEnabled;
+	}
+
+
+	public boolean isStorePasswords() {
+		return storePasswords;
+	}
+
+	public void setStorePasswords(boolean storePasswords) {
+		this.storePasswords = storePasswords;
+	}
+
+	/**
+	 * @return the contact
+	 */
+	public String getContact() {
+		return contact;
+	}
+
+	/**
+	 * @param contact the contact to set
+	 */
+	public void setContact(String contact) {
+		this.contact = contact;
 	}
 
 }

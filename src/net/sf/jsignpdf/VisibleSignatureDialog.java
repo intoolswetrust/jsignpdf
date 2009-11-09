@@ -17,7 +17,7 @@ public class VisibleSignatureDialog extends javax.swing.JDialog {
 
 	protected final ResourceProvider res = ResourceProvider.getInstance();
 
-	private SignerOptions options;
+	private BasicSignerOptions options;
 	private SignerFileChooser fc;
 	private PdfExtraInfo extraInfo;
 
@@ -43,7 +43,7 @@ public class VisibleSignatureDialog extends javax.swing.JDialog {
 
 	/** Creates new form VisibleSignatureDialog */
 	public VisibleSignatureDialog(java.awt.Frame parent, boolean modal,
-		final SignerOptions anOptions, final SignerFileChooser aFC) {
+		final BasicSignerOptions anOptions, final SignerFileChooser aFC) {
 		super(parent, modal);
 		options = anOptions;
 		fc = aFC;
@@ -440,11 +440,6 @@ public class VisibleSignatureDialog extends javax.swing.JDialog {
 
         tfL4Text.setMinimumSize(new java.awt.Dimension(200, 20));
         tfL4Text.setPreferredSize(new java.awt.Dimension(200, 20));
-        tfL4Text.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                tfL4TextActionPerformed(evt);
-            }
-        });
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
         gridBagConstraints.gridy = 10;
@@ -649,10 +644,6 @@ public class VisibleSignatureDialog extends javax.swing.JDialog {
 	private void cbDisplayModeActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cbDisplayModeActionPerformed
 		switchImage();
 	}//GEN-LAST:event_cbDisplayModeActionPerformed
-
-	private void tfL4TextActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_tfL4TextActionPerformed
-		// TODO add your handling code here:
-	}//GEN-LAST:event_tfL4TextActionPerformed
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnBgImgPathBrowse;

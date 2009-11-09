@@ -9,12 +9,12 @@ import com.lowagie.text.pdf.PdfReader;
  */
 public class PdfExtraInfo {
 
-	private SignerOptions options;
+	private BasicSignerOptions options;
 
 	/**
 	 * @param anOptions
 	 */
-	public PdfExtraInfo(SignerOptions anOptions) {
+	public PdfExtraInfo(BasicSignerOptions anOptions) {
 		options = anOptions;
 	}
 

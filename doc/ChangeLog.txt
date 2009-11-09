@@ -1,9 +1,19 @@
+2009-11-07 Josef Cacek
+  * Bouncy castle libraries upgrade (143->144)
+  * Contact field added
+  * TSA & OCSP support
+  * SignerOptions class removed - BasicSignerOptions used instead
+  * workaround for non-unique key aliases in WINDOWS-MY keystore
+  * improvements in command-line version:
+	- possibility to load default property file (-lp parameter)
+	- selecting key by index (e.g. because of national character in key alias, -ki parameter)
+
 2009-07-12 Josef Cacek
-  * build.xml: exporting sources from CVS  
+  * build.xml: exporting sources from CVS
   * iText upgrade (2.1.6->2.1.7)
-  
+
 2009-06-25 Josef Cacek
-  * embedded Unicode font for Layer 2 texts in visible signature 
+  * embedded Unicode font for Layer 2 texts in visible signature
   * additional option for setting font size in visible signature
 
 2009-06-02 Josef Cacek

@@ -1,5 +1,7 @@
 package net.sf.jsignpdf;
 
+import static net.sf.jsignpdf.Constants.*;
+
 import java.io.PrintWriter;
 
 import org.apache.commons.cli.CommandLine;
@@ -8,8 +10,6 @@ import org.apache.commons.cli.OptionBuilder;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.cli.PosixParser;
-
-import static net.sf.jsignpdf.Constants.*;
 
 /**
  * This class parses and holds options from command line
@@ -34,12 +34,17 @@ public class SignerOptionsFromCmdLine extends BasicSignerOptions {
 	//parse command line using CLI here
 	public void loadCmdLine(final String[] anArgs) throws ParseException {
 		if (anArgs == null) return;
-		setAdvanced(true);
 
 		// create the command line parser
 		final CommandLineParser parser = new PosixParser();
 		// parse the command line arguments
 		final CommandLine line = parser.parse(OPTS, anArgs);
+
+		if (line.hasOption(ARG_LOADPROPS)) {
+			loadOptions();
+		} else {
+			setAdvanced(true);
+		}
 
 		//enable logging if not quiet run
 		if (! line.hasOption(ARG_QUIET)) {
@@ -56,45 +61,46 @@ public class SignerOptionsFromCmdLine extends BasicSignerOptions {
 		setListKeys(line.hasOption(ARG_LIST_KEYS));
 
 		//basic options
-		setKsType(line.getOptionValue(ARG_KS_TYPE));
-		setKsFile(line.getOptionValue(ARG_KS_FILE));
-		setKsPasswd(line.getOptionValue(ARG_KS_PWD));
-		setKeyAlias(line.getOptionValue(ARG_KEY_ALIAS));
-		setKeyPasswd(line.getOptionValue(ARG_KEY_PWD));
-		setOutPath(line.getOptionValue(ARG_OUTPATH));
-		setOutPrefix(line.getOptionValue(ARG_OPREFIX));
-		setOutSuffix(line.getOptionValue(ARG_OSUFFIX));
-		setReason(line.getOptionValue(ARG_REASON));
-		setLocation(line.getOptionValue(ARG_LOCATION));
-		setAppend(line.hasOption(ARG_APPEND));
-		setCertLevel(line.getOptionValue(ARG_CERT_LEVEL));
+		if (line.hasOption(ARG_KS_TYPE)) setKsType(line.getOptionValue(ARG_KS_TYPE));
+		if (line.hasOption(ARG_KS_FILE)) setKsFile(line.getOptionValue(ARG_KS_FILE));
+		if (line.hasOption(ARG_KS_PWD)) setKsPasswd(line.getOptionValue(ARG_KS_PWD));
+		if (line.hasOption(ARG_KEY_ALIAS)) setKeyAlias(line.getOptionValue(ARG_KEY_ALIAS));
+		if (line.hasOption(ARG_KEY_INDEX)) setKeyIndex(getInt(line.getParsedOptionValue(ARG_KEY_INDEX), getKeyIndex()));
+		if (line.hasOption(ARG_KEY_PWD)) setKeyPasswd(line.getOptionValue(ARG_KEY_PWD));
+		if (line.hasOption(ARG_OUTPATH)) setOutPath(line.getOptionValue(ARG_OUTPATH));
+		if (line.hasOption(ARG_OPREFIX)) setOutPrefix(line.getOptionValue(ARG_OPREFIX));
+		if (line.hasOption(ARG_OSUFFIX)) setOutSuffix(line.getOptionValue(ARG_OSUFFIX));
+		if (line.hasOption(ARG_REASON)) setReason(line.getOptionValue(ARG_REASON));
+		if (line.hasOption(ARG_LOCATION)) setLocation(line.getOptionValue(ARG_LOCATION));
+		if (line.hasOption(ARG_APPEND)) setAppend(line.hasOption(ARG_APPEND));
+		if (line.hasOption(ARG_CERT_LEVEL)) setCertLevel(line.getOptionValue(ARG_CERT_LEVEL));
 
 		//encryption
-		setEncrypted(line.hasOption(ARG_ENCRYPTED));
-		setPdfOwnerPwd(line.getOptionValue(ARG_PWD_OWNER));
-		setPdfUserPwd(line.getOptionValue(ARG_PWD_USER));
-		setRightPrinting(line.getOptionValue(ARG_RIGHT_PRINT));
-		setRightCopy(! line.hasOption(ARG_DISABLE_COPY_LONG));
-		setRightAssembly(! line.hasOption(ARG_DISABLE_ASSEMBLY_LONG));
-		setRightFillIn(! line.hasOption(ARG_DISABLE_FILL_LONG));
-		setRightScreanReaders(! line.hasOption(ARG_DISABLE_SCREEN_READERS_LONG));
-		setRightModifyAnnotations(! line.hasOption(ARG_DISABLE_MODIFY_ANNOT_LONG));
-		setRightModifyContents(! line.hasOption(ARG_DISABLE_MODIFY_CONTENT_LONG));
+		if (line.hasOption(ARG_ENCRYPTED)) setEncrypted(true);
+		if (line.hasOption(ARG_PWD_OWNER)) setPdfOwnerPwd(line.getOptionValue(ARG_PWD_OWNER));
+		if (line.hasOption(ARG_PWD_USER)) setPdfUserPwd(line.getOptionValue(ARG_PWD_USER));
+		if (line.hasOption(ARG_RIGHT_PRINT)) setRightPrinting(line.getOptionValue(ARG_RIGHT_PRINT));
+		if (line.hasOption(ARG_DISABLE_COPY_LONG)) setRightCopy(false);
+		if (line.hasOption(ARG_DISABLE_ASSEMBLY_LONG)) setRightAssembly(false);
+		if (line.hasOption(ARG_DISABLE_FILL_LONG)) setRightFillIn(false);
+		if (line.hasOption(ARG_DISABLE_SCREEN_READERS_LONG)) setRightScreanReaders(false);
+		if (line.hasOption(ARG_DISABLE_MODIFY_ANNOT_LONG)) setRightModifyAnnotations(false);
+		if (line.hasOption(ARG_DISABLE_MODIFY_CONTENT_LONG)) setRightModifyContents(false);
 
 		//visible signature
-		setVisible(line.hasOption(ARG_VISIBLE));
-		setPage(getInt(line.getParsedOptionValue(ARG_PAGE), getPage()));
-		setPositionLLX(getFloat(line.getParsedOptionValue(ARG_POS_LLX), getPositionLLX()));
-		setPositionLLY(getFloat(line.getParsedOptionValue(ARG_POS_LLY), getPositionLLY()));
-		setPositionURX(getFloat(line.getParsedOptionValue(ARG_POS_URX), getPositionURX()));
-		setPositionURY(getFloat(line.getParsedOptionValue(ARG_POS_URY), getPositionURY()));
-		setBgImgScale(getFloat(line.getParsedOptionValue(ARG_BG_SCALE), getBgImgScale()));
-		setRenderMode(line.getOptionValue(ARG_RENDER_MODE));
-		setL2Text(line.getOptionValue(ARG_L2_TEXT_LONG));
-		setL2TextFontSize(getFloat(line.getParsedOptionValue(ARG_L2TEXT_FONT_SIZE), getL2TextFontSize()));
-		setL4Text(line.getOptionValue(ARG_L4_TEXT_LONG));
-		setImgPath(line.getOptionValue(ARG_IMG_PATH));
-		setBgImgPath(line.getOptionValue(ARG_BG_PATH));
+		if (line.hasOption(ARG_VISIBLE)) setVisible(true);
+		if (line.hasOption(ARG_PAGE)) setPage(getInt(line.getParsedOptionValue(ARG_PAGE), getPage()));
+		if (line.hasOption(ARG_POS_LLX)) setPositionLLX(getFloat(line.getParsedOptionValue(ARG_POS_LLX), getPositionLLX()));
+		if (line.hasOption(ARG_POS_LLY)) setPositionLLY(getFloat(line.getParsedOptionValue(ARG_POS_LLY), getPositionLLY()));
+		if (line.hasOption(ARG_POS_URX)) setPositionURX(getFloat(line.getParsedOptionValue(ARG_POS_URX), getPositionURX()));
+		if (line.hasOption(ARG_POS_URY)) setPositionURY(getFloat(line.getParsedOptionValue(ARG_POS_URY), getPositionURY()));
+		if (line.hasOption(ARG_BG_SCALE)) setBgImgScale(getFloat(line.getParsedOptionValue(ARG_BG_SCALE), getBgImgScale()));
+		if (line.hasOption(ARG_RENDER_MODE)) setRenderMode(line.getOptionValue(ARG_RENDER_MODE));
+		if (line.hasOption(ARG_L2_TEXT_LONG)) setL2Text(line.getOptionValue(ARG_L2_TEXT_LONG));
+		if (line.hasOption(ARG_L2TEXT_FONT_SIZE)) setL2TextFontSize(getFloat(line.getParsedOptionValue(ARG_L2TEXT_FONT_SIZE), getL2TextFontSize()));
+		if (line.hasOption(ARG_L4_TEXT_LONG)) setL4Text(line.getOptionValue(ARG_L4_TEXT_LONG));
+		if (line.hasOption(ARG_IMG_PATH)) setImgPath(line.getOptionValue(ARG_IMG_PATH));
+		if (line.hasOption(ARG_BG_PATH)) setBgImgPath(line.getOptionValue(ARG_BG_PATH));
 
 		if (StringUtils.isEmpty(outPrefix) && StringUtils.isEmpty(outSuffix)) {
 			outSuffix = "_signed";
@@ -146,6 +152,12 @@ public class SignerOptionsFromCmdLine extends BasicSignerOptions {
 		);
 		OPTS.addOption(
 				OptionBuilder
+				.withLongOpt(ARG_LOADPROPS_LONG)
+				.withDescription(res.get("hlp.loadProperties"))
+				.create(ARG_LOADPROPS)
+		);
+		OPTS.addOption(
+				OptionBuilder
 				.withLongOpt(ARG_LIST_KS_TYPES_LONG)
 				.withDescription(res.get("hlp.listKsTypes"))
 				.create(ARG_LIST_KS_TYPES)
@@ -189,6 +201,15 @@ public class SignerOptionsFromCmdLine extends BasicSignerOptions {
 				.hasArg()
 				.withArgName("alias")
 				.create(ARG_KEY_ALIAS)
+		);
+		OPTS.addOption(
+				OptionBuilder
+				.withLongOpt(ARG_KEY_INDEX_LONG)
+				.withDescription(res.get("hlp.keyIndex"))
+				.hasArg()
+				.withType(Number.class)
+				.withArgName("index")
+				.create(ARG_KEY_INDEX)
 		);
 		OPTS.addOption(
 				OptionBuilder
@@ -422,7 +443,7 @@ public class SignerOptionsFromCmdLine extends BasicSignerOptions {
 		OPTS.addOption(
 				OptionBuilder
 				.withDescription(
-						res.get("hlp.l2TextFontSize", 
+						res.get("hlp.l2TextFontSize",
 								new String[] { String.valueOf(Constants.DEFVAL_L2_FONT_SIZE)}))
 				.withLongOpt(ARG_L2TEXT_FONT_SIZE_LONG)
 				.hasArg()

@@ -64,7 +64,8 @@ public class Signer {
 					System.out.println(tmpCert);
 				}
 			}
-			if (tmpOpts.getFiles()!=null && tmpOpts.getFiles().length>0) {
+			if ((tmpOpts.getFiles()!=null && tmpOpts.getFiles().length>0) ||
+					(!StringUtils.isEmpty(tmpOpts.getInFile()) && !StringUtils.isEmpty(tmpOpts.getOutFile()))) {
 				signFiles(tmpOpts);
 			} else {
 				final boolean tmpCommand =
@@ -94,6 +95,11 @@ public class Signer {
 	 */
 	private static void signFiles(SignerOptionsFromCmdLine anOpts) {
 		final SignerLogic tmpLogic = new SignerLogic(anOpts);
+		if (anOpts.getFiles()==null || anOpts.getFiles().length==0) {
+			//we've used -lp (loadproperties) parameter
+			tmpLogic.run();
+			return;
+		}
 		for (final String tmpInFile : anOpts.getFiles()) {
 			final File tmpFile = new File(tmpInFile);
 			if (! tmpFile.canRead()) {

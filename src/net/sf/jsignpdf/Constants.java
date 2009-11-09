@@ -45,6 +45,7 @@ public class Constants {
 	public static final String PROPERTY_KSTYPE = "keystore.type";
 	public static final String PROPERTY_ADVANCED = "view.advanced";
 	public static final String PROPERTY_ALIAS = "keystore.alias";
+	public static final String PROPERTY_KEY_INDEX = "keystore.keyIndex";
 	public static final String PROPERTY_STOREPWD = "store.passwords";
 
 	public static final String PROPERTY_APPEND = "signature.append";
@@ -74,6 +75,13 @@ public class Constants {
 	public static final String PROPERTY_VISIBLE_IMG = "visibleSignature.img";
 	public static final String PROPERTY_VISIBLE_BGIMG = "visibleSignature.bgImg";
 
+	public static final String PROPERTY_TSA_ENABLED = "tsa.enabled";
+	public static final String PROPERTY_TSA_URL = "tsa.url";
+	public static final String PROPERTY_TSA_USER = "tsa.user";
+	public static final String EPROPERTY_TSA_PWD = "enc.tsa.passwd";
+
+	public static final String PROPERTY_OCSP_ENABLED = "ocsp.enabled";
+
 	/**
 	 * Property name.
 	 */
@@ -95,7 +103,10 @@ public class Constants {
 	 */
 	public static final String PROPERTY_LOCATION = "signature.location";
 
+	public static final String PROPERTY_CONTACT = "signature.contact";
 
+
+	public static final int DEFVAL_KEY_INDEX = 0;
 	public static final int DEFVAL_PAGE = 1;
 	public static final float DEFVAL_LLX = 0f;
 	public static final float DEFVAL_LLY = 0f;
@@ -112,6 +123,9 @@ public class Constants {
 
 	public static final String ARG_VERSION_LONG = "version";
 	public static final String ARG_VERSION = "v";
+
+	public static final String ARG_LOADPROPS_LONG = "load-properties";
+	public static final String ARG_LOADPROPS = "lp";
 
 	public static final String ARG_LIST_KS_TYPES = "lkt";
 	public static final String ARG_LIST_KS_TYPES_LONG = "list-keystore-types";
@@ -133,6 +147,9 @@ public class Constants {
 
 	public static final String ARG_KEY_ALIAS_LONG = "key-alias";
 	public static final String ARG_KEY_ALIAS = "ka";
+
+	public static final String ARG_KEY_INDEX_LONG = "key-index";
+	public static final String ARG_KEY_INDEX = "ki";
 
 	public static final String ARG_OUTPATH = "d";
 	public static final String ARG_OUTPATH_LONG = "out-directory";

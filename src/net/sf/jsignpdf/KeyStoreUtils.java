@@ -3,9 +3,19 @@ package net.sf.jsignpdf;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
+import java.lang.reflect.Field;
 import java.security.KeyStore;
+import java.security.KeyStoreException;
+import java.security.KeyStoreSpi;
+import java.security.NoSuchAlgorithmException;
+import java.security.PrivateKey;
+import java.security.UnrecoverableKeyException;
+import java.security.cert.Certificate;
+import java.security.cert.X509Certificate;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Enumeration;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -33,27 +43,67 @@ public class KeyStoreUtils {
 		if (options==null) {
 			throw new NullPointerException("Options are empty.");
 		}
-		final List<String> tmpResult = new ArrayList<String>();
-		try {
-			options.log("console.getKeystoreType", options.getKsType());
-			final KeyStore tmpKs = loadKeyStore(options.getKsType(),
+		options.log("console.getKeystoreType", options.getKsType());
+		final KeyStore tmpKs = loadKeyStore(options.getKsType(),
+				options.getKsFile(), options.getKsPasswd());
+		final List<String> tmpResult = getAliasesList(tmpKs, options);
+		return tmpResult.toArray(new String[tmpResult.size()]);
+	}
+
+	private static List<String> getAliasesList(KeyStore aKs, final BasicSignerOptions options) {
+			if (options==null) {
+				throw new NullPointerException("Options are empty.");
+			}
+			final List<String> tmpResult = new ArrayList<String>();
+			try {
+
+				options.log("console.getAliases");
+				final Enumeration<String> tmpAliases = aKs.aliases();
+				while (tmpAliases.hasMoreElements()) {
+					final String tmpAlias = tmpAliases.nextElement();
+					if (aKs.isKeyEntry(tmpAlias)) {
+						tmpResult.add(tmpAlias);
+					}
+				}
+				options.fireSignerFinishedEvent(true);
+			} catch (Exception e) {
+				options.log("console.exception");
+				e.printStackTrace(options.getPrintWriter());
+				options.fireSignerFinishedEvent(false);
+			}
+			return tmpResult;
+	}
+
+	/**
+	 * Returns alias defined (either as a string or as an key index) in options
+	 * @param options
+	 * @return key alias
+	 */
+	public static String getKeyAlias(final BasicSignerOptions options) {
+		final KeyStore tmpKs = loadKeyStore(options.getKsType(),
 				options.getKsFile(), options.getKsPasswd());
 
-			options.log("console.getAliases");
-			final Enumeration<String> tmpAliases = tmpKs.aliases();
-			while (tmpAliases.hasMoreElements()) {
-				final String tmpAlias = tmpAliases.nextElement();
-				if (tmpKs.isKeyEntry(tmpAlias)) {
-					tmpResult.add(tmpAlias);
-				}
-			}
-			options.fireSignerFinishedEvent(true);
-		} catch (Exception e) {
-			options.log("console.exception");
-			e.printStackTrace(options.getPrintWriter());
-			options.fireSignerFinishedEvent(false);
+		String tmpResult = getKeyAliasInternal(options, tmpKs);
+		return tmpResult;
+	}
+
+	private static String getKeyAliasInternal(final BasicSignerOptions options,
+			final KeyStore tmpKs) {
+		String tmpResult = null;
+		final List<String> tmpList = getAliasesList(tmpKs, options);
+		final String tmpAlias = options.getKeyAliasX();
+		final int tmpIndex = options.getKeyIndexX();
+
+		if (tmpAlias!=null && tmpList.contains(tmpAlias)) {
+			tmpResult = tmpAlias;
+		} else if (tmpList.size()>tmpIndex && tmpIndex>=0) {
+			tmpResult = tmpList.get(tmpIndex);
+		} else if (tmpList.size()>0) {
+			//fallback - return the first key
+			tmpResult = tmpList.get(0);
 		}
-		return tmpResult.toArray(new String[tmpResult.size()]);
+		options.log("console.usedKeyAlias",tmpResult);
+		return tmpResult;
 	}
 
 	/**
@@ -131,6 +181,7 @@ public class KeyStoreUtils {
 				tmpIS = new FileInputStream(aKsFile);
 			}
 			tmpKs.load(tmpIS, aKsPasswd);
+			fixAliases(tmpKs);
 		} catch (Exception e) {
 			e.printStackTrace();
 			return null;
@@ -165,6 +216,81 @@ public class KeyStoreUtils {
 			return null;
 		} finally {
 			try{if (fin != null) {fin.close();}}catch(Exception ex){}
+		}
+	}
+
+	/**
+	 * Returns PrivateKey and its certificate chain
+	 * @param options
+	 * @return
+	 * @throws NoSuchAlgorithmException
+	 * @throws KeyStoreException
+	 * @throws UnrecoverableKeyException
+	 */
+	public static PrivateKeyInfo getPkInfo(BasicSignerOptions options) throws UnrecoverableKeyException, KeyStoreException, NoSuchAlgorithmException {
+		final KeyStore tmpKs = loadKeyStore(options.getKsType(),
+				options.getKsFile(), options.getKsPasswd());
+
+		String tmpAlias = getKeyAliasInternal(options, tmpKs);
+		options.log("console.getPrivateKey");
+		final PrivateKey tmpPk = (PrivateKey) tmpKs.getKey(tmpAlias, options.getKeyPasswdX());
+		options.log("console.getCertChain");
+		final Certificate[] tmpChain = tmpKs.getCertificateChain(tmpAlias);
+		PrivateKeyInfo tmpResult = new PrivateKeyInfo(tmpPk, tmpChain);
+		return tmpResult;
+	}
+
+
+
+	/**
+	 * For WINDOWS-MY keystore fixes problem with non-unique aliases
+	 * @param keyStore
+	 */
+	@SuppressWarnings("unchecked")
+	private static void fixAliases(final KeyStore keyStore) {
+		Field field;
+		KeyStoreSpi keyStoreVeritable;
+		final Set<String> tmpAliases = new HashSet<String>();
+		try {
+			field = keyStore.getClass().getDeclaredField("keyStoreSpi");
+			field.setAccessible(true);
+			keyStoreVeritable = (KeyStoreSpi) field.get(keyStore);
+
+			if ("sun.security.mscapi.KeyStore$MY".equals(keyStoreVeritable
+					.getClass().getName())) {
+				Collection<Object> entries;
+				String alias, hashCode;
+				X509Certificate[] certificates;
+
+				field = keyStoreVeritable.getClass().getEnclosingClass()
+						.getDeclaredField("entries");
+				field.setAccessible(true);
+				entries = (Collection<Object>) field.get(keyStoreVeritable);
+
+				for (Object entry : entries) {
+					field = entry.getClass().getDeclaredField("certChain");
+					field.setAccessible(true);
+					certificates = (X509Certificate[]) field.get(entry);
+
+					hashCode = Integer.toString(certificates[0].hashCode());
+
+					field = entry.getClass().getDeclaredField("alias");
+					field.setAccessible(true);
+					alias = (String) field.get(entry);
+					String tmpAlias = alias;
+					int i=0;
+					while (tmpAliases.contains(tmpAlias)) {
+						i++;
+						tmpAlias = alias + "-" + i;
+					}
+					tmpAliases.add(tmpAlias);
+					if (!alias.equals(hashCode)) {
+						field.set(entry, tmpAlias);
+					}
+				}
+			}
+		} catch (Exception exception) {
+			//nothing to do here
 		}
 	}
 

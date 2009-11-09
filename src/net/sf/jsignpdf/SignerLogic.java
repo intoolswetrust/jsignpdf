@@ -1,22 +1,32 @@
 package net.sf.jsignpdf;
 
 import java.io.ByteArrayOutputStream;
-import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.InputStream;
-import java.security.KeyStore;
+import java.security.MessageDigest;
 import java.security.PrivateKey;
 import java.security.cert.Certificate;
-import java.util.Enumeration;
+import java.security.cert.X509Certificate;
+import java.util.Calendar;
+import java.util.HashMap;
 
 import com.lowagie.text.Font;
 import com.lowagie.text.Image;
 import com.lowagie.text.Rectangle;
 import com.lowagie.text.pdf.BaseFont;
+import com.lowagie.text.pdf.OcspClientBouncyCastle;
+import com.lowagie.text.pdf.PdfDate;
+import com.lowagie.text.pdf.PdfDictionary;
+import com.lowagie.text.pdf.PdfName;
+import com.lowagie.text.pdf.PdfPKCS7;
 import com.lowagie.text.pdf.PdfReader;
+import com.lowagie.text.pdf.PdfSignature;
 import com.lowagie.text.pdf.PdfSignatureAppearance;
 import com.lowagie.text.pdf.PdfStamper;
+import com.lowagie.text.pdf.PdfString;
 import com.lowagie.text.pdf.PdfWriter;
+import com.lowagie.text.pdf.TSAClient;
+import com.lowagie.text.pdf.TSAClientBouncyCastle;
 
 /**
  * Main logic of signer application. It uses iText to create signature in PDF.
@@ -39,6 +49,7 @@ public class SignerLogic implements Runnable {
 	/* (non-Javadoc)
 	 * @see java.lang.Runnable#run()
 	 */
+	@SuppressWarnings("unchecked")
 	public void run() {
 		if (options==null) {
 			throw new NullPointerException("Options has to be filled.");
@@ -46,31 +57,9 @@ public class SignerLogic implements Runnable {
 
 		boolean tmpResult = false;
 		try {
-
-			options.log("console.getKeystoreType", options.getKsType());
-			final KeyStore ks = KeyStore.getInstance(options.getKsType());
-			InputStream ksInputStream = null;
-			if (!StringUtils.isEmpty(options.getKsFile())) {
-				options.log("console.loadKeystore", options.getKsFile());
-				ksInputStream = new FileInputStream(options.getKsFile());
-			}
-			ks.load(ksInputStream,options.getKsPasswd());
-			options.log("console.getAliases");
-			String tmpAlias = options.getKeyAliasX();
-			if (tmpAlias==null || tmpAlias.length()==0) {
-				final Enumeration<String> tmpAliases = ks.aliases();
-				while (tmpAliases.hasMoreElements()) {
-					tmpAlias = tmpAliases.nextElement();
-					if (ks.isKeyEntry(tmpAlias)) {
-						break;
-					}
-					tmpAlias = null;
-				}
-			}
-			options.log("console.getPrivateKey");
-			final PrivateKey key = (PrivateKey) ks.getKey(tmpAlias, options.getKeyPasswdX());
-			options.log("console.getCertChain");
-			final Certificate[] chain = ks.getCertificateChain(tmpAlias);
+			final PrivateKeyInfo pkInfo = KeyStoreUtils.getPkInfo(options);
+			final PrivateKey key = pkInfo.getKey();
+			final Certificate[] chain = pkInfo.getChain();
 			options.log("console.createPdfReader", options.getInFile());
 			PdfReader reader;
 			try {
@@ -120,6 +109,10 @@ public class SignerLogic implements Runnable {
 				options.log("console.setLocation", options.getLocation());
 				sap.setLocation(options.getLocation());
 			}
+			if (!StringUtils.isEmpty(options.getContact())) {
+				options.log("console.setContact", options.getContact());
+				sap.setContact(options.getContact());
+			}
 			options.log("console.setCertificationLevel");
 			sap.setCertificationLevel(options.getCertLevelX().getLevel());
 
@@ -164,9 +157,65 @@ public class SignerLogic implements Runnable {
 					options.getPage(),
 					null);
 			}
+
 			options.log("console.processing");
-			stp.close();
+			final PdfSignature dic = new PdfSignature(PdfName.ADOBE_PPKLITE,
+					new PdfName("adbe.pkcs7.detached"));
+			dic.setReason(sap.getReason());
+			dic.setLocation(sap.getLocation());
+			dic.setContact(sap.getContact());
+			dic.setDate(new PdfDate(sap.getSignDate()));
+			sap.setCryptoDictionary(dic);
+
+			int contentEstimated = 15000;
+			HashMap exc = new HashMap();
+			exc.put(PdfName.CONTENTS, new Integer(contentEstimated * 2 + 2));
+			sap.preClose(exc);
+
+			PdfPKCS7 sgn = new PdfPKCS7(key, chain, null, "SHA1", null, false);
+			InputStream data = sap.getRangeStream();
+			MessageDigest messageDigest = MessageDigest.getInstance("SHA1");
+			byte buf[] = new byte[8192];
+			int n;
+			while ((n = data.read(buf)) > 0) {
+				messageDigest.update(buf, 0, n);
+			}
+			byte hash[] = messageDigest.digest();
+			Calendar cal = Calendar.getInstance();
+			byte[] ocsp = null;
+			if (options.isOcspEnabledX() && chain.length >= 2) {
+				options.log("console.getOCSPURL");
+				String url = PdfPKCS7.getOCSPURL((X509Certificate) chain[0]);
+				if (url != null && url.length() > 0) {
+					options.log("console.readingOCSP");
+					ocsp = new OcspClientBouncyCastle(
+							(X509Certificate) chain[0],
+							(X509Certificate) chain[1], url).getEncoded();
+				}
+			}
+			byte sh[] = sgn.getAuthenticatedAttributeBytes(hash, cal, ocsp);
+			sgn.update(sh, 0, sh.length);
+
+			TSAClient tsc = null;
+			if (options.isTimestampX() && ! StringUtils.isEmpty(options.getTsaUrl())) {
+				options.log("console.creatingTsaClient");
+				tsc = new TSAClientBouncyCastle(options.getTsaUrl(),
+						StringUtils.emptyNull(options.getTsaUser()),
+						StringUtils.emptyNull(options.getTsaPasswd()));
+			}
+			byte[] encodedSig = sgn.getEncodedPKCS7(hash, cal, tsc, ocsp);
+
+			if (contentEstimated + 2 < encodedSig.length)
+				throw new Exception("Not enough space");
+
+			byte[] paddedSig = new byte[contentEstimated];
+			System.arraycopy(encodedSig, 0, paddedSig, 0, encodedSig.length);
+
+			PdfDictionary dic2 = new PdfDictionary();
+			dic2.put(PdfName.CONTENTS, new PdfString(paddedSig)
+					.setHexWriting(true));
 			options.log("console.closeStream");
+			sap.close(dic2);
 			fout.close();
 
 			tmpResult = true;
