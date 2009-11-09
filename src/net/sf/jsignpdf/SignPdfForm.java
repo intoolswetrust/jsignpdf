@@ -139,11 +139,7 @@ public class SignPdfForm extends javax.swing.JFrame implements SignResultListene
 		tfKeystoreFile.setText(options.getKsFile());
 		pfKeystorePwd.setText(options.getKsPasswdStr());
 		chkbStorePwd.setSelected(options.isStorePasswords());
-		if (StringUtils.isEmpty(options.getKeyAlias())) {
-			cbAlias.setSelectedIndex(options.getKeyIndex());
-		} else {
-			cbAlias.setSelectedItem(options.getKeyAlias());
-		}
+		cbAlias.setSelectedItem(options.getKeyAlias());
 		pfKeyPwd.setText(options.getKeyPasswdStr());
 		tfInPdfFile.setText(options.getInFile());
 		chkbPdfEncrypted.setSelected(options.isEncrypted());
