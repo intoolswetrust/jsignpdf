@@ -65,6 +65,7 @@ public class GuiConstants {
 		public static final String PROPERTIES_CONTACT_TEXTFIELD = "properties.contact.textfield";
 		public static final String PROPERTIES_CERTIFICATE_LABEL = "properties.certificate.label";
 		public static final String PROPERTIES_CERTIFICATE_COMBOBOX = "properties.certificate.combobox";
+		public static final String PROPERTIES_APPEND_CHECKBOX = "properties.append.checkbox";
 
 		public static final String TIMESTAMP_HEADER = "timestamp.header";
 		public static final String TIMESTAMP_ENABLED_CHECKBOX = "timestamp.enabled.checkbox";
