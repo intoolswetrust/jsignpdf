@@ -1,3 +1,6 @@
+2010-02-24 Josef Cacek
+  * documentation update
+
 2009-11-07 Josef Cacek
   * Bouncy castle libraries upgrade (143->144)
   * Contact field added

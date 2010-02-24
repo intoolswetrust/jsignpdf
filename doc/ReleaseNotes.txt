@@ -1,3 +1,17 @@
+Version 0.9.6
+-------------
+  * it's version 0.9.5 with small fixes
+  
+Version 0.9.5 (not public)
+-------------
+  * support for timestamp server  
+  * OCSP support
+  * Contact field added
+  * fix non-unique key aliases in WINDOWS-MY keystore
+  * improvements in command-line version:
+	- possibility to load default property file (-lp parameter)
+	- selecting key by index (e.g. because of national character in key alias, -ki parameter)  
+
 Version 0.9
 -------------
   * embedded Unicode font for Layer 2 texts in visible signature (fix for i18n and PDF/A specification) 
