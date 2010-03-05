@@ -102,6 +102,16 @@ public class SignerOptionsFromCmdLine extends BasicSignerOptions {
 		if (line.hasOption(ARG_IMG_PATH)) setImgPath(line.getOptionValue(ARG_IMG_PATH));
 		if (line.hasOption(ARG_BG_PATH)) setBgImgPath(line.getOptionValue(ARG_BG_PATH));
 
+		//TSA & OCSP
+		if (line.hasOption(ARG_TSA_URL)) {
+			setTimestamp(true);
+			setTsaUrl(line.getOptionValue(ARG_TSA_URL));
+		}
+		if (line.hasOption(ARG_TSA_USER)) setTsaUser(line.getOptionValue(ARG_TSA_USER));
+		if (line.hasOption(ARG_TSA_PWD)) setTsaPasswd(line.getOptionValue(ARG_TSA_PWD));
+		if (line.hasOption(ARG_OCSP_LONG)) setOcspEnabled(true);
+		
+		
 		if (StringUtils.isEmpty(outPrefix) && StringUtils.isEmpty(outSuffix)) {
 			outSuffix = "_signed";
 		}
@@ -457,6 +467,41 @@ public class SignerOptionsFromCmdLine extends BasicSignerOptions {
 				.withLongOpt(ARG_L4_TEXT_LONG)
 				.hasArg()
 				.withArgName("text")
+				.create()
+		);
+
+		//TSA & OCSP
+		OPTS.addOption(
+				OptionBuilder
+				.withLongOpt(ARG_TSA_URL_LONG)
+				.withDescription(res.get("hlp.tsaUrl"))
+				.hasArg()
+				.withArgName("URL")
+				.create(ARG_TSA_URL)
+		);
+
+		OPTS.addOption(
+				OptionBuilder
+				.withLongOpt(ARG_TSA_USER_LONG)
+				.withDescription(res.get("hlp.tsaUser"))
+				.hasArg()
+				.withArgName("username")
+				.create(ARG_TSA_USER)
+		);
+
+		OPTS.addOption(
+				OptionBuilder
+				.withLongOpt(ARG_TSA_PWD_LONG)
+				.withDescription(res.get("hlp.tsaPwd"))
+				.hasArg()
+				.withArgName("password")
+				.create(ARG_TSA_PWD)
+		);
+
+		OPTS.addOption(
+				OptionBuilder
+				.withLongOpt(ARG_OCSP_LONG)
+				.withDescription(res.get("hlp.ocsp"))
 				.create()
 		);
 

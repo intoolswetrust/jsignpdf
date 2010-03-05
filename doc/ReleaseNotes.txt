@@ -1,6 +1,7 @@
 Version 0.9.6
 -------------
   * it's version 0.9.5 with small fixes
+  * TSA & OCSP command line switches
   
 Version 0.9.5 (not public)
 -------------

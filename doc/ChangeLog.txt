@@ -1,3 +1,6 @@
+2010-03-04 Josef Cacek
+  * command line switches for TSA & OCSP
+
 2010-02-24 Josef Cacek
   * documentation update
 
