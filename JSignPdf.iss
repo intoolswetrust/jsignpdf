@@ -33,7 +33,7 @@ Name: {group}\JSignPdf Guide; Filename: {app}\docs\JSignPdf_signed.pdf; Componen
 Name: {group}\Uninstall {#MyAppName}; Filename: {uninstallexe}; Components: 
 
 [UninstallDelete]
-Name: {%USERPROFILE}\.JSignPdf; Type: files; Components: 
+;Name: {%USERPROFILE}\.JSignPdf; Type: files; Components:
 
 [Code]
 //********** Check if application is already installed
