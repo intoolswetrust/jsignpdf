@@ -319,7 +319,9 @@ public class BasicSignerOptions {
 		return keyPasswd;
 	}
 	public char[] getKeyPasswdX() {
-		if (keyPasswd == null || keyPasswd.length==0) return null;
+		if (keyPasswd != null && keyPasswd.length==0) {
+			keyPasswd = null;
+		}
 		return advanced?keyPasswd:ksPasswd;
 	}
 	public String getKeyPasswdStr() {
