@@ -50,9 +50,18 @@ public class KeyStoreUtils {
 		return tmpResult.toArray(new String[tmpResult.size()]);
 	}
 
-	private static List<String> getAliasesList(KeyStore aKs, final BasicSignerOptions options) {
+	/**
+	 * Returns list of key aliases in given keystore.
+	 * @param aKs
+	 * @param options
+	 * @return
+	 */
+	private static List<String> getAliasesList(final KeyStore aKs, final BasicSignerOptions options) {
 			if (options==null) {
 				throw new NullPointerException("Options are empty.");
+			}
+			if (aKs==null) {
+				throw new NullPointerException("Keystore was not loaded. Check the type, path and password.");
 			}
 			final List<String> tmpResult = new ArrayList<String>();
 			try {
