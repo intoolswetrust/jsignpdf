@@ -1,3 +1,8 @@
+2010-04-01 Josef Cacek
+  * fixed password usage in a simple view
+  * check if keystore is loaded during key refresh
+  * if the name of output file is not filled, automatically is used "_signed" suffix. E.g. test.pdf->test_signed.pdf 
+
 2010-03-04 Josef Cacek
   * command line switches for TSA & OCSP
 

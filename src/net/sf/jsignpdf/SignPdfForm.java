@@ -187,7 +187,18 @@ public class SignPdfForm extends javax.swing.JFrame implements SignResultListene
 		options.setEncrypted(chkbPdfEncrypted.isSelected());
 		options.setPdfOwnerPwd(pfPdfOwnerPwd.getPassword());
 		options.setPdfUserPwd(pfPdfUserPwd.getPassword());
-		options.setOutFile(tfOutPdfFile.getText());
+		String tmpOut = StringUtils.emptyNull(tfOutPdfFile.getText());
+		if (tmpOut == null) {
+			String tmpExtension = "";
+			String tmpNameBase = options.getInFile();
+			if (tmpNameBase.toLowerCase().endsWith(".pdf")) {
+				final int tmpBaseLen = tmpNameBase.length() - 4;
+				tmpExtension = tmpNameBase.substring(tmpBaseLen);
+				tmpNameBase = tmpNameBase.substring(0, tmpBaseLen);
+			}
+			tmpOut = tmpNameBase + Constants.DEFAULT_OUT_SUFFIX + tmpExtension;
+		}
+		options.setOutFile(tmpOut);
 		options.setReason(tfReason.getText());
 		options.setLocation(tfLocation.getText());
 		options.setContact(tfContact.getText());
@@ -990,23 +1001,6 @@ public class SignPdfForm extends javax.swing.JFrame implements SignResultListene
 	}
 
 	/**
-	 * Checks if is textfield filled
-	 * @param aTF text field to check
-	 * @param aDescKey text field description
-	 * @return result of the check
-	 */
-	private boolean checkFilled(JTextField aTF, String aDescKey) {
-		final String tmpFileName = aTF.getText();
-		if (tmpFileName!=null && tmpFileName.length()>0) {
-			return true;
-		}
-		final String tmpMsg = res.get("gui.valueNotFilled.error",
-			new String[] {res.get(aDescKey)});
-		JOptionPane.showMessageDialog(this,tmpMsg, res.get("gui.check.error.title"), JOptionPane.ERROR_MESSAGE);
-		return false;
-	}
-
-	/**
 	 * Checks if inFile and outFile are different.
 	 * @return result of the check
 	 */
@@ -1014,7 +1008,7 @@ public class SignPdfForm extends javax.swing.JFrame implements SignResultListene
 		final String tmpInName = tfInPdfFile.getText();
 		final String tmpOutName = tfOutPdfFile.getText();
 		boolean tmpResult = true;
-		if (tmpInName!=null && tmpOutName!=null) {
+		if (tmpInName!=null && StringUtils.hasLength(tmpOutName)) {
 			try {
 				final File tmpInFile = (new File(tmpInName)).getAbsoluteFile();
 				final File tmpOutFile = (new File(tmpOutName)).getAbsoluteFile();
@@ -1041,9 +1035,8 @@ public class SignPdfForm extends javax.swing.JFrame implements SignResultListene
 	private void btnSignItActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSignItActionPerformed
 		storeToOptions();
 		if (checkFileExists(tfInPdfFile, "gui.inPdfFile.label")
-//				&& checkFileExists(tfKeystoreFile, "gui.keystoreFile.label")
-				&& checkFilled(tfOutPdfFile, "gui.outPdfFile.label")
-				&& checkInOutDiffers()) {
+				&& checkInOutDiffers()
+				) {
 			infoStream.clear();
 			btnInfoClose.setEnabled(false);
 			infoDialog.setVisible(true);

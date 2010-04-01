@@ -413,6 +413,15 @@ public class StringUtils {
 	}
 
 	/**
+	 * Returns true if string representation of given object is not empty.
+	 * @param anObj object
+	 * @return
+	 */
+	public static boolean hasLength(final Object anObj) {
+		return !isEmpty(anObj);
+	}
+
+	/**
 	 * Returns not null String representation of given parameter.
 	 * @param anObj object
 	 * @return trimmed toString() or null

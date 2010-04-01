@@ -113,7 +113,7 @@ public class SignerOptionsFromCmdLine extends BasicSignerOptions {
 		
 		
 		if (StringUtils.isEmpty(outPrefix) && StringUtils.isEmpty(outSuffix)) {
-			outSuffix = "_signed";
+			outSuffix = Constants.DEFAULT_OUT_SUFFIX;
 		}
 	}
 

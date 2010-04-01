@@ -34,6 +34,8 @@ public class Constants {
 	public static final String L2TEXT_FONT_PATH = "/net/sf/jsignpdf/fonts/pokrytie.ttf";
 	public static final String L2TEXT_FONT_NAME = "pokrytie.ttf";
 
+	public static final String DEFAULT_OUT_SUFFIX = "_signed";
+	
 	/**
 	 * Property name.
 	 */
