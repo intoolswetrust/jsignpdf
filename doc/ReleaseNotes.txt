@@ -1,3 +1,8 @@
+Version 0.9.7 (bugfix release)
+-------------
+  * fixes password handling in simple view (caused *KeyException for PKCS#12 keystores)
+  * Output PDF filename field can be left empty in a GUI, then is automatically used the value from Input PDF suffixed with "_signed" (e.g. test.pdf->test_signed.pdf)
+
 Version 0.9.6
 -------------
   * it's version 0.9.5 with small fixes
