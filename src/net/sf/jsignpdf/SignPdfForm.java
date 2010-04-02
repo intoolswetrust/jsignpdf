@@ -57,8 +57,11 @@ public class SignPdfForm extends javax.swing.JFrame implements SignResultListene
 
 		//setIconImage is available from Java 1.6!
 //		rightsDialog.setIconImage(getIconImage());
+		rightsDialog.getRootPane().setDefaultButton(btnRightsOK);
 		rightsDialog.pack();
 
+		
+		
 		options.setPrintWriter(infoWriter);
 		options.setListener(this);
 
