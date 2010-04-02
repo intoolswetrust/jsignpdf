@@ -52,6 +52,7 @@ public class VisibleSignatureDialog extends javax.swing.JDialog {
 		tfPage.getDocument().addDocumentListener(new PageNrDocumentListener());
 		cbDisplayMode.setModel(new DefaultComboBoxModel(RenderMode.values()));
 		extraInfo = new PdfExtraInfo(anOptions);
+		getRootPane().setDefaultButton(btnClose);
 	}
 
 	/**

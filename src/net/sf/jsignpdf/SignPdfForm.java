@@ -43,6 +43,7 @@ public class SignPdfForm extends javax.swing.JFrame implements SignResultListene
 		translateLabels();
 
 		setDefaultCloseOperation(aCloseOperation);
+		getRootPane().setDefaultButton(btnSignIt);
 
 		infoStream = new TextAreaStream(infoTextArea);
 		infoWriter = new PrintWriter(infoStream, true);
@@ -51,7 +52,7 @@ public class SignPdfForm extends javax.swing.JFrame implements SignResultListene
 		URL tmpImgUrl = getClass().getResource("/net/sf/jsignpdf/signedpdf32.png");
 		setIconImage(Toolkit.getDefaultToolkit().getImage(tmpImgUrl));
 		infoDialog.setIconImage(getIconImage());
-
+		infoDialog.getRootPane().setDefaultButton(btnInfoClose);
 		infoDialog.pack();
 
 		//setIconImage is available from Java 1.6!
@@ -968,6 +969,7 @@ public class SignPdfForm extends javax.swing.JFrame implements SignResultListene
 	public synchronized void signerFinishedEvent(boolean success) {
 		btnInfoClose.setEnabled(true);
 		infoDialog.setDefaultCloseOperation(javax.swing.WindowConstants.HIDE_ON_CLOSE);
+		if (!btnInfoClose.hasFocus()) btnInfoClose.requestFocus();
 		if (autoclose) btnInfoCloseActionPerformed(null);
 	}
 

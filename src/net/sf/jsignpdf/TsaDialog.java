@@ -19,8 +19,9 @@ public class TsaDialog extends javax.swing.JDialog {
 		super(parent, modal);
 		options = anOpts;
 		initComponents();
+		getRootPane().setDefaultButton(btnTsaOK);
 		translateLabels();
-		switchTsaEnabled();
+		switchTsaEnabled();		
 	}
 
 		/**
