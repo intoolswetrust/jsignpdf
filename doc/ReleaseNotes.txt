@@ -1,6 +1,6 @@
-Version 0.9.8 (not public)
+Version 0.9.8
 -------------
-  * output prefix and suffix can be empty in batch mode - use the same filename (and different directory)
+  * output prefix and suffix can be empty in batch mode - can use the same filename if output goes to different directory
 
 Version 0.9.7 (bugfix release)
 -------------
