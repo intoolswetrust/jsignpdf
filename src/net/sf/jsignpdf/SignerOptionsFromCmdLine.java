@@ -21,7 +21,7 @@ public class SignerOptionsFromCmdLine extends BasicSignerOptions {
 	static final Options OPTS = new Options();
 
 	private String outPrefix;
-	private String outSuffix;
+	private String outSuffix = Constants.DEFAULT_OUT_SUFFIX;
 	private String outPath;
 
 	private String[] files;
@@ -31,7 +31,11 @@ public class SignerOptionsFromCmdLine extends BasicSignerOptions {
 	private boolean listKeyStores;
 	private boolean listKeys;
 
-	//parse command line using CLI here
+	/**
+	 * Parses options provided as command line arguments.
+	 * @param anArgs
+	 * @throws ParseException
+	 */
 	public void loadCmdLine(final String[] anArgs) throws ParseException {
 		if (anArgs == null) return;
 
@@ -111,10 +115,6 @@ public class SignerOptionsFromCmdLine extends BasicSignerOptions {
 		if (line.hasOption(ARG_TSA_PWD)) setTsaPasswd(line.getOptionValue(ARG_TSA_PWD));
 		if (line.hasOption(ARG_OCSP_LONG)) setOcspEnabled(true);
 		
-		
-		if (StringUtils.isEmpty(outPrefix) && StringUtils.isEmpty(outSuffix)) {
-			outSuffix = Constants.DEFAULT_OUT_SUFFIX;
-		}
 	}
 
 	/**
