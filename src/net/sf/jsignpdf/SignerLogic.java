@@ -1,6 +1,7 @@
 package net.sf.jsignpdf;
 
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.security.MessageDigest;
@@ -53,6 +54,10 @@ public class SignerLogic implements Runnable {
 	public void run() {
 		if (options==null) {
 			throw new NullPointerException("Options has to be filled.");
+		}
+		if (! validateInOutFiles(options.getInFile(), options.getOutFile())) {
+			options.log("console.skippingSigning");
+			return;
 		}
 
 		boolean tmpResult = false;
@@ -230,6 +235,31 @@ public class SignerLogic implements Runnable {
 		options.fireSignerFinishedEvent(tmpResult);
 	}
 
+
+	/**
+	 * Validates if input and output files are valid for signing.
+	 * @param inFile input file
+	 * @param outFile output file
+	 * @return true if valid, false otherwise
+	 */
+	private boolean validateInOutFiles(final String inFile, final String outFile) {
+		options.log("console.validatingFiles");		
+		if (StringUtils.isEmpty(inFile) || StringUtils.isEmpty(outFile)) {
+			options.log("console.fileNotFilled.error");
+			return false;
+		}
+		final File tmpInFile = new File(inFile);
+		final File tmpOutFile = new File(outFile);
+		if (! (tmpInFile.exists() && tmpInFile.isFile() && tmpInFile.canRead()) ) {
+			options.log("console.inFileNotFound.error");
+			return false;			
+		}
+		if (tmpInFile.getAbsolutePath().equals(tmpOutFile.getAbsolutePath())) {
+			options.log("console.filesAreEqual.error");
+			return false;
+		}
+		return true;
+	}
 
 	/**
 	 * Returns BaseFont for text of visible signature;
