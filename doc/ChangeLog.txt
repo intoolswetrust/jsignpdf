@@ -1,3 +1,7 @@
+2010-04-12 Josef Cacek
+  * suffix can be empty in batch mode (output to different directory with the same filename)
+  * additional file-checks in SignerLogic class
+
 2010-04-02 Josef Cacek
   * set default buttons for dialogs
 

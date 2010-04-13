@@ -1,3 +1,7 @@
+Version 0.9.8 (not public)
+-------------
+  * output prefix and suffix can be empty in batch mode - use the same filename (and different directory)
+
 Version 0.9.7 (bugfix release)
 -------------
   * fixes password handling in simple view (caused *KeyException for PKCS#12 keystores)
