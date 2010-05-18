@@ -17,7 +17,8 @@ import javax.swing.filechooser.FileFilter;
 
 /**
  * GUI for PDFSigner.
- * @author  Josef Cacek
+ * 
+ * @author Josef Cacek
  */
 public class SignPdfForm extends javax.swing.JFrame implements SignResultListener {
 
@@ -34,7 +35,7 @@ public class SignPdfForm extends javax.swing.JFrame implements SignResultListene
 	private BasicSignerOptions options = new BasicSignerOptions();
 	private SignerLogic signerLogic = new SignerLogic(options);
 	private VisibleSignatureDialog vsDialog = new VisibleSignatureDialog(this, true, options, fc);
-	private TsaDialog tsaDialog = new TsaDialog(this,true,options);
+	private TsaDialog tsaDialog = new TsaDialog(this, true, options);
 
 	/** Creates new form SignPdfForm */
 	public SignPdfForm(int aCloseOperation) {
@@ -48,20 +49,18 @@ public class SignPdfForm extends javax.swing.JFrame implements SignResultListene
 		infoStream = new TextAreaStream(infoTextArea);
 		infoWriter = new PrintWriter(infoStream, true);
 
-		//set Icon of frames
+		// set Icon of frames
 		URL tmpImgUrl = getClass().getResource("/net/sf/jsignpdf/signedpdf32.png");
 		setIconImage(Toolkit.getDefaultToolkit().getImage(tmpImgUrl));
 		infoDialog.setIconImage(getIconImage());
 		infoDialog.getRootPane().setDefaultButton(btnInfoClose);
 		infoDialog.pack();
 
-		//setIconImage is available from Java 1.6!
-//		rightsDialog.setIconImage(getIconImage());
+		// setIconImage is available from Java 1.6!
+		// rightsDialog.setIconImage(getIconImage());
 		rightsDialog.getRootPane().setDefaultButton(btnRightsOK);
 		rightsDialog.pack();
 
-		
-		
 		options.setPrintWriter(infoWriter);
 		options.setListener(this);
 
@@ -79,7 +78,7 @@ public class SignPdfForm extends javax.swing.JFrame implements SignResultListene
 	 * Application translations.
 	 */
 	private void translateLabels() {
-		setTitle(res.get("gui.title", new String[] {Constants.VERSION}));
+		setTitle(res.get("gui.title", new String[] { Constants.VERSION }));
 		setLabelAndMnemonic(lblKeystoreType, "gui.keystoreType.label");
 		setLabelAndMnemonic(chkbAdvanced, "gui.advancedView.checkbox");
 		setLabelAndMnemonic(lblKeystoreFile, "gui.keystoreFile.label");
@@ -104,7 +103,7 @@ public class SignPdfForm extends javax.swing.JFrame implements SignResultListene
 		btnInPdfFile.setText(res.get("gui.browse.button"));
 		btnOutPdfFile.setText(res.get("gui.browse.button"));
 
-		setLabelAndMnemonic(btnSignIt,"gui.signIt.button");
+		setLabelAndMnemonic(btnSignIt, "gui.signIt.button");
 
 		infoDialog.setTitle(res.get("gui.info.title"));
 		btnInfoClose.setText(res.get("gui.info.close.button"));
@@ -127,8 +126,11 @@ public class SignPdfForm extends javax.swing.JFrame implements SignResultListene
 
 	/**
 	 * Sets translations and mnemonics for labels and different kind of buttons
-	 * @param aComponent component in which should be label set
-	 * @param aKey message key
+	 * 
+	 * @param aComponent
+	 *            component in which should be label set
+	 * @param aKey
+	 *            message key
 	 */
 	private void setLabelAndMnemonic(final JComponent aComponent, final String aKey) {
 		res.setLabelAndMnemonic(aComponent, aKey);
@@ -181,8 +183,7 @@ public class SignPdfForm extends javax.swing.JFrame implements SignResultListene
 		options.setKsFile(tfKeystoreFile.getText());
 		options.setKsPasswd(pfKeystorePwd.getPassword());
 		options.setStorePasswords(chkbStorePwd.isSelected());
-		if (cbAlias.getSelectedItem()!=options.getKeyAlias() ||
-				cbAlias.getSelectedIndex()>-1) {
+		if (cbAlias.getSelectedItem() != options.getKeyAlias() || cbAlias.getSelectedIndex() > -1) {
 			options.setKeyAlias((String) cbAlias.getSelectedItem());
 			options.setKeyIndex(cbAlias.getSelectedIndex());
 		}
@@ -191,18 +192,7 @@ public class SignPdfForm extends javax.swing.JFrame implements SignResultListene
 		options.setEncrypted(chkbPdfEncrypted.isSelected());
 		options.setPdfOwnerPwd(pfPdfOwnerPwd.getPassword());
 		options.setPdfUserPwd(pfPdfUserPwd.getPassword());
-		String tmpOut = StringUtils.emptyNull(tfOutPdfFile.getText());
-		if (tmpOut == null) {
-			String tmpExtension = "";
-			String tmpNameBase = options.getInFile();
-			if (tmpNameBase.toLowerCase().endsWith(".pdf")) {
-				final int tmpBaseLen = tmpNameBase.length() - 4;
-				tmpExtension = tmpNameBase.substring(tmpBaseLen);
-				tmpNameBase = tmpNameBase.substring(0, tmpBaseLen);
-			}
-			tmpOut = tmpNameBase + Constants.DEFAULT_OUT_SUFFIX + tmpExtension;
-		}
-		options.setOutFile(tmpOut);
+		options.setOutFile(tfOutPdfFile.getText());
 		options.setReason(tfReason.getText());
 		options.setLocation(tfLocation.getText());
 		options.setContact(tfContact.getText());
@@ -223,7 +213,9 @@ public class SignPdfForm extends javax.swing.JFrame implements SignResultListene
 	/**
 	 * Handles switching Advanced checkbox. Sets some components visible/hidden
 	 * depending on given status flag.
-	 * @param anAdvanced flag - advanced view is enabled
+	 * 
+	 * @param anAdvanced
+	 *            flag - advanced view is enabled
 	 */
 	private void switchAdvancedView(boolean anAdvanced) {
 		btnLoadAliases.setVisible(anAdvanced);
@@ -239,18 +231,22 @@ public class SignPdfForm extends javax.swing.JFrame implements SignResultListene
 	}
 
 	/**
-	 * Handles switching Visible signature checkbox. Sets button Settings enabled/disabled
-	 * @param anVisible flag - visible signature is enabled
+	 * Handles switching Visible signature checkbox. Sets button Settings
+	 * enabled/disabled
+	 * 
+	 * @param anVisible
+	 *            flag - visible signature is enabled
 	 */
 	private void switchVisibleSignature(boolean anVisible) {
 		btnVisibleSigSettings.setEnabled(anVisible);
 	}
 
 	/**
-	 * Handles switching Encrypted checkbox.
-	 * Sets some components enabled/disabled
-	 * depending on given status flag.
-	 * @param anEnabled flag - encrypted view is enabled
+	 * Handles switching Encrypted checkbox. Sets some components
+	 * enabled/disabled depending on given status flag.
+	 * 
+	 * @param anEnabled
+	 *            flag - encrypted view is enabled
 	 */
 	private void switchEncryptedPdf(boolean anEnabled) {
 		final boolean tmpEncrypted = chkbAdvanced.isSelected() && anEnabled;
@@ -265,21 +261,25 @@ public class SignPdfForm extends javax.swing.JFrame implements SignResultListene
 
 	/**
 	 * Displays file chooser dialog of given type and with givet FileFilter.
-	 * @param aFileField assigned textfield
-	 * @param aFilter filefilter
-	 * @param aType dialog type (SAVE_DIALOG, OPEN_DIALOG)
+	 * 
+	 * @param aFileField
+	 *            assigned textfield
+	 * @param aFilter
+	 *            filefilter
+	 * @param aType
+	 *            dialog type (SAVE_DIALOG, OPEN_DIALOG)
 	 */
 	void showFileChooser(final JTextField aFileField, final FileFilter aFilter, final int aType) {
 		fc.showFileChooser(aFileField, aFilter, aType);
 	}
 
-
-	/** This method is called from within the constructor to
-	 * initialize the form.
-	 * WARNING: Do NOT modify this code. The content of this method is
-	 * always regenerated by the Form Editor.
+	/**
+	 * This method is called from within the constructor to initialize the form.
+	 * WARNING: Do NOT modify this code. The content of this method is always
+	 * regenerated by the Form Editor.
 	 */
-	// <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
+	// <editor-fold defaultstate="collapsed"
+	// desc="Generated Code">//GEN-BEGIN:initComponents
 	private void initComponents() {
 		java.awt.GridBagConstraints gridBagConstraints;
 
@@ -374,7 +374,8 @@ public class SignPdfForm extends javax.swing.JFrame implements SignResultListene
 		gridBagConstraints.insets = new java.awt.Insets(2, 5, 2, 5);
 		rightsDialog.getContentPane().add(lblPrinting, gridBagConstraints);
 
-		cbPrinting.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Allow", "Allow Degraded", "Disallow" }));
+		cbPrinting
+				.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Allow", "Allow Degraded", "Disallow" }));
 		gridBagConstraints = new java.awt.GridBagConstraints();
 		gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
 		gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
@@ -509,7 +510,8 @@ public class SignPdfForm extends javax.swing.JFrame implements SignResultListene
 		gridBagConstraints.insets = new java.awt.Insets(2, 5, 2, 10);
 		getContentPane().add(lblKeystoreFile, gridBagConstraints);
 
-		btnVisibleSigSettings.setIcon(new javax.swing.ImageIcon(getClass().getResource("/net/sf/jsignpdf/options16.png"))); // NOI18N
+		btnVisibleSigSettings.setIcon(new javax.swing.ImageIcon(getClass()
+				.getResource("/net/sf/jsignpdf/options16.png"))); // NOI18N
 		btnVisibleSigSettings.setText("Settings");
 		btnVisibleSigSettings.setHorizontalAlignment(javax.swing.SwingConstants.LEADING);
 		btnVisibleSigSettings.addActionListener(new java.awt.event.ActionListener() {
@@ -925,46 +927,45 @@ public class SignPdfForm extends javax.swing.JFrame implements SignResultListene
 		pack();
 	}// </editor-fold>//GEN-END:initComponents
 
-	private void btnVisibleSigSettingsActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnVisibleSigSettingsActionPerformed
+	private void btnVisibleSigSettingsActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_btnVisibleSigSettingsActionPerformed
 		storeToOptions();
 		vsDialog.pack();
 		vsDialog.setVisible(true);
-	}//GEN-LAST:event_btnVisibleSigSettingsActionPerformed
+	}// GEN-LAST:event_btnVisibleSigSettingsActionPerformed
 
-	private void chkbVisibleSigActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_chkbVisibleSigActionPerformed
+	private void chkbVisibleSigActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_chkbVisibleSigActionPerformed
 		switchVisibleSignature(chkbVisibleSig.isSelected());
-	}//GEN-LAST:event_chkbVisibleSigActionPerformed
+	}// GEN-LAST:event_chkbVisibleSigActionPerformed
 
-	private void btnRightsOKActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnRightsOKActionPerformed
+	private void btnRightsOKActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_btnRightsOKActionPerformed
 		rightsDialog.setVisible(false);
-	}//GEN-LAST:event_btnRightsOKActionPerformed
+	}// GEN-LAST:event_btnRightsOKActionPerformed
 
-	private void btnRightsActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnRightsActionPerformed
+	private void btnRightsActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_btnRightsActionPerformed
 		rightsDialog.setVisible(true);
-	}//GEN-LAST:event_btnRightsActionPerformed
+	}// GEN-LAST:event_btnRightsActionPerformed
 
-	private void btnLoadAliasesActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnLoadAliasesActionPerformed
+	private void btnLoadAliasesActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_btnLoadAliasesActionPerformed
 		storeToOptions();
 		cbAlias.setModel(new DefaultComboBoxModel(KeyStoreUtils.getKeyAliases(options)));
-	}//GEN-LAST:event_btnLoadAliasesActionPerformed
+	}// GEN-LAST:event_btnLoadAliasesActionPerformed
 
-	private void chkbPdfEncryptedActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_chkbPdfEncryptedActionPerformed
+	private void chkbPdfEncryptedActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_chkbPdfEncryptedActionPerformed
 		switchEncryptedPdf(chkbPdfEncrypted.isSelected());
 		pack();
-	}//GEN-LAST:event_chkbPdfEncryptedActionPerformed
+	}// GEN-LAST:event_chkbPdfEncryptedActionPerformed
 
-	private void chkbAdvancedActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_chkbAdvancedActionPerformed
+	private void chkbAdvancedActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_chkbAdvancedActionPerformed
 		switchAdvancedView(chkbAdvanced.isSelected());
 		switchEncryptedPdf(chkbPdfEncrypted.isSelected());
 		pack();
-	}//GEN-LAST:event_chkbAdvancedActionPerformed
+	}// GEN-LAST:event_chkbAdvancedActionPerformed
 
-	private void infoDialogWindowClosing(java.awt.event.WindowEvent evt) {//GEN-FIRST:event_infoDialogWindowClosing
+	private void infoDialogWindowClosing(java.awt.event.WindowEvent evt) {// GEN-FIRST:event_infoDialogWindowClosing
 		if (btnInfoClose.isEnabled()) {
 			setVisible(true);
 		}
-	}//GEN-LAST:event_infoDialogWindowClosing
-
+	}// GEN-LAST:event_infoDialogWindowClosing
 
 	/**
 	 * @see net.sf.jsignpdf.SignResultListener#signerFinishedEvent(boolean)
@@ -972,111 +973,114 @@ public class SignPdfForm extends javax.swing.JFrame implements SignResultListene
 	public synchronized void signerFinishedEvent(boolean success) {
 		btnInfoClose.setEnabled(true);
 		infoDialog.setDefaultCloseOperation(javax.swing.WindowConstants.HIDE_ON_CLOSE);
-		if (!btnInfoClose.hasFocus()) btnInfoClose.requestFocus();
-		if (autoclose) btnInfoCloseActionPerformed(null);
+		if (!btnInfoClose.hasFocus())
+			btnInfoClose.requestFocus();
+		if (autoclose)
+			btnInfoCloseActionPerformed(null);
 	}
 
-
-	private void btnInfoCloseActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnInfoCloseActionPerformed
+	private void btnInfoCloseActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_btnInfoCloseActionPerformed
 		infoDialog.setVisible(false);
 		setVisible(true);
-	}//GEN-LAST:event_btnInfoCloseActionPerformed
+	}// GEN-LAST:event_btnInfoCloseActionPerformed
 
 	/**
 	 * Checks if file exists and it's possible write to it.
-	 * @param aTF text field with file name filled
-	 * @param aFileDescKey file description (used in error message)
+	 * 
+	 * @param aTF
+	 *            text field with file name filled
+	 * @param aFileDescKey
+	 *            file description (used in error message)
 	 * @return result of the check
 	 */
 	private boolean checkFileExists(JTextField aTF, String aFileDescKey) {
 		final String tmpFileName = aTF.getText();
 		try {
-			if (tmpFileName!=null) {
+			if (tmpFileName != null) {
 				File tmpFile = new File(tmpFileName);
 				if (tmpFile.canRead() && !tmpFile.isDirectory()) {
 					return true;
 				}
 			}
-		} catch (Exception e) {}
+		} catch (Exception e) {
+		}
 
-		final String tmpMsg = res.get("gui.fileNotExists.error",
-			new String[] {res.get(aFileDescKey)});
+		final String tmpMsg = res.get("gui.fileNotExists.error", new String[] { res.get(aFileDescKey) });
 		JOptionPane.showMessageDialog(this, tmpMsg, res.get("gui.check.error.title"), JOptionPane.ERROR_MESSAGE);
 		return false;
 	}
 
 	/**
 	 * Checks if inFile and outFile are different.
+	 * 
 	 * @return result of the check
 	 */
 	private boolean checkInOutDiffers() {
 		final String tmpInName = tfInPdfFile.getText();
 		final String tmpOutName = tfOutPdfFile.getText();
 		boolean tmpResult = true;
-		if (tmpInName!=null && StringUtils.hasLength(tmpOutName)) {
+		if (tmpInName != null && StringUtils.hasLength(tmpOutName)) {
 			try {
 				final File tmpInFile = (new File(tmpInName)).getAbsoluteFile();
 				final File tmpOutFile = (new File(tmpOutName)).getAbsoluteFile();
 				if (tmpInFile.equals(tmpOutFile)) {
 					tmpResult = false;
-					JOptionPane.showMessageDialog(this,
-						res.get("gui.filesEqual.error"),
-						res.get("gui.check.error.title"),
-						JOptionPane.ERROR_MESSAGE);
+					JOptionPane.showMessageDialog(this, res.get("gui.filesEqual.error"), res
+							.get("gui.check.error.title"), JOptionPane.ERROR_MESSAGE);
 				}
 			} catch (Exception e) {
 				tmpResult = false;
-				JOptionPane.showMessageDialog(this,e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+				JOptionPane.showMessageDialog(this, e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
 			}
 		}
 		return tmpResult;
 	}
 
 	/**
-	 * Handles pressing of "Sign It" button. Creates and runs SignerLogic instance
-	 * in a new thread.
-	 * @param evt event
+	 * Handles pressing of "Sign It" button. Creates and runs SignerLogic
+	 * instance in a new thread.
+	 * 
+	 * @param evt
+	 *            event
 	 */
-	private void btnSignItActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSignItActionPerformed
+	private void btnSignItActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_btnSignItActionPerformed
 		storeToOptions();
-		if (checkFileExists(tfInPdfFile, "gui.inPdfFile.label")
-				&& checkInOutDiffers()
-				) {
+		if (checkFileExists(tfInPdfFile, "gui.inPdfFile.label") && checkInOutDiffers()) {
 			infoStream.clear();
 			btnInfoClose.setEnabled(false);
 			infoDialog.setVisible(true);
 			setVisible(false);
 			infoDialog.setDefaultCloseOperation(javax.swing.WindowConstants.DO_NOTHING_ON_CLOSE);
 			infoWriter.println(res.get("console.starting"));
-			//Let's do it
+			// Let's do it
 			final Thread tmpST = new Thread(signerLogic);
 			tmpST.start();
 		}
-	}//GEN-LAST:event_btnSignItActionPerformed
+	}// GEN-LAST:event_btnSignItActionPerformed
 
-	private void formWindowClosing(java.awt.event.WindowEvent evt) {//GEN-FIRST:event_formWindowClosing
+	private void formWindowClosing(java.awt.event.WindowEvent evt) {// GEN-FIRST:event_formWindowClosing
 		storeToOptions();
 		options.storeOptions();
-	}//GEN-LAST:event_formWindowClosing
+	}// GEN-LAST:event_formWindowClosing
 
-	private void btnOutPdfFileActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnOutPdfFileActionPerformed
+	private void btnOutPdfFileActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_btnOutPdfFileActionPerformed
 		showFileChooser(tfOutPdfFile, SignerFileChooser.FILEFILTER_PDF, JFileChooser.SAVE_DIALOG);
 
-	}//GEN-LAST:event_btnOutPdfFileActionPerformed
+	}// GEN-LAST:event_btnOutPdfFileActionPerformed
 
-	private void btnInPdfFileActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnInPdfFileActionPerformed
+	private void btnInPdfFileActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_btnInPdfFileActionPerformed
 		showFileChooser(tfInPdfFile, SignerFileChooser.FILEFILTER_PDF, JFileChooser.OPEN_DIALOG);
-	}//GEN-LAST:event_btnInPdfFileActionPerformed
+	}// GEN-LAST:event_btnInPdfFileActionPerformed
 
-	private void btnKeystoreFileActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnKeystoreFileActionPerformed
+	private void btnKeystoreFileActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_btnKeystoreFileActionPerformed
 		showFileChooser(tfKeystoreFile, null, JFileChooser.OPEN_DIALOG);
-	}//GEN-LAST:event_btnKeystoreFileActionPerformed
+	}// GEN-LAST:event_btnKeystoreFileActionPerformed
 
-	private void btnTsaOcspActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnTsaOcspActionPerformed
+	private void btnTsaOcspActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_btnTsaOcspActionPerformed
 		storeToOptions();
 		tsaDialog.pack();
 		tsaDialog.setVisible(true);
-}//GEN-LAST:event_btnTsaOcspActionPerformed
+	}// GEN-LAST:event_btnTsaOcspActionPerformed
 
 	// Variables declaration - do not modify//GEN-BEGIN:variables
 	private javax.swing.JButton btnInPdfFile;
@@ -1135,11 +1139,11 @@ public class SignPdfForm extends javax.swing.JFrame implements SignResultListene
 	private javax.swing.JTextField tfReason;
 	// End of variables declaration//GEN-END:variables
 
-
 }
 
 /**
  * OutputStream wrapper for writing to TextArea component
+ * 
  * @author Josef Cacek
  */
 class TextAreaStream extends OutputStream {

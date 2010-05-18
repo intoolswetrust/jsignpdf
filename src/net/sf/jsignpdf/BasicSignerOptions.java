@@ -6,6 +6,7 @@ import org.bouncycastle.crypto.CryptoException;
 
 /**
  * Options for PDF signer.
+ * 
  * @author Josef Cacek
  */
 public class BasicSignerOptions {
@@ -36,7 +37,7 @@ public class BasicSignerOptions {
 
 	protected volatile boolean storePasswords;
 
-	//options from rights dialog
+	// options from rights dialog
 	private volatile PrintRight rightPrinting;
 	private volatile boolean rightCopy;
 	private volatile boolean rightAssembly;
@@ -45,8 +46,7 @@ public class BasicSignerOptions {
 	private volatile boolean rightModifyAnnotations;
 	private volatile boolean rightModifyContents;
 
-
-	//options from visible signature settings dialog
+	// options from visible signature settings dialog
 	private volatile boolean visible;
 	private volatile int page = Constants.DEFVAL_PAGE;
 	private volatile float positionLLX = Constants.DEFVAL_LLX;
@@ -61,13 +61,13 @@ public class BasicSignerOptions {
 	private volatile String imgPath;
 	private volatile String bgImgPath;
 
-	//options for timestamps (provided by external TSA)
+	// options for timestamps (provided by external TSA)
 	private volatile boolean timestamp;
 	private volatile String tsaUrl;
 	private volatile String tsaUser;
 	private volatile String tsaPasswd;
 
-	//options for timestamps (provided by external TSA)
+	// options for timestamps (provided by external TSA)
 	private volatile boolean ocspEnabled;
 
 	/**
@@ -96,7 +96,7 @@ public class BasicSignerOptions {
 		setRightModifyAnnotations(props.getAsBool(Constants.PROPERTY_RIGHT_MOD_ANNOT));
 		setRightModifyContents(props.getAsBool(Constants.PROPERTY_RIGHT_MOD_CONT));
 
-		//visible signature options
+		// visible signature options
 		setVisible(props.getAsBool(Constants.PROPERTY_VISIBLE_ENABLED));
 		setPage(props.getAsInt(Constants.PROPERTY_VISIBLE_PAGE, Constants.DEFVAL_PAGE));
 		setPositionLLX(props.getAsFloat(Constants.PROPERTY_VISIBLE_POS_LLX, Constants.DEFVAL_LLX));
@@ -111,20 +111,18 @@ public class BasicSignerOptions {
 		setImgPath(props.getProperty(Constants.PROPERTY_VISIBLE_IMG));
 		setBgImgPath(props.getProperty(Constants.PROPERTY_VISIBLE_BGIMG));
 
-		//TSA
+		// TSA
 		setTimestamp(props.getAsBool(Constants.PROPERTY_TSA_ENABLED));
 		setTsaUrl(props.getProperty(Constants.PROPERTY_TSA_URL));
 		setTsaUser(props.getProperty(Constants.PROPERTY_TSA_USER));
 
-		//OCSP
+		// OCSP
 		setOcspEnabled(props.getAsBool(Constants.PROPERTY_OCSP_ENABLED));
 
-		//passwords
+		// passwords
 		storePasswords = props.getAsBool(Constants.PROPERTY_STOREPWD);
 		final String tmpHome = getDecrypted(Constants.EPROPERTY_USERHOME);
-		boolean tmpPasswords = storePasswords &&
-			Constants.USER_HOME!=null &&
-			Constants.USER_HOME.equals(tmpHome);
+		boolean tmpPasswords = storePasswords && Constants.USER_HOME != null && Constants.USER_HOME.equals(tmpHome);
 		if (tmpPasswords) {
 			setKsPasswd(getDecrypted(Constants.EPROPERTY_KS_PWD));
 			setKeyPasswd(getDecrypted(Constants.EPROPERTY_KEY_PWD));
@@ -163,7 +161,7 @@ public class BasicSignerOptions {
 		props.setProperty(Constants.PROPERTY_RIGHT_MOD_ANNOT, isRightModifyAnnotations());
 		props.setProperty(Constants.PROPERTY_RIGHT_MOD_CONT, isRightModifyContents());
 
-		//visible signature options
+		// visible signature options
 		props.setProperty(Constants.PROPERTY_VISIBLE_ENABLED, isVisible());
 		props.setProperty(Constants.PROPERTY_VISIBLE_PAGE, getPage());
 		props.setProperty(Constants.PROPERTY_VISIBLE_POS_LLX, getPositionLLX());
@@ -204,10 +202,11 @@ public class BasicSignerOptions {
 		props.saveDefault();
 	}
 
-
 	/**
 	 * Logs localized message to PrintWriter
-	 * @param aKey message key
+	 * 
+	 * @param aKey
+	 *            message key
 	 */
 	void log(final String aKey) {
 		log(aKey, (String[]) null);
@@ -215,20 +214,26 @@ public class BasicSignerOptions {
 
 	/**
 	 * Logs localized message to PrintWriter
-	 * @param aKey message key
-	 * @param anArg message parameter
+	 * 
+	 * @param aKey
+	 *            message key
+	 * @param anArg
+	 *            message parameter
 	 */
 	void log(final String aKey, final String anArg) {
-		log(aKey, anArg==null? null: new String[] {anArg});
+		log(aKey, anArg == null ? null : new String[] { anArg });
 	}
 
 	/**
 	 * Logs localized message to PrintWriter
-	 * @param aKey message key
-	 * @param anArgs message parameters
+	 * 
+	 * @param aKey
+	 *            message key
+	 * @param anArgs
+	 *            message parameters
 	 */
 	void log(final String aKey, final String[] anArgs) {
-		if (printWriter!=null) {
+		if (printWriter != null) {
 			printWriter.println(res.get(aKey, anArgs));
 			printWriter.flush();
 		}
@@ -236,6 +241,7 @@ public class BasicSignerOptions {
 
 	/**
 	 * Fires event listener
+	 * 
 	 * @param aResult
 	 * @see #getListener()
 	 */
@@ -246,35 +252,45 @@ public class BasicSignerOptions {
 	}
 
 	/**
-	 * Converts array of characters to String. If array is null, empty string is returned
-	 * @param aCharArr char array
+	 * Converts array of characters to String. If array is null, empty string is
+	 * returned
+	 * 
+	 * @param aCharArr
+	 *            char array
 	 * @return not null string
 	 */
 	private String charArrToStr(final char[] aCharArr) {
-		return aCharArr==null?"":new String(aCharArr);
+		return aCharArr == null ? "" : new String(aCharArr);
 	}
 
 	public PrintWriter getPrintWriter() {
 		return printWriter;
 	}
+
 	public void setPrintWriter(PrintWriter outWriter) {
 		this.printWriter = outWriter;
 	}
+
 	public String getKsType() {
 		return ksType;
 	}
+
 	public void setKsType(String ksType) {
 		this.ksType = ksType;
 	}
+
 	public String getKsFile() {
 		return ksFile;
 	}
+
 	public void setKsFile(String ksFile) {
 		this.ksFile = ksFile;
 	}
+
 	public char[] getKsPasswd() {
 		return ksPasswd;
 	}
+
 	public String getKsPasswdStr() {
 		return charArrToStr(ksPasswd);
 	}
@@ -282,64 +298,107 @@ public class BasicSignerOptions {
 	public void setKsPasswd(char[] passwd) {
 		this.ksPasswd = passwd;
 	}
+
 	public void setKsPasswd(String aPasswd) {
-		setKsPasswd(aPasswd==null?null:aPasswd.toCharArray());
+		setKsPasswd(aPasswd == null ? null : aPasswd.toCharArray());
 	}
+
 	public String getInFile() {
 		return inFile;
 	}
+
 	public void setInFile(String inFile) {
 		this.inFile = inFile;
 	}
+
 	public String getOutFile() {
 		return outFile;
 	}
+
+	/**
+	 * Returns output file name if filled or input file name with default output
+	 * suffix ("_signed")
+	 * 
+	 * @return
+	 */
+	public String getOutFileX() {
+		String tmpOut = StringUtils.emptyNull(outFile);
+		if (tmpOut == null) {
+			String tmpExtension = "";
+			String tmpNameBase = StringUtils.emptyNull(getInFile());
+			if (tmpNameBase == null) {
+				tmpOut = "signed.pdf";
+			} else {
+				if (tmpNameBase.toLowerCase().endsWith(".pdf")) {
+					final int tmpBaseLen = tmpNameBase.length() - 4;
+					tmpExtension = tmpNameBase.substring(tmpBaseLen);
+					tmpNameBase = tmpNameBase.substring(0, tmpBaseLen);
+				}
+				tmpOut = tmpNameBase + Constants.DEFAULT_OUT_SUFFIX + tmpExtension;
+			}
+		}
+		return tmpOut;
+	}
+
 	public void setOutFile(String outFile) {
 		this.outFile = outFile;
 	}
+
 	public String getReason() {
 		return reason;
 	}
+
 	public void setReason(String reason) {
 		this.reason = reason;
 	}
+
 	public String getLocation() {
 		return location;
 	}
+
 	public void setLocation(String location) {
 		this.location = location;
 	}
+
 	public SignResultListener getListener() {
 		return listener;
 	}
+
 	public void setListener(SignResultListener listener) {
 		this.listener = listener;
 	}
+
 	public char[] getKeyPasswd() {
 		return keyPasswd;
 	}
+
 	public char[] getKeyPasswdX() {
-		if (keyPasswd != null && keyPasswd.length==0) {
+		if (keyPasswd != null && keyPasswd.length == 0) {
 			keyPasswd = null;
 		}
-		return advanced?keyPasswd:ksPasswd;
+		return advanced ? keyPasswd : ksPasswd;
 	}
+
 	public String getKeyPasswdStr() {
 		return charArrToStr(keyPasswd);
 	}
+
 	public void setKeyPasswd(char[] keyPasswd) {
 		this.keyPasswd = keyPasswd;
 	}
+
 	public void setKeyPasswd(String aPasswd) {
-		setKeyPasswd(aPasswd==null?null:aPasswd.toCharArray());
+		setKeyPasswd(aPasswd == null ? null : aPasswd.toCharArray());
 	}
 
 	public String getKeyAlias() {
 		return keyAlias;
 	}
+
 	public String getKeyAliasX() {
-		return advanced?keyAlias:null;
+		return advanced ? keyAlias : null;
 	}
+
 	public void setKeyAlias(String keyAlias) {
 		this.keyAlias = keyAlias;
 	}
@@ -347,21 +406,25 @@ public class BasicSignerOptions {
 	public int getKeyIndex() {
 		return keyIndex;
 	}
+
 	public int getKeyIndexX() {
-		return advanced?keyIndex:Constants.DEFVAL_KEY_INDEX;
-	}
-	public void setKeyIndex(int anIndex) {
-		this.keyIndex = anIndex;
-		if (keyIndex<0) keyIndex = Constants.DEFVAL_KEY_INDEX;
+		return advanced ? keyIndex : Constants.DEFVAL_KEY_INDEX;
 	}
 
+	public void setKeyIndex(int anIndex) {
+		this.keyIndex = anIndex;
+		if (keyIndex < 0)
+			keyIndex = Constants.DEFVAL_KEY_INDEX;
+	}
 
 	public boolean isAppend() {
 		return append;
 	}
+
 	public boolean isAppendX() {
 		return advanced && append && !encrypted;
 	}
+
 	public void setAppend(boolean append) {
 		this.append = append;
 	}
@@ -377,6 +440,7 @@ public class BasicSignerOptions {
 	public boolean isEncrypted() {
 		return encrypted;
 	}
+
 	public boolean isEncryptedX() {
 		return advanced && encrypted;
 	}
@@ -388,6 +452,7 @@ public class BasicSignerOptions {
 	public char[] getPdfOwnerPwd() {
 		return pdfOwnerPwd;
 	}
+
 	public String getPdfOwnerPwdStr() {
 		return charArrToStr(pdfOwnerPwd);
 	}
@@ -395,13 +460,15 @@ public class BasicSignerOptions {
 	public void setPdfOwnerPwd(char[] pdfOwnerPwd) {
 		this.pdfOwnerPwd = pdfOwnerPwd;
 	}
+
 	public void setPdfOwnerPwd(String aPasswd) {
-		setPdfOwnerPwd(aPasswd==null?null:aPasswd.toCharArray());
+		setPdfOwnerPwd(aPasswd == null ? null : aPasswd.toCharArray());
 	}
 
 	public char[] getPdfUserPwd() {
 		return pdfUserPwd;
 	}
+
 	public String getPdfUserPwdStr() {
 		return charArrToStr(pdfUserPwd);
 	}
@@ -409,18 +476,20 @@ public class BasicSignerOptions {
 	public void setPdfUserPwd(char[] pdfUserPwd) {
 		this.pdfUserPwd = pdfUserPwd;
 	}
+
 	public void setPdfUserPwd(String aPasswd) {
-		setPdfUserPwd(aPasswd==null?null:aPasswd.toCharArray());
+		setPdfUserPwd(aPasswd == null ? null : aPasswd.toCharArray());
 	}
 
 	public CertificationLevel getCertLevel() {
-		if (certLevel==null) {
+		if (certLevel == null) {
 			certLevel = CertificationLevel.NOT_CERTIFIED;
 		}
 		return certLevel;
 	}
+
 	public CertificationLevel getCertLevelX() {
-		return advanced?getCertLevel():CertificationLevel.NOT_CERTIFIED;
+		return advanced ? getCertLevel() : CertificationLevel.NOT_CERTIFIED;
 	}
 
 	public void setCertLevel(CertificationLevel aCertLevel) {
@@ -428,7 +497,7 @@ public class BasicSignerOptions {
 	}
 
 	public void setCertLevel(String aCertLevel) {
-		setCertLevel(aCertLevel==null?null:CertificationLevel.valueOf(aCertLevel.toUpperCase()));
+		setCertLevel(aCertLevel == null ? null : CertificationLevel.valueOf(aCertLevel.toUpperCase()));
 	}
 
 	public boolean isRightCopy() {
@@ -484,13 +553,14 @@ public class BasicSignerOptions {
 	}
 
 	public void setRightPrinting(PrintRight rightPrinting) {
-		if (getRightPrinting()==null) {
+		if (getRightPrinting() == null) {
 			rightPrinting = PrintRight.ALLOW_PRINTING;
 		}
 		this.rightPrinting = rightPrinting;
 	}
+
 	public void setRightPrinting(String aValue) {
-		setRightPrinting(aValue==null?null:PrintRight.valueOf(aValue.toUpperCase()));
+		setRightPrinting(aValue == null ? null : PrintRight.valueOf(aValue.toUpperCase()));
 	}
 
 	public boolean isVisible() {
@@ -506,7 +576,7 @@ public class BasicSignerOptions {
 	}
 
 	public void setPage(int aPage) {
-		if (aPage<1) {
+		if (aPage < 1) {
 			aPage = 1;
 		}
 		this.page = aPage;
@@ -553,7 +623,7 @@ public class BasicSignerOptions {
 	}
 
 	public RenderMode getRenderMode() {
-		if (renderMode==null) {
+		if (renderMode == null) {
 			renderMode = RenderMode.DESCRTIPTION_ONLY;
 		}
 		return renderMode;
@@ -564,7 +634,7 @@ public class BasicSignerOptions {
 	}
 
 	public void setRenderMode(String aValue) {
-		setRenderMode(aValue==null?null:RenderMode.valueOf(aValue.toUpperCase()));
+		setRenderMode(aValue == null ? null : RenderMode.valueOf(aValue.toUpperCase()));
 	}
 
 	public String getL2Text() {
@@ -603,14 +673,15 @@ public class BasicSignerOptions {
 	 * @return the l2TextFontSize
 	 */
 	public float getL2TextFontSize() {
-		if (l2TextFontSize<=0f) {
+		if (l2TextFontSize <= 0f) {
 			l2TextFontSize = Constants.DEFVAL_L2_FONT_SIZE;
 		}
 		return l2TextFontSize;
 	}
 
 	/**
-	 * @param textFontSize the l2TextFontSize to set
+	 * @param textFontSize
+	 *            the l2TextFontSize to set
 	 */
 	public void setL2TextFontSize(float textFontSize) {
 		l2TextFontSize = textFontSize;
@@ -618,6 +689,7 @@ public class BasicSignerOptions {
 
 	/**
 	 * Returns decrypted property
+	 * 
 	 * @param aProperty
 	 * @return
 	 */
@@ -632,13 +704,13 @@ public class BasicSignerOptions {
 
 	/**
 	 * Sets encrypted property
+	 * 
 	 * @param aProperty
 	 * @return
 	 */
 	protected void setEncrypted(final String aProperty, final String aValue) {
 		try {
-			props.setProperty(aProperty,
-					encryptor.encryptString(aValue));
+			props.setProperty(aProperty, encryptor.encryptString(aValue));
 		} catch (CryptoException e) {
 			e.printStackTrace();
 			props.removeProperty(aProperty);
@@ -657,7 +729,8 @@ public class BasicSignerOptions {
 	}
 
 	/**
-	 * @param timestamp the timestamp to set
+	 * @param timestamp
+	 *            the timestamp to set
 	 */
 	public void setTimestamp(boolean timestamp) {
 		this.timestamp = timestamp;
@@ -671,7 +744,8 @@ public class BasicSignerOptions {
 	}
 
 	/**
-	 * @param tsaUrl the tsaUrl to set
+	 * @param tsaUrl
+	 *            the tsaUrl to set
 	 */
 	public void setTsaUrl(String tsaUrl) {
 		this.tsaUrl = tsaUrl;
@@ -685,7 +759,8 @@ public class BasicSignerOptions {
 	}
 
 	/**
-	 * @param tsaUser the tsaUser to set
+	 * @param tsaUser
+	 *            the tsaUser to set
 	 */
 	public void setTsaUser(String tsaUser) {
 		this.tsaUser = tsaUser;
@@ -699,7 +774,8 @@ public class BasicSignerOptions {
 	}
 
 	/**
-	 * @param tsaPasswd the tsaPasswd to set
+	 * @param tsaPasswd
+	 *            the tsaPasswd to set
 	 */
 	public void setTsaPasswd(String tsaPasswd) {
 		this.tsaPasswd = tsaPasswd;
@@ -717,12 +793,12 @@ public class BasicSignerOptions {
 	}
 
 	/**
-	 * @param ocspEnabled the ocspEnabled to set
+	 * @param ocspEnabled
+	 *            the ocspEnabled to set
 	 */
 	public void setOcspEnabled(boolean ocspEnabled) {
 		this.ocspEnabled = ocspEnabled;
 	}
-
 
 	public boolean isStorePasswords() {
 		return storePasswords;
@@ -740,7 +816,8 @@ public class BasicSignerOptions {
 	}
 
 	/**
-	 * @param contact the contact to set
+	 * @param contact
+	 *            the contact to set
 	 */
 	public void setContact(String contact) {
 		this.contact = contact;

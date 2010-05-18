@@ -10,10 +10,12 @@ import java.security.cert.Certificate;
 import java.security.cert.X509Certificate;
 import java.util.Calendar;
 import java.util.HashMap;
+import java.util.List;
 
 import com.lowagie.text.Font;
 import com.lowagie.text.Image;
 import com.lowagie.text.Rectangle;
+import com.lowagie.text.pdf.AcroFields;
 import com.lowagie.text.pdf.BaseFont;
 import com.lowagie.text.pdf.OcspClientBouncyCastle;
 import com.lowagie.text.pdf.PdfDate;
@@ -60,7 +62,8 @@ public class SignerLogic implements Runnable {
 		if (options == null) {
 			throw new NullPointerException("Options has to be filled.");
 		}
-		if (!validateInOutFiles(options.getInFile(), options.getOutFile())) {
+		final String outFile = options.getOutFileX();
+		if (!validateInOutFiles(options.getInFile(), outFile)) {
 			options.log("console.skippingSigning");
 			return;
 		}
@@ -83,8 +86,8 @@ public class SignerLogic implements Runnable {
 				}
 			}
 
-			options.log("console.createOutPdf", options.getOutFile());
-			final FileOutputStream fout = new FileOutputStream(options.getOutFile());
+			options.log("console.createOutPdf", outFile);
+			final FileOutputStream fout = new FileOutputStream(outFile);
 
 			options.log("console.createSignature");
 			char tmpPdfVersion = '\0'; // default version - the same as input
@@ -98,6 +101,15 @@ public class SignerLogic implements Runnable {
 				}
 			}
 			final PdfStamper stp = PdfStamper.createSignature(reader, fout, tmpPdfVersion, null, options.isAppendX());
+			if (!options.isAppendX()) {
+				// we are not in append mode, let's remove existing signatures
+				// (otherwise we're getting to troubles)
+				final AcroFields acroFields = stp.getAcroFields();
+				final List<String> sigNames = acroFields.getSignatureNames();
+				for (String sigName : sigNames) {
+					acroFields.removeField(sigName);
+				}
+			}
 			if (options.isEncryptedX()) {
 				options.log("console.setEncryption");
 				final int tmpRight = options.getRightPrinting().getRight()
