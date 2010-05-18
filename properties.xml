@@ -24,7 +24,8 @@
 		<format property="build.timestamp" pattern="yyyyMMddHHmm"/>
 	</tstamp>
 
-	<property name="jsignpdf.filename" value="JSignPdf" />
+	<property name="jsignpdf.product.name" value="JSignPdf" />
+	<property name="jsignpdf.filename" value="${jsignpdf.product.name}" />
 
 	<!-- Default options for compiling -->
 	<property name="compile.deprecation" value="false" />

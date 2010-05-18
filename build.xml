@@ -16,7 +16,7 @@
 	<path id="project.classpath">
 		<path refid="ooo.classpath"/>
 
-		<fileset dir="${lib.dir}">
+		<fileset dir="${dist.dir}/lib">
 			<include name="*.jar" />
 		</fileset>
 	</path>
@@ -38,10 +38,21 @@
 		<delete dir="${build.dir}"/>
 		<delete dir="${dist.dir}"/>
 		<delete dir="Output"/>
+		<ant antfile="../jsignpdf-itxt/src/build.xml" useNativeBasedir="true" target="clean" />
 	</target>
 
+	<target name="jsignpdf-itxt">
+		<echo message="Creating JSignPdf-itxt"/>
+		<property name="releasenumber" value="${jsignpdf.version}"/>
+		<property name="product.name" value="${jsignpdf.product.name}"/>
+		<tstamp>
+			<format property="releasedate" pattern="yyyy-MM-dd"/>
+		</tstamp>
+		<ant antfile="../jsignpdf-itxt/src/build.xml" useNativeBasedir="true" target="release-1.4" />
+	</target>
+	
 	<!-- Prepare directory structure for the build -->
-	<target name="prepare">
+	<target name="prepare" depends="jsignpdf-itxt">
 		<echo message="Preparing directory structure for the build" />
 		<mkdir dir="${bin.dir}"/>
 		<mkdir dir="${src.filtered.dir}"/>
@@ -69,6 +80,8 @@
 				<include name="licenses/**"/>
 			</fileset>
 		</copy>
+		<copy todir="${bin.plugin.dir}/lib" file="../jsignpdf-itxt/build/release/dist/jsignpdf-itxt-${jsignpdf.version}.jar"/>
+		
 		<copy todir="${bin.dir}">
 			<fileset dir="${res.dir}">
 				<include name="**"/>
@@ -76,7 +89,7 @@
 		</copy>
 
 		<copy todir="${dist.dir}">
-			<fileset dir=".">
+			<fileset dir="${bin.plugin.dir}">
 				<include name="lib/*.jar"/>
 			</fileset>
 		</copy>
@@ -108,7 +121,7 @@
 		<!-- create Class-Path attribute value for MANIFEST.MF -->
 		<pathconvert property="manifest.classpath" pathsep=" ">
 			<path>
-				<fileset dir="lib">
+				<fileset dir="${dist.dir}/lib">
 					<include name="*.jar" />
 				</fileset>
 			</path>
