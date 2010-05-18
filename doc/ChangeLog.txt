@@ -1,3 +1,9 @@
+2010-05-16 Josef Cacek
+  * fixed handling of multiple-signatures in non-append mode (old signatures are correctly removed now)
+  * fix for Unicode in PDF-producer field
+  * started using own branch of iText library based on version 2.1.7 (new name: JSignPdf-itxt)
+  * fixed handling of empty Output PDF field (it was filled after application restart)
+
 2010-04-26 Josef Cacek & Marcus Schoeller
   * listing/reloading keys checks certificate validity and KeyUsage attributes (it's still possible 
     to sign with another private key, but you have to provide the correct alias by hand!) 
