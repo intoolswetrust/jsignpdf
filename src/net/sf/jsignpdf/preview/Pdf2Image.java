@@ -26,7 +26,7 @@ public class Pdf2Image {
 	 */
 	public Pdf2Image(BasicSignerOptions anOpts) {
 		if (anOpts == null)
-			throw new IllegalArgumentException("Options have to be not-null");
+			throw new NullPointerException("Options have to be not-null");
 		options = anOpts;
 	}
 
