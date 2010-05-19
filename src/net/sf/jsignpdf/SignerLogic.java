@@ -13,6 +13,9 @@ import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
 
+import net.sf.jsignpdf.crl.CRLInfo;
+import net.sf.jsignpdf.crl.CRLUtils;
+
 import com.lowagie.text.Font;
 import com.lowagie.text.Image;
 import com.lowagie.text.Rectangle;
@@ -203,12 +206,17 @@ public class SignerLogic implements Runnable {
 			dic.setDate(new PdfDate(sap.getSignDate()));
 			sap.setCryptoDictionary(dic);
 
-			int contentEstimated = 15000;
+			options.log("console.readingCRLs");
+			final CRLInfo crlInfo = options.isCrlEnabledX() ? CRLUtils.getCRLs((X509Certificate) chain[0])
+					: new CRLInfo();
+
+			// FIXME find better way of estimating content size if CRL is used
+			int contentEstimated = 15000 + (int) crlInfo.getByteCount() * 2;
 			HashMap exc = new HashMap();
 			exc.put(PdfName.CONTENTS, new Integer(contentEstimated * 2 + 2));
 			sap.preClose(exc);
 
-			PdfPKCS7 sgn = new PdfPKCS7(key, chain, null, "SHA1", null, false);
+			PdfPKCS7 sgn = new PdfPKCS7(key, chain, crlInfo.getCrls(), "SHA1", null, false);
 			InputStream data = sap.getRangeStream();
 			MessageDigest messageDigest = MessageDigest.getInstance("SHA1");
 			byte buf[] = new byte[8192];

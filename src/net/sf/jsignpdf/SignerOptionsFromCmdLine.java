@@ -505,6 +505,13 @@ public class SignerOptionsFromCmdLine extends BasicSignerOptions {
 				.create()
 		);
 
+		OPTS.addOption(
+				OptionBuilder
+				.withLongOpt(ARG_CRL_LONG)
+				.withDescription(res.get("hlp.crl"))
+				.create()
+		);
+
 	}
 
 	/**

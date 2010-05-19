@@ -35,7 +35,7 @@ public class Constants {
 	public static final String L2TEXT_FONT_NAME = "pokrytie.ttf";
 
 	public static final String DEFAULT_OUT_SUFFIX = "_signed";
-	
+
 	/**
 	 * Property name.
 	 */
@@ -84,6 +84,7 @@ public class Constants {
 	public static final String EPROPERTY_TSA_PWD = "enc.tsa.passwd";
 
 	public static final String PROPERTY_OCSP_ENABLED = "ocsp.enabled";
+	public static final String PROPERTY_CRL_ENABLED = "crl.enabled";
 
 	/**
 	 * Property name.
@@ -226,5 +227,6 @@ public class Constants {
 	public static final String ARG_TSA_PWD_LONG = "tsa-password";
 
 	public static final String ARG_OCSP_LONG = "ocsp";
+	public static final String ARG_CRL_LONG = "crl";
 
 }

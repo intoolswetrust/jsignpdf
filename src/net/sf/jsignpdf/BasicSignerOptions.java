@@ -67,8 +67,9 @@ public class BasicSignerOptions {
 	private volatile String tsaUser;
 	private volatile String tsaPasswd;
 
-	// options for timestamps (provided by external TSA)
+	// options for certificate validation
 	private volatile boolean ocspEnabled;
+	private volatile boolean crlEnabled;
 
 	/**
 	 * Loads options from PropertyProvider
@@ -116,8 +117,9 @@ public class BasicSignerOptions {
 		setTsaUrl(props.getProperty(Constants.PROPERTY_TSA_URL));
 		setTsaUser(props.getProperty(Constants.PROPERTY_TSA_USER));
 
-		// OCSP
+		// OCSP & CRL
 		setOcspEnabled(props.getAsBool(Constants.PROPERTY_OCSP_ENABLED));
+		setCrlEnabled(props.getAsBool(Constants.PROPERTY_CRL_ENABLED));
 
 		// passwords
 		storePasswords = props.getAsBool(Constants.PROPERTY_STOREPWD);
@@ -180,6 +182,7 @@ public class BasicSignerOptions {
 		props.setProperty(Constants.PROPERTY_TSA_URL, getTsaUrl());
 		props.setProperty(Constants.PROPERTY_TSA_USER, getTsaUser());
 		props.setProperty(Constants.PROPERTY_OCSP_ENABLED, isOcspEnabled());
+		props.setProperty(Constants.PROPERTY_CRL_ENABLED, isCrlEnabled());
 
 		props.setProperty(Constants.PROPERTY_STOREPWD, isStorePasswords());
 		setEncrypted(Constants.EPROPERTY_USERHOME, Constants.USER_HOME);
@@ -821,6 +824,18 @@ public class BasicSignerOptions {
 	 */
 	public void setContact(String contact) {
 		this.contact = contact;
+	}
+
+	public boolean isCrlEnabled() {
+		return crlEnabled;
+	}
+
+	public boolean isCrlEnabledX() {
+		return advanced && crlEnabled;
+	}
+
+	public void setCrlEnabled(boolean crlEnabled) {
+		this.crlEnabled = crlEnabled;
 	}
 
 }

@@ -1,3 +1,9 @@
+2010-05-19 Josef Cacek
+  * added multiline support for signature text (L2)
+  * translation friendly default signature text (L2)
+  * added CRL support
+  * preview and/or select by mouse visible signature (using PdfBox to convert PDF page to image)
+
 2010-05-16 Josef Cacek
   * fixed handling of multiple-signatures in non-append mode (old signatures are correctly removed now)
   * fix for Unicode in PDF-producer field
