@@ -8,6 +8,7 @@ import java.security.MessageDigest;
 import java.security.PrivateKey;
 import java.security.cert.Certificate;
 import java.security.cert.X509Certificate;
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
@@ -37,6 +38,8 @@ import com.lowagie.text.pdf.TSAClientBouncyCastle;
  * @author Josef Cacek
  */
 public class SignerLogic implements Runnable {
+
+	protected final static ResourceProvider res = ResourceProvider.getInstance();
 
 	private BasicSignerOptions options;
 
@@ -162,7 +165,24 @@ public class SignerLogic implements Runnable {
 				options.log("console.setImageScale");
 				sap.setImageScale(options.getBgImgScale());
 				options.log("console.setL2Text");
-				sap.setLayer2Text(options.getL2Text());
+				if (options.getL2Text() != null) {
+					sap.setLayer2Text(options.getL2Text());
+				} else {
+					final StringBuilder buf = new StringBuilder();
+					buf.append(res.get("default.l2text.signedBy")).append(" ");
+					buf.append(PdfPKCS7.getSubjectFields((X509Certificate) chain[0]).getField("CN")).append('\n');
+					final SimpleDateFormat sd = new SimpleDateFormat("yyyy.MM.dd HH:mm:ss z");
+					buf.append(res.get("default.l2text.date")).append(" ").append(
+							sd.format(sap.getSignDate().getTime()));
+					if (StringUtils.hasLength(options.getReason()))
+						buf.append('\n').append(res.get("default.l2text.reason")).append(" ").append(
+								options.getReason());
+					if (StringUtils.hasLength(options.getLocation()))
+						buf.append('\n').append(res.get("default.l2text.location")).append(" ").append(
+								options.getLocation());
+					sap.setLayer2Text(buf.toString());
+					;
+				}
 				if (getL2BaseFont() != null) {
 					sap.setLayer2Font(new Font(getL2BaseFont(), options.getL2TextFontSize()));
 				}
