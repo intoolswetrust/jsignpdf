@@ -155,7 +155,7 @@ public class VisibleSignatureDialog extends javax.swing.JDialog {
 		tfPosURY.setText(ConvertUtils.toString(options.getPositionURY()));
 		tfBgImgScale.setText(ConvertUtils.toString(options.getBgImgScale()));
 		cbDisplayMode.setSelectedItem(options.getRenderMode());
-		tfL2Text.setText(options.getL2Text());
+		taL2Text.setText(options.getL2Text());
 		chkbL2TextDefault.setSelected(options.getL2Text() == null);
 		tfL2TextFontSize.setText(ConvertUtils.toString(options.getL2TextFontSize()));
 		tfL4Text.setText(options.getL4Text());
@@ -179,7 +179,7 @@ public class VisibleSignatureDialog extends javax.swing.JDialog {
 		options.setPositionURY(ConvertUtils.toFloat(tfPosURY.getText(), Constants.DEFVAL_URY));
 		options.setBgImgScale(ConvertUtils.toFloat(tfBgImgScale.getText(), Constants.DEFVAL_BG_SCALE));
 		options.setRenderMode((RenderMode) cbDisplayMode.getSelectedItem());
-		options.setL2Text(chkbL2TextDefault.isSelected() ? null : StringUtils.toNotNull(tfL2Text.getText()));
+		options.setL2Text(chkbL2TextDefault.isSelected() ? null : StringUtils.toNotNull(taL2Text.getText()));
 		options.setL2TextFontSize(ConvertUtils.toFloat(tfL2TextFontSize.getText(), Constants.DEFVAL_L2_FONT_SIZE));
 		options.setL4Text(chkbL4TextDefault.isSelected() ? null : StringUtils.toNotNull(tfL4Text.getText()));
 		options.setImgPath(tfImgPath.getText());
@@ -259,6 +259,8 @@ public class VisibleSignatureDialog extends javax.swing.JDialog {
 	// <editor-fold defaultstate="collapsed"
 	// <editor-fold defaultstate="collapsed"
 	// <editor-fold defaultstate="collapsed"
+	// <editor-fold defaultstate="collapsed"
+	// <editor-fold defaultstate="collapsed"
 	// desc="Generated Code">//GEN-BEGIN:initComponents
 	private void initComponents() {
 		java.awt.GridBagConstraints gridBagConstraints;
@@ -278,7 +280,6 @@ public class VisibleSignatureDialog extends javax.swing.JDialog {
 		lblSettings = new javax.swing.JLabel();
 		lblDisplayMode = new javax.swing.JLabel();
 		cbDisplayMode = new javax.swing.JComboBox();
-		tfL2Text = new javax.swing.JTextField();
 		chkbL2TextDefault = new javax.swing.JCheckBox();
 		lblL4Text = new javax.swing.JLabel();
 		tfL4Text = new javax.swing.JTextField();
@@ -299,6 +300,10 @@ public class VisibleSignatureDialog extends javax.swing.JDialog {
 		lblL2TextFontSize = new javax.swing.JLabel();
 		tfL2TextFontSize = new javax.swing.JTextField();
 		btnPreview = new javax.swing.JButton();
+		jScrollPane1 = new javax.swing.JScrollPane();
+		taL2Text = new javax.swing.JTextArea();
+
+		previewDialog.setModal(true);
 
 		addComponentListener(new java.awt.event.ComponentAdapter() {
 			public void componentHidden(java.awt.event.ComponentEvent evt) {
@@ -450,15 +455,6 @@ public class VisibleSignatureDialog extends javax.swing.JDialog {
 		gridBagConstraints.insets = new java.awt.Insets(2, 5, 2, 5);
 		getContentPane().add(cbDisplayMode, gridBagConstraints);
 
-		tfL2Text.setMinimumSize(new java.awt.Dimension(200, 20));
-		tfL2Text.setPreferredSize(new java.awt.Dimension(200, 20));
-		gridBagConstraints = new java.awt.GridBagConstraints();
-		gridBagConstraints.gridx = 1;
-		gridBagConstraints.gridy = 8;
-		gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-		gridBagConstraints.insets = new java.awt.Insets(2, 5, 2, 5);
-		getContentPane().add(tfL2Text, gridBagConstraints);
-
 		chkbL2TextDefault.setText("Default");
 		chkbL2TextDefault.setBorder(javax.swing.BorderFactory.createEmptyBorder(0, 0, 0, 0));
 		chkbL2TextDefault.setMargin(new java.awt.Insets(0, 0, 0, 0));
@@ -471,7 +467,8 @@ public class VisibleSignatureDialog extends javax.swing.JDialog {
 		gridBagConstraints.gridx = 2;
 		gridBagConstraints.gridy = 8;
 		gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-		gridBagConstraints.insets = new java.awt.Insets(0, 2, 0, 2);
+		gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTH;
+		gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
 		getContentPane().add(chkbL2TextDefault, gridBagConstraints);
 
 		lblL4Text.setLabelFor(tfL4Text);
@@ -627,12 +624,13 @@ public class VisibleSignatureDialog extends javax.swing.JDialog {
 		gridBagConstraints.gridy = 3;
 		getContentPane().add(lblPosLLYBounds, gridBagConstraints);
 
-		lblL2Text.setLabelFor(tfL2Text);
+		lblL2Text.setLabelFor(taL2Text);
 		lblL2Text.setText("Signature text");
 		gridBagConstraints = new java.awt.GridBagConstraints();
 		gridBagConstraints.gridx = 0;
 		gridBagConstraints.gridy = 8;
 		gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+		gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHEAST;
 		gridBagConstraints.insets = new java.awt.Insets(2, 5, 2, 5);
 		getContentPane().add(lblL2Text, gridBagConstraints);
 
@@ -668,6 +666,20 @@ public class VisibleSignatureDialog extends javax.swing.JDialog {
 		gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
 		gridBagConstraints.insets = new java.awt.Insets(0, 2, 0, 2);
 		getContentPane().add(btnPreview, gridBagConstraints);
+
+		jScrollPane1.setVerticalScrollBarPolicy(javax.swing.ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
+		jScrollPane1.setMinimumSize(new java.awt.Dimension(24, 48));
+
+		taL2Text.setColumns(20);
+		taL2Text.setRows(5);
+		jScrollPane1.setViewportView(taL2Text);
+
+		gridBagConstraints = new java.awt.GridBagConstraints();
+		gridBagConstraints.gridx = 1;
+		gridBagConstraints.gridy = 8;
+		gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+		gridBagConstraints.insets = new java.awt.Insets(2, 5, 2, 5);
+		getContentPane().add(jScrollPane1, gridBagConstraints);
 
 		pack();
 	}// </editor-fold>//GEN-END:initComponents
@@ -706,7 +718,7 @@ public class VisibleSignatureDialog extends javax.swing.JDialog {
 	}// GEN-LAST:event_chkbL4TextDefaultActionPerformed
 
 	private void chkbL2TextDefaultActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_chkbL2TextDefaultActionPerformed
-		tfL2Text.setEnabled(!chkbL2TextDefault.isSelected());
+		taL2Text.setEnabled(!chkbL2TextDefault.isSelected());
 	}// GEN-LAST:event_chkbL2TextDefaultActionPerformed
 
 	private void formComponentHidden(java.awt.event.ComponentEvent evt) {// GEN-FIRST:event_formComponentHidden
@@ -731,6 +743,7 @@ public class VisibleSignatureDialog extends javax.swing.JDialog {
 	private javax.swing.JComboBox cbDisplayMode;
 	private javax.swing.JCheckBox chkbL2TextDefault;
 	private javax.swing.JCheckBox chkbL4TextDefault;
+	private javax.swing.JScrollPane jScrollPane1;
 	private javax.swing.JLabel lblBgImgPath;
 	private javax.swing.JLabel lblBgImgScale;
 	private javax.swing.JLabel lblDisplayMode;
@@ -749,10 +762,10 @@ public class VisibleSignatureDialog extends javax.swing.JDialog {
 	private javax.swing.JLabel lblPosition;
 	private javax.swing.JLabel lblSettings;
 	private javax.swing.JDialog previewDialog;
+	private javax.swing.JTextArea taL2Text;
 	private javax.swing.JTextField tfBgImgPath;
 	private javax.swing.JTextField tfBgImgScale;
 	private javax.swing.JTextField tfImgPath;
-	private javax.swing.JTextField tfL2Text;
 	private javax.swing.JTextField tfL2TextFontSize;
 	private javax.swing.JTextField tfL4Text;
 	private javax.swing.JTextField tfPage;
