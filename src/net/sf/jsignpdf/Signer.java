@@ -1,6 +1,8 @@
 package net.sf.jsignpdf;
 
-import static net.sf.jsignpdf.Constants.*;
+import static net.sf.jsignpdf.Constants.EXIT_CODE_NO_COMMAND;
+import static net.sf.jsignpdf.Constants.EXIT_CODE_PARSE_ERR;
+import static net.sf.jsignpdf.Constants.VERSION;
 
 import java.io.File;
 
@@ -11,8 +13,9 @@ import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.ParseException;
 
 /**
- * JSignPdf main class - it either process command line or if no argument is given,
- * sets system Look&Feel and creates SignPdfForm GUI.
+ * JSignPdf main class - it either process command line or if no argument is
+ * given, sets system Look&Feel and creates SignPdfForm GUI.
+ * 
  * @author Josef Cacek
  */
 public class Signer {
@@ -20,20 +23,17 @@ public class Signer {
 	private static void printHelp() {
 		final HelpFormatter formatter = new HelpFormatter();
 		final ResourceProvider res = ResourceProvider.getInstance();
-		formatter.printHelp(80,
-				"java -jar JSignPdf.jar [file1.pdf [file2.pdf ...]]",
-				res.get("hlp.header"),
-				SignerOptionsFromCmdLine.OPTS,
-				res.get("hlp.footer"),
-				true);
+		formatter.printHelp(80, "java -jar JSignPdf.jar [file1.pdf [file2.pdf ...]]", res.get("hlp.header"),
+				SignerOptionsFromCmdLine.OPTS, res.get("hlp.footer"), true);
 	}
 
 	/**
 	 * Main.
+	 * 
 	 * @param args
 	 */
 	public static void main(String[] args) {
-		if (args!=null && args.length>0) {
+		if (args != null && args.length > 0) {
 			final SignerOptionsFromCmdLine tmpOpts = new SignerOptionsFromCmdLine();
 			try {
 				tmpOpts.loadCmdLine(args);
@@ -59,20 +59,19 @@ public class Signer {
 			if (tmpOpts.isListKeys()) {
 				final String[] tmpKeyAliases = KeyStoreUtils.getKeyAliases(tmpOpts);
 				tmpOpts.log("console.keys");
-				//list certificate aliases in the keystore
+				// list certificate aliases in the keystore
 				for (String tmpCert : tmpKeyAliases) {
 					System.out.println(tmpCert);
 				}
 			}
-			if ((tmpOpts.getFiles()!=null && tmpOpts.getFiles().length>0) ||
-					(!StringUtils.isEmpty(tmpOpts.getInFile()) && !StringUtils.isEmpty(tmpOpts.getOutFile()))) {
+			if ((tmpOpts.getFiles() != null && tmpOpts.getFiles().length > 0)
+					|| (!StringUtils.isEmpty(tmpOpts.getInFile()) && !StringUtils.isEmpty(tmpOpts.getOutFile()))) {
 				signFiles(tmpOpts);
 			} else {
-				final boolean tmpCommand =
-					tmpOpts.isPrintVersion() || tmpOpts.isPrintHelp() || tmpOpts.isListKeyStores() ||
-					tmpOpts.isListKeys();
+				final boolean tmpCommand = tmpOpts.isPrintVersion() || tmpOpts.isPrintHelp()
+						|| tmpOpts.isListKeyStores() || tmpOpts.isListKeys();
 				if (!tmpCommand) {
-					//no valid command provided - print help and exit
+					// no valid command provided - print help and exit
 					printHelp();
 					System.exit(EXIT_CODE_NO_COMMAND);
 				}
@@ -85,25 +84,27 @@ public class Signer {
 			}
 			SignPdfForm tmpForm = new SignPdfForm(WindowConstants.EXIT_ON_CLOSE);
 			tmpForm.pack();
+			GuiUtils.centerWindow(tmpForm);
 			tmpForm.setVisible(true);
 		}
 	}
 
 	/**
 	 * Sign the files
+	 * 
 	 * @param anOpts
 	 */
 	private static void signFiles(SignerOptionsFromCmdLine anOpts) {
 		final SignerLogic tmpLogic = new SignerLogic(anOpts);
-		if (anOpts.getFiles()==null || anOpts.getFiles().length==0) {
-			//we've used -lp (loadproperties) parameter
+		if (anOpts.getFiles() == null || anOpts.getFiles().length == 0) {
+			// we've used -lp (loadproperties) parameter
 			tmpLogic.run();
 			return;
 		}
 		for (final String tmpInFile : anOpts.getFiles()) {
 			final File tmpFile = new File(tmpInFile);
-			if (! tmpFile.canRead()) {
-				System.err.println(ResourceProvider.getInstance().get("file.notReadable", new String[] {tmpInFile}));
+			if (!tmpFile.canRead()) {
+				System.err.println(ResourceProvider.getInstance().get("file.notReadable", new String[] { tmpInFile }));
 				continue;
 			}
 			anOpts.setInFile(tmpInFile);
@@ -116,7 +117,7 @@ public class Signer {
 				tmpNameBase = tmpInFile;
 			}
 			int tmpPos = tmpNameBase.replaceAll("\\\\", "/").lastIndexOf('/');
-			if (tmpPos>-1) {
+			if (tmpPos > -1) {
 				tmpNameBase = tmpNameBase.substring(tmpPos + 1);
 			}
 			final StringBuilder tmpName = new StringBuilder(anOpts.getOutPath());

@@ -133,8 +133,18 @@ public class RelRect {
 	 *            the startPoint to set
 	 */
 	public void setStartPoint(Point aPoint) {
+		setStartPoint(getRelPoint(aPoint));
+	}
+
+	/**
+	 * Sets the start Point
+	 * 
+	 * @param aPoint
+	 *            the startPoint to set
+	 */
+	public void setStartPoint(FloatPoint aPoint) {
 		final FloatPoint oldPoint = startPoint;
-		startPoint = getRelPoint(aPoint);
+		startPoint = aPoint;
 		pcs.firePropertyChange(PROPERTY_START_POINT, oldPoint, startPoint);
 	}
 
@@ -145,8 +155,18 @@ public class RelRect {
 	 *            the endPoint to set
 	 */
 	public void setEndPoint(Point aPoint) {
+		setEndPoint(getRelPoint(aPoint));
+	}
+
+	/**
+	 * Sets the end Point
+	 * 
+	 * @param aPoint
+	 *            the endPoint to set
+	 */
+	public void setEndPoint(FloatPoint aPoint) {
 		final FloatPoint oldPoint = endPoint;
-		endPoint = getRelPoint(aPoint);
+		endPoint = aPoint;
 		pcs.firePropertyChange(PROPERTY_END_POINT, oldPoint, endPoint);
 	}
 
@@ -196,5 +216,10 @@ public class RelRect {
 		}
 
 		return new FloatPoint(((float) aPoint.x) / dimension.width, ((float) aPoint.y) / dimension.height);
+	}
+
+	@Override
+	public String toString() {
+		return "RelRect [dimension=" + dimension + ", endPoint=" + endPoint + ", startPoint=" + startPoint + "]";
 	}
 }

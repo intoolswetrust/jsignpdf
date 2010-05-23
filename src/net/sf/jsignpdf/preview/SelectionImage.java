@@ -55,7 +55,7 @@ public class SelectionImage extends JPanel {
 				return;
 			btnPressed = true;
 			relRect.setStartPoint(e.getPoint());
-			relRect.setEndPoint(null);
+			relRect.setEndPoint((FloatPoint) null);
 			repaint();
 		}
 

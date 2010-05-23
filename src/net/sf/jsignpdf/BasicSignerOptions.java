@@ -2,6 +2,11 @@ package net.sf.jsignpdf;
 
 import java.io.PrintWriter;
 
+import net.sf.jsignpdf.types.CertificationLevel;
+import net.sf.jsignpdf.types.HashAlgorithm;
+import net.sf.jsignpdf.types.PrintRight;
+import net.sf.jsignpdf.types.RenderMode;
+
 import org.bouncycastle.crypto.CryptoException;
 
 /**
@@ -15,61 +20,62 @@ public class BasicSignerOptions {
 	protected final PropertyProvider props = PropertyProvider.getInstance();
 	protected final JSignEncryptor encryptor = new JSignEncryptor();
 
-	private volatile PrintWriter printWriter;
-	private volatile String ksType;
-	private volatile String ksFile;
-	private volatile char[] ksPasswd;
-	private volatile String keyAlias;
-	private volatile int keyIndex = Constants.DEFVAL_KEY_INDEX;
-	private volatile char[] keyPasswd;
-	private volatile String inFile;
-	private volatile String outFile;
-	private volatile String reason;
-	private volatile String location;
-	private volatile String contact;
-	private volatile SignResultListener listener;
-	private volatile boolean append;
-	private volatile boolean advanced;
-	private volatile boolean encrypted;
-	private volatile char[] pdfOwnerPwd;
-	private volatile char[] pdfUserPwd;
-	private volatile CertificationLevel certLevel;
+	private PrintWriter printWriter;
+	private String ksType;
+	private String ksFile;
+	private char[] ksPasswd;
+	private String keyAlias;
+	private int keyIndex = Constants.DEFVAL_KEY_INDEX;
+	private char[] keyPasswd;
+	private String inFile;
+	private String outFile;
+	private String reason;
+	private String location;
+	private String contact;
+	private SignResultListener listener;
+	private boolean append;
+	private boolean advanced;
+	private boolean encrypted;
+	private char[] pdfOwnerPwd;
+	private char[] pdfUserPwd;
+	private CertificationLevel certLevel;
+	private HashAlgorithm hashAlgorithm;
 
-	protected volatile boolean storePasswords;
+	protected boolean storePasswords;
 
 	// options from rights dialog
-	private volatile PrintRight rightPrinting;
-	private volatile boolean rightCopy;
-	private volatile boolean rightAssembly;
-	private volatile boolean rightFillIn;
-	private volatile boolean rightScreanReaders;
-	private volatile boolean rightModifyAnnotations;
-	private volatile boolean rightModifyContents;
+	private PrintRight rightPrinting;
+	private boolean rightCopy;
+	private boolean rightAssembly;
+	private boolean rightFillIn;
+	private boolean rightScreanReaders;
+	private boolean rightModifyAnnotations;
+	private boolean rightModifyContents;
 
 	// options from visible signature settings dialog
-	private volatile boolean visible;
-	private volatile int page = Constants.DEFVAL_PAGE;
-	private volatile float positionLLX = Constants.DEFVAL_LLX;
-	private volatile float positionLLY = Constants.DEFVAL_LLY;
-	private volatile float positionURX = Constants.DEFVAL_URX;
-	private volatile float positionURY = Constants.DEFVAL_URY;
-	private volatile float bgImgScale = Constants.DEFVAL_BG_SCALE;
-	private volatile RenderMode renderMode;
-	private volatile String l2Text;
-	private volatile String l4Text;
-	private volatile float l2TextFontSize = Constants.DEFVAL_L2_FONT_SIZE;
-	private volatile String imgPath;
-	private volatile String bgImgPath;
+	private boolean visible;
+	private int page = Constants.DEFVAL_PAGE;
+	private float positionLLX = Constants.DEFVAL_LLX;
+	private float positionLLY = Constants.DEFVAL_LLY;
+	private float positionURX = Constants.DEFVAL_URX;
+	private float positionURY = Constants.DEFVAL_URY;
+	private float bgImgScale = Constants.DEFVAL_BG_SCALE;
+	private RenderMode renderMode;
+	private String l2Text;
+	private String l4Text;
+	private float l2TextFontSize = Constants.DEFVAL_L2_FONT_SIZE;
+	private String imgPath;
+	private String bgImgPath;
 
 	// options for timestamps (provided by external TSA)
-	private volatile boolean timestamp;
-	private volatile String tsaUrl;
-	private volatile String tsaUser;
-	private volatile String tsaPasswd;
+	private boolean timestamp;
+	private String tsaUrl;
+	private String tsaUser;
+	private String tsaPasswd;
 
 	// options for certificate validation
-	private volatile boolean ocspEnabled;
-	private volatile boolean crlEnabled;
+	private boolean ocspEnabled;
+	private boolean crlEnabled;
 
 	/**
 	 * Loads options from PropertyProvider
@@ -88,6 +94,7 @@ public class BasicSignerOptions {
 		setAppend(props.getAsBool(Constants.PROPERTY_APPEND));
 		setEncrypted(props.getAsBool(Constants.PROPERTY_ENCRYPTED_PDF));
 		setCertLevel(props.getProperty(Constants.PROPERTY_CERT_LEVEL));
+		setHashAlgorithm(props.getProperty(Constants.PROPERTY_HASH_ALGORITHM));
 
 		setRightPrinting(props.getProperty(Constants.PROPERTY_RIGHT_PRINT));
 		setRightCopy(props.getAsBool(Constants.PROPERTY_RIGHT_COPY));
@@ -154,6 +161,7 @@ public class BasicSignerOptions {
 		props.setProperty(Constants.PROPERTY_APPEND, isAppend());
 		props.setProperty(Constants.PROPERTY_ENCRYPTED_PDF, isEncrypted());
 		props.setProperty(Constants.PROPERTY_CERT_LEVEL, getCertLevel().name());
+		props.setProperty(Constants.PROPERTY_HASH_ALGORITHM, getHashAlgorithm().name());
 
 		props.setProperty(Constants.PROPERTY_RIGHT_PRINT, getRightPrinting().name());
 		props.setProperty(Constants.PROPERTY_RIGHT_COPY, isRightCopy());
@@ -836,6 +844,28 @@ public class BasicSignerOptions {
 
 	public void setCrlEnabled(boolean crlEnabled) {
 		this.crlEnabled = crlEnabled;
+	}
+
+	public HashAlgorithm getHashAlgorithm() {
+		if (hashAlgorithm == null) {
+			hashAlgorithm = Constants.DEFVAL_HASH_ALGORITHM;
+		}
+		return hashAlgorithm;
+	}
+
+	public HashAlgorithm getHashAlgorithmX() {
+		if (!advanced) {
+			return Constants.DEFVAL_HASH_ALGORITHM;
+		}
+		return getHashAlgorithm();
+	}
+
+	public void setHashAlgorithm(HashAlgorithm hashAlgorithm) {
+		this.hashAlgorithm = hashAlgorithm;
+	}
+
+	public void setHashAlgorithm(String aStrValue) {
+		setHashAlgorithm(StringUtils.isEmpty(aStrValue) ? null : HashAlgorithm.valueOf(aStrValue));
 	}
 
 }

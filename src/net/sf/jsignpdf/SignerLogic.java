@@ -15,6 +15,7 @@ import java.util.List;
 
 import net.sf.jsignpdf.crl.CRLInfo;
 import net.sf.jsignpdf.crl.CRLUtils;
+import net.sf.jsignpdf.types.HashAlgorithm;
 
 import com.lowagie.text.Font;
 import com.lowagie.text.Image;
@@ -95,16 +96,14 @@ public class SignerLogic implements Runnable {
 			options.log("console.createOutPdf", outFile);
 			final FileOutputStream fout = new FileOutputStream(outFile);
 
+			final HashAlgorithm hashAlgorithm = options.getHashAlgorithmX();
+
 			options.log("console.createSignature");
 			char tmpPdfVersion = '\0'; // default version - the same as input
-			if (options.isVisible() && !options.isAppendX()) {
-				// fix the problem with embedded font name in older PDF versions
-				char tmpOldVersion = reader.getPdfVersion();
-				if (tmpOldVersion < PdfWriter.VERSION_1_3) {
-					tmpPdfVersion = PdfWriter.VERSION_1_3;
-					options.log("console.updateVersion", new String[] { String.valueOf(tmpOldVersion),
-							String.valueOf(tmpPdfVersion) });
-				}
+			if (reader.getPdfVersion() < hashAlgorithm.getPdfVersion()) {
+				tmpPdfVersion = hashAlgorithm.getPdfVersion();
+				options.log("console.updateVersion", new String[] { String.valueOf(reader.getPdfVersion()),
+						String.valueOf(tmpPdfVersion) });
 			}
 			final PdfStamper stp = PdfStamper.createSignature(reader, fout, tmpPdfVersion, null, options.isAppendX());
 			if (!options.isAppendX()) {
@@ -206,19 +205,22 @@ public class SignerLogic implements Runnable {
 			dic.setDate(new PdfDate(sap.getSignDate()));
 			sap.setCryptoDictionary(dic);
 
-			options.log("console.readingCRLs");
-			final CRLInfo crlInfo = options.isCrlEnabledX() ? CRLUtils.getCRLs((X509Certificate) chain[0])
-					: new CRLInfo();
+			final CRLInfo crlInfo;
+			if (options.isCrlEnabledX()) {
+				options.log("console.readingCRLs");
+				crlInfo = CRLUtils.getCRLs((X509Certificate) chain[0]);
+			} else {
+				crlInfo = new CRLInfo();
+			}
 
-			// FIXME find better way of estimating content size if CRL is used
-			int contentEstimated = 15000 + (int) crlInfo.getByteCount() * 2;
+			int contentEstimated = (int) CRLUtils.guessSignatureSize(crlInfo.getCrls());
 			HashMap exc = new HashMap();
 			exc.put(PdfName.CONTENTS, new Integer(contentEstimated * 2 + 2));
 			sap.preClose(exc);
 
-			PdfPKCS7 sgn = new PdfPKCS7(key, chain, crlInfo.getCrls(), "SHA1", null, false);
+			PdfPKCS7 sgn = new PdfPKCS7(key, chain, crlInfo.getCrls(), hashAlgorithm.getAlgorithmName(), null, false);
 			InputStream data = sap.getRangeStream();
-			MessageDigest messageDigest = MessageDigest.getInstance("SHA1");
+			final MessageDigest messageDigest = MessageDigest.getInstance(hashAlgorithm.getAlgorithmName());
 			byte buf[] = new byte[8192];
 			int n;
 			while ((n = data.read(buf)) > 0) {
@@ -324,4 +326,5 @@ public class SignerLogic implements Runnable {
 		}
 		return l2baseFont;
 	}
+
 }

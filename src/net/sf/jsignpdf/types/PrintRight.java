@@ -1,4 +1,6 @@
-package net.sf.jsignpdf;
+package net.sf.jsignpdf.types;
+
+import net.sf.jsignpdf.ResourceProvider;
 
 import com.lowagie.text.pdf.PdfWriter;
 

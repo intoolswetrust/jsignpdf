@@ -1,5 +1,7 @@
 package net.sf.jsignpdf;
 
+import net.sf.jsignpdf.types.HashAlgorithm;
+
 /**
  * Constants used in PDF signer application.
  * 
@@ -55,6 +57,7 @@ public class Constants {
 	public static final String PROPERTY_ENCRYPTED_PDF = "inpdf.encrypted";
 
 	public static final String PROPERTY_CERT_LEVEL = "certification.level";
+	public static final String PROPERTY_HASH_ALGORITHM = "hash.algorithm";
 
 	public static final String PROPERTY_RIGHT_PRINT = "right.printing";
 	public static final String PROPERTY_RIGHT_COPY = "right.copy";
@@ -108,6 +111,8 @@ public class Constants {
 	public static final String PROPERTY_LOCATION = "signature.location";
 
 	public static final String PROPERTY_CONTACT = "signature.contact";
+
+	public static final HashAlgorithm DEFVAL_HASH_ALGORITHM = HashAlgorithm.SHA1;
 
 	public static final int DEFVAL_KEY_INDEX = 0;
 	public static final int DEFVAL_PAGE = 1;
@@ -177,6 +182,9 @@ public class Constants {
 
 	public static final String ARG_CERT_LEVEL = "cl";
 	public static final String ARG_CERT_LEVEL_LONG = "certification-level";
+
+	public static final String ARG_HASH_ALGORITHM = "ha";
+	public static final String ARG_HASH_ALGORITHM_LONG = "hash-algorithm";
 
 	public static final String ARG_ENCRYPTED = "e";
 	public static final String ARG_ENCRYPTED_LONG = "encrypted";

@@ -1,4 +1,4 @@
-package net.sf.jsignpdf;
+package net.sf.jsignpdf.ooo;
 
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;

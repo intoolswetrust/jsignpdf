@@ -9,6 +9,7 @@ import java.security.KeyStoreException;
 import java.security.KeyStoreSpi;
 import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
+import java.security.Security;
 import java.security.UnrecoverableKeyException;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateExpiredException;
@@ -20,6 +21,10 @@ import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.SortedSet;
+import java.util.TreeSet;
+
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
 /**
  * This class provides methods for KeyStore(s) handling.
@@ -28,6 +33,10 @@ import java.util.Set;
  */
 public class KeyStoreUtils {
 
+	static {
+		Security.addProvider(new BouncyCastleProvider());
+	}
+
 	/**
 	 * Returns array of supported KeyStores
 	 * 
@@ -35,7 +44,7 @@ public class KeyStoreUtils {
 	 */
 	public static String[] getKeyStores() {
 		final Set<String> tmpKeyStores = java.security.Security.getAlgorithms("KeyStore");
-		final List<String> tmpResult = new ArrayList<String>(tmpKeyStores);
+		final SortedSet<String> tmpResult = new TreeSet<String>(tmpKeyStores);
 		return tmpResult.toArray(new String[tmpResult.size()]);
 	}
 
@@ -95,7 +104,6 @@ public class KeyStoreUtils {
 					}
 				}
 			}
-			options.fireSignerFinishedEvent(true);
 		} catch (Exception e) {
 			options.log("console.exception");
 			e.printStackTrace(options.getPrintWriter());

@@ -4,6 +4,11 @@ import static net.sf.jsignpdf.Constants.*;
 
 import java.io.PrintWriter;
 
+import net.sf.jsignpdf.types.CertificationLevel;
+import net.sf.jsignpdf.types.HashAlgorithm;
+import net.sf.jsignpdf.types.PrintRight;
+import net.sf.jsignpdf.types.RenderMode;
+
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.OptionBuilder;
@@ -78,6 +83,7 @@ public class SignerOptionsFromCmdLine extends BasicSignerOptions {
 		if (line.hasOption(ARG_LOCATION)) setLocation(line.getOptionValue(ARG_LOCATION));
 		if (line.hasOption(ARG_APPEND)) setAppend(line.hasOption(ARG_APPEND));
 		if (line.hasOption(ARG_CERT_LEVEL)) setCertLevel(line.getOptionValue(ARG_CERT_LEVEL));
+		if (line.hasOption(ARG_HASH_ALGORITHM)) setCertLevel(line.getOptionValue(ARG_HASH_ALGORITHM));
 
 		//encryption
 		if (line.hasOption(ARG_ENCRYPTED)) setEncrypted(true);
@@ -284,6 +290,15 @@ public class SignerOptionsFromCmdLine extends BasicSignerOptions {
 				.withArgName("level")
 				.create(ARG_CERT_LEVEL)
 		);
+		OPTS.addOption(
+				OptionBuilder
+				.withLongOpt(ARG_HASH_ALGORITHM_LONG)
+				.withDescription(res.get("hlp.hashAlgorithm", getEnumValues(HashAlgorithm.values())))
+				.hasArg()
+				.withArgName("algorithm")
+				.create(ARG_HASH_ALGORITHM)
+		);
+
 		OPTS.addOption(
 				OptionBuilder
 				.withLongOpt(ARG_QUIET_LONG)

@@ -1,7 +1,9 @@
-package net.sf.jsignpdf;
+package net.sf.jsignpdf.ooo;
 
 import javax.swing.UIManager;
 import javax.swing.WindowConstants;
+
+import net.sf.jsignpdf.SignPdfForm;
 
 import com.sun.star.lang.XSingleComponentFactory;
 import com.sun.star.lib.uno.helper.Factory;
