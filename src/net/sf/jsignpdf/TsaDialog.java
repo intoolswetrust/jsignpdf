@@ -49,6 +49,7 @@ public class TsaDialog extends javax.swing.JDialog {
 		tfTsaUser.setText(ConvertUtils.toString(options.getTsaUser()));
 		pfTsaPwd.setText(ConvertUtils.toString(options.getTsaPasswd()));
 		cbOcspEnabled.setSelected(options.isOcspEnabled());
+		cbCrlEnabled.setSelected(options.isCrlEnabled());
 	}
 
 	/**
@@ -70,6 +71,7 @@ public class TsaDialog extends javax.swing.JDialog {
 		options.setTsaUser(tfTsaUser.getText());
 		options.setTsaPasswd(new String(pfTsaPwd.getPassword()));
 		options.setOcspEnabled(cbOcspEnabled.isSelected());
+		options.setCrlEnabled(cbCrlEnabled.isSelected());
 
 		// if there are fixed values update them in the form;
 		updateFromOptions();
