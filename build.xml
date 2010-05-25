@@ -141,13 +141,13 @@
 				<!-- attribute name="Built-By" value="${user.name}"/ -->
 				<attribute name="Main-Class" value="net.sf.jsignpdf.Signer"/>
 				<attribute name="Class-Path" value="${manifest.classpath}" />
-				<attribute name="RegistrationClassName" value="net.sf.jsignpdf.CentralRegistrationClass" />
+				<attribute name="RegistrationClassName" value="net.sf.jsignpdf.ooo.CentralRegistrationClass" />
 				<attribute name="Implementation-Vendor" value="Josef Cacek"/>
 				<attribute name="Implementation-Title" value="JSignPdf"/>
 				<attribute name="Implementation-Version" value="${jsignpdf.version} ${build.timestamp}"/>
 
-				<section name="net/sf/jsignpdf/CentralRegistrationClass.class">
-					<attribute name="RegistrationClasses" value="net.sf.jsignpdf.JSignPdf" />
+				<section name="net/sf/jsignpdf/ooo/CentralRegistrationClass.class">
+					<attribute name="RegistrationClasses" value="net.sf.jsignpdf.ooo.JSignPdf" />
 				</section>
 			</manifest>
 			<fileset dir="${bin.dir}"/>
