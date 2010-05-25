@@ -219,6 +219,7 @@ public class SignerLogic implements Runnable {
 			sap.preClose(exc);
 
 			PdfPKCS7 sgn = new PdfPKCS7(key, chain, crlInfo.getCrls(), hashAlgorithm.getAlgorithmName(), null, false);
+			System.out.println("Len: " + sgn.getEncodedPKCS7().length);
 			InputStream data = sap.getRangeStream();
 			final MessageDigest messageDigest = MessageDigest.getInstance(hashAlgorithm.getAlgorithmName());
 			byte buf[] = new byte[8192];
@@ -249,8 +250,10 @@ public class SignerLogic implements Runnable {
 			}
 			byte[] encodedSig = sgn.getEncodedPKCS7(hash, cal, tsc, ocsp);
 
-			if (contentEstimated + 2 < encodedSig.length)
+			if (contentEstimated + 2 < encodedSig.length) {
+				System.err.println("SigSize - contentEstimated=" + contentEstimated + ", sigLen=" + encodedSig.length);
 				throw new Exception("Not enough space");
+			}
 
 			byte[] paddedSig = new byte[contentEstimated];
 			System.arraycopy(encodedSig, 0, paddedSig, 0, encodedSig.length);

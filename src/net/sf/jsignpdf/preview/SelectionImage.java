@@ -13,6 +13,9 @@ import java.awt.image.BufferedImage;
 
 import javax.swing.JPanel;
 
+import net.sf.jsignpdf.types.FloatPoint;
+import net.sf.jsignpdf.types.RelRect;
+
 /**
  * Resizeable image component with rectangle selection implementation. It
  * extends {@link JPanel} component and draws itself on the panel surface.
@@ -25,6 +28,7 @@ public class SelectionImage extends JPanel {
 
 	private BufferedImage image = null;
 	private BufferedImage originalImage = null;
+	private int offsetX, offsetY;
 
 	private RelRect relRect = new RelRect();
 
@@ -47,14 +51,11 @@ public class SelectionImage extends JPanel {
 
 		@Override
 		public void mousePressed(MouseEvent e) {
-			if (e.getButton() != btnCode
-			// || image == null
-			// || e.getPoint().x >= image.getWidth()
-			// || e.getPoint().y > image.getHeight()
-			)
+			if (e.getButton() != btnCode)
 				return;
 			btnPressed = true;
-			relRect.setStartPoint(e.getPoint());
+			final Point point = e.getPoint();
+			relRect.setStartPoint(new Point(point.x - offsetX, point.y - offsetY));
 			relRect.setEndPoint((FloatPoint) null);
 			repaint();
 		}
@@ -63,7 +64,8 @@ public class SelectionImage extends JPanel {
 			currentPoint = e.getPoint();
 			if (!btnPressed)
 				return;
-			relRect.setEndPoint(e.getPoint());
+			final Point point = e.getPoint();
+			relRect.setEndPoint(new Point(point.x - offsetX, point.y - offsetY));
 			repaint();
 		}
 
@@ -76,7 +78,8 @@ public class SelectionImage extends JPanel {
 			if (e.getButton() != btnCode || !btnPressed)
 				return;
 			btnPressed = false;
-			relRect.setEndPoint(e.getPoint());
+			final Point point = e.getPoint();
+			relRect.setEndPoint(new Point(point.x - offsetX, point.y - offsetY));
 			repaint();
 		}
 
@@ -117,9 +120,10 @@ public class SelectionImage extends JPanel {
 	public void paintComponent(Graphics g) {
 		super.paintComponent(g);
 		if (image != null) {
-			g.drawImage(image, 0, 0, null);
+			g.drawImage(image, offsetX, offsetY, null);
 			if (relRect.isValid()) {
-				g.drawRect(relRect.getLeft(), relRect.getTop(), relRect.getWidth(), relRect.getHeight());
+				g.drawRect(relRect.getLeft() + offsetX, relRect.getTop() + offsetY, relRect.getWidth(), relRect
+						.getHeight());
 			}
 		}
 	}
@@ -161,6 +165,8 @@ public class SelectionImage extends JPanel {
 		} else {
 			image = resize(originalImage, getWidth(), getHeight());
 			relRect.scale(image.getWidth(), image.getHeight());
+			offsetX = (getWidth() - image.getWidth()) / 2;
+			offsetY = (getHeight() - image.getHeight()) / 2;
 		}
 		repaint();
 	}

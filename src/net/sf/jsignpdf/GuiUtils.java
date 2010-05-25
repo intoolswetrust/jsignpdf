@@ -3,6 +3,11 @@ package net.sf.jsignpdf;
 import java.awt.Component;
 import java.awt.Dimension;
 
+/**
+ * Helper class for swing GUI (window, component) manipulation
+ * 
+ * @author Josef Cacek
+ */
 public class GuiUtils {
 
 	/**

@@ -1,8 +1,10 @@
-package net.sf.jsignpdf.preview;
+package net.sf.jsignpdf.types;
 
 import java.awt.Dimension;
 import java.awt.Point;
 import java.beans.PropertyChangeListener;
+
+import net.sf.jsignpdf.preview.FinalPropertyChangeSupport;
 
 /**
  * Rectangle implementation based on relative positions.

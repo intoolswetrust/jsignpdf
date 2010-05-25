@@ -1,6 +1,5 @@
 package net.sf.jsignpdf;
 
-import java.awt.Point;
 import java.awt.image.BufferedImage;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
@@ -12,8 +11,9 @@ import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 
 import net.sf.jsignpdf.preview.Pdf2Image;
-import net.sf.jsignpdf.preview.RelRect;
 import net.sf.jsignpdf.preview.SelectionImage;
+import net.sf.jsignpdf.types.FloatPoint;
+import net.sf.jsignpdf.types.RelRect;
 import net.sf.jsignpdf.types.RenderMode;
 
 /**
@@ -34,7 +34,7 @@ public class VisibleSignatureDialog extends javax.swing.JDialog {
 	private SelectionImage selectionImage = new SelectionImage();
 
 	private int numberOfPages = -1;
-	private float[] pdfPageSize;
+	private FloatPoint pdfPageSize;
 
 	private boolean previewListenerDisabled;
 
@@ -79,10 +79,10 @@ public class VisibleSignatureDialog extends javax.swing.JDialog {
 					// tfPosURY.setText(null);
 					return;
 				}
-				tfPosLLX.setText(String.valueOf(tmpRect.getRelLeft() * pdfPageSize[0]));
-				tfPosLLY.setText(String.valueOf((1 - tmpRect.getRelBottom()) * pdfPageSize[1]));
-				tfPosURX.setText(String.valueOf(tmpRect.getRelRight() * pdfPageSize[0]));
-				tfPosURY.setText(String.valueOf((1 - tmpRect.getRelTop()) * pdfPageSize[1]));
+				tfPosLLX.setText(String.valueOf(tmpRect.getRelLeft() * pdfPageSize.getX()));
+				tfPosLLY.setText(String.valueOf((1 - tmpRect.getRelBottom()) * pdfPageSize.getY()));
+				tfPosURX.setText(String.valueOf(tmpRect.getRelRight() * pdfPageSize.getX()));
+				tfPosURY.setText(String.valueOf((1 - tmpRect.getRelTop()) * pdfPageSize.getY()));
 			}
 		});
 		cbDisplayMode.setModel(new DefaultComboBoxModel(RenderMode.values()));
@@ -104,11 +104,11 @@ public class VisibleSignatureDialog extends javax.swing.JDialog {
 
 		final Integer tmpPageNr = ConvertUtils.toInteger(tfPage.getText());
 		if (tmpPageNr != null && tmpPageNr > 0 && tmpPageNr <= numberOfPages) {
-			pdfPageSize = extraInfo.getUpperRightCorner(tmpPageNr.intValue());
+			pdfPageSize = extraInfo.getPageSize(tmpPageNr.intValue());
 		}
 		if (switchBounds(pdfPageSize != null)) {
-			lblPosLLYBounds.setText("0.0 - " + pdfPageSize[0]);
-			lblPosLLXBounds.setText("0.0 - " + pdfPageSize[1]);
+			lblPosLLYBounds.setText("0.0 - " + pdfPageSize.getY());
+			lblPosLLXBounds.setText("0.0 - " + pdfPageSize.getX());
 		}
 	}
 
@@ -726,11 +726,11 @@ public class VisibleSignatureDialog extends javax.swing.JDialog {
 				final RelRect tmpRect = selectionImage.getRelRect();
 				previewListenerDisabled = true;
 				try {
-					tmpRect.scale(getInt(pdfPageSize[0]), getInt(pdfPageSize[1]));
-					tmpRect.setStartPoint(new Point(getInt(Float.parseFloat(tfPosLLX.getText())), getInt(pdfPageSize[1]
-							- Float.parseFloat(tfPosLLY.getText()))));
-					tmpRect.setEndPoint(new Point(getInt(Float.parseFloat(tfPosURX.getText())), getInt(pdfPageSize[1]
-							- Float.parseFloat(tfPosURY.getText()))));
+					tmpRect.scale(getInt(pdfPageSize.getX()), getInt(pdfPageSize.getY()));
+					tmpRect.setStartPoint(new FloatPoint(Float.parseFloat(tfPosLLX.getText()) / pdfPageSize.getX(), 1f
+							- Float.parseFloat(tfPosLLY.getText()) / pdfPageSize.getY()));
+					tmpRect.setEndPoint(new FloatPoint(Float.parseFloat(tfPosURX.getText()) / pdfPageSize.getX(), 1f
+							- Float.parseFloat(tfPosURY.getText()) / pdfPageSize.getY()));
 				} catch (Exception e) {
 					// TODO
 				}

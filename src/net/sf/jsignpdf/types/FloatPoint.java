@@ -1,4 +1,4 @@
-package net.sf.jsignpdf.preview;
+package net.sf.jsignpdf.types;
 
 /**
  * Simple implementation of coordinates (X,Y) with floating-point (float) values
