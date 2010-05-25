@@ -38,7 +38,8 @@ import org.bouncycastle.x509.extension.X509ExtensionUtil;
 public class CRLUtils {
 
 	/**
-	 * Returns CRLs retrieved from distribution points for this certificate.
+	 * Returns CRLs retrieved from distribution points for the given
+	 * certificate.
 	 * 
 	 * @param aCert
 	 * @return
@@ -137,7 +138,10 @@ public class CRLUtils {
 				final ASN1OutputStream dout = new ASN1OutputStream(cOS);
 				dout.writeObject(new DERTaggedObject(false, 1, dercrls));
 				dout.close();
-				tmpResult += cOS.getByteCount();
+
+				// CRLs are stored twice c.f.
+				// PdfPKCS7.getAuthenticatedAttributeBytes
+				tmpResult += cOS.getByteCount() * 2L;
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
