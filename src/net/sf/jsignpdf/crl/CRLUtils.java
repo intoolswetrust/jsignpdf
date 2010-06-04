@@ -3,6 +3,7 @@ package net.sf.jsignpdf.crl;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.net.MalformedURLException;
+import java.net.Proxy;
 import java.net.URL;
 import java.security.cert.CRL;
 import java.security.cert.CRLException;
@@ -42,15 +43,17 @@ public class CRLUtils {
 	 * certificate.
 	 * 
 	 * @param aCert
+	 * @param aProxy
 	 * @return
 	 */
-	public static CRLInfo getCRLs(final X509Certificate aCert) {
+	public static CRLInfo getCRLs(final X509Certificate aCert, final Proxy aProxy) {
 		final Set<CRL> crlSet = new HashSet<CRL>();
 		long byteCount = 0;
 		for (final String urlStr : getCrlUrls(aCert)) {
 			try {
 				final URL tmpUrl = new URL(urlStr);
-				final CountingInputStream inStream = new CountingInputStream(tmpUrl.openStream());
+				final CountingInputStream inStream = new CountingInputStream(tmpUrl.openConnection(aProxy)
+						.getInputStream());
 				final CertificateFactory cf = CertificateFactory.getInstance("X.509");
 				final CRL crl = cf.generateCRL(inStream);
 				if (!crlSet.contains(crl)) {

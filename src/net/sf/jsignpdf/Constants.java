@@ -1,5 +1,7 @@
 package net.sf.jsignpdf;
 
+import java.net.Proxy;
+
 import net.sf.jsignpdf.types.HashAlgorithm;
 
 /**
@@ -89,6 +91,10 @@ public class Constants {
 	public static final String PROPERTY_OCSP_ENABLED = "ocsp.enabled";
 	public static final String PROPERTY_CRL_ENABLED = "crl.enabled";
 
+	public static final String PROPERTY_PROXY_TYPE = "proxy.type";
+	public static final String PROPERTY_PROXY_HOST = "proxy.host";
+	public static final String PROPERTY_PROXY_PORT = "proxy.port";
+
 	/**
 	 * Property name.
 	 */
@@ -122,6 +128,9 @@ public class Constants {
 	public static final float DEFVAL_URY = 100f;
 	public static final float DEFVAL_L2_FONT_SIZE = 10f;
 	public static final float DEFVAL_BG_SCALE = -1f;
+
+	public static final Proxy.Type DEFVAL_PROXY_TYPE = Proxy.Type.DIRECT;
+	public static final int DEFVAL_PROXY_PORT = 80;
 
 	public static final int EXIT_CODE_PARSE_ERR = -1;
 	public static final int EXIT_CODE_NO_COMMAND = -1;
@@ -236,5 +245,9 @@ public class Constants {
 
 	public static final String ARG_OCSP_LONG = "ocsp";
 	public static final String ARG_CRL_LONG = "crl";
+
+	public static final String ARG_PROXY_TYPE_LONG = "proxy-type";
+	public static final String ARG_PROXY_HOST_LONG = "proxy-host";
+	public static final String ARG_PROXY_PORT_LONG = "proxy-port";
 
 }

@@ -1,6 +1,8 @@
 package net.sf.jsignpdf;
 
 import java.io.PrintWriter;
+import java.net.InetSocketAddress;
+import java.net.Proxy;
 
 import net.sf.jsignpdf.types.CertificationLevel;
 import net.sf.jsignpdf.types.HashAlgorithm;
@@ -77,6 +79,11 @@ public class BasicSignerOptions {
 	private boolean ocspEnabled;
 	private boolean crlEnabled;
 
+	// Proxy connection
+	private Proxy.Type proxyType;
+	private String proxyHost;
+	private int proxyPort;
+
 	/**
 	 * Loads options from PropertyProvider
 	 */
@@ -127,6 +134,11 @@ public class BasicSignerOptions {
 		// OCSP & CRL
 		setOcspEnabled(props.getAsBool(Constants.PROPERTY_OCSP_ENABLED));
 		setCrlEnabled(props.getAsBool(Constants.PROPERTY_CRL_ENABLED));
+
+		// proxy
+		setProxyType(props.getProperty(Constants.PROPERTY_PROXY_TYPE));
+		setProxyHost(props.getProperty(Constants.PROPERTY_PROXY_HOST));
+		setProxyPort(props.getAsInt(Constants.PROPERTY_PROXY_PORT, Constants.DEFVAL_PROXY_PORT));
 
 		// passwords
 		storePasswords = props.getAsBool(Constants.PROPERTY_STOREPWD);
@@ -191,6 +203,10 @@ public class BasicSignerOptions {
 		props.setProperty(Constants.PROPERTY_TSA_USER, getTsaUser());
 		props.setProperty(Constants.PROPERTY_OCSP_ENABLED, isOcspEnabled());
 		props.setProperty(Constants.PROPERTY_CRL_ENABLED, isCrlEnabled());
+
+		props.setProperty(Constants.PROPERTY_PROXY_TYPE, getProxyType().name());
+		props.setProperty(Constants.PROPERTY_PROXY_HOST, getProxyHost());
+		props.setProperty(Constants.PROPERTY_PROXY_PORT, getProxyPort());
 
 		props.setProperty(Constants.PROPERTY_STOREPWD, isStorePasswords());
 		setEncrypted(Constants.EPROPERTY_USERHOME, Constants.USER_HOME);
@@ -868,4 +884,48 @@ public class BasicSignerOptions {
 		setHashAlgorithm(StringUtils.isEmpty(aStrValue) ? null : HashAlgorithm.valueOf(aStrValue));
 	}
 
+	public Proxy.Type getProxyType() {
+		if (proxyType == null) {
+			proxyType = Constants.DEFVAL_PROXY_TYPE;
+		}
+		return proxyType;
+	}
+
+	public void setProxyType(Proxy.Type proxyType) {
+		this.proxyType = proxyType;
+	}
+
+	public void setProxyType(final String aStrValue) {
+		setProxyType(StringUtils.isEmpty(aStrValue) ? null : Proxy.Type.valueOf(aStrValue));
+	}
+
+	public String getProxyHost() {
+		return proxyHost;
+	}
+
+	public void setProxyHost(String proxyHost) {
+		this.proxyHost = proxyHost;
+	}
+
+	public int getProxyPort() {
+		return proxyPort;
+	}
+
+	public void setProxyPort(int proxyPort) {
+		this.proxyPort = proxyPort;
+	}
+
+	/**
+	 * Creates and returns Proxy object, which should be used for URL
+	 * connections in JSignPdf.
+	 * 
+	 * @return initialized Proxy object.
+	 */
+	public Proxy createProxy() {
+		Proxy tmpResult = Proxy.NO_PROXY;
+		if (isAdvanced() && getProxyType() != Proxy.Type.DIRECT) {
+			tmpResult = new Proxy(getProxyType(), new InetSocketAddress(getProxyHost(), getProxyPort()));
+		}
+		return tmpResult;
+	}
 }

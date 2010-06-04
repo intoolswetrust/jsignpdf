@@ -1,3 +1,6 @@
+2010-06-02 Josef Cacek
+  * proxy support for TSA, OCSP and CRL
+
 2010-05-23 Josef Cacek
   * support for BouncyCastle keystore providers
   * possibility to choose hash algorithm

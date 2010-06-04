@@ -4,6 +4,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.InputStream;
+import java.net.Proxy;
 import java.security.MessageDigest;
 import java.security.PrivateKey;
 import java.security.cert.Certificate;
@@ -33,7 +34,6 @@ import com.lowagie.text.pdf.PdfSignatureAppearance;
 import com.lowagie.text.pdf.PdfStamper;
 import com.lowagie.text.pdf.PdfString;
 import com.lowagie.text.pdf.PdfWriter;
-import com.lowagie.text.pdf.TSAClient;
 import com.lowagie.text.pdf.TSAClientBouncyCastle;
 
 /**
@@ -205,10 +205,12 @@ public class SignerLogic implements Runnable {
 			dic.setDate(new PdfDate(sap.getSignDate()));
 			sap.setCryptoDictionary(dic);
 
+			final Proxy tmpProxy = options.createProxy();
+
 			final CRLInfo crlInfo;
 			if (options.isCrlEnabledX()) {
 				options.log("console.readingCRLs");
-				crlInfo = CRLUtils.getCRLs((X509Certificate) chain[0]);
+				crlInfo = CRLUtils.getCRLs((X509Certificate) chain[0], tmpProxy);
 			} else {
 				crlInfo = new CRLInfo();
 			}
@@ -219,7 +221,6 @@ public class SignerLogic implements Runnable {
 			sap.preClose(exc);
 
 			PdfPKCS7 sgn = new PdfPKCS7(key, chain, crlInfo.getCrls(), hashAlgorithm.getAlgorithmName(), null, false);
-			System.out.println("Len: " + sgn.getEncodedPKCS7().length);
 			InputStream data = sap.getRangeStream();
 			final MessageDigest messageDigest = MessageDigest.getInstance(hashAlgorithm.getAlgorithmName());
 			byte buf[] = new byte[8192];
@@ -235,18 +236,21 @@ public class SignerLogic implements Runnable {
 				String url = PdfPKCS7.getOCSPURL((X509Certificate) chain[0]);
 				if (url != null && url.length() > 0) {
 					options.log("console.readingOCSP");
-					ocsp = new OcspClientBouncyCastle((X509Certificate) chain[0], (X509Certificate) chain[1], url)
-							.getEncoded();
+					final OcspClientBouncyCastle ocspClient = new OcspClientBouncyCastle((X509Certificate) chain[0],
+							(X509Certificate) chain[1], url);
+					ocspClient.setProxy(tmpProxy);
+					ocsp = ocspClient.getEncoded();
 				}
 			}
 			byte sh[] = sgn.getAuthenticatedAttributeBytes(hash, cal, ocsp);
 			sgn.update(sh, 0, sh.length);
 
-			TSAClient tsc = null;
+			TSAClientBouncyCastle tsc = null;
 			if (options.isTimestampX() && !StringUtils.isEmpty(options.getTsaUrl())) {
 				options.log("console.creatingTsaClient");
 				tsc = new TSAClientBouncyCastle(options.getTsaUrl(), StringUtils.emptyNull(options.getTsaUser()),
 						StringUtils.emptyNull(options.getTsaPasswd()));
+				tsc.setProxy(tmpProxy);
 			}
 			byte[] encodedSig = sgn.getEncodedPKCS7(hash, cal, tsc, ocsp);
 

@@ -3,6 +3,7 @@ package net.sf.jsignpdf;
 import static net.sf.jsignpdf.Constants.*;
 
 import java.io.PrintWriter;
+import java.net.Proxy;
 
 import net.sf.jsignpdf.types.CertificationLevel;
 import net.sf.jsignpdf.types.HashAlgorithm;
@@ -120,6 +121,11 @@ public class SignerOptionsFromCmdLine extends BasicSignerOptions {
 		if (line.hasOption(ARG_TSA_USER)) setTsaUser(line.getOptionValue(ARG_TSA_USER));
 		if (line.hasOption(ARG_TSA_PWD)) setTsaPasswd(line.getOptionValue(ARG_TSA_PWD));
 		if (line.hasOption(ARG_OCSP_LONG)) setOcspEnabled(true);
+		
+		if (line.hasOption(ARG_PROXY_TYPE_LONG)) setProxyType(line.getOptionValue(ARG_PROXY_TYPE_LONG));
+		if (line.hasOption(ARG_PROXY_HOST_LONG)) setProxyHost(line.getOptionValue(ARG_PROXY_HOST_LONG));
+		if (line.hasOption(ARG_PROXY_PORT_LONG)) setProxyPort(
+				getInt(line.getParsedOptionValue(ARG_PROXY_PORT_LONG), getProxyPort()));
 		
 	}
 
@@ -468,8 +474,7 @@ public class SignerOptionsFromCmdLine extends BasicSignerOptions {
 		OPTS.addOption(
 				OptionBuilder
 				.withDescription(
-						res.get("hlp.l2TextFontSize",
-								new String[] { String.valueOf(Constants.DEFVAL_L2_FONT_SIZE)}))
+						res.get("hlp.l2TextFontSize",String.valueOf(Constants.DEFVAL_L2_FONT_SIZE)))
 				.withLongOpt(ARG_L2TEXT_FONT_SIZE_LONG)
 				.hasArg()
 				.withType(Number.class)
@@ -527,6 +532,34 @@ public class SignerOptionsFromCmdLine extends BasicSignerOptions {
 				.create()
 		);
 
+		OPTS.addOption(
+				OptionBuilder
+				.withDescription(res.get("hlp.proxyType", DEFVAL_PROXY_TYPE.name(), getEnumValues(Proxy.Type.values())))
+				.withLongOpt(ARG_PROXY_TYPE_LONG)
+				.hasArg()
+				.withArgName("type")
+				.create()
+		);
+		
+		OPTS.addOption(
+				OptionBuilder
+				.withDescription(res.get("hlp.proxyHost"))
+				.withLongOpt(ARG_PROXY_HOST_LONG)
+				.hasArg()
+				.withArgName("hostname")
+				.create()
+		);
+
+		OPTS.addOption(
+				OptionBuilder
+				.withDescription(res.get("hlp.proxyPort", String.valueOf(DEFVAL_PROXY_PORT)))
+				.withLongOpt(ARG_PROXY_PORT_LONG)
+				.hasArg()
+				.withType(Number.class)
+				.withArgName("port")
+				.create()
+		);
+
 	}
 
 	/**
@@ -542,7 +575,7 @@ public class SignerOptionsFromCmdLine extends BasicSignerOptions {
 	 * @param aEnumVals
 	 * @return
 	 */
-	private static String[] getEnumValues(Enum<?>[] aEnumVals) {
+	private static String getEnumValues(Enum<?>[] aEnumVals) {
 		final StringBuilder tmpResult = new StringBuilder();
 		boolean tmpFirst = true;
 		for (Enum<?> tmpEnu : aEnumVals) {
@@ -553,7 +586,7 @@ public class SignerOptionsFromCmdLine extends BasicSignerOptions {
 			}
 			tmpResult.append(tmpEnu.name());
 		}
-		return new String[] { tmpResult.toString() };
+		return tmpResult.toString();
 	}
 
 	/**
