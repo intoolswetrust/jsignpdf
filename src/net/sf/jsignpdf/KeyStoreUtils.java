@@ -115,7 +115,6 @@ public class KeyStoreUtils {
 		} catch (Exception e) {
 			options.log("console.exception");
 			e.printStackTrace(options.getPrintWriter());
-			options.fireSignerFinishedEvent(false);
 		}
 		return tmpResult;
 	}

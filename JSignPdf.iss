@@ -29,6 +29,7 @@ AppVersion={#MyAppVersion}
 
 [Icons]
 Name: {group}\JSignPdf {#MyAppVersion}; Filename: {app}\JSignPdf.exe; Components: ; WorkingDir: {app}
+Name: {group}\InstallCert Tool; Filename: {app}\InstallCert.exe; Components: ; WorkingDir: {app}
 Name: {group}\JSignPdf Guide; Filename: {app}\docs\JSignPdf_signed.pdf; Components: 
 Name: {group}\Uninstall {#MyAppName}; Filename: {uninstallexe}; Components: 
 

@@ -51,12 +51,23 @@ import javax.net.ssl.TrustManager;
 import javax.net.ssl.TrustManagerFactory;
 import javax.net.ssl.X509TrustManager;
 
+/**
+ * Installs certificate for given SSL connection to Java CA keystore.
+ * 
+ * @author Andreas Sterbenz
+ */
 public class InstallCert {
 
 	public static void main(String[] args) throws Exception {
 		String host;
 		int port;
 		char[] passphrase;
+
+		System.out.println("InstallCert - Install CA certificate to Java Keystore");
+		System.out.println("=====================================================");
+
+		final BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
+
 		if ((args.length == 1) || (args.length == 2)) {
 			String[] c = args[0].split(":");
 			host = c[0];
@@ -64,8 +75,19 @@ public class InstallCert {
 			String p = (args.length == 1) ? "changeit" : args[1];
 			passphrase = p.toCharArray();
 		} else {
-			System.out.println("Usage: java InstallCert <host>[:port] [passphrase]");
-			return;
+			String tmpStr;
+			do {
+				System.out.print("Enter hostname or IP address: ");
+				tmpStr = StringUtils.emptyNull(reader.readLine());
+			} while (tmpStr == null);
+			host = tmpStr;
+			System.out.print("Enter port number [443]: ");
+			tmpStr = StringUtils.emptyNull(reader.readLine());
+			port = tmpStr == null ? 443 : Integer.parseInt(tmpStr);
+			System.out.print("Enter keystore password [changeit]: ");
+			tmpStr = reader.readLine();
+			String p = "".equals(tmpStr) ? "changeit" : tmpStr;
+			passphrase = p.toCharArray();
 		}
 
 		File file = new File("jssecacerts");
@@ -111,8 +133,6 @@ public class InstallCert {
 			return;
 		}
 
-		BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
-
 		System.out.println();
 		System.out.println("Server sent " + chain.length + " certificate(s):");
 		System.out.println();
@@ -129,7 +149,7 @@ public class InstallCert {
 			System.out.println();
 		}
 
-		System.out.println("Enter certificate to add to trusted keystore or 'q' to quit: [1]");
+		System.out.print("Enter certificate to add to trusted keystore or 'q' to quit [1]: ");
 		String line = reader.readLine().trim();
 		int k;
 		try {
@@ -151,6 +171,8 @@ public class InstallCert {
 		System.out.println(cert);
 		System.out.println();
 		System.out.println("Added certificate to keystore 'jssecacerts' using alias '" + alias + "'");
+		System.out.println("Press Enter to finish...");
+		reader.readLine();
 	}
 
 	private static final char[] HEXDIGITS = "0123456789abcdef".toCharArray();

@@ -75,7 +75,7 @@ public class SignerLogic implements Runnable {
 			return;
 		}
 
-		boolean tmpResult = false;
+		Exception tmpResult = null;
 		try {
 			final PrivateKeyInfo pkInfo = KeyStoreUtils.getPkInfo(options);
 			final PrivateKey key = pkInfo.getKey();
@@ -268,15 +268,15 @@ public class SignerLogic implements Runnable {
 			sap.close(dic2);
 			fout.close();
 
-			tmpResult = true;
 		} catch (Exception e) {
 			options.log("console.exception");
 			e.printStackTrace(options.getPrintWriter());
+			tmpResult = e;
 		} catch (OutOfMemoryError e) {
 			e.printStackTrace(options.getPrintWriter());
 			options.log("console.memoryError");
 		}
-		options.log("console.finished." + (tmpResult ? "ok" : "error"));
+		options.log("console.finished." + (tmpResult == null ? "ok" : "error"));
 		options.fireSignerFinishedEvent(tmpResult);
 	}
 

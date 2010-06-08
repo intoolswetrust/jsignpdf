@@ -7,6 +7,7 @@ import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.net.URL;
 
+import javax.net.ssl.SSLHandshakeException;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JComponent;
 import javax.swing.JFileChooser;
@@ -1011,9 +1012,13 @@ public class SignPdfForm extends javax.swing.JFrame implements SignResultListene
 	}// GEN-LAST:event_infoDialogWindowClosing
 
 	/**
-	 * @see net.sf.jsignpdf.SignResultListener#signerFinishedEvent(boolean)
+	 * @see net.sf.jsignpdf.SignResultListener#signerFinishedEvent(Exception)
 	 */
-	public synchronized void signerFinishedEvent(boolean success) {
+	public synchronized void signerFinishedEvent(Exception e) {
+		if (e instanceof SSLHandshakeException) {
+			JOptionPane.showMessageDialog(this, res.get("error.sslHandshakeException"), "Error",
+					JOptionPane.WARNING_MESSAGE);
+		}
 		btnInfoClose.setEnabled(true);
 		infoDialog.setDefaultCloseOperation(javax.swing.WindowConstants.HIDE_ON_CLOSE);
 		if (!btnInfoClose.hasFocus())

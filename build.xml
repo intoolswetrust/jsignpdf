@@ -152,6 +152,24 @@
 			</manifest>
 			<fileset dir="${bin.dir}"/>
 		</jar>
+		
+		<jar destfile="${dist.dir}/${installcert.filename}.jar">
+			<manifest>
+				<!-- attribute name="Built-By" value="${user.name}"/ -->
+				<attribute name="Main-Class" value="net.sf.jsignpdf.InstallCert"/>
+				<attribute name="Implementation-Vendor" value="Josef Cacek"/>
+				<attribute name="Implementation-Title" value="JSignPdf - InstallCert"/>
+				<attribute name="Implementation-Version" value="${jsignpdf.version} ${build.timestamp}"/>
+			</manifest>
+			<fileset dir="${bin.dir}">
+				<include name="**/InstallCert*.class"/>
+				<include name="**/StringUtils*.class"/>
+			</fileset>
+			<fileset dir="${src.filtered.dir}">
+				<include name="**/InstallCert.java"/>
+				<include name="**/StringUtils.java"/>
+			</fileset>
+		</jar>
 	</target>
 
 	<target name="oxt" depends="jar">
@@ -193,7 +211,24 @@
 					originalFilename="JSignPdf.exe" />
 			</config>
 		</launch4j>
-	</target>
+
+		<launch4j>
+			<config headerType="console" outfile="${dist.dir}/InstallCert.exe"
+					dontWrapJar="true" jarPath="${installcert.filename}.jar"
+					icon="doc/icon/Certificate.ico">
+				<jre minVersion="1.5.0" maxHeapSize="512"/>
+				<versionInfo fileVersion="${jsignpdf.version}.0"
+					txtFileVersion="InstallCert launcher v. ${jsignpdf.version}"
+					fileDescription="Installs host SSL certificates to Java keystore"
+					copyright="Josef Cacek"
+					productVersion="${jsignpdf.version}.0"
+					txtProductVersion="Installs host SSL certificates to Java keystore"
+					productName="InstallCert"
+					internalName="InstallCert"
+					originalFilename="InstallCert.exe" />
+			</config>
+		</launch4j>
+</target>
 
 	<target name="ooo_start">
 		<echo>Opening Open Office</echo>
