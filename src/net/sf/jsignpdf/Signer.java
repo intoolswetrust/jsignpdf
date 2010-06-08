@@ -84,7 +84,7 @@ public class Signer {
 			}
 			SignPdfForm tmpForm = new SignPdfForm(WindowConstants.EXIT_ON_CLOSE);
 			tmpForm.pack();
-			GuiUtils.centerWindow(tmpForm);
+			GuiUtils.center(tmpForm);
 			tmpForm.setVisible(true);
 		}
 	}

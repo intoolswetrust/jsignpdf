@@ -1,6 +1,5 @@
 package net.sf.jsignpdf.crl;
 
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.Proxy;
@@ -9,20 +8,14 @@ import java.security.cert.CRL;
 import java.security.cert.CRLException;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
-import java.security.cert.X509CRL;
 import java.security.cert.X509Certificate;
 import java.util.HashSet;
 import java.util.Set;
 
+import net.sf.jsignpdf.Constants;
+
 import org.apache.commons.io.input.CountingInputStream;
-import org.apache.commons.io.output.CountingOutputStream;
-import org.apache.commons.io.output.NullOutputStream;
-import org.bouncycastle.asn1.ASN1EncodableVector;
-import org.bouncycastle.asn1.ASN1InputStream;
-import org.bouncycastle.asn1.ASN1OutputStream;
-import org.bouncycastle.asn1.DERSet;
 import org.bouncycastle.asn1.DERString;
-import org.bouncycastle.asn1.DERTaggedObject;
 import org.bouncycastle.asn1.x509.CRLDistPoint;
 import org.bouncycastle.asn1.x509.DistributionPoint;
 import org.bouncycastle.asn1.x509.DistributionPointName;
@@ -71,8 +64,9 @@ public class CRLUtils {
 				e.printStackTrace();
 			}
 		}
-
-		return new CRLInfo(crlSet.toArray(new CRL[crlSet.size()]), byteCount);
+		// CRLs are stored twice c.f.
+		// PdfPKCS7.getAuthenticatedAttributeBytes
+		return new CRLInfo(crlSet.toArray(new CRL[crlSet.size()]), Constants.DEFVAL_SIG_SIZE + byteCount * 2L);
 	}
 
 	/**
@@ -119,36 +113,4 @@ public class CRLUtils {
 		return tmpResult;
 	}
 
-	/**
-	 * Returns guessed signature size.
-	 * 
-	 * @param crls
-	 *            CRL array
-	 * @return
-	 */
-	public static long guessSignatureSize(final CRL[] crls) {
-		long tmpResult = 15000L;
-		if (crls != null && crls.length > 0) {
-			try {
-				ASN1EncodableVector v = new ASN1EncodableVector();
-				for (CRL crl : crls) {
-					ASN1InputStream t = new ASN1InputStream(new ByteArrayInputStream(((X509CRL) crl).getEncoded()));
-					v.add(t.readObject());
-				}
-				DERSet dercrls = new DERSet(v);
-
-				final CountingOutputStream cOS = new CountingOutputStream(new NullOutputStream());
-				final ASN1OutputStream dout = new ASN1OutputStream(cOS);
-				dout.writeObject(new DERTaggedObject(false, 1, dercrls));
-				dout.close();
-
-				// CRLs are stored twice c.f.
-				// PdfPKCS7.getAuthenticatedAttributeBytes
-				tmpResult += cOS.getByteCount() * 2L;
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-		}
-		return tmpResult;
-	}
 }

@@ -2,6 +2,8 @@ package net.sf.jsignpdf.crl;
 
 import java.security.cert.CRL;
 
+import net.sf.jsignpdf.Constants;
+
 /**
  * Helper bean for holding CRL related data.
  * 
@@ -17,7 +19,7 @@ public class CRLInfo {
 	 */
 	public CRLInfo() {
 		crls = null;
-		byteCount = 0L;
+		byteCount = Constants.DEFVAL_SIG_SIZE;
 	}
 
 	/**

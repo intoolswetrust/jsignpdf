@@ -33,6 +33,8 @@ import org.bouncycastle.jce.provider.BouncyCastleProvider;
  */
 public class KeyStoreUtils {
 
+	private static final ResourceProvider res = ResourceProvider.getInstance();
+
 	static {
 		Security.addProvider(new BouncyCastleProvider());
 	}
@@ -59,6 +61,9 @@ public class KeyStoreUtils {
 		}
 		options.log("console.getKeystoreType", options.getKsType());
 		final KeyStore tmpKs = loadKeyStore(options.getKsType(), options.getKsFile(), options.getKsPasswd());
+		if (tmpKs == null) {
+			throw new NullPointerException(res.get("error.keystoreNull"));
+		}
 		final List<String> tmpResult = getAliasesList(tmpKs, options);
 		return tmpResult.toArray(new String[tmpResult.size()]);
 	}
@@ -75,7 +80,7 @@ public class KeyStoreUtils {
 			throw new NullPointerException("Options are empty.");
 		}
 		if (aKs == null) {
-			throw new NullPointerException("Keystore was not loaded. Check the type, path and password.");
+			throw new NullPointerException(res.get("error.keystoreNull"));
 		}
 		final List<String> tmpResult = new ArrayList<String>();
 		try {
@@ -89,7 +94,10 @@ public class KeyStoreUtils {
 						final X509Certificate tmpX509 = (X509Certificate) tmpCert;
 						try {
 							tmpX509.checkValidity();
-							if (tmpX509.getKeyUsage()[0]) {
+							// check if the certificate is supposed to be used
+							// for digital signatures
+							final boolean keyUsage[] = tmpX509.getKeyUsage();
+							if (keyUsage == null || keyUsage.length == 0 || keyUsage[0]) {
 								tmpResult.add(tmpAlias);
 							} else {
 								options.log("console.certificateNotForSignature", tmpAlias);
@@ -125,9 +133,18 @@ public class KeyStoreUtils {
 		return tmpResult;
 	}
 
-	private static String getKeyAliasInternal(final BasicSignerOptions options, final KeyStore tmpKs) {
+	private static String getKeyAliasInternal(final BasicSignerOptions options, final KeyStore aKs) {
 		String tmpResult = null;
-		final List<String> tmpList = getAliasesList(tmpKs, options);
+		try {
+			if (aKs.isKeyEntry(options.getKeyAliasX())) {
+				tmpResult = options.getKeyAliasX();
+				options.log("console.usedKeyAlias", tmpResult);
+				return tmpResult;
+			}
+		} catch (KeyStoreException e) {
+			// nothing to do, fallback to default handling
+		}
+		final List<String> tmpList = getAliasesList(aKs, options);
 		final String tmpAlias = options.getKeyAliasX();
 		final int tmpIndex = options.getKeyIndexX();
 

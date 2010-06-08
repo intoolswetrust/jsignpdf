@@ -59,19 +59,19 @@ public class SignPdfForm extends javax.swing.JFrame implements SignResultListene
 		infoDialog.setIconImage(getIconImage());
 		infoDialog.getRootPane().setDefaultButton(btnInfoClose);
 		infoDialog.pack();
-		GuiUtils.centerWindow(infoDialog);
+		GuiUtils.center(infoDialog);
 
 		// setIconImage is available from Java 1.6!
 		// rightsDialog.setIconImage(getIconImage());
 		rightsDialog.getRootPane().setDefaultButton(btnRightsOK);
 		rightsDialog.pack();
-		GuiUtils.centerWindow(rightsDialog);
+		GuiUtils.center(rightsDialog);
 
 		tsaDialog.pack();
-		GuiUtils.centerWindow(tsaDialog);
+		GuiUtils.center(tsaDialog);
 
 		vsDialog.pack();
-		GuiUtils.centerWindow(vsDialog);
+		GuiUtils.center(vsDialog);
 
 		options.setPrintWriter(infoWriter);
 		options.setListener(this);
@@ -986,7 +986,11 @@ public class SignPdfForm extends javax.swing.JFrame implements SignResultListene
 
 	private void btnLoadAliasesActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_btnLoadAliasesActionPerformed
 		storeToOptions();
-		cbAlias.setModel(new DefaultComboBoxModel(KeyStoreUtils.getKeyAliases(options)));
+		try {
+			cbAlias.setModel(new DefaultComboBoxModel(KeyStoreUtils.getKeyAliases(options)));
+		} catch (Exception e) {
+			JOptionPane.showMessageDialog(this, e.getLocalizedMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+		}
 	}// GEN-LAST:event_btnLoadAliasesActionPerformed
 
 	private void chkbPdfEncryptedActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_chkbPdfEncryptedActionPerformed

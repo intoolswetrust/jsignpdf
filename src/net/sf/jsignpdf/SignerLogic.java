@@ -215,7 +215,7 @@ public class SignerLogic implements Runnable {
 				crlInfo = new CRLInfo();
 			}
 
-			int contentEstimated = (int) CRLUtils.guessSignatureSize(crlInfo.getCrls());
+			int contentEstimated = (int) crlInfo.getByteCount();
 			HashMap exc = new HashMap();
 			exc.put(PdfName.CONTENTS, new Integer(contentEstimated * 2 + 2));
 			sap.preClose(exc);

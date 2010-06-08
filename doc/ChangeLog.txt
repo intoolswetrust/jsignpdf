@@ -1,5 +1,11 @@
+2010-06-07 Josef Cacek
+  * fixed reading of X.509 KeyUsage extension
+  * rendering library Apache PDFBox replaced by Sun PdfRenderer (LGPL)
+  * CRL estimated size   
+
 2010-06-02 Josef Cacek
   * proxy support for TSA, OCSP and CRL
+  * centering windows
 
 2010-05-23 Josef Cacek
   * support for BouncyCastle keystore providers

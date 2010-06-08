@@ -118,6 +118,9 @@ public class Constants {
 
 	public static final String PROPERTY_CONTACT = "signature.contact";
 
+	public static final long DEFVAL_SIG_SIZE = 15000L;
+	public static final String DEFVAL_CACERTS_PASSWD = "changeit";
+
 	public static final HashAlgorithm DEFVAL_HASH_ALGORITHM = HashAlgorithm.SHA1;
 
 	public static final int DEFVAL_KEY_INDEX = 0;
