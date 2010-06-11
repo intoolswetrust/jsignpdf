@@ -7,6 +7,7 @@ import java.beans.PropertyChangeListener;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JComponent;
 import javax.swing.JFileChooser;
+import javax.swing.JOptionPane;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 
@@ -140,6 +141,7 @@ public class VisibleSignatureDialog extends javax.swing.JDialog {
 		setLabelAndMnemonic(btnClose, "gui.vs.close.button");
 
 		setLabelAndMnemonic(btnPreviewClose, "gui.vs.close.button");
+		previewDialog.setTitle(res.get("gui.preview.title"));
 
 		setToolTip(tfPage, "gui.vs.page.tooltip");
 		setToolTip(tfPosLLX, "gui.vs.llx.tooltip");
@@ -227,6 +229,7 @@ public class VisibleSignatureDialog extends javax.swing.JDialog {
 	private boolean switchBounds(final boolean aVisible) {
 		lblPosLLXBounds.setVisible(aVisible);
 		lblPosLLYBounds.setVisible(aVisible);
+		btnPreview.setEnabled(aVisible);
 		return aVisible;
 	}
 
@@ -737,10 +740,12 @@ public class VisibleSignatureDialog extends javax.swing.JDialog {
 				previewListenerDisabled = false;
 				previewDialog.setVisible(true);
 			} else {
-				// TODO warning
+				JOptionPane.showMessageDialog(this, res.get("error.vs.previewFailed"), "Error",
+						JOptionPane.WARNING_MESSAGE);
 			}
 		} else {
-			// TODO warning
+			JOptionPane.showMessageDialog(this, res.get("error.vs.pageNotANumber"), "Error",
+					JOptionPane.WARNING_MESSAGE);
 		}
 	}// GEN-LAST:event_btnPreviewActionPerformed
 
