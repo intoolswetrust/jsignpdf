@@ -1,8 +1,11 @@
+2010-06-09 Josef Cacek
+  * PDFBox enabled again as a second try for rendering PDF (if Sun PdfRenderer fails)
+
 2010-06-07 Josef Cacek
   * fixed reading of X.509 KeyUsage extension
   * rendering library Apache PDFBox replaced by Sun PdfRenderer (LGPL)
   * CRL estimated size
-  * InstallCert support (jar, Windows launcher)    
+  * InstallCert support (jar, Windows launcher)
 
 2010-06-02 Josef Cacek
   * proxy support for TSA, OCSP and CRL
