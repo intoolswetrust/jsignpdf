@@ -37,7 +37,7 @@
 		<echo message="Cleaning build" />
 		<delete dir="${build.dir}"/>
 		<delete dir="${dist.dir}"/>
-		<delete dir="Output"/>
+		<delete dir="${output.dir}"/>
 		<ant antfile="../jsignpdf-itxt/src/build.xml" useNativeBasedir="true" target="clean" />
 	</target>
 
@@ -58,6 +58,7 @@
 		<mkdir dir="${src.filtered.dir}"/>
 		<mkdir dir="${dist.dir}"/>
 		<mkdir dir="${dist.doc.dir}"/>
+		<mkdir dir="${output.dir}"/>
 
 		<echo message="Copying sources and resources with filter" />
 		<copy todir="${src.filtered.dir}">
@@ -174,7 +175,7 @@
 
 	<target name="oxt" depends="jar">
 		<echo message="Creating OpenOffice.org plugin (oxt)" />
-		<zip destfile="${dist.dir}/${jsignpdf.filename}.oxt">
+		<zip destfile="${output.dir}/${jsignpdf.filename}-${jsignpdf.version}.oxt">
 			<fileset dir="${bin.plugin.dir}"/>
 			<fileset dir="${dist.dir}" includes="${jsignpdf.filename}.jar"/>
 		</zip>
@@ -275,18 +276,19 @@
 			<arg line="/dJreInstaller=${jre.installer}"/>
 			<arg line="/dMyAppFilename=${jsignpdf.filename}"/>
 			<arg line="/dDistDir=${dist.dir}"/>
+			<arg line="/dOutputDir=${output.dir}"/>
 		</exec>
 	</target>
 
-	<target name="zip" depends="oxt,launcher,doc">
+	<target name="zip" depends="jar,launcher,doc">
 		<echo message="Creating a zip release" />
 
-		<zip destfile="Output/JSignPdf-${jsignpdf.version}.zip">
+		<zip destfile="${output.dir}/JSignPdf-${jsignpdf.version}.zip">
 			<fileset dir="${build.dir}" includes="${app.dir}/**"/>
 		</zip>
 	</target>
 
-	<target name="all" depends="installer,zip"/>
+	<target name="all" depends="installer,zip,oxt"/>
 
 	<target name="sources-cvs-export">
 		<echo message="Exporting sources from CVS" />
@@ -297,7 +299,7 @@
 		        <argument line="export -r ${jsignpdf.cvs.tag} jsignpdf"/>
 		    </commandline>
 		</cvs>
-		<zip destfile="Output/JSignPdf-${jsignpdf.version}.src.zip">
+		<zip destfile="${output.dir}/JSignPdf-${jsignpdf.version}.src.zip">
 			<fileset dir="${build.dir}/export"/>
 		</zip>
 	</target>
