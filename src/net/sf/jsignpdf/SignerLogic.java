@@ -15,7 +15,6 @@ import java.util.HashMap;
 import java.util.List;
 
 import net.sf.jsignpdf.crl.CRLInfo;
-import net.sf.jsignpdf.crl.CRLUtils;
 import net.sf.jsignpdf.types.HashAlgorithm;
 
 import com.lowagie.text.Font;
@@ -207,15 +206,11 @@ public class SignerLogic implements Runnable {
 
 			final Proxy tmpProxy = options.createProxy();
 
-			final CRLInfo crlInfo;
-			if (options.isCrlEnabledX()) {
-				options.log("console.readingCRLs");
-				crlInfo = CRLUtils.getCRLs((X509Certificate) chain[0], tmpProxy);
-			} else {
-				crlInfo = new CRLInfo();
-			}
+			final CRLInfo crlInfo = new CRLInfo(options, chain);
 
-			int contentEstimated = (int) crlInfo.getByteCount();
+			// CRLs are stored twice in PDF c.f.
+			// PdfPKCS7.getAuthenticatedAttributeBytes
+			final int contentEstimated = (int) (Constants.DEFVAL_SIG_SIZE + 2L * crlInfo.getByteCount());
 			HashMap exc = new HashMap();
 			exc.put(PdfName.CONTENTS, new Integer(contentEstimated * 2 + 2));
 			sap.preClose(exc);

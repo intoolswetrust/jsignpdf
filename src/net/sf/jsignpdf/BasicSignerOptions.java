@@ -234,32 +234,10 @@ public class BasicSignerOptions {
 	 * 
 	 * @param aKey
 	 *            message key
-	 */
-	void log(final String aKey) {
-		log(aKey, (String[]) null);
-	}
-
-	/**
-	 * Logs localized message to PrintWriter
-	 * 
-	 * @param aKey
-	 *            message key
-	 * @param anArg
-	 *            message parameter
-	 */
-	void log(final String aKey, final String anArg) {
-		log(aKey, anArg == null ? null : new String[] { anArg });
-	}
-
-	/**
-	 * Logs localized message to PrintWriter
-	 * 
-	 * @param aKey
-	 *            message key
 	 * @param anArgs
 	 *            message parameters
 	 */
-	void log(final String aKey, final String[] anArgs) {
+	public void log(final String aKey, final String... anArgs) {
 		if (printWriter != null) {
 			printWriter.println(res.get(aKey, anArgs));
 			printWriter.flush();

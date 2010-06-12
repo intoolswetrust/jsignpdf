@@ -31,6 +31,11 @@ public class Constants {
 	public static final String PROPERTIES_FILE = ".JSignPdf";
 
 	/**
+	 * Name of X.509 certificate type.
+	 */
+	public static final String CERT_TYPE_X509 = "X.509";
+
+	/**
 	 * Name (path) of resource bundle
 	 */
 	public static final String RESOURCE_BUNDLE_BASE = "net.sf.jsignpdf.translations.messages";
