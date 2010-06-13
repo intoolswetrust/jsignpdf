@@ -6,6 +6,8 @@ import java.io.File;
 import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.net.URL;
+import java.security.KeyStore;
+import java.util.Set;
 
 import javax.net.ssl.SSLHandshakeException;
 import javax.swing.DefaultComboBoxModel;
@@ -77,7 +79,12 @@ public class SignPdfForm extends javax.swing.JFrame implements SignResultListene
 		options.setPrintWriter(infoWriter);
 		options.setListener(this);
 
-		cbKeystoreType.setModel(new DefaultComboBoxModel(KeyStoreUtils.getKeyStores()));
+		final Set<String> tmpKsTypes = KeyStoreUtils.getKeyStores();
+		cbKeystoreType.setModel(new DefaultComboBoxModel(tmpKsTypes.toArray(new String[tmpKsTypes.size()])));
+		if (tmpKsTypes.contains(Constants.KEYSTORE_TYPE_WINDOWS_MY)) {
+			cbKeystoreType.setSelectedItem(Constants.KEYSTORE_TYPE_WINDOWS_MY);
+		}
+
 		cbCertLevel.setModel(new DefaultComboBoxModel(CertificationLevel.values()));
 		cbHashAlgorithm.setModel(new DefaultComboBoxModel(HashAlgorithm.values()));
 		cbPrinting.setModel(new DefaultComboBoxModel(PrintRight.values()));
@@ -155,7 +162,11 @@ public class SignPdfForm extends javax.swing.JFrame implements SignResultListene
 	 * Loads properties saved by previous run of application
 	 */
 	private void updateFromOptions() {
-		cbKeystoreType.setSelectedItem(options.getKsType());
+		if (StringUtils.hasLength(options.getKsType())) {
+			cbKeystoreType.setSelectedItem(options.getKsType());
+		} else if (cbKeystoreType.getSelectedItem() == null) {
+			cbKeystoreType.setSelectedItem(KeyStore.getDefaultType());
+		}
 		chkbAdvanced.setSelected(options.isAdvanced());
 		tfKeystoreFile.setText(options.getKsFile());
 		pfKeystorePwd.setText(options.getKsPasswdStr());

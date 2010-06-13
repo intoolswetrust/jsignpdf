@@ -50,9 +50,8 @@ public class Signer {
 				printHelp();
 			}
 			if (tmpOpts.isListKeyStores()) {
-				final String[] tmpKeyStores = KeyStoreUtils.getKeyStores();
 				tmpOpts.log("console.keystores");
-				for (String tmpKsType : tmpKeyStores) {
+				for (String tmpKsType : KeyStoreUtils.getKeyStores()) {
 					System.out.println(tmpKsType);
 				}
 			}

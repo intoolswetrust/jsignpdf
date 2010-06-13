@@ -44,10 +44,9 @@ public class KeyStoreUtils {
 	 * 
 	 * @return String array with supported KeyStore implementation names
 	 */
-	public static String[] getKeyStores() {
+	public static SortedSet<String> getKeyStores() {
 		final Set<String> tmpKeyStores = java.security.Security.getAlgorithms("KeyStore");
-		final SortedSet<String> tmpResult = new TreeSet<String>(tmpKeyStores);
-		return tmpResult.toArray(new String[tmpResult.size()]);
+		return new TreeSet<String>(tmpKeyStores);
 	}
 
 	/**
