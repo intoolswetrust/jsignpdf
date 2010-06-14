@@ -200,7 +200,7 @@
 					dontWrapJar="true" jarPath="${jsignpdf.filename}.jar"
 					icon="doc/icon/icons.ico">
 				<jre minVersion="1.5.0" maxHeapSize="512"/>
-				<splash file="doc/icon/splash08.bmp"/>
+				<splash file="${jsignpdf.splashimage.path}"/>
 				<versionInfo fileVersion="${jsignpdf.version}.0"
 					txtFileVersion="JSignPdf launcher v. ${jsignpdf.version}"
 					fileDescription="Adds digital signatures to PDF files"

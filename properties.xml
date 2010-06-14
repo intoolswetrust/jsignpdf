@@ -27,6 +27,7 @@
 
 	<property name="jsignpdf.product.name" value="JSignPdf" />
 	<property name="jsignpdf.filename" value="${jsignpdf.product.name}" />
+	<property name="jsignpdf.splashimage.path" value="doc/icon/splash08.bmp" />
 
 	<property name="installcert.filename" value="InstallCert" />
 
