@@ -1,3 +1,6 @@
+2010-06-16 Josef Cacek
+  * splashscreen and ReleaseNotes for version 1.0.0 
+
 2010-06-13 Josef Cacek
   * WINDOWS-MY keystore type (if it's present) set as the default one in GUI 
   

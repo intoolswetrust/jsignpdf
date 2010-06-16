@@ -1,3 +1,14 @@
+Version 1.0.0
+-------------
+  * implements PDF preview & selecting position of visible signature using mouse
+  * adds support for Certificate Revocation Lists (CRL)
+  * provides support for selecting hash algorithm (depends on cryptographic provider for selected keystore type)
+  * adds keystore types provided by BouncyCastle cryptographic library   
+  * checks if a certificates are valid and if they're intended for signing 
+  * includes proxy support for TSA, OCSP and CRL
+  * fixes removing old signatures in non-append mode 
+  * adds tool for installing trusted certificate to default Java keystore (InstallCert Tool) 
+
 Version 0.9.8
 -------------
   * output prefix and suffix can be empty in batch mode - can use the same filename if output goes to different directory
