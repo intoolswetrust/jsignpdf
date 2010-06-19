@@ -1,6 +1,6 @@
 package net.sf.jsignpdf.types;
 
-import net.sf.jsignpdf.ResourceProvider;
+import net.sf.jsignpdf.utils.ResourceProvider;
 
 import com.lowagie.text.pdf.PdfSignatureAppearance;
 

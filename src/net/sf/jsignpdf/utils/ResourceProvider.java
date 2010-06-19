@@ -1,4 +1,4 @@
-package net.sf.jsignpdf;
+package net.sf.jsignpdf.utils;
 
 import java.text.MessageFormat;
 import java.util.ResourceBundle;
@@ -9,14 +9,16 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.border.TitledBorder;
 
+import net.sf.jsignpdf.Constants;
+
 /**
  * Entry point to internationalization. Resource bundles has base
  * "translation/messages".
  * 
  * @author Josef Cacek [josef.cacek (at) gmail.com]
  * @author $Author: kwart $
- * @version $Revision: 1.3.2.1 $
- * @created $Date: 2010/06/04 14:20:08 $
+ * @version $Revision: 1.1.2.1 $
+ * @created $Date: 2010/06/19 08:33:43 $
  */
 public class ResourceProvider {
 

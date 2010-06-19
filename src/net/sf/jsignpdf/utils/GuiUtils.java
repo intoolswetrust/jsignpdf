@@ -1,4 +1,4 @@
-package net.sf.jsignpdf;
+package net.sf.jsignpdf.utils;
 
 import java.awt.Component;
 import java.awt.Dimension;

@@ -1,4 +1,4 @@
-package net.sf.jsignpdf;
+package net.sf.jsignpdf.utils;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -23,6 +23,9 @@ import java.util.List;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
+
+import net.sf.jsignpdf.BasicSignerOptions;
+import net.sf.jsignpdf.PrivateKeyInfo;
 
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
@@ -85,11 +88,12 @@ public class KeyStoreUtils {
 		try {
 			options.log("console.getAliases");
 			final Enumeration<String> tmpAliases = aKs.aliases();
+			final boolean checkValidity = ConfigProvider.getInstance().getAsBool("certificate.checkValidity", true);
 			while (tmpAliases.hasMoreElements()) {
 				final String tmpAlias = tmpAliases.nextElement();
 				if (aKs.isKeyEntry(tmpAlias)) {
 					final Certificate tmpCert = aKs.getCertificate(tmpAlias);
-					if (tmpCert instanceof X509Certificate) {
+					if (checkValidity && tmpCert instanceof X509Certificate) {
 						final X509Certificate tmpX509 = (X509Certificate) tmpCert;
 						try {
 							tmpX509.checkValidity();

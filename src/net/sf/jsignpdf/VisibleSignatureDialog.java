@@ -16,6 +16,10 @@ import net.sf.jsignpdf.preview.SelectionImage;
 import net.sf.jsignpdf.types.FloatPoint;
 import net.sf.jsignpdf.types.RelRect;
 import net.sf.jsignpdf.types.RenderMode;
+import net.sf.jsignpdf.utils.ConvertUtils;
+import net.sf.jsignpdf.utils.GuiUtils;
+import net.sf.jsignpdf.utils.ResourceProvider;
+import net.sf.jsignpdf.utils.StringUtils;
 
 /**
  * Options dialog for Visible signature settings

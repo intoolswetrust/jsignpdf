@@ -1,4 +1,4 @@
-package net.sf.jsignpdf;
+package net.sf.jsignpdf.utils;
 
 /**
  * Type conversion routines.

@@ -30,6 +30,8 @@ public class Constants {
 	 */
 	public static final String PROPERTIES_FILE = ".JSignPdf";
 
+	public static final String CONF_FILE = "conf/conf.properties";
+
 	/**
 	 * Name of X.509 certificate type.
 	 */

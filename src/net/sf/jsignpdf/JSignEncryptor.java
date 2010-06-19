@@ -1,5 +1,7 @@
 package net.sf.jsignpdf;
 
+import net.sf.jsignpdf.utils.StringUtils;
+
 import org.bouncycastle.crypto.BufferedBlockCipher;
 import org.bouncycastle.crypto.CryptoException;
 import org.bouncycastle.crypto.engines.BlowfishEngine;

@@ -6,7 +6,9 @@ Version 1.0.0
   * adds keystore types provided by BouncyCastle cryptographic library   
   * checks if a certificates are valid and if they're intended for signing 
   * includes proxy support for TSA, OCSP and CRL
+  * font used in visible signatures can be changed (using conf/conf.properties file) 
   * fixes removing old signatures in non-append mode 
+  * fixes embedding font of visible signature if the input PDF is in version 1.2 
   * adds tool for installing trusted certificate to default Java keystore (InstallCert Tool) 
 
 Version 0.9.8

@@ -1,6 +1,5 @@
 package net.sf.jsignpdf;
 
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.InputStream;
@@ -16,12 +15,15 @@ import java.util.List;
 
 import net.sf.jsignpdf.crl.CRLInfo;
 import net.sf.jsignpdf.types.HashAlgorithm;
+import net.sf.jsignpdf.utils.FontUtils;
+import net.sf.jsignpdf.utils.KeyStoreUtils;
+import net.sf.jsignpdf.utils.ResourceProvider;
+import net.sf.jsignpdf.utils.StringUtils;
 
 import com.lowagie.text.Font;
 import com.lowagie.text.Image;
 import com.lowagie.text.Rectangle;
 import com.lowagie.text.pdf.AcroFields;
-import com.lowagie.text.pdf.BaseFont;
 import com.lowagie.text.pdf.OcspClientBouncyCastle;
 import com.lowagie.text.pdf.PdfDate;
 import com.lowagie.text.pdf.PdfDictionary;
@@ -45,8 +47,6 @@ public class SignerLogic implements Runnable {
 	protected final static ResourceProvider res = ResourceProvider.getInstance();
 
 	private BasicSignerOptions options;
-
-	private static BaseFont l2baseFont;
 
 	/**
 	 * Constructor with all necessary parameters.
@@ -184,8 +184,8 @@ public class SignerLogic implements Runnable {
 					sap.setLayer2Text(buf.toString());
 					;
 				}
-				if (getL2BaseFont() != null) {
-					sap.setLayer2Font(new Font(getL2BaseFont(), options.getL2TextFontSize()));
+				if (FontUtils.getL2BaseFont() != null) {
+					sap.setLayer2Font(new Font(FontUtils.getL2BaseFont(), options.getL2TextFontSize()));
 				}
 				options.log("console.setL4Text");
 				sap.setLayer4Text(options.getL4Text());
@@ -301,32 +301,6 @@ public class SignerLogic implements Runnable {
 			return false;
 		}
 		return true;
-	}
-
-	/**
-	 * Returns BaseFont for text of visible signature;
-	 * 
-	 * @return
-	 */
-	public static synchronized BaseFont getL2BaseFont() {
-		if (l2baseFont == null) {
-			try {
-				final ByteArrayOutputStream tmpBaos = new ByteArrayOutputStream();
-				InputStream tmpIs = SignerLogic.class.getResourceAsStream(Constants.L2TEXT_FONT_PATH);
-				IOUtils.copy(tmpIs, tmpBaos);
-				tmpIs.close();
-				tmpBaos.close();
-				l2baseFont = BaseFont.createFont(Constants.L2TEXT_FONT_NAME, BaseFont.IDENTITY_H, BaseFont.EMBEDDED,
-						BaseFont.CACHED, tmpBaos.toByteArray(), null);
-			} catch (Exception e) {
-				try {
-					l2baseFont = BaseFont.createFont(BaseFont.HELVETICA, BaseFont.CP1250, BaseFont.EMBEDDED);
-				} catch (Exception ex) {
-					// where is the problem, dear Watson?
-				}
-			}
-		}
-		return l2baseFont;
 	}
 
 }

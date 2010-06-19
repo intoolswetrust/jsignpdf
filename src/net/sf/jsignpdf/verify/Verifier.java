@@ -5,8 +5,8 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
-import net.sf.jsignpdf.IOUtils;
-import net.sf.jsignpdf.KeyStoreUtils;
+import net.sf.jsignpdf.utils.IOUtils;
+import net.sf.jsignpdf.utils.KeyStoreUtils;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
@@ -20,8 +20,8 @@ import org.apache.commons.cli.PosixParser;
  * Entry point (i.e. main class) to PDF signature verifications.
  * @author Josef Cacek
  * @author $Author: kwart $
- * @version $Revision: 1.3 $
- * @created $Date: 2008/06/26 15:37:49 $
+ * @version $Revision: 1.3.2.1 $
+ * @created $Date: 2010/06/19 08:33:43 $
  */
 public class Verifier {
 

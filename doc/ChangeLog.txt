@@ -1,3 +1,7 @@
+2010-06-19 Josef Cacek
+  * font for visible signature is configurable (set in conf/conf.properties file)
+  * certificate validity check and keyUsage can be disabled (set in conf/conf.properties file)
+  
 2010-06-16 Josef Cacek
   * splashscreen and ReleaseNotes for version 1.0.0 
 

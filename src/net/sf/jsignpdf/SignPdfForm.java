@@ -21,6 +21,11 @@ import javax.swing.filechooser.FileFilter;
 import net.sf.jsignpdf.types.CertificationLevel;
 import net.sf.jsignpdf.types.HashAlgorithm;
 import net.sf.jsignpdf.types.PrintRight;
+import net.sf.jsignpdf.utils.GuiUtils;
+import net.sf.jsignpdf.utils.KeyStoreUtils;
+import net.sf.jsignpdf.utils.PropertyProvider;
+import net.sf.jsignpdf.utils.ResourceProvider;
+import net.sf.jsignpdf.utils.StringUtils;
 
 /**
  * GUI for PDFSigner.

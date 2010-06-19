@@ -5,6 +5,9 @@ import java.net.Proxy;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JComponent;
 
+import net.sf.jsignpdf.utils.ConvertUtils;
+import net.sf.jsignpdf.utils.ResourceProvider;
+
 /**
  * JDialog for setting timestamp authority and enabling OCSP.
  * 

@@ -11,8 +11,8 @@ import javax.swing.JOptionPane;
 import javax.swing.JTextField;
 import javax.swing.filechooser.FileFilter;
 
-import net.sf.jsignpdf.KeyStoreUtils;
 import net.sf.jsignpdf.SignerFileChooser;
+import net.sf.jsignpdf.utils.KeyStoreUtils;
 
 /**
  * GUI for PDF signatures verification.

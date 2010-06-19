@@ -8,6 +8,9 @@ import net.sf.jsignpdf.types.CertificationLevel;
 import net.sf.jsignpdf.types.HashAlgorithm;
 import net.sf.jsignpdf.types.PrintRight;
 import net.sf.jsignpdf.types.RenderMode;
+import net.sf.jsignpdf.utils.PropertyProvider;
+import net.sf.jsignpdf.utils.ResourceProvider;
+import net.sf.jsignpdf.utils.StringUtils;
 
 import org.bouncycastle.crypto.CryptoException;
 

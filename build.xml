@@ -74,6 +74,12 @@
 			<filterset refid="jsignpdf.filterset"/>
 		</copy>
 
+		<copy todir="${dist.dir}">
+			<fileset dir=".">
+				<include name="conf/**"/>
+			</fileset>
+		</copy>
+		
 		<copy todir="${bin.plugin.dir}">
 			<fileset dir=".">
 				<include name="images/**"/>
@@ -82,6 +88,7 @@
 			</fileset>
 		</copy>
 		<copy todir="${bin.plugin.dir}/lib" file="../jsignpdf-itxt/build/release/dist/jsignpdf-itxt-${jsignpdf.version}.jar"/>
+		<copy todir="${output.dir}" file="../jsignpdf-itxt/build/release/dist/jsignpdf-itxt-${jsignpdf.version}-sources.jar"/>
 		
 		<copy todir="${bin.dir}">
 			<fileset dir="${res.dir}">
@@ -288,7 +295,21 @@
 		</zip>
 	</target>
 
-	<target name="all" depends="installer,zip,oxt"/>
+	<target name="all" depends="installer,zip,oxt,src"/>
+
+	<target name="src" depends="prepare">
+		<echo message="Creating package from 'live' sources" />
+
+		<zip destfile="${output.dir}/JSignPdf-${jsignpdf.version}.src.zip">
+			<fileset dir="." includes="src/**"/>
+			<fileset dir="." includes="res/**"/>
+			<fileset dir="." includes="doc/**"/>
+			<fileset dir="." includes="conf/**"/>
+			<fileset dir="." includes="images/**"/>
+			<fileset dir="." includes="licenses/**"/>
+			<fileset dir="." includes="plugin/**"/>
+		</zip>
+	</target>
 
 	<target name="sources-cvs-export">
 		<echo message="Exporting sources from CVS" />
@@ -304,6 +325,6 @@
 		</zip>
 	</target>
 
-	<target name="all-src" depends="all,sources-cvs-export"/>
+	<target name="all-src-cvs" depends="installer,zip,oxt,sources-cvs-export"/>
 	
 </project>

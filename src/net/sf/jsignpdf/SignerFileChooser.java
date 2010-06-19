@@ -8,6 +8,8 @@ import javax.swing.JTextField;
 import javax.swing.filechooser.FileFilter;
 import javax.swing.plaf.basic.BasicFileChooserUI;
 
+import net.sf.jsignpdf.utils.ResourceProvider;
+
 /**
  * Improved JFileChooser. It contains some small bug-fixes.
  * @author Josef Cacek

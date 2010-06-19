@@ -11,7 +11,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 
 import net.sf.jsignpdf.Constants;
-import net.sf.jsignpdf.KeyStoreUtils;
+import net.sf.jsignpdf.utils.KeyStoreUtils;
 
 import com.lowagie.text.pdf.AcroFields;
 import com.lowagie.text.pdf.PdfPKCS7;
@@ -26,8 +26,8 @@ import com.lowagie.text.pdf.PdfPKCS7.X509Name;
  * 
  * @author Josef Cacek
  * @author $Author: kwart $
- * @version $Revision: 1.5.2.1 $
- * @created $Date: 2010/06/12 14:30:43 $
+ * @version $Revision: 1.5.2.2 $
+ * @created $Date: 2010/06/19 08:33:43 $
  */
 public class VerifierLogic {
 
