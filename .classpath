@@ -17,5 +17,5 @@
 	<classpathentry kind="lib" path="lib/pdfbox-1.1.0.jar"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.USER_LIBRARY/OOo"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/jsignpdf-itxt"/>
-	<classpathentry kind="output" path="build/classes"/>
+	<classpathentry kind="output" path="bin"/>
 </classpath>
