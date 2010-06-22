@@ -1,4 +1,7 @@
-2010-06-19 Josef Cacek
+2010-06-22 Josef Cacek (released 1.0.1)
+  * KeyStoreUtils fix - the simple didn't work correctly because of NPE for throwed by null key alias
+
+2010-06-19 Josef Cacek (released 1.0.0)
   * font for visible signature is configurable (set in conf/conf.properties file)
   * certificate validity check and keyUsage can be disabled (set in conf/conf.properties file)
   
