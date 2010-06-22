@@ -136,15 +136,20 @@ public class KeyStoreUtils {
 	}
 
 	private static String getKeyAliasInternal(final BasicSignerOptions options, final KeyStore aKs) {
+		if (aKs == null) {
+			throw new NullPointerException(res.get("error.keystoreNull"));
+		}
 		String tmpResult = null;
-		try {
-			if (aKs.isKeyEntry(options.getKeyAliasX())) {
-				tmpResult = options.getKeyAliasX();
-				options.log("console.usedKeyAlias", tmpResult);
-				return tmpResult;
+		if (StringUtils.hasLength(options.getKeyAliasX())) {
+			try {
+				if (aKs.isKeyEntry(options.getKeyAliasX())) {
+					tmpResult = options.getKeyAliasX();
+					options.log("console.usedKeyAlias", tmpResult);
+					return tmpResult;
+				}
+			} catch (KeyStoreException e) {
+				// nothing to do, fallback to default handling
 			}
-		} catch (KeyStoreException e) {
-			// nothing to do, fallback to default handling
 		}
 		final List<String> tmpList = getAliasesList(aKs, options);
 		final String tmpAlias = options.getKeyAliasX();
