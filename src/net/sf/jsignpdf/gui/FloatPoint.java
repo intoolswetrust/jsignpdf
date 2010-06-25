@@ -6,17 +6,10 @@ package net.sf.jsignpdf.gui;
  * 
  * @author Josef Cacek
  */
-public class FloatPoint {
+public final class FloatPoint {
 
-	protected float x;
-	protected float y;
-
-	/**
-	 * Default constructor
-	 */
-	public FloatPoint() {
-		// default constructor
-	}
+	protected final float x;
+	protected final float y;
 
 	/**
 	 * All parameters constructor
@@ -39,24 +32,9 @@ public class FloatPoint {
 	}
 
 	/**
-	 * Sets position on axis X
-	 */
-	public void setX(float x) {
-		this.x = x;
-	}
-
-	/**
 	 * Returns position on axis Y
 	 */
 	public float getY() {
 		return y;
 	}
-
-	/**
-	 * Sets position on axis Y
-	 */
-	public void setY(float y) {
-		this.y = y;
-	}
-
 }

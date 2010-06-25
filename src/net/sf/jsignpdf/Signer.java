@@ -19,7 +19,7 @@ public class Signer {
 
 	private static void printHelp() {
 		final HelpFormatter formatter = new HelpFormatter();
-		final ResourceProvider res = ResourceProvider.getInstance();
+		final ResourceProvider res = ResourceProvider.getBundleBean();
 		formatter.printHelp(80,
 				"java -jar JSignPdf.jar [file1.pdf [file2.pdf ...]]",
 				res.get("hlp.header"),
@@ -103,7 +103,7 @@ public class Signer {
 		for (final String tmpInFile : anOpts.getFiles()) {
 			final File tmpFile = new File(tmpInFile);
 			if (! tmpFile.canRead()) {
-				System.err.println(ResourceProvider.getInstance().get("file.notReadable", new String[] {tmpInFile}));
+				System.err.println(ResourceProvider.getBundleBean().get("file.notReadable", new String[] {tmpInFile}));
 				continue;
 			}
 			anOpts.setInFile(tmpInFile);

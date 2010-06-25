@@ -9,7 +9,6 @@ Name: java; Description: Java Runtime Environment 6; Types: full
 
 [Run]
 Filename: {tmp}\java_setup.exe; StatusMsg: Installing Java Runtime Environment; Components: java
-;Filename: {reg:HKLM\SOFTWARE\OpenOffice.org\UNO\InstallPath,}\unopkg.exe; Parameters: " add {app}\JSignPdf.oxt"; Components: ooo; StatusMsg: Enabling OpenOffice.org Add-On
 Filename: {app}\{#MyAppFilename}.oxt; Components: ooo; StatusMsg: Enabling OpenOffice.org Add-On; Flags: shellexec
 
 [Setup]

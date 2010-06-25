@@ -28,7 +28,7 @@ public enum RenderMode {
 	 */
 	@Override
 	public String toString() {
-		return ResourceProvider.getInstance().get(msgKey);
+		return ResourceProvider.getBundleBean().get(msgKey);
 	}
 
 	/**

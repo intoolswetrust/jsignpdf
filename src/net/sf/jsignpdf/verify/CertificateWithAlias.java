@@ -3,11 +3,12 @@ package net.sf.jsignpdf.verify;
 import java.security.cert.X509Certificate;
 
 /**
- * Helper class to hold togehter X509Certificate and alias used in keystore.
+ * Helper class to hold together X509Certificate and alias used in keystore.
+ * 
  * @author Josef Cacek
  */
 public class CertificateWithAlias {
-	
+
 	private String alias;
 	private X509Certificate certificate;
 
@@ -19,6 +20,7 @@ public class CertificateWithAlias {
 
 	/**
 	 * Returns alias of certificate
+	 * 
 	 * @return
 	 */
 	public String getAlias() {
@@ -27,6 +29,7 @@ public class CertificateWithAlias {
 
 	/**
 	 * Returns X509Certificate instance
+	 * 
 	 * @return
 	 */
 	public X509Certificate getCertificate() {

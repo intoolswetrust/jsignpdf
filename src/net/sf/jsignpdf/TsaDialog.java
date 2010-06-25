@@ -10,7 +10,7 @@ public class TsaDialog extends javax.swing.JDialog {
 
 	private static final long serialVersionUID = 1L;
 
-	protected final ResourceProvider res = ResourceProvider.getInstance();
+	protected final ResourceProvider res = ResourceProvider.getBundleBean();
 	private BasicSignerOptions options;
 
 	/** Creates new form TsaDialog */

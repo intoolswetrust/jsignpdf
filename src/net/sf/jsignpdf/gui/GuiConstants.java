@@ -17,14 +17,48 @@ public class GuiConstants {
 	/**
 	 * Path to default form design
 	 */
-	public static final String DEFAULT_FORM_PATH = "net/sf/jsignpdf/forms/2010.jfrm";
+	public static final String DEFAULT_FORM_PATH = "net/sf/jsignpdf/forms/2010a.jfrm";
 
+	/**
+	 * BaseName of GUI resource bundle
+	 */
+	public static final String RESOURCE_BUNDLE_GUI = "net.sf.jsignpdf.translations.gui";
+
+	public static class Actions {
+
+		public static final String CHOOSEFILE_NAME = "action.choosefile.name";
+		public static final String CHOOSEFILE_TOOLTIP = "action.refreshkey.tooltip";
+		public static final String CHOOSEFILE_ICON = "/net/sf/jsignpdf/fileopen16.png";
+
+		public static final String REFRESHKEY_NAME = "action.refreshkey.name";
+		public static final String REFRESHKEY_TOOLTIP = "action.refreshkey.tooltip";
+		public static final String REFRESHKEY_ICON = "/net/sf/jsignpdf/refresh16.png";
+
+		private Actions() {
+			// don't want to initialize this class
+		}
+	}
+
+	/**
+	 * Names of GUI properties
+	 */
+	public static class Properties {
+
+		public static final String ENABLED = "enabled";
+
+		private Properties() {
+			// don't want to initialize this class
+		}
+	}
+	
 	/**
 	 * Contains constants with component names on the JSignPdf form
 	 * 
 	 * @author Josef Cacek
 	 */
 	public static class Components {
+
+		public static final String SIGNPDF_BUTTON = "signpdf.button";
 
 		public static final String INPUT_HEADER = "input.header";
 		public static final String INPUT_PDFPATH_LABEL = "input.pdfpath.label";
@@ -74,7 +108,7 @@ public class GuiConstants {
 		public static final String TIMESTAMP_USER_LABEL = "timestamp.user.label";
 		public static final String TIMESTAMP_USER_TEXTFIELD = "timestamp.user.textfield";
 		public static final String TIMESTAMP_PWD_LABEL = "timestamp.pwd.label";
-		public static final String TIMESTAMP_USER_PASSWORD = "timestamp.pwd.password";
+		public static final String TIMESTAMP_PWD_PASSWORD = "timestamp.pwd.password";
 
 		public static final String RIGHTS_HEADER = "rights.header";
 		public static final String RIGHTS_ENABLED_CHECKBOX = "rights.enabled.checkbox";

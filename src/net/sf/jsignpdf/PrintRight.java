@@ -24,7 +24,7 @@ public enum PrintRight {
 	 * Returns internationalized description of a right.
 	 */
 	public String toString() {
-		return ResourceProvider.getInstance().get(msgKey);
+		return ResourceProvider.getBundleBean().get(msgKey);
 	}
 
 	/**

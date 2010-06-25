@@ -2,12 +2,25 @@
 <classpath>
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="src" path="res"/>
+	<classpathentry kind="src" path="test"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="lib" path="lib/commons-cli-1.2.jar"/>
 	<classpathentry kind="lib" path="lib/iText-2.1.7.jar"/>
 	<classpathentry kind="lib" path="lib/bcprov-jdk15-144.jar"/>
 	<classpathentry kind="lib" path="lib/bctsp-jdk15-144.jar"/>
 	<classpathentry kind="lib" path="lib/bcmail-jdk15-144.jar"/>
+	<classpathentry kind="lib" path="lib/pdfbox-0.8.0-incubating.jar"/>
+	<classpathentry kind="lib" path="lib/fontbox-0.8.0-incubating.jar"/>
+	<classpathentry kind="lib" path="lib/icu4j-3.8.jar"/>
+	<classpathentry kind="lib" path="lib/jempbox-0.8.0-incubating.jar"/>
+	<classpathentry kind="lib" path="lib/formsrt.jar"/>
+	<classpathentry kind="lib" path="lib/jcl-over-slf4j-1.5.10.jar"/>
+	<classpathentry kind="lib" path="lib/log4j-1.2.15.jar"/>
+	<classpathentry kind="lib" path="lib/looks-2.3.0.jar"/>
+	<classpathentry kind="lib" path="lib/slf4j-api-1.5.10.jar"/>
+	<classpathentry kind="lib" path="lib/slf4j-log4j12-1.5.10.jar"/>
+	<classpathentry kind="lib" path="lib/binding-2.0.6.jar"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.USER_LIBRARY/OOo"/>
-	<classpathentry kind="output" path="build/classes"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.junit.JUNIT_CONTAINER/3"/>
+	<classpathentry kind="output" path="bin"/>
 </classpath>

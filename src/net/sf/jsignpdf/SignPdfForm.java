@@ -26,7 +26,7 @@ public class SignPdfForm extends javax.swing.JFrame implements SignResultListene
 	private SignerFileChooser fc = new SignerFileChooser();
 
 	protected final PropertyProvider props = PropertyProvider.getInstance();
-	protected final ResourceProvider res = ResourceProvider.getInstance();
+	protected final ResourceProvider res = ResourceProvider.getBundleBean();
 
 	private PrintWriter infoWriter;
 	private TextAreaStream infoStream;

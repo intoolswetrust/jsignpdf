@@ -208,7 +208,9 @@
 
 		<java jar="${dist.dir}/${jsignpdf.filename}.jar" fork="true">
 			<arg value="-kst"/>
-			<arg value="WINDOWS-MY"/>
+			<arg value="${docSignature.keystore}"/>
+			<arg value="-ki"/>
+			<arg value="${docSignature.keyIndex}"/>
 			<arg value="-d"/>
 			<arg value="${dist.doc.dir}"/>
 			<arg value="${dist.doc.dir}/JSignPdf.pdf"/>
@@ -245,9 +247,9 @@
 		<mkdir dir="${build.dir}/export"/>
 		<cvs cvsroot=":pserver:anonymous@jsignpdf.cvs.sourceforge.net:/cvsroot/jsignpdf"
 			dest="${build.dir}/export">
-		    <commandline>
-		        <argument line="export -r ${jsignpdf.cvs.tag} jsignpdf"/>
-		    </commandline>
+			<commandline>
+				<argument line="export -r ${jsignpdf.cvs.tag} jsignpdf"/>
+			</commandline>
 		</cvs>
 		<zip destfile="Output/JSignPdf-${jsignpdf.version}.src.zip">
 			<fileset dir="${build.dir}/export"/>
@@ -255,5 +257,5 @@
 	</target>
 
 	<target name="all-src" depends="all,sources-cvs-export"/>
-	
+
 </project>

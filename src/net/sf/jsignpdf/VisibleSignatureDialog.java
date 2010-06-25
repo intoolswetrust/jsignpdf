@@ -1,5 +1,8 @@
-
 package net.sf.jsignpdf;
+
+import java.awt.image.BufferedImage;
+import java.util.HashMap;
+import java.util.Map;
 
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JComponent;
@@ -7,24 +10,34 @@ import javax.swing.JFileChooser;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 
+import net.sf.jsignpdf.gui.SelectionImage;
+
 /**
  * Options dialog for Visible signature settings
- * @author  Josef Cacek
+ * 
+ * @author Josef Cacek
  */
 public class VisibleSignatureDialog extends javax.swing.JDialog {
 
 	private static final long serialVersionUID = 1L;
 
-	protected final ResourceProvider res = ResourceProvider.getInstance();
+	protected final ResourceProvider res = ResourceProvider.getBundleBean();
 
 	private BasicSignerOptions options;
 	private SignerFileChooser fc;
 	private PdfExtraInfo extraInfo;
+	private Pdf2Image p2i;
+	private SelectionImage selectionImage = new SelectionImage();
+
+	private Map<Integer, BufferedImage> previewCache;
+
+	private float[] pdfPageSize;
 
 	private int numberOfPages = -1;
 
 	/**
 	 * Document listener which catches page number change.
+	 * 
 	 * @author Josef Cacek
 	 */
 	class PageNrDocumentListener implements DocumentListener {
@@ -42,32 +55,42 @@ public class VisibleSignatureDialog extends javax.swing.JDialog {
 	}
 
 	/** Creates new form VisibleSignatureDialog */
-	public VisibleSignatureDialog(java.awt.Frame parent, boolean modal,
-		final BasicSignerOptions anOptions, final SignerFileChooser aFC) {
+	public VisibleSignatureDialog(java.awt.Frame parent, boolean modal, final BasicSignerOptions anOptions,
+			final SignerFileChooser aFC) {
 		super(parent, modal);
 		options = anOptions;
+		p2i = new Pdf2Image(options);
 		fc = aFC;
 		initComponents();
 		translateLabels();
+		previewDialog.add(selectionImage, java.awt.BorderLayout.CENTER);
 		tfPage.getDocument().addDocumentListener(new PageNrDocumentListener());
 		cbDisplayMode.setModel(new DefaultComboBoxModel(RenderMode.values()));
 		extraInfo = new PdfExtraInfo(anOptions);
 	}
 
 	/**
-	 * Event handler for page number change. It displays (or hides) position bounds.
+	 * Event handler for page number change. It displays (or hides) position
+	 * bounds.
 	 */
 	protected void pageNrChanged() {
-		if (numberOfPages<1) return;
+		if (numberOfPages < 1)
+			return;
 
 		final Integer tmpPageNr = ConvertUtils.toInteger(tfPage.getText());
-		float[] tmpUR = null;
-		if (tmpPageNr!=null && tmpPageNr>0 && tmpPageNr<=numberOfPages) {
-			tmpUR = extraInfo.getUpperRightCorner(tmpPageNr.intValue());
-		}
-		if (switchBounds(tmpUR!=null)) {
-			lblPosLLYBounds.setText("0.0 - " + tmpUR[0]);
-			lblPosLLXBounds.setText("0.0 - " + tmpUR[1]);
+		if (tmpPageNr != null && tmpPageNr > 0 && tmpPageNr <= numberOfPages) {
+			pdfPageSize = extraInfo.getUpperRightCorner(tmpPageNr.intValue());
+			if (switchBounds(pdfPageSize != null)) {
+				lblPosLLYBounds.setText("0.0 - " + pdfPageSize[0]);
+				lblPosLLXBounds.setText("0.0 - " + pdfPageSize[1]);
+				// TODO another thread
+				if (!previewCache.containsKey(tmpPageNr)) {
+					previewCache.put(tmpPageNr, p2i.getImageForPage(tmpPageNr));
+				}
+				selectionImage.setImage(previewCache.get(tmpPageNr));
+			}
+		} else {
+			switchBounds(false);
 		}
 	}
 
@@ -107,7 +130,6 @@ public class VisibleSignatureDialog extends javax.swing.JDialog {
 
 	}
 
-
 	/**
 	 * Loads properties saved by previous run of application
 	 */
@@ -120,14 +142,14 @@ public class VisibleSignatureDialog extends javax.swing.JDialog {
 		tfBgImgScale.setText(ConvertUtils.toString(options.getBgImgScale()));
 		cbDisplayMode.setSelectedItem(options.getRenderMode());
 		tfL2Text.setText(options.getL2Text());
-		chkbL2TextDefault.setSelected(options.getL2Text()==null);
+		chkbL2TextDefault.setSelected(options.getL2Text() == null);
 		tfL2TextFontSize.setText(ConvertUtils.toString(options.getL2TextFontSize()));
 		tfL4Text.setText(options.getL4Text());
-		chkbL4TextDefault.setSelected(options.getL4Text()==null);
+		chkbL4TextDefault.setSelected(options.getL4Text() == null);
 		tfImgPath.setText(options.getImgPath());
 		tfBgImgPath.setText(options.getBgImgPath());
 
-		//set description fields enabled/disabled
+		// set description fields enabled/disabled
 		chkbL2TextDefaultActionPerformed(null);
 		chkbL4TextDefaultActionPerformed(null);
 	}
@@ -143,21 +165,20 @@ public class VisibleSignatureDialog extends javax.swing.JDialog {
 		options.setPositionURY(ConvertUtils.toFloat(tfPosURY.getText(), Constants.DEFVAL_URY));
 		options.setBgImgScale(ConvertUtils.toFloat(tfBgImgScale.getText(), Constants.DEFVAL_BG_SCALE));
 		options.setRenderMode((RenderMode) cbDisplayMode.getSelectedItem());
-		options.setL2Text(chkbL2TextDefault.isSelected()?null:
-			StringUtils.toNotNull(tfL2Text.getText()));
-		options.setL2TextFontSize(
-				ConvertUtils.toFloat(tfL2TextFontSize.getText(), Constants.DEFVAL_L2_FONT_SIZE));
-		options.setL4Text(chkbL4TextDefault.isSelected()?null:
-			StringUtils.toNotNull(tfL4Text.getText()));
+		options.setL2Text(chkbL2TextDefault.isSelected() ? null : StringUtils.toNotNull(tfL2Text.getText()));
+		options.setL2TextFontSize(ConvertUtils.toFloat(tfL2TextFontSize.getText(), Constants.DEFVAL_L2_FONT_SIZE));
+		options.setL4Text(chkbL4TextDefault.isSelected() ? null : StringUtils.toNotNull(tfL4Text.getText()));
 		options.setImgPath(tfImgPath.getText());
 		options.setBgImgPath(tfBgImgPath.getText());
 
-		//if there are fixed values update them in the form;
+		// if there are fixed values update them in the form;
 		updateFromOptions();
 	}
 
 	/**
-	 * Facade for {@link ResourceProvider#setLabelAndMnemonic(JComponent, String)}
+	 * Facade for
+	 * {@link ResourceProvider#setLabelAndMnemonic(JComponent, String)}
+	 * 
 	 * @param aComponent
 	 * @param aKey
 	 */
@@ -167,8 +188,11 @@ public class VisibleSignatureDialog extends javax.swing.JDialog {
 
 	/**
 	 * Sets tooltip with given key to given component
-	 * @param aComponent component to which a tooltip should be assigned
-	 * @param aKey tooltip key (in resource bundle)
+	 * 
+	 * @param aComponent
+	 *            component to which a tooltip should be assigned
+	 * @param aKey
+	 *            tooltip key (in resource bundle)
 	 */
 	private void setToolTip(final JComponent aComponent, final String aKey) {
 		aComponent.setToolTipText(res.get(aKey));
@@ -176,6 +200,7 @@ public class VisibleSignatureDialog extends javax.swing.JDialog {
 
 	/**
 	 * Shows/hides position bounds.
+	 * 
 	 * @param aVisible
 	 * @return
 	 */
@@ -189,497 +214,562 @@ public class VisibleSignatureDialog extends javax.swing.JDialog {
 	 * Enables/disables siganture image input for selected render mode.
 	 */
 	private void switchImage() {
-		final boolean tmpEnabled = RenderMode.GRAPHIC_AND_DESCRIPTION
-		.equals(cbDisplayMode.getSelectedItem());
+		final boolean tmpEnabled = RenderMode.GRAPHIC_AND_DESCRIPTION.equals(cbDisplayMode.getSelectedItem());
 		tfImgPath.setEnabled(tmpEnabled);
 		btnImgPathBrowse.setEnabled(tmpEnabled);
 	}
+
+	// public void selectionChanged(RelRect aRect) {
+	// if (pdfPageSize == null || !aRect.isValid()) {
+	// tfPosLLX.setText(null);
+	// tfPosLLY.setText(null);
+	// tfPosURX.setText(null);
+	// tfPosURY.setText(null);
+	// return;
+	// }
+	// tfPosLLX.setText(String.valueOf(aRect.getRelLeft() * pdfPageSize[0]));
+	// tfPosLLY.setText(String.valueOf((1 - aRect.getRelBottom()) *
+	// pdfPageSize[1]));
+	// tfPosURX.setText(String.valueOf(aRect.getRelRight() * pdfPageSize[0]));
+	// tfPosURY.setText(String.valueOf((1 - aRect.getRelTop()) *
+	// pdfPageSize[1]));
+	// }
 
 	/**
 	 * Reads number of pages from PDF.
 	 */
 	private void readPdfInfo() {
 		numberOfPages = extraInfo.getNumberOfPages();
-		tfPage.setEnabled(numberOfPages!=1);
-		lblPageBounds.setVisible(numberOfPages>0);
+		tfPage.setEnabled(numberOfPages != 1);
+		lblPageBounds.setVisible(numberOfPages > 0);
 		switchBounds(false);
-		if (numberOfPages>0) {
+		if (numberOfPages > 0) {
 			lblPageBounds.setText("1 - " + numberOfPages);
 			final Integer tmpPageNr = ConvertUtils.toInteger(tfPage.getText());
-			if (tmpPageNr==null || tmpPageNr.intValue()<1 || tmpPageNr.intValue()>numberOfPages) {
+			if (tmpPageNr == null || tmpPageNr.intValue() < 1 || tmpPageNr.intValue() > numberOfPages) {
 				tfPage.setText(ConvertUtils.toString(Constants.DEFVAL_PAGE));
 			}
 		}
 		pageNrChanged();
 	}
 
-	/** This method is called from within the constructor to
-	 * initialize the form.
-	 * WARNING: Do NOT modify this code. The content of this method is
-	 * always regenerated by the Form Editor.
+	/**
+	 * This method is called from within the constructor to initialize the form.
+	 * WARNING: Do NOT modify this code. The content of this method is always
+	 * regenerated by the Form Editor.
 	 */
-    // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
-    private void initComponents() {
-        java.awt.GridBagConstraints gridBagConstraints;
+	// <editor-fold defaultstate="collapsed"
+	// <editor-fold defaultstate="collapsed"
+	// desc="Generated Code">//GEN-BEGIN:initComponents
+	private void initComponents() {
+		java.awt.GridBagConstraints gridBagConstraints;
 
-        lblPosition = new javax.swing.JLabel();
-        lblPage = new javax.swing.JLabel();
-        tfPage = new javax.swing.JTextField();
-        lblPosLLX = new javax.swing.JLabel();
-        tfPosLLX = new javax.swing.JTextField();
-        lblPosLLY = new javax.swing.JLabel();
-        tfPosLLY = new javax.swing.JTextField();
-        lblPosURX = new javax.swing.JLabel();
-        tfPosURX = new javax.swing.JTextField();
-        lblPosURY = new javax.swing.JLabel();
-        tfPosURY = new javax.swing.JTextField();
-        lblSettings = new javax.swing.JLabel();
-        lblDisplayMode = new javax.swing.JLabel();
-        cbDisplayMode = new javax.swing.JComboBox();
-        tfL2Text = new javax.swing.JTextField();
-        chkbL2TextDefault = new javax.swing.JCheckBox();
-        lblL4Text = new javax.swing.JLabel();
-        tfL4Text = new javax.swing.JTextField();
-        chkbL4TextDefault = new javax.swing.JCheckBox();
-        lblImgPath = new javax.swing.JLabel();
-        tfImgPath = new javax.swing.JTextField();
-        btnImgPathBrowse = new javax.swing.JButton();
-        lblBgImgPath = new javax.swing.JLabel();
-        tfBgImgPath = new javax.swing.JTextField();
-        btnBgImgPathBrowse = new javax.swing.JButton();
-        lblBgImgScale = new javax.swing.JLabel();
-        tfBgImgScale = new javax.swing.JTextField();
-        btnClose = new javax.swing.JButton();
-        lblPageBounds = new javax.swing.JLabel();
-        lblPosLLXBounds = new javax.swing.JLabel();
-        lblPosLLYBounds = new javax.swing.JLabel();
-        lblL2Text = new javax.swing.JLabel();
-        lblL2TextFontSize = new javax.swing.JLabel();
-        tfL2TextFontSize = new javax.swing.JTextField();
+		previewDialog = new javax.swing.JDialog();
+		lblPreviewInfo = new javax.swing.JLabel();
+		lblPosition = new javax.swing.JLabel();
+		lblPage = new javax.swing.JLabel();
+		tfPage = new javax.swing.JTextField();
+		lblPosLLX = new javax.swing.JLabel();
+		tfPosLLX = new javax.swing.JTextField();
+		lblPosLLY = new javax.swing.JLabel();
+		tfPosLLY = new javax.swing.JTextField();
+		lblPosURX = new javax.swing.JLabel();
+		tfPosURX = new javax.swing.JTextField();
+		lblPosURY = new javax.swing.JLabel();
+		tfPosURY = new javax.swing.JTextField();
+		lblSettings = new javax.swing.JLabel();
+		lblDisplayMode = new javax.swing.JLabel();
+		cbDisplayMode = new javax.swing.JComboBox();
+		tfL2Text = new javax.swing.JTextField();
+		chkbL2TextDefault = new javax.swing.JCheckBox();
+		lblL4Text = new javax.swing.JLabel();
+		tfL4Text = new javax.swing.JTextField();
+		chkbL4TextDefault = new javax.swing.JCheckBox();
+		lblImgPath = new javax.swing.JLabel();
+		tfImgPath = new javax.swing.JTextField();
+		btnImgPathBrowse = new javax.swing.JButton();
+		lblBgImgPath = new javax.swing.JLabel();
+		tfBgImgPath = new javax.swing.JTextField();
+		btnBgImgPathBrowse = new javax.swing.JButton();
+		lblBgImgScale = new javax.swing.JLabel();
+		tfBgImgScale = new javax.swing.JTextField();
+		btnClose = new javax.swing.JButton();
+		lblPageBounds = new javax.swing.JLabel();
+		lblPosLLXBounds = new javax.swing.JLabel();
+		lblPosLLYBounds = new javax.swing.JLabel();
+		lblL2Text = new javax.swing.JLabel();
+		lblL2TextFontSize = new javax.swing.JLabel();
+		tfL2TextFontSize = new javax.swing.JTextField();
+		btnSelectPosition = new javax.swing.JButton();
+		jPanel1 = new javax.swing.JPanel();
 
-        addComponentListener(new java.awt.event.ComponentAdapter() {
-            public void componentHidden(java.awt.event.ComponentEvent evt) {
-                formComponentHidden(evt);
-            }
-            public void componentShown(java.awt.event.ComponentEvent evt) {
-                formComponentShown(evt);
-            }
-        });
-        getContentPane().setLayout(new java.awt.GridBagLayout());
+		previewDialog.setTitle("Preview");
+		previewDialog.setModal(true);
 
-        lblPosition.setText("Position");
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-        gridBagConstraints.insets = new java.awt.Insets(10, 0, 10, 0);
-        getContentPane().add(lblPosition, gridBagConstraints);
+		lblPreviewInfo.setText("Loading image...");
+		previewDialog.getContentPane().add(lblPreviewInfo, java.awt.BorderLayout.PAGE_START);
 
-        lblPage.setLabelFor(lblPage);
-        lblPage.setText("Page");
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 1;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-        gridBagConstraints.insets = new java.awt.Insets(2, 5, 2, 5);
-        getContentPane().add(lblPage, gridBagConstraints);
+		addComponentListener(new java.awt.event.ComponentAdapter() {
+			public void componentHidden(java.awt.event.ComponentEvent evt) {
+				formComponentHidden(evt);
+			}
 
-        tfPage.setHorizontalAlignment(javax.swing.JTextField.RIGHT);
-        tfPage.setText("1");
-        tfPage.setMinimumSize(new java.awt.Dimension(70, 20));
-        tfPage.setPreferredSize(new java.awt.Dimension(70, 20));
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 1;
-        gridBagConstraints.gridy = 1;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-        gridBagConstraints.insets = new java.awt.Insets(2, 5, 2, 5);
-        getContentPane().add(tfPage, gridBagConstraints);
+			public void componentShown(java.awt.event.ComponentEvent evt) {
+				formComponentShown(evt);
+			}
+		});
+		getContentPane().setLayout(new java.awt.GridBagLayout());
 
-        lblPosLLX.setLabelFor(tfPosLLX);
-        lblPosLLX.setText("Lower Left X");
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 2;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-        gridBagConstraints.insets = new java.awt.Insets(2, 5, 2, 5);
-        getContentPane().add(lblPosLLX, gridBagConstraints);
+		lblPosition.setText("Position");
+		gridBagConstraints = new java.awt.GridBagConstraints();
+		gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+		gridBagConstraints.insets = new java.awt.Insets(10, 0, 10, 0);
+		getContentPane().add(lblPosition, gridBagConstraints);
 
-        tfPosLLX.setHorizontalAlignment(javax.swing.JTextField.RIGHT);
-        tfPosLLX.setText("0.0");
-        tfPosLLX.setMinimumSize(new java.awt.Dimension(70, 20));
-        tfPosLLX.setPreferredSize(new java.awt.Dimension(70, 20));
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 1;
-        gridBagConstraints.gridy = 2;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-        gridBagConstraints.insets = new java.awt.Insets(2, 5, 2, 5);
-        getContentPane().add(tfPosLLX, gridBagConstraints);
+		lblPage.setLabelFor(lblPage);
+		lblPage.setText("Page");
+		gridBagConstraints = new java.awt.GridBagConstraints();
+		gridBagConstraints.gridx = 0;
+		gridBagConstraints.gridy = 1;
+		gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+		gridBagConstraints.insets = new java.awt.Insets(2, 5, 2, 5);
+		getContentPane().add(lblPage, gridBagConstraints);
 
-        lblPosLLY.setLabelFor(tfPosLLY);
-        lblPosLLY.setText("Lower Left Y");
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 3;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-        gridBagConstraints.insets = new java.awt.Insets(2, 5, 2, 5);
-        getContentPane().add(lblPosLLY, gridBagConstraints);
+		tfPage.setHorizontalAlignment(javax.swing.JTextField.RIGHT);
+		tfPage.setText("1");
+		tfPage.setMinimumSize(new java.awt.Dimension(70, 20));
+		tfPage.setPreferredSize(new java.awt.Dimension(70, 20));
+		gridBagConstraints = new java.awt.GridBagConstraints();
+		gridBagConstraints.gridx = 1;
+		gridBagConstraints.gridy = 1;
+		gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+		gridBagConstraints.insets = new java.awt.Insets(2, 5, 2, 5);
+		getContentPane().add(tfPage, gridBagConstraints);
 
-        tfPosLLY.setHorizontalAlignment(javax.swing.JTextField.RIGHT);
-        tfPosLLY.setText("0.0");
-        tfPosLLY.setMinimumSize(new java.awt.Dimension(70, 20));
-        tfPosLLY.setPreferredSize(new java.awt.Dimension(70, 20));
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 1;
-        gridBagConstraints.gridy = 3;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-        gridBagConstraints.insets = new java.awt.Insets(2, 5, 2, 5);
-        getContentPane().add(tfPosLLY, gridBagConstraints);
+		lblPosLLX.setLabelFor(tfPosLLX);
+		lblPosLLX.setText("Lower Left X");
+		gridBagConstraints = new java.awt.GridBagConstraints();
+		gridBagConstraints.gridx = 0;
+		gridBagConstraints.gridy = 2;
+		gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+		gridBagConstraints.insets = new java.awt.Insets(2, 5, 2, 5);
+		getContentPane().add(lblPosLLX, gridBagConstraints);
 
-        lblPosURX.setLabelFor(tfPosURX);
-        lblPosURX.setText("Upper Right X");
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 4;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-        gridBagConstraints.insets = new java.awt.Insets(2, 5, 2, 5);
-        getContentPane().add(lblPosURX, gridBagConstraints);
+		tfPosLLX.setHorizontalAlignment(javax.swing.JTextField.RIGHT);
+		tfPosLLX.setText("0.0");
+		tfPosLLX.setMinimumSize(new java.awt.Dimension(70, 20));
+		tfPosLLX.setPreferredSize(new java.awt.Dimension(70, 20));
+		gridBagConstraints = new java.awt.GridBagConstraints();
+		gridBagConstraints.gridx = 1;
+		gridBagConstraints.gridy = 2;
+		gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+		gridBagConstraints.insets = new java.awt.Insets(2, 5, 2, 5);
+		getContentPane().add(tfPosLLX, gridBagConstraints);
 
-        tfPosURX.setHorizontalAlignment(javax.swing.JTextField.RIGHT);
-        tfPosURX.setText("100.0");
-        tfPosURX.setMinimumSize(new java.awt.Dimension(70, 20));
-        tfPosURX.setPreferredSize(new java.awt.Dimension(70, 20));
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 1;
-        gridBagConstraints.gridy = 4;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-        gridBagConstraints.insets = new java.awt.Insets(2, 5, 2, 5);
-        getContentPane().add(tfPosURX, gridBagConstraints);
+		lblPosLLY.setLabelFor(tfPosLLY);
+		lblPosLLY.setText("Lower Left Y");
+		gridBagConstraints = new java.awt.GridBagConstraints();
+		gridBagConstraints.gridx = 0;
+		gridBagConstraints.gridy = 3;
+		gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+		gridBagConstraints.insets = new java.awt.Insets(2, 5, 2, 5);
+		getContentPane().add(lblPosLLY, gridBagConstraints);
 
-        lblPosURY.setLabelFor(tfPosURY);
-        lblPosURY.setText("Upper Right Y");
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 5;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-        gridBagConstraints.insets = new java.awt.Insets(2, 5, 2, 5);
-        getContentPane().add(lblPosURY, gridBagConstraints);
+		tfPosLLY.setHorizontalAlignment(javax.swing.JTextField.RIGHT);
+		tfPosLLY.setText("0.0");
+		tfPosLLY.setMinimumSize(new java.awt.Dimension(70, 20));
+		tfPosLLY.setPreferredSize(new java.awt.Dimension(70, 20));
+		gridBagConstraints = new java.awt.GridBagConstraints();
+		gridBagConstraints.gridx = 1;
+		gridBagConstraints.gridy = 3;
+		gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+		gridBagConstraints.insets = new java.awt.Insets(2, 5, 2, 5);
+		getContentPane().add(tfPosLLY, gridBagConstraints);
 
-        tfPosURY.setHorizontalAlignment(javax.swing.JTextField.RIGHT);
-        tfPosURY.setText("100.0");
-        tfPosURY.setMinimumSize(new java.awt.Dimension(70, 20));
-        tfPosURY.setPreferredSize(new java.awt.Dimension(70, 20));
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 1;
-        gridBagConstraints.gridy = 5;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-        gridBagConstraints.insets = new java.awt.Insets(2, 5, 2, 5);
-        getContentPane().add(tfPosURY, gridBagConstraints);
+		lblPosURX.setLabelFor(tfPosURX);
+		lblPosURX.setText("Upper Right X");
+		gridBagConstraints = new java.awt.GridBagConstraints();
+		gridBagConstraints.gridx = 0;
+		gridBagConstraints.gridy = 4;
+		gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+		gridBagConstraints.insets = new java.awt.Insets(2, 5, 2, 5);
+		getContentPane().add(lblPosURX, gridBagConstraints);
 
-        lblSettings.setText("Settings");
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 6;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-        gridBagConstraints.insets = new java.awt.Insets(10, 0, 10, 0);
-        getContentPane().add(lblSettings, gridBagConstraints);
+		tfPosURX.setHorizontalAlignment(javax.swing.JTextField.RIGHT);
+		tfPosURX.setText("100.0");
+		tfPosURX.setMinimumSize(new java.awt.Dimension(70, 20));
+		tfPosURX.setPreferredSize(new java.awt.Dimension(70, 20));
+		gridBagConstraints = new java.awt.GridBagConstraints();
+		gridBagConstraints.gridx = 1;
+		gridBagConstraints.gridy = 4;
+		gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+		gridBagConstraints.insets = new java.awt.Insets(2, 5, 2, 5);
+		getContentPane().add(tfPosURX, gridBagConstraints);
 
-        lblDisplayMode.setLabelFor(cbDisplayMode);
-        lblDisplayMode.setText("Display");
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 7;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-        gridBagConstraints.insets = new java.awt.Insets(2, 5, 2, 5);
-        getContentPane().add(lblDisplayMode, gridBagConstraints);
+		lblPosURY.setLabelFor(tfPosURY);
+		lblPosURY.setText("Upper Right Y");
+		gridBagConstraints = new java.awt.GridBagConstraints();
+		gridBagConstraints.gridx = 0;
+		gridBagConstraints.gridy = 5;
+		gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+		gridBagConstraints.insets = new java.awt.Insets(2, 5, 2, 5);
+		getContentPane().add(lblPosURY, gridBagConstraints);
 
-        cbDisplayMode.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
-        cbDisplayMode.setMinimumSize(new java.awt.Dimension(200, 20));
-        cbDisplayMode.setPreferredSize(new java.awt.Dimension(200, 20));
-        cbDisplayMode.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                cbDisplayModeActionPerformed(evt);
-            }
-        });
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 1;
-        gridBagConstraints.gridy = 7;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-        gridBagConstraints.insets = new java.awt.Insets(2, 5, 2, 5);
-        getContentPane().add(cbDisplayMode, gridBagConstraints);
+		tfPosURY.setHorizontalAlignment(javax.swing.JTextField.RIGHT);
+		tfPosURY.setText("100.0");
+		tfPosURY.setMinimumSize(new java.awt.Dimension(70, 20));
+		tfPosURY.setPreferredSize(new java.awt.Dimension(70, 20));
+		gridBagConstraints = new java.awt.GridBagConstraints();
+		gridBagConstraints.gridx = 1;
+		gridBagConstraints.gridy = 5;
+		gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+		gridBagConstraints.insets = new java.awt.Insets(2, 5, 2, 5);
+		getContentPane().add(tfPosURY, gridBagConstraints);
 
-        tfL2Text.setMinimumSize(new java.awt.Dimension(200, 20));
-        tfL2Text.setPreferredSize(new java.awt.Dimension(200, 20));
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 1;
-        gridBagConstraints.gridy = 8;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-        gridBagConstraints.insets = new java.awt.Insets(2, 5, 2, 5);
-        getContentPane().add(tfL2Text, gridBagConstraints);
+		lblSettings.setText("Settings");
+		gridBagConstraints = new java.awt.GridBagConstraints();
+		gridBagConstraints.gridx = 0;
+		gridBagConstraints.gridy = 6;
+		gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+		gridBagConstraints.insets = new java.awt.Insets(10, 0, 10, 0);
+		getContentPane().add(lblSettings, gridBagConstraints);
 
-        chkbL2TextDefault.setText("Default");
-        chkbL2TextDefault.setBorder(javax.swing.BorderFactory.createEmptyBorder(0, 0, 0, 0));
-        chkbL2TextDefault.setMargin(new java.awt.Insets(0, 0, 0, 0));
-        chkbL2TextDefault.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                chkbL2TextDefaultActionPerformed(evt);
-            }
-        });
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 2;
-        gridBagConstraints.gridy = 8;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-        gridBagConstraints.insets = new java.awt.Insets(0, 2, 0, 2);
-        getContentPane().add(chkbL2TextDefault, gridBagConstraints);
+		lblDisplayMode.setLabelFor(cbDisplayMode);
+		lblDisplayMode.setText("Display");
+		gridBagConstraints = new java.awt.GridBagConstraints();
+		gridBagConstraints.gridx = 0;
+		gridBagConstraints.gridy = 7;
+		gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+		gridBagConstraints.insets = new java.awt.Insets(2, 5, 2, 5);
+		getContentPane().add(lblDisplayMode, gridBagConstraints);
 
-        lblL4Text.setLabelFor(tfL4Text);
-        lblL4Text.setText("Status text");
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 10;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-        gridBagConstraints.insets = new java.awt.Insets(2, 5, 2, 5);
-        getContentPane().add(lblL4Text, gridBagConstraints);
+		cbDisplayMode.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Item 1", "Item 2", "Item 3",
+				"Item 4" }));
+		cbDisplayMode.setMinimumSize(new java.awt.Dimension(200, 20));
+		cbDisplayMode.setPreferredSize(new java.awt.Dimension(200, 20));
+		cbDisplayMode.addActionListener(new java.awt.event.ActionListener() {
+			public void actionPerformed(java.awt.event.ActionEvent evt) {
+				cbDisplayModeActionPerformed(evt);
+			}
+		});
+		gridBagConstraints = new java.awt.GridBagConstraints();
+		gridBagConstraints.gridx = 1;
+		gridBagConstraints.gridy = 7;
+		gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+		gridBagConstraints.insets = new java.awt.Insets(2, 5, 2, 5);
+		getContentPane().add(cbDisplayMode, gridBagConstraints);
 
-        tfL4Text.setMinimumSize(new java.awt.Dimension(200, 20));
-        tfL4Text.setPreferredSize(new java.awt.Dimension(200, 20));
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 1;
-        gridBagConstraints.gridy = 10;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-        gridBagConstraints.insets = new java.awt.Insets(2, 5, 2, 5);
-        getContentPane().add(tfL4Text, gridBagConstraints);
+		tfL2Text.setMinimumSize(new java.awt.Dimension(200, 20));
+		tfL2Text.setPreferredSize(new java.awt.Dimension(200, 20));
+		gridBagConstraints = new java.awt.GridBagConstraints();
+		gridBagConstraints.gridx = 1;
+		gridBagConstraints.gridy = 8;
+		gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+		gridBagConstraints.insets = new java.awt.Insets(2, 5, 2, 5);
+		getContentPane().add(tfL2Text, gridBagConstraints);
 
-        chkbL4TextDefault.setText("Default");
-        chkbL4TextDefault.setBorder(javax.swing.BorderFactory.createEmptyBorder(0, 0, 0, 0));
-        chkbL4TextDefault.setMargin(new java.awt.Insets(0, 0, 0, 0));
-        chkbL4TextDefault.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                chkbL4TextDefaultActionPerformed(evt);
-            }
-        });
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 2;
-        gridBagConstraints.gridy = 10;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-        gridBagConstraints.insets = new java.awt.Insets(0, 2, 0, 2);
-        getContentPane().add(chkbL4TextDefault, gridBagConstraints);
+		chkbL2TextDefault.setText("Default");
+		chkbL2TextDefault.setBorder(javax.swing.BorderFactory.createEmptyBorder(0, 0, 0, 0));
+		chkbL2TextDefault.setMargin(new java.awt.Insets(0, 0, 0, 0));
+		chkbL2TextDefault.addActionListener(new java.awt.event.ActionListener() {
+			public void actionPerformed(java.awt.event.ActionEvent evt) {
+				chkbL2TextDefaultActionPerformed(evt);
+			}
+		});
+		gridBagConstraints = new java.awt.GridBagConstraints();
+		gridBagConstraints.gridx = 2;
+		gridBagConstraints.gridy = 8;
+		gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+		gridBagConstraints.insets = new java.awt.Insets(0, 2, 0, 2);
+		getContentPane().add(chkbL2TextDefault, gridBagConstraints);
 
-        lblImgPath.setLabelFor(tfImgPath);
-        lblImgPath.setText("Image");
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 11;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-        gridBagConstraints.insets = new java.awt.Insets(2, 5, 2, 5);
-        getContentPane().add(lblImgPath, gridBagConstraints);
+		lblL4Text.setLabelFor(tfL4Text);
+		lblL4Text.setText("Status text");
+		gridBagConstraints = new java.awt.GridBagConstraints();
+		gridBagConstraints.gridx = 0;
+		gridBagConstraints.gridy = 10;
+		gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+		gridBagConstraints.insets = new java.awt.Insets(2, 5, 2, 5);
+		getContentPane().add(lblL4Text, gridBagConstraints);
 
-        tfImgPath.setMinimumSize(new java.awt.Dimension(200, 20));
-        tfImgPath.setPreferredSize(new java.awt.Dimension(200, 20));
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 1;
-        gridBagConstraints.gridy = 11;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-        gridBagConstraints.insets = new java.awt.Insets(2, 5, 2, 5);
-        getContentPane().add(tfImgPath, gridBagConstraints);
+		tfL4Text.setMinimumSize(new java.awt.Dimension(200, 20));
+		tfL4Text.setPreferredSize(new java.awt.Dimension(200, 20));
+		gridBagConstraints = new java.awt.GridBagConstraints();
+		gridBagConstraints.gridx = 1;
+		gridBagConstraints.gridy = 10;
+		gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+		gridBagConstraints.insets = new java.awt.Insets(2, 5, 2, 5);
+		getContentPane().add(tfL4Text, gridBagConstraints);
 
-        btnImgPathBrowse.setIcon(new javax.swing.ImageIcon(getClass().getResource("/net/sf/jsignpdf/fileopen16.png"))); // NOI18N
-        btnImgPathBrowse.setText("Browse");
-        btnImgPathBrowse.setHorizontalAlignment(javax.swing.SwingConstants.LEADING);
-        btnImgPathBrowse.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                btnImgPathBrowseActionPerformed(evt);
-            }
-        });
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 2;
-        gridBagConstraints.gridy = 11;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-        gridBagConstraints.insets = new java.awt.Insets(0, 2, 0, 2);
-        getContentPane().add(btnImgPathBrowse, gridBagConstraints);
+		chkbL4TextDefault.setText("Default");
+		chkbL4TextDefault.setBorder(javax.swing.BorderFactory.createEmptyBorder(0, 0, 0, 0));
+		chkbL4TextDefault.setMargin(new java.awt.Insets(0, 0, 0, 0));
+		chkbL4TextDefault.addActionListener(new java.awt.event.ActionListener() {
+			public void actionPerformed(java.awt.event.ActionEvent evt) {
+				chkbL4TextDefaultActionPerformed(evt);
+			}
+		});
+		gridBagConstraints = new java.awt.GridBagConstraints();
+		gridBagConstraints.gridx = 2;
+		gridBagConstraints.gridy = 10;
+		gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+		gridBagConstraints.insets = new java.awt.Insets(0, 2, 0, 2);
+		getContentPane().add(chkbL4TextDefault, gridBagConstraints);
 
-        lblBgImgPath.setLabelFor(tfBgImgPath);
-        lblBgImgPath.setText("Background image");
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 12;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-        gridBagConstraints.insets = new java.awt.Insets(2, 5, 2, 5);
-        getContentPane().add(lblBgImgPath, gridBagConstraints);
+		lblImgPath.setLabelFor(tfImgPath);
+		lblImgPath.setText("Image");
+		gridBagConstraints = new java.awt.GridBagConstraints();
+		gridBagConstraints.gridx = 0;
+		gridBagConstraints.gridy = 11;
+		gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+		gridBagConstraints.insets = new java.awt.Insets(2, 5, 2, 5);
+		getContentPane().add(lblImgPath, gridBagConstraints);
 
-        tfBgImgPath.setMinimumSize(new java.awt.Dimension(200, 20));
-        tfBgImgPath.setPreferredSize(new java.awt.Dimension(200, 20));
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 1;
-        gridBagConstraints.gridy = 12;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-        gridBagConstraints.insets = new java.awt.Insets(2, 5, 2, 5);
-        getContentPane().add(tfBgImgPath, gridBagConstraints);
+		tfImgPath.setMinimumSize(new java.awt.Dimension(200, 20));
+		tfImgPath.setPreferredSize(new java.awt.Dimension(200, 20));
+		gridBagConstraints = new java.awt.GridBagConstraints();
+		gridBagConstraints.gridx = 1;
+		gridBagConstraints.gridy = 11;
+		gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+		gridBagConstraints.insets = new java.awt.Insets(2, 5, 2, 5);
+		getContentPane().add(tfImgPath, gridBagConstraints);
 
-        btnBgImgPathBrowse.setIcon(new javax.swing.ImageIcon(getClass().getResource("/net/sf/jsignpdf/fileopen16.png"))); // NOI18N
-        btnBgImgPathBrowse.setText("Browse");
-        btnBgImgPathBrowse.setHorizontalAlignment(javax.swing.SwingConstants.LEADING);
-        btnBgImgPathBrowse.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                btnBgImgPathBrowseActionPerformed(evt);
-            }
-        });
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 2;
-        gridBagConstraints.gridy = 12;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-        gridBagConstraints.insets = new java.awt.Insets(0, 2, 0, 2);
-        getContentPane().add(btnBgImgPathBrowse, gridBagConstraints);
+		btnImgPathBrowse.setIcon(new javax.swing.ImageIcon(getClass().getResource("/net/sf/jsignpdf/fileopen16.png"))); // NOI18N
+		btnImgPathBrowse.setText("Browse");
+		btnImgPathBrowse.setHorizontalAlignment(javax.swing.SwingConstants.LEADING);
+		btnImgPathBrowse.addActionListener(new java.awt.event.ActionListener() {
+			public void actionPerformed(java.awt.event.ActionEvent evt) {
+				btnImgPathBrowseActionPerformed(evt);
+			}
+		});
+		gridBagConstraints = new java.awt.GridBagConstraints();
+		gridBagConstraints.gridx = 2;
+		gridBagConstraints.gridy = 11;
+		gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+		gridBagConstraints.insets = new java.awt.Insets(0, 2, 0, 2);
+		getContentPane().add(btnImgPathBrowse, gridBagConstraints);
 
-        lblBgImgScale.setLabelFor(tfBgImgScale);
-        lblBgImgScale.setText("Background image scale");
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 13;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-        gridBagConstraints.insets = new java.awt.Insets(2, 5, 2, 5);
-        getContentPane().add(lblBgImgScale, gridBagConstraints);
+		lblBgImgPath.setLabelFor(tfBgImgPath);
+		lblBgImgPath.setText("Background image");
+		gridBagConstraints = new java.awt.GridBagConstraints();
+		gridBagConstraints.gridx = 0;
+		gridBagConstraints.gridy = 12;
+		gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+		gridBagConstraints.insets = new java.awt.Insets(2, 5, 2, 5);
+		getContentPane().add(lblBgImgPath, gridBagConstraints);
 
-        tfBgImgScale.setHorizontalAlignment(javax.swing.JTextField.RIGHT);
-        tfBgImgScale.setText("-1.0");
-        tfBgImgScale.setMinimumSize(new java.awt.Dimension(70, 20));
-        tfBgImgScale.setPreferredSize(new java.awt.Dimension(70, 20));
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 1;
-        gridBagConstraints.gridy = 13;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-        gridBagConstraints.insets = new java.awt.Insets(2, 5, 2, 5);
-        getContentPane().add(tfBgImgScale, gridBagConstraints);
+		tfBgImgPath.setMinimumSize(new java.awt.Dimension(200, 20));
+		tfBgImgPath.setPreferredSize(new java.awt.Dimension(200, 20));
+		gridBagConstraints = new java.awt.GridBagConstraints();
+		gridBagConstraints.gridx = 1;
+		gridBagConstraints.gridy = 12;
+		gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+		gridBagConstraints.insets = new java.awt.Insets(2, 5, 2, 5);
+		getContentPane().add(tfBgImgPath, gridBagConstraints);
 
-        btnClose.setIcon(new javax.swing.ImageIcon(getClass().getResource("/net/sf/jsignpdf/back16.png"))); // NOI18N
-        btnClose.setText("Close");
-        btnClose.setHorizontalAlignment(javax.swing.SwingConstants.LEADING);
-        btnClose.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                btnCloseActionPerformed(evt);
-            }
-        });
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 2;
-        gridBagConstraints.gridy = 14;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-        gridBagConstraints.insets = new java.awt.Insets(10, 2, 5, 2);
-        getContentPane().add(btnClose, gridBagConstraints);
+		btnBgImgPathBrowse
+				.setIcon(new javax.swing.ImageIcon(getClass().getResource("/net/sf/jsignpdf/fileopen16.png"))); // NOI18N
+		btnBgImgPathBrowse.setText("Browse");
+		btnBgImgPathBrowse.setHorizontalAlignment(javax.swing.SwingConstants.LEADING);
+		btnBgImgPathBrowse.addActionListener(new java.awt.event.ActionListener() {
+			public void actionPerformed(java.awt.event.ActionEvent evt) {
+				btnBgImgPathBrowseActionPerformed(evt);
+			}
+		});
+		gridBagConstraints = new java.awt.GridBagConstraints();
+		gridBagConstraints.gridx = 2;
+		gridBagConstraints.gridy = 12;
+		gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+		gridBagConstraints.insets = new java.awt.Insets(0, 2, 0, 2);
+		getContentPane().add(btnBgImgPathBrowse, gridBagConstraints);
 
-        lblPageBounds.setText("1 - 10");
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 2;
-        gridBagConstraints.gridy = 1;
-        getContentPane().add(lblPageBounds, gridBagConstraints);
+		lblBgImgScale.setLabelFor(tfBgImgScale);
+		lblBgImgScale.setText("Background image scale");
+		gridBagConstraints = new java.awt.GridBagConstraints();
+		gridBagConstraints.gridx = 0;
+		gridBagConstraints.gridy = 13;
+		gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+		gridBagConstraints.insets = new java.awt.Insets(2, 5, 2, 5);
+		getContentPane().add(lblBgImgScale, gridBagConstraints);
 
-        lblPosLLXBounds.setText("0.0 - 20.0");
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 2;
-        gridBagConstraints.gridy = 2;
-        getContentPane().add(lblPosLLXBounds, gridBagConstraints);
+		tfBgImgScale.setHorizontalAlignment(javax.swing.JTextField.RIGHT);
+		tfBgImgScale.setText("-1.0");
+		tfBgImgScale.setMinimumSize(new java.awt.Dimension(70, 20));
+		tfBgImgScale.setPreferredSize(new java.awt.Dimension(70, 20));
+		gridBagConstraints = new java.awt.GridBagConstraints();
+		gridBagConstraints.gridx = 1;
+		gridBagConstraints.gridy = 13;
+		gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+		gridBagConstraints.insets = new java.awt.Insets(2, 5, 2, 5);
+		getContentPane().add(tfBgImgScale, gridBagConstraints);
 
-        lblPosLLYBounds.setText("0.0 - 20.0");
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 2;
-        gridBagConstraints.gridy = 3;
-        getContentPane().add(lblPosLLYBounds, gridBagConstraints);
+		btnClose.setIcon(new javax.swing.ImageIcon(getClass().getResource("/net/sf/jsignpdf/back16.png"))); // NOI18N
+		btnClose.setText("Close");
+		btnClose.setHorizontalAlignment(javax.swing.SwingConstants.LEADING);
+		btnClose.addActionListener(new java.awt.event.ActionListener() {
+			public void actionPerformed(java.awt.event.ActionEvent evt) {
+				btnCloseActionPerformed(evt);
+			}
+		});
+		gridBagConstraints = new java.awt.GridBagConstraints();
+		gridBagConstraints.gridx = 2;
+		gridBagConstraints.gridy = 14;
+		gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+		gridBagConstraints.insets = new java.awt.Insets(10, 2, 5, 2);
+		getContentPane().add(btnClose, gridBagConstraints);
 
-        lblL2Text.setLabelFor(tfL2Text);
-        lblL2Text.setText("Signature text");
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 8;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-        gridBagConstraints.insets = new java.awt.Insets(2, 5, 2, 5);
-        getContentPane().add(lblL2Text, gridBagConstraints);
+		lblPageBounds.setText("1 - 10");
+		gridBagConstraints = new java.awt.GridBagConstraints();
+		gridBagConstraints.gridx = 2;
+		gridBagConstraints.gridy = 1;
+		getContentPane().add(lblPageBounds, gridBagConstraints);
 
-        lblL2TextFontSize.setLabelFor(tfL2TextFontSize);
-        lblL2TextFontSize.setText("Signature text size");
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 9;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-        gridBagConstraints.insets = new java.awt.Insets(2, 5, 2, 5);
-        getContentPane().add(lblL2TextFontSize, gridBagConstraints);
+		lblPosLLXBounds.setText("0.0 - 20.0");
+		gridBagConstraints = new java.awt.GridBagConstraints();
+		gridBagConstraints.gridx = 2;
+		gridBagConstraints.gridy = 2;
+		getContentPane().add(lblPosLLXBounds, gridBagConstraints);
 
-        tfL2TextFontSize.setHorizontalAlignment(javax.swing.JTextField.RIGHT);
-        tfL2TextFontSize.setText("10.0");
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 1;
-        gridBagConstraints.gridy = 9;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-        gridBagConstraints.insets = new java.awt.Insets(2, 5, 2, 5);
-        getContentPane().add(tfL2TextFontSize, gridBagConstraints);
+		lblPosLLYBounds.setText("0.0 - 20.0");
+		gridBagConstraints = new java.awt.GridBagConstraints();
+		gridBagConstraints.gridx = 2;
+		gridBagConstraints.gridy = 3;
+		getContentPane().add(lblPosLLYBounds, gridBagConstraints);
 
-        pack();
-    }// </editor-fold>//GEN-END:initComponents
+		lblL2Text.setLabelFor(tfL2Text);
+		lblL2Text.setText("Signature text");
+		gridBagConstraints = new java.awt.GridBagConstraints();
+		gridBagConstraints.gridx = 0;
+		gridBagConstraints.gridy = 8;
+		gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+		gridBagConstraints.insets = new java.awt.Insets(2, 5, 2, 5);
+		getContentPane().add(lblL2Text, gridBagConstraints);
 
-	private void btnBgImgPathBrowseActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnBgImgPathBrowseActionPerformed
+		lblL2TextFontSize.setLabelFor(tfL2TextFontSize);
+		lblL2TextFontSize.setText("Signature text size");
+		gridBagConstraints = new java.awt.GridBagConstraints();
+		gridBagConstraints.gridx = 0;
+		gridBagConstraints.gridy = 9;
+		gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+		gridBagConstraints.insets = new java.awt.Insets(2, 5, 2, 5);
+		getContentPane().add(lblL2TextFontSize, gridBagConstraints);
+
+		tfL2TextFontSize.setHorizontalAlignment(javax.swing.JTextField.RIGHT);
+		tfL2TextFontSize.setText("10.0");
+		gridBagConstraints = new java.awt.GridBagConstraints();
+		gridBagConstraints.gridx = 1;
+		gridBagConstraints.gridy = 9;
+		gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+		gridBagConstraints.insets = new java.awt.Insets(2, 5, 2, 5);
+		getContentPane().add(tfL2TextFontSize, gridBagConstraints);
+
+		btnSelectPosition.setIcon(new javax.swing.ImageIcon(getClass().getResource("/net/sf/jsignpdf/fileopen16.png"))); // NOI18N
+		btnSelectPosition.setText("Place");
+		btnSelectPosition.setHorizontalAlignment(javax.swing.SwingConstants.LEADING);
+		btnSelectPosition.addActionListener(new java.awt.event.ActionListener() {
+			public void actionPerformed(java.awt.event.ActionEvent evt) {
+				btnSelectPositionActionPerformed(evt);
+			}
+		});
+		gridBagConstraints = new java.awt.GridBagConstraints();
+		gridBagConstraints.gridx = 2;
+		gridBagConstraints.gridy = 4;
+		gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+		gridBagConstraints.insets = new java.awt.Insets(0, 2, 0, 2);
+		getContentPane().add(btnSelectPosition, gridBagConstraints);
+
+		jPanel1.setMinimumSize(new java.awt.Dimension(50, 10));
+		gridBagConstraints = new java.awt.GridBagConstraints();
+		gridBagConstraints.gridx = 3;
+		gridBagConstraints.gridy = 0;
+		gridBagConstraints.gridheight = 15;
+		gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+		gridBagConstraints.weightx = 1.0;
+		gridBagConstraints.weighty = 1.0;
+		getContentPane().add(jPanel1, gridBagConstraints);
+
+		pack();
+	}// </editor-fold>//GEN-END:initComponents
+
+	private void btnBgImgPathBrowseActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_btnBgImgPathBrowseActionPerformed
 		fc.showFileChooser(tfBgImgPath, null, JFileChooser.OPEN_DIALOG);
-	}//GEN-LAST:event_btnBgImgPathBrowseActionPerformed
+	}// GEN-LAST:event_btnBgImgPathBrowseActionPerformed
 
-	private void btnImgPathBrowseActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnImgPathBrowseActionPerformed
+	private void btnImgPathBrowseActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_btnImgPathBrowseActionPerformed
 		fc.showFileChooser(tfImgPath, null, JFileChooser.OPEN_DIALOG);
-	}//GEN-LAST:event_btnImgPathBrowseActionPerformed
+	}// GEN-LAST:event_btnImgPathBrowseActionPerformed
 
-	private void btnCloseActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCloseActionPerformed
+	private void btnCloseActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_btnCloseActionPerformed
 		setVisible(false);
-	}//GEN-LAST:event_btnCloseActionPerformed
+	}// GEN-LAST:event_btnCloseActionPerformed
 
-	private void chkbL4TextDefaultActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_chkbL4TextDefaultActionPerformed
-		tfL4Text.setEnabled(! chkbL4TextDefault.isSelected());
-	}//GEN-LAST:event_chkbL4TextDefaultActionPerformed
+	private void chkbL4TextDefaultActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_chkbL4TextDefaultActionPerformed
+		tfL4Text.setEnabled(!chkbL4TextDefault.isSelected());
+	}// GEN-LAST:event_chkbL4TextDefaultActionPerformed
 
-	private void chkbL2TextDefaultActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_chkbL2TextDefaultActionPerformed
-		tfL2Text.setEnabled(! chkbL2TextDefault.isSelected());
-	}//GEN-LAST:event_chkbL2TextDefaultActionPerformed
+	private void chkbL2TextDefaultActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_chkbL2TextDefaultActionPerformed
+		tfL2Text.setEnabled(!chkbL2TextDefault.isSelected());
+	}// GEN-LAST:event_chkbL2TextDefaultActionPerformed
 
-	private void formComponentHidden(java.awt.event.ComponentEvent evt) {//GEN-FIRST:event_formComponentHidden
+	private void formComponentHidden(java.awt.event.ComponentEvent evt) {// GEN-FIRST:event_formComponentHidden
 		storeToOptions();
-	}//GEN-LAST:event_formComponentHidden
+	}// GEN-LAST:event_formComponentHidden
 
-	private void formComponentShown(java.awt.event.ComponentEvent evt) {//GEN-FIRST:event_formComponentShown
+	private void formComponentShown(java.awt.event.ComponentEvent evt) {// GEN-FIRST:event_formComponentShown
+		previewCache = new HashMap<Integer, BufferedImage>();
 		updateFromOptions();
 		readPdfInfo();
 		switchImage();
-	}//GEN-LAST:event_formComponentShown
+	}// GEN-LAST:event_formComponentShown
 
-	private void cbDisplayModeActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cbDisplayModeActionPerformed
+	private void cbDisplayModeActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_cbDisplayModeActionPerformed
 		switchImage();
-	}//GEN-LAST:event_cbDisplayModeActionPerformed
+	}// GEN-LAST:event_cbDisplayModeActionPerformed
 
-    // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JButton btnBgImgPathBrowse;
-    private javax.swing.JButton btnClose;
-    private javax.swing.JButton btnImgPathBrowse;
-    private javax.swing.JComboBox cbDisplayMode;
-    private javax.swing.JCheckBox chkbL2TextDefault;
-    private javax.swing.JCheckBox chkbL4TextDefault;
-    private javax.swing.JLabel lblBgImgPath;
-    private javax.swing.JLabel lblBgImgScale;
-    private javax.swing.JLabel lblDisplayMode;
-    private javax.swing.JLabel lblImgPath;
-    private javax.swing.JLabel lblL2Text;
-    private javax.swing.JLabel lblL2TextFontSize;
-    private javax.swing.JLabel lblL4Text;
-    private javax.swing.JLabel lblPage;
-    private javax.swing.JLabel lblPageBounds;
-    private javax.swing.JLabel lblPosLLX;
-    private javax.swing.JLabel lblPosLLXBounds;
-    private javax.swing.JLabel lblPosLLY;
-    private javax.swing.JLabel lblPosLLYBounds;
-    private javax.swing.JLabel lblPosURX;
-    private javax.swing.JLabel lblPosURY;
-    private javax.swing.JLabel lblPosition;
-    private javax.swing.JLabel lblSettings;
-    private javax.swing.JTextField tfBgImgPath;
-    private javax.swing.JTextField tfBgImgScale;
-    private javax.swing.JTextField tfImgPath;
-    private javax.swing.JTextField tfL2Text;
-    private javax.swing.JTextField tfL2TextFontSize;
-    private javax.swing.JTextField tfL4Text;
-    private javax.swing.JTextField tfPage;
-    private javax.swing.JTextField tfPosLLX;
-    private javax.swing.JTextField tfPosLLY;
-    private javax.swing.JTextField tfPosURX;
-    private javax.swing.JTextField tfPosURY;
-    // End of variables declaration//GEN-END:variables
+	private void btnSelectPositionActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_btnSelectPositionActionPerformed
+		previewDialog.pack();
+		previewDialog.setVisible(true);
+	}// GEN-LAST:event_btnSelectPositionActionPerformed
+
+	// Variables declaration - do not modify//GEN-BEGIN:variables
+	private javax.swing.JButton btnBgImgPathBrowse;
+	private javax.swing.JButton btnClose;
+	private javax.swing.JButton btnImgPathBrowse;
+	private javax.swing.JButton btnSelectPosition;
+	private javax.swing.JComboBox cbDisplayMode;
+	private javax.swing.JCheckBox chkbL2TextDefault;
+	private javax.swing.JCheckBox chkbL4TextDefault;
+	private javax.swing.JPanel jPanel1;
+	private javax.swing.JLabel lblBgImgPath;
+	private javax.swing.JLabel lblBgImgScale;
+	private javax.swing.JLabel lblDisplayMode;
+	private javax.swing.JLabel lblImgPath;
+	private javax.swing.JLabel lblL2Text;
+	private javax.swing.JLabel lblL2TextFontSize;
+	private javax.swing.JLabel lblL4Text;
+	private javax.swing.JLabel lblPage;
+	private javax.swing.JLabel lblPageBounds;
+	private javax.swing.JLabel lblPosLLX;
+	private javax.swing.JLabel lblPosLLXBounds;
+	private javax.swing.JLabel lblPosLLY;
+	private javax.swing.JLabel lblPosLLYBounds;
+	private javax.swing.JLabel lblPosURX;
+	private javax.swing.JLabel lblPosURY;
+	private javax.swing.JLabel lblPosition;
+	private javax.swing.JLabel lblPreviewInfo;
+	private javax.swing.JLabel lblSettings;
+	private javax.swing.JDialog previewDialog;
+	private javax.swing.JTextField tfBgImgPath;
+	private javax.swing.JTextField tfBgImgScale;
+	private javax.swing.JTextField tfImgPath;
+	private javax.swing.JTextField tfL2Text;
+	private javax.swing.JTextField tfL2TextFontSize;
+	private javax.swing.JTextField tfL4Text;
+	private javax.swing.JTextField tfPage;
+	private javax.swing.JTextField tfPosLLX;
+	private javax.swing.JTextField tfPosLLY;
+	private javax.swing.JTextField tfPosURX;
+	private javax.swing.JTextField tfPosURY;
+	// End of variables declaration//GEN-END:variables
 
 }

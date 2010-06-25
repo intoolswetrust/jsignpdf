@@ -25,7 +25,7 @@ public enum CertificationLevel {
 	 * Returns internationalized description of a level.
 	 */
 	public String toString() {
-		return ResourceProvider.getInstance().get(msgKey);
+		return ResourceProvider.getBundleBean().get(msgKey);
 	}
 
 	/**

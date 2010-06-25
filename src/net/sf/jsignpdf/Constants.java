@@ -1,8 +1,8 @@
 package net.sf.jsignpdf;
 
-
 /**
  * Constants used in PDF signer application.
+ * 
  * @author Josef Cacek
  */
 public class Constants {
@@ -13,17 +13,24 @@ public class Constants {
 	public static final String VERSION = "@JSIGNPDF_VERSION@";
 
 	/**
-	 * Home directory of current user. It's not a real constant
-	 * it only holds value of <code>System.getProperty("user.home")</code>
+	 * Home directory of current user. It's not a real constant it only holds
+	 * value of <code>System.getProperty("user.home")</code>
 	 */
 	public static final String USER_HOME = System.getProperty("user.home");
 
 	/**
-	 * Filename (in USER_HOME), where filled values from JSign application
-	 * are stored.
+	 * Filename (in USER_HOME), where filled values from JSign application are
+	 * stored.
+	 * 
 	 * @see #USER_HOME
 	 */
 	public static final String PROPERTIES_FILE = ".JSignPdf";
+
+	/**
+	 * Default PDF version for signed file is '\0', i.e. the same version as the
+	 * original file.
+	 */
+	public static final char PDF_DEFAULT_VERSION = '\0';
 
 	/**
 	 * Name (path) of resource bundle
@@ -104,7 +111,6 @@ public class Constants {
 	public static final String PROPERTY_LOCATION = "signature.location";
 
 	public static final String PROPERTY_CONTACT = "signature.contact";
-
 
 	public static final int DEFVAL_KEY_INDEX = 0;
 	public static final int DEFVAL_PAGE = 1;

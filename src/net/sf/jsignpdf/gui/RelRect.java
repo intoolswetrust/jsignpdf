@@ -2,6 +2,9 @@ package net.sf.jsignpdf.gui;
 
 import java.awt.Dimension;
 import java.awt.Point;
+import java.beans.PropertyChangeListener;
+
+import javax.swing.event.SwingPropertyChangeSupport;
 
 /**
  * Rectangle implementation based on relative positions.
@@ -9,6 +12,9 @@ import java.awt.Point;
  * @author Josef Cacek
  */
 public class RelRect {
+
+	public static final String PROPERTY_START_POINT = "startPoint";
+	public static final String PROPERTY_END_POINT = "endPoint";
 
 	/**
 	 * Value returned by getters if {@link #isValid()} method returns false
@@ -19,6 +25,8 @@ public class RelRect {
 	private FloatPoint endPoint;
 
 	private Dimension dimension = new Dimension(1, 1);
+
+	private SwingPropertyChangeSupport pcs = new SwingPropertyChangeSupport(this);
 
 	/**
 	 * Return if the rectangle is valid (i.e. both startPoint and endPoint are
@@ -127,7 +135,9 @@ public class RelRect {
 	 *            the startPoint to set
 	 */
 	public void setStartPoint(Point aPoint) {
-		startPoint = getRelPoint(aPoint, startPoint);
+		final FloatPoint oldPoint = startPoint;
+		startPoint = getRelPoint(aPoint);
+		pcs.firePropertyChange(PROPERTY_START_POINT, oldPoint, startPoint);
 	}
 
 	/**
@@ -137,7 +147,9 @@ public class RelRect {
 	 *            the endPoint to set
 	 */
 	public void setEndPoint(Point aPoint) {
-		endPoint = getRelPoint(aPoint, endPoint);
+		final FloatPoint oldPoint = endPoint;
+		endPoint = getRelPoint(aPoint);
+		pcs.firePropertyChange(PROPERTY_END_POINT, oldPoint, endPoint);
 	}
 
 	/**
@@ -157,27 +169,34 @@ public class RelRect {
 	}
 
 	/**
-	 * Converts given point to relative FloatPoint. If the second argument is
-	 * not-null, then the object provided is only changed and returned (reuses
-	 * the provided object).
+	 * Adds propertyChangeListener for this bean
+	 * 
+	 * @param listener
+	 */
+	public void addPropertyChangeListener(PropertyChangeListener listener) {
+		this.pcs.addPropertyChangeListener(listener);
+	}
+
+	/**
+	 * Removes propertyChangeListener from this bean
+	 * 
+	 * @param listener
+	 */
+	public void removePropertyChangeListener(PropertyChangeListener listener) {
+		this.pcs.removePropertyChangeListener(listener);
+	}
+
+	/**
+	 * Converts given point to relative FloatPoint.
 	 * 
 	 * @param aPoint
-	 * @param aRelPoint
 	 * @return FloatPoint or null if aPoint is null.
 	 */
-	private FloatPoint getRelPoint(Point aPoint, final FloatPoint aRelPoint) {
+	private FloatPoint getRelPoint(Point aPoint) {
 		if (aPoint == null) {
 			return null;
 		}
 
-		final FloatPoint tmpResult;
-		if (aRelPoint == null) {
-			tmpResult = new FloatPoint();
-		} else {
-			tmpResult = aRelPoint;
-		}
-		tmpResult.x = ((float) aPoint.x) / dimension.width;
-		tmpResult.y = ((float) aPoint.y) / dimension.height;
-		return tmpResult;
+		return new FloatPoint(((float) aPoint.x) / dimension.width, ((float) aPoint.y) / dimension.height);
 	}
 }

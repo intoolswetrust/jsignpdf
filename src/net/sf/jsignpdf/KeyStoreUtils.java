@@ -19,14 +19,22 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /**
  * This class provides methods for KeyStore(s) handling.
+ * 
  * @author Josef Cacek
  */
 public class KeyStoreUtils {
 
+	private static final Logger logger = LoggerFactory.getLogger(KeyStoreUtils.class);
+	private static final ResourceBundleBean res = ResourceProvider.getBundleBean();
+
 	/**
 	 * Returns array of supported KeyStores
+	 * 
 	 * @return String array with supported KeyStore implementation names
 	 */
 	public static String[] getKeyStores() {
@@ -37,81 +45,87 @@ public class KeyStoreUtils {
 
 	/**
 	 * Loads key names (aliases) from the keystore
+	 * 
 	 * @return array of key aliases
 	 */
-	public static String[] getKeyAliases(final BasicSignerOptions options) {
-		if (options==null) {
+	public static String[] getKeyAliases(final SignerOptions options) {
+		if (options == null) {
 			throw new NullPointerException("Options are empty.");
 		}
-		options.log("console.getKeystoreType", options.getKsType());
-		final KeyStore tmpKs = loadKeyStore(options.getKsType(),
-				options.getKsFile(), options.getKsPasswd());
+		logger.info(res.get("console.getKeystoreType", options.getKsType()));
+		final KeyStore tmpKs = loadKeyStore(options.getKsType(), options.getKsFile(), options.getKsPasswd());
 		final List<String> tmpResult = getAliasesList(tmpKs, options);
 		return tmpResult.toArray(new String[tmpResult.size()]);
 	}
 
-	private static List<String> getAliasesList(KeyStore aKs, final BasicSignerOptions options) {
-			if (options==null) {
-				throw new NullPointerException("Options are empty.");
-			}
-			final List<String> tmpResult = new ArrayList<String>();
-			try {
-
-				options.log("console.getAliases");
-				final Enumeration<String> tmpAliases = aKs.aliases();
-				while (tmpAliases.hasMoreElements()) {
-					final String tmpAlias = tmpAliases.nextElement();
-					if (aKs.isKeyEntry(tmpAlias)) {
-						tmpResult.add(tmpAlias);
-					}
+	/**
+	 * Returns list of key aliases in given keystore.
+	 * @param aKs not null keystore
+	 * @param options not null options
+	 * @return
+	 */
+	private static List<String> getAliasesList(KeyStore aKs, final SignerOptions options) {
+		if (options == null) {
+			throw new NullPointerException("Options are empty.");
+		}
+		if (aKs==null) {
+			throw new NullPointerException("Keystore was not loaded. Check the type, path and password.");
+		}
+		final List<String> tmpResult = new ArrayList<String>();
+		try {
+			logger.info(res.get("console.getAliases"));
+			final Enumeration<String> tmpAliases = aKs.aliases();
+			while (tmpAliases.hasMoreElements()) {
+				final String tmpAlias = tmpAliases.nextElement();
+				if (aKs.isKeyEntry(tmpAlias)) {
+					tmpResult.add(tmpAlias);
 				}
-				options.fireSignerFinishedEvent(true);
-			} catch (Exception e) {
-				options.log("console.exception");
-				e.printStackTrace(options.getPrintWriter());
-				options.fireSignerFinishedEvent(false);
 			}
-			return tmpResult;
+		} catch (Exception e) {
+			logger.warn(res.get("console.exception"), e);
+		}
+		return tmpResult;
 	}
 
 	/**
 	 * Returns alias defined (either as a string or as an key index) in options
+	 * 
 	 * @param options
 	 * @return key alias
 	 */
-	public static String getKeyAlias(final BasicSignerOptions options) {
-		final KeyStore tmpKs = loadKeyStore(options.getKsType(),
-				options.getKsFile(), options.getKsPasswd());
+	public static String getKeyAlias(final SignerOptions options) {
+		final KeyStore tmpKs = loadKeyStore(options.getKsType(), options.getKsFile(), options.getKsPasswd());
 
 		String tmpResult = getKeyAliasInternal(options, tmpKs);
 		return tmpResult;
 	}
 
-	private static String getKeyAliasInternal(final BasicSignerOptions options,
-			final KeyStore tmpKs) {
+	private static String getKeyAliasInternal(final SignerOptions options, final KeyStore tmpKs) {
 		String tmpResult = null;
 		final List<String> tmpList = getAliasesList(tmpKs, options);
-		final String tmpAlias = options.getKeyAliasX();
-		final int tmpIndex = options.getKeyIndexX();
+		final String tmpAlias = options.getKeyAlias();
+		final int tmpIndex = options.getKeyIndex();
 
-		if (tmpAlias!=null && tmpList.contains(tmpAlias)) {
+		if (tmpAlias != null && tmpList.contains(tmpAlias)) {
 			tmpResult = tmpAlias;
-		} else if (tmpList.size()>tmpIndex && tmpIndex>=0) {
+		} else if (tmpList.size() > tmpIndex && tmpIndex >= 0) {
 			tmpResult = tmpList.get(tmpIndex);
-		} else if (tmpList.size()>0) {
-			//fallback - return the first key
+		} else if (tmpList.size() > 0) {
+			// fallback - return the first key
 			tmpResult = tmpList.get(0);
 		}
-		options.log("console.usedKeyAlias",tmpResult);
+		logger.info(res.get("console.usedKeyAlias", tmpResult));
 		return tmpResult;
 	}
 
 	/**
 	 * Loads certificate names (aliases) from the given keystore
+	 * 
 	 * @return array of certificate aliases
 	 */
 	public static String[] getCertAliases(KeyStore tmpKs) {
-		if (tmpKs==null) return null;
+		if (tmpKs == null)
+			return null;
 		final List<String> tmpResult = new ArrayList<String>();
 		try {
 			final Enumeration<String> tmpAliases = tmpKs.aliases();
@@ -130,6 +144,7 @@ public class KeyStoreUtils {
 
 	/**
 	 * Loads certificate names (aliases) from the given keystore
+	 * 
 	 * @param aKsType
 	 * @param aKsFile
 	 * @param aKsPasswd
@@ -141,15 +156,15 @@ public class KeyStoreUtils {
 
 	/**
 	 * Opens given keystore.
+	 * 
 	 * @param aKsType
 	 * @param aKsFile
 	 * @param aKsPasswd
 	 * @return
 	 */
-	public static KeyStore loadKeyStore(String aKsType,
-		final String aKsFile, final String aKsPasswd) {
+	public static KeyStore loadKeyStore(String aKsType, final String aKsFile, final String aKsPasswd) {
 		char[] tmpPass = null;
-		if (aKsPasswd!=null) {
+		if (aKsPasswd != null) {
 			tmpPass = aKsPasswd.toCharArray();
 		}
 		return loadKeyStore(aKsType, aKsFile, tmpPass);
@@ -157,13 +172,13 @@ public class KeyStoreUtils {
 
 	/**
 	 * Opens given keystore.
+	 * 
 	 * @param aKsType
 	 * @param aKsFile
 	 * @param aKsPasswd
 	 * @return
 	 */
-	public static KeyStore loadKeyStore(String aKsType,
-		final String aKsFile, final char[] aKsPasswd) {
+	public static KeyStore loadKeyStore(String aKsType, final String aKsFile, final char[] aKsPasswd) {
 
 		if (StringUtils.isEmpty(aKsType) && StringUtils.isEmpty(aKsFile)) {
 			return loadCacertsKeyStore(null);
@@ -186,15 +201,21 @@ public class KeyStoreUtils {
 			e.printStackTrace();
 			return null;
 		} finally {
-			if (tmpIS!=null) try { tmpIS.close(); } catch (Exception e) {}
+			if (tmpIS != null)
+				try {
+					tmpIS.close();
+				} catch (Exception e) {
+				}
 		}
 		return tmpKs;
 	}
 
-
 	/**
-	 * Loads the default root certificates at &lt;java.home&gt;/lib/security/cacerts.
-	 * @param provider the provider or <code>null</code> for the default provider
+	 * Loads the default root certificates at
+	 * &lt;java.home&gt;/lib/security/cacerts.
+	 * 
+	 * @param provider
+	 *            the provider or <code>null</code> for the default provider
 	 * @return a <CODE>KeyStore</CODE>
 	 */
 	public static KeyStore loadCacertsKeyStore(String provider) {
@@ -215,35 +236,41 @@ public class KeyStoreUtils {
 			e.printStackTrace();
 			return null;
 		} finally {
-			try{if (fin != null) {fin.close();}}catch(Exception ex){}
+			try {
+				if (fin != null) {
+					fin.close();
+				}
+			} catch (Exception ex) {
+			}
 		}
 	}
 
 	/**
 	 * Returns PrivateKey and its certificate chain
+	 * 
 	 * @param options
 	 * @return
 	 * @throws NoSuchAlgorithmException
 	 * @throws KeyStoreException
 	 * @throws UnrecoverableKeyException
 	 */
-	public static PrivateKeyInfo getPkInfo(BasicSignerOptions options) throws UnrecoverableKeyException, KeyStoreException, NoSuchAlgorithmException {
-		final KeyStore tmpKs = loadKeyStore(options.getKsType(),
-				options.getKsFile(), options.getKsPasswd());
+	public static PrivateKeyInfo getPkInfo(SignerOptions options) throws UnrecoverableKeyException, KeyStoreException,
+			NoSuchAlgorithmException {
+		final KeyStore tmpKs = loadKeyStore(options.getKsType(), options.getKsFile(), options.getKsPasswd());
 
 		String tmpAlias = getKeyAliasInternal(options, tmpKs);
-		options.log("console.getPrivateKey");
-		final PrivateKey tmpPk = (PrivateKey) tmpKs.getKey(tmpAlias, options.getKeyPasswdX());
-		options.log("console.getCertChain");
+		logger.info(res.get("console.getPrivateKey"));
+		final PrivateKey tmpPk = (PrivateKey) tmpKs.getKey(tmpAlias, StringUtils.toCharArray(options
+				.getInFileOwnerPwd()));
+		logger.info(res.get("console.getCertChain"));
 		final Certificate[] tmpChain = tmpKs.getCertificateChain(tmpAlias);
 		PrivateKeyInfo tmpResult = new PrivateKeyInfo(tmpPk, tmpChain);
 		return tmpResult;
 	}
 
-
-
 	/**
 	 * For WINDOWS-MY keystore fixes problem with non-unique aliases
+	 * 
 	 * @param keyStore
 	 */
 	@SuppressWarnings("unchecked")
@@ -256,14 +283,12 @@ public class KeyStoreUtils {
 			field.setAccessible(true);
 			keyStoreVeritable = (KeyStoreSpi) field.get(keyStore);
 
-			if ("sun.security.mscapi.KeyStore$MY".equals(keyStoreVeritable
-					.getClass().getName())) {
+			if ("sun.security.mscapi.KeyStore$MY".equals(keyStoreVeritable.getClass().getName())) {
 				Collection<Object> entries;
 				String alias, hashCode;
 				X509Certificate[] certificates;
 
-				field = keyStoreVeritable.getClass().getEnclosingClass()
-						.getDeclaredField("entries");
+				field = keyStoreVeritable.getClass().getEnclosingClass().getDeclaredField("entries");
 				field.setAccessible(true);
 				entries = (Collection<Object>) field.get(keyStoreVeritable);
 
@@ -278,7 +303,7 @@ public class KeyStoreUtils {
 					field.setAccessible(true);
 					alias = (String) field.get(entry);
 					String tmpAlias = alias;
-					int i=0;
+					int i = 0;
 					while (tmpAliases.contains(tmpAlias)) {
 						i++;
 						tmpAlias = alias + "-" + i;
@@ -289,8 +314,8 @@ public class KeyStoreUtils {
 					}
 				}
 			}
-		} catch (Exception exception) {
-			//nothing to do here
+		} catch (Exception e) {
+			logger.debug("Fixing aliases failed.", e);
 		}
 	}
 
