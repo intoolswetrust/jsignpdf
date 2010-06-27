@@ -1,16 +1,25 @@
 package net.sf.jsignpdf;
 
 import java.awt.image.BufferedImage;
-import java.util.HashMap;
-import java.util.Map;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JComponent;
 import javax.swing.JFileChooser;
+import javax.swing.JOptionPane;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 
-import net.sf.jsignpdf.gui.SelectionImage;
+import net.sf.jsignpdf.preview.Pdf2Image;
+import net.sf.jsignpdf.preview.SelectionImage;
+import net.sf.jsignpdf.types.FloatPoint;
+import net.sf.jsignpdf.types.RelRect;
+import net.sf.jsignpdf.types.RenderMode;
+import net.sf.jsignpdf.utils.ConvertUtils;
+import net.sf.jsignpdf.utils.GuiUtils;
+import net.sf.jsignpdf.utils.ResourceProvider;
+import net.sf.jsignpdf.utils.StringUtils;
 
 /**
  * Options dialog for Visible signature settings
@@ -21,7 +30,7 @@ public class VisibleSignatureDialog extends javax.swing.JDialog {
 
 	private static final long serialVersionUID = 1L;
 
-	protected final ResourceProvider res = ResourceProvider.getBundleBean();
+	protected final ResourceProvider res = ResourceProvider.getInstance();
 
 	private BasicSignerOptions options;
 	private SignerFileChooser fc;
@@ -29,11 +38,10 @@ public class VisibleSignatureDialog extends javax.swing.JDialog {
 	private Pdf2Image p2i;
 	private SelectionImage selectionImage = new SelectionImage();
 
-	private Map<Integer, BufferedImage> previewCache;
-
-	private float[] pdfPageSize;
-
 	private int numberOfPages = -1;
+	private FloatPoint pdfPageSize;
+
+	private boolean previewListenerDisabled;
 
 	/**
 	 * Document listener which catches page number change.
@@ -59,14 +67,35 @@ public class VisibleSignatureDialog extends javax.swing.JDialog {
 			final SignerFileChooser aFC) {
 		super(parent, modal);
 		options = anOptions;
-		p2i = new Pdf2Image(options);
 		fc = aFC;
+		p2i = new Pdf2Image(options);
 		initComponents();
 		translateLabels();
-		previewDialog.add(selectionImage, java.awt.BorderLayout.CENTER);
 		tfPage.getDocument().addDocumentListener(new PageNrDocumentListener());
+		selectionImage.getRelRect().addPropertyChangeListener(new PropertyChangeListener() {
+			public void propertyChange(PropertyChangeEvent evt) {
+				if (previewListenerDisabled)
+					return;
+				final RelRect tmpRect = selectionImage.getRelRect();
+				if (pdfPageSize == null || !tmpRect.isValid()) {
+					// tfPosLLX.setText(null);
+					// tfPosLLY.setText(null);
+					// tfPosURX.setText(null);
+					// tfPosURY.setText(null);
+					return;
+				}
+				tfPosLLX.setText(String.valueOf(tmpRect.getRelLeft() * pdfPageSize.getX()));
+				tfPosLLY.setText(String.valueOf((1 - tmpRect.getRelBottom()) * pdfPageSize.getY()));
+				tfPosURX.setText(String.valueOf(tmpRect.getRelRight() * pdfPageSize.getX()));
+				tfPosURY.setText(String.valueOf((1 - tmpRect.getRelTop()) * pdfPageSize.getY()));
+			}
+		});
 		cbDisplayMode.setModel(new DefaultComboBoxModel(RenderMode.values()));
 		extraInfo = new PdfExtraInfo(anOptions);
+		previewDialog.add(selectionImage, java.awt.BorderLayout.CENTER);
+		previewDialog.setModal(true);
+		GuiUtils.resizeAndCenter(previewDialog);
+		getRootPane().setDefaultButton(btnClose);
 	}
 
 	/**
@@ -79,18 +108,11 @@ public class VisibleSignatureDialog extends javax.swing.JDialog {
 
 		final Integer tmpPageNr = ConvertUtils.toInteger(tfPage.getText());
 		if (tmpPageNr != null && tmpPageNr > 0 && tmpPageNr <= numberOfPages) {
-			pdfPageSize = extraInfo.getUpperRightCorner(tmpPageNr.intValue());
-			if (switchBounds(pdfPageSize != null)) {
-				lblPosLLYBounds.setText("0.0 - " + pdfPageSize[0]);
-				lblPosLLXBounds.setText("0.0 - " + pdfPageSize[1]);
-				// TODO another thread
-				if (!previewCache.containsKey(tmpPageNr)) {
-					previewCache.put(tmpPageNr, p2i.getImageForPage(tmpPageNr));
-				}
-				selectionImage.setImage(previewCache.get(tmpPageNr));
-			}
-		} else {
-			switchBounds(false);
+			pdfPageSize = extraInfo.getPageSize(tmpPageNr.intValue());
+		}
+		if (switchBounds(pdfPageSize != null)) {
+			lblPosLLYBounds.setText("0.0 - " + pdfPageSize.getY());
+			lblPosLLXBounds.setText("0.0 - " + pdfPageSize.getX());
 		}
 	}
 
@@ -107,6 +129,7 @@ public class VisibleSignatureDialog extends javax.swing.JDialog {
 		setLabelAndMnemonic(lblPosURX, "gui.vs.urx.label");
 		setLabelAndMnemonic(lblPosURY, "gui.vs.ury.label");
 		setLabelAndMnemonic(lblBgImgScale, "gui.vs.bgImgScale.label");
+		setLabelAndMnemonic(btnPreview, "gui.vs.preview.button");
 
 		setLabelAndMnemonic(lblSettings, "gui.vs.settings.label");
 		setLabelAndMnemonic(lblDisplayMode, "gui.vs.renderMode.label");
@@ -120,6 +143,9 @@ public class VisibleSignatureDialog extends javax.swing.JDialog {
 		setLabelAndMnemonic(btnBgImgPathBrowse, "gui.vs.browse.button");
 		setLabelAndMnemonic(btnImgPathBrowse, "gui.vs.browse.button");
 		setLabelAndMnemonic(btnClose, "gui.vs.close.button");
+
+		setLabelAndMnemonic(btnPreviewClose, "gui.vs.close.button");
+		previewDialog.setTitle(res.get("gui.preview.title"));
 
 		setToolTip(tfPage, "gui.vs.page.tooltip");
 		setToolTip(tfPosLLX, "gui.vs.llx.tooltip");
@@ -141,7 +167,7 @@ public class VisibleSignatureDialog extends javax.swing.JDialog {
 		tfPosURY.setText(ConvertUtils.toString(options.getPositionURY()));
 		tfBgImgScale.setText(ConvertUtils.toString(options.getBgImgScale()));
 		cbDisplayMode.setSelectedItem(options.getRenderMode());
-		tfL2Text.setText(options.getL2Text());
+		taL2Text.setText(options.getL2Text());
 		chkbL2TextDefault.setSelected(options.getL2Text() == null);
 		tfL2TextFontSize.setText(ConvertUtils.toString(options.getL2TextFontSize()));
 		tfL4Text.setText(options.getL4Text());
@@ -165,7 +191,7 @@ public class VisibleSignatureDialog extends javax.swing.JDialog {
 		options.setPositionURY(ConvertUtils.toFloat(tfPosURY.getText(), Constants.DEFVAL_URY));
 		options.setBgImgScale(ConvertUtils.toFloat(tfBgImgScale.getText(), Constants.DEFVAL_BG_SCALE));
 		options.setRenderMode((RenderMode) cbDisplayMode.getSelectedItem());
-		options.setL2Text(chkbL2TextDefault.isSelected() ? null : StringUtils.toNotNull(tfL2Text.getText()));
+		options.setL2Text(chkbL2TextDefault.isSelected() ? null : StringUtils.toNotNull(taL2Text.getText()));
 		options.setL2TextFontSize(ConvertUtils.toFloat(tfL2TextFontSize.getText(), Constants.DEFVAL_L2_FONT_SIZE));
 		options.setL4Text(chkbL4TextDefault.isSelected() ? null : StringUtils.toNotNull(tfL4Text.getText()));
 		options.setImgPath(tfImgPath.getText());
@@ -207,6 +233,7 @@ public class VisibleSignatureDialog extends javax.swing.JDialog {
 	private boolean switchBounds(final boolean aVisible) {
 		lblPosLLXBounds.setVisible(aVisible);
 		lblPosLLYBounds.setVisible(aVisible);
+		btnPreview.setEnabled(aVisible);
 		return aVisible;
 	}
 
@@ -218,22 +245,6 @@ public class VisibleSignatureDialog extends javax.swing.JDialog {
 		tfImgPath.setEnabled(tmpEnabled);
 		btnImgPathBrowse.setEnabled(tmpEnabled);
 	}
-
-	// public void selectionChanged(RelRect aRect) {
-	// if (pdfPageSize == null || !aRect.isValid()) {
-	// tfPosLLX.setText(null);
-	// tfPosLLY.setText(null);
-	// tfPosURX.setText(null);
-	// tfPosURY.setText(null);
-	// return;
-	// }
-	// tfPosLLX.setText(String.valueOf(aRect.getRelLeft() * pdfPageSize[0]));
-	// tfPosLLY.setText(String.valueOf((1 - aRect.getRelBottom()) *
-	// pdfPageSize[1]));
-	// tfPosURX.setText(String.valueOf(aRect.getRelRight() * pdfPageSize[0]));
-	// tfPosURY.setText(String.valueOf((1 - aRect.getRelTop()) *
-	// pdfPageSize[1]));
-	// }
 
 	/**
 	 * Reads number of pages from PDF.
@@ -265,7 +276,8 @@ public class VisibleSignatureDialog extends javax.swing.JDialog {
 		java.awt.GridBagConstraints gridBagConstraints;
 
 		previewDialog = new javax.swing.JDialog();
-		lblPreviewInfo = new javax.swing.JLabel();
+		jPanel1 = new javax.swing.JPanel();
+		btnPreviewClose = new javax.swing.JButton();
 		lblPosition = new javax.swing.JLabel();
 		lblPage = new javax.swing.JLabel();
 		tfPage = new javax.swing.JTextField();
@@ -280,7 +292,6 @@ public class VisibleSignatureDialog extends javax.swing.JDialog {
 		lblSettings = new javax.swing.JLabel();
 		lblDisplayMode = new javax.swing.JLabel();
 		cbDisplayMode = new javax.swing.JComboBox();
-		tfL2Text = new javax.swing.JTextField();
 		chkbL2TextDefault = new javax.swing.JCheckBox();
 		lblL4Text = new javax.swing.JLabel();
 		tfL4Text = new javax.swing.JTextField();
@@ -300,14 +311,30 @@ public class VisibleSignatureDialog extends javax.swing.JDialog {
 		lblL2Text = new javax.swing.JLabel();
 		lblL2TextFontSize = new javax.swing.JLabel();
 		tfL2TextFontSize = new javax.swing.JTextField();
-		btnSelectPosition = new javax.swing.JButton();
-		jPanel1 = new javax.swing.JPanel();
+		btnPreview = new javax.swing.JButton();
+		jScrollPane1 = new javax.swing.JScrollPane();
+		taL2Text = new javax.swing.JTextArea();
 
-		previewDialog.setTitle("Preview");
 		previewDialog.setModal(true);
 
-		lblPreviewInfo.setText("Loading image...");
-		previewDialog.getContentPane().add(lblPreviewInfo, java.awt.BorderLayout.PAGE_START);
+		jPanel1.setLayout(new java.awt.GridBagLayout());
+
+		btnPreviewClose.setIcon(new javax.swing.ImageIcon(getClass().getResource("/net/sf/jsignpdf/back16.png"))); // NOI18N
+		btnPreviewClose.setText("Close");
+		btnPreviewClose.setMinimumSize(new java.awt.Dimension(50, 20));
+		btnPreviewClose.addActionListener(new java.awt.event.ActionListener() {
+			public void actionPerformed(java.awt.event.ActionEvent evt) {
+				btnPreviewCloseActionPerformed(evt);
+			}
+		});
+		gridBagConstraints = new java.awt.GridBagConstraints();
+		gridBagConstraints.gridx = 0;
+		gridBagConstraints.gridy = 0;
+		gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+		gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
+		jPanel1.add(btnPreviewClose, gridBagConstraints);
+
+		previewDialog.getContentPane().add(jPanel1, java.awt.BorderLayout.PAGE_END);
 
 		addComponentListener(new java.awt.event.ComponentAdapter() {
 			public void componentHidden(java.awt.event.ComponentEvent evt) {
@@ -459,15 +486,6 @@ public class VisibleSignatureDialog extends javax.swing.JDialog {
 		gridBagConstraints.insets = new java.awt.Insets(2, 5, 2, 5);
 		getContentPane().add(cbDisplayMode, gridBagConstraints);
 
-		tfL2Text.setMinimumSize(new java.awt.Dimension(200, 20));
-		tfL2Text.setPreferredSize(new java.awt.Dimension(200, 20));
-		gridBagConstraints = new java.awt.GridBagConstraints();
-		gridBagConstraints.gridx = 1;
-		gridBagConstraints.gridy = 8;
-		gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-		gridBagConstraints.insets = new java.awt.Insets(2, 5, 2, 5);
-		getContentPane().add(tfL2Text, gridBagConstraints);
-
 		chkbL2TextDefault.setText("Default");
 		chkbL2TextDefault.setBorder(javax.swing.BorderFactory.createEmptyBorder(0, 0, 0, 0));
 		chkbL2TextDefault.setMargin(new java.awt.Insets(0, 0, 0, 0));
@@ -480,7 +498,8 @@ public class VisibleSignatureDialog extends javax.swing.JDialog {
 		gridBagConstraints.gridx = 2;
 		gridBagConstraints.gridy = 8;
 		gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-		gridBagConstraints.insets = new java.awt.Insets(0, 2, 0, 2);
+		gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTH;
+		gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
 		getContentPane().add(chkbL2TextDefault, gridBagConstraints);
 
 		lblL4Text.setLabelFor(tfL4Text);
@@ -636,12 +655,13 @@ public class VisibleSignatureDialog extends javax.swing.JDialog {
 		gridBagConstraints.gridy = 3;
 		getContentPane().add(lblPosLLYBounds, gridBagConstraints);
 
-		lblL2Text.setLabelFor(tfL2Text);
+		lblL2Text.setLabelFor(taL2Text);
 		lblL2Text.setText("Signature text");
 		gridBagConstraints = new java.awt.GridBagConstraints();
 		gridBagConstraints.gridx = 0;
 		gridBagConstraints.gridy = 8;
 		gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+		gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHEAST;
 		gridBagConstraints.insets = new java.awt.Insets(2, 5, 2, 5);
 		getContentPane().add(lblL2Text, gridBagConstraints);
 
@@ -663,12 +683,12 @@ public class VisibleSignatureDialog extends javax.swing.JDialog {
 		gridBagConstraints.insets = new java.awt.Insets(2, 5, 2, 5);
 		getContentPane().add(tfL2TextFontSize, gridBagConstraints);
 
-		btnSelectPosition.setIcon(new javax.swing.ImageIcon(getClass().getResource("/net/sf/jsignpdf/fileopen16.png"))); // NOI18N
-		btnSelectPosition.setText("Place");
-		btnSelectPosition.setHorizontalAlignment(javax.swing.SwingConstants.LEADING);
-		btnSelectPosition.addActionListener(new java.awt.event.ActionListener() {
+		btnPreview.setIcon(new javax.swing.ImageIcon(getClass().getResource("/net/sf/jsignpdf/preview16.png"))); // NOI18N
+		btnPreview.setText("Preview");
+		btnPreview.setHorizontalAlignment(javax.swing.SwingConstants.LEADING);
+		btnPreview.addActionListener(new java.awt.event.ActionListener() {
 			public void actionPerformed(java.awt.event.ActionEvent evt) {
-				btnSelectPositionActionPerformed(evt);
+				btnPreviewActionPerformed(evt);
 			}
 		});
 		gridBagConstraints = new java.awt.GridBagConstraints();
@@ -676,20 +696,62 @@ public class VisibleSignatureDialog extends javax.swing.JDialog {
 		gridBagConstraints.gridy = 4;
 		gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
 		gridBagConstraints.insets = new java.awt.Insets(0, 2, 0, 2);
-		getContentPane().add(btnSelectPosition, gridBagConstraints);
+		getContentPane().add(btnPreview, gridBagConstraints);
 
-		jPanel1.setMinimumSize(new java.awt.Dimension(50, 10));
+		jScrollPane1.setVerticalScrollBarPolicy(javax.swing.ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
+		jScrollPane1.setMinimumSize(new java.awt.Dimension(24, 48));
+
+		taL2Text.setColumns(20);
+		taL2Text.setRows(5);
+		jScrollPane1.setViewportView(taL2Text);
+
 		gridBagConstraints = new java.awt.GridBagConstraints();
-		gridBagConstraints.gridx = 3;
-		gridBagConstraints.gridy = 0;
-		gridBagConstraints.gridheight = 15;
-		gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-		gridBagConstraints.weightx = 1.0;
-		gridBagConstraints.weighty = 1.0;
-		getContentPane().add(jPanel1, gridBagConstraints);
+		gridBagConstraints.gridx = 1;
+		gridBagConstraints.gridy = 8;
+		gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+		gridBagConstraints.insets = new java.awt.Insets(2, 5, 2, 5);
+		getContentPane().add(jScrollPane1, gridBagConstraints);
 
 		pack();
 	}// </editor-fold>//GEN-END:initComponents
+
+	private void btnPreviewCloseActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_btnPreviewCloseActionPerformed
+		previewDialog.setVisible(false);
+	}// GEN-LAST:event_btnPreviewCloseActionPerformed
+
+	private int getInt(float aFloat) {
+		return Math.round(aFloat * 100F);
+	}
+
+	private void btnPreviewActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_btnPreviewActionPerformed
+		final Integer pageNr = ConvertUtils.toInteger(tfPage.getText());
+		if (pageNr != null) {
+			// TODO progress bar or animated image... "yes, we are working..."
+			final BufferedImage buffImg = p2i.getImageForPage(pageNr.intValue());
+			if (buffImg != null) {
+				final RelRect tmpRect = selectionImage.getRelRect();
+				previewListenerDisabled = true;
+				try {
+					tmpRect.scale(getInt(pdfPageSize.getX()), getInt(pdfPageSize.getY()));
+					tmpRect.setStartPoint(new FloatPoint(Float.parseFloat(tfPosLLX.getText()) / pdfPageSize.getX(), 1f
+							- Float.parseFloat(tfPosLLY.getText()) / pdfPageSize.getY()));
+					tmpRect.setEndPoint(new FloatPoint(Float.parseFloat(tfPosURX.getText()) / pdfPageSize.getX(), 1f
+							- Float.parseFloat(tfPosURY.getText()) / pdfPageSize.getY()));
+				} catch (Exception e) {
+					// TODO
+				}
+				selectionImage.setImage(buffImg);
+				previewListenerDisabled = false;
+				previewDialog.setVisible(true);
+			} else {
+				JOptionPane.showMessageDialog(this, res.get("error.vs.previewFailed"), "Error",
+						JOptionPane.WARNING_MESSAGE);
+			}
+		} else {
+			JOptionPane.showMessageDialog(this, res.get("error.vs.pageNotANumber"), "Error",
+					JOptionPane.WARNING_MESSAGE);
+		}
+	}// GEN-LAST:event_btnPreviewActionPerformed
 
 	private void btnBgImgPathBrowseActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_btnBgImgPathBrowseActionPerformed
 		fc.showFileChooser(tfBgImgPath, null, JFileChooser.OPEN_DIALOG);
@@ -708,7 +770,7 @@ public class VisibleSignatureDialog extends javax.swing.JDialog {
 	}// GEN-LAST:event_chkbL4TextDefaultActionPerformed
 
 	private void chkbL2TextDefaultActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_chkbL2TextDefaultActionPerformed
-		tfL2Text.setEnabled(!chkbL2TextDefault.isSelected());
+		taL2Text.setEnabled(!chkbL2TextDefault.isSelected());
 	}// GEN-LAST:event_chkbL2TextDefaultActionPerformed
 
 	private void formComponentHidden(java.awt.event.ComponentEvent evt) {// GEN-FIRST:event_formComponentHidden
@@ -716,7 +778,6 @@ public class VisibleSignatureDialog extends javax.swing.JDialog {
 	}// GEN-LAST:event_formComponentHidden
 
 	private void formComponentShown(java.awt.event.ComponentEvent evt) {// GEN-FIRST:event_formComponentShown
-		previewCache = new HashMap<Integer, BufferedImage>();
 		updateFromOptions();
 		readPdfInfo();
 		switchImage();
@@ -726,20 +787,17 @@ public class VisibleSignatureDialog extends javax.swing.JDialog {
 		switchImage();
 	}// GEN-LAST:event_cbDisplayModeActionPerformed
 
-	private void btnSelectPositionActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_btnSelectPositionActionPerformed
-		previewDialog.pack();
-		previewDialog.setVisible(true);
-	}// GEN-LAST:event_btnSelectPositionActionPerformed
-
 	// Variables declaration - do not modify//GEN-BEGIN:variables
 	private javax.swing.JButton btnBgImgPathBrowse;
 	private javax.swing.JButton btnClose;
 	private javax.swing.JButton btnImgPathBrowse;
-	private javax.swing.JButton btnSelectPosition;
+	private javax.swing.JButton btnPreview;
+	private javax.swing.JButton btnPreviewClose;
 	private javax.swing.JComboBox cbDisplayMode;
 	private javax.swing.JCheckBox chkbL2TextDefault;
 	private javax.swing.JCheckBox chkbL4TextDefault;
 	private javax.swing.JPanel jPanel1;
+	private javax.swing.JScrollPane jScrollPane1;
 	private javax.swing.JLabel lblBgImgPath;
 	private javax.swing.JLabel lblBgImgScale;
 	private javax.swing.JLabel lblDisplayMode;
@@ -756,13 +814,12 @@ public class VisibleSignatureDialog extends javax.swing.JDialog {
 	private javax.swing.JLabel lblPosURX;
 	private javax.swing.JLabel lblPosURY;
 	private javax.swing.JLabel lblPosition;
-	private javax.swing.JLabel lblPreviewInfo;
 	private javax.swing.JLabel lblSettings;
 	private javax.swing.JDialog previewDialog;
+	private javax.swing.JTextArea taL2Text;
 	private javax.swing.JTextField tfBgImgPath;
 	private javax.swing.JTextField tfBgImgScale;
 	private javax.swing.JTextField tfImgPath;
-	private javax.swing.JTextField tfL2Text;
 	private javax.swing.JTextField tfL2TextFontSize;
 	private javax.swing.JTextField tfL4Text;
 	private javax.swing.JTextField tfPage;

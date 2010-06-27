@@ -4,12 +4,10 @@ Source: {#JreInstaller}; DestDir: {tmp}; DestName: java_setup.exe; Flags: delete
 
 [Components]
 Name: base; Description: Program files; Flags: fixed; Types: custom compact full
-Name: ooo; Description: OpenOffice.org Add-On; Types: full custom
 Name: java; Description: Java Runtime Environment 6; Types: full
 
 [Run]
 Filename: {tmp}\java_setup.exe; StatusMsg: Installing Java Runtime Environment; Components: java
-Filename: {app}\{#MyAppFilename}.oxt; Components: ooo; StatusMsg: Enabling OpenOffice.org Add-On; Flags: shellexec
 
 [Setup]
 AppName={#MyAppName}
@@ -25,14 +23,16 @@ VersionInfoDescription=JSignPdf adds digital signatures to PDF documents
 AppPublisher=Josef Cacek
 AppSupportURL=http://jsignpdf.sourceforge.net/
 AppVersion={#MyAppVersion}
+OutputDir={#OutputDir}
 
 [Icons]
 Name: {group}\JSignPdf {#MyAppVersion}; Filename: {app}\JSignPdf.exe; Components: ; WorkingDir: {app}
+Name: {group}\InstallCert Tool; Filename: {app}\InstallCert.exe; Components: ; WorkingDir: {app}
 Name: {group}\JSignPdf Guide; Filename: {app}\docs\JSignPdf_signed.pdf; Components: 
 Name: {group}\Uninstall {#MyAppName}; Filename: {uninstallexe}; Components: 
 
 [UninstallDelete]
-Name: {%USERPROFILE}\.JSignPdf; Type: files; Components: 
+;Name: {%USERPROFILE}\.JSignPdf; Type: files; Components:
 
 [Code]
 //********** Check if application is already installed

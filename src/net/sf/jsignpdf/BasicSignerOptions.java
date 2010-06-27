@@ -1,6 +1,16 @@
 package net.sf.jsignpdf;
 
 import java.io.PrintWriter;
+import java.net.InetSocketAddress;
+import java.net.Proxy;
+
+import net.sf.jsignpdf.types.CertificationLevel;
+import net.sf.jsignpdf.types.HashAlgorithm;
+import net.sf.jsignpdf.types.PrintRight;
+import net.sf.jsignpdf.types.RenderMode;
+import net.sf.jsignpdf.utils.PropertyProvider;
+import net.sf.jsignpdf.utils.ResourceProvider;
+import net.sf.jsignpdf.utils.StringUtils;
 
 import org.bouncycastle.crypto.CryptoException;
 
@@ -11,63 +21,71 @@ import org.bouncycastle.crypto.CryptoException;
  */
 public class BasicSignerOptions {
 
-	protected final static ResourceProvider res = ResourceProvider.getBundleBean();
+	protected final static ResourceProvider res = ResourceProvider.getInstance();
 	protected final PropertyProvider props = PropertyProvider.getInstance();
 	protected final JSignEncryptor encryptor = new JSignEncryptor();
 
-	private volatile PrintWriter printWriter;
-	private volatile String ksType;
-	private volatile String ksFile;
-	private volatile char[] ksPasswd;
-	private volatile String keyAlias;
-	private volatile int keyIndex = Constants.DEFVAL_KEY_INDEX;
-	private volatile char[] keyPasswd;
-	private volatile String inFile;
-	private volatile String outFile;
-	private volatile String reason;
-	private volatile String location;
-	private volatile String contact;
-	private volatile SignResultListener listener;
-	private volatile boolean append;
-	private volatile boolean advanced;
-	private volatile boolean encrypted;
-	private volatile char[] pdfOwnerPwd;
-	private volatile char[] pdfUserPwd;
-	private volatile CertificationLevel certLevel;
+	private PrintWriter printWriter;
+	private String ksType;
+	private String ksFile;
+	private char[] ksPasswd;
+	private String keyAlias;
+	private int keyIndex = Constants.DEFVAL_KEY_INDEX;
+	private char[] keyPasswd;
+	private String inFile;
+	private String outFile;
+	private String reason;
+	private String location;
+	private String contact;
+	private SignResultListener listener;
+	private boolean append;
+	private boolean advanced;
+	private boolean encrypted;
+	private char[] pdfOwnerPwd;
+	private char[] pdfUserPwd;
+	private CertificationLevel certLevel;
+	private HashAlgorithm hashAlgorithm;
 
-	protected volatile boolean storePasswords;
+	protected boolean storePasswords;
 
 	// options from rights dialog
-	private volatile PrintRight rightPrinting;
-	private volatile boolean rightCopy;
-	private volatile boolean rightAssembly;
-	private volatile boolean rightFillIn;
-	private volatile boolean rightScreanReaders;
-	private volatile boolean rightModifyAnnotations;
-	private volatile boolean rightModifyContents;
+	private PrintRight rightPrinting;
+	private boolean rightCopy;
+	private boolean rightAssembly;
+	private boolean rightFillIn;
+	private boolean rightScreanReaders;
+	private boolean rightModifyAnnotations;
+	private boolean rightModifyContents;
 
 	// options from visible signature settings dialog
-	private volatile boolean visible;
-	private volatile int page = Constants.DEFVAL_PAGE;
-	private volatile float positionLLX = Constants.DEFVAL_LLX;
-	private volatile float positionLLY = Constants.DEFVAL_LLY;
-	private volatile float positionURX = Constants.DEFVAL_URX;
-	private volatile float positionURY = Constants.DEFVAL_URY;
-	private volatile float bgImgScale = Constants.DEFVAL_BG_SCALE;
-	private volatile RenderMode renderMode;
-	private volatile String l2Text;
-	private volatile String l4Text;
-	private volatile float l2TextFontSize = Constants.DEFVAL_L2_FONT_SIZE;
-	private volatile String imgPath;
-	private volatile String bgImgPath;
+	private boolean visible;
+	private int page = Constants.DEFVAL_PAGE;
+	private float positionLLX = Constants.DEFVAL_LLX;
+	private float positionLLY = Constants.DEFVAL_LLY;
+	private float positionURX = Constants.DEFVAL_URX;
+	private float positionURY = Constants.DEFVAL_URY;
+	private float bgImgScale = Constants.DEFVAL_BG_SCALE;
+	private RenderMode renderMode;
+	private String l2Text;
+	private String l4Text;
+	private float l2TextFontSize = Constants.DEFVAL_L2_FONT_SIZE;
+	private String imgPath;
+	private String bgImgPath;
 
 	// options for timestamps (provided by external TSA)
-	private volatile boolean timestamp;
-	private volatile String tsaUrl;
-	private volatile String tsaUser;
-	private volatile String tsaPasswd;
+	private boolean timestamp;
+	private String tsaUrl;
+	private String tsaUser;
+	private String tsaPasswd;
 
-	private volatile boolean ocspEnabled;
+	// options for certificate validation
+	private boolean ocspEnabled;
+	private boolean crlEnabled;
+
+	// Proxy connection
+	private Proxy.Type proxyType;
+	private String proxyHost;
+	private int proxyPort;
 
 	/**
 	 * Loads options from PropertyProvider
@@ -86,6 +104,7 @@ public class BasicSignerOptions {
 		setAppend(props.getAsBool(Constants.PROPERTY_APPEND));
 		setEncrypted(props.getAsBool(Constants.PROPERTY_ENCRYPTED_PDF));
 		setCertLevel(props.getProperty(Constants.PROPERTY_CERT_LEVEL));
+		setHashAlgorithm(props.getProperty(Constants.PROPERTY_HASH_ALGORITHM));
 
 		setRightPrinting(props.getProperty(Constants.PROPERTY_RIGHT_PRINT));
 		setRightCopy(props.getAsBool(Constants.PROPERTY_RIGHT_COPY));
@@ -115,8 +134,14 @@ public class BasicSignerOptions {
 		setTsaUrl(props.getProperty(Constants.PROPERTY_TSA_URL));
 		setTsaUser(props.getProperty(Constants.PROPERTY_TSA_USER));
 
-		// OCSP
+		// OCSP & CRL
 		setOcspEnabled(props.getAsBool(Constants.PROPERTY_OCSP_ENABLED));
+		setCrlEnabled(props.getAsBool(Constants.PROPERTY_CRL_ENABLED));
+
+		// proxy
+		setProxyType(props.getProperty(Constants.PROPERTY_PROXY_TYPE));
+		setProxyHost(props.getProperty(Constants.PROPERTY_PROXY_HOST));
+		setProxyPort(props.getAsInt(Constants.PROPERTY_PROXY_PORT, Constants.DEFVAL_PROXY_PORT));
 
 		// passwords
 		storePasswords = props.getAsBool(Constants.PROPERTY_STOREPWD);
@@ -151,6 +176,7 @@ public class BasicSignerOptions {
 		props.setProperty(Constants.PROPERTY_APPEND, isAppend());
 		props.setProperty(Constants.PROPERTY_ENCRYPTED_PDF, isEncrypted());
 		props.setProperty(Constants.PROPERTY_CERT_LEVEL, getCertLevel().name());
+		props.setProperty(Constants.PROPERTY_HASH_ALGORITHM, getHashAlgorithm().name());
 
 		props.setProperty(Constants.PROPERTY_RIGHT_PRINT, getRightPrinting().name());
 		props.setProperty(Constants.PROPERTY_RIGHT_COPY, isRightCopy());
@@ -179,6 +205,11 @@ public class BasicSignerOptions {
 		props.setProperty(Constants.PROPERTY_TSA_URL, getTsaUrl());
 		props.setProperty(Constants.PROPERTY_TSA_USER, getTsaUser());
 		props.setProperty(Constants.PROPERTY_OCSP_ENABLED, isOcspEnabled());
+		props.setProperty(Constants.PROPERTY_CRL_ENABLED, isCrlEnabled());
+
+		props.setProperty(Constants.PROPERTY_PROXY_TYPE, getProxyType().name());
+		props.setProperty(Constants.PROPERTY_PROXY_HOST, getProxyHost());
+		props.setProperty(Constants.PROPERTY_PROXY_PORT, getProxyPort());
 
 		props.setProperty(Constants.PROPERTY_STOREPWD, isStorePasswords());
 		setEncrypted(Constants.EPROPERTY_USERHOME, Constants.USER_HOME);
@@ -206,32 +237,10 @@ public class BasicSignerOptions {
 	 * 
 	 * @param aKey
 	 *            message key
-	 */
-	void log(final String aKey) {
-		log(aKey, (String[]) null);
-	}
-
-	/**
-	 * Logs localized message to PrintWriter
-	 * 
-	 * @param aKey
-	 *            message key
-	 * @param anArg
-	 *            message parameter
-	 */
-	void log(final String aKey, final String anArg) {
-		log(aKey, anArg == null ? null : new String[] { anArg });
-	}
-
-	/**
-	 * Logs localized message to PrintWriter
-	 * 
-	 * @param aKey
-	 *            message key
 	 * @param anArgs
 	 *            message parameters
 	 */
-	void log(final String aKey, final String[] anArgs) {
+	public void log(final String aKey, final String... anArgs) {
 		if (printWriter != null) {
 			printWriter.println(res.get(aKey, anArgs));
 			printWriter.flush();
@@ -244,7 +253,7 @@ public class BasicSignerOptions {
 	 * @param aResult
 	 * @see #getListener()
 	 */
-	protected void fireSignerFinishedEvent(boolean aResult) {
+	protected void fireSignerFinishedEvent(Exception aResult) {
 		if (listener != null) {
 			listener.signerFinishedEvent(aResult);
 		}
@@ -314,6 +323,31 @@ public class BasicSignerOptions {
 		return outFile;
 	}
 
+	/**
+	 * Returns output file name if filled or input file name with default output
+	 * suffix ("_signed")
+	 * 
+	 * @return
+	 */
+	public String getOutFileX() {
+		String tmpOut = StringUtils.emptyNull(outFile);
+		if (tmpOut == null) {
+			String tmpExtension = "";
+			String tmpNameBase = StringUtils.emptyNull(getInFile());
+			if (tmpNameBase == null) {
+				tmpOut = "signed.pdf";
+			} else {
+				if (tmpNameBase.toLowerCase().endsWith(".pdf")) {
+					final int tmpBaseLen = tmpNameBase.length() - 4;
+					tmpExtension = tmpNameBase.substring(tmpBaseLen);
+					tmpNameBase = tmpNameBase.substring(0, tmpBaseLen);
+				}
+				tmpOut = tmpNameBase + Constants.DEFAULT_OUT_SUFFIX + tmpExtension;
+			}
+		}
+		return tmpOut;
+	}
+
 	public void setOutFile(String outFile) {
 		this.outFile = outFile;
 	}
@@ -347,10 +381,10 @@ public class BasicSignerOptions {
 	}
 
 	public char[] getKeyPasswdX() {
-		if (keyPasswd != null && keyPasswd.length==0) {
+		if (keyPasswd != null && keyPasswd.length == 0) {
 			keyPasswd = null;
 		}
-		return advanced ? keyPasswd : ksPasswd;
+		return (advanced && keyPasswd != null) ? keyPasswd : ksPasswd;
 	}
 
 	public String getKeyPasswdStr() {
@@ -797,4 +831,82 @@ public class BasicSignerOptions {
 		this.contact = contact;
 	}
 
+	public boolean isCrlEnabled() {
+		return crlEnabled;
+	}
+
+	public boolean isCrlEnabledX() {
+		return advanced && crlEnabled;
+	}
+
+	public void setCrlEnabled(boolean crlEnabled) {
+		this.crlEnabled = crlEnabled;
+	}
+
+	public HashAlgorithm getHashAlgorithm() {
+		if (hashAlgorithm == null) {
+			hashAlgorithm = Constants.DEFVAL_HASH_ALGORITHM;
+		}
+		return hashAlgorithm;
+	}
+
+	public HashAlgorithm getHashAlgorithmX() {
+		if (!advanced) {
+			return Constants.DEFVAL_HASH_ALGORITHM;
+		}
+		return getHashAlgorithm();
+	}
+
+	public void setHashAlgorithm(HashAlgorithm hashAlgorithm) {
+		this.hashAlgorithm = hashAlgorithm;
+	}
+
+	public void setHashAlgorithm(String aStrValue) {
+		setHashAlgorithm(StringUtils.isEmpty(aStrValue) ? null : HashAlgorithm.valueOf(aStrValue));
+	}
+
+	public Proxy.Type getProxyType() {
+		if (proxyType == null) {
+			proxyType = Constants.DEFVAL_PROXY_TYPE;
+		}
+		return proxyType;
+	}
+
+	public void setProxyType(Proxy.Type proxyType) {
+		this.proxyType = proxyType;
+	}
+
+	public void setProxyType(final String aStrValue) {
+		setProxyType(StringUtils.isEmpty(aStrValue) ? null : Proxy.Type.valueOf(aStrValue));
+	}
+
+	public String getProxyHost() {
+		return proxyHost;
+	}
+
+	public void setProxyHost(String proxyHost) {
+		this.proxyHost = proxyHost;
+	}
+
+	public int getProxyPort() {
+		return proxyPort;
+	}
+
+	public void setProxyPort(int proxyPort) {
+		this.proxyPort = proxyPort;
+	}
+
+	/**
+	 * Creates and returns Proxy object, which should be used for URL
+	 * connections in JSignPdf.
+	 * 
+	 * @return initialized Proxy object.
+	 */
+	public Proxy createProxy() {
+		Proxy tmpResult = Proxy.NO_PROXY;
+		if (isAdvanced() && getProxyType() != Proxy.Type.DIRECT) {
+			tmpResult = new Proxy(getProxyType(), new InetSocketAddress(getProxyHost(), getProxyPort()));
+		}
+		return tmpResult;
+	}
 }

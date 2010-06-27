@@ -14,6 +14,7 @@
 	<property name="src.dir" value="${basedir}/src" />
 	<property name="res.dir" value="${basedir}/res" />
 	<property name="plugin.dir" value="${basedir}/plugin" />
+	<property name="output.dir" value="${basedir}/Output" />
 
 	<property name="dist.doc.dir" value="${dist.dir}/docs" />
 	<property name="bin.dir" value="${build.dir}/bin" />
@@ -24,7 +25,11 @@
 		<format property="build.timestamp" pattern="yyyyMMddHHmm"/>
 	</tstamp>
 
-	<property name="jsignpdf.filename" value="JSignPdf" />
+	<property name="jsignpdf.product.name" value="JSignPdf" />
+	<property name="jsignpdf.filename" value="${jsignpdf.product.name}" />
+	<property name="jsignpdf.splashimage.path" value="doc/icon/splash08.bmp" />
+
+	<property name="installcert.filename" value="InstallCert" />
 
 	<!-- Default options for compiling -->
 	<property name="compile.deprecation" value="false" />

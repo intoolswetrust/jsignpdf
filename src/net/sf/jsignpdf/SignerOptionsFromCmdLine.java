@@ -3,6 +3,13 @@ package net.sf.jsignpdf;
 import static net.sf.jsignpdf.Constants.*;
 
 import java.io.PrintWriter;
+import java.net.Proxy;
+
+import net.sf.jsignpdf.types.CertificationLevel;
+import net.sf.jsignpdf.types.HashAlgorithm;
+import net.sf.jsignpdf.types.PrintRight;
+import net.sf.jsignpdf.types.RenderMode;
+import net.sf.jsignpdf.utils.StringUtils;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
@@ -21,7 +28,7 @@ public class SignerOptionsFromCmdLine extends BasicSignerOptions {
 	static final Options OPTS = new Options();
 
 	private String outPrefix;
-	private String outSuffix;
+	private String outSuffix = Constants.DEFAULT_OUT_SUFFIX;
 	private String outPath;
 
 	private String[] files;
@@ -31,7 +38,11 @@ public class SignerOptionsFromCmdLine extends BasicSignerOptions {
 	private boolean listKeyStores;
 	private boolean listKeys;
 
-	//parse command line using CLI here
+	/**
+	 * Parses options provided as command line arguments.
+	 * @param anArgs
+	 * @throws ParseException
+	 */
 	public void loadCmdLine(final String[] anArgs) throws ParseException {
 		if (anArgs == null) return;
 
@@ -74,6 +85,7 @@ public class SignerOptionsFromCmdLine extends BasicSignerOptions {
 		if (line.hasOption(ARG_LOCATION)) setLocation(line.getOptionValue(ARG_LOCATION));
 		if (line.hasOption(ARG_APPEND)) setAppend(line.hasOption(ARG_APPEND));
 		if (line.hasOption(ARG_CERT_LEVEL)) setCertLevel(line.getOptionValue(ARG_CERT_LEVEL));
+		if (line.hasOption(ARG_HASH_ALGORITHM)) setCertLevel(line.getOptionValue(ARG_HASH_ALGORITHM));
 
 		//encryption
 		if (line.hasOption(ARG_ENCRYPTED)) setEncrypted(true);
@@ -102,9 +114,20 @@ public class SignerOptionsFromCmdLine extends BasicSignerOptions {
 		if (line.hasOption(ARG_IMG_PATH)) setImgPath(line.getOptionValue(ARG_IMG_PATH));
 		if (line.hasOption(ARG_BG_PATH)) setBgImgPath(line.getOptionValue(ARG_BG_PATH));
 
-		if (StringUtils.isEmpty(outPrefix) && StringUtils.isEmpty(outSuffix)) {
-			outSuffix = "_signed";
+		//TSA & OCSP
+		if (line.hasOption(ARG_TSA_URL)) {
+			setTimestamp(true);
+			setTsaUrl(line.getOptionValue(ARG_TSA_URL));
 		}
+		if (line.hasOption(ARG_TSA_USER)) setTsaUser(line.getOptionValue(ARG_TSA_USER));
+		if (line.hasOption(ARG_TSA_PWD)) setTsaPasswd(line.getOptionValue(ARG_TSA_PWD));
+		if (line.hasOption(ARG_OCSP_LONG)) setOcspEnabled(true);
+		
+		if (line.hasOption(ARG_PROXY_TYPE_LONG)) setProxyType(line.getOptionValue(ARG_PROXY_TYPE_LONG));
+		if (line.hasOption(ARG_PROXY_HOST_LONG)) setProxyHost(line.getOptionValue(ARG_PROXY_HOST_LONG));
+		if (line.hasOption(ARG_PROXY_PORT_LONG)) setProxyPort(
+				getInt(line.getParsedOptionValue(ARG_PROXY_PORT_LONG), getProxyPort()));
+		
 	}
 
 	/**
@@ -276,6 +299,15 @@ public class SignerOptionsFromCmdLine extends BasicSignerOptions {
 		);
 		OPTS.addOption(
 				OptionBuilder
+				.withLongOpt(ARG_HASH_ALGORITHM_LONG)
+				.withDescription(res.get("hlp.hashAlgorithm", getEnumValues(HashAlgorithm.values())))
+				.hasArg()
+				.withArgName("algorithm")
+				.create(ARG_HASH_ALGORITHM)
+		);
+
+		OPTS.addOption(
+				OptionBuilder
 				.withLongOpt(ARG_QUIET_LONG)
 				.withDescription(res.get("hlp.quiet"))
 				.create(ARG_QUIET)
@@ -443,8 +475,7 @@ public class SignerOptionsFromCmdLine extends BasicSignerOptions {
 		OPTS.addOption(
 				OptionBuilder
 				.withDescription(
-						res.get("hlp.l2TextFontSize",
-								new String[] { String.valueOf(Constants.DEFVAL_L2_FONT_SIZE)}))
+						res.get("hlp.l2TextFontSize",String.valueOf(Constants.DEFVAL_L2_FONT_SIZE)))
 				.withLongOpt(ARG_L2TEXT_FONT_SIZE_LONG)
 				.hasArg()
 				.withType(Number.class)
@@ -457,6 +488,76 @@ public class SignerOptionsFromCmdLine extends BasicSignerOptions {
 				.withLongOpt(ARG_L4_TEXT_LONG)
 				.hasArg()
 				.withArgName("text")
+				.create()
+		);
+
+		//TSA & OCSP
+		OPTS.addOption(
+				OptionBuilder
+				.withLongOpt(ARG_TSA_URL_LONG)
+				.withDescription(res.get("hlp.tsaUrl"))
+				.hasArg()
+				.withArgName("URL")
+				.create(ARG_TSA_URL)
+		);
+
+		OPTS.addOption(
+				OptionBuilder
+				.withLongOpt(ARG_TSA_USER_LONG)
+				.withDescription(res.get("hlp.tsaUser"))
+				.hasArg()
+				.withArgName("username")
+				.create(ARG_TSA_USER)
+		);
+
+		OPTS.addOption(
+				OptionBuilder
+				.withLongOpt(ARG_TSA_PWD_LONG)
+				.withDescription(res.get("hlp.tsaPwd"))
+				.hasArg()
+				.withArgName("password")
+				.create(ARG_TSA_PWD)
+		);
+
+		OPTS.addOption(
+				OptionBuilder
+				.withLongOpt(ARG_OCSP_LONG)
+				.withDescription(res.get("hlp.ocsp"))
+				.create()
+		);
+
+		OPTS.addOption(
+				OptionBuilder
+				.withLongOpt(ARG_CRL_LONG)
+				.withDescription(res.get("hlp.crl"))
+				.create()
+		);
+
+		OPTS.addOption(
+				OptionBuilder
+				.withDescription(res.get("hlp.proxyType", DEFVAL_PROXY_TYPE.name(), getEnumValues(Proxy.Type.values())))
+				.withLongOpt(ARG_PROXY_TYPE_LONG)
+				.hasArg()
+				.withArgName("type")
+				.create()
+		);
+		
+		OPTS.addOption(
+				OptionBuilder
+				.withDescription(res.get("hlp.proxyHost"))
+				.withLongOpt(ARG_PROXY_HOST_LONG)
+				.hasArg()
+				.withArgName("hostname")
+				.create()
+		);
+
+		OPTS.addOption(
+				OptionBuilder
+				.withDescription(res.get("hlp.proxyPort", String.valueOf(DEFVAL_PROXY_PORT)))
+				.withLongOpt(ARG_PROXY_PORT_LONG)
+				.hasArg()
+				.withType(Number.class)
+				.withArgName("port")
 				.create()
 		);
 
@@ -475,7 +576,7 @@ public class SignerOptionsFromCmdLine extends BasicSignerOptions {
 	 * @param aEnumVals
 	 * @return
 	 */
-	private static String[] getEnumValues(Enum<?>[] aEnumVals) {
+	private static String getEnumValues(Enum<?>[] aEnumVals) {
 		final StringBuilder tmpResult = new StringBuilder();
 		boolean tmpFirst = true;
 		for (Enum<?> tmpEnu : aEnumVals) {
@@ -486,7 +587,7 @@ public class SignerOptionsFromCmdLine extends BasicSignerOptions {
 			}
 			tmpResult.append(tmpEnu.name());
 		}
-		return new String[] { tmpResult.toString() };
+		return tmpResult.toString();
 	}
 
 	/**

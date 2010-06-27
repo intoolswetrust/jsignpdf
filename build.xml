@@ -16,7 +16,7 @@
 	<path id="project.classpath">
 		<path refid="ooo.classpath"/>
 
-		<fileset dir="${lib.dir}">
+		<fileset dir="${dist.dir}/lib">
 			<include name="*.jar" />
 		</fileset>
 	</path>
@@ -37,16 +37,28 @@
 		<echo message="Cleaning build" />
 		<delete dir="${build.dir}"/>
 		<delete dir="${dist.dir}"/>
-		<delete dir="Output"/>
+		<delete dir="${output.dir}"/>
+		<ant antfile="../jsignpdf-itxt/src/build.xml" useNativeBasedir="true" target="clean" />
 	</target>
 
+	<target name="jsignpdf-itxt">
+		<echo message="Creating JSignPdf-itxt"/>
+		<property name="releasenumber" value="${jsignpdf.version}"/>
+		<property name="product.name" value="${jsignpdf.product.name}"/>
+		<tstamp>
+			<format property="releasedate" pattern="yyyy-MM-dd"/>
+		</tstamp>
+		<ant antfile="../jsignpdf-itxt/src/build.xml" useNativeBasedir="true" target="release-1.4" />
+	</target>
+	
 	<!-- Prepare directory structure for the build -->
-	<target name="prepare">
+	<target name="prepare" depends="jsignpdf-itxt">
 		<echo message="Preparing directory structure for the build" />
 		<mkdir dir="${bin.dir}"/>
 		<mkdir dir="${src.filtered.dir}"/>
 		<mkdir dir="${dist.dir}"/>
 		<mkdir dir="${dist.doc.dir}"/>
+		<mkdir dir="${output.dir}"/>
 
 		<echo message="Copying sources and resources with filter" />
 		<copy todir="${src.filtered.dir}">
@@ -62,13 +74,23 @@
 			<filterset refid="jsignpdf.filterset"/>
 		</copy>
 
+		<copy todir="${dist.dir}">
+			<fileset dir=".">
+				<include name="conf/**"/>
+			</fileset>
+		</copy>
+		
 		<copy todir="${bin.plugin.dir}">
 			<fileset dir=".">
 				<include name="images/**"/>
 				<include name="lib/*.jar"/>
 				<include name="licenses/**"/>
+				<include name="conf/**"/>
 			</fileset>
 		</copy>
+		<copy todir="${bin.plugin.dir}/lib" file="../jsignpdf-itxt/build/release/dist/jsignpdf-itxt-${jsignpdf.version}.jar"/>
+		<copy todir="${output.dir}" file="../jsignpdf-itxt/build/release/dist/jsignpdf-itxt-${jsignpdf.version}-sources.jar"/>
+		
 		<copy todir="${bin.dir}">
 			<fileset dir="${res.dir}">
 				<include name="**"/>
@@ -76,7 +98,7 @@
 		</copy>
 
 		<copy todir="${dist.dir}">
-			<fileset dir=".">
+			<fileset dir="${bin.plugin.dir}">
 				<include name="lib/*.jar"/>
 			</fileset>
 		</copy>
@@ -108,7 +130,7 @@
 		<!-- create Class-Path attribute value for MANIFEST.MF -->
 		<pathconvert property="manifest.classpath" pathsep=" ">
 			<path>
-				<fileset dir="lib">
+				<fileset dir="${dist.dir}/lib">
 					<include name="*.jar" />
 				</fileset>
 			</path>
@@ -128,22 +150,40 @@
 				<!-- attribute name="Built-By" value="${user.name}"/ -->
 				<attribute name="Main-Class" value="net.sf.jsignpdf.Signer"/>
 				<attribute name="Class-Path" value="${manifest.classpath}" />
-				<attribute name="RegistrationClassName" value="net.sf.jsignpdf.CentralRegistrationClass" />
+				<attribute name="RegistrationClassName" value="net.sf.jsignpdf.ooo.CentralRegistrationClass" />
 				<attribute name="Implementation-Vendor" value="Josef Cacek"/>
 				<attribute name="Implementation-Title" value="JSignPdf"/>
 				<attribute name="Implementation-Version" value="${jsignpdf.version} ${build.timestamp}"/>
 
-				<section name="net/sf/jsignpdf/CentralRegistrationClass.class">
-					<attribute name="RegistrationClasses" value="net.sf.jsignpdf.JSignPdf" />
+				<section name="net/sf/jsignpdf/ooo/CentralRegistrationClass.class">
+					<attribute name="RegistrationClasses" value="net.sf.jsignpdf.ooo.JSignPdf" />
 				</section>
 			</manifest>
 			<fileset dir="${bin.dir}"/>
+		</jar>
+		
+		<jar destfile="${dist.dir}/${installcert.filename}.jar">
+			<manifest>
+				<!-- attribute name="Built-By" value="${user.name}"/ -->
+				<attribute name="Main-Class" value="net.sf.jsignpdf.InstallCert"/>
+				<attribute name="Implementation-Vendor" value="Josef Cacek"/>
+				<attribute name="Implementation-Title" value="JSignPdf - InstallCert"/>
+				<attribute name="Implementation-Version" value="${jsignpdf.version} ${build.timestamp}"/>
+			</manifest>
+			<fileset dir="${bin.dir}">
+				<include name="**/InstallCert*.class"/>
+				<include name="**/StringUtils*.class"/>
+			</fileset>
+			<fileset dir="${src.filtered.dir}">
+				<include name="**/InstallCert.java"/>
+				<include name="**/StringUtils.java"/>
+			</fileset>
 		</jar>
 	</target>
 
 	<target name="oxt" depends="jar">
 		<echo message="Creating OpenOffice.org plugin (oxt)" />
-		<zip destfile="${dist.dir}/${jsignpdf.filename}.oxt">
+		<zip destfile="${output.dir}/${jsignpdf.filename}-${jsignpdf.version}.oxt">
 			<fileset dir="${bin.plugin.dir}"/>
 			<fileset dir="${dist.dir}" includes="${jsignpdf.filename}.jar"/>
 		</zip>
@@ -168,7 +208,7 @@
 					dontWrapJar="true" jarPath="${jsignpdf.filename}.jar"
 					icon="doc/icon/icons.ico">
 				<jre minVersion="1.5.0" maxHeapSize="512"/>
-				<splash file="doc/icon/splash08.bmp"/>
+				<splash file="${jsignpdf.splashimage.path}"/>
 				<versionInfo fileVersion="${jsignpdf.version}.0"
 					txtFileVersion="JSignPdf launcher v. ${jsignpdf.version}"
 					fileDescription="Adds digital signatures to PDF files"
@@ -180,7 +220,24 @@
 					originalFilename="JSignPdf.exe" />
 			</config>
 		</launch4j>
-	</target>
+
+		<launch4j>
+			<config headerType="console" outfile="${dist.dir}/InstallCert.exe"
+					dontWrapJar="true" jarPath="${installcert.filename}.jar"
+					icon="doc/icon/Certificate.ico">
+				<jre minVersion="1.5.0" maxHeapSize="512"/>
+				<versionInfo fileVersion="${jsignpdf.version}.0"
+					txtFileVersion="InstallCert launcher v. ${jsignpdf.version}"
+					fileDescription="Installs host SSL certificates to Java keystore"
+					copyright="Josef Cacek"
+					productVersion="${jsignpdf.version}.0"
+					txtProductVersion="Installs host SSL certificates to Java keystore"
+					productName="InstallCert"
+					internalName="InstallCert"
+					originalFilename="InstallCert.exe" />
+			</config>
+		</launch4j>
+</target>
 
 	<target name="ooo_start">
 		<echo>Opening Open Office</echo>
@@ -208,9 +265,7 @@
 
 		<java jar="${dist.dir}/${jsignpdf.filename}.jar" fork="true">
 			<arg value="-kst"/>
-			<arg value="${docSignature.keystore}"/>
-			<arg value="-ki"/>
-			<arg value="${docSignature.keyIndex}"/>
+			<arg value="WINDOWS-MY"/>
 			<arg value="-d"/>
 			<arg value="${dist.doc.dir}"/>
 			<arg value="${dist.doc.dir}/JSignPdf.pdf"/>
@@ -229,33 +284,48 @@
 			<arg line="/dJreInstaller=${jre.installer}"/>
 			<arg line="/dMyAppFilename=${jsignpdf.filename}"/>
 			<arg line="/dDistDir=${dist.dir}"/>
+			<arg line="/dOutputDir=${output.dir}"/>
 		</exec>
 	</target>
 
-	<target name="zip" depends="oxt,launcher,doc">
+	<target name="zip" depends="jar,launcher,doc">
 		<echo message="Creating a zip release" />
 
-		<zip destfile="Output/JSignPdf-${jsignpdf.version}.zip">
+		<zip destfile="${output.dir}/JSignPdf-${jsignpdf.version}.zip">
 			<fileset dir="${build.dir}" includes="${app.dir}/**"/>
 		</zip>
 	</target>
 
-	<target name="all" depends="installer,zip"/>
+	<target name="all" depends="installer,zip,oxt,src"/>
+
+	<target name="src" depends="prepare">
+		<echo message="Creating package from 'live' sources" />
+
+		<zip destfile="${output.dir}/JSignPdf-${jsignpdf.version}.src.zip">
+			<fileset dir="." includes="src/**"/>
+			<fileset dir="." includes="res/**"/>
+			<fileset dir="." includes="doc/**"/>
+			<fileset dir="." includes="conf/**"/>
+			<fileset dir="." includes="images/**"/>
+			<fileset dir="." includes="licenses/**"/>
+			<fileset dir="." includes="plugin/**"/>
+		</zip>
+	</target>
 
 	<target name="sources-cvs-export">
 		<echo message="Exporting sources from CVS" />
 		<mkdir dir="${build.dir}/export"/>
 		<cvs cvsroot=":pserver:anonymous@jsignpdf.cvs.sourceforge.net:/cvsroot/jsignpdf"
 			dest="${build.dir}/export">
-			<commandline>
-				<argument line="export -r ${jsignpdf.cvs.tag} jsignpdf"/>
-			</commandline>
+		    <commandline>
+		        <argument line="export -r ${jsignpdf.cvs.tag} jsignpdf"/>
+		    </commandline>
 		</cvs>
-		<zip destfile="Output/JSignPdf-${jsignpdf.version}.src.zip">
+		<zip destfile="${output.dir}/JSignPdf-${jsignpdf.version}.src.zip">
 			<fileset dir="${build.dir}/export"/>
 		</zip>
 	</target>
 
-	<target name="all-src" depends="all,sources-cvs-export"/>
-
+	<target name="all-src-cvs" depends="installer,zip,oxt,sources-cvs-export"/>
+	
 </project>

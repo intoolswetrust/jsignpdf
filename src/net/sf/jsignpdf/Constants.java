@@ -1,5 +1,9 @@
 package net.sf.jsignpdf;
 
+import java.net.Proxy;
+
+import net.sf.jsignpdf.types.HashAlgorithm;
+
 /**
  * Constants used in PDF signer application.
  * 
@@ -26,11 +30,12 @@ public class Constants {
 	 */
 	public static final String PROPERTIES_FILE = ".JSignPdf";
 
+	public static final String CONF_FILE = "conf/conf.properties";
+
 	/**
-	 * Default PDF version for signed file is '\0', i.e. the same version as the
-	 * original file.
+	 * Name of X.509 certificate type.
 	 */
-	public static final char PDF_DEFAULT_VERSION = '\0';
+	public static final String CERT_TYPE_X509 = "X.509";
 
 	/**
 	 * Name (path) of resource bundle
@@ -39,6 +44,10 @@ public class Constants {
 
 	public static final String L2TEXT_FONT_PATH = "/net/sf/jsignpdf/fonts/pokrytie.ttf";
 	public static final String L2TEXT_FONT_NAME = "pokrytie.ttf";
+
+	public static final String DEFAULT_OUT_SUFFIX = "_signed";
+
+	public static final String KEYSTORE_TYPE_WINDOWS_MY = "WINDOWS-MY";
 
 	/**
 	 * Property name.
@@ -59,6 +68,7 @@ public class Constants {
 	public static final String PROPERTY_ENCRYPTED_PDF = "inpdf.encrypted";
 
 	public static final String PROPERTY_CERT_LEVEL = "certification.level";
+	public static final String PROPERTY_HASH_ALGORITHM = "hash.algorithm";
 
 	public static final String PROPERTY_RIGHT_PRINT = "right.printing";
 	public static final String PROPERTY_RIGHT_COPY = "right.copy";
@@ -88,6 +98,11 @@ public class Constants {
 	public static final String EPROPERTY_TSA_PWD = "enc.tsa.passwd";
 
 	public static final String PROPERTY_OCSP_ENABLED = "ocsp.enabled";
+	public static final String PROPERTY_CRL_ENABLED = "crl.enabled";
+
+	public static final String PROPERTY_PROXY_TYPE = "proxy.type";
+	public static final String PROPERTY_PROXY_HOST = "proxy.host";
+	public static final String PROPERTY_PROXY_PORT = "proxy.port";
 
 	/**
 	 * Property name.
@@ -112,6 +127,11 @@ public class Constants {
 
 	public static final String PROPERTY_CONTACT = "signature.contact";
 
+	public static final long DEFVAL_SIG_SIZE = 15000L;
+	public static final String DEFVAL_CACERTS_PASSWD = "changeit";
+
+	public static final HashAlgorithm DEFVAL_HASH_ALGORITHM = HashAlgorithm.SHA1;
+
 	public static final int DEFVAL_KEY_INDEX = 0;
 	public static final int DEFVAL_PAGE = 1;
 	public static final float DEFVAL_LLX = 0f;
@@ -120,6 +140,9 @@ public class Constants {
 	public static final float DEFVAL_URY = 100f;
 	public static final float DEFVAL_L2_FONT_SIZE = 10f;
 	public static final float DEFVAL_BG_SCALE = -1f;
+
+	public static final Proxy.Type DEFVAL_PROXY_TYPE = Proxy.Type.DIRECT;
+	public static final int DEFVAL_PROXY_PORT = 80;
 
 	public static final int EXIT_CODE_PARSE_ERR = -1;
 	public static final int EXIT_CODE_NO_COMMAND = -1;
@@ -181,6 +204,9 @@ public class Constants {
 	public static final String ARG_CERT_LEVEL = "cl";
 	public static final String ARG_CERT_LEVEL_LONG = "certification-level";
 
+	public static final String ARG_HASH_ALGORITHM = "ha";
+	public static final String ARG_HASH_ALGORITHM_LONG = "hash-algorithm";
+
 	public static final String ARG_ENCRYPTED = "e";
 	public static final String ARG_ENCRYPTED_LONG = "encrypted";
 
@@ -219,4 +245,21 @@ public class Constants {
 	public static final String ARG_L4_TEXT_LONG = "l4-text";
 	public static final String ARG_IMG_PATH = "img-path";
 	public static final String ARG_BG_PATH = "bg-path";
+
+	public static final String ARG_TSA_URL = "ts";
+	public static final String ARG_TSA_URL_LONG = "tsa-server-url";
+
+	public static final String ARG_TSA_USER = "tsu";
+	public static final String ARG_TSA_USER_LONG = "tsa-user";
+
+	public static final String ARG_TSA_PWD = "tsp";
+	public static final String ARG_TSA_PWD_LONG = "tsa-password";
+
+	public static final String ARG_OCSP_LONG = "ocsp";
+	public static final String ARG_CRL_LONG = "crl";
+
+	public static final String ARG_PROXY_TYPE_LONG = "proxy-type";
+	public static final String ARG_PROXY_HOST_LONG = "proxy-host";
+	public static final String ARG_PROXY_PORT_LONG = "proxy-port";
+
 }

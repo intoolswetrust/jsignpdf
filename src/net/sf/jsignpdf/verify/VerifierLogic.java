@@ -10,7 +10,8 @@ import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Collection;
 
-import net.sf.jsignpdf.KeyStoreUtils;
+import net.sf.jsignpdf.Constants;
+import net.sf.jsignpdf.utils.KeyStoreUtils;
 
 import com.lowagie.text.pdf.AcroFields;
 import com.lowagie.text.pdf.PdfPKCS7;
@@ -18,13 +19,15 @@ import com.lowagie.text.pdf.PdfReader;
 import com.lowagie.text.pdf.PdfPKCS7.X509Name;
 
 /**
- * Class VerifierLogic contains all logic for PDF signatures verification.
- * It uses only system default keystore by default, but you can add additional
- * certificates from external files using {@link #addX509CertFile(String)} method.
+ * Class VerifierLogic contains all logic for PDF signatures verification. It
+ * uses only system default keystore by default, but you can add additional
+ * certificates from external files using {@link #addX509CertFile(String)}
+ * method.
+ * 
  * @author Josef Cacek
  * @author $Author: kwart $
- * @version $Revision: 1.5 $
- * @created $Date: 2008/08/01 10:17:19 $
+ * @version $Revision: 1.6 $
+ * @created $Date: 2010/06/27 15:56:43 $
  */
 public class VerifierLogic {
 
@@ -33,24 +36,25 @@ public class VerifierLogic {
 	/**
 	 * Constructor. It initializes default keystore.
 	 */
-	public VerifierLogic(final String aType, final String aKeyStore, 
-		final String aPasswd) {
+	public VerifierLogic(final String aType, final String aKeyStore, final String aPasswd) {
 		reinitKeystore(aType, aKeyStore, aPasswd);
 	}
 
 	/**
-	 * Adds X.509 certificates from given file. If any Exception occures,
-	 * it's not throwed but returned as a result of this method.
-	 * @param aPath full path to the file with certificate(s)
+	 * Adds X.509 certificates from given file. If any Exception occures, it's
+	 * not throwed but returned as a result of this method.
+	 * 
+	 * @param aPath
+	 *            full path to the file with certificate(s)
 	 * @return Exception if any throwed during adding.
 	 */
 	@SuppressWarnings("unchecked")
 	public Exception addX509CertFile(final String aPath) {
 		try {
-			final CertificateFactory tmpCertFac = CertificateFactory.getInstance("X509"); //X.509 ?
-			final Collection<X509Certificate> tmpCertCol = 
-				(Collection<X509Certificate>) 
-				tmpCertFac.generateCertificates(new FileInputStream(aPath));
+			final CertificateFactory tmpCertFac = CertificateFactory.getInstance(Constants.CERT_TYPE_X509); // X.509
+																											// ?
+			final Collection<X509Certificate> tmpCertCol = (Collection<X509Certificate>) tmpCertFac
+					.generateCertificates(new FileInputStream(aPath));
 			for (X509Certificate tmpCert : tmpCertCol) {
 				kall.setCertificateEntry(tmpCert.getSerialNumber().toString(Character.MAX_RADIX), tmpCert);
 			}
@@ -61,18 +65,20 @@ public class VerifierLogic {
 	}
 
 	/**
-	 * Initializes keystore (load certificates from default keystore). 
-	 * All previously added certificates from external files are forgotten.
+	 * Initializes keystore (load certificates from default keystore). All
+	 * previously added certificates from external files are forgotten.
 	 */
-	public void reinitKeystore(String aKsType, final String aKeyStore, 
-		final String aPasswd) {
+	public void reinitKeystore(String aKsType, final String aKeyStore, final String aPasswd) {
 		kall = KeyStoreUtils.loadKeyStore(aKsType, aKeyStore, aPasswd);
 	}
 
 	/**
 	 * Verifies signature(s) in PDF document.
-	 * @param aFileName path to a verified PDF file
-	 * @param aPassword PDF password - used if PDF is encrypted 
+	 * 
+	 * @param aFileName
+	 *            path to a verified PDF file
+	 * @param aPassword
+	 *            PDF password - used if PDF is encrypted
 	 * @return
 	 */
 	@SuppressWarnings("unchecked")
@@ -96,10 +102,10 @@ public class VerifierLogic {
 				tmpVerif.setSignName(pk.getSignName());
 				final Certificate pkc[] = pk.getCertificates();
 				final X509Name tmpX509Name = PdfPKCS7.getSubjectFields(pk.getSigningCertificate());
-				//TODO read more details from X509Name ?
+				// TODO read more details from X509Name ?
 				tmpVerif.setSubject(tmpX509Name.toString());
 				tmpVerif.setModified(!pk.verify());
-				//TODO revocation list and date to which should be verified?
+				// TODO revocation list and date to which should be verified?
 				tmpVerif.setFails(PdfPKCS7.verifyCertificates(pkc, kall, null, tmpVerif.getDate()));
 				tmpResult.addVerification(tmpVerif);
 			}
@@ -110,8 +116,9 @@ public class VerifierLogic {
 	}
 
 	/**
-	 * Returns InputStream which contains extracted revision (PDF) which was signed
-	 * with signature of given name.
+	 * Returns InputStream which contains extracted revision (PDF) which was
+	 * signed with signature of given name.
+	 * 
 	 * @param aFileName
 	 * @param aPassword
 	 * @param aSignatureName
@@ -131,15 +138,18 @@ public class VerifierLogic {
 	 * <li>with empty password</li>
 	 * <li>with given password</li>
 	 * </ul>
-	 * @param aFileName file name of PDF
-	 * @param aPassword password
+	 * 
+	 * @param aFileName
+	 *            file name of PDF
+	 * @param aPassword
+	 *            password
 	 * @return
-	 * @throws IOException 
+	 * @throws IOException
 	 */
 	public static PdfReader getPdfReader(final String aFileName, byte[] aPassword) throws IOException {
 		PdfReader tmpReader = null;
 		try {
-			//try to read without password
+			// try to read without password
 			tmpReader = new PdfReader(aFileName);
 		} catch (Exception e) {
 			try {
@@ -153,6 +163,7 @@ public class VerifierLogic {
 
 	/**
 	 * Returns keystore used in verifier.
+	 * 
 	 * @return used keystore
 	 */
 	public KeyStore getKeyStore() {

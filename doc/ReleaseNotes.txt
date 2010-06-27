@@ -1,3 +1,44 @@
+Version 1.0.1
+-------------
+  * fixes keystore handling in simple view
+
+Version 1.0.0
+-------------
+  * implements PDF preview & selecting position of visible signature using mouse
+  * adds support for Certificate Revocation Lists (CRL)
+  * provides support for selecting hash algorithm (depends on cryptographic provider for selected keystore type)
+  * adds keystore types provided by BouncyCastle cryptographic library   
+  * checks if a certificates are valid and if they're intended for signing 
+  * includes proxy support for TSA, OCSP and CRL
+  * font used in visible signatures can be changed (using conf/conf.properties file) 
+  * fixes removing old signatures in non-append mode 
+  * fixes embedding font of visible signature if the input PDF is in version 1.2 
+  * adds tool for installing trusted certificate to default Java keystore (InstallCert Tool) 
+
+Version 0.9.8
+-------------
+  * output prefix and suffix can be empty in batch mode - can use the same filename if output goes to different directory
+
+Version 0.9.7 (bugfix release)
+-------------
+  * fixes password handling in simple view (caused *KeyException for PKCS#12 keystores)
+  * Output PDF filename field can be left empty in a GUI, then is automatically used the value from Input PDF suffixed with "_signed" (e.g. test.pdf->test_signed.pdf)
+
+Version 0.9.6
+-------------
+  * it's version 0.9.5 with small fixes
+  * TSA & OCSP command line switches
+  
+Version 0.9.5 (not public)
+-------------
+  * support for timestamp server  
+  * OCSP support
+  * Contact field added
+  * fix non-unique key aliases in WINDOWS-MY keystore
+  * improvements in command-line version:
+	- possibility to load default property file (-lp parameter)
+	- selecting key by index (e.g. because of national character in key alias, -ki parameter)  
+
 Version 0.9
 -------------
   * embedded Unicode font for Layer 2 texts in visible signature (fix for i18n and PDF/A specification) 
