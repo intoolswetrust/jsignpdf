@@ -156,6 +156,9 @@ public class Constants {
 	public static final String ARG_LOADPROPS_LONG = "load-properties";
 	public static final String ARG_LOADPROPS = "lp";
 
+	public static final String ARG_LOADPROPS_FILE_LONG = "load-properties-file";
+	public static final String ARG_LOADPROPS_FILE = "lpf";
+
 	public static final String ARG_LIST_KS_TYPES = "lkt";
 	public static final String ARG_LIST_KS_TYPES_LONG = "list-keystore-types";
 
