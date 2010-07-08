@@ -1,13 +1,5 @@
 [Files]
-Source: {#DistDir}\*; DestDir: {app}; Flags: recursesubdirs; Components: base
-Source: {#JreInstaller}; DestDir: {tmp}; DestName: java_setup.exe; Flags: deleteafterinstall; Components: java
-
-[Components]
-Name: base; Description: Program files; Flags: fixed; Types: custom compact full
-Name: java; Description: Java Runtime Environment 6; Types: full
-
-[Run]
-Filename: {tmp}\java_setup.exe; StatusMsg: Installing Java Runtime Environment; Components: java
+Source: {#DistDir}\*; DestDir: {app}; Flags: recursesubdirs
 
 [Setup]
 AppName={#MyAppName}

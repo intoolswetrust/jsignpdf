@@ -41,14 +41,11 @@
 
 
 	<!-- OpenOffice properties -->
-	<property name="ooo.dir" value="c:/Program Files/OpenOffice.org 3" />
+	<property name="ooo.libs" value="unsorted/ooo.libs" />
 
 	<path id="ooo.classpath">
-		<fileset dir="${ooo.dir}/URE/java">
+		<fileset dir="${ooo.libs}">
 			<include name="*.jar" />
-		</fileset>
-		<fileset dir="${ooo.dir}/Basis/program/classes">
-			<include name="unoil.jar" />
 		</fileset>
 	</path>
 

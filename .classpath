@@ -16,7 +16,12 @@
 	<classpathentry kind="lib" path="lib/icu4j-charsets-4_2_1.jar"/>
 	<classpathentry kind="lib" path="lib/jempbox-1.1.0.jar"/>
 	<classpathentry kind="lib" path="lib/pdfbox-1.1.0.jar"/>
-	<classpathentry kind="con" path="org.eclipse.jdt.USER_LIBRARY/OOo"/>
+	<classpathentry kind="lib" path="unsorted/ooo.libs/juh.jar"/>
+	<classpathentry kind="lib" path="unsorted/ooo.libs/jurt.jar"/>
+	<classpathentry kind="lib" path="unsorted/ooo.libs/ridl.jar"/>
+	<classpathentry kind="lib" path="unsorted/ooo.libs/unoil.jar"/>
+	<classpathentry kind="lib" path="unsorted/ooo.libs/unoloader.jar"/>
+	<classpathentry kind="lib" path="unsorted/ooo.libs/java_uno.jar"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/jsignpdf-itxt"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.junit.JUNIT_CONTAINER/4"/>
 	<classpathentry kind="output" path="bin"/>

@@ -41,7 +41,7 @@
 		<ant antfile="../jsignpdf-itxt/src/build.xml" useNativeBasedir="true" target="clean" />
 	</target>
 
-	<target name="jsignpdf-itxt">
+	<target name="jsignpdf-itxt" depends="prepare">
 		<echo message="Creating JSignPdf-itxt"/>
 		<property name="releasenumber" value="${jsignpdf.version}"/>
 		<property name="product.name" value="${jsignpdf.product.name}"/>
@@ -49,10 +49,14 @@
 			<format property="releasedate" pattern="yyyy-MM-dd"/>
 		</tstamp>
 		<ant antfile="../jsignpdf-itxt/src/build.xml" useNativeBasedir="true" target="release-1.4" />
+
+		<copy todir="${bin.plugin.dir}/lib" file="../jsignpdf-itxt/build/release/dist/jsignpdf-itxt-${jsignpdf.version}.jar"/>
+		<copy todir="${dist.dir}/lib" file="../jsignpdf-itxt/build/release/dist/jsignpdf-itxt-${jsignpdf.version}.jar"/>
+		<copy todir="${output.dir}" file="../jsignpdf-itxt/build/release/dist/jsignpdf-itxt-${jsignpdf.version}-sources.jar"/>
 	</target>
-	
+
 	<!-- Prepare directory structure for the build -->
-	<target name="prepare" depends="jsignpdf-itxt">
+	<target name="prepare">
 		<echo message="Preparing directory structure for the build" />
 		<mkdir dir="${bin.dir}"/>
 		<mkdir dir="${src.filtered.dir}"/>
@@ -88,8 +92,6 @@
 				<include name="conf/**"/>
 			</fileset>
 		</copy>
-		<copy todir="${bin.plugin.dir}/lib" file="../jsignpdf-itxt/build/release/dist/jsignpdf-itxt-${jsignpdf.version}.jar"/>
-		<copy todir="${output.dir}" file="../jsignpdf-itxt/build/release/dist/jsignpdf-itxt-${jsignpdf.version}-sources.jar"/>
 		
 		<copy todir="${bin.dir}">
 			<fileset dir="${res.dir}">
@@ -114,7 +116,7 @@
 	</target>
 
 	<!-- Compile sources -->
-	<target name="compile" depends="prepare">
+	<target name="compile" depends="prepare,jsignpdf-itxt">
 		<echo message="Compiling sources" />
 		<javac srcdir="${src.filtered.dir}" nowarn="${compile.nowarn}"
 			destdir="${bin.dir}" debug="${compile.debug}"
@@ -122,6 +124,11 @@
 			source="${compile.source}" target="${compile.target}"
 			classpathref="project.classpath">
 		</javac>
+	</target>
+
+	<target name="unpack-jre" depends="prepare">
+		<echo message="Unpacking JRE" />
+		<unzip src="${jre.zip}" dest="${dist.dir}"/>
 	</target>
 
 	<!-- Create jar for the project -->
@@ -189,7 +196,7 @@
 		</zip>
 	</target>
 
-	<target name="launcher" depends="prepare">
+	<target name="launcher" depends="jar">
 		<echo message="Creating windows launcher (EXE)" />
 
 		<antcall target="_get_sf_archive">
@@ -207,7 +214,7 @@
 			<config headerType="gui" outfile="${dist.dir}/JSignPdf.exe"
 					dontWrapJar="true" jarPath="${jsignpdf.filename}.jar"
 					icon="doc/icon/icons.ico">
-				<jre minVersion="1.5.0" maxHeapSize="512"/>
+				<jre maxHeapSize="512" path="jre"/>
 				<splash file="${jsignpdf.splashimage.path}"/>
 				<versionInfo fileVersion="${jsignpdf.version}.0"
 					txtFileVersion="JSignPdf launcher v. ${jsignpdf.version}"
@@ -225,7 +232,7 @@
 			<config headerType="console" outfile="${dist.dir}/InstallCert.exe"
 					dontWrapJar="true" jarPath="${installcert.filename}.jar"
 					icon="doc/icon/Certificate.ico">
-				<jre minVersion="1.5.0" maxHeapSize="512"/>
+				<jre maxHeapSize="512" path="jre"/>
 				<versionInfo fileVersion="${jsignpdf.version}.0"
 					txtFileVersion="InstallCert launcher v. ${jsignpdf.version}"
 					fileDescription="Installs host SSL certificates to Java keystore"
@@ -237,7 +244,38 @@
 					originalFilename="InstallCert.exe" />
 			</config>
 		</launch4j>
-</target>
+	</target>
+		
+	<target name="uncompresspdf" depends="launcher">
+		<!-- uncompresser -->
+		<jar destfile="${build.dir}/UncompressPdf.jar">
+			<fileset dir="${bin.dir}" includes="**/UncompressPdf*"/>
+			<zipfileset src="${dist.dir}/lib/jsignpdf-itxt-${jsignpdf.version}.jar"/>
+			<manifest>
+				<attribute name="Main-Class" value="net.sf.jsignpdf.UncompressPdf"/>
+				<attribute name="Implementation-Vendor" value="Josef Cacek"/>
+				<attribute name="Implementation-Title" value="JSignPdf - UncompressPdf"/>
+				<attribute name="Implementation-Version" value="${jsignpdf.version} ${build.timestamp}"/>
+			</manifest>
+		</jar>
+
+		<launch4j>
+			<config headerType="console" outfile="${build.dir}/UncompressPdf.exe"
+					jarPath="${build.dir}/UncompressPdf.jar"
+					icon="doc/icon/misc.ico">
+				<jre maxHeapSize="512" path="jre"/>
+				<versionInfo fileVersion="${jsignpdf.version}.0"
+					txtFileVersion="UncompressPdf v. ${jsignpdf.version}"
+					fileDescription="Uncompresses PDF"
+					copyright="Josef Cacek"
+					productVersion="${jsignpdf.version}.0"
+					txtProductVersion="Uncompresses PDF"
+					productName="UncompressPdf"
+					internalName="UncompressPdf"
+					originalFilename="UncompressPdf.exe" />
+			</config>
+		</launch4j>		
+	</target>
 
 	<target name="ooo_start">
 		<echo>Opening Open Office</echo>
@@ -272,7 +310,7 @@
 		</java>
 	</target>
 
-	<target name="installer" depends="oxt,launcher,doc">
+	<target name="installer" depends="jar,unpack-jre,launcher,doc">
 		<echo message="Creating a windows setup" />
 		<exec failonerror="false"
 				executable="${innosetup.dir}\iscc.exe">
@@ -281,14 +319,13 @@
 			<arg line="/dMyAppVersion=${jsignpdf.version}"/>
 			<arg line="/dMyAppVersionWin=${jsignpdf.version}.0"/>
 			<arg line="/dMyAppId=JSignPdf"/>
-			<arg line="/dJreInstaller=${jre.installer}"/>
 			<arg line="/dMyAppFilename=${jsignpdf.filename}"/>
 			<arg line="/dDistDir=${dist.dir}"/>
 			<arg line="/dOutputDir=${output.dir}"/>
 		</exec>
 	</target>
 
-	<target name="zip" depends="jar,launcher,doc">
+	<target name="zip" depends="jar,doc">
 		<echo message="Creating a zip release" />
 
 		<zip destfile="${output.dir}/JSignPdf-${jsignpdf.version}.zip">
@@ -296,7 +333,7 @@
 		</zip>
 	</target>
 
-	<target name="all" depends="installer,zip,oxt,src"/>
+	<target name="all" depends="zip,oxt,installer,src"/>
 
 	<target name="src" depends="prepare">
 		<echo message="Creating package from 'live' sources" />
@@ -327,5 +364,5 @@
 	</target>
 
 	<target name="all-src-cvs" depends="installer,zip,oxt,sources-cvs-export"/>
-	
+
 </project>
