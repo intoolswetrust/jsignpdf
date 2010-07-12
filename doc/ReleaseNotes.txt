@@ -1,3 +1,9 @@
+Version 1.0.2
+-------------
+  * added command line option --load-properties-file (-lpf) added
+  * embedded JRE for Windows (Java 6, 32-bit)
+  * improvements of Install Cert Tool
+
 Version 1.0.1
 -------------
   * fixes keystore handling in simple view

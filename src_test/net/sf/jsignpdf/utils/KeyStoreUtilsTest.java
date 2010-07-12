@@ -3,7 +3,11 @@ package net.sf.jsignpdf.utils;
 import static net.sf.jsignpdf.TestConstants.*;
 import static org.junit.Assert.*;
 
+import java.util.Arrays;
+import java.util.List;
 import java.util.SortedSet;
+
+import net.sf.jsignpdf.TestConstants;
 
 import org.junit.Test;
 
@@ -34,7 +38,16 @@ public class KeyStoreUtilsTest {
 	 */
 	@Test
 	public void testGetKeyAliases() {
-		fail("Not yet implemented");
+		for (TestConstants.Keystore keystore : TestConstants.Keystore.values()) {
+			for (TestConstants.TestPrivateKey privateKey : TestConstants.TestPrivateKey.values()) {
+				System.out.println("Testing " + keystore + ":" + privateKey);
+				String[] keyAliases = KeyStoreUtils.getKeyAliases(privateKey.toSignerOptions(keystore));
+				assertNotNull(keyAliases);
+				assertTrue(keyAliases.length > 0);
+				List<String> keyList = Arrays.asList(keyAliases);
+				assertTrue(keyList.contains(privateKey.getAlias()) != privateKey.isExpired());
+			}
+		}
 	}
 
 	@Test

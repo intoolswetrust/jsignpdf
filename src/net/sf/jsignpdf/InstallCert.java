@@ -35,6 +35,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
@@ -42,6 +43,7 @@ import java.security.KeyStore;
 import java.security.MessageDigest;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
+import java.text.SimpleDateFormat;
 
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLException;
@@ -51,16 +53,29 @@ import javax.net.ssl.TrustManager;
 import javax.net.ssl.TrustManagerFactory;
 import javax.net.ssl.X509TrustManager;
 
+import net.sf.jsignpdf.utils.IOUtils;
 import net.sf.jsignpdf.utils.StringUtils;
 
 /**
  * Installs certificate for given SSL connection to Java CA keystore.
  * 
  * @author Andreas Sterbenz
+ * @author Josef Cacek
  */
 public class InstallCert {
 
-	public static void main(String[] args) throws Exception {
+	/**
+	 * Cacerts truststore filename.
+	 */
+	public final static String CACERTS_KEYSTORE = "cacerts";
+
+	/**
+	 * The main - whole logic of Install Cert Tool.
+	 * 
+	 * @param args
+	 * @throws Exception
+	 */
+	public static void main(String[] args) {
 		String host;
 		int port;
 		char[] passphrase;
@@ -93,15 +108,10 @@ public class InstallCert {
 				passphrase = p.toCharArray();
 			}
 
-			File file = new File("jssecacerts");
-			if (file.isFile() == false) {
-				char SEP = File.separatorChar;
-				File dir = new File(System.getProperty("java.home") + SEP + "lib" + SEP + "security");
-				file = new File(dir, "jssecacerts");
-				if (file.isFile() == false) {
-					file = new File(dir, "cacerts");
-				}
-			}
+			char SEP = File.separatorChar;
+			final File dir = new File(System.getProperty("java.home") + SEP + "lib" + SEP + "security");
+			final File file = new File(dir, "cacerts");
+
 			System.out.println("Loading KeyStore " + file + "...");
 			InputStream in = new FileInputStream(file);
 			KeyStore ks = KeyStore.getInstance(KeyStore.getDefaultType());
@@ -154,26 +164,43 @@ public class InstallCert {
 
 			System.out.print("Enter certificate to add to trusted keystore or 'q' to quit [1]: ");
 			String line = reader.readLine().trim();
-			int k;
+			int k = -1;
 			try {
 				k = (line.length() == 0) ? 0 : Integer.parseInt(line) - 1;
 			} catch (NumberFormatException e) {
-				System.out.println("KeyStore not changed");
-				return;
 			}
 
-			X509Certificate cert = chain[k];
-			String alias = host + "-" + (k + 1);
-			ks.setCertificateEntry(alias, cert);
+			if (k < 0 || k >= chain.length) {
+				System.out.println("KeyStore not changed");
+			} else {
+				try {
+					System.out.println("Creating keystore backup");
+					final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMddHHmmss");
+					final File backupFile = new File(dir, CACERTS_KEYSTORE + "."
+							+ dateFormat.format(new java.util.Date()));
+					final FileInputStream fis = new FileInputStream(file);
+					final FileOutputStream fos = new FileOutputStream(backupFile);
+					IOUtils.copy(fis, fos);
+					fis.close();
+					fos.close();
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+				System.out.println("Installing certificate...");
 
-			OutputStream out = new FileOutputStream("jssecacerts");
-			ks.store(out, passphrase);
-			out.close();
+				X509Certificate cert = chain[k];
+				String alias = host + "-" + (k + 1);
+				ks.setCertificateEntry(alias, cert);
 
-			System.out.println();
-			System.out.println(cert);
-			System.out.println();
-			System.out.println("Added certificate to keystore 'jssecacerts' using alias '" + alias + "'");
+				OutputStream out = new FileOutputStream(file);
+				ks.store(out, passphrase);
+				out.close();
+
+				System.out.println();
+				System.out.println(cert);
+				System.out.println();
+				System.out.println("Added certificate to keystore '" + file + "' using alias '" + alias + "'");
+			}
 		} catch (Exception e) {
 			System.out.println();
 			System.out.println("----------------------------------------------");
@@ -182,7 +209,11 @@ public class InstallCert {
 			System.out.println("----------------------------------------------");
 		}
 		System.out.println("Press Enter to finish...");
-		reader.readLine();
+		try {
+			reader.readLine();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
 
 	private static final char[] HEXDIGITS = "0123456789abcdef".toCharArray();

@@ -15,26 +15,73 @@ public class TestConstants {
 	public static final String KEYSTORE_FILE_JKS = "testdata/test-keystore.jks";
 	public static final String KEYSTORE_FILE_PKCS12 = "testdata/test-keystore.p12";
 
-	// keytool -genkeypair -keyalg RSA -keysize 2048 -dname
-	// "cn=Expired Key, ou=PDF support, o=JSignPdf s.r.o., c=CZ" -alias expired
-	// -keypass expiredpass -keystore test-keystore.jks -storepass keystorepass
-	// -validity 90
-	public static final BasicSignerOptions OPTIONS_EXPIREDKEY = new BasicSignerOptions();
-	static {
-		OPTIONS_EXPIREDKEY.setAdvanced(true);
-		OPTIONS_EXPIREDKEY.setKeyAlias("expired");
-		OPTIONS_EXPIREDKEY.setKeyPasswd("expiredpass".toCharArray());
-		OPTIONS_EXPIREDKEY.setKsPasswd(KEYSTORE_TEST_PASSWD);
+	public static final String KEY_PASSWD_SUFFIX = "pass";
+
+	public static enum Keystore {
+		JKS(KEYSTORE_FILE_JKS),
+		PKCS12(KEYSTORE_FILE_PKCS12),
+		BCPKCS12(KEYSTORE_FILE_PKCS12);
+
+		private final String ksFile;
+
+		private Keystore(final String aFilePath) {
+			ksFile = aFilePath;
+		}
+
+		public String getKsFile() {
+			return ksFile;
+		}
+
+		public String getKsType() {
+			return name();
+		}
+
+		public char[] getPasswd() {
+			return KEYSTORE_TEST_PASSWD;
+		}
 	}
 
-	// TODO trida pro klice
+	/**
+	 * Test private keys present in test keystore file.
+	 * 
+	 * @author Josef Cacek
+	 */
+	public static enum TestPrivateKey {
+		EXPIRED(true),
+		RSA1024(false),
+		RSA2048(false),
+		RSA4096(false),
+		DSA1024(false);
 
-	public static final BasicSignerOptions OPTIONS_VALIDKEY = new BasicSignerOptions();
-	static {
-		OPTIONS_VALIDKEY.setAdvanced(true);
-		OPTIONS_VALIDKEY.setKeyAlias("valid");
-		OPTIONS_VALIDKEY.setKeyPasswd("validpass".toCharArray());
-		OPTIONS_VALIDKEY.setKsPasswd(KEYSTORE_TEST_PASSWD);
+		private final boolean expired;
+
+		private TestPrivateKey(boolean anExpired) {
+			expired = anExpired;
+		}
+
+		public boolean isExpired() {
+			return expired;
+		}
+
+		public String getAlias() {
+			return name().toLowerCase();
+		}
+
+		public char[] getPasswd() {
+			return (name() + KEY_PASSWD_SUFFIX).toCharArray();
+		}
+
+		public BasicSignerOptions toSignerOptions(final Keystore aKeystore) {
+			final BasicSignerOptions options = new BasicSignerOptions();
+			options.setAdvanced(true);
+			options.setKsType(aKeystore.getKsType());
+			options.setKsFile(aKeystore.getKsFile());
+			options.setKsPasswd(aKeystore.getPasswd());
+			options.setKeyAlias(getAlias());
+			options.setKeyPasswd(getPasswd());
+			return options;
+
+		}
 	}
 
 }

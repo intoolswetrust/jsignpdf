@@ -56,7 +56,7 @@
 	</target>
 
 	<!-- Prepare directory structure for the build -->
-	<target name="prepare">
+	<target name="prepare" depends="clean">
 		<echo message="Preparing directory structure for the build" />
 		<mkdir dir="${bin.dir}"/>
 		<mkdir dir="${src.filtered.dir}"/>
@@ -180,10 +180,12 @@
 			<fileset dir="${bin.dir}">
 				<include name="**/InstallCert*.class"/>
 				<include name="**/StringUtils*.class"/>
+				<include name="**/IOUtils*.class"/>
 			</fileset>
 			<fileset dir="${src.filtered.dir}">
 				<include name="**/InstallCert.java"/>
 				<include name="**/StringUtils.java"/>
+				<include name="**/IOUtils.java"/>
 			</fileset>
 		</jar>
 	</target>
@@ -279,12 +281,12 @@
 
 	<target name="ooo_start">
 		<echo>Opening Open Office</echo>
-		<exec failonerror="false" spawn="true"
-				executable="${ooo.dir}\program\soffice.exe">
+		<exec executable="${ooo.dir}/program/soffice.exe" failonerror="false" spawn="true">
 			<arg line="-headless"/>
 			<arg line="-accept='socket,port=8100;urp;'"/>
 		</exec>
-		<echo>Open Office open</echo>
+		<echo>Open Office opened - sleeping for 10s</echo>
+		<sleep seconds="10"/>
 	</target>
 
 	<target name="doc" depends="jar,ooo_start">

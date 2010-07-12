@@ -1,3 +1,7 @@
+2010-07-12 Josef Cacek
+  * Install Cert Tool doesn't work with jssecacerts file anymore, it uses directly {java.home}/lib/security/cacerts keystore
+  * InstallCert creates backup of cacerts file before adding new certificate
+
 2010-07-08 Josef Cacek
   * command line option --load-properties-file (-lpf) added
   * for windows package use embedded JRE 6 (32-bit, i.e. supports WINDOWS-MY keystore)

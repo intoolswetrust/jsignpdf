@@ -54,6 +54,8 @@ public class SignerOptionsFromCmdLine extends BasicSignerOptions {
 		// parse the command line arguments
 		final CommandLine line = parser.parse(OPTS, anArgs);
 
+		setAdvanced(true);
+
 		if (line.hasOption(ARG_LOADPROPS_FILE)) {
 			if (!line.hasOption(ARG_LOADPROPS)) {
 				props.clear();
@@ -63,8 +65,6 @@ public class SignerOptionsFromCmdLine extends BasicSignerOptions {
 
 		if (line.hasOption(ARG_LOADPROPS) || line.hasOption(ARG_LOADPROPS_FILE)) {
 			loadOptions();
-		} else {
-			setAdvanced(true);
 		}
 
 		// enable logging if not quiet run
