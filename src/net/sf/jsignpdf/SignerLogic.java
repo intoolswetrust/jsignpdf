@@ -75,6 +75,7 @@ public class SignerLogic implements Runnable {
 		}
 
 		Exception tmpResult = null;
+		FileOutputStream fout = null;
 		try {
 			final PrivateKeyInfo pkInfo = KeyStoreUtils.getPkInfo(options);
 			final PrivateKey key = pkInfo.getKey();
@@ -93,7 +94,7 @@ public class SignerLogic implements Runnable {
 			}
 
 			options.log("console.createOutPdf", outFile);
-			final FileOutputStream fout = new FileOutputStream(outFile);
+			fout = new FileOutputStream(outFile);
 
 			final HashAlgorithm hashAlgorithm = options.getHashAlgorithmX();
 
@@ -270,6 +271,14 @@ public class SignerLogic implements Runnable {
 		} catch (OutOfMemoryError e) {
 			e.printStackTrace(options.getPrintWriter());
 			options.log("console.memoryError");
+		} finally {
+			if (fout != null) {
+				try {
+					fout.close();
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
 		}
 		options.log("console.finished." + (tmpResult == null ? "ok" : "error"));
 		options.fireSignerFinishedEvent(tmpResult);
