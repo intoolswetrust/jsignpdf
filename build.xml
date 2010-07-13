@@ -246,6 +246,13 @@
 					originalFilename="InstallCert.exe" />
 			</config>
 		</launch4j>
+		
+		<echo message="Adding batch files to application folder"/>
+		<copy todir="${dist.dir}">
+			<fileset dir="unsorted/batch">
+				<include name="*.*"/>
+			</fileset>
+		</copy>
 	</target>
 		
 	<target name="uncompresspdf" depends="launcher">
