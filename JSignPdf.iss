@@ -16,6 +16,7 @@ AppPublisher=Josef Cacek
 AppSupportURL=http://jsignpdf.sourceforge.net/
 AppVersion={#MyAppVersion}
 OutputDir={#OutputDir}
+InfoBeforeFile={#DistDir}\jre\LICENSE.rtf
 
 [Icons]
 Name: {group}\JSignPdf {#MyAppVersion}; Filename: {app}\JSignPdf.exe; Components: ; WorkingDir: {app}
