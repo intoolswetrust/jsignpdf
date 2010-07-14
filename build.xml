@@ -231,6 +231,23 @@
 		</launch4j>
 
 		<launch4j>
+			<config headerType="console" outfile="${dist.dir}/JSignPdfC.exe"
+					dontWrapJar="true" jarPath="${jsignpdf.filename}.jar"
+					icon="doc/icon/icons.ico">
+				<jre maxHeapSize="512" path="jre"/>
+				<versionInfo fileVersion="${jsignpdf.version}.0"
+									txtFileVersion="JSignPdf console launcher v. ${jsignpdf.version}"
+									fileDescription="Console launcher for JSignPdf"
+									copyright="Josef Cacek"
+									productVersion="${jsignpdf.version}.0"
+									txtProductVersion="Adds digital signatures to PDF files"
+									productName="JSignPdf"
+									internalName="JSignPdf"
+									originalFilename="JSignPdfC.exe" />
+			</config>
+		</launch4j>
+
+		<launch4j>
 			<config headerType="console" outfile="${dist.dir}/InstallCert.exe"
 					dontWrapJar="true" jarPath="${installcert.filename}.jar"
 					icon="doc/icon/Certificate.ico">

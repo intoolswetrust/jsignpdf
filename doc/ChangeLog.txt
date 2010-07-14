@@ -1,4 +1,7 @@
-2010-07-12 Josef Cacek
+2010-07-14 Josef Cacek
+  * Windows console launcher JSignPdfC.exe
+
+2010-07-12 Josef Cacek (1.0.2)
   * Install Cert Tool doesn't work with jssecacerts file anymore, it uses directly {java.home}/lib/security/cacerts keystore
   * InstallCert creates backup of cacerts file before adding new certificate
 
