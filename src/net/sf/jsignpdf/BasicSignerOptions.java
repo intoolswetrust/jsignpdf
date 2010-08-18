@@ -38,7 +38,7 @@ public class BasicSignerOptions {
 	private String location;
 	private String contact;
 	private SignResultListener listener;
-	private boolean append;
+	private boolean append = Constants.DEFVAL_APPEND;
 	private boolean advanced;
 	private boolean encrypted;
 	private char[] pdfOwnerPwd;
@@ -430,7 +430,8 @@ public class BasicSignerOptions {
 	}
 
 	public boolean isAppendX() {
-		return advanced && append && !encrypted;
+		return (!encrypted)
+				&& ((!Constants.DEFVAL_APPEND && advanced && append) || (Constants.DEFVAL_APPEND && (append || !advanced)));
 	}
 
 	public void setAppend(boolean append) {

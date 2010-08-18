@@ -87,8 +87,8 @@ public class Pdf2Image {
 				}
 			}
 
-			// draw the first page to an image
-			PDFPage page = pdffile.getPage(aPage - 1);
+			// draw the page to an image
+			PDFPage page = pdffile.getPage(aPage);
 
 			// get the width and height for the doc at the default zoom
 			Rectangle rect = new Rectangle(0, 0, (int) page.getBBox().getWidth(), (int) page.getBBox().getHeight());

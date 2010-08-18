@@ -132,6 +132,8 @@ public class Constants {
 
 	public static final HashAlgorithm DEFVAL_HASH_ALGORITHM = HashAlgorithm.SHA1;
 
+	public static final boolean DEFVAL_APPEND = true;
+
 	public static final int DEFVAL_KEY_INDEX = 0;
 	public static final int DEFVAL_PAGE = 1;
 	public static final float DEFVAL_LLX = 0f;

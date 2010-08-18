@@ -1,3 +1,7 @@
+2010-08-18 Josef Cacek
+  * Append mode is the default
+  * Fixed page numbering in PdfRenderer preview
+
 2010-07-26 Josef Cacek
   * Updated Japanese translation (thanks to mshibata(at)sf.net)
 
