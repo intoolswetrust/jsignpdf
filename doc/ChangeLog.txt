@@ -1,4 +1,4 @@
-2010-08-24 Josef Cacek
+2010-08-24 Josef Cacek (1.0.3)
   * Windows verifier launcher Verify.exe
   * Previous/Next page buttons in PDF preview window 
 
