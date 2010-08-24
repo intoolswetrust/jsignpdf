@@ -94,6 +94,7 @@ public class VisibleSignatureDialog extends javax.swing.JDialog {
 		extraInfo = new PdfExtraInfo(anOptions);
 		previewDialog.add(selectionImage, java.awt.BorderLayout.CENTER);
 		previewDialog.setModal(true);
+		previewDialog.getRootPane().setDefaultButton(btnPreviewClose);
 		GuiUtils.resizeAndCenter(previewDialog);
 		getRootPane().setDefaultButton(btnClose);
 	}
