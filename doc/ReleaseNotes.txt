@@ -1,3 +1,10 @@
+Version 1.0.3
+-------------
+  * additional windows launchers JSignPdfC.exe and Verify.exe
+  * Append mode is the default for not-encrypted PDF documents
+  * added previous/next buttons for changing the page in PDF preview window
+  * fixed page numbering in PDF preview
+
 Version 1.0.2
 -------------
   * added command line option --load-properties-file (-lpf) added
