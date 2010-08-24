@@ -251,7 +251,9 @@
 			<config headerType="console" outfile="${dist.dir}/Verify.exe"
 					dontWrapJar="true" jarPath="${jsignpdf.filename}.jar"
 					icon="doc/icon/icons.ico">
-				<classPath mainClass="net.sf.jsignpdf.verify.Verifier"/>
+				<classPath mainClass="net.sf.jsignpdf.verify.Verifier">
+					 <cp>${dist.dir}/lib/*.jar</cp>
+				</classPath>
 				<jre maxHeapSize="512" path="jre"/>
 				<versionInfo fileVersion="${jsignpdf.version}.0"
 									txtFileVersion="JSignPdf signature verifier v. ${jsignpdf.version}"
@@ -289,7 +291,7 @@
 			</fileset>
 		</copy>
 	</target>
-		
+
 	<target name="uncompresspdf" depends="launcher">
 		<!-- uncompresser -->
 		<jar destfile="${build.dir}/UncompressPdf.jar">
