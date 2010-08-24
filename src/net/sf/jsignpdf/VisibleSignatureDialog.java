@@ -271,6 +271,7 @@ public class VisibleSignatureDialog extends javax.swing.JDialog {
 	 */
 	// <editor-fold defaultstate="collapsed"
 	// <editor-fold defaultstate="collapsed"
+	// <editor-fold defaultstate="collapsed"
 	// desc="Generated Code">//GEN-BEGIN:initComponents
 	private void initComponents() {
 		java.awt.GridBagConstraints gridBagConstraints;
@@ -278,6 +279,8 @@ public class VisibleSignatureDialog extends javax.swing.JDialog {
 		previewDialog = new javax.swing.JDialog();
 		jPanel1 = new javax.swing.JPanel();
 		btnPreviewClose = new javax.swing.JButton();
+		btnPrevious = new javax.swing.JButton();
+		btnNext = new javax.swing.JButton();
 		lblPosition = new javax.swing.JLabel();
 		lblPage = new javax.swing.JLabel();
 		tfPage = new javax.swing.JTextField();
@@ -328,11 +331,39 @@ public class VisibleSignatureDialog extends javax.swing.JDialog {
 			}
 		});
 		gridBagConstraints = new java.awt.GridBagConstraints();
-		gridBagConstraints.gridx = 0;
+		gridBagConstraints.gridx = 1;
 		gridBagConstraints.gridy = 0;
 		gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
 		gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
 		jPanel1.add(btnPreviewClose, gridBagConstraints);
+
+		btnPrevious.setIcon(new javax.swing.ImageIcon(getClass().getResource("/net/sf/jsignpdf/prev16.png"))); // NOI18N
+		btnPrevious.setMinimumSize(new java.awt.Dimension(50, 20));
+		btnPrevious.addActionListener(new java.awt.event.ActionListener() {
+			public void actionPerformed(java.awt.event.ActionEvent evt) {
+				btnPreviousActionPerformed(evt);
+			}
+		});
+		gridBagConstraints = new java.awt.GridBagConstraints();
+		gridBagConstraints.gridx = 0;
+		gridBagConstraints.gridy = 0;
+		gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+		gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
+		jPanel1.add(btnPrevious, gridBagConstraints);
+
+		btnNext.setIcon(new javax.swing.ImageIcon(getClass().getResource("/net/sf/jsignpdf/next16.png"))); // NOI18N
+		btnNext.setMinimumSize(new java.awt.Dimension(50, 20));
+		btnNext.addActionListener(new java.awt.event.ActionListener() {
+			public void actionPerformed(java.awt.event.ActionEvent evt) {
+				btnNextActionPerformed(evt);
+			}
+		});
+		gridBagConstraints = new java.awt.GridBagConstraints();
+		gridBagConstraints.gridx = 2;
+		gridBagConstraints.gridy = 0;
+		gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+		gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
+		jPanel1.add(btnNext, gridBagConstraints);
 
 		previewDialog.getContentPane().add(jPanel1, java.awt.BorderLayout.PAGE_END);
 
@@ -715,6 +746,16 @@ public class VisibleSignatureDialog extends javax.swing.JDialog {
 		pack();
 	}// </editor-fold>//GEN-END:initComponents
 
+	private void btnPreviousActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_btnPreviousActionPerformed
+		tfPage.setText(String.valueOf(ConvertUtils.toInt(tfPage.getText(), 2) - 1));
+		btnPreviewActionPerformed(evt);
+	}// GEN-LAST:event_btnPreviousActionPerformed
+
+	private void btnNextActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_btnNextActionPerformed
+		tfPage.setText(String.valueOf(ConvertUtils.toInt(tfPage.getText(), 0) + 1));
+		btnPreviewActionPerformed(evt);
+	}// GEN-LAST:event_btnNextActionPerformed
+
 	private void btnPreviewCloseActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_btnPreviewCloseActionPerformed
 		previewDialog.setVisible(false);
 	}// GEN-LAST:event_btnPreviewCloseActionPerformed
@@ -726,6 +767,8 @@ public class VisibleSignatureDialog extends javax.swing.JDialog {
 	private void btnPreviewActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_btnPreviewActionPerformed
 		final Integer pageNr = ConvertUtils.toInteger(tfPage.getText());
 		if (pageNr != null) {
+			btnPrevious.setEnabled(pageNr > 1);
+			btnNext.setEnabled(pageNr < numberOfPages);
 			// TODO progress bar or animated image... "yes, we are working..."
 			final BufferedImage buffImg = p2i.getImageForPage(pageNr.intValue());
 			if (buffImg != null) {
@@ -791,8 +834,10 @@ public class VisibleSignatureDialog extends javax.swing.JDialog {
 	private javax.swing.JButton btnBgImgPathBrowse;
 	private javax.swing.JButton btnClose;
 	private javax.swing.JButton btnImgPathBrowse;
+	private javax.swing.JButton btnNext;
 	private javax.swing.JButton btnPreview;
 	private javax.swing.JButton btnPreviewClose;
+	private javax.swing.JButton btnPrevious;
 	private javax.swing.JComboBox cbDisplayMode;
 	private javax.swing.JCheckBox chkbL2TextDefault;
 	private javax.swing.JCheckBox chkbL4TextDefault;
