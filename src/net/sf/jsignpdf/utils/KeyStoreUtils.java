@@ -25,6 +25,7 @@ import java.util.SortedSet;
 import java.util.TreeSet;
 
 import net.sf.jsignpdf.BasicSignerOptions;
+import net.sf.jsignpdf.Constants;
 import net.sf.jsignpdf.PrivateKeyInfo;
 
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
@@ -89,28 +90,62 @@ public class KeyStoreUtils {
 			options.log("console.getAliases");
 			final Enumeration<String> tmpAliases = aKs.aliases();
 			final boolean checkValidity = ConfigProvider.getInstance().getAsBool("certificate.checkValidity", true);
+			final boolean checkKeyUsage = ConfigProvider.getInstance().getAsBool("certificate.checkKeyUsage", true);
+			final boolean checkCriticalExtensions = ConfigProvider.getInstance().getAsBool(
+					"certificate.checkCriticalExtensions", true);
 			while (tmpAliases.hasMoreElements()) {
-				final String tmpAlias = tmpAliases.nextElement();
+				String tmpAlias = tmpAliases.nextElement();
 				if (aKs.isKeyEntry(tmpAlias)) {
 					final Certificate tmpCert = aKs.getCertificate(tmpAlias);
-					if (checkValidity && tmpCert instanceof X509Certificate) {
+					boolean tmpAddAlias = true;
+					if (tmpCert instanceof X509Certificate) {
 						final X509Certificate tmpX509 = (X509Certificate) tmpCert;
-						try {
-							tmpX509.checkValidity();
-							// check if the certificate is supposed to be used
-							// for digital signatures
-							final boolean keyUsage[] = tmpX509.getKeyUsage();
-							if (keyUsage == null || keyUsage.length == 0 || keyUsage[0]) {
-								tmpResult.add(tmpAlias);
-							} else {
-								options.log("console.certificateNotForSignature", tmpAlias);
+						if (checkValidity) {
+							try {
+								tmpX509.checkValidity();
+							} catch (CertificateExpiredException e) {
+								options.log("console.certificateExpired", tmpAlias);
+								tmpAddAlias = false;
+							} catch (CertificateNotYetValidException e) {
+								options.log("console.certificateNotYetValid", tmpAlias);
+								tmpAddAlias = false;
 							}
-						} catch (CertificateExpiredException e) {
-							options.log("console.certificateExpired", tmpAlias);
-						} catch (CertificateNotYetValidException e) {
-							options.log("console.certificateNotYetValid", tmpAlias);
 						}
-					} else {
+						if (checkKeyUsage) {
+							// check if the certificate is supposed to be
+							// used for digital signatures
+							final boolean keyUsage[] = tmpX509.getKeyUsage();
+							if (keyUsage != null && keyUsage.length > 0) {
+								// KeyUsage ::= BIT STRING {
+								// digitalSignature (0),
+								// nonRepudiation (1),
+								// keyEncipherment (2),
+								// dataEncipherment (3),
+								// keyAgreement (4),
+								// keyCertSign (5),
+								// cRLSign (6),
+								// encipherOnly (7),
+								// decipherOnly (8) }
+								if (!(keyUsage[0] || keyUsage[1])) {
+									options.log("console.certificateNotForSignature", tmpAlias);
+									tmpAddAlias = false;
+								}
+							}
+						}
+						// check critical extensions
+						if (checkCriticalExtensions) {
+							final Set<String> criticalExtensionOIDs = tmpX509.getCriticalExtensionOIDs();
+							if (criticalExtensionOIDs != null) {
+								for (String oid : criticalExtensionOIDs) {
+									if (!Constants.SUPPORTED_CRITICAL_EXTENSION_OIDS.contains(oid)) {
+										options.log("console.criticalExtensionNotSupported", tmpAlias, oid);
+										tmpAddAlias = false;
+									}
+								}
+							}
+						}
+					}
+					if (tmpAddAlias) {
 						tmpResult.add(tmpAlias);
 					}
 				}

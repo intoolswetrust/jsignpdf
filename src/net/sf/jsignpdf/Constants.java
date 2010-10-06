@@ -1,6 +1,9 @@
 package net.sf.jsignpdf;
 
 import java.net.Proxy;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
 
 import net.sf.jsignpdf.types.HashAlgorithm;
 
@@ -266,5 +269,12 @@ public class Constants {
 	public static final String ARG_PROXY_TYPE_LONG = "proxy-type";
 	public static final String ARG_PROXY_HOST_LONG = "proxy-host";
 	public static final String ARG_PROXY_PORT_LONG = "proxy-port";
+
+	public static final Set<String> SUPPORTED_CRITICAL_EXTENSION_OIDS;
+	static {
+		final Set<String> oidSet = new HashSet<String>();
+		oidSet.add("2.5.29.15"); // KeyUsage
+		SUPPORTED_CRITICAL_EXTENSION_OIDS = Collections.unmodifiableSet(oidSet);
+	}
 
 }
