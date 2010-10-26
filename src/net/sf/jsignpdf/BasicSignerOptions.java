@@ -77,6 +77,7 @@ public class BasicSignerOptions {
 	private String tsaUrl;
 	private String tsaUser;
 	private String tsaPasswd;
+	private String tsaPolicy;
 
 	// options for certificate validation
 	private boolean ocspEnabled;
@@ -133,6 +134,7 @@ public class BasicSignerOptions {
 		setTimestamp(props.getAsBool(Constants.PROPERTY_TSA_ENABLED));
 		setTsaUrl(props.getProperty(Constants.PROPERTY_TSA_URL));
 		setTsaUser(props.getProperty(Constants.PROPERTY_TSA_USER));
+		setTsaPolicy(props.getProperty(Constants.PROPERTY_TSA_POLICY));
 
 		// OCSP & CRL
 		setOcspEnabled(props.getAsBool(Constants.PROPERTY_OCSP_ENABLED));
@@ -204,6 +206,7 @@ public class BasicSignerOptions {
 		props.setProperty(Constants.PROPERTY_TSA_ENABLED, isTimestamp());
 		props.setProperty(Constants.PROPERTY_TSA_URL, getTsaUrl());
 		props.setProperty(Constants.PROPERTY_TSA_USER, getTsaUser());
+		props.setProperty(Constants.PROPERTY_TSA_POLICY, getTsaPolicy());
 		props.setProperty(Constants.PROPERTY_OCSP_ENABLED, isOcspEnabled());
 		props.setProperty(Constants.PROPERTY_CRL_ENABLED, isCrlEnabled());
 
@@ -773,6 +776,21 @@ public class BasicSignerOptions {
 	 */
 	public void setTsaUser(String tsaUser) {
 		this.tsaUser = tsaUser;
+	}
+
+	/**
+	 * @return the tsaPolicy
+	 */
+	public String getTsaPolicy() {
+		return tsaPolicy;
+	}
+
+	/**
+	 * @param tsaPolicy
+	 *            the tsaPolicy to set
+	 */
+	public void setTsaPolicy(String tsaPolicy) {
+		this.tsaPolicy = tsaPolicy;
 	}
 
 	/**

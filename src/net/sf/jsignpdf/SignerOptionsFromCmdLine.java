@@ -110,7 +110,7 @@ public class SignerOptionsFromCmdLine extends BasicSignerOptions {
 		if (line.hasOption(ARG_CERT_LEVEL))
 			setCertLevel(line.getOptionValue(ARG_CERT_LEVEL));
 		if (line.hasOption(ARG_HASH_ALGORITHM))
-			setCertLevel(line.getOptionValue(ARG_HASH_ALGORITHM));
+			setHashAlgorithm(line.getOptionValue(ARG_HASH_ALGORITHM));
 
 		// encryption
 		if (line.hasOption(ARG_ENCRYPTED))
@@ -331,6 +331,9 @@ public class SignerOptionsFromCmdLine extends BasicSignerOptions {
 
 		OPTS.addOption(OptionBuilder.withLongOpt(ARG_TSA_PWD_LONG).withDescription(res.get("hlp.tsaPwd")).hasArg()
 				.withArgName("password").create(ARG_TSA_PWD));
+
+		OPTS.addOption(OptionBuilder.withLongOpt(ARG_TSA_POLICY_LONG).withDescription(res.get("hlp.tsaPolicy"))
+				.hasArg().withArgName("policyOID").create());
 
 		OPTS.addOption(OptionBuilder.withLongOpt(ARG_OCSP_LONG).withDescription(res.get("hlp.ocsp")).create());
 

@@ -1,3 +1,7 @@
+2010-10-26 Josef Cacek
+  * added support for a custom TSA policy OID
+  * fixed setting hash algorithm from command line (thanks to Jan Klimes)
+  
 2010-10-06 Josef Cacek
   * additional Certificate checks implemented
   * Certificate checks can be disabled in conf.properties under following keys:

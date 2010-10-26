@@ -5,7 +5,6 @@ import java.net.Proxy;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JComponent;
 
-import net.sf.jsignpdf.utils.ConvertUtils;
 import net.sf.jsignpdf.utils.ResourceProvider;
 
 /**
@@ -42,6 +41,7 @@ public class TsaDialog extends javax.swing.JDialog {
 		setLabelAndMnemonic(lblTsaUrl, "gui.tsa.url.label");
 		setLabelAndMnemonic(lblTsaUser, "gui.tsa.user.label");
 		setLabelAndMnemonic(lblTsaPwd, "gui.tsa.pwd.label");
+		setLabelAndMnemonic(lblTsaPolicy, "gui.tsa.policy.label");
 
 		setLabelAndMnemonic(chkbOcspEnabled, "gui.tsa.ocspEnabled.checkbox");
 		setLabelAndMnemonic(chkbCrlEnabled, "gui.tsa.crlEnabled.checkbox");
@@ -56,9 +56,10 @@ public class TsaDialog extends javax.swing.JDialog {
 	 */
 	private void updateFromOptions() {
 		chkbTsaEnabled.setSelected(options.isTimestamp());
-		tfTsaUrl.setText(ConvertUtils.toString(options.getTsaUrl()));
-		tfTsaUser.setText(ConvertUtils.toString(options.getTsaUser()));
-		pfTsaPwd.setText(ConvertUtils.toString(options.getTsaPasswd()));
+		tfTsaUrl.setText(options.getTsaUrl());
+		tfTsaUser.setText(options.getTsaUser());
+		pfTsaPwd.setText(options.getTsaPasswd());
+		tfTsaPolicy.setText(options.getTsaPolicy());
 		chkbOcspEnabled.setSelected(options.isOcspEnabled());
 		chkbCrlEnabled.setSelected(options.isCrlEnabled());
 		cbProxyType.setSelectedItem(options.getProxyType());
@@ -74,6 +75,7 @@ public class TsaDialog extends javax.swing.JDialog {
 		tfTsaUrl.setEnabled(tmpEnabled);
 		tfTsaUser.setEnabled(tmpEnabled);
 		pfTsaPwd.setEnabled(tmpEnabled);
+		tfTsaPolicy.setEnabled(tmpEnabled);
 	}
 
 	/**
@@ -84,6 +86,7 @@ public class TsaDialog extends javax.swing.JDialog {
 		options.setTsaUrl(tfTsaUrl.getText());
 		options.setTsaUser(tfTsaUser.getText());
 		options.setTsaPasswd(new String(pfTsaPwd.getPassword()));
+		options.setTsaPolicy(tfTsaPolicy.getText());
 		options.setOcspEnabled(chkbOcspEnabled.isSelected());
 		options.setCrlEnabled(chkbCrlEnabled.isSelected());
 
@@ -112,6 +115,7 @@ public class TsaDialog extends javax.swing.JDialog {
 	 */
 	// <editor-fold defaultstate="collapsed"
 	// <editor-fold defaultstate="collapsed"
+	// <editor-fold defaultstate="collapsed"
 	// desc="Generated Code">//GEN-BEGIN:initComponents
 	private void initComponents() {
 		java.awt.GridBagConstraints gridBagConstraints;
@@ -132,6 +136,8 @@ public class TsaDialog extends javax.swing.JDialog {
 		lblProxyType = new javax.swing.JLabel();
 		cbProxyType = new javax.swing.JComboBox();
 		spProxyPort = new javax.swing.JSpinner();
+		lblTsaPolicy = new javax.swing.JLabel();
+		tfTsaPolicy = new javax.swing.JTextField();
 
 		addComponentListener(new java.awt.event.ComponentAdapter() {
 			public void componentHidden(java.awt.event.ComponentEvent evt) {
@@ -222,7 +228,7 @@ public class TsaDialog extends javax.swing.JDialog {
 		chkbOcspEnabled.setMaximumSize(new java.awt.Dimension(2147483647, 2147483647));
 		gridBagConstraints = new java.awt.GridBagConstraints();
 		gridBagConstraints.gridx = 0;
-		gridBagConstraints.gridy = 4;
+		gridBagConstraints.gridy = 5;
 		gridBagConstraints.gridwidth = 2;
 		gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
 		gridBagConstraints.insets = new java.awt.Insets(2, 5, 2, 5);
@@ -237,7 +243,7 @@ public class TsaDialog extends javax.swing.JDialog {
 		});
 		gridBagConstraints = new java.awt.GridBagConstraints();
 		gridBagConstraints.gridx = 1;
-		gridBagConstraints.gridy = 7;
+		gridBagConstraints.gridy = 8;
 		gridBagConstraints.anchor = java.awt.GridBagConstraints.EAST;
 		gridBagConstraints.insets = new java.awt.Insets(7, 2, 2, 5);
 		getContentPane().add(btnTsaOK, gridBagConstraints);
@@ -246,7 +252,7 @@ public class TsaDialog extends javax.swing.JDialog {
 		chkbCrlEnabled.setMaximumSize(new java.awt.Dimension(2147483647, 2147483647));
 		gridBagConstraints = new java.awt.GridBagConstraints();
 		gridBagConstraints.gridx = 0;
-		gridBagConstraints.gridy = 5;
+		gridBagConstraints.gridy = 6;
 		gridBagConstraints.gridwidth = 2;
 		gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
 		gridBagConstraints.insets = new java.awt.Insets(2, 5, 2, 5);
@@ -313,10 +319,30 @@ public class TsaDialog extends javax.swing.JDialog {
 
 		gridBagConstraints = new java.awt.GridBagConstraints();
 		gridBagConstraints.gridx = 0;
-		gridBagConstraints.gridy = 6;
+		gridBagConstraints.gridy = 7;
 		gridBagConstraints.gridwidth = 2;
 		gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
 		getContentPane().add(pnlProxy, gridBagConstraints);
+
+		lblTsaPolicy.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
+		lblTsaPolicy.setLabelFor(tfTsaUser);
+		lblTsaPolicy.setText("TSA policy OID");
+		gridBagConstraints = new java.awt.GridBagConstraints();
+		gridBagConstraints.gridx = 0;
+		gridBagConstraints.gridy = 4;
+		gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+		gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+		gridBagConstraints.insets = new java.awt.Insets(2, 5, 2, 5);
+		getContentPane().add(lblTsaPolicy, gridBagConstraints);
+
+		tfTsaPolicy.setMinimumSize(new java.awt.Dimension(70, 20));
+		gridBagConstraints = new java.awt.GridBagConstraints();
+		gridBagConstraints.gridx = 1;
+		gridBagConstraints.gridy = 4;
+		gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+		gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+		gridBagConstraints.insets = new java.awt.Insets(2, 5, 2, 5);
+		getContentPane().add(tfTsaPolicy, gridBagConstraints);
 	}// </editor-fold>//GEN-END:initComponents
 
 	private void btnTsaOKActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_btnTsaOKActionPerformed
@@ -344,6 +370,7 @@ public class TsaDialog extends javax.swing.JDialog {
 	private javax.swing.JCheckBox chkbTsaEnabled;
 	private javax.swing.JLabel lblProxyHost;
 	private javax.swing.JLabel lblProxyType;
+	private javax.swing.JLabel lblTsaPolicy;
 	private javax.swing.JLabel lblTsaPwd;
 	private javax.swing.JLabel lblTsaUrl;
 	private javax.swing.JLabel lblTsaUser;
@@ -351,6 +378,7 @@ public class TsaDialog extends javax.swing.JDialog {
 	private javax.swing.JPanel pnlProxy;
 	private javax.swing.JSpinner spProxyPort;
 	private javax.swing.JTextField tfProxyHost;
+	private javax.swing.JTextField tfTsaPolicy;
 	private javax.swing.JTextField tfTsaUrl;
 	private javax.swing.JTextField tfTsaUser;
 	// End of variables declaration//GEN-END:variables

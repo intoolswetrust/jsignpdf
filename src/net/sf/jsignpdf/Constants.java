@@ -99,6 +99,7 @@ public class Constants {
 	public static final String PROPERTY_TSA_URL = "tsa.url";
 	public static final String PROPERTY_TSA_USER = "tsa.user";
 	public static final String EPROPERTY_TSA_PWD = "enc.tsa.passwd";
+	public static final String PROPERTY_TSA_POLICY = "tsa.policy";
 
 	public static final String PROPERTY_OCSP_ENABLED = "ocsp.enabled";
 	public static final String PROPERTY_CRL_ENABLED = "crl.enabled";
@@ -263,6 +264,8 @@ public class Constants {
 	public static final String ARG_TSA_PWD = "tsp";
 	public static final String ARG_TSA_PWD_LONG = "tsa-password";
 
+	public static final String ARG_TSA_POLICY_LONG = "tsa-policy-oid";
+
 	public static final String ARG_OCSP_LONG = "ocsp";
 	public static final String ARG_CRL_LONG = "crl";
 
@@ -271,6 +274,7 @@ public class Constants {
 	public static final String ARG_PROXY_PORT_LONG = "proxy-port";
 
 	public static final Set<String> SUPPORTED_CRITICAL_EXTENSION_OIDS;
+
 	static {
 		final Set<String> oidSet = new HashSet<String>();
 		oidSet.add("2.5.29.15"); // KeyUsage

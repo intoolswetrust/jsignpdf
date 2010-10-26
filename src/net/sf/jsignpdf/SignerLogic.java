@@ -247,6 +247,11 @@ public class SignerLogic implements Runnable {
 				tsc = new TSAClientBouncyCastle(options.getTsaUrl(), StringUtils.emptyNull(options.getTsaUser()),
 						StringUtils.emptyNull(options.getTsaPasswd()));
 				tsc.setProxy(tmpProxy);
+				final String policyOid = options.getTsaPolicy();
+				if (StringUtils.hasLength(policyOid)) {
+					options.log("console.settingTsaPolicy", policyOid);
+					tsc.setPolicy(policyOid);
+				}
 			}
 			byte[] encodedSig = sgn.getEncodedPKCS7(hash, cal, tsc, ocsp);
 
