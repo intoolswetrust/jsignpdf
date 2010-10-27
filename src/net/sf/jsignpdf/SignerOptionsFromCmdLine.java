@@ -171,6 +171,8 @@ public class SignerOptionsFromCmdLine extends BasicSignerOptions {
 			setTsaUser(line.getOptionValue(ARG_TSA_USER));
 		if (line.hasOption(ARG_TSA_PWD))
 			setTsaPasswd(line.getOptionValue(ARG_TSA_PWD));
+		if (line.hasOption(ARG_TSA_POLICY_LONG))
+			setTsaPolicy(line.getOptionValue(ARG_TSA_POLICY_LONG));
 		if (line.hasOption(ARG_OCSP_LONG))
 			setOcspEnabled(true);
 
