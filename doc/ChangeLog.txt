@@ -1,3 +1,7 @@
+2010-10-27 Josef Cacek (1.1.0)
+  * updated documentation
+  * fixed setting Policy OID in CLI mode
+
 2010-10-26 Josef Cacek
   * added support for a custom TSA policy OID
   * fixed setting hash algorithm from command line (thanks to Jan Klimes)

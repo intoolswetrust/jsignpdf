@@ -1,3 +1,9 @@
+Version 1.1.0
+-------------
+  * fine grained control of certificate display through conf.properties file
+  * support for setting custom Policy OID in TSA requests
+  * fixed setting hash algorithm from command line
+
 Version 1.0.3
 -------------
   * additional windows launchers JSignPdfC.exe and Verify.exe
