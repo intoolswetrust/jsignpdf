@@ -1,3 +1,6 @@
+2010-10-27 Josef Cacek
+  * added some "well-known" certificate critical extensions 
+
 2010-10-27 Josef Cacek (1.1.0)
   * updated documentation
   * fixed setting Policy OID in CLI mode
