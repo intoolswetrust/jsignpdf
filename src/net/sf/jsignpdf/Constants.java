@@ -278,7 +278,7 @@ public class Constants {
 	static {
 		final Set<String> oidSet = new HashSet<String>();
 		oidSet.add("2.5.29.15"); // KeyUsage
-		oidSet.add("2.5.29.17"); // Subject Alternative Name4
+		oidSet.add("2.5.29.17"); // Subject Alternative Name
 		oidSet.add("2.5.29.19"); // Basic Constraints
 		oidSet.add("2.5.29.29"); // Certificate Issuer
 		oidSet.add("2.5.29.37"); // Extended Key Usage
