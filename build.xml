@@ -216,7 +216,7 @@
 			<config headerType="gui" outfile="${dist.dir}/JSignPdf.exe"
 					dontWrapJar="true" jarPath="${jsignpdf.filename}.jar"
 					icon="doc/icon/icons.ico">
-				<jre maxHeapSize="512" path="jre"/>
+				<jre path="jre"/>
 				<splash file="${jsignpdf.splashimage.path}"/>
 				<versionInfo fileVersion="${jsignpdf.version}.0"
 					txtFileVersion="JSignPdf launcher v. ${jsignpdf.version}"
@@ -229,12 +229,13 @@
 					originalFilename="JSignPdf.exe" />
 			</config>
 		</launch4j>
+		<copy file="unsorted/template.l4j.ini" tofile="${dist.dir}/JSignPdf.l4j.ini"/>
 
 		<launch4j>
 			<config headerType="console" outfile="${dist.dir}/JSignPdfC.exe"
 					dontWrapJar="true" jarPath="${jsignpdf.filename}.jar"
 					icon="doc/icon/icons.ico">
-				<jre maxHeapSize="512" path="jre"/>
+				<jre path="jre"/>
 				<versionInfo fileVersion="${jsignpdf.version}.0"
 									txtFileVersion="JSignPdf console launcher v. ${jsignpdf.version}"
 									fileDescription="Console launcher for JSignPdf"
@@ -246,6 +247,7 @@
 									originalFilename="JSignPdfC.exe" />
 			</config>
 		</launch4j>
+		<copy file="unsorted/template.l4j.ini" tofile="${dist.dir}/JSignPdfC.l4j.ini"/>
 
 		<launch4j>
 			<config headerType="console" outfile="${dist.dir}/Verify.exe"
@@ -254,7 +256,7 @@
 				<classPath mainClass="net.sf.jsignpdf.verify.Verifier">
 					 <cp>${dist.dir}/lib/*.jar</cp>
 				</classPath>
-				<jre maxHeapSize="512" path="jre"/>
+				<jre path="jre"/>
 				<versionInfo fileVersion="${jsignpdf.version}.0"
 									txtFileVersion="JSignPdf signature verifier v. ${jsignpdf.version}"
 									fileDescription="Launcher for JSignPdf verifier"
@@ -266,12 +268,14 @@
 									originalFilename="Verify.exe" />
 			</config>
 		</launch4j>
+		<copy file="unsorted/template.l4j.ini" tofile="${dist.dir}/Verify.l4j.ini"/>
+		
 
 		<launch4j>
 			<config headerType="console" outfile="${dist.dir}/InstallCert.exe"
 					dontWrapJar="true" jarPath="${installcert.filename}.jar"
 					icon="doc/icon/Certificate.ico">
-				<jre maxHeapSize="512" path="jre"/>
+				<jre path="jre"/>
 				<versionInfo fileVersion="${jsignpdf.version}.0"
 					txtFileVersion="InstallCert launcher v. ${jsignpdf.version}"
 					fileDescription="Installs host SSL certificates to Java keystore"
@@ -283,6 +287,7 @@
 					originalFilename="InstallCert.exe" />
 			</config>
 		</launch4j>
+		<copy file="unsorted/template.l4j.ini" tofile="${dist.dir}/InstallCert.l4j.ini"/>
 		
 		<echo message="Adding batch files to application folder"/>
 		<copy todir="${dist.dir}">
@@ -309,7 +314,7 @@
 			<config headerType="console" outfile="${build.dir}/UncompressPdf.exe"
 					jarPath="${build.dir}/UncompressPdf.jar"
 					icon="doc/icon/misc.ico">
-				<jre maxHeapSize="512" path="jre"/>
+				<jre path="jre"/>
 				<versionInfo fileVersion="${jsignpdf.version}.0"
 					txtFileVersion="UncompressPdf v. ${jsignpdf.version}"
 					fileDescription="Uncompresses PDF"
