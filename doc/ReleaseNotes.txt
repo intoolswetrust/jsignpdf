@@ -1,3 +1,9 @@
+Version 1.1.1
+-------------
+  * checking known critical extensions is disabled by default in conf.properties
+  * added some "well-known" certificate critical extension OIDs
+  * created l4j.ini files for exe launchers - JRE options are configurable now
+
 Version 1.1.0
 -------------
   * fine grained control of certificate display through conf.properties file

@@ -1,7 +1,10 @@
-2010-10-22 Josef Cacek
+2011-01-09 Josef Cacek (1.1.1)
+  * created l4j.ini files for exe launchers - JRE maximum memory is configurable now
+
+2010-12-22 Josef Cacek
   * checking known critical extensions is disabled by default
 
-2010-10-27 Josef Cacek
+2010-11-18 Josef Cacek
   * added some "well-known" certificate critical extensions 
 
 2010-10-27 Josef Cacek (1.1.0)
