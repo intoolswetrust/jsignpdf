@@ -1,3 +1,6 @@
+2011-03-11 Josef Cacek
+  * setting default OCSP server URL
+
 2011-01-09 Josef Cacek (1.1.1)
   * created l4j.ini files for exe launchers - JRE maximum memory is configurable now
 

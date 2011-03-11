@@ -102,6 +102,7 @@ public class Constants {
 	public static final String PROPERTY_TSA_POLICY = "tsa.policy";
 
 	public static final String PROPERTY_OCSP_ENABLED = "ocsp.enabled";
+	public static final String PROPERTY_OCSP_SERVER_URL = "ocsp.serverUrl";
 	public static final String PROPERTY_CRL_ENABLED = "crl.enabled";
 
 	public static final String PROPERTY_PROXY_TYPE = "proxy.type";
@@ -267,6 +268,7 @@ public class Constants {
 	public static final String ARG_TSA_POLICY_LONG = "tsa-policy-oid";
 
 	public static final String ARG_OCSP_LONG = "ocsp";
+	public static final String ARG_OCSP_SERVER_LONG = "ocsp-server-url";
 	public static final String ARG_CRL_LONG = "crl";
 
 	public static final String ARG_PROXY_TYPE_LONG = "proxy-type";

@@ -230,8 +230,13 @@ public class SignerLogic implements Runnable {
 			if (options.isOcspEnabledX() && chain.length >= 2) {
 				options.log("console.getOCSPURL");
 				String url = PdfPKCS7.getOCSPURL((X509Certificate) chain[0]);
-				if (url != null && url.length() > 0) {
-					options.log("console.readingOCSP");
+				if (StringUtils.isEmpty(url)) {
+					//get from options
+					options.log("console.noOCSPURL");
+					url = options.getOcspServerUrl();
+				}
+				if (!StringUtils.isEmpty(url)) {
+					options.log("console.readingOCSP", url);
 					final OcspClientBouncyCastle ocspClient = new OcspClientBouncyCastle((X509Certificate) chain[0],
 							(X509Certificate) chain[1], url);
 					ocspClient.setProxy(tmpProxy);

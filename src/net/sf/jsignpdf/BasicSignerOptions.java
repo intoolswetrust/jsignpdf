@@ -81,6 +81,7 @@ public class BasicSignerOptions {
 
 	// options for certificate validation
 	private boolean ocspEnabled;
+	private String ocspServerUrl;
 	private boolean crlEnabled;
 
 	// Proxy connection
@@ -138,6 +139,7 @@ public class BasicSignerOptions {
 
 		// OCSP & CRL
 		setOcspEnabled(props.getAsBool(Constants.PROPERTY_OCSP_ENABLED));
+		setOcspServerUrl(props.getProperty(Constants.PROPERTY_OCSP_SERVER_URL));
 		setCrlEnabled(props.getAsBool(Constants.PROPERTY_CRL_ENABLED));
 
 		// proxy
@@ -208,6 +210,7 @@ public class BasicSignerOptions {
 		props.setProperty(Constants.PROPERTY_TSA_USER, getTsaUser());
 		props.setProperty(Constants.PROPERTY_TSA_POLICY, getTsaPolicy());
 		props.setProperty(Constants.PROPERTY_OCSP_ENABLED, isOcspEnabled());
+		props.setProperty(Constants.PROPERTY_OCSP_SERVER_URL, getOcspServerUrl());
 		props.setProperty(Constants.PROPERTY_CRL_ENABLED, isCrlEnabled());
 
 		props.setProperty(Constants.PROPERTY_PROXY_TYPE, getProxyType().name());
@@ -825,6 +828,21 @@ public class BasicSignerOptions {
 	 */
 	public void setOcspEnabled(boolean ocspEnabled) {
 		this.ocspEnabled = ocspEnabled;
+	}
+
+	/**
+	 * @return the ocspServerUrl
+	 */
+	public String getOcspServerUrl() {
+		return ocspServerUrl;
+	}
+
+	/**
+	 * @param ocspServerUrl
+	 *            the ocspServerUrl to set
+	 */
+	public void setOcspServerUrl(String ocspServerUrl) {
+		this.ocspServerUrl = ocspServerUrl;
 	}
 
 	public boolean isStorePasswords() {
