@@ -1,3 +1,6 @@
+2011-03-13 Josef Cacek
+  * Java Runtime Environment update (6u24)
+
 2011-03-11 Josef Cacek
   * setting default OCSP server URL
 
