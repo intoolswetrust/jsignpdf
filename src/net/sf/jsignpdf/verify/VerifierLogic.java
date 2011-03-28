@@ -26,8 +26,8 @@ import com.lowagie.text.pdf.PdfPKCS7.X509Name;
  * 
  * @author Josef Cacek
  * @author $Author: kwart $
- * @version $Revision: 1.6 $
- * @created $Date: 2010/06/27 15:56:43 $
+ * @version $Revision: 1.7 $
+ * @created $Date: 2011/03/28 14:19:34 $
  */
 public class VerifierLogic {
 
@@ -52,7 +52,7 @@ public class VerifierLogic {
 	public Exception addX509CertFile(final String aPath) {
 		try {
 			final CertificateFactory tmpCertFac = CertificateFactory.getInstance(Constants.CERT_TYPE_X509); // X.509
-																											// ?
+			// ?
 			final Collection<X509Certificate> tmpCertCol = (Collection<X509Certificate>) tmpCertFac
 					.generateCertificates(new FileInputStream(aPath));
 			for (X509Certificate tmpCert : tmpCertCol) {
@@ -96,7 +96,7 @@ public class VerifierLogic {
 				tmpVerif.setWholeDocument(tmpAcroFields.signatureCoversWholeDocument(name));
 				tmpVerif.setRevision(tmpAcroFields.getRevision(name));
 				final PdfPKCS7 pk = tmpAcroFields.verifySignature(name);
-				tmpVerif.setDate(pk.getSignDate());
+				tmpVerif.setDate(pk.getTimeStampDate() != null ? pk.getTimeStampDate() : pk.getSignDate());
 				tmpVerif.setLocation(pk.getLocation());
 				tmpVerif.setReason(pk.getReason());
 				tmpVerif.setSignName(pk.getSignName());
@@ -105,8 +105,9 @@ public class VerifierLogic {
 				// TODO read more details from X509Name ?
 				tmpVerif.setSubject(tmpX509Name.toString());
 				tmpVerif.setModified(!pk.verify());
-				// TODO revocation list and date to which should be verified?
-				tmpVerif.setFails(PdfPKCS7.verifyCertificates(pkc, kall, null, tmpVerif.getDate()));
+				tmpVerif.setOcspPresent(pk.getOcsp() != null);
+				tmpVerif.setOcspValid(pk.isRevocationValid());
+				tmpVerif.setFails(PdfPKCS7.verifyCertificates(pkc, kall, pk.getCRLs(), tmpVerif.getDate()));
 				tmpResult.addVerification(tmpVerif);
 			}
 		} catch (Exception e) {

@@ -1,3 +1,6 @@
+2011-03-28 Josef Cacek
+  * Verifier updates suggested in http://sourceforge.net/projects/jsignpdf/forums/forum/782217/topic/4432329
+
 2011-03-13 Josef Cacek
   * Java Runtime Environment update (6u24)
 
