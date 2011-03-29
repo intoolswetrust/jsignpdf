@@ -161,6 +161,7 @@ public class SignerOptionsFromCmdLine extends BasicSignerOptions {
 			setImgPath(line.getOptionValue(ARG_IMG_PATH));
 		if (line.hasOption(ARG_BG_PATH))
 			setBgImgPath(line.getOptionValue(ARG_BG_PATH));
+		setAcro6Layers(!line.hasOption(ARG_DISABLE_ACRO6LAYERS));
 
 		// TSA & OCSP
 		if (line.hasOption(ARG_TSA_URL)) {
@@ -313,6 +314,8 @@ public class SignerOptionsFromCmdLine extends BasicSignerOptions {
 				.withArgName("file").create());
 		OPTS.addOption(OptionBuilder.withDescription(res.get("hlp.bgScale")).withLongOpt(ARG_BG_SCALE).hasArg()
 				.withType(Number.class).withArgName("scale").create());
+		OPTS.addOption(OptionBuilder.withDescription(res.get("hlp.disableAcro6Layers")).withLongOpt(
+				ARG_DISABLE_ACRO6LAYERS).create());
 
 		OPTS.addOption(OptionBuilder.withDescription(res.get("hlp.renderMode", getEnumValues(RenderMode.values())))
 				.withLongOpt(ARG_RENDER_MODE).hasArg().withArgName("mode").create());

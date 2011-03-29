@@ -147,8 +147,8 @@ public class SignerLogic implements Runnable {
 			if (options.isVisible()) {
 				// visible signature is enabled
 				options.log("console.configureVisible");
-				options.log("console.setAcro6Layers");
-				sap.setAcro6Layers(true);
+				options.log("console.setAcro6Layers", Boolean.toString(options.isAcro6Layers()));
+				sap.setAcro6Layers(options.isAcro6Layers());
 
 				final String tmpImgPath = options.getImgPath();
 				if (tmpImgPath != null) {
@@ -199,9 +199,15 @@ public class SignerLogic implements Runnable {
 
 			options.log("console.processing");
 			final PdfSignature dic = new PdfSignature(PdfName.ADOBE_PPKLITE, new PdfName("adbe.pkcs7.detached"));
-			dic.setReason(sap.getReason());
-			dic.setLocation(sap.getLocation());
-			dic.setContact(sap.getContact());
+			if (!StringUtils.isEmpty(options.getReason())) {
+				dic.setReason(sap.getReason());
+			}
+			if (!StringUtils.isEmpty(options.getLocation())) {
+				dic.setLocation(sap.getLocation());
+			}
+			if (!StringUtils.isEmpty(options.getContact())) {
+				dic.setContact(sap.getContact());
+			}
 			dic.setDate(new PdfDate(sap.getSignDate()));
 			sap.setCryptoDictionary(dic);
 

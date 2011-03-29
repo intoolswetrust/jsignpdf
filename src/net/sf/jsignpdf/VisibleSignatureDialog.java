@@ -133,6 +133,7 @@ public class VisibleSignatureDialog extends javax.swing.JDialog {
 		setLabelAndMnemonic(btnPreview, "gui.vs.preview.button");
 
 		setLabelAndMnemonic(lblSettings, "gui.vs.settings.label");
+		setLabelAndMnemonic(chkbAcro6Layers, "gui.vs.acro6layers.checkbox");
 		setLabelAndMnemonic(lblDisplayMode, "gui.vs.renderMode.label");
 		setLabelAndMnemonic(lblL2Text, "gui.vs.l2Text.label");
 		setLabelAndMnemonic(lblL2TextFontSize, "gui.vs.l2TextFontSize.label");
@@ -175,6 +176,7 @@ public class VisibleSignatureDialog extends javax.swing.JDialog {
 		chkbL4TextDefault.setSelected(options.getL4Text() == null);
 		tfImgPath.setText(options.getImgPath());
 		tfBgImgPath.setText(options.getBgImgPath());
+		chkbAcro6Layers.setSelected(options.isAcro6Layers());
 
 		// set description fields enabled/disabled
 		chkbL2TextDefaultActionPerformed(null);
@@ -197,6 +199,7 @@ public class VisibleSignatureDialog extends javax.swing.JDialog {
 		options.setL4Text(chkbL4TextDefault.isSelected() ? null : StringUtils.toNotNull(tfL4Text.getText()));
 		options.setImgPath(tfImgPath.getText());
 		options.setBgImgPath(tfBgImgPath.getText());
+		options.setAcro6Layers(chkbAcro6Layers.isSelected());
 
 		// if there are fixed values update them in the form;
 		updateFromOptions();
@@ -315,6 +318,7 @@ public class VisibleSignatureDialog extends javax.swing.JDialog {
 		btnPreview = new javax.swing.JButton();
 		jScrollPane1 = new javax.swing.JScrollPane();
 		taL2Text = new javax.swing.JTextArea();
+		chkbAcro6Layers = new javax.swing.JCheckBox();
 
 		previewDialog.setModal(true);
 
@@ -527,8 +531,7 @@ public class VisibleSignatureDialog extends javax.swing.JDialog {
 		gridBagConstraints.gridx = 2;
 		gridBagConstraints.gridy = 8;
 		gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-		gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTH;
-		gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
+		gridBagConstraints.insets = new java.awt.Insets(0, 2, 0, 2);
 		getContentPane().add(chkbL2TextDefault, gridBagConstraints);
 
 		lblL4Text.setLabelFor(tfL4Text);
@@ -714,17 +717,16 @@ public class VisibleSignatureDialog extends javax.swing.JDialog {
 
 		btnPreview.setIcon(new javax.swing.ImageIcon(getClass().getResource("/net/sf/jsignpdf/preview16.png"))); // NOI18N
 		btnPreview.setText("Preview");
-		btnPreview.setHorizontalAlignment(javax.swing.SwingConstants.LEADING);
 		btnPreview.addActionListener(new java.awt.event.ActionListener() {
 			public void actionPerformed(java.awt.event.ActionEvent evt) {
 				btnPreviewActionPerformed(evt);
 			}
 		});
 		gridBagConstraints = new java.awt.GridBagConstraints();
-		gridBagConstraints.gridx = 2;
-		gridBagConstraints.gridy = 4;
+		gridBagConstraints.gridx = 1;
+		gridBagConstraints.gridy = 0;
 		gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-		gridBagConstraints.insets = new java.awt.Insets(0, 2, 0, 2);
+		gridBagConstraints.insets = new java.awt.Insets(2, 5, 2, 5);
 		getContentPane().add(btnPreview, gridBagConstraints);
 
 		jScrollPane1.setVerticalScrollBarPolicy(javax.swing.ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
@@ -741,8 +743,29 @@ public class VisibleSignatureDialog extends javax.swing.JDialog {
 		gridBagConstraints.insets = new java.awt.Insets(2, 5, 2, 5);
 		getContentPane().add(jScrollPane1, gridBagConstraints);
 
+		chkbAcro6Layers.setSelected(true);
+		chkbAcro6Layers.setText("Acrobat 6 layer mode");
+		chkbAcro6Layers.setBorder(javax.swing.BorderFactory.createEmptyBorder(0, 0, 0, 0));
+		chkbAcro6Layers.setMargin(new java.awt.Insets(0, 0, 0, 0));
+		chkbAcro6Layers.addActionListener(new java.awt.event.ActionListener() {
+			public void actionPerformed(java.awt.event.ActionEvent evt) {
+				chkbAcro6LayersActionPerformed(evt);
+			}
+		});
+		gridBagConstraints = new java.awt.GridBagConstraints();
+		gridBagConstraints.gridx = 2;
+		gridBagConstraints.gridy = 7;
+		gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+		gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTH;
+		gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
+		getContentPane().add(chkbAcro6Layers, gridBagConstraints);
+
 		pack();
 	}// </editor-fold>//GEN-END:initComponents
+
+	private void chkbAcro6LayersActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_chkbAcro6LayersActionPerformed
+		// TODO add your handling code here:
+	}//GEN-LAST:event_chkbAcro6LayersActionPerformed
 
 	private void btnPreviousActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_btnPreviousActionPerformed
 		tfPage.setText(String.valueOf(ConvertUtils.toInt(tfPage.getText(), 2) - 1));
@@ -837,6 +860,7 @@ public class VisibleSignatureDialog extends javax.swing.JDialog {
 	private javax.swing.JButton btnPreviewClose;
 	private javax.swing.JButton btnPrevious;
 	private javax.swing.JComboBox cbDisplayMode;
+	private javax.swing.JCheckBox chkbAcro6Layers;
 	private javax.swing.JCheckBox chkbL2TextDefault;
 	private javax.swing.JCheckBox chkbL4TextDefault;
 	private javax.swing.JPanel jPanel1;

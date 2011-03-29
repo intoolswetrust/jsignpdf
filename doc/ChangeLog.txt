@@ -1,3 +1,7 @@
+2011-03-29 Josef Cacek
+  * Added option which allows to disable Acrobat 6 layer mode (in visible signature settings) tracker#3250105  
+  * Font size setting applied also for Display mode "Signature name and description" (in visible signature settings) tracker#3201238  
+
 2011-03-28 Josef Cacek
   * Verifier updates suggested in http://sourceforge.net/projects/jsignpdf/forums/forum/782217/topic/4432329
 

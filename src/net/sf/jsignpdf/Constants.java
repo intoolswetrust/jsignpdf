@@ -94,6 +94,7 @@ public class Constants {
 	public static final String PROPERTY_VISIBLE_L4TEXT = "visibleSignature.l4text";
 	public static final String PROPERTY_VISIBLE_IMG = "visibleSignature.img";
 	public static final String PROPERTY_VISIBLE_BGIMG = "visibleSignature.bgImg";
+	public static final String PROPERTY_VISIBLE_ACRO6LAYERS = "visibleSignature.acro6layers";
 
 	public static final String PROPERTY_TSA_ENABLED = "tsa.enabled";
 	public static final String PROPERTY_TSA_URL = "tsa.url";
@@ -147,6 +148,7 @@ public class Constants {
 	public static final float DEFVAL_URY = 100f;
 	public static final float DEFVAL_L2_FONT_SIZE = 10f;
 	public static final float DEFVAL_BG_SCALE = -1f;
+	public static final boolean DEFVAL_ACRO6LAYERS = true;
 
 	public static final Proxy.Type DEFVAL_PROXY_TYPE = Proxy.Type.DIRECT;
 	public static final int DEFVAL_PROXY_PORT = 80;
@@ -255,6 +257,8 @@ public class Constants {
 	public static final String ARG_L4_TEXT_LONG = "l4-text";
 	public static final String ARG_IMG_PATH = "img-path";
 	public static final String ARG_BG_PATH = "bg-path";
+
+	public static final String ARG_DISABLE_ACRO6LAYERS = "disable-acrobat6-layer-mode";
 
 	public static final String ARG_TSA_URL = "ts";
 	public static final String ARG_TSA_URL_LONG = "tsa-server-url";

@@ -71,6 +71,7 @@ public class BasicSignerOptions {
 	private float l2TextFontSize = Constants.DEFVAL_L2_FONT_SIZE;
 	private String imgPath;
 	private String bgImgPath;
+	private boolean acro6Layers = Constants.DEFVAL_ACRO6LAYERS;
 
 	// options for timestamps (provided by external TSA)
 	private boolean timestamp;
@@ -130,6 +131,8 @@ public class BasicSignerOptions {
 		setL4Text(props.getPropNullSensitive(Constants.PROPERTY_VISIBLE_L4TEXT));
 		setImgPath(props.getProperty(Constants.PROPERTY_VISIBLE_IMG));
 		setBgImgPath(props.getProperty(Constants.PROPERTY_VISIBLE_BGIMG));
+		setAcro6Layers(!props.exists(Constants.PROPERTY_VISIBLE_ACRO6LAYERS)
+				|| props.getAsBool(Constants.PROPERTY_VISIBLE_ACRO6LAYERS));
 
 		// TSA
 		setTimestamp(props.getAsBool(Constants.PROPERTY_TSA_ENABLED));
@@ -204,6 +207,7 @@ public class BasicSignerOptions {
 		props.setPropNullSensitive(Constants.PROPERTY_VISIBLE_L4TEXT, getL4Text());
 		props.setProperty(Constants.PROPERTY_VISIBLE_IMG, getImgPath());
 		props.setProperty(Constants.PROPERTY_VISIBLE_BGIMG, getBgImgPath());
+		props.setProperty(Constants.PROPERTY_VISIBLE_ACRO6LAYERS, isAcro6Layers());
 
 		props.setProperty(Constants.PROPERTY_TSA_ENABLED, isTimestamp());
 		props.setProperty(Constants.PROPERTY_TSA_URL, getTsaUrl());
@@ -700,6 +704,21 @@ public class BasicSignerOptions {
 	 */
 	public void setL2TextFontSize(float textFontSize) {
 		l2TextFontSize = textFontSize;
+	}
+
+	/**
+	 * @return the acro6Layers
+	 */
+	public boolean isAcro6Layers() {
+		return acro6Layers;
+	}
+
+	/**
+	 * @param acro6Layers
+	 *            the acro6Layers to set
+	 */
+	public void setAcro6Layers(boolean acro6Layers) {
+		this.acro6Layers = acro6Layers;
 	}
 
 	/**
