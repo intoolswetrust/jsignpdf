@@ -4,6 +4,7 @@
   * Font size setting applied also for "Signature name and description" display mode as a maximal allowed size 
     - i.e. it can be generated smaller in the result tracker#3201238
   * Added chapter Advanced application configuration into the documentation (JSignPdf Quick Start Guide)  
+  * Visually separate the Append signature checkbox (it's not related to certification level)  
 
 2011-03-28 Josef Cacek
   * Verifier updates suggested in http://sourceforge.net/projects/jsignpdf/forums/forum/782217/topic/4432329
