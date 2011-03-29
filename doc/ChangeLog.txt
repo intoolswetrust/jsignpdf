@@ -1,4 +1,5 @@
 2011-03-29 Josef Cacek
+  * Support for SunPKCS11 security provider registration at during application startup (additional configuration in conf.properties)  
   * Added option which allows to disable Acrobat 6 layer mode (in visible signature settings) tracker#3250105  
   * Font size setting applied also for "Signature name and description" display mode as a maximal allowed size 
     - i.e. it can be generated smaller in the result tracker#3201238  

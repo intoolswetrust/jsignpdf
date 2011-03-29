@@ -1,16 +1,16 @@
 package net.sf.jsignpdf;
 
-import static net.sf.jsignpdf.Constants.EXIT_CODE_NO_COMMAND;
-import static net.sf.jsignpdf.Constants.EXIT_CODE_PARSE_ERR;
-import static net.sf.jsignpdf.Constants.VERSION;
+import static net.sf.jsignpdf.Constants.*;
 
 import java.io.File;
 
 import javax.swing.UIManager;
 import javax.swing.WindowConstants;
 
+import net.sf.jsignpdf.utils.ConfigProvider;
 import net.sf.jsignpdf.utils.GuiUtils;
 import net.sf.jsignpdf.utils.KeyStoreUtils;
+import net.sf.jsignpdf.utils.PKCS11Utils;
 import net.sf.jsignpdf.utils.ResourceProvider;
 import net.sf.jsignpdf.utils.StringUtils;
 
@@ -38,6 +38,8 @@ public class Signer {
 	 * @param args
 	 */
 	public static void main(String[] args) {
+		PKCS11Utils.registerProvider(ConfigProvider.getInstance().getProperty("pkcs11config.path"));
+
 		if (args != null && args.length > 0) {
 			final SignerOptionsFromCmdLine tmpOpts = new SignerOptionsFromCmdLine();
 			try {
