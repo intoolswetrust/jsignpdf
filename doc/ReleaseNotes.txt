@@ -1,3 +1,12 @@
+Version 1.1.9 test (1.2.0 beta)
+-------------
+  * Support for PKCS11 initialization (additional configuration in conf.properties)  
+  * Verifier improvements
+  * Added option to control which layers will be generated in visible signature (Acrobat 6 layer mode)
+  * Font size setting applied also for "Signature name and description" display mode as a maximal allowed size 
+  * Java Runtime Environment update (6u24)
+  * setting default OCSP server URL
+
 Version 1.1.1
 -------------
   * checking known critical extensions is disabled by default in conf.properties
