@@ -1,4 +1,4 @@
-2011-03-30 Josef Cacek
+2011-03-30 Josef Cacek (1.1.9 test)
   * Verifier doesn't use a given keystores directly, it creates in-memory keystore now
   * Verifier validates the TSA certificates too
   
