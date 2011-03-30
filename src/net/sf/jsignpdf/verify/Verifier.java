@@ -21,8 +21,8 @@ import org.apache.commons.cli.PosixParser;
  * 
  * @author Josef Cacek
  * @author $Author: kwart $
- * @version $Revision: 1.4 $
- * @created $Date: 2010/06/27 15:56:43 $
+ * @version $Revision: 1.5 $
+ * @created $Date: 2011/03/30 20:59:40 $
  */
 public class Verifier {
 
@@ -78,10 +78,11 @@ public class Verifier {
 		if (line.hasOption("h") || args == null || args.length == 0) {
 			// automatically generate the help statement
 			HelpFormatter formatter = new HelpFormatter();
-			// formatter.printHelp(70,
-			// "java -jar verify.jar [-c <certificates>] [-h] [-v] <PDF_file(s)>",
 			// "//TODO header", options, "//TODO footer");
-			formatter.printHelp(70, "java -jar verify.jar ", "//TODO header", options, "//TODO footer", true);
+			formatter
+					.printHelp(70, "java -jar Verifier.jar [file1.pdf [file2.pdf ...]]",
+							"JSignpdf Verifier is a command line tool for verifying signed PDF documents.", options,
+							null, true);
 		} else if (line.hasOption("lk")) {
 			// list keystores
 			for (String tmpKsType : KeyStoreUtils.getKeyStores()) {

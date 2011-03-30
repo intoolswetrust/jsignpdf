@@ -1,3 +1,7 @@
+2011-03-30 Josef Cacek
+  * Verifier doesn't use a given keystores directly, it creates in-memory keystore now
+  * Verifier validates the TSA certificates too
+  
 2011-03-29 Josef Cacek
   * Support for SunPKCS11 security provider registration at during application startup (additional configuration in conf.properties)  
   * Added option which allows to disable Acrobat 6 layer mode (in visible signature settings) tracker#3250105  

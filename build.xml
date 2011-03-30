@@ -171,6 +171,16 @@
 			</manifest>
 			<fileset dir="${bin.dir}"/>
 		</jar>
+
+		<jar destfile="${dist.dir}/${verifier.filename}.jar">
+			<manifest>
+				<attribute name="Main-Class" value="net.sf.jsignpdf.verify.Verifier"/>
+				<attribute name="Class-Path" value="${jsignpdf.filename}.jar" />
+				<attribute name="Implementation-Vendor" value="Josef Cacek"/>
+				<attribute name="Implementation-Title" value="JSignPdf Verifier"/>
+				<attribute name="Implementation-Version" value="${jsignpdf.version} ${build.timestamp}"/>
+			</manifest>
+		</jar>
 		
 		<jar destfile="${dist.dir}/${installcert.filename}.jar">
 			<manifest>
@@ -253,12 +263,9 @@
 		<copy file="unsorted/template.l4j.ini" tofile="${dist.dir}/JSignPdfC.l4j.ini"/>
 
 		<launch4j>
-			<config headerType="console" outfile="${dist.dir}/Verify.exe"
-					dontWrapJar="true" jarPath="${jsignpdf.filename}.jar"
+			<config headerType="console" outfile="${dist.dir}/Verifier.exe"
+					dontWrapJar="true" jarPath="${verifier.filename}.jar"
 					icon="doc/icon/icons.ico">
-				<classPath mainClass="net.sf.jsignpdf.verify.Verifier">
-					 <cp>${dist.dir}/lib/*.jar</cp>
-				</classPath>
 				<jre path="jre"/>
 				<versionInfo fileVersion="${jsignpdf.version}.0"
 									txtFileVersion="JSignPdf signature verifier v. ${jsignpdf.version}"
@@ -268,10 +275,10 @@
 									txtProductVersion="Verifies digital signatures in PDF files"
 									productName="JSignPdf verifier"
 									internalName="JSignPdf verifier"
-									originalFilename="Verify.exe" />
+									originalFilename="Verifier.exe" />
 			</config>
 		</launch4j>
-		<copy file="unsorted/template.l4j.ini" tofile="${dist.dir}/Verify.l4j.ini"/>
+		<copy file="unsorted/template.l4j.ini" tofile="${dist.dir}/Verifier.l4j.ini"/>
 		
 
 		<launch4j>

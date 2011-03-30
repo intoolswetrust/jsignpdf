@@ -3,15 +3,26 @@ package net.sf.jsignpdf.verify;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.math.BigInteger;
 import java.security.KeyStore;
+import java.security.cert.CertStore;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
-import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Iterator;
+import java.util.List;
+
+import javax.security.auth.x500.X500Principal;
 
 import net.sf.jsignpdf.Constants;
 import net.sf.jsignpdf.utils.KeyStoreUtils;
+
+import org.bouncycastle.cms.SignerId;
+import org.bouncycastle.cms.SignerInformationVerifier;
+import org.bouncycastle.cms.jcajce.JcaSimpleSignerInfoVerifierBuilder;
+import org.bouncycastle.tsp.TSPException;
+import org.bouncycastle.tsp.TimeStampToken;
 
 import com.lowagie.text.pdf.AcroFields;
 import com.lowagie.text.pdf.PdfPKCS7;
@@ -26,8 +37,8 @@ import com.lowagie.text.pdf.PdfPKCS7.X509Name;
  * 
  * @author Josef Cacek
  * @author $Author: kwart $
- * @version $Revision: 1.7 $
- * @created $Date: 2011/03/28 14:19:34 $
+ * @version $Revision: 1.8 $
+ * @created $Date: 2011/03/30 20:59:40 $
  */
 public class VerifierLogic {
 
@@ -69,7 +80,15 @@ public class VerifierLogic {
 	 * previously added certificates from external files are forgotten.
 	 */
 	public void reinitKeystore(String aKsType, final String aKeyStore, final String aPasswd) {
-		kall = KeyStoreUtils.loadKeyStore(aKsType, aKeyStore, aPasswd);
+		try {
+			kall = KeyStoreUtils.createKeyStore();
+		} catch (Exception e) {
+			throw new RuntimeException(e);
+		}
+		final KeyStore ksToImport = KeyStoreUtils.loadKeyStore(aKsType, aKeyStore, aPasswd);
+		if (ksToImport != null) {
+			KeyStoreUtils.copyCertificates(ksToImport, kall);
+		}
 	}
 
 	/**
@@ -88,21 +107,24 @@ public class VerifierLogic {
 			final PdfReader tmpReader = getPdfReader(aFileName, aPassword);
 
 			final AcroFields tmpAcroFields = tmpReader.getAcroFields();
-			final ArrayList<String> tmpNames = tmpAcroFields.getSignatureNames();
+			final List<String> tmpNames = tmpAcroFields.getSignatureNames();
 			tmpResult.setTotalRevisions(tmpAcroFields.getTotalRevisions());
 
-			for (String name : tmpNames) {
+			for (int i = tmpNames.size() - 1; i >= 0; i--) {
+				final String name = tmpNames.get(i);
 				final SignatureVerification tmpVerif = new SignatureVerification(name);
 				tmpVerif.setWholeDocument(tmpAcroFields.signatureCoversWholeDocument(name));
 				tmpVerif.setRevision(tmpAcroFields.getRevision(name));
 				final PdfPKCS7 pk = tmpAcroFields.verifySignature(name);
+				final TimeStampToken tst = pk.getTimeStampToken();
+				tmpVerif.setTsTokenPresent(tst != null);
+				tmpVerif.setTsTokenValidationResult(validateTimeStampToken(tst));
 				tmpVerif.setDate(pk.getTimeStampDate() != null ? pk.getTimeStampDate() : pk.getSignDate());
 				tmpVerif.setLocation(pk.getLocation());
 				tmpVerif.setReason(pk.getReason());
 				tmpVerif.setSignName(pk.getSignName());
 				final Certificate pkc[] = pk.getCertificates();
 				final X509Name tmpX509Name = PdfPKCS7.getSubjectFields(pk.getSigningCertificate());
-				// TODO read more details from X509Name ?
 				tmpVerif.setSubject(tmpX509Name.toString());
 				tmpVerif.setModified(!pk.verify());
 				tmpVerif.setOcspPresent(pk.getOcsp() != null);
@@ -170,4 +192,42 @@ public class VerifierLogic {
 	public KeyStore getKeyStore() {
 		return kall;
 	}
+
+	public Exception validateTimeStampToken(TimeStampToken token) {
+		if (token == null) {
+			return null;
+		}
+		try {
+			SignerId signer = token.getSID();
+
+			X509Certificate certificate = null;
+			X500Principal sign_cert_issuer = signer.getIssuer();
+			BigInteger sign_cert_serial = signer.getSerialNumber();
+
+			CertStore store = token.getCertificatesAndCRLs("Collection", "BC");
+
+			// Iterate CertStore to find a signing certificate
+			Collection<? extends Certificate> certs = store.getCertificates(null);
+			Iterator<? extends Certificate> iter = certs.iterator();
+			while (iter.hasNext()) {
+				X509Certificate cert = (X509Certificate) iter.next();
+				if (cert.getIssuerX500Principal().equals(sign_cert_issuer)
+						&& cert.getSerialNumber().equals(sign_cert_serial)) {
+					certificate = cert;
+					break;
+				}
+			}
+
+			if (certificate == null) {
+				throw new TSPException("Missing signing certificate for TSA.");
+			}
+
+			SignerInformationVerifier verifier = new JcaSimpleSignerInfoVerifierBuilder().build(certificate);
+			token.validate(verifier);
+		} catch (Exception e) {
+			return e;
+		}
+		return null;
+	}
+
 }

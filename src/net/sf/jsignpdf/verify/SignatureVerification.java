@@ -8,8 +8,8 @@ import java.util.Calendar;
  * 
  * @author Josef Cacek
  * @author $Author: kwart $
- * @version $Revision: 1.4 $
- * @created $Date: 2011/03/28 14:19:34 $
+ * @version $Revision: 1.5 $
+ * @created $Date: 2011/03/30 20:59:40 $
  */
 public class SignatureVerification {
 
@@ -22,6 +22,8 @@ public class SignatureVerification {
 	private boolean modified;
 	private boolean ocspPresent;
 	private boolean ocspValid;
+	private boolean tsTokenPresent;
+	private Exception tsTokenValidationResult;
 	private Object[] fails;
 	private String reason;
 	private String location;
@@ -139,11 +141,43 @@ public class SignatureVerification {
 		this.signName = signName;
 	}
 
+	/**
+	 * @return the tsTokenPresent
+	 */
+	public boolean isTsTokenPresent() {
+		return tsTokenPresent;
+	}
+
+	/**
+	 * @param tsTokenPresent
+	 *            the tsTokenPresent to set
+	 */
+	public void setTsTokenPresent(boolean tsTokenPresent) {
+		this.tsTokenPresent = tsTokenPresent;
+	}
+
+	/**
+	 * @return the tsTokenValidationResult
+	 */
+	public Exception getTsTokenValidationResult() {
+		return tsTokenValidationResult;
+	}
+
+	/**
+	 * @param tsTokenValidationResult
+	 *            the tsTokenValidationResult to set
+	 */
+	public void setTsTokenValidationResult(Exception tsTokenValidationResult) {
+		this.tsTokenValidationResult = tsTokenValidationResult;
+	}
+
 	public String toString() {
 		return "Signature verification [" + "\n signName=" + signName + "\n name=" + name + "\n subject=" + subject
 				+ "\n date=" + date.getTime() + "\n reason=" + reason + "\n location=" + location + "\n revision="
 				+ revision + "\n wholeDocument=" + wholeDocument + "\n modified=" + modified + "\n ocspPresent="
-				+ ocspPresent + "\n ocspValid=" + ocspValid + "\n fails="
+				+ ocspPresent + "\n ocspValid=" + ocspValid + "\n timeStampTokenPresent=" + tsTokenPresent
+				+ "\n timeStampTokenValidationFail="
+				+ (tsTokenValidationResult == null ? "no" : tsTokenValidationResult.getMessage()) + "\n fails="
 				+ (fails == null ? "no" : Arrays.asList(fails)) + "\n]";
 	}
 

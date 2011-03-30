@@ -2,6 +2,7 @@ package net.sf.jsignpdf.utils;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Field;
 import java.security.KeyStore;
@@ -12,6 +13,7 @@ import java.security.PrivateKey;
 import java.security.Security;
 import java.security.UnrecoverableKeyException;
 import java.security.cert.Certificate;
+import java.security.cert.CertificateException;
 import java.security.cert.CertificateExpiredException;
 import java.security.cert.CertificateNotYetValidException;
 import java.security.cert.X509Certificate;
@@ -252,6 +254,46 @@ public class KeyStoreUtils {
 			tmpPass = aKsPasswd.toCharArray();
 		}
 		return loadKeyStore(aKsType, aKsFile, tmpPass);
+	}
+
+	/**
+	 * Creates empty JKS keystore..
+	 * 
+	 * @return new JKS keystore
+	 * @throws KeyStoreException
+	 * @throws IOException
+	 * @throws CertificateException
+	 * @throws NoSuchAlgorithmException
+	 */
+	public static KeyStore createKeyStore() throws KeyStoreException, NoSuchAlgorithmException, CertificateException,
+			IOException {
+		final KeyStore newKeyStore = KeyStore.getInstance("JKS");
+		newKeyStore.load(null, null);
+		return newKeyStore;
+	}
+
+	/**
+	 * Copies certificates from one keystore to another (both keystore has to be
+	 * initialized.
+	 * 
+	 * @param fromKeyStore
+	 * @param toKeyStore
+	 * @return
+	 */
+	public static boolean copyCertificates(KeyStore fromKeyStore, KeyStore toKeyStore) {
+		if (fromKeyStore == null || toKeyStore == null) {
+			return false;
+		}
+
+		try {
+			for (String alias : getCertAliases(fromKeyStore)) {
+				toKeyStore.setCertificateEntry(alias, fromKeyStore.getCertificate(alias));
+			}
+			return true;
+		} catch (KeyStoreException e) {
+			e.printStackTrace();
+		}
+		return false;
 	}
 
 	/**

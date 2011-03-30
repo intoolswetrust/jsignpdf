@@ -5,9 +5,6 @@
 	<classpathentry kind="src" path="src_test"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="lib" path="lib/commons-cli-1.2.jar"/>
-	<classpathentry kind="lib" path="lib/bcprov-jdk15-144.jar"/>
-	<classpathentry kind="lib" path="lib/bctsp-jdk15-144.jar"/>
-	<classpathentry kind="lib" path="lib/bcmail-jdk15-144.jar"/>
 	<classpathentry kind="lib" path="lib/PDFRenderer.jar"/>
 	<classpathentry kind="lib" path="lib/commons-io-1.4.jar"/>
 	<classpathentry kind="lib" path="lib/commons-logging-1.1.1.jar"/>
@@ -24,5 +21,8 @@
 	<classpathentry kind="lib" path="unsorted/ooo.libs/java_uno.jar"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/jsignpdf-itxt"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.junit.JUNIT_CONTAINER/4"/>
+	<classpathentry kind="lib" path="lib/bcmail-jdk15-146.jar"/>
+	<classpathentry kind="lib" path="lib/bcprov-jdk15-146.jar"/>
+	<classpathentry kind="lib" path="lib/bctsp-jdk15-146.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
