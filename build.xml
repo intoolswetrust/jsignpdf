@@ -106,7 +106,7 @@
 		</copy>
 		
 		<!-- SF.net handles README automatically (replacement for the old Release Notes) -->
-		<copy file="doc/ReleaseNotes.txt" tofile="${dist.dir}/README.txt"/>
+		<copy file="doc/ReleaseNotes.txt" tofile="${output.dir}/README.txt"/>
 
 		<copy todir="${dist.doc.dir}">
 			<fileset dir="licenses">
