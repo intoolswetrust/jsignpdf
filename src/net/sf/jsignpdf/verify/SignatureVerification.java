@@ -3,13 +3,15 @@ package net.sf.jsignpdf.verify;
 import java.util.Arrays;
 import java.util.Calendar;
 
+import net.sf.jsignpdf.types.CertificationLevel;
+
 /**
  * This class represents a result of a single signature verification.
  * 
  * @author Josef Cacek
  * @author $Author: kwart $
- * @version $Revision: 1.5 $
- * @created $Date: 2011/03/30 20:59:40 $
+ * @version $Revision: 1.6 $
+ * @created $Date: 2011/03/31 10:45:48 $
  */
 public class SignatureVerification {
 
@@ -27,6 +29,8 @@ public class SignatureVerification {
 	private Object[] fails;
 	private String reason;
 	private String location;
+	private int certLevelCode;
+	private boolean certificateValid;
 
 	/**
 	 * Default constructore
@@ -171,10 +175,51 @@ public class SignatureVerification {
 		this.tsTokenValidationResult = tsTokenValidationResult;
 	}
 
+	/**
+	 * @return the certLevelCode
+	 */
+	public int getCertLevelCode() {
+		return certLevelCode;
+	}
+
+	/**
+	 * @param certLevelCode
+	 *            the certLevelCode to set
+	 */
+	public void setCertLevelCode(int certLevelCode) {
+		this.certLevelCode = certLevelCode;
+	}
+
+	/**
+	 * Returns instance of {@link CertificationLevel} for the property
+	 * certLevelCode.
+	 * 
+	 * @return
+	 */
+	public CertificationLevel getCertificationLevel() {
+		return CertificationLevel.findCertificationLevel(certLevelCode);
+	}
+
+	/**
+	 * @return the certificateValid
+	 */
+	public boolean isCertificateValid() {
+		return certificateValid;
+	}
+
+	/**
+	 * @param certificateValid
+	 *            the certificateValid to set
+	 */
+	public void setCertificateValid(boolean certificateValid) {
+		this.certificateValid = certificateValid;
+	}
+
 	public String toString() {
 		return "Signature verification [" + "\n signName=" + signName + "\n name=" + name + "\n subject=" + subject
 				+ "\n date=" + date.getTime() + "\n reason=" + reason + "\n location=" + location + "\n revision="
-				+ revision + "\n wholeDocument=" + wholeDocument + "\n modified=" + modified + "\n ocspPresent="
+				+ revision + "\n wholeDocument=" + wholeDocument + "\n modified=" + modified + "\n certificationLevel="
+				+ getCertificationLevel().name() + "\n certificateValid=" + certificateValid + "\n ocspPresent="
 				+ ocspPresent + "\n ocspValid=" + ocspValid + "\n timeStampTokenPresent=" + tsTokenPresent
 				+ "\n timeStampTokenValidationFail="
 				+ (tsTokenValidationResult == null ? "no" : tsTokenValidationResult.getMessage()) + "\n fails="

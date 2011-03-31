@@ -16,6 +16,7 @@ import java.util.List;
 import javax.security.auth.x500.X500Principal;
 
 import net.sf.jsignpdf.Constants;
+import net.sf.jsignpdf.types.CertificationLevel;
 import net.sf.jsignpdf.utils.KeyStoreUtils;
 
 import org.bouncycastle.cms.SignerId;
@@ -37,8 +38,8 @@ import com.lowagie.text.pdf.PdfPKCS7.X509Name;
  * 
  * @author Josef Cacek
  * @author $Author: kwart $
- * @version $Revision: 1.8 $
- * @created $Date: 2011/03/30 20:59:40 $
+ * @version $Revision: 1.9 $
+ * @created $Date: 2011/03/31 10:45:48 $
  */
 public class VerifierLogic {
 
@@ -103,6 +104,7 @@ public class VerifierLogic {
 	@SuppressWarnings("unchecked")
 	public VerificationResult verify(final String aFileName, byte[] aPassword) {
 		final VerificationResult tmpResult = new VerificationResult();
+		boolean modified = false;
 		try {
 			final PdfReader tmpReader = getPdfReader(aFileName, aPassword);
 
@@ -130,7 +132,20 @@ public class VerifierLogic {
 				tmpVerif.setOcspPresent(pk.getOcsp() != null);
 				tmpVerif.setOcspValid(pk.isRevocationValid());
 				tmpVerif.setFails(PdfPKCS7.verifyCertificates(pkc, kall, pk.getCRLs(), tmpVerif.getDate()));
+				final InputStream revision = tmpAcroFields.extractRevision(name);
+				try {
+					final PdfReader revisionReader = new PdfReader(revision);
+					tmpVerif.setCertLevelCode(revisionReader.getCertificationLevel());
+				} finally {
+					if (revision != null) {
+						revision.close();
+					}
+				}
 				tmpResult.addVerification(tmpVerif);
+				//The certificate is broken
+				tmpVerif.setCertificateValid(tmpVerif.getCertificationLevel() == CertificationLevel.NOT_CERTIFIED
+						|| !modified);
+				modified = true;
 			}
 		} catch (Exception e) {
 			tmpResult.setException(e);
