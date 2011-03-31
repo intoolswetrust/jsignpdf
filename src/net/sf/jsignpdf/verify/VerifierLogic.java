@@ -38,8 +38,8 @@ import com.lowagie.text.pdf.PdfPKCS7.X509Name;
  * 
  * @author Josef Cacek
  * @author $Author: kwart $
- * @version $Revision: 1.9 $
- * @created $Date: 2011/03/31 10:45:48 $
+ * @version $Revision: 1.10 $
+ * @created $Date: 2011/03/31 10:59:17 $
  */
 public class VerifierLogic {
 
@@ -104,7 +104,6 @@ public class VerifierLogic {
 	@SuppressWarnings("unchecked")
 	public VerificationResult verify(final String aFileName, byte[] aPassword) {
 		final VerificationResult tmpResult = new VerificationResult();
-		boolean modified = false;
 		try {
 			final PdfReader tmpReader = getPdfReader(aFileName, aPassword);
 
@@ -112,6 +111,7 @@ public class VerifierLogic {
 			final List<String> tmpNames = tmpAcroFields.getSignatureNames();
 			tmpResult.setTotalRevisions(tmpAcroFields.getTotalRevisions());
 
+			boolean modified = false;
 			for (int i = tmpNames.size() - 1; i >= 0; i--) {
 				final String name = tmpNames.get(i);
 				final SignatureVerification tmpVerif = new SignatureVerification(name);
@@ -129,6 +129,7 @@ public class VerifierLogic {
 				final X509Name tmpX509Name = PdfPKCS7.getSubjectFields(pk.getSigningCertificate());
 				tmpVerif.setSubject(tmpX509Name.toString());
 				tmpVerif.setModified(!pk.verify());
+				modified = modified || tmpVerif.isModified();
 				tmpVerif.setOcspPresent(pk.getOcsp() != null);
 				tmpVerif.setOcspValid(pk.isRevocationValid());
 				tmpVerif.setFails(PdfPKCS7.verifyCertificates(pkc, kall, pk.getCRLs(), tmpVerif.getDate()));
