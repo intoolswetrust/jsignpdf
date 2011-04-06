@@ -45,8 +45,8 @@ import com.lowagie.text.pdf.PdfSignatureAppearance;
  * 
  * @author Josef Cacek
  * @author Aleksandar Stojsavljevic
- * @version $Revision: 1.14 $
- * @created $Date: 2011/04/06 08:37:38 $
+ * @version $Revision: 1.15 $
+ * @created $Date: 2011/04/06 11:10:08 $
  */
 public class VerifierLogic {
 
@@ -267,11 +267,12 @@ public class VerifierLogic {
 			}
 
 			// check TS token's certificate against keystore
-			String certificateAlias = kall.getCertificateAlias(certificate);
-			if (certificateAlias != null) {
-				// this means that signing certificate is directly trusted
-				// we'll not check this certificate with PdfPKCS7.verifyCertificate(certificate, null, null)
-			} else if (certs.size() >= 2) {
+			if (certs.size() == 1) {
+				boolean verifyTimestampCertificates = PdfPKCS7.verifyTimestampCertificates(token, kall, null);
+				if (!verifyTimestampCertificates) {
+					throw new Exception("Certificate can't be verified agains keystore.");
+				}
+			} else {
 				int certSize = certs.size();
 				Certificate[] array = certs.toArray(new Certificate[certSize]);
 				Certificate[] certArray = new Certificate[certSize];
@@ -279,12 +280,11 @@ public class VerifierLogic {
 				for (int i = 0; i < certSize; i++) {
 					certArray[i] = array[certSize - 1 - i];
 				}
+				// token.validate(SignerInformationVerifier) will check if certificate has been valid at the time the timestamp was created
 				Object[] verifyCertificates = PdfPKCS7.verifyCertificates(certArray, kall, null, null);
 				if (verifyCertificates != null) {
 					throw new Exception("Certificate can't be verified agains keystore.");
 				}
-			} else {
-				throw new Exception("Certificate can't be verified agains keystore.");
 			}
 
 			SignerInformationVerifier verifier = new JcaSimpleSignerInfoVerifierBuilder().build(certificate);
@@ -313,7 +313,7 @@ public class VerifierLogic {
 			OcspClientBouncyCastle ocspClient = new OcspClientBouncyCastle((X509Certificate) pkc[2],
 					(X509Certificate) pkc[1], url);
 			// TODO implement proxy support
-			// ocspClient.setProxy(new Proxy(getProxyType(), new InetSocketAddress(getProxyHost(), getProxyPort()));)
+//			ocspClient.setProxy(new Proxy(Proxy.Type.HTTP, new InetSocketAddress("127.0.0.1", 8888)));
 
 			byte[] encoded = ocspClient.getEncoded();
 
