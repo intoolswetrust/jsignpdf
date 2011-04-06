@@ -20,13 +20,18 @@ import javax.security.auth.x500.X500Principal;
 import net.sf.jsignpdf.Constants;
 import net.sf.jsignpdf.utils.KeyStoreUtils;
 
+import org.bouncycastle.asn1.ASN1InputStream;
+import org.bouncycastle.asn1.ocsp.BasicOCSPResponse;
 import org.bouncycastle.cms.SignerId;
 import org.bouncycastle.cms.SignerInformationVerifier;
 import org.bouncycastle.cms.jcajce.JcaSimpleSignerInfoVerifierBuilder;
+import org.bouncycastle.ocsp.CertificateID;
+import org.bouncycastle.ocsp.SingleResp;
 import org.bouncycastle.tsp.TSPException;
 import org.bouncycastle.tsp.TimeStampToken;
 
 import com.lowagie.text.pdf.AcroFields;
+import com.lowagie.text.pdf.OcspClientBouncyCastle;
 import com.lowagie.text.pdf.PdfPKCS7;
 import com.lowagie.text.pdf.PdfPKCS7.X509Name;
 import com.lowagie.text.pdf.PdfReader;
@@ -39,9 +44,9 @@ import com.lowagie.text.pdf.PdfSignatureAppearance;
  * method.
  * 
  * @author Josef Cacek
- * @author $Author: stojsavljevic $
- * @version $Revision: 1.12 $
- * @created $Date: 2011/04/01 12:17:04 $
+ * @author Aleksandar Stojsavljevic
+ * @version $Revision: 1.13 $
+ * @created $Date: 2011/04/06 08:16:34 $
  */
 public class VerifierLogic {
 
@@ -132,7 +137,17 @@ public class VerifierLogic {
 				tmpVerif.setModified(!pk.verify());
 				tmpVerif.setOcspPresent(pk.getOcsp() != null);
 				tmpVerif.setOcspValid(pk.isRevocationValid());
+				tmpVerif.setCrlPresent(pk.getCRLs() != null && pk.getCRLs().size() > 0);
 				tmpVerif.setFails(PdfPKCS7.verifyCertificates(pkc, kall, pk.getCRLs(), tmpVerif.getDate()));
+
+				// try to get OCSP url from signing certificate 
+				String url = PdfPKCS7.getOCSPURL((X509Certificate) pk.getSigningCertificate());
+				tmpVerif.setOcspInCertPresent(url != null);
+
+				if (url != null) {
+					// OCSP url is found in signing certificate - verify certificate with that url
+					tmpVerif.setOcspInCertValid(validateCertificateOCSP(pkc, url));
+				}
 
 				String certificateAlias = kall.getCertificateAlias(pk.getSigningCertificate());
 				if (certificateAlias != null) {
@@ -234,6 +249,7 @@ public class VerifierLogic {
 			// Iterate CertStore to find a signing certificate
 			Collection<? extends Certificate> certs = store.getCertificates(null);
 			Iterator<? extends Certificate> iter = certs.iterator();
+
 			while (iter.hasNext()) {
 				X509Certificate cert = (X509Certificate) iter.next();
 				if (cert.getIssuerX500Principal().equals(sign_cert_issuer)
@@ -247,12 +263,70 @@ public class VerifierLogic {
 				throw new TSPException("Missing signing certificate for TSA.");
 			}
 
+			// check TS token's certificate against keystore
+			String certificateAlias = kall.getCertificateAlias(certificate);
+			if (certificateAlias != null) {
+				// this means that signing certificate is directly trusted
+				// we'll not check this certificate with PdfPKCS7.verifyCertificate(certificate, null, null)
+			} else if (certs.size() >= 2) {
+				int certSize = certs.size();
+				Certificate[] array = certs.toArray(new Certificate[certSize]);
+				Certificate[] certArray = new Certificate[certSize];
+				// reverse order
+				for (int i = 0; i < certSize; i++) {
+					certArray[i] = array[certSize - 1 - i];
+				}
+				Object[] verifyCertificates = PdfPKCS7.verifyCertificates(certArray, kall, null, null);
+				if (verifyCertificates != null) {
+					throw new Exception("Certificate can't be verified agains keystore.");
+				}
+			} else {
+				throw new Exception("Certificate can't be verified agains keystore.");
+			}
+
 			SignerInformationVerifier verifier = new JcaSimpleSignerInfoVerifierBuilder().build(certificate);
 			token.validate(verifier);
 		} catch (Exception e) {
 			return e;
 		}
 		return null;
+	}
+
+	/**
+	 * Validates certificate (chain) using OCSP.
+	 * 
+	 * @param pkc
+	 *            certificate chain, 3rd certificate will be validated (pkc[2])
+	 * @param url
+	 *            OCSP url for validation
+	 * @return
+	 */
+	private static boolean validateCertificateOCSP(Certificate pkc[], String url) {
+		if (pkc.length < 2) {
+			return false;
+		}
+
+		try {
+			OcspClientBouncyCastle ocspClient = new OcspClientBouncyCastle((X509Certificate) pkc[2],
+					(X509Certificate) pkc[1], url);
+			// TODO implement proxy support
+			// ocspClient.setProxy(new Proxy(getProxyType(), new InetSocketAddress(getProxyHost(), getProxyPort()));)
+
+			byte[] encoded = ocspClient.getEncoded();
+
+			ASN1InputStream inp = new ASN1InputStream(encoded);
+			BasicOCSPResponse resp = BasicOCSPResponse.getInstance(inp.readObject());
+			org.bouncycastle.ocsp.BasicOCSPResp basicResp = new org.bouncycastle.ocsp.BasicOCSPResp(resp);
+
+			SingleResp sr = basicResp.getResponses()[0];
+			CertificateID cid = sr.getCertID();
+			X509Certificate sigcer = (X509Certificate) pkc[2];
+			X509Certificate isscer = (X509Certificate) pkc[1];
+			CertificateID tis = new CertificateID(CertificateID.HASH_SHA1, isscer, sigcer.getSerialNumber());
+			return tis.equals(cid);
+		} catch (Exception e) {
+			return false;
+		}
 	}
 
 	/**
@@ -276,12 +350,12 @@ public class VerifierLogic {
 	}
 
 	/**
-	 * Gets validation code for provided <code>SignatureVerification</code>
-	 * (single revision).
+	 * Gets validation code for provided {@link SignatureVerification} (single
+	 * revision).
 	 * 
 	 * @param verification
 	 * @param isLastSignature
-	 * @return
+	 * @return validation code defined in {@link SignatureVerification}
 	 */
 	public static Integer getValidationCode(SignatureVerification verification, boolean isLastSignature) {
 		Integer code = null;
@@ -303,10 +377,15 @@ public class VerifierLogic {
 		} else if (!verification.isSignCertTrustedAndValid() && verification.getFails() != null) {
 			// WARNING: certificate is not trusted (can't be verified against keystore)
 			code = SignatureVerification.SIG_STAT_CODE_WARNING_SIGNATURE_VALIDITY_UNKNOWN;
-		} else if (!verification.isSignCertTrustedAndValid() && verification.isOcspPresent()
-				&& !verification.isOcspValid()) {
+		} else if (!verification.isSignCertTrustedAndValid()
+				&& (verification.isOcspPresent() || verification.isOcspInCertPresent()) && !verification.isOcspValid()
+				&& !verification.isOcspInCertValid()) {
 			// WARNING: OCSP validation fails
 			code = SignatureVerification.SIG_STAT_CODE_WARNING_SIGNATURE_OCSP_INVALID;
+		} else if (!verification.isSignCertTrustedAndValid() && !verification.isOcspPresent()
+				&& !verification.isOcspInCertPresent() && !verification.isCrlPresent()) {
+			// WARNING: No revocation information (CRL or OCSP) found
+			code = SignatureVerification.SIG_STAT_CODE_WARNING_NO_REVOCATION_INFO;
 		} else if (!verification.isTsTokenPresent()) {
 			// WARNING: signature date/time are from the clock on the signer's computer
 			code = SignatureVerification.SIG_STAT_CODE_WARNING_NO_TIMESTAMP_TOKEN;

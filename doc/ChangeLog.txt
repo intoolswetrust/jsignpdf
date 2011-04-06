@@ -1,3 +1,6 @@
+2011-04-06 Aleksandar Stojsavljevic
+  * Verifier: Improved verification (added checking for OCSP url inside certificate, added validation of TS server's certificate against keystore)
+
 2011-04-01 Aleksandar Stojsavljevic
   * Verifier: removed certificateValid flag from SignatureVerification class
   * Verifier: introduced more complex checking for certification validity with methods getValidationCodes(VerificationResult) and getValidationCode(SignatureVerification, boolean) 
