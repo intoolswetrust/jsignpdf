@@ -45,8 +45,8 @@ import com.lowagie.text.pdf.PdfSignatureAppearance;
  * 
  * @author Josef Cacek
  * @author Aleksandar Stojsavljevic
- * @version $Revision: 1.13 $
- * @created $Date: 2011/04/06 08:16:34 $
+ * @version $Revision: 1.14 $
+ * @created $Date: 2011/04/06 08:37:38 $
  */
 public class VerifierLogic {
 
@@ -140,13 +140,16 @@ public class VerifierLogic {
 				tmpVerif.setCrlPresent(pk.getCRLs() != null && pk.getCRLs().size() > 0);
 				tmpVerif.setFails(PdfPKCS7.verifyCertificates(pkc, kall, pk.getCRLs(), tmpVerif.getDate()));
 
-				// try to get OCSP url from signing certificate 
-				String url = PdfPKCS7.getOCSPURL((X509Certificate) pk.getSigningCertificate());
-				tmpVerif.setOcspInCertPresent(url != null);
+				// to save time - check OCSP in certificate only if document's OCSP is not present and valid
+				if (!tmpVerif.isOcspValid()) {
+					// try to get OCSP url from signing certificate 
+					String url = PdfPKCS7.getOCSPURL((X509Certificate) pk.getSigningCertificate());
+					tmpVerif.setOcspInCertPresent(url != null);
 
-				if (url != null) {
-					// OCSP url is found in signing certificate - verify certificate with that url
-					tmpVerif.setOcspInCertValid(validateCertificateOCSP(pkc, url));
+					if (url != null) {
+						// OCSP url is found in signing certificate - verify certificate with that url
+						tmpVerif.setOcspInCertValid(validateCertificateOCSP(pkc, url));
+					}
 				}
 
 				String certificateAlias = kall.getCertificateAlias(pk.getSigningCertificate());
