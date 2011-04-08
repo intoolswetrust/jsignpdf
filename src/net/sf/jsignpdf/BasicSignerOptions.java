@@ -26,6 +26,8 @@ public class BasicSignerOptions {
 	protected final JSignEncryptor encryptor = new JSignEncryptor();
 
 	private PrintWriter printWriter;
+	private String propertiesFilePath;
+
 	private String ksType;
 	private String ksFile;
 	private char[] ksPasswd;
@@ -94,6 +96,10 @@ public class BasicSignerOptions {
 	 * Loads options from PropertyProvider
 	 */
 	public void loadOptions() {
+		if (propertiesFilePath != null) {
+			props.loadProperties(propertiesFilePath);
+		}
+
 		setKsType(props.getProperty(Constants.PROPERTY_KSTYPE));
 		setAdvanced(props.getAsBool(Constants.PROPERTY_ADVANCED));
 		setKsFile(props.getProperty(Constants.PROPERTY_KEYSTORE));
@@ -239,7 +245,11 @@ public class BasicSignerOptions {
 			props.removeProperty(Constants.EPROPERTY_TSA_PWD);
 		}
 
-		props.saveDefault();
+		if (propertiesFilePath != null) {
+			props.saveProperties(propertiesFilePath);
+		} else {
+			props.saveDefault();
+		}
 	}
 
 	/**
@@ -287,6 +297,21 @@ public class BasicSignerOptions {
 
 	public void setPrintWriter(PrintWriter outWriter) {
 		this.printWriter = outWriter;
+	}
+
+	/**
+	 * @return the propertiesFilePath
+	 */
+	public String getPropertiesFilePath() {
+		return propertiesFilePath;
+	}
+
+	/**
+	 * @param propertiesFilePath
+	 *            the propertiesFilePath to set
+	 */
+	public void setPropertiesFilePath(String propertiesFilePath) {
+		this.propertiesFilePath = propertiesFilePath;
 	}
 
 	public String getKsType() {
