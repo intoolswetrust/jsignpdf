@@ -13,6 +13,8 @@ import net.sf.jsignpdf.utils.ResourceProvider;
 import net.sf.jsignpdf.utils.StringUtils;
 
 import org.bouncycastle.crypto.CryptoException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Options for PDF signer.
@@ -20,6 +22,8 @@ import org.bouncycastle.crypto.CryptoException;
  * @author Josef Cacek
  */
 public class BasicSignerOptions {
+
+	private final static Logger logger = LoggerFactory.getLogger(BasicSignerOptions.class);
 
 	protected final static ResourceProvider res = ResourceProvider.getInstance();
 	protected final PropertyProvider props = PropertyProvider.getInstance();
@@ -259,10 +263,15 @@ public class BasicSignerOptions {
 	 *            message key
 	 * @param anArgs
 	 *            message parameters
+	 * @deprecated this method should be replaced by calling SLF4J logging
 	 */
+	@Deprecated
 	public void log(final String aKey, final String... anArgs) {
+		//TODO refactor logging in JSignPdf
+		final String message = res.get(aKey, anArgs);
+		logger.info(message);
 		if (printWriter != null) {
-			printWriter.println(res.get(aKey, anArgs));
+			printWriter.println(message);
 			printWriter.flush();
 		}
 	}
