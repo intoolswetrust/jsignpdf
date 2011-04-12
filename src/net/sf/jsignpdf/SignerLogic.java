@@ -15,10 +15,14 @@ import java.util.List;
 
 import net.sf.jsignpdf.crl.CRLInfo;
 import net.sf.jsignpdf.types.HashAlgorithm;
+import net.sf.jsignpdf.types.RenderMode;
 import net.sf.jsignpdf.utils.FontUtils;
 import net.sf.jsignpdf.utils.KeyStoreUtils;
 import net.sf.jsignpdf.utils.ResourceProvider;
 import net.sf.jsignpdf.utils.StringUtils;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.lowagie.text.Font;
 import com.lowagie.text.Image;
@@ -43,6 +47,8 @@ import com.lowagie.text.pdf.TSAClientBouncyCastle;
  * @author Josef Cacek
  */
 public class SignerLogic implements Runnable {
+
+	private final static Logger logger = LoggerFactory.getLogger(SignerLogic.class);
 
 	protected final static ResourceProvider res = ResourceProvider.getInstance();
 
@@ -102,8 +108,8 @@ public class SignerLogic implements Runnable {
 			char tmpPdfVersion = '\0'; // default version - the same as input
 			if (reader.getPdfVersion() < hashAlgorithm.getPdfVersion()) {
 				tmpPdfVersion = hashAlgorithm.getPdfVersion();
-				options.log("console.updateVersion", new String[] { String.valueOf(reader.getPdfVersion()),
-						String.valueOf(tmpPdfVersion) });
+				options.log("console.updateVersion",
+						new String[] { String.valueOf(reader.getPdfVersion()), String.valueOf(tmpPdfVersion) });
 			}
 			final PdfStamper stp = PdfStamper.createSignature(reader, fout, tmpPdfVersion, null, options.isAppendX());
 			if (!options.isAppendX()) {
@@ -174,14 +180,14 @@ public class SignerLogic implements Runnable {
 					buf.append(res.get("default.l2text.signedBy")).append(" ");
 					buf.append(PdfPKCS7.getSubjectFields((X509Certificate) chain[0]).getField("CN")).append('\n');
 					final SimpleDateFormat sd = new SimpleDateFormat("yyyy.MM.dd HH:mm:ss z");
-					buf.append(res.get("default.l2text.date")).append(" ").append(
-							sd.format(sap.getSignDate().getTime()));
+					buf.append(res.get("default.l2text.date")).append(" ")
+							.append(sd.format(sap.getSignDate().getTime()));
 					if (StringUtils.hasLength(options.getReason()))
-						buf.append('\n').append(res.get("default.l2text.reason")).append(" ").append(
-								options.getReason());
+						buf.append('\n').append(res.get("default.l2text.reason")).append(" ")
+								.append(options.getReason());
 					if (StringUtils.hasLength(options.getLocation()))
-						buf.append('\n').append(res.get("default.l2text.location")).append(" ").append(
-								options.getLocation());
+						buf.append('\n').append(res.get("default.l2text.location")).append(" ")
+								.append(options.getLocation());
 					sap.setLayer2Text(buf.toString());
 					;
 				}
@@ -191,10 +197,17 @@ public class SignerLogic implements Runnable {
 				options.log("console.setL4Text");
 				sap.setLayer4Text(options.getL4Text());
 				options.log("console.setRender");
-				sap.setRender(options.getRenderMode().getRender());
+				RenderMode renderMode = options.getRenderMode();
+				if (renderMode == RenderMode.GRAPHIC_AND_DESCRIPTION && sap.getSignatureGraphic() == null) {
+					logger.warn("Render mode of visible signature is set to GRAPHIC_AND_DESCRIPTION, but no image is loaded. Fallback to DESCRIPTION_ONLY.");
+					options.log("console.renderModeFallback");
+					renderMode = RenderMode.DESCRTIPTION_ONLY;
+				}
+				sap.setRender(renderMode.getRender());
 				options.log("console.setVisibleSignature");
-				sap.setVisibleSignature(new Rectangle(options.getPositionLLX(), options.getPositionLLY(), options
-						.getPositionURX(), options.getPositionURY()), options.getPage(), null);
+				sap.setVisibleSignature(
+						new Rectangle(options.getPositionLLX(), options.getPositionLLY(), options.getPositionURX(),
+								options.getPositionURY()), options.getPage(), null);
 			}
 
 			options.log("console.processing");

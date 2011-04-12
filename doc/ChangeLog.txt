@@ -1,3 +1,6 @@
+2011-04-12 Josef Cacek
+  * Signer: if the render mode is GRAPHIC_AND_DESCRIPTION but no graphic is provided, then fall back to DESCRIPTION_ONLY - tracker#3279620
+
 2011-04-06 Aleksandar Stojsavljevic
   * Verifier: Improved verification (added checking for OCSP url inside certificate, added validation of TS server's certificate against keystore)
 
