@@ -45,8 +45,8 @@ import com.lowagie.text.pdf.PdfSignatureAppearance;
  * 
  * @author Josef Cacek
  * @author Aleksandar Stojsavljevic
- * @version $Revision: 1.15 $
- * @created $Date: 2011/04/06 11:10:08 $
+ * @version $Revision: 1.16 $
+ * @created $Date: 2011/04/14 07:14:23 $
  */
 public class VerifierLogic {
 
@@ -401,6 +401,63 @@ public class VerifierLogic {
 		}
 
 		return code;
+	}
+
+	/**
+	 * Checks if document is valid and if not - exit with document's validation
+	 * code defined in {@link SignatureVerification}
+	 * 
+	 * @param args
+	 *            - first argument is path to file we are checking, second
+	 *            argument is file password (optional)
+	 */
+	public static void isValid(String[] args) {
+		if (args == null || args.length == 0) {
+			// TODO arguments are missing - what code to set here?
+			System.exit(0);
+		}
+		String filePath = args[0];
+		String password = null;
+		if (args.length > 1) {
+			password = args[1];
+		}
+
+		// TODO set this switch somewhere else (or take it as argument)
+		boolean failFast = false;
+
+		// TODO what about keystore and keystore type (maybe configurable)?
+		VerifierLogic verifier = new VerifierLogic("WINDOWS-ROOT", null, null);
+
+		VerificationResult verificationResult = verifier
+				.verify(filePath, password != null ? password.getBytes() : null);
+		int totalValidationCode = -1;
+		List<SignatureVerification> verifications = verificationResult.getVerifications();
+		if (verifications != null) {
+			Iterator<SignatureVerification> signIterator = verifications.iterator();
+			int i = verifications.size();
+			while (signIterator.hasNext()) {
+				SignatureVerification next = signIterator.next();
+				Integer validationCode = getValidationCode(next, i == verifications.size());
+
+				if (failFast && validationCode < SignatureVerification.SIG_STAT_CODE_INFO_SIGNATURE_VALID) {
+					// exit fast
+					System.exit(validationCode);
+				}
+
+				if (totalValidationCode == -1 || validationCode < totalValidationCode) {
+					totalValidationCode = validationCode;
+				}
+
+				i--;
+			}
+		} else {
+			// TODO document is not signed - what code to set here?
+			System.exit(0);
+		}
+
+		if (totalValidationCode < SignatureVerification.SIG_STAT_CODE_INFO_SIGNATURE_VALID) {
+			System.exit(totalValidationCode);
+		}
 	}
 
 }
