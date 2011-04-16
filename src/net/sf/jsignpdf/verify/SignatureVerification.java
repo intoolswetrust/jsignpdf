@@ -5,62 +5,64 @@ import java.util.Calendar;
 
 import net.sf.jsignpdf.types.CertificationLevel;
 
+import com.lowagie.text.pdf.PdfSignatureAppearance;
+
 /**
  * This class represents a result of a single signature verification.
  * 
  * @author Josef Cacek
- * @author $Author: stojsavljevic $
- * @version $Revision: 1.8 $
- * @created $Date: 2011/04/06 08:16:34 $
+ * @author $Author: kwart $
+ * @version $Revision: 1.9 $
+ * @created $Date: 2011/04/16 13:08:55 $
  */
 public class SignatureVerification {
 
 	/**
 	 * Signed revision has been altered.
 	 */
-	public static final Integer SIG_STAT_CODE_ERROR_REVISION_MODIFIED = new Integer(10);
+	public static final int SIG_STAT_CODE_ERROR_REVISION_MODIFIED = 10;
 
 	/**
 	 * Revision has set certification level but document was modified later.
 	 */
-	public static final Integer SIG_STAT_CODE_ERROR_CERTIFICATION_BROKEN = new Integer(11);
+	public static final int SIG_STAT_CODE_ERROR_CERTIFICATION_BROKEN = 11;
 
 	/**
 	 * There is some unsigned content in document (last signature doesn't cover
 	 * whole document).
 	 */
-	public static final Integer SIG_STAT_CODE_WARNING_UNSIGNED_CONTENT = new Integer(20);
+	public static final int SIG_STAT_CODE_WARNING_UNSIGNED_CONTENT = 20;
 
 	/**
 	 * Signature validity can't be verified.
 	 */
-	public static final Integer SIG_STAT_CODE_WARNING_SIGNATURE_VALIDITY_UNKNOWN = new Integer(21);
+	public static final int SIG_STAT_CODE_WARNING_SIGNATURE_VALIDITY_UNKNOWN = 21;
 
 	/**
 	 * Signature is invalid according to OCSP.
 	 */
-	public static final Integer SIG_STAT_CODE_WARNING_SIGNATURE_OCSP_INVALID = new Integer(22);
+	public static final int SIG_STAT_CODE_WARNING_SIGNATURE_OCSP_INVALID = 22;
 
 	/**
 	 * There is no timestamp token (signature date/time are from the clock on
 	 * the signer's computer)
 	 */
-	public static final Integer SIG_STAT_CODE_WARNING_NO_TIMESTAMP_TOKEN = new Integer(23);
+	public static final int SIG_STAT_CODE_WARNING_NO_TIMESTAMP_TOKEN = 23;
 
 	/**
 	 * Timestamp token is invalid.
 	 */
-	public static final Integer SIG_STAT_CODE_WARNING_TIMESTAMP_INVALID = new Integer(24);
+	public static final int SIG_STAT_CODE_WARNING_TIMESTAMP_INVALID = 24;
 
 	/**
 	 * No revocation information (CRL or OCSP) found.
 	 */
-	public static final Integer SIG_STAT_CODE_WARNING_NO_REVOCATION_INFO = new Integer(25);
+	public static final int SIG_STAT_CODE_WARNING_NO_REVOCATION_INFO = 25;
 
 	/**
 	 * Signature is valid.
 	 */
-	public static final Integer SIG_STAT_CODE_INFO_SIGNATURE_VALID = new Integer(30);
+	public static final int SIG_STAT_CODE_INFO_SIGNATURE_VALID = 0;
 
 	private String signName;
 	private String name;
@@ -78,6 +80,8 @@ public class SignatureVerification {
 	private String reason;
 	private String location;
 	private int certLevelCode;
+
+	private boolean isLastSignature;
 
 	/**
 	 * This flag means that signing certificate is directly trusted (regarding
@@ -113,6 +117,106 @@ public class SignatureVerification {
 	 */
 	public SignatureVerification(final String aName) {
 		name = aName;
+	}
+
+	/**
+	 * Gets validation code for this verification
+	 * 
+	 * @return validation code defined in {@link SignatureVerification}
+	 */
+	public int getValidationCode() {
+		int code = SignatureVerification.SIG_STAT_CODE_INFO_SIGNATURE_VALID;
+
+		// TODO Handle case when OCRL checking fails
+		if (isModified()) {
+			// ERROR: signed revision is altered
+			code = SignatureVerification.SIG_STAT_CODE_ERROR_REVISION_MODIFIED;
+		} else if (!isLastSignature && getCertLevelCode() != PdfSignatureAppearance.NOT_CERTIFIED) {
+			// ERROR: some signature has certification level set but document is changed (at least with some additional signatures)
+			code = SignatureVerification.SIG_STAT_CODE_ERROR_CERTIFICATION_BROKEN;
+		} else if (isLastSignature && !isWholeDocument() && getCertLevelCode() != PdfSignatureAppearance.NOT_CERTIFIED) {
+			// ERROR: last signature doesn't cover whole document (document is changed) and certification level set
+			code = SignatureVerification.SIG_STAT_CODE_ERROR_CERTIFICATION_BROKEN;
+		} else if (isLastSignature && !isWholeDocument()) {
+			// WARNING: last signature doesn't cover whole document - there is some unsigned content in the document
+			code = SignatureVerification.SIG_STAT_CODE_WARNING_UNSIGNED_CONTENT;
+		} else if (!isSignCertTrustedAndValid() && getFails() != null) {
+			// WARNING: certificate is not trusted (can't be verified against keystore)
+			code = SignatureVerification.SIG_STAT_CODE_WARNING_SIGNATURE_VALIDITY_UNKNOWN;
+		} else if (!isSignCertTrustedAndValid() && (isOcspPresent() || isOcspInCertPresent()) && !isOcspValid()
+				&& !isOcspInCertValid()) {
+			// WARNING: OCSP validation fails
+			code = SignatureVerification.SIG_STAT_CODE_WARNING_SIGNATURE_OCSP_INVALID;
+		} else if (!isSignCertTrustedAndValid() && !isOcspPresent() && !isOcspInCertPresent() && !isCrlPresent()) {
+			// WARNING: No revocation information (CRL or OCSP) found
+			code = SignatureVerification.SIG_STAT_CODE_WARNING_NO_REVOCATION_INFO;
+		} else if (!isTsTokenPresent()) {
+			// WARNING: signature date/time are from the clock on the signer's computer
+			code = SignatureVerification.SIG_STAT_CODE_WARNING_NO_TIMESTAMP_TOKEN;
+		} else if (isTsTokenPresent() && getTsTokenValidationResult() != null) {
+			// WARNING: signature is timestamped but the timestamp could not be verified
+			code = SignatureVerification.SIG_STAT_CODE_WARNING_TIMESTAMP_INVALID;
+		}
+		return code;
+	}
+
+	/**
+	 * Returns true if given validation code means error.
+	 * 
+	 * @param validationCode
+	 * @return
+	 */
+	public static boolean isError(final int validationCode) {
+		return validationCode > 0 && validationCode < 20;
+	}
+
+	/**
+	 * Returns true if the given {@link SignatureVerification} failed.
+	 * 
+	 * @return true if the validation fails
+	 */
+	public boolean containsError() {
+		return isError(getValidationCode());
+	}
+
+	/**
+	 * Returns true if given validation code means warning.
+	 * 
+	 * @param validationCode
+	 * @return
+	 */
+	public static boolean isWarning(final int validationCode) {
+		return validationCode > 20;
+	}
+
+	/**
+	 * Returns true if the given {@link SignatureVerification} contains
+	 * warnings.
+	 * 
+	 * @return true if the validation fails
+	 */
+	public boolean containsWarning() {
+		return isWarning(getValidationCode());
+	}
+
+	/**
+	 * Returns true if given validation code means "valid without warnings".
+	 * 
+	 * @param validationCode
+	 * @return
+	 */
+	public static boolean isValidWithoutWarnings(final int validationCode) {
+		return validationCode == SIG_STAT_CODE_INFO_SIGNATURE_VALID;
+	}
+
+	/**
+	 * Returns true if the given {@link SignatureVerification} contains
+	 * warnings.
+	 * 
+	 * @return true if the validation fails
+	 */
+	public boolean isValidWithoutWarnings() {
+		return isValidWithoutWarnings(getValidationCode());
 	}
 
 	public String getName() {
@@ -330,6 +434,21 @@ public class SignatureVerification {
 	 */
 	public void setOcspInCertValid(boolean ocspInCertValid) {
 		this.ocspInCertValid = ocspInCertValid;
+	}
+
+	/**
+	 * @return the isLastSignature
+	 */
+	public boolean isLastSignature() {
+		return isLastSignature;
+	}
+
+	/**
+	 * @param isLastSignature
+	 *            the isLastSignature to set
+	 */
+	public void setLastSignature(boolean isLastSignature) {
+		this.isLastSignature = isLastSignature;
 	}
 
 	public String toString() {

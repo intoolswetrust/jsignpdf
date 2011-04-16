@@ -35,7 +35,6 @@ import com.lowagie.text.pdf.OcspClientBouncyCastle;
 import com.lowagie.text.pdf.PdfPKCS7;
 import com.lowagie.text.pdf.PdfPKCS7.X509Name;
 import com.lowagie.text.pdf.PdfReader;
-import com.lowagie.text.pdf.PdfSignatureAppearance;
 
 /**
  * Class VerifierLogic contains all logic for PDF signatures verification. It
@@ -45,12 +44,13 @@ import com.lowagie.text.pdf.PdfSignatureAppearance;
  * 
  * @author Josef Cacek
  * @author Aleksandar Stojsavljevic
- * @version $Revision: 1.16 $
- * @created $Date: 2011/04/14 07:14:23 $
+ * @version $Revision: 1.17 $
+ * @created $Date: 2011/04/16 13:08:55 $
  */
 public class VerifierLogic {
 
 	private KeyStore kall;
+	private boolean failFast;
 
 	/**
 	 * Constructor. It initializes default keystore.
@@ -118,9 +118,11 @@ public class VerifierLogic {
 			final List<String> tmpNames = tmpAcroFields.getSignatureNames();
 			tmpResult.setTotalRevisions(tmpAcroFields.getTotalRevisions());
 
-			for (int i = tmpNames.size() - 1; i >= 0; i--) {
+			final int lastSignatureIdx = tmpNames.size() - 1;
+			for (int i = lastSignatureIdx; i >= 0; i--) {
 				final String name = tmpNames.get(i);
 				final SignatureVerification tmpVerif = new SignatureVerification(name);
+				tmpVerif.setLastSignature(i == lastSignatureIdx);
 				tmpVerif.setWholeDocument(tmpAcroFields.signatureCoversWholeDocument(name));
 				tmpVerif.setRevision(tmpAcroFields.getRevision(name));
 				final PdfPKCS7 pk = tmpAcroFields.verifySignature(name);
@@ -174,11 +176,29 @@ public class VerifierLogic {
 					}
 				}
 				tmpResult.addVerification(tmpVerif);
+				if (failFast && tmpVerif.containsError()) {
+					return tmpResult;
+				}
 			}
 		} catch (Exception e) {
 			tmpResult.setException(e);
 		}
 		return tmpResult;
+	}
+
+	/**
+	 * @return the failFast
+	 */
+	public boolean isFailFast() {
+		return failFast;
+	}
+
+	/**
+	 * @param failFast
+	 *            the failFast to set
+	 */
+	public void setFailFast(boolean failFast) {
+		this.failFast = failFast;
 	}
 
 	/**
@@ -339,125 +359,13 @@ public class VerifierLogic {
 	 * @return
 	 */
 	public static Map<String, Integer> getValidationCodes(VerificationResult verResult) {
-		Map<String, Integer> validationCodes = new HashMap<String, Integer>();
-		List<SignatureVerification> verifications = verResult.getVerifications();
-		int i = verifications.size();
+		final Map<String, Integer> validationCodes = new HashMap<String, Integer>();
 
-		for (SignatureVerification verification : verifications) {
-			Integer code = getValidationCode(verification, i == verifications.size());
-			validationCodes.put(verification.getName(), code);
-			i--;
+		for (SignatureVerification verification : verResult.getVerifications()) {
+			validationCodes.put(verification.getName(), verification.getValidationCode());
 		}
 
 		return validationCodes;
-	}
-
-	/**
-	 * Gets validation code for provided {@link SignatureVerification} (single
-	 * revision).
-	 * 
-	 * @param verification
-	 * @param isLastSignature
-	 * @return validation code defined in {@link SignatureVerification}
-	 */
-	public static Integer getValidationCode(SignatureVerification verification, boolean isLastSignature) {
-		Integer code = null;
-
-		// TODO Handle case when OCRL checking fails
-		if (verification.isModified()) {
-			// ERROR: signed revision is altered
-			code = SignatureVerification.SIG_STAT_CODE_ERROR_REVISION_MODIFIED;
-		} else if (!isLastSignature && verification.getCertLevelCode() != PdfSignatureAppearance.NOT_CERTIFIED) {
-			// ERROR: some signature has certification level set but document is changed (at least with some additional signatures)
-			code = SignatureVerification.SIG_STAT_CODE_ERROR_CERTIFICATION_BROKEN;
-		} else if (isLastSignature && !verification.isWholeDocument()
-				&& verification.getCertLevelCode() != PdfSignatureAppearance.NOT_CERTIFIED) {
-			// ERROR: last signature doesn't cover whole document (document is changed) and certification level set
-			code = SignatureVerification.SIG_STAT_CODE_ERROR_CERTIFICATION_BROKEN;
-		} else if (isLastSignature && !verification.isWholeDocument()) {
-			// WARNING: last signature doesn't cover whole document - there is some unsigned content in the document
-			code = SignatureVerification.SIG_STAT_CODE_WARNING_UNSIGNED_CONTENT;
-		} else if (!verification.isSignCertTrustedAndValid() && verification.getFails() != null) {
-			// WARNING: certificate is not trusted (can't be verified against keystore)
-			code = SignatureVerification.SIG_STAT_CODE_WARNING_SIGNATURE_VALIDITY_UNKNOWN;
-		} else if (!verification.isSignCertTrustedAndValid()
-				&& (verification.isOcspPresent() || verification.isOcspInCertPresent()) && !verification.isOcspValid()
-				&& !verification.isOcspInCertValid()) {
-			// WARNING: OCSP validation fails
-			code = SignatureVerification.SIG_STAT_CODE_WARNING_SIGNATURE_OCSP_INVALID;
-		} else if (!verification.isSignCertTrustedAndValid() && !verification.isOcspPresent()
-				&& !verification.isOcspInCertPresent() && !verification.isCrlPresent()) {
-			// WARNING: No revocation information (CRL or OCSP) found
-			code = SignatureVerification.SIG_STAT_CODE_WARNING_NO_REVOCATION_INFO;
-		} else if (!verification.isTsTokenPresent()) {
-			// WARNING: signature date/time are from the clock on the signer's computer
-			code = SignatureVerification.SIG_STAT_CODE_WARNING_NO_TIMESTAMP_TOKEN;
-		} else if (verification.isTsTokenPresent() && verification.getTsTokenValidationResult() != null) {
-			// WARNING: signature is timestamped but the timestamp could not be verified
-			code = SignatureVerification.SIG_STAT_CODE_WARNING_TIMESTAMP_INVALID;
-		} else {
-			// INFO: signature is valid
-			code = SignatureVerification.SIG_STAT_CODE_INFO_SIGNATURE_VALID;
-		}
-
-		return code;
-	}
-
-	/**
-	 * Checks if document is valid and if not - exit with document's validation
-	 * code defined in {@link SignatureVerification}
-	 * 
-	 * @param args
-	 *            - first argument is path to file we are checking, second
-	 *            argument is file password (optional)
-	 */
-	public static void isValid(String[] args) {
-		if (args == null || args.length == 0) {
-			// TODO arguments are missing - what code to set here?
-			System.exit(0);
-		}
-		String filePath = args[0];
-		String password = null;
-		if (args.length > 1) {
-			password = args[1];
-		}
-
-		// TODO set this switch somewhere else (or take it as argument)
-		boolean failFast = false;
-
-		// TODO what about keystore and keystore type (maybe configurable)?
-		VerifierLogic verifier = new VerifierLogic("WINDOWS-ROOT", null, null);
-
-		VerificationResult verificationResult = verifier
-				.verify(filePath, password != null ? password.getBytes() : null);
-		int totalValidationCode = -1;
-		List<SignatureVerification> verifications = verificationResult.getVerifications();
-		if (verifications != null) {
-			Iterator<SignatureVerification> signIterator = verifications.iterator();
-			int i = verifications.size();
-			while (signIterator.hasNext()) {
-				SignatureVerification next = signIterator.next();
-				Integer validationCode = getValidationCode(next, i == verifications.size());
-
-				if (failFast && validationCode < SignatureVerification.SIG_STAT_CODE_INFO_SIGNATURE_VALID) {
-					// exit fast
-					System.exit(validationCode);
-				}
-
-				if (totalValidationCode == -1 || validationCode < totalValidationCode) {
-					totalValidationCode = validationCode;
-				}
-
-				i--;
-			}
-		} else {
-			// TODO document is not signed - what code to set here?
-			System.exit(0);
-		}
-
-		if (totalValidationCode < SignatureVerification.SIG_STAT_CODE_INFO_SIGNATURE_VALID) {
-			System.exit(totalValidationCode);
-		}
 	}
 
 }
