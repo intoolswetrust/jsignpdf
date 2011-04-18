@@ -8,9 +8,9 @@ import java.util.List;
  * verification;
  * 
  * @author Josef Cacek
- * @author $Author: kwart $
- * @version $Revision: 1.2 $
- * @created $Date: 2011/04/16 13:08:55 $
+ * @author $Author: stojsavljevic $
+ * @version $Revision: 1.3 $
+ * @created $Date: 2011/04/18 12:40:07 $
  */
 public class VerificationResult {
 
@@ -51,8 +51,7 @@ public class VerificationResult {
 		verifications.add(aVerification);
 		final int code = aVerification.getValidationCode();
 		if (code != SignatureVerification.SIG_STAT_CODE_INFO_SIGNATURE_VALID) {
-			if (verificationResultCode == SignatureVerification.SIG_STAT_CODE_INFO_SIGNATURE_VALID
-					|| verificationResultCode > code) {
+			if (verificationResultCode < code) {
 				verificationResultCode = code;
 			}
 		}

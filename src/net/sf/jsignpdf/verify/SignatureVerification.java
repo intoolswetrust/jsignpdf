@@ -11,53 +11,53 @@ import com.lowagie.text.pdf.PdfSignatureAppearance;
  * This class represents a result of a single signature verification.
  * 
  * @author Josef Cacek
- * @author $Author: kwart $
- * @version $Revision: 1.9 $
- * @created $Date: 2011/04/16 13:08:55 $
+ * @author $Author: stojsavljevic $
+ * @version $Revision: 1.10 $
+ * @created $Date: 2011/04/18 12:40:07 $
  */
 public class SignatureVerification {
 
 	/**
 	 * Signed revision has been altered.
 	 */
-	public static final int SIG_STAT_CODE_ERROR_REVISION_MODIFIED = 10;
+	public static final int SIG_STAT_CODE_ERROR_REVISION_MODIFIED = 120;
 
 	/**
 	 * Revision has set certification level but document was modified later.
 	 */
-	public static final int SIG_STAT_CODE_ERROR_CERTIFICATION_BROKEN = 11;
+	public static final int SIG_STAT_CODE_ERROR_CERTIFICATION_BROKEN = 110;
 
 	/**
 	 * There is some unsigned content in document (last signature doesn't cover
 	 * whole document).
 	 */
-	public static final int SIG_STAT_CODE_WARNING_UNSIGNED_CONTENT = 20;
+	public static final int SIG_STAT_CODE_WARNING_UNSIGNED_CONTENT = 70;
 
 	/**
 	 * Signature validity can't be verified.
 	 */
-	public static final int SIG_STAT_CODE_WARNING_SIGNATURE_VALIDITY_UNKNOWN = 21;
+	public static final int SIG_STAT_CODE_WARNING_SIGNATURE_VALIDITY_UNKNOWN = 60;
 
 	/**
 	 * Signature is invalid according to OCSP.
 	 */
-	public static final int SIG_STAT_CODE_WARNING_SIGNATURE_OCSP_INVALID = 22;
+	public static final int SIG_STAT_CODE_WARNING_SIGNATURE_OCSP_INVALID = 50;
 
 	/**
 	 * There is no timestamp token (signature date/time are from the clock on
 	 * the signer's computer)
 	 */
-	public static final int SIG_STAT_CODE_WARNING_NO_TIMESTAMP_TOKEN = 23;
+	public static final int SIG_STAT_CODE_WARNING_NO_TIMESTAMP_TOKEN = 40;
 
 	/**
 	 * Timestamp token is invalid.
 	 */
-	public static final int SIG_STAT_CODE_WARNING_TIMESTAMP_INVALID = 24;
+	public static final int SIG_STAT_CODE_WARNING_TIMESTAMP_INVALID = 30;
 
 	/**
 	 * No revocation information (CRL or OCSP) found.
 	 */
-	public static final int SIG_STAT_CODE_WARNING_NO_REVOCATION_INFO = 25;
+	public static final int SIG_STAT_CODE_WARNING_NO_REVOCATION_INFO = 20;
 
 	/**
 	 * Signature is valid.
@@ -167,7 +167,7 @@ public class SignatureVerification {
 	 * @return
 	 */
 	public static boolean isError(final int validationCode) {
-		return validationCode > 0 && validationCode < 20;
+		return validationCode >= 100;
 	}
 
 	/**
@@ -186,7 +186,7 @@ public class SignatureVerification {
 	 * @return
 	 */
 	public static boolean isWarning(final int validationCode) {
-		return validationCode > 20;
+		return validationCode >= 10 && validationCode < 100;
 	}
 
 	/**
