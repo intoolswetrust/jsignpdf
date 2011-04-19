@@ -10,8 +10,8 @@ import net.sf.jsignpdf.types.PrintRight;
 import net.sf.jsignpdf.types.RenderMode;
 import net.sf.jsignpdf.utils.PropertyProvider;
 import net.sf.jsignpdf.utils.ResourceProvider;
-import net.sf.jsignpdf.utils.StringUtils;
 
+import org.apache.commons.lang.StringUtils;
 import org.bouncycastle.crypto.CryptoException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -374,10 +374,10 @@ public class BasicSignerOptions {
 	 * @return
 	 */
 	public String getOutFileX() {
-		String tmpOut = StringUtils.emptyNull(outFile);
+		String tmpOut = StringUtils.defaultIfBlank(outFile, null);
 		if (tmpOut == null) {
 			String tmpExtension = "";
-			String tmpNameBase = StringUtils.emptyNull(getInFile());
+			String tmpNameBase = StringUtils.defaultIfBlank(getInFile(), null);
 			if (tmpNameBase == null) {
 				tmpOut = "signed.pdf";
 			} else {
@@ -707,7 +707,7 @@ public class BasicSignerOptions {
 	}
 
 	public String getImgPath() {
-		return (imgPath = StringUtils.emptyNull(imgPath));
+		return (imgPath = StringUtils.defaultIfBlank(imgPath, null));
 	}
 
 	public void setImgPath(String imgPath) {
@@ -715,7 +715,7 @@ public class BasicSignerOptions {
 	}
 
 	public String getBgImgPath() {
-		return (bgImgPath = StringUtils.emptyNull(bgImgPath));
+		return (bgImgPath = StringUtils.defaultIfBlank(bgImgPath, null));
 	}
 
 	public void setBgImgPath(String bgImgPath) {

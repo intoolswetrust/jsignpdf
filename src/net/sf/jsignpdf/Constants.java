@@ -138,7 +138,7 @@ public class Constants {
 
 	public static final HashAlgorithm DEFVAL_HASH_ALGORITHM = HashAlgorithm.SHA1;
 
-	public static final boolean DEFVAL_APPEND = true;
+	public static final boolean DEFVAL_APPEND = toBoolean(true);
 
 	public static final int DEFVAL_KEY_INDEX = 0;
 	public static final int DEFVAL_PAGE = 1;
@@ -289,6 +289,10 @@ public class Constants {
 		oidSet.add("2.5.29.29"); // Certificate Issuer
 		oidSet.add("2.5.29.37"); // Extended Key Usage
 		SUPPORTED_CRITICAL_EXTENSION_OIDS = Collections.unmodifiableSet(oidSet);
+	}
+
+	private static boolean toBoolean(boolean b) {
+		return b;
 	}
 
 }
