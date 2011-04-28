@@ -44,8 +44,8 @@ import com.lowagie.text.pdf.PdfReader;
  * 
  * @author Josef Cacek
  * @author Aleksandar Stojsavljevic
- * @version $Revision: 1.17 $
- * @created $Date: 2011/04/16 13:08:55 $
+ * @version $Revision: 1.18 $
+ * @created $Date: 2011/04/28 06:34:30 $
  */
 public class VerifierLogic {
 
@@ -108,12 +108,48 @@ public class VerifierLogic {
 	 *            PDF password - used if PDF is encrypted
 	 * @return
 	 */
-	@SuppressWarnings("unchecked")
 	public VerificationResult verify(final String aFileName, byte[] aPassword) {
+
+		try {
+			return verify(getPdfReader(aFileName, aPassword));
+		} catch (Exception e) {
+			final VerificationResult tmpResult = new VerificationResult();
+			tmpResult.setException(e);
+			return tmpResult;
+		}
+	}
+
+	/**
+	 * Verifies signature(s) in PDF document.
+	 * 
+	 * @param content
+	 *            content of PDF
+	 * @param aPassword
+	 *            password
+	 * @return
+	 */
+	public VerificationResult verify(final byte[] content, byte[] aPassword) {
+
+		try {
+			return verify(getPdfReader(content, aPassword));
+		} catch (Exception e) {
+			final VerificationResult tmpResult = new VerificationResult();
+			tmpResult.setException(e);
+			return tmpResult;
+		}
+	}
+
+	/**
+	 * Verifies signature(s) in PDF document.
+	 * 
+	 * @param tmpReader
+	 *            PdfReader for given PDF
+	 * @return
+	 */
+	@SuppressWarnings("unchecked")
+	private VerificationResult verify(final PdfReader tmpReader) {
 		final VerificationResult tmpResult = new VerificationResult();
 		try {
-			final PdfReader tmpReader = getPdfReader(aFileName, aPassword);
-
 			final AcroFields tmpAcroFields = tmpReader.getAcroFields();
 			final List<String> tmpNames = tmpAcroFields.getSignatureNames();
 			tmpResult.setTotalRevisions(tmpAcroFields.getTotalRevisions());
@@ -242,6 +278,36 @@ public class VerifierLogic {
 				tmpReader = new PdfReader(aFileName, new byte[0]);
 			} catch (Exception e2) {
 				tmpReader = new PdfReader(aFileName, aPassword);
+			}
+		}
+		return tmpReader;
+	}
+
+	/**
+	 * It tries to create PDF reader in 3 steps:
+	 * <ul>
+	 * <li>without password</li>
+	 * <li>with empty password</li>
+	 * <li>with given password</li>
+	 * </ul>
+	 * 
+	 * @param content
+	 *            content of PDF
+	 * @param aPassword
+	 *            password
+	 * @return
+	 * @throws IOException
+	 */
+	public static PdfReader getPdfReader(final byte[] content, byte[] aPassword) throws IOException {
+		PdfReader tmpReader = null;
+		try {
+			// try to read without password
+			tmpReader = new PdfReader(content);
+		} catch (Exception e) {
+			try {
+				tmpReader = new PdfReader(content, new byte[0]);
+			} catch (Exception e2) {
+				tmpReader = new PdfReader(content, aPassword);
 			}
 		}
 		return tmpReader;
