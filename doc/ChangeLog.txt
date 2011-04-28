@@ -1,4 +1,8 @@
 2011-04-28 Aleksandar Stojsavljevic
+  * Verifier: Improved verification (added new validation codes for certificate status)
+  * Verifier: SignatureVerification class now holds signing certificate and certificate path
+
+2011-04-28 Aleksandar Stojsavljevic
   * Verifier: verification is now possible against content of pdf (file doesn't have to be on file system).
 
 2011-04-12 Josef Cacek
