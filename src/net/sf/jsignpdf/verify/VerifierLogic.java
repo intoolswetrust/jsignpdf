@@ -5,10 +5,12 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigInteger;
 import java.security.KeyStore;
+import java.security.cert.CertPath;
 import java.security.cert.CertStore;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -44,8 +46,8 @@ import com.lowagie.text.pdf.PdfReader;
  * 
  * @author Josef Cacek
  * @author Aleksandar Stojsavljevic
- * @version $Revision: 1.18 $
- * @created $Date: 2011/04/28 06:34:30 $
+ * @version $Revision: 1.19 $
+ * @created $Date: 2011/04/28 13:51:33 $
  */
 public class VerifierLogic {
 
@@ -177,6 +179,13 @@ public class VerifierLogic {
 				tmpVerif.setOcspValid(pk.isRevocationValid());
 				tmpVerif.setCrlPresent(pk.getCRLs() != null && pk.getCRLs().size() > 0);
 				tmpVerif.setFails(PdfPKCS7.verifyCertificates(pkc, kall, pk.getCRLs(), tmpVerif.getDate()));
+				tmpVerif.setSigningCertificate(pk.getSigningCertificate());
+
+				// generate CertPath
+				List<Certificate> certList = Arrays.asList(pkc);
+				CertificateFactory cf = CertificateFactory.getInstance("X.509");
+				CertPath cp = cf.generateCertPath(certList);
+				tmpVerif.setCertPath(cp);
 
 				// to save time - check OCSP in certificate only if document's OCSP is not present and valid
 				if (!tmpVerif.isOcspValid()) {
