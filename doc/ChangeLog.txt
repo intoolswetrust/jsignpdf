@@ -1,3 +1,6 @@
+2011-04-28 Aleksandar Stojsavljevic
+  * Verifier: verification is now possible against content of pdf (file doesn't have to be on file system).
+
 2011-04-12 Josef Cacek
   * Signer: if the render mode is GRAPHIC_AND_DESCRIPTION but no graphic is provided, then fall back to DESCRIPTION_ONLY - tracker#3279620
 
