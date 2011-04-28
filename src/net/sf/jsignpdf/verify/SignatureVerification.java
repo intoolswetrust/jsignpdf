@@ -1,5 +1,7 @@
 package net.sf.jsignpdf.verify;
 
+import java.security.cert.CertPath;
+import java.security.cert.X509Certificate;
 import java.util.Arrays;
 import java.util.Calendar;
 
@@ -12,8 +14,8 @@ import com.lowagie.text.pdf.PdfSignatureAppearance;
  * 
  * @author Josef Cacek
  * @author $Author: stojsavljevic $
- * @version $Revision: 1.10 $
- * @created $Date: 2011/04/18 12:40:07 $
+ * @version $Revision: 1.11 $
+ * @created $Date: 2011/04/28 13:52:10 $
  */
 public class SignatureVerification {
 
@@ -34,9 +36,39 @@ public class SignatureVerification {
 	public static final int SIG_STAT_CODE_WARNING_UNSIGNED_CONTENT = 70;
 
 	/**
-	 * Signature validity can't be verified.
+	 * Certificate validity can't be verified.
 	 */
-	public static final int SIG_STAT_CODE_WARNING_SIGNATURE_VALIDITY_UNKNOWN = 60;
+	public static final int SIG_STAT_CODE_WARNING_CERTIFICATE_CANT_BE_VERIFIED = 60;
+
+	/**
+	 * Certificate expired.
+	 */
+	public static final int SIG_STAT_CODE_WARNING_CERTIFICATE_EXPIRED = 61;
+
+	/**
+	 * Certificate not yet valid.
+	 */
+	public static final int SIG_STAT_CODE_WARNING_CERTIFICATE_NOT_YET_VALID = 62;
+
+	/**
+	 * Certificate revoked.
+	 */
+	public static final int SIG_STAT_CODE_WARNING_CERTIFICATE_REVOKED = 63;
+
+	/**
+	 * Certificate has unsupported critical extension.
+	 */
+	public static final int SIG_STAT_CODE_WARNING_CERTIFICATE_UNSUPPORTED_CRITICAL_EXTENSION = 64;
+
+	/**
+	 * Invalid state. Possible circular certificate chain.
+	 */
+	public static final int SIG_STAT_CODE_WARNING_CERTIFICATE_INVALID_STATE = 65;
+
+	/**
+	 * All certificate errors that are not covered with 60-65 codes.
+	 */
+	public static final int SIG_STAT_CODE_WARNING_CERTIFICATE_PROBLEM = 66;
 
 	/**
 	 * Signature is invalid according to OCSP.
@@ -63,6 +95,14 @@ public class SignatureVerification {
 	 * Signature is valid.
 	 */
 	public static final int SIG_STAT_CODE_INFO_SIGNATURE_VALID = 0;
+
+	// error messages when validating certificate
+	private static final String CERT_PROBLEM_CANT_BE_VERIFIED = "Cannot be verified against the KeyStore";
+	private static final String CERT_PROBLEM_EXPIRED = "certificate expired on";
+	private static final String CERT_PROBLEM_NOT_YET_VALID = "certificate not valid till";
+	private static final String CERT_PROBLEM_REVOKED = "Certificate revoked";
+	private static final String CERT_PROBLEM_UNSUPPORTED_CRITICAL_EXTENSION = "Has unsupported critical extension";
+	private static final String CERT_PROBLEM_INVALID_STATE = "Invalid state. Possible circular certificate chain";
 
 	private String signName;
 	private String name;
@@ -103,6 +143,16 @@ public class SignatureVerification {
 	private boolean ocspInCertValid;
 
 	/**
+	 * Certificate that signed document.
+	 */
+	private X509Certificate signingCertificate;
+
+	/**
+	 * Certification path for signing certificate.
+	 */
+	private CertPath certPath;
+
+	/**
 	 * Default constructore
 	 */
 	public SignatureVerification() {
@@ -141,8 +191,30 @@ public class SignatureVerification {
 			// WARNING: last signature doesn't cover whole document - there is some unsigned content in the document
 			code = SignatureVerification.SIG_STAT_CODE_WARNING_UNSIGNED_CONTENT;
 		} else if (!isSignCertTrustedAndValid() && getFails() != null) {
-			// WARNING: certificate is not trusted (can't be verified against keystore)
-			code = SignatureVerification.SIG_STAT_CODE_WARNING_SIGNATURE_VALIDITY_UNKNOWN;
+			// WARNING: there is some problem with certificate
+			String errorMessage = String.valueOf(getFails()[1]).trim().toLowerCase();
+			if (errorMessage.startsWith(CERT_PROBLEM_CANT_BE_VERIFIED.trim().toLowerCase())) {
+				// WARNING: certificate is not trusted (can't be verified against keystore)
+				code = SignatureVerification.SIG_STAT_CODE_WARNING_CERTIFICATE_CANT_BE_VERIFIED;
+			} else if (errorMessage.startsWith(CERT_PROBLEM_EXPIRED.trim().toLowerCase())) {
+				// WARNING: certificate expired
+				code = SignatureVerification.SIG_STAT_CODE_WARNING_CERTIFICATE_EXPIRED;
+			} else if (errorMessage.startsWith(CERT_PROBLEM_NOT_YET_VALID.trim().toLowerCase())) {
+				// WARNING: certificate not yet valid
+				code = SignatureVerification.SIG_STAT_CODE_WARNING_CERTIFICATE_NOT_YET_VALID;
+			} else if (errorMessage.startsWith(CERT_PROBLEM_REVOKED.trim().toLowerCase())) {
+				// WARNING: certificate revoked
+				code = SignatureVerification.SIG_STAT_CODE_WARNING_CERTIFICATE_REVOKED;
+			} else if (errorMessage.startsWith(CERT_PROBLEM_UNSUPPORTED_CRITICAL_EXTENSION.trim().toLowerCase())) {
+				// WARNING: certificate has unsupported critical extension
+				code = SignatureVerification.SIG_STAT_CODE_WARNING_CERTIFICATE_UNSUPPORTED_CRITICAL_EXTENSION;
+			} else if (errorMessage.startsWith(CERT_PROBLEM_INVALID_STATE.trim().toLowerCase())) {
+				// WARNING: possible circular certificate chain
+				code = SignatureVerification.SIG_STAT_CODE_WARNING_CERTIFICATE_INVALID_STATE;
+			} else {
+				// WARNING: some other certificate error
+				code = SignatureVerification.SIG_STAT_CODE_WARNING_CERTIFICATE_PROBLEM;
+			}
 		} else if (!isSignCertTrustedAndValid() && (isOcspPresent() || isOcspInCertPresent()) && !isOcspValid()
 				&& !isOcspInCertValid()) {
 			// WARNING: OCSP validation fails
@@ -451,6 +523,36 @@ public class SignatureVerification {
 		this.isLastSignature = isLastSignature;
 	}
 
+	/**
+	 * @return the signingCertificate
+	 */
+	public X509Certificate getSigningCertificate() {
+		return signingCertificate;
+	}
+
+	/**
+	 * @param signingCertificate
+	 *            the signingCertificate to set
+	 */
+	public void setSigningCertificate(X509Certificate signingCertificate) {
+		this.signingCertificate = signingCertificate;
+	}
+
+	/**
+	 * @return the certPath
+	 */
+	public CertPath getCertPath() {
+		return certPath;
+	}
+
+	/**
+	 * @param certPath
+	 *            the certPath to set
+	 */
+	public void setCertPath(CertPath certPath) {
+		this.certPath = certPath;
+	}
+
 	public String toString() {
 		return "Signature verification [" + "\n signName=" + signName + "\n name=" + name + "\n subject=" + subject
 				+ "\n date=" + date.getTime() + "\n reason=" + reason + "\n location=" + location + "\n revision="
@@ -460,7 +562,9 @@ public class SignatureVerification {
 				+ "\n ocspInCertPresent=" + ocspInCertPresent + "\n ocspInCertValid=" + ocspInCertValid
 				+ "\n timeStampTokenPresent=" + tsTokenPresent + "\n timeStampTokenValidationFail="
 				+ (tsTokenValidationResult == null ? "no" : tsTokenValidationResult.getMessage()) + "\n fails="
-				+ (fails == null ? "no" : Arrays.asList(fails)) + "\n]";
+				+ (fails == null ? "no" : Arrays.asList(fails)) + "\n certPath="
+				+ (certPath == null ? "no" : certPath.getCertificates()) + "\n signingCertificate="
+				+ (signingCertificate == null ? "no" : signingCertificate.toString()) + "\n]";
 	}
 
 }
