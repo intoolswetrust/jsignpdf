@@ -14,8 +14,8 @@ import com.lowagie.text.pdf.PdfSignatureAppearance;
  * 
  * @author Josef Cacek
  * @author $Author: stojsavljevic $
- * @version $Revision: 1.11 $
- * @created $Date: 2011/04/28 13:52:10 $
+ * @version $Revision: 1.12 $
+ * @created $Date: 2011/05/04 10:03:19 $
  */
 public class SignatureVerification {
 
@@ -178,13 +178,15 @@ public class SignatureVerification {
 		int code = SignatureVerification.SIG_STAT_CODE_INFO_SIGNATURE_VALID;
 
 		// TODO Handle case when OCRL checking fails
+		// TODO Handle case when new content is added after signature with certification level set
 		if (isModified()) {
 			// ERROR: signed revision is altered
 			code = SignatureVerification.SIG_STAT_CODE_ERROR_REVISION_MODIFIED;
-		} else if (!isLastSignature && getCertLevelCode() != PdfSignatureAppearance.NOT_CERTIFIED) {
+		} else if (!isLastSignature && getCertLevelCode() == PdfSignatureAppearance.CERTIFIED_NO_CHANGES_ALLOWED) {
 			// ERROR: some signature has certification level set but document is changed (at least with some additional signatures)
 			code = SignatureVerification.SIG_STAT_CODE_ERROR_CERTIFICATION_BROKEN;
 		} else if (isLastSignature && !isWholeDocument() && getCertLevelCode() != PdfSignatureAppearance.NOT_CERTIFIED) {
+			// TODO What if e.g. annotations are added (which is allowed by cert level)?
 			// ERROR: last signature doesn't cover whole document (document is changed) and certification level set
 			code = SignatureVerification.SIG_STAT_CODE_ERROR_CERTIFICATION_BROKEN;
 		} else if (isLastSignature && !isWholeDocument()) {
