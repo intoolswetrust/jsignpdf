@@ -1,3 +1,7 @@
+2011-07-01 Josef Cacek (1.1.10 test)
+  * new command line tool added: SignatureCounter
+  * fixed wrong spelling of RenderMode.DESCRIPTION_ONLY enum instance (thanks to Jiri Lisicky for reporting)
+
 2011-04-28 Aleksandar Stojsavljevic
   * Verifier: Improved verification (added new validation codes for certificate status)
   * Verifier: SignatureVerification class now holds signing certificate and certificate path
