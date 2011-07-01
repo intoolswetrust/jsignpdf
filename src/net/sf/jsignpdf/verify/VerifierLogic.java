@@ -21,6 +21,7 @@ import javax.security.auth.x500.X500Principal;
 
 import net.sf.jsignpdf.Constants;
 import net.sf.jsignpdf.utils.KeyStoreUtils;
+import net.sf.jsignpdf.utils.PdfUtils;
 
 import org.bouncycastle.asn1.ASN1InputStream;
 import org.bouncycastle.asn1.ocsp.BasicOCSPResponse;
@@ -46,8 +47,8 @@ import com.lowagie.text.pdf.PdfReader;
  * 
  * @author Josef Cacek
  * @author Aleksandar Stojsavljevic
- * @version $Revision: 1.19 $
- * @created $Date: 2011/04/28 13:51:33 $
+ * @version $Revision: 1.20 $
+ * @created $Date: 2011/07/01 11:15:01 $
  */
 public class VerifierLogic {
 
@@ -113,7 +114,7 @@ public class VerifierLogic {
 	public VerificationResult verify(final String aFileName, byte[] aPassword) {
 
 		try {
-			return verify(getPdfReader(aFileName, aPassword));
+			return verify(PdfUtils.getPdfReader(aFileName, aPassword));
 		} catch (Exception e) {
 			final VerificationResult tmpResult = new VerificationResult();
 			tmpResult.setException(e);
@@ -133,7 +134,7 @@ public class VerifierLogic {
 	public VerificationResult verify(final byte[] content, byte[] aPassword) {
 
 		try {
-			return verify(getPdfReader(content, aPassword));
+			return verify(PdfUtils.getPdfReader(content, aPassword));
 		} catch (Exception e) {
 			final VerificationResult tmpResult = new VerificationResult();
 			tmpResult.setException(e);
@@ -257,69 +258,9 @@ public class VerifierLogic {
 	 * @throws IOException
 	 */
 	public InputStream extractRevision(String aFileName, byte[] aPassword, String aSignatureName) throws IOException {
-		final PdfReader tmpReader = getPdfReader(aFileName, aPassword);
+		final PdfReader tmpReader = PdfUtils.getPdfReader(aFileName, aPassword);
 		final AcroFields tmpAcroFields = tmpReader.getAcroFields();
 		return tmpAcroFields.extractRevision(aSignatureName);
-	}
-
-	/**
-	 * It tries to create PDF reader in 3 steps:
-	 * <ul>
-	 * <li>without password</li>
-	 * <li>with empty password</li>
-	 * <li>with given password</li>
-	 * </ul>
-	 * 
-	 * @param aFileName
-	 *            file name of PDF
-	 * @param aPassword
-	 *            password
-	 * @return
-	 * @throws IOException
-	 */
-	public static PdfReader getPdfReader(final String aFileName, byte[] aPassword) throws IOException {
-		PdfReader tmpReader = null;
-		try {
-			// try to read without password
-			tmpReader = new PdfReader(aFileName);
-		} catch (Exception e) {
-			try {
-				tmpReader = new PdfReader(aFileName, new byte[0]);
-			} catch (Exception e2) {
-				tmpReader = new PdfReader(aFileName, aPassword);
-			}
-		}
-		return tmpReader;
-	}
-
-	/**
-	 * It tries to create PDF reader in 3 steps:
-	 * <ul>
-	 * <li>without password</li>
-	 * <li>with empty password</li>
-	 * <li>with given password</li>
-	 * </ul>
-	 * 
-	 * @param content
-	 *            content of PDF
-	 * @param aPassword
-	 *            password
-	 * @return
-	 * @throws IOException
-	 */
-	public static PdfReader getPdfReader(final byte[] content, byte[] aPassword) throws IOException {
-		PdfReader tmpReader = null;
-		try {
-			// try to read without password
-			tmpReader = new PdfReader(content);
-		} catch (Exception e) {
-			try {
-				tmpReader = new PdfReader(content, new byte[0]);
-			} catch (Exception e2) {
-				tmpReader = new PdfReader(content, aPassword);
-			}
-		}
-		return tmpReader;
 	}
 
 	/**
