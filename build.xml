@@ -201,6 +201,20 @@
 				<include name="**/IOUtils.java"/>
 			</fileset>
 		</jar>
+		
+		<jar destfile="${dist.dir}/${sigcounter.filename}.jar">
+			<manifest>
+				<attribute name="Main-Class" value="net.sf.jsignpdf.verify.SignatureCounter"/>
+				<attribute name="Implementation-Vendor" value="Josef Cacek"/>
+				<attribute name="Implementation-Title" value="JSignPdf - Signature Counter"/>
+				<attribute name="Implementation-Version" value="${jsignpdf.version} ${build.timestamp}"/>
+				<attribute name="Class-Path" value="${manifest.classpath}" />
+			</manifest>
+			<fileset dir="${bin.dir}">
+				<include name="**/PdfUtils*.class"/>
+				<include name="**/SignatureCounter*.class"/>
+			</fileset>
+		</jar>
 	</target>
 
 	<target name="oxt" depends="jar">

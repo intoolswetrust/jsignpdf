@@ -32,6 +32,7 @@
 	<property name="verifier.filename" value="Verifier" />
 
 	<property name="installcert.filename" value="InstallCert" />
+	<property name="sigcounter.filename" value="SignatureCounter" />
 
 	<!-- Default options for compiling -->
 	<property name="compile.deprecation" value="false" />
