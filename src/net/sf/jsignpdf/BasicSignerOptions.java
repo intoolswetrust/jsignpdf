@@ -677,7 +677,7 @@ public class BasicSignerOptions {
 
 	public RenderMode getRenderMode() {
 		if (renderMode == null) {
-			renderMode = RenderMode.DESCRTIPTION_ONLY;
+			renderMode = RenderMode.DESCRIPTION_ONLY;
 		}
 		return renderMode;
 	}

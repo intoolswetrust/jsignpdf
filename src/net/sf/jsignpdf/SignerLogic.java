@@ -201,7 +201,7 @@ public class SignerLogic implements Runnable {
 				if (renderMode == RenderMode.GRAPHIC_AND_DESCRIPTION && sap.getSignatureGraphic() == null) {
 					logger.warn("Render mode of visible signature is set to GRAPHIC_AND_DESCRIPTION, but no image is loaded. Fallback to DESCRIPTION_ONLY.");
 					options.log("console.renderModeFallback");
-					renderMode = RenderMode.DESCRTIPTION_ONLY;
+					renderMode = RenderMode.DESCRIPTION_ONLY;
 				}
 				sap.setRender(renderMode.getRender());
 				options.log("console.setVisibleSignature");

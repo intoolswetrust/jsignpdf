@@ -10,7 +10,7 @@ import com.lowagie.text.pdf.PdfSignatureAppearance;
  */
 public enum RenderMode {
 
-	DESCRTIPTION_ONLY ("render.descriptionOnly",
+	DESCRIPTION_ONLY ("render.descriptionOnly",
 		PdfSignatureAppearance.SignatureRenderDescription),
 	GRAPHIC_AND_DESCRIPTION ("render.graphicAndDescription",
 		PdfSignatureAppearance.SignatureRenderGraphicAndDescription),
