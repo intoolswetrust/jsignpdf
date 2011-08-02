@@ -1,3 +1,6 @@
+2011-08-02 Josef Cacek
+  * contact field specified from command line (tracker#3304993)
+
 2011-07-01 Josef Cacek (1.1.10 test)
   * new command line tool added: SignatureCounter
   * fixed wrong spelling of RenderMode.DESCRIPTION_ONLY enum instance (thanks to Jiri Lisicky for reporting)
