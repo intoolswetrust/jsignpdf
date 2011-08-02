@@ -1,5 +1,6 @@
 2011-08-02 Josef Cacek
   * contact field specified from command line (tracker#3304993)
+  * Polish translation from Zbig Wittmann added
 
 2011-07-01 Josef Cacek (1.1.10 test)
   * new command line tool added: SignatureCounter
