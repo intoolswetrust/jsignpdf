@@ -1,9 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <manifest:manifest xmlns:manifest="http://openoffice.org/2001/manifest">
-	<manifest:file-entry manifest:media-type="application/vnd.sun.star.uno-component;type=Java"
-						manifest:full-path="@JSIGNPDF_FILENAME@.jar"/>
-	<manifest:file-entry manifest:media-type="application/vnd.sun.star.configuration-data"
-						manifest:full-path="Addons.xcu"/>
-	<manifest:file-entry manifest:media-type="application/vnd.sun.star.configuration-data"
-						manifest:full-path="ProtocolHandler.xcu"/>
+	<manifest:file-entry manifest:full-path="@JSIGNPDF_FILENAME@.jar" manifest:media-type="application/vnd.sun.star.uno-component;type=Java"/>
+	<manifest:file-entry manifest:full-path="BaseWindowState.xcu" manifest:media-type="application/vnd.sun.star.configuration-data"/>
+	<manifest:file-entry manifest:full-path="CalcWindowState.xcu" manifest:media-type="application/vnd.sun.star.configuration-data"/>
+	<manifest:file-entry manifest:full-path="DrawWindowState.xcu" manifest:media-type="application/vnd.sun.star.configuration-data"/>
+	<manifest:file-entry manifest:full-path="ChartWindowState.xcu" manifest:media-type="application/vnd.sun.star.configuration-data"/>
+	<manifest:file-entry manifest:full-path="ImpressWindowState.xcu" manifest:media-type="application/vnd.sun.star.configuration-data"/>
+	<manifest:file-entry manifest:full-path="MathWindowState.xcu" manifest:media-type="application/vnd.sun.star.configuration-data"/>
+	<manifest:file-entry manifest:full-path="StartModuleWindowState.xcu" manifest:media-type="application/vnd.sun.star.configuration-data"/>
+	<manifest:file-entry manifest:full-path="WriterFormWindowState.xcu" manifest:media-type="application/vnd.sun.star.configuration-data"/>
+	<manifest:file-entry manifest:full-path="WriterWebWindowState.xcu" manifest:media-type="application/vnd.sun.star.configuration-data"/>
+	<manifest:file-entry manifest:full-path="WriterWindowState.xcu" manifest:media-type="application/vnd.sun.star.configuration-data"/>
+	<manifest:file-entry manifest:full-path="Addons.xcu" manifest:media-type="application/vnd.sun.star.configuration-data"/>
+	<manifest:file-entry manifest:full-path="ProtocolHandler.xcu" manifest:media-type="application/vnd.sun.star.configuration-data"/>
 </manifest:manifest>
