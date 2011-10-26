@@ -378,7 +378,13 @@
 
 		<java jar="${dist.dir}/${jsignpdf.filename}.jar" fork="true">
 			<arg value="-kst"/>
-			<arg value="WINDOWS-MY"/>
+			<arg value="JKS"/>
+			<arg value="-ksf"/>
+			<arg value="unsorted/demokeystore.jks"/>
+			<arg value="-ksp"/>
+			<arg value="jsignpdfdemo"/>
+			<arg value="-ka"/>
+			<arg value="JSignPdfDemo"/>
 			<arg value="-d"/>
 			<arg value="${dist.doc.dir}"/>
 			<arg value="${dist.doc.dir}/JSignPdf.pdf"/>
