@@ -1,3 +1,6 @@
+2011-10-26 Josef Cacek
+  * fixed illegal enum initial values in property file
+
 2011-10-18 Josef Cacek
   * added French translation (thanks to David Ruelle)
 
