@@ -1,4 +1,4 @@
-2011-10-26 Josef Cacek
+2011-10-26 Josef Cacek (1.2.0)
   * fixed illegal enum initial values in property file
 
 2011-10-18 Josef Cacek
