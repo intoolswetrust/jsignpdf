@@ -1,3 +1,8 @@
+2011-11-12 Josef Cacek (1.2.1)
+  * updated French translations (thanks David)
+  * better handling of misconfigured keystore (https://sourceforge.net/projects/jsignpdf/forums/forum/782217/topic/4802421)
+  * chapter "Changing the application language" added to the documentation
+
 2011-10-26 Josef Cacek (1.2.0)
   * fixed illegal enum initial values in property file
 
