@@ -81,6 +81,7 @@ public class SignerLogic implements Runnable {
       return;
     }
 
+    boolean finished = false;
     Exception tmpResult = null;
     FileOutputStream fout = null;
     try {
@@ -295,7 +296,7 @@ public class SignerLogic implements Runnable {
       options.log("console.closeStream");
       sap.close(dic2);
       fout.close();
-
+      finished = true;
     } catch (Exception e) {
       options.log("console.exception");
       e.printStackTrace(options.getPrintWriter());
@@ -311,9 +312,9 @@ public class SignerLogic implements Runnable {
           e.printStackTrace();
         }
       }
+      options.log("console.finished." + (tmpResult == null && finished ? "ok" : "error"));
+      options.fireSignerFinishedEvent(tmpResult);
     }
-    options.log("console.finished." + (tmpResult == null ? "ok" : "error"));
-    options.fireSignerFinishedEvent(tmpResult);
   }
 
   /**
