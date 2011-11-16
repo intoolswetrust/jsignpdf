@@ -353,12 +353,12 @@
 	</target>
 
 	<target name="ooo_start">
-		<echo>Opening Open Office</echo>
+		<echo>Opening OpenOffice.org/LibreOffice</echo>
 		<exec executable="${ooo.dir}/program/soffice.exe" failonerror="false" spawn="true">
 			<arg line="-headless"/>
 			<arg line="-accept='socket,port=8100;urp;'"/>
 		</exec>
-		<echo>Open Office opened - sleeping for 10s</echo>
+		<echo>OpenOffice.org/LibreOffice opened - sleeping for 10s</echo>
 		<sleep seconds="10"/>
 	</target>
 
