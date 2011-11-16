@@ -1,5 +1,5 @@
-2011-11-16 Josef Cacek
-  * exit codes improved in CLI;
+2011-11-16 Josef Cacek (1.2.2)
+  * exit codes improved in CLI:
     EXIT_CODE_PARSE_ERR = -1 (command line in a wrong format)
     EXIT_CODE_NO_COMMAND = -2 (nothing to do - e.g. no file for signing provided)
     EXIT_CODE_SOME_SIG_FAILED = -3 (signing of some - but not all - files failed) 
