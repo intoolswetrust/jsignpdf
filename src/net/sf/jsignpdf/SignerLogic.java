@@ -53,7 +53,7 @@ public class SignerLogic implements Runnable {
 
   protected final static ResourceProvider res = ResourceProvider.getInstance();
 
-  private BasicSignerOptions options;
+  private final BasicSignerOptions options;
 
   /**
    * Constructor with all necessary parameters.
@@ -62,6 +62,9 @@ public class SignerLogic implements Runnable {
    *          options of signer
    */
   public SignerLogic(final BasicSignerOptions anOptions) {
+    if (anOptions == null) {
+      throw new NullPointerException("Options has to be filled.");
+    }
     options = anOptions;
   }
 
@@ -72,17 +75,18 @@ public class SignerLogic implements Runnable {
    */
   @SuppressWarnings("unchecked")
   public void run() {
-    if (options == null) {
-      throw new NullPointerException("Options has to be filled.");
-    }
+    signFile();
+  }
+
+  public boolean signFile() {
     final String outFile = options.getOutFileX();
     if (!validateInOutFiles(options.getInFile(), outFile)) {
       options.log("console.skippingSigning");
-      return;
+      return false;
     }
 
     boolean finished = false;
-    Exception tmpResult = null;
+    Throwable tmpException = null;
     FileOutputStream fout = null;
     try {
       final PrivateKeyInfo pkInfo = KeyStoreUtils.getPkInfo(options);
@@ -91,7 +95,7 @@ public class SignerLogic implements Runnable {
       if (ArrayUtils.isEmpty(chain)) {
         //the certificate was not found
         options.log("console.certificateChainEmpty");
-        return;
+        return false;
       }
       options.log("console.createPdfReader", options.getInFile());
       PdfReader reader;
@@ -296,12 +300,14 @@ public class SignerLogic implements Runnable {
       options.log("console.closeStream");
       sap.close(dic2);
       fout.close();
+      fout = null;
       finished = true;
     } catch (Exception e) {
       options.log("console.exception");
       e.printStackTrace(options.getPrintWriter());
-      tmpResult = e;
+      tmpException = e;
     } catch (OutOfMemoryError e) {
+      tmpException = e;
       e.printStackTrace(options.getPrintWriter());
       options.log("console.memoryError");
     } finally {
@@ -312,9 +318,11 @@ public class SignerLogic implements Runnable {
           e.printStackTrace();
         }
       }
-      options.log("console.finished." + (tmpResult == null && finished ? "ok" : "error"));
-      options.fireSignerFinishedEvent(tmpResult);
+
+      options.log("console.finished." + (finished ? "ok" : "error"));
+      options.fireSignerFinishedEvent(tmpException);
     }
+    return finished;
   }
 
   /**

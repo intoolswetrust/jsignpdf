@@ -1,3 +1,10 @@
+2011-11-16 Josef Cacek
+  * exit codes improved in CLI;
+    EXIT_CODE_PARSE_ERR = -1 (command line in a wrong format)
+    EXIT_CODE_NO_COMMAND = -2 (nothing to do - e.g. no file for signing provided)
+    EXIT_CODE_SOME_SIG_FAILED = -3 (signing of some - but not all - files failed) 
+    EXIT_CODE_ALL_SIG_FAILED = -4 (signing of all files failed)
+
 2011-11-12 Josef Cacek (1.2.1)
   * updated French translations (thanks David)
   * better handling of misconfigured keystore (https://sourceforge.net/projects/jsignpdf/forums/forum/782217/topic/4802421)

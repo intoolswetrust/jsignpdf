@@ -154,7 +154,9 @@ public class Constants {
   public static final int DEFVAL_PROXY_PORT = 80;
 
   public static final int EXIT_CODE_PARSE_ERR = -1;
-  public static final int EXIT_CODE_NO_COMMAND = -1;
+  public static final int EXIT_CODE_NO_COMMAND = -2;
+  public static final int EXIT_CODE_SOME_SIG_FAILED = -3;
+  public static final int EXIT_CODE_ALL_SIG_FAILED = -4;
 
   public static final String ARG_HELP_LONG = "help";
   public static final String ARG_HELP = "h";

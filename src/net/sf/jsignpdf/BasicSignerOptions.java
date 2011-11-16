@@ -282,7 +282,7 @@ public class BasicSignerOptions {
    * @param aResult
    * @see #getListener()
    */
-  protected void fireSignerFinishedEvent(Exception aResult) {
+  protected void fireSignerFinishedEvent(Throwable aResult) {
     if (listener != null) {
       listener.signerFinishedEvent(aResult);
     }
