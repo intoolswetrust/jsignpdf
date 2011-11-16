@@ -116,6 +116,7 @@ public class Signer {
     for (final String tmpInFile : anOpts.getFiles()) {
       final File tmpFile = new File(tmpInFile);
       if (!tmpFile.canRead()) {
+        failedCount++;
         System.err.println(ResourceProvider.getInstance().get("file.notReadable", new String[] { tmpInFile }));
         continue;
       }
