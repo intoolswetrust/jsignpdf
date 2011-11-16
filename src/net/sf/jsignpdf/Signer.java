@@ -12,10 +12,10 @@ import net.sf.jsignpdf.utils.GuiUtils;
 import net.sf.jsignpdf.utils.KeyStoreUtils;
 import net.sf.jsignpdf.utils.PKCS11Utils;
 import net.sf.jsignpdf.utils.ResourceProvider;
-import net.sf.jsignpdf.utils.StringUtils;
 
 import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.ParseException;
+import org.apache.commons.lang.StringUtils;
 
 /**
  * JSignPdf main class - it either process command line or if no argument is
@@ -28,8 +28,10 @@ public class Signer {
   private static void printHelp() {
     final HelpFormatter formatter = new HelpFormatter();
     final ResourceProvider res = ResourceProvider.getInstance();
+    final String ls = System.getProperty("line.separator");
     formatter.printHelp(80, "java -jar JSignPdf.jar [file1.pdf [file2.pdf ...]]", res.get("hlp.header"),
-        SignerOptionsFromCmdLine.OPTS, res.get("hlp.footer"), true);
+        SignerOptionsFromCmdLine.OPTS, ls + res.get("hlp.footer.exitCodes") + ls + StringUtils.repeat("-", 80) + ls
+            + res.get("hlp.footer.examples"), true);
   }
 
   /**
