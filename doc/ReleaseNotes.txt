@@ -1,10 +1,6 @@
 Version 1.2.2
 -------------
-  * exit codes improved in CLI
-    EXIT_CODE_PARSE_ERR = -1 (command line in a wrong format)
-    EXIT_CODE_NO_COMMAND = -2 (nothing to do - e.g. no file for signing provided)
-    EXIT_CODE_SOME_SIG_FAILED = -3 (signing of some - but not all - files failed) 
-    EXIT_CODE_ALL_SIG_FAILED = -4 (signing of all files failed)
+  * program exit codes improved in CLI (codes described in documentation)
 
 Version 1.2.1
 -------------
