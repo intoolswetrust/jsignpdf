@@ -44,12 +44,7 @@ public class Signer {
 
     if (args != null && args.length > 0) {
       final SignerOptionsFromCmdLine tmpOpts = new SignerOptionsFromCmdLine();
-      try {
-        tmpOpts.loadCmdLine(args);
-      } catch (ParseException exp) {
-        System.err.println("Unable to parse command line (Use -h for the help)\n" + exp.getMessage());
-        System.exit(EXIT_CODE_PARSE_ERR);
-      }
+      parseCommandLine(args, tmpOpts);
 
       if (tmpOpts.isPrintVersion()) {
         System.out.println("JSignPdf version " + VERSION);
@@ -144,6 +139,21 @@ public class Signer {
     }
     if (failedCount > 0) {
       System.exit(successCount > 0 ? Constants.EXIT_CODE_SOME_SIG_FAILED : Constants.EXIT_CODE_ALL_SIG_FAILED);
+    }
+  }
+
+  /**
+   * Parses the command line. Exits with error exit code when parsing fails.
+   * 
+   * @param args
+   * @param opts
+   */
+  private static void parseCommandLine(String[] args, final SignerOptionsFromCmdLine opts) {
+    try {
+      opts.loadCmdLine(args);
+    } catch (ParseException exp) {
+      System.err.println("Unable to parse command line (Use -h for the help)\n" + exp.getMessage());
+      System.exit(EXIT_CODE_PARSE_ERR);
     }
   }
 }
