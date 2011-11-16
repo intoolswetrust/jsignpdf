@@ -47,8 +47,7 @@ public class Signer {
       try {
         tmpOpts.loadCmdLine(args);
       } catch (ParseException exp) {
-        System.out.println("Unable to parse command line, check the arguments. (Use -h for help screen.)");
-        exp.printStackTrace();
+        System.err.println("Unable to parse command line (Use -h for the help): " + exp.getMessage());
         System.exit(EXIT_CODE_PARSE_ERR);
       }
 
