@@ -371,12 +371,12 @@
 		</antcall>
 		<unzip src="${jodconverter.zip}" dest="${build.dir}"/>
 
-		<java jar="${build.dir}/${jodconverter.dir}/lib/jodconverter-cli-${jodconverter.version}.jar" fork="true">
+		<java jar="${build.dir}/${jodconverter.dir}/lib/jodconverter-cli-${jodconverter.version}.jar" fork="true" failonerror="true">
 			<arg value="doc/JSignPdf.odt"/>
 			<arg value="${dist.doc.dir}/JSignPdf.pdf"/>
 		</java>
 
-		<java jar="${dist.dir}/${jsignpdf.filename}.jar" fork="true">
+		<java jar="${dist.dir}/${jsignpdf.filename}.jar" fork="true" failonerror="true">
 			<arg value="-kst"/>
 			<arg value="JKS"/>
 			<arg value="-ksf"/>
