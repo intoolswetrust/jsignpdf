@@ -73,11 +73,15 @@ public class SignerLogic implements Runnable {
    * 
    * @see java.lang.Runnable#run()
    */
-  @SuppressWarnings("unchecked")
   public void run() {
     signFile();
   }
 
+  /**
+   * Signs a single file.
+   * 
+   * @return true when signing is finished succesfully, false otherwise
+   */
   public boolean signFile() {
     final String outFile = options.getOutFileX();
     if (!validateInOutFiles(options.getInFile(), outFile)) {
@@ -118,10 +122,13 @@ public class SignerLogic implements Runnable {
       options.log("console.createSignature");
       char tmpPdfVersion = '\0'; // default version - the same as input
       if (reader.getPdfVersion() < hashAlgorithm.getPdfVersion()) {
+        //this covers also problems with visible signatures (embedded fonts) in PDF 1.2, because the minimal version
+        //for hash algorithms is 1.3 (for SHA1)
         tmpPdfVersion = hashAlgorithm.getPdfVersion();
         options.log("console.updateVersion",
             new String[] { String.valueOf(reader.getPdfVersion()), String.valueOf(tmpPdfVersion) });
       }
+
       final PdfStamper stp = PdfStamper.createSignature(reader, fout, tmpPdfVersion, null, options.isAppendX());
       if (!options.isAppendX()) {
         // we are not in append mode, let's remove existing signatures
