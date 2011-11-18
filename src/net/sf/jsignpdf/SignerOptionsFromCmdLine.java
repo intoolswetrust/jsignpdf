@@ -9,7 +9,6 @@ import net.sf.jsignpdf.types.CertificationLevel;
 import net.sf.jsignpdf.types.HashAlgorithm;
 import net.sf.jsignpdf.types.PrintRight;
 import net.sf.jsignpdf.types.RenderMode;
-import net.sf.jsignpdf.utils.StringUtils;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
@@ -17,6 +16,7 @@ import org.apache.commons.cli.OptionBuilder;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.cli.PosixParser;
+import org.apache.commons.lang.StringUtils;
 
 /**
  * This class parses and holds options from command line
@@ -107,8 +107,7 @@ public class SignerOptionsFromCmdLine extends BasicSignerOptions {
       setLocation(line.getOptionValue(ARG_LOCATION));
     if (line.hasOption(ARG_CONTACT))
       setContact(line.getOptionValue(ARG_CONTACT));
-    if (line.hasOption(ARG_APPEND))
-      setAppend(line.hasOption(ARG_APPEND));
+    setAppend(line.hasOption(ARG_APPEND));
     if (line.hasOption(ARG_CERT_LEVEL))
       setCertLevel(line.getOptionValue(ARG_CERT_LEVEL));
     if (line.hasOption(ARG_HASH_ALGORITHM))
