@@ -124,6 +124,11 @@ public class SignerLogic implements Runnable {
       if (reader.getPdfVersion() < hashAlgorithm.getPdfVersion()) {
         //this covers also problems with visible signatures (embedded fonts) in PDF 1.2, because the minimal version
         //for hash algorithms is 1.3 (for SHA1)
+        if (options.isAppendX()) {
+          //if we are in append mode and version should be updated then return false (not possible)
+          options.log("console.updateVersionNotPossibleInAppendMode");
+          return false;
+        }
         tmpPdfVersion = hashAlgorithm.getPdfVersion();
         options.log("console.updateVersion",
             new String[] { String.valueOf(reader.getPdfVersion()), String.valueOf(tmpPdfVersion) });

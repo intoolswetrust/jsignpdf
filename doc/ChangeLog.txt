@@ -1,3 +1,6 @@
+2011-11-23 Josef Cacek
+  * if PDF version update is not possible, show eror message and don't sign 
+
 2011-11-18 Josef Cacek (1.2.3)
   * fix CLI - the "append mode" for signatures was used always
 
