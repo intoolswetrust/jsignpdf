@@ -14,8 +14,8 @@ import com.lowagie.text.pdf.PdfSignatureAppearance;
  * 
  * @author Josef Cacek
  * @author $Author: stojsavljevic $
- * @version $Revision: 1.12 $
- * @created $Date: 2011/05/04 10:03:19 $
+ * @version $Revision: 1.13 $
+ * @created $Date: 2011/11/28 14:43:41 $
  */
 public class SignatureVerification {
 
@@ -217,8 +217,9 @@ public class SignatureVerification {
 				// WARNING: some other certificate error
 				code = SignatureVerification.SIG_STAT_CODE_WARNING_CERTIFICATE_PROBLEM;
 			}
-		} else if (!isSignCertTrustedAndValid() && (isOcspPresent() || isOcspInCertPresent()) && !isOcspValid()
+		} else if ((!isCrlPresent() || (isCrlPresent() && getFails() != null)) && !isSignCertTrustedAndValid() && (isOcspPresent() || isOcspInCertPresent()) && !isOcspValid()
 				&& !isOcspInCertValid()) {
+			// If certificate is successfully validated against CRL - don't set warning flag for OCSP (set OCSP error only if CRL doesn't exist or there are some errors)  
 			// WARNING: OCSP validation fails
 			code = SignatureVerification.SIG_STAT_CODE_WARNING_SIGNATURE_OCSP_INVALID;
 		} else if (!isSignCertTrustedAndValid() && !isOcspPresent() && !isOcspInCertPresent() && !isCrlPresent()) {

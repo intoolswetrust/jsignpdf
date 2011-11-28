@@ -1,3 +1,6 @@
+2011-11-28 Aleksandar Stojsavljevic
+  * Verifier: If certificate is successfully validated against CRL - don't set warning flag for OCSP
+
 2011-11-23 Josef Cacek
   * if PDF version update is not possible, show eror message and don't sign 
   * print stacktrace if PKCS11 provider initialization fails
