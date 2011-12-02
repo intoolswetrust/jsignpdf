@@ -21,8 +21,8 @@ import com.lowagie.text.pdf.PdfReader;
  * 
  * @author Josef Cacek
  * @author $Author: kwart $
- * @version $Revision: 1.1 $
- * @created $Date: 2011/07/01 11:15:30 $
+ * @version $Revision: 1.2 $
+ * @created $Date: 2011/12/02 14:30:39 $
  */
 public class SignatureCounter {
 
@@ -52,7 +52,7 @@ public class SignatureCounter {
       line = parser.parse(options, args);
     } catch (ParseException exp) {
       System.err.println("Illegal command used: " + exp.getMessage());
-      System.exit(-1);
+      System.exit(1);
     }
 
     final String[] tmpArgs = line.getArgs();
@@ -76,7 +76,7 @@ public class SignatureCounter {
         final File tmpFile = new File(tmpFilePath);
         if (!tmpFile.canRead()) {
           System.err.println("Couldn't read the file. Check the path and permissions.");
-          System.exit(-1);
+          System.exit(2);
         }
         try {
           final PdfReader pdfReader = PdfUtils.getPdfReader(tmpFilePath, tmpPasswd);
@@ -88,6 +88,7 @@ public class SignatureCounter {
           }
         } catch (IOException e) {
           e.printStackTrace();
+          System.exit(3);
         }
       }
     }

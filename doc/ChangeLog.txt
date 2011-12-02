@@ -1,3 +1,6 @@
+2011-12-02 Josef Cacek
+  * add non-zero exit codes to SignatureCounter for error cases 
+
 2011-11-28 Aleksandar Stojsavljevic
   * Verifier: If certificate is successfully validated against CRL - don't set warning flag for OCSP
 
