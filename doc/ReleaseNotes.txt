@@ -1,3 +1,10 @@
+Version 1.2.4
+-------------
+  * Verifier and SignatureCounter tools description added to documentatio
+  * SignatureCounter exit codes improved in CLI (codes described in documentation)
+  * Verifier updates for OCSP validation
+  * signing fails if PDF version update is not possible (prints only an eror message) 
+
 Version 1.2.3
 -------------
   * fix signatures "append mode" processing in command-line version

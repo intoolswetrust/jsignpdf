@@ -1,6 +1,11 @@
-2011-12-02 Josef Cacek
-  * add non-zero exit codes to SignatureCounter for error cases 
-
+2011-12-02 Josef Cacek (1.2.4)
+  * add non-zero exit codes to SignatureCounter for error cases:
+    EXIT_CODE_PARSE_ERR = 1 (command line in a wrong format)
+    EXIT_CODE_CANT_READ_FILE = 5 (unable to read the file from given path)
+    EXIT_CODE_COMMON_ERROR = 6 (counting signatures in the PDF failed)
+  * new SignatureCounter parameter --names (prints signatures names instead of signatures count)
+  * added sections about command-line tools to documentation - Verifier and SignatureCounter (including exit codes) 
+  
 2011-11-28 Aleksandar Stojsavljevic
   * Verifier: If certificate is successfully validated against CRL - don't set warning flag for OCSP
 
