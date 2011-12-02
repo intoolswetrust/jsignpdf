@@ -158,6 +158,10 @@ public class Constants {
   public static final int EXIT_CODE_SOME_SIG_FAILED = 3;
   public static final int EXIT_CODE_ALL_SIG_FAILED = 4;
 
+  //new in SignatureCounter
+  public static final int EXIT_CODE_CANT_READ_FILE = 5;
+  public static final int EXIT_CODE_COMMON_ERROR = 6;
+
   public static final String ARG_HELP_LONG = "help";
   public static final String ARG_HELP = "h";
 

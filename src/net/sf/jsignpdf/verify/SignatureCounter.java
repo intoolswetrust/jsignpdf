@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.List;
 
+import net.sf.jsignpdf.Constants;
 import net.sf.jsignpdf.utils.PdfUtils;
 
 import org.apache.commons.cli.CommandLine;
@@ -21,8 +22,8 @@ import com.lowagie.text.pdf.PdfReader;
  * 
  * @author Josef Cacek
  * @author $Author: kwart $
- * @version $Revision: 1.2 $
- * @created $Date: 2011/12/02 14:30:39 $
+ * @version $Revision: 1.3 $
+ * @created $Date: 2011/12/02 15:28:06 $
  */
 public class SignatureCounter {
 
@@ -34,14 +35,17 @@ public class SignatureCounter {
   public static void main(String[] args) {
 
     // create the Options
-    Option optHelp = new Option("h", "help", false, "print this message");
-    Option optDebug = new Option("d", "debug", false, "enables debug output");
-    Option optPasswd = new Option("p", "password", true, "set password for opening PDF");
+    final Option optHelp = new Option("h", "help", false, "print this message");
+    final Option optDebug = new Option("d", "debug", false, "enables debug output");
+    final Option optNames = new Option("n", "names", false,
+        "print comma separated signature names instead of the count");
+    final Option optPasswd = new Option("p", "password", true, "set password for opening PDF");
     optPasswd.setArgName("password");
 
     final Options options = new Options();
     options.addOption(optHelp);
     options.addOption(optDebug);
+    options.addOption(optNames);
     options.addOption(optPasswd);
 
     CommandLine line = null;
@@ -51,8 +55,8 @@ public class SignatureCounter {
       // parse the command line arguments
       line = parser.parse(options, args);
     } catch (ParseException exp) {
-      System.err.println("Illegal command used: " + exp.getMessage());
-      System.exit(1);
+      System.err.println("Unable to parse command line (Use -h for the help)\n" + exp.getMessage());
+      System.exit(Constants.EXIT_CODE_PARSE_ERR);
     }
 
     final String[] tmpArgs = line.getArgs();
@@ -60,14 +64,15 @@ public class SignatureCounter {
       // automatically generate the help statement
       HelpFormatter formatter = new HelpFormatter();
       formatter.printHelp(70, "java -jar SignatureCounter.jar [file1.pdf [file2.pdf ...]]",
-          "JSignpdf SignatureCounter is a command line tool which prints count of signatures in given PDF document.",
+          "JSignPdf SignatureCounter is a command line tool which prints count of signatures in given PDF document.",
           options, null, true);
     } else {
       byte[] tmpPasswd = null;
       if (line.hasOption("p")) {
         tmpPasswd = line.getOptionValue("p").getBytes();
       }
-      boolean debug = line.hasOption("d");
+      final boolean debug = line.hasOption("d");
+      final boolean names = line.hasOption("n");
 
       for (String tmpFilePath : tmpArgs) {
         if (debug) {
@@ -75,20 +80,34 @@ public class SignatureCounter {
         }
         final File tmpFile = new File(tmpFilePath);
         if (!tmpFile.canRead()) {
-          System.err.println("Couldn't read the file. Check the path and permissions.");
-          System.exit(2);
+          System.err.println("Couldn't read the file. Check the path and permissions: " + tmpFilePath);
+          System.exit(Constants.EXIT_CODE_CANT_READ_FILE);
         }
         try {
           final PdfReader pdfReader = PdfUtils.getPdfReader(tmpFilePath, tmpPasswd);
           @SuppressWarnings("unchecked")
           final List<String> sigNames = pdfReader.getAcroFields().getSignatureNames();
-          System.out.println(sigNames.size());
-          if (debug) {
-            System.out.println("Signature names: " + sigNames);
+          if (names) {
+            //print comma-separated names
+            boolean isNotFirst = false;
+            for (String sig : sigNames) {
+              if (isNotFirst) {
+                System.out.println(",");
+              } else {
+                isNotFirst = true;
+              }
+              System.out.println(sig);
+            }
+          } else {
+            //normal processing print only count of signatures
+            System.out.println(sigNames.size());
+            if (debug) {
+              System.out.println("Signature names: " + sigNames);
+            }
           }
         } catch (IOException e) {
           e.printStackTrace();
-          System.exit(3);
+          System.exit(Constants.EXIT_CODE_COMMON_ERROR);
         }
       }
     }
