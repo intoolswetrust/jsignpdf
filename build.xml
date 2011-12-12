@@ -389,6 +389,9 @@
 			<arg value="${dist.doc.dir}"/>
 			<arg value="${dist.doc.dir}/JSignPdf.pdf"/>
 		</java>
+		
+		<!-- guide also as a download -->
+		<copy file="${dist.doc.dir}/JSignPdf_signed.pdf" tofile="${output.dir}/JSignPdf_guide.pdf"/>
 	</target>
 
 	<target name="installer" depends="jar,unpack-jre,launcher,doc">
