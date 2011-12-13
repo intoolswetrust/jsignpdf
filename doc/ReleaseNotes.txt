@@ -1,3 +1,7 @@
+Version 1.2.5
+-------------
+  * fix for removing existing signatures 
+
 Version 1.2.4
 -------------
   * Verifier and SignatureCounter tools description added to documentatio

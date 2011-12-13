@@ -1,3 +1,6 @@
+2011-12-13 Josef Cacek (1.2.5)
+  * fixed problem with removing existing signatures (when PDF page dictionary is missing)
+
 2011-12-02 Josef Cacek (1.2.4)
   * add non-zero exit codes to SignatureCounter for error cases:
     EXIT_CODE_PARSE_ERR = 1 (command line in a wrong format)
