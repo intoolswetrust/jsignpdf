@@ -391,7 +391,7 @@
 		</java>
 		
 		<!-- guide also as a download -->
-		<copy file="${dist.doc.dir}/JSignPdf_signed.pdf" tofile="${output.dir}/JSignPdf_guide.pdf"/>
+		<copy file="${dist.doc.dir}/JSignPdf.pdf" tofile="${output.dir}/JSignPdf guide ${jsignpdf.version}.pdf"/>
 	</target>
 
 	<target name="installer" depends="jar,unpack-jre,launcher,doc">
