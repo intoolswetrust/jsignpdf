@@ -154,10 +154,26 @@
 			</chainedmapper>
 			</mapper>
 		</pathconvert>
+		<pathconvert property="instcert.manifest.classpath" pathsep=" ">
+			<path>
+				<fileset dir="${dist.dir}/lib">
+					<include name="commons-io*.jar" />
+					<include name="commons-lang*.jar" />
+				</fileset>
+			</path>
+			<mapper>
+			<chainedmapper>
+				<!-- remove absolute path -->
+				<flattenmapper />
 
+				<!-- add lib/ prefix -->
+				<globmapper from="*" to="lib/*" />
+			</chainedmapper>
+			</mapper>
+		</pathconvert>
+		
 		<jar destfile="${dist.dir}/${jsignpdf.filename}.jar">
 			<manifest>
-				<!-- attribute name="Built-By" value="${user.name}"/ -->
 				<attribute name="Main-Class" value="net.sf.jsignpdf.Signer"/>
 				<attribute name="Class-Path" value="${manifest.classpath}" />
 				<attribute name="RegistrationClassName" value="net.sf.jsignpdf.ooo.CentralRegistrationClass" />
@@ -184,21 +200,17 @@
 		
 		<jar destfile="${dist.dir}/${installcert.filename}.jar">
 			<manifest>
-				<!-- attribute name="Built-By" value="${user.name}"/ -->
 				<attribute name="Main-Class" value="net.sf.jsignpdf.InstallCert"/>
+				<attribute name="Class-Path" value="${instcert.manifest.classpath}" />				
 				<attribute name="Implementation-Vendor" value="Josef Cacek"/>
 				<attribute name="Implementation-Title" value="JSignPdf - InstallCert"/>
 				<attribute name="Implementation-Version" value="${jsignpdf.version} ${build.timestamp}"/>
 			</manifest>
 			<fileset dir="${bin.dir}">
 				<include name="**/InstallCert*.class"/>
-				<include name="**/StringUtils*.class"/>
-				<include name="**/IOUtils*.class"/>
 			</fileset>
 			<fileset dir="${src.filtered.dir}">
 				<include name="**/InstallCert.java"/>
-				<include name="**/StringUtils.java"/>
-				<include name="**/IOUtils.java"/>
 			</fileset>
 		</jar>
 		
