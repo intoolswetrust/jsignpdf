@@ -1,3 +1,7 @@
+Version 1.2.6
+-------------
+  * fixed bug in handling CLI option "-pr DISALLOW_PRINTING"
+
 Version 1.2.5
 -------------
   * fix for removing existing signatures 
