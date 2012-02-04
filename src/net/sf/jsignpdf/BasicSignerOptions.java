@@ -614,7 +614,7 @@ public class BasicSignerOptions {
   }
 
   public void setRightPrinting(PrintRight rightPrinting) {
-    if (getRightPrinting() == null) {
+    if (rightPrinting == null) {
       rightPrinting = PrintRight.ALLOW_PRINTING;
     }
     this.rightPrinting = rightPrinting;
