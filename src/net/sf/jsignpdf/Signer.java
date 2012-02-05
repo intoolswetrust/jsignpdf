@@ -3,6 +3,7 @@ package net.sf.jsignpdf;
 import static net.sf.jsignpdf.Constants.*;
 
 import java.io.File;
+import java.io.FileFilter;
 
 import javax.swing.UIManager;
 import javax.swing.WindowConstants;
@@ -15,7 +16,11 @@ import net.sf.jsignpdf.utils.ResourceProvider;
 
 import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.ParseException;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.io.filefilter.AndFileFilter;
+import org.apache.commons.io.filefilter.FileFileFilter;
+import org.apache.commons.io.filefilter.WildcardFileFilter;
+import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.lang3.StringUtils;
 
 /**
  * JSignPdf main class - it either process command line or if no argument is
@@ -66,7 +71,7 @@ public class Signer {
           System.out.println(tmpCert);
         }
       }
-      if ((tmpOpts.getFiles() != null && tmpOpts.getFiles().length > 0)
+      if (ArrayUtils.isNotEmpty(tmpOpts.getFiles())
           || (!StringUtils.isEmpty(tmpOpts.getInFile()) && !StringUtils.isEmpty(tmpOpts.getOutFile()))) {
         signFiles(tmpOpts);
       } else {
@@ -98,7 +103,7 @@ public class Signer {
    */
   private static void signFiles(SignerOptionsFromCmdLine anOpts) {
     final SignerLogic tmpLogic = new SignerLogic(anOpts);
-    if (anOpts.getFiles() == null || anOpts.getFiles().length == 0) {
+    if (ArrayUtils.isEmpty(anOpts.getFiles())) {
       // we've used -lp (loadproperties) parameter
       if (!tmpLogic.signFile()) {
         System.exit(Constants.EXIT_CODE_ALL_SIG_FAILED);
@@ -107,34 +112,46 @@ public class Signer {
     }
     int successCount = 0;
     int failedCount = 0;
-    for (final String tmpInFile : anOpts.getFiles()) {
-      final File tmpFile = new File(tmpInFile);
-      if (!tmpFile.canRead()) {
-        failedCount++;
-        System.err.println(ResourceProvider.getInstance().get("file.notReadable", new String[] { tmpInFile }));
-        continue;
-      }
-      anOpts.setInFile(tmpInFile);
-      String tmpNameBase, tmpSuffix;
-      if (tmpInFile.toLowerCase().endsWith(".pdf")) {
-        tmpSuffix = tmpInFile.substring(tmpInFile.length() - 4);
-        tmpNameBase = tmpInFile.substring(0, tmpInFile.length() - 4);
+
+    for (final String wildcardPath : anOpts.getFiles()) {
+      final File wildcardFile = new File(wildcardPath);
+
+      File[] inputFiles;
+      if (StringUtils.containsAny(wildcardFile.getName(), '*', '?')) {
+        final File inputFolder = wildcardFile.getAbsoluteFile().getParentFile();
+        final FileFilter fileFilter = new AndFileFilter(FileFileFilter.FILE, new WildcardFileFilter(
+            wildcardFile.getName()));
+        inputFiles = inputFolder.listFiles(fileFilter);
+        if (inputFiles == null) {
+          continue;
+        }
       } else {
-        tmpSuffix = ".pdf";
-        tmpNameBase = tmpInFile;
+        inputFiles = new File[] { wildcardFile };
       }
-      int tmpPos = tmpNameBase.replaceAll("\\\\", "/").lastIndexOf('/');
-      if (tmpPos > -1) {
-        tmpNameBase = tmpNameBase.substring(tmpPos + 1);
-      }
-      final StringBuilder tmpName = new StringBuilder(anOpts.getOutPath());
-      tmpName.append(anOpts.getOutPrefix());
-      tmpName.append(tmpNameBase).append(anOpts.getOutSuffix()).append(tmpSuffix);
-      anOpts.setOutFile(tmpName.toString());
-      if (tmpLogic.signFile()) {
-        successCount++;
-      } else {
-        failedCount++;
+      for (File inputFile : inputFiles) {
+        final String tmpInFile = inputFile.getPath();
+        if (!inputFile.canRead()) {
+          failedCount++;
+          System.err.println(ResourceProvider.getInstance().get("file.notReadable", new String[] { tmpInFile }));
+          continue;
+        }
+        anOpts.setInFile(tmpInFile);
+        String tmpNameBase = inputFile.getName();
+        String tmpSuffix = ".pdf";
+        if (StringUtils.endsWithIgnoreCase(tmpNameBase, tmpSuffix)) {
+          tmpSuffix = StringUtils.right(tmpNameBase, 4);
+          tmpNameBase = StringUtils.left(tmpNameBase, tmpNameBase.length() - 4);
+        }
+        final StringBuilder tmpName = new StringBuilder(anOpts.getOutPath());
+        tmpName.append(anOpts.getOutPrefix());
+        tmpName.append(tmpNameBase).append(anOpts.getOutSuffix()).append(tmpSuffix);
+        anOpts.setOutFile(tmpName.toString());
+        if (tmpLogic.signFile()) {
+          successCount++;
+        } else {
+          failedCount++;
+        }
+
       }
     }
     if (failedCount > 0) {

@@ -26,7 +26,7 @@ import net.sf.jsignpdf.utils.KeyStoreUtils;
 import net.sf.jsignpdf.utils.PropertyProvider;
 import net.sf.jsignpdf.utils.ResourceProvider;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 /**
  * GUI for PDFSigner.

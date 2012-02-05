@@ -6,19 +6,16 @@
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="lib" path="lib/commons-cli-1.2.jar"/>
 	<classpathentry kind="lib" path="lib/PDFRenderer.jar"/>
-	<classpathentry kind="lib" path="lib/commons-io-1.4.jar"/>
 	<classpathentry kind="lib" path="lib/fontbox-1.1.0.jar"/>
 	<classpathentry kind="lib" path="lib/icu4j-4_2_1.jar"/>
 	<classpathentry kind="lib" path="lib/icu4j-charsets-4_2_1.jar"/>
 	<classpathentry kind="lib" path="lib/jempbox-1.1.0.jar"/>
 	<classpathentry kind="lib" path="lib/pdfbox-1.1.0.jar"/>
-	<classpathentry kind="lib" path="unsorted/ooo.libs/juh.jar"/>
 	<classpathentry kind="lib" path="unsorted/ooo.libs/jurt.jar"/>
 	<classpathentry kind="lib" path="unsorted/ooo.libs/ridl.jar"/>
 	<classpathentry kind="lib" path="unsorted/ooo.libs/unoil.jar"/>
 	<classpathentry kind="lib" path="unsorted/ooo.libs/unoloader.jar"/>
 	<classpathentry kind="lib" path="unsorted/ooo.libs/java_uno.jar"/>
-	<classpathentry kind="lib" path="lib/commons-lang-2.6.jar"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/jsignpdf-itxt"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.junit.JUNIT_CONTAINER/4"/>
 	<classpathentry kind="lib" path="lib/bcmail-jdk15-146.jar"/>
@@ -28,5 +25,7 @@
 	<classpathentry kind="lib" path="lib/log4j-1.2.16.jar"/>
 	<classpathentry kind="lib" path="lib/slf4j-api-1.6.1.jar"/>
 	<classpathentry kind="lib" path="lib/slf4j-log4j12-1.6.1.jar"/>
+	<classpathentry kind="lib" path="lib/commons-io-2.1.jar"/>
+	<classpathentry kind="lib" path="lib/commons-lang3-3.1.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

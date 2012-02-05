@@ -1,4 +1,8 @@
-2011-12-13 Josef Cacek (1.2.6)
+2012-02-05 Josef Cacek
+  * wildcard (*,?) support in PDF names when using batch signing
+  * updated Apache commons libraries (commons-lang3-3.1, commons-io-2.1)
+
+2012-02-04 Josef Cacek (1.2.6)
   * fixed bug in handling CLI option "-pr DISALLOW_PRINTING" (c.f. https://sourceforge.net/projects/jsignpdf/forums/forum/782217/topic/4925360)
   * IOUtils class removed from jsignpdf packages - commons-io version is used instead
 

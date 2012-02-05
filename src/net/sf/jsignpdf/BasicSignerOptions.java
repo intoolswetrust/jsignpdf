@@ -11,7 +11,7 @@ import net.sf.jsignpdf.types.RenderMode;
 import net.sf.jsignpdf.utils.PropertyProvider;
 import net.sf.jsignpdf.utils.ResourceProvider;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.bouncycastle.crypto.CryptoException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

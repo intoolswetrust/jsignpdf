@@ -21,7 +21,7 @@ import net.sf.jsignpdf.utils.KeyStoreUtils;
 import net.sf.jsignpdf.utils.ResourceProvider;
 import net.sf.jsignpdf.utils.StringUtils;
 
-import org.apache.commons.lang.ArrayUtils;
+import org.apache.commons.lang3.ArrayUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
