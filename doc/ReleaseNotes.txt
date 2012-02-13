@@ -1,3 +1,9 @@
+Version 1.2.7 (test)
+-------------
+  * wildcard (*,?) support in PDF names when using batch signing
+  * Updated dependencies (Java runtime for Windows version 6u30, Apache commons libraries)
+  * Mac OS X test support (dmg)
+
 Version 1.2.6
 -------------
   * fixed bug in handling CLI option "-pr DISALLOW_PRINTING"

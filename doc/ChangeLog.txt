@@ -1,3 +1,10 @@
+2012-02-13 Josef Cacek
+  * symbolic link to /Applications added to Mac OS X .dmg package
+
+2012-02-10 Josef Cacek (1.2.7 test)
+  * Updated Java runtime for Windows (6u30)
+  * Mac OS X test support (dmg)
+
 2012-02-05 Josef Cacek
   * wildcard (*,?) support in PDF names when using batch signing
   * updated Apache commons libraries (commons-lang3-3.1, commons-io-2.1)
