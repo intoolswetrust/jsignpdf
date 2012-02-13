@@ -7,6 +7,12 @@
 	<!-- import properties -->
 	<import file="properties.xml"/>
 
+	<taskdef name="jarbundler" classname="net.sourceforge.jarbundler.JarBundler">
+		<classpath>
+			<pathelement location="${jarbundler.jar}"/>
+		</classpath>
+	</taskdef>	
+	
 	<filterset id="jsignpdf.filterset">
 		<filter token="JSIGNPDF_VERSION" value="${jsignpdf.version}"/>
 		<filter token="JSIGNPDF_FILENAME" value="${jsignpdf.filename}"/>
@@ -421,6 +427,59 @@
 		</exec>
 	</target>
 
+	<target name="setOS">
+		<condition property="isUnix">
+			<os family="unix"/>
+		</condition>
+	</target>	
+	
+	<target name="checkUnix" depends="setOS" unless="isUnix">
+		<fail message="Not a Unix OS."/>		
+	</target>
+	
+	<target name="macosx" depends="checkUnix">
+		<delete dir="${macosx.dir}"/>
+		<mkdir dir="${macosx.dir}"/>
+		<jarbundler dir="${macosx.dir}"
+				name="${jsignpdf.product.name}"
+				icon="doc\icon\iconverticons.com\signedpdf.icns"
+				version="${jsignpdf.version}"
+				jvmversion="1.6+"
+				vmoptions="-Xms32m -Xmx512m"
+				mainclass="net.sf.jsignpdf.Signer">
+			<jarfileset dir="${dist.dir}">
+			    <include name="${jsignpdf.filename}.jar" />
+			    <include name="lib/*.jar" />
+			</jarfileset>
+			<resourcefileset dir="${dist.dir}">
+				<include name="docs/**/*"/>
+				<include name="conf/**/*"/>
+				<exclude name="**/*.jar"/>
+			</resourcefileset>
+		</jarbundler>
+		
+		<!-- Delete the JavaApplicationStub and replace it with a symbolic link -->
+		<!--   which should work on older and future versions of OS X           -->
+		<delete file="${output.dir}/${jsignpdf.product.name}.app/Contents/MacOS/JavaApplicationStub"/>
+		<symlink link="${macosx.dir}/${jsignpdf.product.name}.app/Contents/MacOS/JavaApplicationStub" resource="/System/Library/Frameworks/JavaVM.framework/Resources/MacOS/JavaApplicationStub"/>
+
+		<!-- add symlink to /Applications -->
+		<symlink link="${macosx.dir}/Applications" resource="/Applications"/>
+
+		<!-- Create dmg -->
+		<exec executable="genisoimage" failonerror="true">
+			<arg value="-D"/>
+			<arg value="-V"/>
+			<arg value="${jsignpdf.product.name}"/>
+			<arg value="-no-pad"/>
+			<arg value="-r"/>
+			<arg value="-apple"/>
+			<arg value="-o"/>
+			<arg value="${output.dir}/${jsignpdf.filename}-${jsignpdf.version}.dmg"/>
+			<arg value="${macosx.dir}"/>
+		</exec>
+	</target>
+		
 	<target name="zip" depends="jar,doc">
 		<echo message="Creating a zip release" />
 

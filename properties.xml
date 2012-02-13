@@ -44,7 +44,7 @@
 
 
 	<!-- OpenOffice properties -->
-	<property name="ooo.libs" value="unsorted/ooo.libs" />
+	<property name="ooo.libs" value="lib-build/OpenOffice.org" />
 
 	<path id="ooo.classpath">
 		<fileset dir="${ooo.libs}">
@@ -64,4 +64,6 @@
 	<property name="jodconverter.zip" value="jodconverter-${jodconverter.version}.zip" />
 	<property name="jodconverter.dir" value="jodconverter-${jodconverter.version}" />
 
+	<property name="jarbundler.jar" value="lib-build/jarbundler-2.2.0.jar" />
+	<property name="macosx.dir" value="${java.io.tmpdir}/${jsignpdf.product.name}-macosx-temp" />
 </project>
