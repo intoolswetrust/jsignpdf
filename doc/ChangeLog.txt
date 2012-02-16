@@ -1,3 +1,6 @@
+2012-02-16 Josef Cacek
+  * improved hiding of components in the GUI (e.g. keystore file and password are hidden for WINDOWS-MY keystore) 
+
 2012-02-13 Josef Cacek
   * symbolic link to /Applications added to Mac OS X .dmg package
 
