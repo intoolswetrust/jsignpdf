@@ -206,7 +206,9 @@ public class KeyStoreUtils {
 
   private static String getKeyAliasInternal(final BasicSignerOptions options, final KeyStore aKs) {
     if (aKs == null) {
-      throw new NullPointerException(RES.get("error.keystoreNull"));
+      final String message = RES.get("error.keystoreNull");
+      LOGGER.warn(message);
+      throw new NullPointerException(message);
     }
     String tmpResult = null;
     if (StringUtils.isNotEmpty(options.getKeyAliasX())) {
