@@ -370,31 +370,16 @@
 		</launch4j>		
 	</target>
 
-	<target name="ooo_start">
-		<echo>Opening OpenOffice.org/LibreOffice</echo>
-		<exec executable="${ooo.dir}/program/soffice.exe" failonerror="false" spawn="true">
-			<arg line="-headless"/>
-			<arg line="-accept='socket,port=8100;urp;'"/>
-		</exec>
-		<echo>OpenOffice.org/LibreOffice opened - sleeping for 10s</echo>
-		<sleep seconds="10"/>
-	</target>
-
-	<target name="doc" depends="jar,ooo_start">
+	<target name="doc" depends="jar">
 		<echo message="Converting documentation (odt->pdf)" />
-
-		<antcall target="_get_sf_archive">
-			<param name="sfProject" value="${jodconverter.project}"/>
-			<param name="sfProjectArchive" value="${jodconverter.zip}"/>
-		</antcall>
-		<unzip src="${jodconverter.zip}" dest="${build.dir}"/>
-
-		<java jar="${build.dir}/${jodconverter.dir}/lib/jodconverter-cli-${jodconverter.version}.jar" fork="true" failonerror="true">
+		<exec executable="${ooo.dir}/program/soffice.exe" failonerror="true">
+			<arg line="--headless"/>
+			<arg line="--convert-to pdf:writer_pdf_Export --outdir"/>
+			<arg value="${dist.doc.dir}"/>
 			<arg value="doc/JSignPdf.odt"/>
-			<arg value="${dist.doc.dir}/JSignPdf.pdf"/>
-		</java>
+		</exec>
 
-		<java jar="${dist.dir}/${jsignpdf.filename}.jar" fork="true" failonerror="true">
+		<java jar="${dist.dir}/${jsignpdf.filename}.jar" fork="true" failonerror="true" jvmargs="-Duser.language=en">
 			<arg value="-kst"/>
 			<arg value="JKS"/>
 			<arg value="-ksf"/>
@@ -427,17 +412,20 @@
 		</exec>
 	</target>
 
-	<target name="setOS">
-		<condition property="isUnix">
-			<os family="unix"/>
+	<target name="setMacPreconditions">
+		<condition property="macBulildPossible">
+			<and>
+				<os family="unix"/>
+				<available file="${dist.dir}/${jsignpdf.filename}.jar" type="file" property="isJarAvailable"/>
+			</and>
 		</condition>
 	</target>	
 	
-	<target name="checkUnix" depends="setOS" unless="isUnix">
-		<fail message="Not a Unix OS."/>		
+	<target name="checkMacBuildPreconditions" depends="setMacPreconditions" unless="macBulildPossible">
+		<fail message="Not possible to run Mac build check OS and if the app is already build."/>		
 	</target>
 	
-	<target name="macosx" depends="checkUnix">
+	<target name="macosx" depends="checkMacBuildPreconditions">
 		<delete dir="${macosx.dir}"/>
 		<mkdir dir="${macosx.dir}"/>
 		<jarbundler dir="${macosx.dir}"

@@ -58,12 +58,6 @@
 	<property name="launch4j.zip" value="launch4j-${launch4j.version}-win32.zip" />
 	<property name="launch4j.dir" value="launch4j" />
 
-	<!-- JODConverter properties -->
-	<property name="jodconverter.project" value="jodconverter" />
-	<property name="jodconverter.version" value="2.2.2" />
-	<property name="jodconverter.zip" value="jodconverter-${jodconverter.version}.zip" />
-	<property name="jodconverter.dir" value="jodconverter-${jodconverter.version}" />
-
 	<property name="jarbundler.jar" value="lib-build/jarbundler-2.2.0.jar" />
 	<property name="macosx.dir" value="${java.io.tmpdir}/${jsignpdf.product.name}-macosx-temp" />
 </project>
