@@ -1,3 +1,9 @@
+Version 1.2.8 (test)
+-------------
+  * reporting (status messages) are logged by Log4J appenders
+  * GUI components visibility improved (e.g. for WINDOWS-MY keystore) 
+  * symbolic link to /Applications added to Mac OS X .dmg package
+
 Version 1.2.7 (test)
 -------------
   * wildcard (*,?) support in PDF names when using batch signing
