@@ -1,3 +1,8 @@
+2012-02-17 Josef Cacek
+  * jod-converter no more used for converting "JSignPdf guide" to PDF
+  * SLF4J removed from the project (only Log4J remains)
+  * used StringUtils from commons-lang3
+
 2012-02-16 Josef Cacek
   * improved hiding of components in the GUI (e.g. keystore file and password are hidden for WINDOWS-MY keystore) 
 

@@ -4,6 +4,8 @@ import java.io.File;
 import java.security.Provider;
 import java.security.Security;
 
+import org.apache.commons.lang3.StringUtils;
+
 /**
  * Methods for handling PKCS#11 security providers.
  * 

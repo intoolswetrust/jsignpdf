@@ -19,11 +19,10 @@ import net.sf.jsignpdf.types.RenderMode;
 import net.sf.jsignpdf.utils.FontUtils;
 import net.sf.jsignpdf.utils.KeyStoreUtils;
 import net.sf.jsignpdf.utils.ResourceProvider;
-import net.sf.jsignpdf.utils.StringUtils;
 
 import org.apache.commons.lang3.ArrayUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.log4j.Logger;
 
 import com.lowagie.text.Font;
 import com.lowagie.text.Image;
@@ -49,7 +48,7 @@ import com.lowagie.text.pdf.TSAClientBouncyCastle;
  */
 public class SignerLogic implements Runnable {
 
-  private final static Logger logger = LoggerFactory.getLogger(SignerLogic.class);
+  private final static Logger logger = Logger.getLogger(SignerLogic.class);
 
   protected final static ResourceProvider res = ResourceProvider.getInstance();
 
@@ -157,15 +156,15 @@ public class SignerLogic implements Runnable {
 
       final PdfSignatureAppearance sap = stp.getSignatureAppearance();
       sap.setCrypto(key, chain, null, PdfSignatureAppearance.WINCER_SIGNED);
-      if (!StringUtils.isEmpty(options.getReason())) {
+      if (StringUtils.isNotEmpty(options.getReason())) {
         options.log("console.setReason", options.getReason());
         sap.setReason(options.getReason());
       }
-      if (!StringUtils.isEmpty(options.getLocation())) {
+      if (StringUtils.isNotEmpty(options.getLocation())) {
         options.log("console.setLocation", options.getLocation());
         sap.setLocation(options.getLocation());
       }
-      if (!StringUtils.isEmpty(options.getContact())) {
+      if (StringUtils.isNotEmpty(options.getContact())) {
         options.log("console.setContact", options.getContact());
         sap.setContact(options.getContact());
       }
@@ -203,9 +202,9 @@ public class SignerLogic implements Runnable {
           buf.append(PdfPKCS7.getSubjectFields((X509Certificate) chain[0]).getField("CN")).append('\n');
           final SimpleDateFormat sd = new SimpleDateFormat("yyyy.MM.dd HH:mm:ss z");
           buf.append(res.get("default.l2text.date")).append(" ").append(sd.format(sap.getSignDate().getTime()));
-          if (StringUtils.hasLength(options.getReason()))
+          if (StringUtils.isNotEmpty(options.getReason()))
             buf.append('\n').append(res.get("default.l2text.reason")).append(" ").append(options.getReason());
-          if (StringUtils.hasLength(options.getLocation()))
+          if (StringUtils.isNotEmpty(options.getLocation()))
             buf.append('\n').append(res.get("default.l2text.location")).append(" ").append(options.getLocation());
           sap.setLayer2Text(buf.toString());
           ;
@@ -288,11 +287,11 @@ public class SignerLogic implements Runnable {
       TSAClientBouncyCastle tsc = null;
       if (options.isTimestampX() && !StringUtils.isEmpty(options.getTsaUrl())) {
         options.log("console.creatingTsaClient");
-        tsc = new TSAClientBouncyCastle(options.getTsaUrl(), StringUtils.emptyNull(options.getTsaUser()),
-            StringUtils.emptyNull(options.getTsaPasswd()));
+        tsc = new TSAClientBouncyCastle(options.getTsaUrl(), StringUtils.defaultString(options.getTsaUser()),
+            StringUtils.defaultString(options.getTsaPasswd()));
         tsc.setProxy(tmpProxy);
         final String policyOid = options.getTsaPolicy();
-        if (StringUtils.hasLength(policyOid)) {
+        if (StringUtils.isNotEmpty(policyOid)) {
           options.log("console.settingTsaPolicy", policyOid);
           tsc.setPolicy(policyOid);
         }

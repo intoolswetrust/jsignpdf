@@ -12,9 +12,8 @@ import net.sf.jsignpdf.utils.PropertyProvider;
 import net.sf.jsignpdf.utils.ResourceProvider;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.log4j.Logger;
 import org.bouncycastle.crypto.CryptoException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Options for PDF signer.
@@ -23,7 +22,7 @@ import org.slf4j.LoggerFactory;
  */
 public class BasicSignerOptions {
 
-  private final static Logger logger = LoggerFactory.getLogger(BasicSignerOptions.class);
+  private final static Logger logger = Logger.getLogger(BasicSignerOptions.class);
 
   protected final static ResourceProvider res = ResourceProvider.getInstance();
   protected final PropertyProvider props = PropertyProvider.getInstance();
