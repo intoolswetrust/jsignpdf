@@ -29,6 +29,8 @@
  */
 package net.sf.jsignpdf;
 
+import static net.sf.jsignpdf.Constants.RES;
+
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.InputStream;
@@ -41,13 +43,13 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import net.sf.jsignpdf.crl.CRLInfo;
 import net.sf.jsignpdf.types.HashAlgorithm;
 import net.sf.jsignpdf.types.RenderMode;
 import net.sf.jsignpdf.utils.FontUtils;
 import net.sf.jsignpdf.utils.KeyStoreUtils;
-import net.sf.jsignpdf.utils.ResourceProvider;
 
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -77,9 +79,7 @@ import com.lowagie.text.pdf.TSAClientBouncyCastle;
  */
 public class SignerLogic implements Runnable {
 
-  private final static Logger logger = Logger.getLogger(SignerLogic.class);
-
-  protected final static ResourceProvider res = ResourceProvider.getInstance();
+  private final static Logger LOGGER = Logger.getLogger(SignerLogic.class);
 
   private final BasicSignerOptions options;
 
@@ -113,7 +113,7 @@ public class SignerLogic implements Runnable {
   public boolean signFile() {
     final String outFile = options.getOutFileX();
     if (!validateInOutFiles(options.getInFile(), outFile)) {
-      options.log("console.skippingSigning");
+      LOGGER.info(RES.get("console.skippingSigning"));
       return false;
     }
 
@@ -126,10 +126,10 @@ public class SignerLogic implements Runnable {
       final Certificate[] chain = pkInfo.getChain();
       if (ArrayUtils.isEmpty(chain)) {
         //the certificate was not found
-        options.log("console.certificateChainEmpty");
+        LOGGER.info(RES.get("console.certificateChainEmpty"));
         return false;
       }
-      options.log("console.createPdfReader", options.getInFile());
+      LOGGER.info(RES.get("console.createPdfReader", options.getInFile()));
       PdfReader reader;
       try {
         // try to read without password
@@ -142,24 +142,24 @@ public class SignerLogic implements Runnable {
         }
       }
 
-      options.log("console.createOutPdf", outFile);
+      LOGGER.info(RES.get("console.createOutPdf", outFile));
       fout = new FileOutputStream(outFile);
 
       final HashAlgorithm hashAlgorithm = options.getHashAlgorithmX();
 
-      options.log("console.createSignature");
+      LOGGER.info(RES.get("console.createSignature"));
       char tmpPdfVersion = '\0'; // default version - the same as input
       if (reader.getPdfVersion() < hashAlgorithm.getPdfVersion()) {
         //this covers also problems with visible signatures (embedded fonts) in PDF 1.2, because the minimal version
         //for hash algorithms is 1.3 (for SHA1)
         if (options.isAppendX()) {
           //if we are in append mode and version should be updated then return false (not possible)
-          options.log("console.updateVersionNotPossibleInAppendMode");
+          LOGGER.info(RES.get("console.updateVersionNotPossibleInAppendMode"));
           return false;
         }
         tmpPdfVersion = hashAlgorithm.getPdfVersion();
-        options.log("console.updateVersion",
-            new String[] { String.valueOf(reader.getPdfVersion()), String.valueOf(tmpPdfVersion) });
+        LOGGER.info(RES.get("console.updateVersion",
+            new String[] { String.valueOf(reader.getPdfVersion()), String.valueOf(tmpPdfVersion) }));
       }
 
       final PdfStamper stp = PdfStamper.createSignature(reader, fout, tmpPdfVersion, null, options.isAppendX());
@@ -167,13 +167,14 @@ public class SignerLogic implements Runnable {
         // we are not in append mode, let's remove existing signatures
         // (otherwise we're getting to troubles)
         final AcroFields acroFields = stp.getAcroFields();
+        @SuppressWarnings("unchecked")
         final List<String> sigNames = acroFields.getSignatureNames();
         for (String sigName : sigNames) {
           acroFields.removeField(sigName);
         }
       }
       if (options.isEncryptedX()) {
-        options.log("console.setEncryption");
+        LOGGER.info(RES.get("console.setEncryption"));
         final int tmpRight = options.getRightPrinting().getRight() | (options.isRightCopy() ? PdfWriter.ALLOW_COPY : 0)
             | (options.isRightAssembly() ? PdfWriter.ALLOW_ASSEMBLY : 0)
             | (options.isRightFillIn() ? PdfWriter.ALLOW_FILL_IN : 0)
@@ -186,79 +187,79 @@ public class SignerLogic implements Runnable {
       final PdfSignatureAppearance sap = stp.getSignatureAppearance();
       sap.setCrypto(key, chain, null, PdfSignatureAppearance.WINCER_SIGNED);
       if (StringUtils.isNotEmpty(options.getReason())) {
-        options.log("console.setReason", options.getReason());
+        LOGGER.info(RES.get("console.setReason", options.getReason()));
         sap.setReason(options.getReason());
       }
       if (StringUtils.isNotEmpty(options.getLocation())) {
-        options.log("console.setLocation", options.getLocation());
+        LOGGER.info(RES.get("console.setLocation", options.getLocation()));
         sap.setLocation(options.getLocation());
       }
       if (StringUtils.isNotEmpty(options.getContact())) {
-        options.log("console.setContact", options.getContact());
+        LOGGER.info(RES.get("console.setContact", options.getContact()));
         sap.setContact(options.getContact());
       }
-      options.log("console.setCertificationLevel");
+      LOGGER.info(RES.get("console.setCertificationLevel"));
       sap.setCertificationLevel(options.getCertLevelX().getLevel());
 
       if (options.isVisible()) {
         // visible signature is enabled
-        options.log("console.configureVisible");
-        options.log("console.setAcro6Layers", Boolean.toString(options.isAcro6Layers()));
+        LOGGER.info(RES.get("console.configureVisible"));
+        LOGGER.info(RES.get("console.setAcro6Layers", Boolean.toString(options.isAcro6Layers())));
         sap.setAcro6Layers(options.isAcro6Layers());
 
         final String tmpImgPath = options.getImgPath();
         if (tmpImgPath != null) {
-          options.log("console.createImage", tmpImgPath);
+          LOGGER.info(RES.get("console.createImage", tmpImgPath));
           final Image img = Image.getInstance(tmpImgPath);
-          options.log("console.setSignatureGraphic");
+          LOGGER.info(RES.get("console.setSignatureGraphic"));
           sap.setSignatureGraphic(img);
         }
         final String tmpBgImgPath = options.getBgImgPath();
         if (tmpBgImgPath != null) {
-          options.log("console.createImage", tmpBgImgPath);
+          LOGGER.info(RES.get("console.createImage", tmpBgImgPath));
           final Image img = Image.getInstance(tmpBgImgPath);
-          options.log("console.setImage");
+          LOGGER.info(RES.get("console.setImage"));
           sap.setImage(img);
         }
-        options.log("console.setImageScale");
+        LOGGER.info(RES.get("console.setImageScale"));
         sap.setImageScale(options.getBgImgScale());
-        options.log("console.setL2Text");
+        LOGGER.info(RES.get("console.setL2Text"));
         if (options.getL2Text() != null) {
           sap.setLayer2Text(options.getL2Text());
         } else {
           final StringBuilder buf = new StringBuilder();
-          buf.append(res.get("default.l2text.signedBy")).append(" ");
+          buf.append(RES.get("default.l2text.signedBy")).append(" ");
           buf.append(PdfPKCS7.getSubjectFields((X509Certificate) chain[0]).getField("CN")).append('\n');
           final SimpleDateFormat sd = new SimpleDateFormat("yyyy.MM.dd HH:mm:ss z");
-          buf.append(res.get("default.l2text.date")).append(" ").append(sd.format(sap.getSignDate().getTime()));
+          buf.append(RES.get("default.l2text.date")).append(" ").append(sd.format(sap.getSignDate().getTime()));
           if (StringUtils.isNotEmpty(options.getReason()))
-            buf.append('\n').append(res.get("default.l2text.reason")).append(" ").append(options.getReason());
+            buf.append('\n').append(RES.get("default.l2text.reason")).append(" ").append(options.getReason());
           if (StringUtils.isNotEmpty(options.getLocation()))
-            buf.append('\n').append(res.get("default.l2text.location")).append(" ").append(options.getLocation());
+            buf.append('\n').append(RES.get("default.l2text.location")).append(" ").append(options.getLocation());
           sap.setLayer2Text(buf.toString());
           ;
         }
         if (FontUtils.getL2BaseFont() != null) {
           sap.setLayer2Font(new Font(FontUtils.getL2BaseFont(), options.getL2TextFontSize()));
         }
-        options.log("console.setL4Text");
+        LOGGER.info(RES.get("console.setL4Text"));
         sap.setLayer4Text(options.getL4Text());
-        options.log("console.setRender");
+        LOGGER.info(RES.get("console.setRender"));
         RenderMode renderMode = options.getRenderMode();
         if (renderMode == RenderMode.GRAPHIC_AND_DESCRIPTION && sap.getSignatureGraphic() == null) {
-          logger
+          LOGGER
               .warn("Render mode of visible signature is set to GRAPHIC_AND_DESCRIPTION, but no image is loaded. Fallback to DESCRIPTION_ONLY.");
-          options.log("console.renderModeFallback");
+          LOGGER.info(RES.get("console.renderModeFallback"));
           renderMode = RenderMode.DESCRIPTION_ONLY;
         }
         sap.setRender(renderMode.getRender());
-        options.log("console.setVisibleSignature");
+        LOGGER.info(RES.get("console.setVisibleSignature"));
         sap.setVisibleSignature(
             new Rectangle(options.getPositionLLX(), options.getPositionLLY(), options.getPositionURX(), options
                 .getPositionURY()), options.getPage(), null);
       }
 
-      options.log("console.processing");
+      LOGGER.info(RES.get("console.processing"));
       final PdfSignature dic = new PdfSignature(PdfName.ADOBE_PPKLITE, new PdfName("adbe.pkcs7.detached"));
       if (!StringUtils.isEmpty(options.getReason())) {
         dic.setReason(sap.getReason());
@@ -279,7 +280,7 @@ public class SignerLogic implements Runnable {
       // CRLs are stored twice in PDF c.f.
       // PdfPKCS7.getAuthenticatedAttributeBytes
       final int contentEstimated = (int) (Constants.DEFVAL_SIG_SIZE + 2L * crlInfo.getByteCount());
-      HashMap exc = new HashMap();
+      final Map<PdfName, Integer> exc = new HashMap<PdfName, Integer>();
       exc.put(PdfName.CONTENTS, new Integer(contentEstimated * 2 + 2));
       sap.preClose(exc);
 
@@ -295,15 +296,15 @@ public class SignerLogic implements Runnable {
       Calendar cal = Calendar.getInstance();
       byte[] ocsp = null;
       if (options.isOcspEnabledX() && chain.length >= 2) {
-        options.log("console.getOCSPURL");
+        LOGGER.info(RES.get("console.getOCSPURL"));
         String url = PdfPKCS7.getOCSPURL((X509Certificate) chain[0]);
         if (StringUtils.isEmpty(url)) {
           //get from options
-          options.log("console.noOCSPURL");
+          LOGGER.info(RES.get("console.noOCSPURL"));
           url = options.getOcspServerUrl();
         }
         if (!StringUtils.isEmpty(url)) {
-          options.log("console.readingOCSP", url);
+          LOGGER.info(RES.get("console.readingOCSP", url));
           final OcspClientBouncyCastle ocspClient = new OcspClientBouncyCastle((X509Certificate) chain[0],
               (X509Certificate) chain[1], url);
           ocspClient.setProxy(tmpProxy);
@@ -315,13 +316,13 @@ public class SignerLogic implements Runnable {
 
       TSAClientBouncyCastle tsc = null;
       if (options.isTimestampX() && !StringUtils.isEmpty(options.getTsaUrl())) {
-        options.log("console.creatingTsaClient");
+        LOGGER.info(RES.get("console.creatingTsaClient"));
         tsc = new TSAClientBouncyCastle(options.getTsaUrl(), StringUtils.defaultString(options.getTsaUser()),
             StringUtils.defaultString(options.getTsaPasswd()));
         tsc.setProxy(tmpProxy);
         final String policyOid = options.getTsaPolicy();
         if (StringUtils.isNotEmpty(policyOid)) {
-          options.log("console.settingTsaPolicy", policyOid);
+          LOGGER.info(RES.get("console.settingTsaPolicy", policyOid));
           tsc.setPolicy(policyOid);
         }
       }
@@ -337,19 +338,15 @@ public class SignerLogic implements Runnable {
 
       PdfDictionary dic2 = new PdfDictionary();
       dic2.put(PdfName.CONTENTS, new PdfString(paddedSig).setHexWriting(true));
-      options.log("console.closeStream");
+      LOGGER.info(RES.get("console.closeStream"));
       sap.close(dic2);
       fout.close();
       fout = null;
       finished = true;
     } catch (Exception e) {
-      options.log("console.exception");
-      e.printStackTrace(options.getPrintWriter());
-      tmpException = e;
+      LOGGER.error(RES.get("console.exception"), e);
     } catch (OutOfMemoryError e) {
-      tmpException = e;
-      e.printStackTrace(options.getPrintWriter());
-      options.log("console.memoryError");
+      LOGGER.fatal(RES.get("console.memoryError"), e);
     } finally {
       if (fout != null) {
         try {
@@ -359,7 +356,7 @@ public class SignerLogic implements Runnable {
         }
       }
 
-      options.log("console.finished." + (finished ? "ok" : "error"));
+      LOGGER.info(RES.get("console.finished." + (finished ? "ok" : "error")));
       options.fireSignerFinishedEvent(tmpException);
     }
     return finished;
@@ -375,19 +372,19 @@ public class SignerLogic implements Runnable {
    * @return true if valid, false otherwise
    */
   private boolean validateInOutFiles(final String inFile, final String outFile) {
-    options.log("console.validatingFiles");
+    LOGGER.info(RES.get("console.validatingFiles"));
     if (StringUtils.isEmpty(inFile) || StringUtils.isEmpty(outFile)) {
-      options.log("console.fileNotFilled.error");
+      LOGGER.info(RES.get("console.fileNotFilled.error"));
       return false;
     }
     final File tmpInFile = new File(inFile);
     final File tmpOutFile = new File(outFile);
     if (!(tmpInFile.exists() && tmpInFile.isFile() && tmpInFile.canRead())) {
-      options.log("console.inFileNotFound.error");
+      LOGGER.info(RES.get("console.inFileNotFound.error"));
       return false;
     }
     if (tmpInFile.getAbsolutePath().equals(tmpOutFile.getAbsolutePath())) {
-      options.log("console.filesAreEqual.error");
+      LOGGER.info(RES.get("console.filesAreEqual.error"));
       return false;
     }
     return true;

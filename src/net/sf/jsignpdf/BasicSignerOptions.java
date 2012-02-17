@@ -29,7 +29,6 @@
  */
 package net.sf.jsignpdf;
 
-import java.io.PrintWriter;
 import java.net.InetSocketAddress;
 import java.net.Proxy;
 
@@ -38,10 +37,8 @@ import net.sf.jsignpdf.types.HashAlgorithm;
 import net.sf.jsignpdf.types.PrintRight;
 import net.sf.jsignpdf.types.RenderMode;
 import net.sf.jsignpdf.utils.PropertyProvider;
-import net.sf.jsignpdf.utils.ResourceProvider;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.log4j.Logger;
 import org.bouncycastle.crypto.CryptoException;
 
 /**
@@ -51,13 +48,11 @@ import org.bouncycastle.crypto.CryptoException;
  */
 public class BasicSignerOptions {
 
-  private final static Logger logger = Logger.getLogger(BasicSignerOptions.class);
+//  private final static Logger LOGGER = Logger.getLogger(BasicSignerOptions.class);
 
-  protected final static ResourceProvider res = ResourceProvider.getInstance();
   protected final PropertyProvider props = PropertyProvider.getInstance();
   protected final JSignEncryptor encryptor = new JSignEncryptor();
 
-  private PrintWriter printWriter;
   private String propertiesFilePath;
 
   private String ksType;
@@ -285,26 +280,6 @@ public class BasicSignerOptions {
   }
 
   /**
-   * Logs localized message to PrintWriter
-   * 
-   * @param aKey
-   *          message key
-   * @param anArgs
-   *          message parameters
-   * @deprecated this method should be replaced by calling SLF4J logging
-   */
-  @Deprecated
-  public void log(final String aKey, final String... anArgs) {
-    //TODO refactor logging in JSignPdf
-    final String message = res.get(aKey, anArgs);
-    logger.info(message);
-    if (printWriter != null) {
-      printWriter.println(message);
-      printWriter.flush();
-    }
-  }
-
-  /**
    * Fires event listener
    * 
    * @param aResult
@@ -326,14 +301,6 @@ public class BasicSignerOptions {
    */
   private String charArrToStr(final char[] aCharArr) {
     return aCharArr == null ? "" : new String(aCharArr);
-  }
-
-  public PrintWriter getPrintWriter() {
-    return printWriter;
-  }
-
-  public void setPrintWriter(PrintWriter outWriter) {
-    this.printWriter = outWriter;
   }
 
   /**

@@ -32,9 +32,11 @@ package net.sf.jsignpdf;
 import java.net.Proxy;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.ResourceBundle;
 import java.util.Set;
 
 import net.sf.jsignpdf.types.HashAlgorithm;
+import net.sf.jsignpdf.utils.ResourceProvider;
 
 /**
  * Constants used in PDF signer application.
@@ -80,6 +82,10 @@ public class Constants {
   public static final String DEFAULT_OUT_SUFFIX = "_signed";
 
   public static final String KEYSTORE_TYPE_WINDOWS_MY = "WINDOWS-MY";
+
+  public static final String NEW_LINE = System.getProperty("line.separator");
+
+  public static final ResourceProvider RES = new ResourceProvider(ResourceBundle.getBundle(RESOURCE_BUNDLE_BASE));
 
   /**
    * Property name.

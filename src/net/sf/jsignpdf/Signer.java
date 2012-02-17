@@ -41,7 +41,6 @@ import net.sf.jsignpdf.utils.ConfigProvider;
 import net.sf.jsignpdf.utils.GuiUtils;
 import net.sf.jsignpdf.utils.KeyStoreUtils;
 import net.sf.jsignpdf.utils.PKCS11Utils;
-import net.sf.jsignpdf.utils.ResourceProvider;
 
 import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.ParseException;
@@ -50,6 +49,7 @@ import org.apache.commons.io.filefilter.FileFileFilter;
 import org.apache.commons.io.filefilter.WildcardFileFilter;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.log4j.Logger;
 
 /**
  * JSignPdf main class - it either process command line or if no argument is
@@ -59,13 +59,20 @@ import org.apache.commons.lang3.StringUtils;
  */
 public class Signer {
 
+  private final static Logger LOGGER = Logger.getLogger(BasicSignerOptions.class);
+
+  /**
+   * Prints formatted help message (command line arguments).
+   */
   private static void printHelp() {
     final HelpFormatter formatter = new HelpFormatter();
-    final ResourceProvider res = ResourceProvider.getInstance();
-    final String ls = System.getProperty("line.separator");
-    formatter.printHelp(80, "java -jar JSignPdf.jar [file1.pdf [file2.pdf ...]]", res.get("hlp.header"),
-        SignerOptionsFromCmdLine.OPTS, ls + res.get("hlp.footer.exitCodes") + ls + StringUtils.repeat("-", 80) + ls
-            + res.get("hlp.footer.examples"), true);
+    formatter.printHelp(
+        80,
+        "java -jar JSignPdf.jar [file1.pdf [file2.pdf ...]]",
+        RES.get("hlp.header"),
+        SignerOptionsFromCmdLine.OPTS,
+        NEW_LINE + RES.get("hlp.footer.exitCodes") + NEW_LINE + StringUtils.repeat("-", 80) + NEW_LINE
+            + RES.get("hlp.footer.examples"), true);
   }
 
   /**
@@ -74,6 +81,8 @@ public class Signer {
    * @param args
    */
   public static void main(String[] args) {
+//    BasicConfigurator.configure();
+
     PKCS11Utils.registerProvider(ConfigProvider.getInstance().getProperty("pkcs11config.path"));
 
     if (args != null && args.length > 0) {
@@ -87,14 +96,14 @@ public class Signer {
         printHelp();
       }
       if (tmpOpts.isListKeyStores()) {
-        tmpOpts.log("console.keystores");
+        LOGGER.info(RES.get("console.keystores"));
         for (String tmpKsType : KeyStoreUtils.getKeyStores()) {
           System.out.println(tmpKsType);
         }
       }
       if (tmpOpts.isListKeys()) {
         final String[] tmpKeyAliases = KeyStoreUtils.getKeyAliases(tmpOpts);
-        tmpOpts.log("console.keys");
+        LOGGER.info(RES.get("console.keys"));
         // list certificate aliases in the keystore
         for (String tmpCert : tmpKeyAliases) {
           System.out.println(tmpCert);
@@ -161,7 +170,7 @@ public class Signer {
         final String tmpInFile = inputFile.getPath();
         if (!inputFile.canRead()) {
           failedCount++;
-          System.err.println(ResourceProvider.getInstance().get("file.notReadable", new String[] { tmpInFile }));
+          System.err.println(RES.get("file.notReadable", new String[] { tmpInFile }));
           continue;
         }
         anOpts.setInFile(tmpInFile);

@@ -29,46 +29,45 @@
  */
 package net.sf.jsignpdf.types;
 
-import net.sf.jsignpdf.utils.ResourceProvider;
+import static net.sf.jsignpdf.Constants.RES;
 
 import com.lowagie.text.pdf.PdfSignatureAppearance;
 
 /**
  * Enum for visible sign rendering configuration
+ * 
  * @author Josef Cacek
  */
 public enum RenderMode {
 
-	DESCRIPTION_ONLY ("render.descriptionOnly",
-		PdfSignatureAppearance.SignatureRenderDescription),
-	GRAPHIC_AND_DESCRIPTION ("render.graphicAndDescription",
-		PdfSignatureAppearance.SignatureRenderGraphicAndDescription),
-	SIGNAME_AND_DESCRIPTION ("render.signameAndDescription",
-		PdfSignatureAppearance.SignatureRenderNameAndDescription);
+  DESCRIPTION_ONLY("render.descriptionOnly", PdfSignatureAppearance.SignatureRenderDescription),
+  GRAPHIC_AND_DESCRIPTION("render.graphicAndDescription", PdfSignatureAppearance.SignatureRenderGraphicAndDescription),
+  SIGNAME_AND_DESCRIPTION("render.signameAndDescription", PdfSignatureAppearance.SignatureRenderNameAndDescription);
 
-	private String msgKey;
-	private int render;
+  private String msgKey;
+  private int render;
 
-	RenderMode(final String aMsgKey, final int aLevel) {
-		msgKey = aMsgKey;
-		render = aLevel;
-	}
+  RenderMode(final String aMsgKey, final int aLevel) {
+    msgKey = aMsgKey;
+    render = aLevel;
+  }
 
-	/**
-	 * Returns internationalized description of a right.
-	 */
-	@Override
-	public String toString() {
-		return ResourceProvider.getInstance().get(msgKey);
-	}
+  /**
+   * Returns internationalized description of a right.
+   */
+  @Override
+  public String toString() {
+    return RES.get(msgKey);
+  }
 
-	/**
-	 * Returns Visible Signature Render flag.
-	 * @return integer flag
-	 * @see PdfSignatureAppearance#setRender(int)
-	 */
-	public int getRender() {
-		return render;
-	}
+  /**
+   * Returns Visible Signature Render flag.
+   * 
+   * @return integer flag
+   * @see PdfSignatureAppearance#setRender(int)
+   */
+  public int getRender() {
+    return render;
+  }
 
 }

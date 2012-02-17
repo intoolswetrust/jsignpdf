@@ -29,6 +29,8 @@
  */
 package net.sf.jsignpdf;
 
+import static net.sf.jsignpdf.Constants.RES;
+
 import java.awt.image.BufferedImage;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
@@ -59,8 +61,6 @@ import org.apache.commons.lang3.StringUtils;
 public class VisibleSignatureDialog extends javax.swing.JDialog {
 
   private static final long serialVersionUID = 1L;
-
-  protected final ResourceProvider res = ResourceProvider.getInstance();
 
   private BasicSignerOptions options;
   private SignerFileChooser fc;
@@ -151,7 +151,7 @@ public class VisibleSignatureDialog extends javax.swing.JDialog {
    * Translates labels in this dialog.
    */
   private void translateLabels() {
-    setTitle(res.get("gui.vs.title"));
+    setTitle(RES.get("gui.vs.title"));
 
     setLabelAndMnemonic(lblPosition, "gui.vs.position.label");
     setLabelAndMnemonic(lblPage, "gui.vs.page.label");
@@ -177,7 +177,7 @@ public class VisibleSignatureDialog extends javax.swing.JDialog {
     setLabelAndMnemonic(btnClose, "gui.vs.close.button");
 
     setLabelAndMnemonic(btnPreviewClose, "gui.vs.close.button");
-    previewDialog.setTitle(res.get("gui.preview.title"));
+    previewDialog.setTitle(RES.get("gui.preview.title"));
 
     setToolTip(tfPage, "gui.vs.page.tooltip");
     setToolTip(tfPosLLX, "gui.vs.llx.tooltip");
@@ -242,7 +242,7 @@ public class VisibleSignatureDialog extends javax.swing.JDialog {
    * @param aKey
    */
   private void setLabelAndMnemonic(final JComponent aComponent, final String aKey) {
-    res.setLabelAndMnemonic(aComponent, aKey);
+    RES.setLabelAndMnemonic(aComponent, aKey);
   }
 
   /**
@@ -254,7 +254,7 @@ public class VisibleSignatureDialog extends javax.swing.JDialog {
    *          tooltip key (in resource bundle)
    */
   private void setToolTip(final JComponent aComponent, final String aKey) {
-    aComponent.setToolTipText(res.get(aKey));
+    aComponent.setToolTipText(RES.get(aKey));
   }
 
   /**
@@ -836,10 +836,10 @@ public class VisibleSignatureDialog extends javax.swing.JDialog {
         previewListenerDisabled = false;
         previewDialog.setVisible(true);
       } else {
-        JOptionPane.showMessageDialog(this, res.get("error.vs.previewFailed"), "Error", JOptionPane.WARNING_MESSAGE);
+        JOptionPane.showMessageDialog(this, RES.get("error.vs.previewFailed"), "Error", JOptionPane.WARNING_MESSAGE);
       }
     } else {
-      JOptionPane.showMessageDialog(this, res.get("error.vs.pageNotANumber"), "Error", JOptionPane.WARNING_MESSAGE);
+      JOptionPane.showMessageDialog(this, RES.get("error.vs.pageNotANumber"), "Error", JOptionPane.WARNING_MESSAGE);
     }
   }// GEN-LAST:event_btnPreviewActionPerformed
 

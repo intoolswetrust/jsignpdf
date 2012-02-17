@@ -29,11 +29,10 @@
  */
 package net.sf.jsignpdf;
 
+import static net.sf.jsignpdf.Constants.RES;
+
 import java.awt.Toolkit;
-import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.OutputStream;
-import java.io.PrintWriter;
 import java.net.URL;
 import java.security.KeyStore;
 import java.util.Set;
@@ -43,7 +42,6 @@ import javax.swing.DefaultComboBoxModel;
 import javax.swing.JComponent;
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
-import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.filechooser.FileFilter;
 
@@ -53,9 +51,12 @@ import net.sf.jsignpdf.types.PrintRight;
 import net.sf.jsignpdf.utils.GuiUtils;
 import net.sf.jsignpdf.utils.KeyStoreUtils;
 import net.sf.jsignpdf.utils.PropertyProvider;
-import net.sf.jsignpdf.utils.ResourceProvider;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.log4j.Appender;
+import org.apache.log4j.Layout;
+import org.apache.log4j.Logger;
+import org.apache.log4j.SimpleLayout;
 
 /**
  * GUI for PDFSigner.
@@ -66,13 +67,12 @@ public class SignPdfForm extends javax.swing.JFrame implements SignResultListene
 
   private static final long serialVersionUID = 1L;
 
+  private final static Logger LOGGER = Logger.getLogger(SignPdfForm.class);
+
   private SignerFileChooser fc = new SignerFileChooser();
 
   protected final PropertyProvider props = PropertyProvider.getInstance();
-  protected final ResourceProvider res = ResourceProvider.getInstance();
 
-  private PrintWriter infoWriter;
-  private TextAreaStream infoStream;
   private boolean autoclose = false;
   private BasicSignerOptions options = new BasicSignerOptions();
   private SignerLogic signerLogic = new SignerLogic(options);
@@ -80,6 +80,9 @@ public class SignPdfForm extends javax.swing.JFrame implements SignResultListene
   private TsaDialog tsaDialog = new TsaDialog(this, true, options);
 
   /** Creates new form SignPdfForm */
+  /**
+   * @param aCloseOperation
+   */
   public SignPdfForm(int aCloseOperation) {
     initComponents();
     options.loadOptions();
@@ -87,9 +90,6 @@ public class SignPdfForm extends javax.swing.JFrame implements SignResultListene
 
     setDefaultCloseOperation(aCloseOperation);
     getRootPane().setDefaultButton(btnSignIt);
-
-    infoStream = new TextAreaStream(infoTextArea);
-    infoWriter = new PrintWriter(infoStream, true);
 
     // set Icon of frames
     URL tmpImgUrl = getClass().getResource("/net/sf/jsignpdf/signedpdf32.png");
@@ -111,7 +111,6 @@ public class SignPdfForm extends javax.swing.JFrame implements SignResultListene
     vsDialog.pack();
     GuiUtils.center(vsDialog);
 
-    options.setPrintWriter(infoWriter);
     options.setListener(this);
 
     final Set<String> tmpKsTypes = KeyStoreUtils.getKeyStores();
@@ -124,6 +123,13 @@ public class SignPdfForm extends javax.swing.JFrame implements SignResultListene
     cbHashAlgorithm.setModel(new DefaultComboBoxModel(HashAlgorithm.values()));
     cbPrinting.setModel(new DefaultComboBoxModel(PrintRight.values()));
 
+    final JTextAreaAppender jTextAreaAppender = new JTextAreaAppender(infoTextArea);
+    final Logger rootLogger = Logger.getRootLogger();
+    final Appender appender = rootLogger.getAppender("jsignpdf");
+    final Layout layout = appender != null ? appender.getLayout() : new SimpleLayout();
+    jTextAreaAppender.setLayout(layout);
+    rootLogger.addAppender(jTextAreaAppender);
+
     updateFromOptions();
   }
 
@@ -131,7 +137,7 @@ public class SignPdfForm extends javax.swing.JFrame implements SignResultListene
    * Application translations.
    */
   private void translateLabels() {
-    setTitle(res.get("gui.title", new String[] { Constants.VERSION }));
+    setTitle(RES.get("gui.title", new String[] { Constants.VERSION }));
     setLabelAndMnemonic(lblKeystoreType, "gui.keystoreType.label");
     setLabelAndMnemonic(chkbAdvanced, "gui.advancedView.checkbox");
     setLabelAndMnemonic(lblKeystoreFile, "gui.keystoreFile.label");
@@ -153,16 +159,16 @@ public class SignPdfForm extends javax.swing.JFrame implements SignResultListene
     setLabelAndMnemonic(chkbAppendSignature, "gui.appendSignature.checkbox");
     setLabelAndMnemonic(lblHashAlgorithm, "gui.hashAlgorithm.label");
 
-    btnKeystoreFile.setText(res.get("gui.browse.button"));
-    btnInPdfFile.setText(res.get("gui.browse.button"));
-    btnOutPdfFile.setText(res.get("gui.browse.button"));
+    btnKeystoreFile.setText(RES.get("gui.browse.button"));
+    btnInPdfFile.setText(RES.get("gui.browse.button"));
+    btnOutPdfFile.setText(RES.get("gui.browse.button"));
 
     setLabelAndMnemonic(btnSignIt, "gui.signIt.button");
 
-    infoDialog.setTitle(res.get("gui.info.title"));
-    btnInfoClose.setText(res.get("gui.info.close.button"));
+    infoDialog.setTitle(RES.get("gui.info.title"));
+    btnInfoClose.setText(RES.get("gui.info.close.button"));
 
-    rightsDialog.setTitle(res.get("gui.rights.title"));
+    rightsDialog.setTitle(RES.get("gui.rights.title"));
     setLabelAndMnemonic(lblPrinting, "gui.rights.printing.label");
     setLabelAndMnemonic(lblRights, "gui.rights.rights.label");
     setLabelAndMnemonic(chkbAllowCopy, "gui.rights.copy.checkbox");
@@ -187,7 +193,7 @@ public class SignPdfForm extends javax.swing.JFrame implements SignResultListene
    *          message key
    */
   private void setLabelAndMnemonic(final JComponent aComponent, final String aKey) {
-    res.setLabelAndMnemonic(aComponent, aKey);
+    RES.setLabelAndMnemonic(aComponent, aKey);
   }
 
   /**
@@ -1070,7 +1076,7 @@ public class SignPdfForm extends javax.swing.JFrame implements SignResultListene
    */
   public synchronized void signerFinishedEvent(Throwable e) {
     if (e instanceof SSLHandshakeException) {
-      JOptionPane.showMessageDialog(this, res.get("error.sslHandshakeException"), "Error", JOptionPane.WARNING_MESSAGE);
+      JOptionPane.showMessageDialog(this, RES.get("error.sslHandshakeException"), "Error", JOptionPane.WARNING_MESSAGE);
     }
     btnInfoClose.setEnabled(true);
     infoDialog.setDefaultCloseOperation(javax.swing.WindowConstants.HIDE_ON_CLOSE);
@@ -1106,8 +1112,8 @@ public class SignPdfForm extends javax.swing.JFrame implements SignResultListene
     } catch (Exception e) {
     }
 
-    final String tmpMsg = res.get("gui.fileNotExists.error", new String[] { res.get(aFileDescKey) });
-    JOptionPane.showMessageDialog(this, tmpMsg, res.get("gui.check.error.title"), JOptionPane.ERROR_MESSAGE);
+    final String tmpMsg = RES.get("gui.fileNotExists.error", new String[] { RES.get(aFileDescKey) });
+    JOptionPane.showMessageDialog(this, tmpMsg, RES.get("gui.check.error.title"), JOptionPane.ERROR_MESSAGE);
     return false;
   }
 
@@ -1126,7 +1132,7 @@ public class SignPdfForm extends javax.swing.JFrame implements SignResultListene
         final File tmpOutFile = (new File(tmpOutName)).getAbsoluteFile();
         if (tmpInFile.equals(tmpOutFile)) {
           tmpResult = false;
-          JOptionPane.showMessageDialog(this, res.get("gui.filesEqual.error"), res.get("gui.check.error.title"),
+          JOptionPane.showMessageDialog(this, RES.get("gui.filesEqual.error"), RES.get("gui.check.error.title"),
               JOptionPane.ERROR_MESSAGE);
         }
       } catch (Exception e) {
@@ -1155,12 +1161,13 @@ public class SignPdfForm extends javax.swing.JFrame implements SignResultListene
     }
     storeToOptions();
     if (checkFileExists(tfInPdfFile, "gui.inPdfFile.label") && checkInOutDiffers()) {
-      infoStream.clear();
+      infoTextArea.setText(null);
       btnInfoClose.setEnabled(false);
       infoDialog.setVisible(true);
       setVisible(false);
       infoDialog.setDefaultCloseOperation(javax.swing.WindowConstants.DO_NOTHING_ON_CLOSE);
-      infoWriter.println(res.get("console.starting"));
+
+      LOGGER.info(RES.get("console.starting"));
       // Let's do it
       final Thread tmpST = new Thread(signerLogic);
       tmpST.start();
@@ -1252,46 +1259,4 @@ public class SignPdfForm extends javax.swing.JFrame implements SignResultListene
   private javax.swing.JTextField tfReason;
   // End of variables declaration//GEN-END:variables
 
-}
-
-/**
- * OutputStream wrapper for writing to TextArea component
- * 
- * @author Josef Cacek
- */
-class TextAreaStream extends OutputStream {
-  protected final JTextArea textArea;
-  protected final ByteArrayOutputStream baos;
-
-  public TextAreaStream(JTextArea textArea) {
-    this.textArea = textArea;
-    this.baos = new ByteArrayOutputStream();
-  }
-
-  public void write(int c) {
-    synchronized (this) {
-      this.baos.write((char) c);
-      this.update();
-    }
-  }
-
-  public void write(byte[] bytes, int offset, int length) {
-    synchronized (this) {
-      this.baos.write(bytes, offset, length);
-      this.update();
-    }
-  }
-
-  private void update() {
-    String text = new String(this.baos.toByteArray());
-    this.textArea.setText(text);
-    this.textArea.setCaretPosition(text.length());
-  }
-
-  public void clear() {
-    synchronized (this) {
-      baos.reset();
-      update();
-    }
-  }
 }

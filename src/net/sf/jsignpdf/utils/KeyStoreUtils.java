@@ -29,6 +29,8 @@
  */
 package net.sf.jsignpdf.utils;
 
+import static net.sf.jsignpdf.Constants.RES;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -60,6 +62,7 @@ import net.sf.jsignpdf.Constants;
 import net.sf.jsignpdf.PrivateKeyInfo;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.log4j.Logger;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
 /**
@@ -69,7 +72,7 @@ import org.bouncycastle.jce.provider.BouncyCastleProvider;
  */
 public class KeyStoreUtils {
 
-  private static final ResourceProvider res = ResourceProvider.getInstance();
+  private final static Logger LOGGER = Logger.getLogger(KeyStoreUtils.class);
 
   static {
     Security.addProvider(new BouncyCastleProvider());
@@ -94,10 +97,10 @@ public class KeyStoreUtils {
     if (options == null) {
       throw new NullPointerException("Options are empty.");
     }
-    options.log("console.getKeystoreType", options.getKsType());
+    LOGGER.info(RES.get("console.getKeystoreType", options.getKsType()));
     final KeyStore tmpKs = loadKeyStore(options.getKsType(), options.getKsFile(), options.getKsPasswd());
     if (tmpKs == null) {
-      throw new NullPointerException(res.get("error.keystoreNull"));
+      throw new NullPointerException(RES.get("error.keystoreNull"));
     }
     final List<String> tmpResult = getAliasesList(tmpKs, options);
     return tmpResult.toArray(new String[tmpResult.size()]);
@@ -115,11 +118,11 @@ public class KeyStoreUtils {
       throw new NullPointerException("Options are empty.");
     }
     if (aKs == null) {
-      throw new NullPointerException(res.get("error.keystoreNull"));
+      throw new NullPointerException(RES.get("error.keystoreNull"));
     }
     final List<String> tmpResult = new ArrayList<String>();
     try {
-      options.log("console.getAliases");
+      LOGGER.info(RES.get("console.getAliases"));
       final Enumeration<String> tmpAliases = aKs.aliases();
       final boolean checkValidity = ConfigProvider.getInstance().getAsBool("certificate.checkValidity", true);
       final boolean checkKeyUsage = ConfigProvider.getInstance().getAsBool("certificate.checkKeyUsage", true);
@@ -136,10 +139,10 @@ public class KeyStoreUtils {
               try {
                 tmpX509.checkValidity();
               } catch (CertificateExpiredException e) {
-                options.log("console.certificateExpired", tmpAlias);
+                LOGGER.info(RES.get("console.certificateExpired", tmpAlias));
                 tmpAddAlias = false;
               } catch (CertificateNotYetValidException e) {
-                options.log("console.certificateNotYetValid", tmpAlias);
+                LOGGER.info(RES.get("console.certificateNotYetValid", tmpAlias));
                 tmpAddAlias = false;
               }
             }
@@ -159,7 +162,7 @@ public class KeyStoreUtils {
                 // encipherOnly (7),
                 // decipherOnly (8) }
                 if (!(keyUsage[0] || keyUsage[1])) {
-                  options.log("console.certificateNotForSignature", tmpAlias);
+                  LOGGER.info(RES.get("console.certificateNotForSignature", tmpAlias));
                   tmpAddAlias = false;
                 }
               }
@@ -170,7 +173,7 @@ public class KeyStoreUtils {
               if (criticalExtensionOIDs != null) {
                 for (String oid : criticalExtensionOIDs) {
                   if (!Constants.SUPPORTED_CRITICAL_EXTENSION_OIDS.contains(oid)) {
-                    options.log("console.criticalExtensionNotSupported", tmpAlias, oid);
+                    LOGGER.info(RES.get("console.criticalExtensionNotSupported", tmpAlias, oid));
                     tmpAddAlias = false;
                   }
                 }
@@ -183,8 +186,7 @@ public class KeyStoreUtils {
         }
       }
     } catch (Exception e) {
-      options.log("console.exception");
-      e.printStackTrace(options.getPrintWriter());
+      LOGGER.error(RES.get("console.exception"), e);
     }
     return tmpResult;
   }
@@ -204,14 +206,14 @@ public class KeyStoreUtils {
 
   private static String getKeyAliasInternal(final BasicSignerOptions options, final KeyStore aKs) {
     if (aKs == null) {
-      throw new NullPointerException(res.get("error.keystoreNull"));
+      throw new NullPointerException(RES.get("error.keystoreNull"));
     }
     String tmpResult = null;
     if (StringUtils.isNotEmpty(options.getKeyAliasX())) {
       try {
         if (aKs.isKeyEntry(options.getKeyAliasX())) {
           tmpResult = options.getKeyAliasX();
-          options.log("console.usedKeyAlias", tmpResult);
+          LOGGER.info(RES.get("console.usedKeyAlias", tmpResult));
           return tmpResult;
         }
       } catch (KeyStoreException e) {
@@ -230,7 +232,7 @@ public class KeyStoreUtils {
       // fallback - return the first key
       tmpResult = tmpList.get(0);
     }
-    options.log("console.usedKeyAlias", tmpResult);
+    LOGGER.info(RES.get("console.usedKeyAlias", tmpResult));
     return tmpResult;
   }
 
@@ -415,9 +417,9 @@ public class KeyStoreUtils {
     final KeyStore tmpKs = loadKeyStore(options.getKsType(), options.getKsFile(), options.getKsPasswd());
 
     String tmpAlias = getKeyAliasInternal(options, tmpKs);
-    options.log("console.getPrivateKey");
+    LOGGER.info(RES.get("console.getPrivateKey"));
     final PrivateKey tmpPk = (PrivateKey) tmpKs.getKey(tmpAlias, options.getKeyPasswdX());
-    options.log("console.getCertChain");
+    LOGGER.info(RES.get("console.getCertChain"));
     final Certificate[] tmpChain = tmpKs.getCertificateChain(tmpAlias);
     PrivateKeyInfo tmpResult = new PrivateKeyInfo(tmpPk, tmpChain);
     return tmpResult;
