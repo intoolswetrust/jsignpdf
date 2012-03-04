@@ -1,3 +1,6 @@
+2012-03-03 Josef Cacek (1.3.0)
+  * documentation updated
+
 2012-02-17 Josef Cacek (1.2.8 test)
   * jod-converter no more used for converting "JSignPdf guide" to PDF
   * SLF4J removed from the project (only Log4J remains)
