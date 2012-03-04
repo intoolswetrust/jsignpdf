@@ -53,8 +53,7 @@
 	</path>
 
 	<!-- Launch4j properties -->
-	<property name="launch4j.project" value="launch4j" />
-	<property name="launch4j.version" value="3.0.1" />
+	<property name="launch4j.version" value="3.0.2" />
 	<property name="launch4j.zip" value="launch4j-${launch4j.version}-win32.zip" />
 	<property name="launch4j.dir" value="launch4j" />
 

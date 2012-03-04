@@ -246,11 +246,7 @@
 	<target name="launcher" depends="jar">
 		<echo message="Creating windows launcher (EXE)" />
 
-		<antcall target="_get_sf_archive">
-			<param name="sfProject" value="${launch4j.project}"/>
-			<param name="sfProjectArchive" value="${launch4j.zip}"/>
-		</antcall>
-		<unzip src="${launch4j.zip}" dest="${build.dir}"/>
+		<unzip src="lib-build/${launch4j.zip}" dest="${build.dir}"/>
 
 		<taskdef name="launch4j"
 			classname="net.sf.launch4j.ant.Launch4jTask"
