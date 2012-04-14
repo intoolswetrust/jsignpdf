@@ -1,3 +1,6 @@
+2012-04-15 Josef Cacek
+  * DejaVu Sans font used for visible signatures instead of Rus Sans Pokrytie
+  
 2012-03-03 Josef Cacek (1.3.0)
   * documentation updated
 
