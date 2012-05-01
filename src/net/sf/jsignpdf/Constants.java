@@ -103,7 +103,10 @@ public class Constants {
 	public static final String PROPERTY_STOREPWD = "store.passwords";
 
 	public static final String PROPERTY_APPEND = "signature.append";
+	@Deprecated
 	public static final String PROPERTY_ENCRYPTED_PDF = "inpdf.encrypted";
+	public static final String PROPERTY_PDF_ENCRYPTION = "pdf.encryption";
+	public static final String PROPERTY_PDF_ENCRYPTION_CERT_FILE = "pdf.encryption.publicKeyFile";
 
 	public static final String PROPERTY_CERT_LEVEL = "certification.level";
 	public static final String PROPERTY_HASH_ALGORITHM = "hash.algorithm";
@@ -266,11 +269,17 @@ public class Constants {
 	public static final String ARG_ENCRYPTED = "e";
 	public static final String ARG_ENCRYPTED_LONG = "encrypted";
 
+	public static final String ARG_ENCRYPTION = "pe";
+	public static final String ARG_ENCRYPTION_LONG = "encryption";
+
 	public static final String ARG_PWD_OWNER = "opwd";
 	public static final String ARG_PWD_OWNER_LONG = "owner-password";
 
 	public static final String ARG_PWD_USER = "upwd";
 	public static final String ARG_PWD_USER_LONG = "user-password";
+
+	public static final String ARG_ENC_CERT = "ec";
+	public static final String ARG_ENC_CERT_LONG = "encryption-certificate";
 
 	public static final String ARG_RIGHT_PRINT = "pr";
 	public static final String ARG_RIGHT_PRINT_LONG = "print-right";
