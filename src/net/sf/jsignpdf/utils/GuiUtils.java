@@ -31,6 +31,8 @@ package net.sf.jsignpdf.utils;
 
 import java.awt.Component;
 import java.awt.Dimension;
+import java.awt.GraphicsDevice;
+import java.awt.GraphicsEnvironment;
 
 /**
  * Helper class for swing GUI (window, component) manipulation
@@ -46,10 +48,11 @@ public class GuiUtils {
 	 *            the component to be centered
 	 */
 	public static void center(final Component component) {
+		final GraphicsDevice gd = GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice();
+		final int screenWidth = gd.getDisplayMode().getWidth();
+		final int screenHeight = gd.getDisplayMode().getHeight();
 		final Dimension paneSize = component.getSize();
-		final Dimension screenSize = component.getToolkit().getScreenSize();
-		component.setLocation((screenSize.width - paneSize.width) / 2,
-				(int) ((screenSize.height - paneSize.height) * 0.45));
+		component.setLocation((screenWidth - paneSize.width) / 2, (int) ((screenHeight - paneSize.height) * 0.45));
 	}
 
 	/**
@@ -58,8 +61,10 @@ public class GuiUtils {
 	 * @param component
 	 */
 	public static void resizeAndCenter(final Component component) {
-		final Dimension screenSize = component.getToolkit().getScreenSize();
-		component.setSize((int) (screenSize.width * 0.8), (int) (screenSize.height * 0.8));
+		final GraphicsDevice gd = GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice();
+		final int screenWidth = gd.getDisplayMode().getWidth();
+		final int screenHeight = gd.getDisplayMode().getHeight();
+		component.setSize((int) (screenWidth * 0.8), (int) (screenHeight * 0.8));
 		center(component);
 	}
 
