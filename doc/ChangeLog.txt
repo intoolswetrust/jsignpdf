@@ -1,6 +1,7 @@
 2012-05-01 Josef Cacek
   * Certificate encryption support for the output PDF added
   * Window positioning fixed for multiple displays
+  * Source code moved from SourceForge CVS to GitHub
 
 2012-04-15 Josef Cacek
   * DejaVu Sans font used for visible signatures instead of Rus Sans Pokrytie
