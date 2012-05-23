@@ -29,11 +29,7 @@
  */
 package net.sf.jsignpdf;
 
-import static net.sf.jsignpdf.Constants.EXIT_CODE_NO_COMMAND;
-import static net.sf.jsignpdf.Constants.EXIT_CODE_PARSE_ERR;
-import static net.sf.jsignpdf.Constants.NEW_LINE;
-import static net.sf.jsignpdf.Constants.RES;
-import static net.sf.jsignpdf.Constants.VERSION;
+import static net.sf.jsignpdf.Constants.*;
 
 import java.io.File;
 import java.io.FileFilter;
@@ -91,6 +87,14 @@ public class Signer {
 	 * @param args
 	 */
 	public static void main(String[] args) {
+		//Details for the properties - http://docs.oracle.com/javase/7/docs/technotes/guides/security/jsse/JSSERefGuide.html
+		//Workaround for http://sourceforge.net/tracker/?func=detail&atid=1037906&aid=3491269&group_id=216921
+		System.setProperty("jsse.enableSNIExtension", "false");
+
+		//just in case...
+		System.setProperty("sun.security.ssl.allowUnsafeRenegotiation", "true");
+		System.setProperty("sun.security.ssl.allowLegacyHelloMessages", "true");
+
 		PKCS11Utils.registerProvider(ConfigProvider.getInstance().getProperty("pkcs11config.path"));
 
 		traceInfo();
