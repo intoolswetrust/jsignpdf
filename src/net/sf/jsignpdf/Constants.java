@@ -137,6 +137,9 @@ public class Constants {
 	public static final String PROPERTY_TSA_ENABLED = "tsa.enabled";
 	public static final String PROPERTY_TSA_URL = "tsa.url";
 	public static final String PROPERTY_TSA_USER = "tsa.user";
+	public static final String PROPERTY_TSA_SERVER_AUTHN = "tsa.serverAuthn";
+	public static final String PROPERTY_TSA_CERT_FILE = "tsa.cert.file";
+	public static final String EPROPERTY_TSA_CERT_PWD = "enc.tsa.cert.file";
 	public static final String EPROPERTY_TSA_PWD = "enc.tsa.passwd";
 	public static final String PROPERTY_TSA_POLICY = "tsa.policy";
 
@@ -344,7 +347,7 @@ public class Constants {
 		SUPPORTED_CRITICAL_EXTENSION_OIDS = Collections.unmodifiableSet(oidSet);
 	}
 
-	private static boolean toBoolean(boolean b) {
+	private static boolean toBoolean(final boolean b) {
 		return b;
 	}
 
