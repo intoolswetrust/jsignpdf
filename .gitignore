@@ -6,3 +6,5 @@
 *.ear
 
 bin
+nbproject/private
+
