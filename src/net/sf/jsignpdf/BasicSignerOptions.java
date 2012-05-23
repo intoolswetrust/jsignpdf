@@ -38,6 +38,7 @@ import net.sf.jsignpdf.types.HashAlgorithm;
 import net.sf.jsignpdf.types.PDFEncryption;
 import net.sf.jsignpdf.types.PrintRight;
 import net.sf.jsignpdf.types.RenderMode;
+import net.sf.jsignpdf.types.ServerAuthentication;
 import net.sf.jsignpdf.utils.PropertyProvider;
 
 import org.apache.commons.lang3.StringUtils;
@@ -108,8 +109,13 @@ public class BasicSignerOptions {
 	// options for timestamps (provided by external TSA)
 	private boolean timestamp;
 	private String tsaUrl;
+	private ServerAuthentication tsaServerAuthn;
 	private String tsaUser;
 	private String tsaPasswd;
+	// assume for now, the private keys for TSA authn will be in PKCS12 keystore (the first PK in the KS) - then we 
+	// don't need to take care about keystore types, aliases and their listing...
+	private String tsaCertFile;
+	private String tsaCertFilePwd;
 	private String tsaPolicy;
 
 	// options for certificate validation

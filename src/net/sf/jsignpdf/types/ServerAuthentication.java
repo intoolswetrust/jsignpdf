@@ -27,66 +27,30 @@
  * the provisions above, a recipient may use your version of this file
  * under either the MPL or the LGPL License.
  */
-package net.sf.jsignpdf.ssl;
+package net.sf.jsignpdf.types;
 
 import static net.sf.jsignpdf.Constants.RES;
 
-import java.security.cert.CertificateException;
-import java.security.cert.X509Certificate;
-
-import javax.net.ssl.X509TrustManager;
-
-import org.apache.log4j.Logger;
-
 /**
+ * A server authentication methods enum.
  * 
  * @author Josef Cacek
  */
-public class UnsafeTrustManager implements X509TrustManager {
+public enum ServerAuthentication {
+	NONE("serverAuthn.none"), PASSWORD("serverAuthn.password"), CERTIFICATE("serverAuthn.certificate");
 
-	private final static Logger LOGGER = Logger.getLogger(UnsafeTrustManager.class);
+	private String msgKey;
 
-	private X509TrustManager tm;
-	private X509Certificate[] chain;
-
-	public UnsafeTrustManager(X509TrustManager tm) {
-		this.tm = tm;
+	ServerAuthentication(final String aMsgKey) {
+		msgKey = aMsgKey;
 	}
 
 	/**
-	 * @return the chain
+	 * Returns internationalized description of a level.
 	 */
-	public X509Certificate[] getChain() {
-		return chain;
-	}
-
-	/* (non-Javadoc)
-	 * @see javax.net.ssl.X509TrustManager#checkClientTrusted(java.security.cert.X509Certificate[], java.lang.String)
-	 */
-	public void checkClientTrusted(X509Certificate[] chain, String authType) throws CertificateException {
-		throw new UnsupportedOperationException();
-	}
-
-	/* (non-Javadoc)
-	 * @see javax.net.ssl.X509TrustManager#checkServerTrusted(java.security.cert.X509Certificate[], java.lang.String)
-	 */
-	public void checkServerTrusted(X509Certificate[] chain, String authType) throws CertificateException {
-		this.chain = chain;
-		if (tm != null) {
-			try {
-				tm.checkServerTrusted(chain, authType);
-			} catch (CertificateException e) {
-				LOGGER.warn(RES.get("console.serverNotTrusted"));
-			}
-		}
-	}
-
-	/* (non-Javadoc)
-	 * @see javax.net.ssl.X509TrustManager#getAcceptedIssuers()
-	 */
-	public X509Certificate[] getAcceptedIssuers() {
-		// TODO What shall we return?
-		return tm != null ? tm.getAcceptedIssuers() : new X509Certificate[0];
+	@Override
+	public String toString() {
+		return RES.get(msgKey);
 	}
 
 }
