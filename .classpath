@@ -17,6 +17,9 @@
 	<classpathentry kind="lib" path="lib-build/OpenOffice.org/ridl.jar"/>
 	<classpathentry kind="lib" path="lib-build/OpenOffice.org/unoil.jar"/>
 	<classpathentry kind="lib" path="lib-build/OpenOffice.org/unoloader.jar"/>
+	<classpathentry kind="lib" path="lib/jcl-over-slf4j-1.6.4.jar"/>
+	<classpathentry kind="lib" path="lib/slf4j-api-1.6.4.jar"/>
+	<classpathentry kind="lib" path="lib/slf4j-log4j12-1.6.4.jar"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/jsignpdf-itxt"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.junit.JUNIT_CONTAINER/4"/>
 	<classpathentry kind="lib" path="lib/bcmail-jdk15-146.jar"/>
