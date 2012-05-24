@@ -319,6 +319,15 @@ public class Constants {
 	public static final String ARG_TSA_URL = "ts";
 	public static final String ARG_TSA_URL_LONG = "tsa-server-url";
 
+	public static final String ARG_TSA_AUTHN = "ta";
+	public static final String ARG_TSA_AUTHN_LONG = "tsa-authentication";
+
+	public static final String ARG_TSA_CERT_FILE = "tscf";
+	public static final String ARG_TSA_CERT_FILE_LONG = "tsa-cert-file";
+
+	public static final String ARG_TSA_CERT_PWD = "tscp";
+	public static final String ARG_TSA_CERT_PWD_LONG = "tsa-cert-password";
+
 	public static final String ARG_TSA_USER = "tsu";
 	public static final String ARG_TSA_USER_LONG = "tsa-user";
 
