@@ -87,13 +87,7 @@ public class Signer {
 	 * @param args
 	 */
 	public static void main(String[] args) {
-		//Details for the properties - http://docs.oracle.com/javase/7/docs/technotes/guides/security/jsse/JSSERefGuide.html
-		//Workaround for http://sourceforge.net/tracker/?func=detail&atid=1037906&aid=3491269&group_id=216921
-		System.setProperty("jsse.enableSNIExtension", "false");
-
-		//just in case...
-		System.setProperty("sun.security.ssl.allowUnsafeRenegotiation", "true");
-		System.setProperty("sun.security.ssl.allowLegacyHelloMessages", "true");
+//		SSLInitializer.init();
 
 		PKCS11Utils.registerProvider(ConfigProvider.getInstance().getProperty("pkcs11config.path"));
 
