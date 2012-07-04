@@ -478,6 +478,26 @@ public class KeyStoreUtils {
 		return result;
 	}
 
+	public static KeyStore createTrustStore() throws KeyStoreException, NoSuchAlgorithmException, CertificateException,
+			IOException {
+		final KeyStore trustStore = createKeyStore();
+
+		char SEP = File.separatorChar;
+		final File dir = new File(System.getProperty("java.home") + SEP + "lib" + SEP + "security");
+		final File file = new File(dir, "cacerts");
+		if (file.canRead()) {
+			final KeyStore ks = KeyStore.getInstance("JKS");
+			final InputStream in = new FileInputStream(file);
+			try {
+				ks.load(in, null);
+			} finally {
+				in.close();
+			}
+			copyCertificates(ks, trustStore);
+		}
+		return trustStore;
+	}
+
 	/**
 	 * For WINDOWS-MY keystore fixes problem with non-unique aliases
 	 * 

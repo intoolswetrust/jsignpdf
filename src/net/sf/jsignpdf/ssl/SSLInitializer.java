@@ -29,9 +29,19 @@
  */
 package net.sf.jsignpdf.ssl;
 
+import java.io.IOException;
+import java.security.KeyManagementException;
+import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
+import java.security.cert.CertificateException;
 
-import net.sf.jsignpdf.utils.ConfigProvider;
+import javax.net.ssl.HostnameVerifier;
+import javax.net.ssl.HttpsURLConnection;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLSession;
+import javax.net.ssl.TrustManager;
+
+import net.sf.jsignpdf.Constants;
 
 /**
  * 
@@ -39,9 +49,9 @@ import net.sf.jsignpdf.utils.ConfigProvider;
  */
 public class SSLInitializer {
 
-	public static final void init() throws NoSuchAlgorithmException {
-		final ConfigProvider conf = ConfigProvider.getInstance();
-		if (conf.getAsBool("relax.ssl.security")) {
+	public static final void init() throws NoSuchAlgorithmException, KeyManagementException, KeyStoreException,
+			CertificateException, IOException {
+		if (Constants.RELAX_SSL_SECURITY) {
 			//Details for the properties - http://docs.oracle.com/javase/7/docs/technotes/guides/security/jsse/JSSERefGuide.html
 			//Workaround for http://sourceforge.net/tracker/?func=detail&atid=1037906&aid=3491269&group_id=216921
 			System.setProperty("jsse.enableSNIExtension", "false");
@@ -50,16 +60,16 @@ public class SSLInitializer {
 			System.setProperty("sun.security.ssl.allowUnsafeRenegotiation", "true");
 			System.setProperty("sun.security.ssl.allowLegacyHelloMessages", "true");
 
-//			SSLContext defaultSSLContext = SSLContext.getInstance("SSLv3");
-//
-//			KeyManagerFactory kmf = KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm());
-////			kmf.init();
-//			KeyManager[] keyManagers = kmf.getKeyManagers();
-//
-//			//TODO orig trust manager
-//			TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm()).
-//			TrustManager[] trustManagers = new TrustManager[] { new UnsafeTrustManager(null) };
-//			defaultSSLContext.init(keyManagers, trustManagers, null);
+			HttpsURLConnection.setDefaultHostnameVerifier(new HostnameVerifier() {
+				public boolean verify(String hostname, SSLSession session) {
+					return true;
+				}
+			});
 		}
+
+		SSLContext sslContext = SSLContext.getInstance("TLS");
+		sslContext.init(null, new TrustManager[] { new DynamicX509TrustManager() }, null);
+
+		HttpsURLConnection.setDefaultSSLSocketFactory(sslContext.getSocketFactory());
 	}
 }

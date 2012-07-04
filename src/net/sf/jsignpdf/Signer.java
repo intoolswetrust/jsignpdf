@@ -43,6 +43,7 @@ import java.util.List;
 import javax.swing.UIManager;
 import javax.swing.WindowConstants;
 
+import net.sf.jsignpdf.ssl.SSLInitializer;
 import net.sf.jsignpdf.utils.ConfigProvider;
 import net.sf.jsignpdf.utils.GuiUtils;
 import net.sf.jsignpdf.utils.KeyStoreUtils;
@@ -87,7 +88,11 @@ public class Signer {
 	 * @param args
 	 */
 	public static void main(String[] args) {
-//		SSLInitializer.init();
+		try {
+			SSLInitializer.init();
+		} catch (Exception e) {
+			LOGGER.warn("Unable to re-configure SSL layer", e);
+		}
 
 		PKCS11Utils.registerProvider(ConfigProvider.getInstance().getProperty("pkcs11config.path"));
 

@@ -36,6 +36,7 @@ import java.util.ResourceBundle;
 import java.util.Set;
 
 import net.sf.jsignpdf.types.HashAlgorithm;
+import net.sf.jsignpdf.utils.ConfigProvider;
 import net.sf.jsignpdf.utils.ResourceProvider;
 
 /**
@@ -86,6 +87,8 @@ public class Constants {
 	public static final String NEW_LINE = System.getProperty("line.separator");
 
 	public static final ResourceProvider RES = new ResourceProvider(ResourceBundle.getBundle(RESOURCE_BUNDLE_BASE));
+
+	public static final boolean RELAX_SSL_SECURITY = ConfigProvider.getInstance().getAsBool("relax.ssl.security");
 
 	/**
 	 * Property name.
