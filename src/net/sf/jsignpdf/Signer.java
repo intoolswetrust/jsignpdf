@@ -66,7 +66,7 @@ import org.apache.log4j.Logger;
  */
 public class Signer {
 
-	private final static Logger LOGGER = Logger.getLogger(BasicSignerOptions.class);
+	private final static Logger LOGGER = Logger.getLogger(Signer.class);
 
 	/**
 	 * Prints formatted help message (command line arguments).

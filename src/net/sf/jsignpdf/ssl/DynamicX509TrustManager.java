@@ -66,11 +66,14 @@ public class DynamicX509TrustManager implements X509TrustManager {
 	 * @throws CertificateException
 	 * @throws IOException
 	 */
-	public DynamicX509TrustManager() throws KeyStoreException, NoSuchAlgorithmException, CertificateException,
-			IOException {
-		this.trustStore = KeyStoreUtils.createTrustStore();
-		trustManagerFactory = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
-		reloadTrustStore();
+	public DynamicX509TrustManager() {
+		try {
+			this.trustStore = KeyStoreUtils.createTrustStore();
+			trustManagerFactory = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
+			reloadTrustStore();
+		} catch (Exception e) {
+			throw new RuntimeException("Unable to create TrustManager.", e);
+		}
 	}
 
 	/**
