@@ -56,12 +56,9 @@ public class TsaDialog extends javax.swing.JDialog {
 		options = anOpts;
 		initComponents();
 		getRootPane().setDefaultButton(btnTsaOK);
-		cbProxyType.setModel(new DefaultComboBoxModel(Proxy.Type.values()));
-		cbTsaAuthn.setModel(new DefaultComboBoxModel(ServerAuthentication.values()));
+		cbProxyType.setModel(new DefaultComboBoxModel<Proxy.Type>(Proxy.Type.values()));
+		cbTsaAuthn.setModel(new DefaultComboBoxModel<ServerAuthentication>(ServerAuthentication.values()));
 		translateLabels();
-		updateEnabledStatus();
-		refreshView();
-		pack();
 	}
 
 	/**
@@ -112,6 +109,10 @@ public class TsaDialog extends javax.swing.JDialog {
 			pfTsaPwd.setText(null);
 		}
 
+		boolean proxyDetailsVisible = cbProxyType.getSelectedItem() != Proxy.Type.DIRECT;
+		lblProxyHost.setVisible(proxyDetailsVisible);
+		tfProxyHost.setVisible(proxyDetailsVisible);
+		spProxyPort.setVisible(proxyDetailsVisible);
 	}
 
 	/**
@@ -119,6 +120,8 @@ public class TsaDialog extends javax.swing.JDialog {
 	 */
 	private void updateFromOptions() {
 		chkbTsaEnabled.setSelected(options.isTimestamp());
+		tfTsaUrl.setText(options.getTsaUrl());
+		cbTsaAuthn.setSelectedItem(options.getTsaServerAuthn());
 		pfTsaPwd.setText(options.getTsaPasswd());
 		tfTsaPolicy.setText(options.getTsaPolicy());
 		chkbOcspEnabled.setSelected(options.isOcspEnabled());
@@ -135,6 +138,7 @@ public class TsaDialog extends javax.swing.JDialog {
 	private void updateEnabledStatus() {
 		final boolean tmpTsaEnabled = chkbTsaEnabled.isSelected();
 		tfTsaUrl.setEnabled(tmpTsaEnabled);
+		cbTsaAuthn.setEnabled(tmpTsaEnabled);
 		tfTsaUser.setEnabled(tmpTsaEnabled);
 		pfTsaPwd.setEnabled(tmpTsaEnabled);
 		tfTsaPolicy.setEnabled(tmpTsaEnabled);
@@ -148,6 +152,7 @@ public class TsaDialog extends javax.swing.JDialog {
 	private void storeToOptions() {
 		options.setTimestamp(chkbTsaEnabled.isSelected());
 		options.setTsaUrl(tfTsaUrl.getText());
+		options.setTsaServerAuthn((ServerAuthentication) cbTsaAuthn.getSelectedItem());
 		if (cbTsaAuthn.getSelectedItem() == ServerAuthentication.CERTIFICATE) {
 			options.setTsaCertFile(tfTsaUser.getText());
 			options.setTsaCertFilePwd(new String(pfTsaPwd.getPassword()));
@@ -376,6 +381,11 @@ public class TsaDialog extends javax.swing.JDialog {
 
 		cbProxyType.setMinimumSize(new java.awt.Dimension(150, 20));
 		cbProxyType.setPreferredSize(new java.awt.Dimension(150, 20));
+		cbProxyType.addActionListener(new java.awt.event.ActionListener() {
+			public void actionPerformed(java.awt.event.ActionEvent evt) {
+				cbProxyTypeActionPerformed(evt);
+			}
+		});
 		gridBagConstraints = new java.awt.GridBagConstraints();
 		gridBagConstraints.gridx = 1;
 		gridBagConstraints.gridy = 0;
@@ -476,6 +486,11 @@ public class TsaDialog extends javax.swing.JDialog {
 		pack();
 	}//GEN-LAST:event_cbTsaAuthnActionPerformed
 
+	private void cbProxyTypeActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cbProxyTypeActionPerformed
+		refreshView();
+		pack();
+	}//GEN-LAST:event_cbProxyTypeActionPerformed
+
 	private void btnTsaOKActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_btnTsaOKActionPerformed
 		setVisible(false);
 	}// GEN-LAST:event_btnTsaOKActionPerformed
@@ -488,6 +503,7 @@ public class TsaDialog extends javax.swing.JDialog {
 		updateFromOptions();
 		updateEnabledStatus();
 		refreshView();
+		pack();
 	}// GEN-LAST:event_formComponentShown
 
 	private void formComponentHidden(java.awt.event.ComponentEvent evt) {// GEN-FIRST:event_formComponentHidden

@@ -9,7 +9,7 @@
 	<property name="app.dir" value="jsignpdf-${jsignpdf.version}" />
 
 	<property name="build.dir" value="${basedir}/build" />
-	<property name="dist.dir" value="${build.dir}\${app.dir}" />
+	<property name="dist.dir" value="${build.dir}/${app.dir}" />
 	<property name="lib.dir" value="${basedir}/lib" />
 	<property name="src.dir" value="${basedir}/src" />
 	<property name="res.dir" value="${basedir}/res" />
@@ -54,7 +54,7 @@
 
 	<!-- Launch4j properties -->
 	<property name="launch4j.version" value="3.0.2" />
-	<property name="launch4j.zip" value="launch4j-${launch4j.version}-win32.zip" />
+	<property name="launch4j.zip" value="launch4j-${launch4j.version}-linux.zip" />
 	<property name="launch4j.dir" value="launch4j" />
 
 	<property name="jarbundler.jar" value="lib-build/jarbundler-2.2.0.jar" />

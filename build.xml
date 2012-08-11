@@ -246,7 +246,9 @@
 	<target name="launcher" depends="jar">
 		<echo message="Creating windows launcher (EXE)" />
 
-		<unzip src="lib-build/${launch4j.zip}" dest="${build.dir}"/>
+		<untar compression="gzip" src="lib-build/${launch4j.zip}" dest="${build.dir}"/>
+		<chmod file="${build.dir}/${launch4j.dir}/bin/windres" perm="+x"/>
+		<chmod file="${build.dir}/${launch4j.dir}/bin/ld" perm="+x"/>
 
 		<taskdef name="launch4j"
 			classname="net.sf.launch4j.ant.Launch4jTask"
@@ -368,13 +370,14 @@
 
 	<target name="doc" depends="jar">
 		<echo message="Converting documentation (odt->pdf)" />
-		<exec executable="${ooo.dir}/program/soffice.exe" failonerror="true">
+		<exec executable="${ooo.exec}" failonerror="true">
 			<arg line="--headless"/>
 			<arg line="--convert-to pdf:writer_pdf_Export --outdir"/>
 			<arg value="${dist.doc.dir}"/>
 			<arg value="doc/JSignPdf.odt"/>
 		</exec>
-
+		
+		<echo message="Signing the documentation with a sample certificate" />
 		<java jar="${dist.dir}/${jsignpdf.filename}.jar" fork="true" failonerror="true" jvmargs="-Duser.language=en">
 			<arg value="-kst"/>
 			<arg value="JKS"/>
@@ -396,15 +399,14 @@
 	<target name="installer" depends="jar,unpack-jre,launcher,doc">
 		<echo message="Creating a windows setup" />
 		<exec failonerror="false"
-				executable="${innosetup.dir}\iscc.exe">
-			<arg line="JSignPdf.iss"/>
+				executable="unsorted/iscc">
+			<arg line="${dist.dir}"/>
+			<arg line="${output.dir}"/>
 			<arg line="/dMyAppName=JSignPdf"/>
 			<arg line="/dMyAppVersion=${jsignpdf.version}"/>
 			<arg line="/dMyAppVersionWin=${jsignpdf.version}.0"/>
 			<arg line="/dMyAppId=JSignPdf"/>
 			<arg line="/dMyAppFilename=${jsignpdf.filename}"/>
-			<arg line="/dDistDir=${dist.dir}"/>
-			<arg line="/dOutputDir=${output.dir}"/>
 		</exec>
 	</target>
 
@@ -472,7 +474,7 @@
 		</zip>
 	</target>
 
-	<target name="all" depends="zip,oxt,installer,src"/>
+	<target name="all" depends="zip,oxt,installer,src,macosx"/>
 
 	<target name="src" depends="prepare">
 		<echo message="Creating package from 'live' sources" />
@@ -487,21 +489,5 @@
 			<fileset dir="." includes="plugin/**"/>
 		</zip>
 	</target>
-
-	<target name="sources-cvs-export">
-		<echo message="Exporting sources from CVS" />
-		<mkdir dir="${build.dir}/export"/>
-		<cvs cvsroot=":pserver:anonymous@jsignpdf.cvs.sourceforge.net:/cvsroot/jsignpdf"
-			dest="${build.dir}/export">
-		    <commandline>
-		        <argument line="export -r ${jsignpdf.cvs.tag} jsignpdf"/>
-		    </commandline>
-		</cvs>
-		<zip destfile="${output.dir}/JSignPdf-${jsignpdf.version}.src.zip">
-			<fileset dir="${build.dir}/export"/>
-		</zip>
-	</target>
-
-	<target name="all-src-cvs" depends="installer,zip,oxt,sources-cvs-export"/>
 
 </project>
