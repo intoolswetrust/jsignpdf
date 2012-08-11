@@ -38,6 +38,7 @@ import net.sf.jsignpdf.types.HashAlgorithm;
 import net.sf.jsignpdf.types.PDFEncryption;
 import net.sf.jsignpdf.types.PrintRight;
 import net.sf.jsignpdf.types.RenderMode;
+import net.sf.jsignpdf.types.ServerAuthentication;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
@@ -364,7 +365,6 @@ public class SignerOptionsFromCmdLine extends BasicSignerOptions {
 
 		OPTS.addOption(OptionBuilder.withDescription(RES.get("hlp.renderMode", getEnumValues(RenderMode.values())))
 				.withLongOpt(ARG_RENDER_MODE).hasArg().withArgName("mode").create());
-
 		OPTS.addOption(OptionBuilder.withDescription(RES.get("hlp.l2Text")).withLongOpt(ARG_L2_TEXT_LONG).hasArg()
 				.withArgName("text").create());
 		OPTS.addOption(OptionBuilder
@@ -377,6 +377,16 @@ public class SignerOptionsFromCmdLine extends BasicSignerOptions {
 		// TSA & OCSP
 		OPTS.addOption(OptionBuilder.withLongOpt(ARG_TSA_URL_LONG).withDescription(RES.get("hlp.tsaUrl")).hasArg()
 				.withArgName("URL").create(ARG_TSA_URL));
+
+		OPTS.addOption(OptionBuilder.withLongOpt(ARG_TSA_AUTHN_LONG)
+				.withDescription(RES.get("hlp.tsaAuthn", getEnumValues(ServerAuthentication.values()))).hasArg()
+				.withArgName("method").create(ARG_TSA_AUTHN));
+
+		OPTS.addOption(OptionBuilder.withLongOpt(ARG_TSA_CERT_FILE_LONG).withDescription(RES.get("hlp.tsaCertFile"))
+				.hasArg().withArgName("file").create(ARG_TSA_CERT_FILE));
+
+		OPTS.addOption(OptionBuilder.withLongOpt(ARG_TSA_CERT_PWD_LONG).withDescription(RES.get("hlp.tsaCertPasswd"))
+				.hasArg().withArgName("password").create(ARG_TSA_CERT_PWD));
 
 		OPTS.addOption(OptionBuilder.withLongOpt(ARG_TSA_USER_LONG).withDescription(RES.get("hlp.tsaUser")).hasArg()
 				.withArgName("username").create(ARG_TSA_USER));

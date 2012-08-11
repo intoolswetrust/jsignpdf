@@ -36,6 +36,7 @@ import java.util.ResourceBundle;
 import java.util.Set;
 
 import net.sf.jsignpdf.types.HashAlgorithm;
+import net.sf.jsignpdf.utils.ConfigProvider;
 import net.sf.jsignpdf.utils.ResourceProvider;
 
 /**
@@ -87,6 +88,8 @@ public class Constants {
 
 	public static final ResourceProvider RES = new ResourceProvider(ResourceBundle.getBundle(RESOURCE_BUNDLE_BASE));
 
+	public static final boolean RELAX_SSL_SECURITY = ConfigProvider.getInstance().getAsBool("relax.ssl.security");
+
 	/**
 	 * Property name.
 	 */
@@ -137,6 +140,9 @@ public class Constants {
 	public static final String PROPERTY_TSA_ENABLED = "tsa.enabled";
 	public static final String PROPERTY_TSA_URL = "tsa.url";
 	public static final String PROPERTY_TSA_USER = "tsa.user";
+	public static final String PROPERTY_TSA_SERVER_AUTHN = "tsa.serverAuthn";
+	public static final String PROPERTY_TSA_CERT_FILE = "tsa.cert.file";
+	public static final String EPROPERTY_TSA_CERT_PWD = "enc.tsa.cert.file";
 	public static final String EPROPERTY_TSA_PWD = "enc.tsa.passwd";
 	public static final String PROPERTY_TSA_POLICY = "tsa.policy";
 
@@ -316,6 +322,15 @@ public class Constants {
 	public static final String ARG_TSA_URL = "ts";
 	public static final String ARG_TSA_URL_LONG = "tsa-server-url";
 
+	public static final String ARG_TSA_AUTHN = "ta";
+	public static final String ARG_TSA_AUTHN_LONG = "tsa-authentication";
+
+	public static final String ARG_TSA_CERT_FILE = "tscf";
+	public static final String ARG_TSA_CERT_FILE_LONG = "tsa-cert-file";
+
+	public static final String ARG_TSA_CERT_PWD = "tscp";
+	public static final String ARG_TSA_CERT_PWD_LONG = "tsa-cert-password";
+
 	public static final String ARG_TSA_USER = "tsu";
 	public static final String ARG_TSA_USER_LONG = "tsa-user";
 
@@ -344,7 +359,7 @@ public class Constants {
 		SUPPORTED_CRITICAL_EXTENSION_OIDS = Collections.unmodifiableSet(oidSet);
 	}
 
-	private static boolean toBoolean(boolean b) {
+	private static boolean toBoolean(final boolean b) {
 		return b;
 	}
 

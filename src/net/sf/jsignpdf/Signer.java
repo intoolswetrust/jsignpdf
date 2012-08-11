@@ -43,6 +43,7 @@ import java.util.List;
 import javax.swing.UIManager;
 import javax.swing.WindowConstants;
 
+import net.sf.jsignpdf.ssl.SSLInitializer;
 import net.sf.jsignpdf.utils.ConfigProvider;
 import net.sf.jsignpdf.utils.GuiUtils;
 import net.sf.jsignpdf.utils.KeyStoreUtils;
@@ -65,7 +66,7 @@ import org.apache.log4j.Logger;
  */
 public class Signer {
 
-	private final static Logger LOGGER = Logger.getLogger(BasicSignerOptions.class);
+	private final static Logger LOGGER = Logger.getLogger(Signer.class);
 
 	/**
 	 * Prints formatted help message (command line arguments).
@@ -87,13 +88,11 @@ public class Signer {
 	 * @param args
 	 */
 	public static void main(String[] args) {
-		//Details for the properties - http://docs.oracle.com/javase/7/docs/technotes/guides/security/jsse/JSSERefGuide.html
-		//Workaround for http://sourceforge.net/tracker/?func=detail&atid=1037906&aid=3491269&group_id=216921
-		System.setProperty("jsse.enableSNIExtension", "false");
-
-		//just in case...
-		System.setProperty("sun.security.ssl.allowUnsafeRenegotiation", "true");
-		System.setProperty("sun.security.ssl.allowLegacyHelloMessages", "true");
+		try {
+			SSLInitializer.init();
+		} catch (Exception e) {
+			LOGGER.warn("Unable to re-configure SSL layer", e);
+		}
 
 		PKCS11Utils.registerProvider(ConfigProvider.getInstance().getProperty("pkcs11config.path"));
 

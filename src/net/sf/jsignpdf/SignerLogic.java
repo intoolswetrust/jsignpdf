@@ -46,9 +46,11 @@ import java.util.List;
 import java.util.Map;
 
 import net.sf.jsignpdf.crl.CRLInfo;
+import net.sf.jsignpdf.ssl.SSLInitializer;
 import net.sf.jsignpdf.types.HashAlgorithm;
 import net.sf.jsignpdf.types.PDFEncryption;
 import net.sf.jsignpdf.types.RenderMode;
+import net.sf.jsignpdf.types.ServerAuthentication;
 import net.sf.jsignpdf.utils.FontUtils;
 import net.sf.jsignpdf.utils.KeyStoreUtils;
 
@@ -122,6 +124,8 @@ public class SignerLogic implements Runnable {
 		Throwable tmpException = null;
 		FileOutputStream fout = null;
 		try {
+			SSLInitializer.init(options);
+
 			final PrivateKeyInfo pkInfo = KeyStoreUtils.getPkInfo(options);
 			final PrivateKey key = pkInfo.getKey();
 			final Certificate[] chain = pkInfo.getChain();
@@ -343,8 +347,14 @@ public class SignerLogic implements Runnable {
 			TSAClientBouncyCastle tsc = null;
 			if (options.isTimestampX() && !StringUtils.isEmpty(options.getTsaUrl())) {
 				LOGGER.info(RES.get("console.creatingTsaClient"));
-				tsc = new TSAClientBouncyCastle(options.getTsaUrl(), StringUtils.defaultString(options.getTsaUser()),
-						StringUtils.defaultString(options.getTsaPasswd()));
+				if (options.getTsaServerAuthn() == ServerAuthentication.PASSWORD) {
+					tsc = new TSAClientBouncyCastle(options.getTsaUrl(),
+							StringUtils.defaultString(options.getTsaUser()), StringUtils.defaultString(options
+									.getTsaPasswd()));
+				} else {
+					tsc = new TSAClientBouncyCastle(options.getTsaUrl());
+
+				}
 				tsc.setProxy(tmpProxy);
 				final String policyOid = options.getTsaPolicy();
 				if (StringUtils.isNotEmpty(policyOid)) {
