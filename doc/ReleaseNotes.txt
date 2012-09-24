@@ -1,8 +1,10 @@
-Version 1.3.9 (test)
+
+Version 1.4.0
 -------------
   * certificate based encryption
   * certificate based authentication (TSA servers)
   * GUI components visibility improved
+  * Greek translation from Vassilis Michalitsis
 
 Version 1.3.0
 -------------
