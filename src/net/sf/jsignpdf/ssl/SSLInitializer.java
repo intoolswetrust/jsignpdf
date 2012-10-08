@@ -108,7 +108,8 @@ public class SSLInitializer {
 				pwd = options.getTsaCertFilePwd().toCharArray();
 			}
 			LOGGER.info(Constants.RES.get("ssl.keymanager.init", options.getTsaCertFile()));
-			KeyStore keyStore = KeyStoreUtils.loadKeyStore("PKCS12", options.getTsaCertFile(), pwd);
+			final String ksType = StringUtils.defaultIfBlank(options.getTsaCertFileType(), "PKCS12");
+			KeyStore keyStore = KeyStoreUtils.loadKeyStore(ksType, options.getTsaCertFile(), pwd);
 			KeyManagerFactory keyManagerFactory = KeyManagerFactory
 					.getInstance(KeyManagerFactory.getDefaultAlgorithm());
 			keyManagerFactory.init(keyStore, pwd);

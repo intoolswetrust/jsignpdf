@@ -1,3 +1,7 @@
+2012-10-08 Josef Cacek (1.4.1)
+  * Fix for using TSA authentication from command line (https://groups.google.com/forum/?fromgroups=#!topic/jsignpdf/c5zAObNmQZg)
+  * Added possibility to use different keystore types  for TSA CERTIFICATE authentication (only in command line -tsct)  
+
 2012-09-24 Josef Cacek (1.4.0)
   * JSignPdf's retiring - read https://groups.google.com/forum/#!topic/jsignpdf/PMduEVZcSko
 

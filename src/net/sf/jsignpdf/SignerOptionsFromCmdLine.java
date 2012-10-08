@@ -206,6 +206,15 @@ public class SignerOptionsFromCmdLine extends BasicSignerOptions {
 			setTimestamp(true);
 			setTsaUrl(line.getOptionValue(ARG_TSA_URL));
 		}
+		if (line.hasOption(ARG_TSA_AUTHN))
+			setTsaServerAuthn(line.getOptionValue(ARG_TSA_AUTHN));
+		if (line.hasOption(ARG_TSA_CERT_FILE_TYPE))
+			setTsaCertFileType(line.getOptionValue(ARG_TSA_CERT_FILE_TYPE));
+		if (line.hasOption(ARG_TSA_CERT_FILE))
+			setTsaCertFile(line.getOptionValue(ARG_TSA_CERT_FILE));
+		if (line.hasOption(ARG_TSA_CERT_PWD))
+			setTsaCertFilePwd(line.getOptionValue(ARG_TSA_CERT_PWD));
+
 		if (line.hasOption(ARG_TSA_USER))
 			setTsaUser(line.getOptionValue(ARG_TSA_USER));
 		if (line.hasOption(ARG_TSA_PWD))
@@ -381,6 +390,10 @@ public class SignerOptionsFromCmdLine extends BasicSignerOptions {
 		OPTS.addOption(OptionBuilder.withLongOpt(ARG_TSA_AUTHN_LONG)
 				.withDescription(RES.get("hlp.tsaAuthn", getEnumValues(ServerAuthentication.values()))).hasArg()
 				.withArgName("method").create(ARG_TSA_AUTHN));
+
+		OPTS.addOption(OptionBuilder.withLongOpt(ARG_TSA_CERT_FILE_TYPE_LONG)
+				.withDescription(RES.get("hlp.tsaCertFileType")).hasArg().withArgName("ks-type")
+				.create(ARG_TSA_CERT_FILE_TYPE));
 
 		OPTS.addOption(OptionBuilder.withLongOpt(ARG_TSA_CERT_FILE_LONG).withDescription(RES.get("hlp.tsaCertFile"))
 				.hasArg().withArgName("file").create(ARG_TSA_CERT_FILE));

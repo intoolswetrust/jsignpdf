@@ -112,8 +112,7 @@ public class BasicSignerOptions {
 	private ServerAuthentication tsaServerAuthn;
 	private String tsaUser;
 	private String tsaPasswd;
-	// assume for now, the private keys for TSA authn will be in PKCS12 keystore (the first PK in the KS) - then we 
-	// don't need to take care about keystore types, aliases and their listing...
+	private String tsaCertFileType;
 	private String tsaCertFile;
 	private String tsaCertFilePwd;
 	private String tsaPolicy;
@@ -191,6 +190,7 @@ public class BasicSignerOptions {
 		if (tsaServerAuthn == null && StringUtils.isNotEmpty(tsaUser)) {
 			setTsaServerAuthn(ServerAuthentication.PASSWORD);
 		}
+		setTsaCertFileType(props.getProperty(Constants.PROPERTY_TSA_CERT_FILE_TYPE));
 		setTsaCertFile(props.getProperty(Constants.PROPERTY_TSA_CERT_FILE));
 		setTsaPolicy(props.getProperty(Constants.PROPERTY_TSA_POLICY));
 
@@ -267,6 +267,7 @@ public class BasicSignerOptions {
 		props.setProperty(Constants.PROPERTY_TSA_ENABLED, isTimestamp());
 		props.setProperty(Constants.PROPERTY_TSA_URL, getTsaUrl());
 		props.setProperty(Constants.PROPERTY_TSA_USER, getTsaUser());
+		props.setProperty(Constants.PROPERTY_TSA_CERT_FILE_TYPE, getTsaCertFileType());
 		props.setProperty(Constants.PROPERTY_TSA_CERT_FILE, getTsaCertFile());
 		props.setProperty(Constants.PROPERTY_TSA_SERVER_AUTHN, getTsaServerAuthn().name());
 		props.setProperty(Constants.PROPERTY_TSA_POLICY, getTsaPolicy());
@@ -941,6 +942,21 @@ public class BasicSignerOptions {
 			}
 		}
 		setTsaServerAuthn(enumInstance);
+	}
+
+	/**
+	 * @return the tsaCertFileType
+	 */
+	public String getTsaCertFileType() {
+		return tsaCertFileType;
+	}
+
+	/**
+	 * @param tsaCertFileType
+	 *            the tsaCertFileType to set
+	 */
+	public void setTsaCertFileType(String tsaCertFileType) {
+		this.tsaCertFileType = tsaCertFileType;
 	}
 
 	/**

@@ -141,6 +141,7 @@ public class Constants {
 	public static final String PROPERTY_TSA_URL = "tsa.url";
 	public static final String PROPERTY_TSA_USER = "tsa.user";
 	public static final String PROPERTY_TSA_SERVER_AUTHN = "tsa.serverAuthn";
+	public static final String PROPERTY_TSA_CERT_FILE_TYPE = "tsa.cert.file.type";
 	public static final String PROPERTY_TSA_CERT_FILE = "tsa.cert.file";
 	public static final String EPROPERTY_TSA_CERT_PWD = "enc.tsa.cert.file";
 	public static final String EPROPERTY_TSA_PWD = "enc.tsa.passwd";
@@ -324,6 +325,9 @@ public class Constants {
 
 	public static final String ARG_TSA_AUTHN = "ta";
 	public static final String ARG_TSA_AUTHN_LONG = "tsa-authentication";
+
+	public static final String ARG_TSA_CERT_FILE_TYPE = "tsct";
+	public static final String ARG_TSA_CERT_FILE_TYPE_LONG = "tsa-cert-file-type";
 
 	public static final String ARG_TSA_CERT_FILE = "tscf";
 	public static final String ARG_TSA_CERT_FILE_LONG = "tsa-cert-file";
