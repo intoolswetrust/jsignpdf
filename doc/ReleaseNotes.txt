@@ -1,4 +1,8 @@
-Version 1.4.0
+Version 1.4.2
+-------------
+  * Fixed signing of password protected PDFs
+
+Version 1.4.1
 -------------
   * CLI improvements and bug-fixes for TSA authentication   
 

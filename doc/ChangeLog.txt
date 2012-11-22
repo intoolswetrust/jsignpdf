@@ -1,3 +1,6 @@
+2012-11-22 Josef Cacek (1.4.2)
+  * Fixed signing PDFs protected only with an owner password, but without user password 
+
 2012-10-08 Josef Cacek (1.4.1)
   * Fix for using TSA authentication from command line (https://groups.google.com/forum/?fromgroups=#!topic/jsignpdf/c5zAObNmQZg)
   * Added possibility to use different keystore types  for TSA CERTIFICATE authentication (only in command line -tsct)  
