@@ -104,15 +104,15 @@ public class Pdf2Image {
 			ByteBuffer buf = channel.map(FileChannel.MapMode.READ_ONLY, 0, channel.size());
 			PDFFile pdffile = null;
 			try {
-				// try to read PDF without password
-				pdffile = new PDFFile(buf);
+				// try to read PDF with owner password
+				pdffile = new PDFFile(buf, new PDFPassword(options.getPdfOwnerPwdStrX()));
 			} catch (PDFParseException ppe) {
 				try {
 					// try to read PDF with empty password
 					pdffile = new PDFFile(buf, new PDFPassword(""));
 				} catch (PDFParseException ppe2) {
-					// try to read PDF with owner password
-					pdffile = new PDFFile(buf, new PDFPassword(options.getPdfOwnerPwdStr()));
+					// try to read PDF without password
+					pdffile = new PDFFile(buf);
 				}
 			}
 
@@ -154,7 +154,7 @@ public class Pdf2Image {
 		try {
 			tmpDoc = PDDocument.load(options.getInFile());
 			if (tmpDoc.isEncrypted()) {
-				tmpDoc.decrypt(options.getPdfOwnerPwdStr());
+				tmpDoc.decrypt(options.getPdfOwnerPwdStrX());
 			}
 			int resolution;
 			try {

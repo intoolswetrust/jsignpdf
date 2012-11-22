@@ -548,6 +548,10 @@ public class BasicSignerOptions {
 		return charArrToStr(pdfOwnerPwd);
 	}
 
+	public String getPdfOwnerPwdStrX() {
+		return charArrToStr(advanced ? pdfOwnerPwd : null);
+	}
+
 	public void setPdfOwnerPwd(final char[] pdfOwnerPwd) {
 		this.pdfOwnerPwd = pdfOwnerPwd;
 	}

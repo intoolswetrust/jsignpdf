@@ -61,13 +61,13 @@ public class PdfExtraInfo {
 		PdfReader reader = null;
 		try {
 			try {
-				// try to read without password
-				reader = new PdfReader(options.getInFile());
+				reader = new PdfReader(options.getInFile(), options.getPdfOwnerPwdStrX().getBytes());
 			} catch (Exception e) {
 				try {
 					reader = new PdfReader(options.getInFile(), new byte[0]);
 				} catch (Exception e2) {
-					reader = new PdfReader(options.getInFile(), options.getPdfOwnerPwdStr().getBytes());
+					// try to read without password
+					reader = new PdfReader(options.getInFile());
 				}
 			}
 			tmpResult = reader.getNumberOfPages();
@@ -99,13 +99,13 @@ public class PdfExtraInfo {
 		PdfReader reader = null;
 		try {
 			try {
-				// try to read without password
-				reader = new PdfReader(options.getInFile());
+				reader = new PdfReader(options.getInFile(), options.getPdfOwnerPwdStrX().getBytes());
 			} catch (Exception e) {
 				try {
 					reader = new PdfReader(options.getInFile(), new byte[0]);
 				} catch (Exception e2) {
-					reader = new PdfReader(options.getInFile(), options.getPdfOwnerPwdStr().getBytes());
+					// try to read without password
+					reader = new PdfReader(options.getInFile());
 				}
 			}
 			final Rectangle tmpRect = reader.getPageSize(aPage);

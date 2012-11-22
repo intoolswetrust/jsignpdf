@@ -137,13 +137,13 @@ public class SignerLogic implements Runnable {
 			LOGGER.info(RES.get("console.createPdfReader", options.getInFile()));
 			PdfReader reader;
 			try {
-				// try to read without password
-				reader = new PdfReader(options.getInFile());
+				reader = new PdfReader(options.getInFile(), options.getPdfOwnerPwdStrX().getBytes());
 			} catch (Exception e) {
 				try {
 					reader = new PdfReader(options.getInFile(), new byte[0]);
 				} catch (Exception e2) {
-					reader = new PdfReader(options.getInFile(), options.getPdfOwnerPwdStr().getBytes());
+					// try to read without password
+					reader = new PdfReader(options.getInFile());
 				}
 			}
 
@@ -189,7 +189,7 @@ public class SignerLogic implements Runnable {
 						| (options.isRightModifyContents() ? PdfWriter.ALLOW_MODIFY_CONTENTS : 0);
 				switch (options.getPdfEncryption()) {
 				case PASSWORD:
-					stp.setEncryption(true, options.getPdfUserPwdStr(), options.getPdfOwnerPwdStr(), tmpRight);
+					stp.setEncryption(true, options.getPdfUserPwdStr(), options.getPdfOwnerPwdStrX(), tmpRight);
 					break;
 				case CERTIFICATE:
 					final X509Certificate encCert = KeyStoreUtils.loadCertificate(options.getPdfEncryptionCertFile());
