@@ -1,3 +1,6 @@
+2012-11-22 Josef Cacek (1.4.3)
+  * Fixed NPE in signing encrypted PDFs from CLI 
+
 2012-11-22 Josef Cacek (1.4.2)
   * Fixed signing PDFs protected only with an owner password, but without user password 
 

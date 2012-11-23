@@ -1,3 +1,7 @@
+Version 1.4.3
+-------------
+  * Fixed NullPointerException occuring when signing encrypted PDFs in batch mode
+
 Version 1.4.2
 -------------
   * Fixed signing of password protected PDFs

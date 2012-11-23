@@ -667,13 +667,13 @@ public class BasicSignerOptions {
 	}
 
 	public PrintRight getRightPrinting() {
+		if (rightPrinting == null) {
+			rightPrinting = PrintRight.ALLOW_PRINTING;
+		}
 		return rightPrinting;
 	}
 
 	public void setRightPrinting(PrintRight rightPrinting) {
-		if (rightPrinting == null) {
-			rightPrinting = PrintRight.ALLOW_PRINTING;
-		}
 		this.rightPrinting = rightPrinting;
 	}
 
