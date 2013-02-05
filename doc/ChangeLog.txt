@@ -1,3 +1,6 @@
+2013-02-05 Josef Cacek (1.4.4)
+  * SunPKCS11 security provider removed at the end
+   
 2012-11-22 Josef Cacek (1.4.3)
   * Fixed NPE in signing encrypted PDFs from CLI 
 

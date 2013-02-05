@@ -94,7 +94,8 @@ public class Signer {
 			LOGGER.warn("Unable to re-configure SSL layer", e);
 		}
 
-		PKCS11Utils.registerProvider(ConfigProvider.getInstance().getProperty("pkcs11config.path"));
+		final String pkcs11ProviderName = PKCS11Utils.registerProvider(ConfigProvider.getInstance().getProperty(
+				"pkcs11config.path"));
 
 		traceInfo();
 
@@ -144,6 +145,18 @@ public class Signer {
 			tmpForm.pack();
 			GuiUtils.center(tmpForm);
 			tmpForm.setVisible(true);
+		}
+
+		// some tokens/card-readers hangs during second usage of the program, they have to be unplugged and plugged again
+		// following code should prevent this issue
+		if (pkcs11ProviderName != null) {
+			Security.removeProvider(pkcs11ProviderName);
+			//we should wait a little bit to de-register provider correctly (is it a driver issue?)
+			try {
+				Thread.sleep(1000);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
 		}
 	}
 
