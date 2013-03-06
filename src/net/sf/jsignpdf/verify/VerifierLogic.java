@@ -339,7 +339,7 @@ public class VerifierLogic {
 			if (certs.size() == 1) {
 				boolean verifyTimestampCertificates = PdfPKCS7.verifyTimestampCertificates(token, kall, null);
 				if (!verifyTimestampCertificates) {
-					throw new Exception("Certificate can't be verified agains keystore.");
+					throw new Exception("Timestamp certificate can't be verified.");
 				}
 			} else {
 				int certSize = certs.size();
@@ -352,7 +352,7 @@ public class VerifierLogic {
 				// token.validate(SignerInformationVerifier) will check if certificate has been valid at the time the timestamp was created
 				Object[] verifyCertificates = PdfPKCS7.verifyCertificates(certArray, kall, null, null);
 				if (verifyCertificates != null) {
-					throw new Exception("Certificate can't be verified agains keystore.");
+					throw new Exception("Timestamp certificate can't be verified.");
 				}
 			}
 
