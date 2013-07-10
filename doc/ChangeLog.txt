@@ -1,3 +1,6 @@
+2013-07-10 Josef Cacek (1.4.5)
+  * Fixed non-working --crl option when using CLI (batch mode)
+
 2013-02-05 Josef Cacek (1.4.4)
   * SunPKCS11 security provider removed at the end
    

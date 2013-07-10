@@ -1,3 +1,7 @@
+Version 1.4.5
+-------------
+  * Fixed non-working --crl option when using CLI (batch mode)
+
 Version 1.4.4
 -------------
   * Newly registered SunPKCS11 security provider is removed at the end of the program
