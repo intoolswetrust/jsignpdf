@@ -225,6 +225,8 @@ public class SignerOptionsFromCmdLine extends BasicSignerOptions {
 			setOcspEnabled(true);
 		if (line.hasOption(ARG_OCSP_SERVER_LONG))
 			setOcspServerUrl(line.getOptionValue(ARG_OCSP_SERVER_LONG));
+		if (line.hasOption(ARG_CRL_LONG))
+			setCrlEnabled(true);
 
 		if (line.hasOption(ARG_PROXY_TYPE_LONG))
 			setProxyType(line.getOptionValue(ARG_PROXY_TYPE_LONG));
