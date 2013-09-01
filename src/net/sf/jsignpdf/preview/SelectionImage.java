@@ -3,19 +3,19 @@
  * Version 1.1 (the "License"); you may not use this file except in
  * compliance with the License. You may obtain a copy of the License at
  * http://www.mozilla.org/MPL/
- * 
+ *
  * Software distributed under the License is distributed on an "AS IS"
  * basis, WITHOUT WARRANTY OF ANY KIND, either express or implied. See the
  * License for the specific language governing rights and limitations
  * under the License.
- * 
+ *
  * The Original Code is 'JSignPdf, a free application for PDF signing'.
- * 
+ *
  * The Initial Developer of the Original Code is Josef Cacek.
  * Portions created by Josef Cacek are Copyright (C) Josef Cacek. All Rights Reserved.
- * 
+ *
  * Contributor(s): Josef Cacek.
- * 
+ *
  * Alternatively, the contents of this file may be used under the terms
  * of the GNU Lesser General Public License, version 2.1 (the  "LGPL License"), in which case the
  * provisions of LGPL License are applicable instead of those
@@ -42,7 +42,6 @@ import java.awt.image.BufferedImage;
 
 import javax.swing.JPanel;
 
-import net.sf.jsignpdf.types.FloatPoint;
 import net.sf.jsignpdf.types.RelRect;
 
 /**
@@ -84,11 +83,13 @@ public class SelectionImage extends JPanel {
 				return;
 			btnPressed = true;
 			final Point point = e.getPoint();
-			relRect.setStartPoint(new Point(point.x - offsetX, point.y - offsetY));
-			relRect.setEndPoint((FloatPoint) null);
+			final Point imgRelPoint = new Point(point.x - offsetX, point.y - offsetY);
+			relRect.setStartPoint(imgRelPoint);
+			relRect.setEndPoint(imgRelPoint);
 			repaint();
 		}
 
+		@Override
 		public void mouseDragged(MouseEvent e) {
 			currentPoint = e.getPoint();
 			if (!btnPressed)
@@ -98,6 +99,7 @@ public class SelectionImage extends JPanel {
 			repaint();
 		}
 
+		@Override
 		public void mouseMoved(MouseEvent e) {
 			currentPoint = e.getPoint();
 		}
@@ -142,7 +144,7 @@ public class SelectionImage extends JPanel {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see java.awt.Component#paint(java.awt.Graphics)
 	 */
 	@Override
@@ -151,8 +153,15 @@ public class SelectionImage extends JPanel {
 		if (image != null) {
 			g.drawImage(image, offsetX, offsetY, null);
 			if (relRect.isValid()) {
-				g.drawRect(relRect.getLeft() + offsetX, relRect.getTop() + offsetY, relRect.getWidth(), relRect
-						.getHeight());
+				// Page (without rotation) 600x400: [50,100; 150,130]
+				// rot 0: [50, 400-100, 150, 400-130]
+				// rot 1 (90deg): [ 100, 50, 130, 150]
+				// rot 2 (180deg): [ 600 - 50, 100, 600-150, 130]
+				// rot 3 (270deg): [ 400 - 100, 600 - 150, 400 - 130, 600 - 150 ]
+				int[] p1 = relRect.getP1();
+				int[] p2 = relRect.getP2();
+				g.drawRect(Math.min(p1[0], p2[0]) + offsetX, Math.min(p1[1], p2[1]) + offsetY, Math.abs(p2[0] - p1[0]),
+						Math.abs(p2[1] - p1[1]));
 			}
 		}
 	}
@@ -193,7 +202,7 @@ public class SelectionImage extends JPanel {
 			image = null;
 		} else {
 			image = resize(originalImage, getWidth(), getHeight());
-			relRect.scale(image.getWidth(), image.getHeight());
+			relRect.setImgSize(image.getWidth(), image.getHeight());
 			offsetX = (getWidth() - image.getWidth()) / 2;
 			offsetY = (getHeight() - image.getHeight()) / 2;
 		}

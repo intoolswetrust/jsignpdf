@@ -3,19 +3,19 @@
  * Version 1.1 (the "License"); you may not use this file except in
  * compliance with the License. You may obtain a copy of the License at
  * http://www.mozilla.org/MPL/
- * 
+ *
  * Software distributed under the License is distributed on an "AS IS"
  * basis, WITHOUT WARRANTY OF ANY KIND, either express or implied. See the
  * License for the specific language governing rights and limitations
  * under the License.
- * 
+ *
  * The Original Code is 'JSignPdf, a free application for PDF signing'.
- * 
+ *
  * The Initial Developer of the Original Code is Josef Cacek.
  * Portions created by Josef Cacek are Copyright (C) Josef Cacek. All Rights Reserved.
- * 
+ *
  * Contributor(s): Josef Cacek.
- * 
+ *
  * Alternatively, the contents of this file may be used under the terms
  * of the GNU Lesser General Public License, version 2.1 (the  "LGPL License"), in which case the
  * provisions of LGPL License are applicable instead of those
@@ -34,17 +34,20 @@ import java.awt.Rectangle;
 import java.awt.Toolkit;
 import java.awt.image.BufferedImage;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 
 import net.sf.jsignpdf.BasicSignerOptions;
+import net.sf.jsignpdf.utils.PdfUtils;
 
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDPage;
+import org.jpedal.PdfDecoder;
+import org.jpedal.exception.PdfException;
 
+import com.lowagie.text.pdf.PdfReader;
 import com.sun.pdfview.PDFFile;
 import com.sun.pdfview.PDFPage;
 import com.sun.pdfview.PDFParseException;
@@ -56,6 +59,8 @@ import com.sun.pdfview.decrypt.PDFPassword;
  * @author Josef Cacek
  */
 public class Pdf2Image {
+
+	private static final int JPEDAL_MAX_IMAGE_RENDER_SIZE = 2000 * 2000;
 
 	private BasicSignerOptions options;
 
@@ -79,16 +84,63 @@ public class Pdf2Image {
 	 * @return image or null if error occures.
 	 */
 	public BufferedImage getImageForPage(final int aPage) {
-		BufferedImage tmpResult = getImageUsingPdfRenderer(aPage);
+		BufferedImage tmpResult = getImageUsingJPedal(aPage);
 		if (tmpResult == null) {
-			tmpResult = getImageUsingPdfBox(aPage);
+			tmpResult = getImageUsingPdfRenderer(aPage);
+			if (tmpResult == null) {
+				tmpResult = getImageUsingPdfBox(aPage);
+			}
 		}
 		return tmpResult;
 	}
 
 	/**
 	 * Returns image (or null if failed) generated from given page in PDF using
-	 * PDFBox tool.
+	 * JPedal LGPL.
+	 * 
+	 * @param aPage
+	 *            page in PDF (1 based)
+	 * @return image or null
+	 */
+	public BufferedImage getImageUsingJPedal(final int aPage) {
+		BufferedImage tmpResult = null;
+		PdfReader reader = null;
+		PdfDecoder pdfDecoder = null;
+		try {
+
+			reader = PdfUtils.getPdfReader(options.getInFile(), options.getPdfOwnerPwdStrX().getBytes());
+			if (JPEDAL_MAX_IMAGE_RENDER_SIZE > reader.getPageSize(aPage).getWidth()
+					* reader.getPageSize(aPage).getHeight()) {
+				pdfDecoder = new PdfDecoder();
+				try {
+					pdfDecoder.openPdfFile(options.getInFile(), options.getPdfOwnerPwdStrX());
+				} catch (PdfException e) {
+					try {
+						// try to read PDF with empty password
+						pdfDecoder.openPdfFile(options.getInFile(), "");
+					} catch (PdfException e1) {
+						// try to read PDF without password
+						pdfDecoder.openPdfFile(options.getInFile());
+					}
+				}
+				tmpResult = pdfDecoder.getPageAsImage(aPage);
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		} finally {
+			if (reader != null) {
+				reader.close();
+			}
+			if (pdfDecoder != null) {
+				pdfDecoder.closePdfFile();
+			}
+		}
+		return tmpResult;
+	}
+
+	/**
+	 * Returns image (or null if failed) generated from given page in PDF using
+	 * Sun PDFRender.
 	 * 
 	 * @param aPage
 	 *            page in PDF (1 based)
@@ -96,10 +148,11 @@ public class Pdf2Image {
 	 */
 	public BufferedImage getImageUsingPdfRenderer(final int aPage) {
 		BufferedImage tmpResult = null;
+		RandomAccessFile raf = null;
 		try {
 			// load a pdf from a byte buffer
 			File file = new File(options.getInFile());
-			RandomAccessFile raf = new RandomAccessFile(file, "r");
+			raf = new RandomAccessFile(file, "r");
 			FileChannel channel = raf.getChannel();
 			ByteBuffer buf = channel.map(FileChannel.MapMode.READ_ONLY, 0, channel.size());
 			PDFFile pdffile = null;
@@ -129,12 +182,16 @@ public class Pdf2Image {
 					true, // fill background with white
 					true // block until drawing is done
 					);
-		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
+		} catch (Exception e) {
 			e.printStackTrace();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+		} finally {
+			if (raf != null) {
+				try {
+					raf.close();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
 		}
 		return tmpResult;
 	}
