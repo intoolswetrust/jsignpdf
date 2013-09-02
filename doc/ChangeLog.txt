@@ -1,18 +1,26 @@
+2013-09-01 Josef Cacek (1.5.0)
+  * Implement image rendering using JPedal
+  * Upgrade libraries used for PDF preview (PDFBox, PDFRenderer)
+  * Reimplementation of selection in preview window
+
+2013-08-31 Vaclav Slavik
+  * Fixed certificates handling in signature verification - make the OCSP verification more robust. Thanks for the fix!
+
 2013-07-10 Josef Cacek (1.4.5)
   * Fixed non-working --crl option when using CLI (batch mode)
 
 2013-02-05 Josef Cacek (1.4.4)
   * SunPKCS11 security provider removed at the end
-   
+
 2012-11-22 Josef Cacek (1.4.3)
-  * Fixed NPE in signing encrypted PDFs from CLI 
+  * Fixed NPE in signing encrypted PDFs from CLI
 
 2012-11-22 Josef Cacek (1.4.2)
-  * Fixed signing PDFs protected only with an owner password, but without user password 
+  * Fixed signing PDFs protected only with an owner password, but without user password
 
 2012-10-08 Josef Cacek (1.4.1)
   * Fix for using TSA authentication from command line (https://groups.google.com/forum/?fromgroups=#!topic/jsignpdf/c5zAObNmQZg)
-  * Added possibility to use different keystore types  for TSA CERTIFICATE authentication (only in command line -tsct)  
+  * Added possibility to use different keystore types  for TSA CERTIFICATE authentication (only in command line -tsct)
 
 2012-09-24 Josef Cacek (1.4.0)
   * JSignPdf's retiring - read https://groups.google.com/forum/#!topic/jsignpdf/PMduEVZcSko
@@ -26,8 +34,8 @@
 2012-07-16 Josef Cacek
   * Certificate authentication for TSA
   * relaxing SSL security is enabled by defaul (can be disabled in conf/conf.properties)
-  * string "based on iText 2.1.7" used in jsignpdf-itxt library product line 
-  
+  * string "based on iText 2.1.7" used in jsignpdf-itxt library product line
+
 2012-05-01 Josef Cacek
   * Certificate encryption support for the output PDF added
   * Window positioning fixed for multiple displays
@@ -35,7 +43,7 @@
 
 2012-04-15 Josef Cacek
   * DejaVu Sans font used for visible signatures instead of Rus Sans Pokrytie
-  
+
 2012-03-03 Josef Cacek (1.3.0)
   * documentation updated
 
@@ -45,7 +53,7 @@
   * used StringUtils from commons-lang3
 
 2012-02-16 Josef Cacek
-  * improved hiding of components in the GUI (e.g. keystore file and password are hidden for WINDOWS-MY keystore) 
+  * improved hiding of components in the GUI (e.g. keystore file and password are hidden for WINDOWS-MY keystore)
 
 2012-02-13 Josef Cacek
   * symbolic link to /Applications added to Mac OS X .dmg package
@@ -71,13 +79,13 @@
     EXIT_CODE_CANT_READ_FILE = 5 (unable to read the file from given path)
     EXIT_CODE_COMMON_ERROR = 6 (counting signatures in the PDF failed)
   * new SignatureCounter parameter --names (prints signatures names instead of signatures count)
-  * added sections about command-line tools to documentation - Verifier and SignatureCounter (including exit codes) 
-  
+  * added sections about command-line tools to documentation - Verifier and SignatureCounter (including exit codes)
+
 2011-11-28 Aleksandar Stojsavljevic
   * Verifier: If certificate is successfully validated against CRL - don't set warning flag for OCSP
 
 2011-11-23 Josef Cacek
-  * if PDF version update is not possible, show eror message and don't sign 
+  * if PDF version update is not possible, show eror message and don't sign
   * print stacktrace if PKCS11 provider initialization fails
 
 2011-11-18 Josef Cacek (1.2.3)
@@ -87,7 +95,7 @@
   * exit codes improved in CLI
     EXIT_CODE_PARSE_ERR = 1 (command line in a wrong format)
     EXIT_CODE_NO_COMMAND = 2 (nothing to do - e.g. no file for signing provided)
-    EXIT_CODE_SOME_SIG_FAILED = 3 (signing of some - but not all - files failed) 
+    EXIT_CODE_SOME_SIG_FAILED = 3 (signing of some - but not all - files failed)
     EXIT_CODE_ALL_SIG_FAILED = 4 (signing of all files failed)
 
 2011-11-12 Josef Cacek (1.2.1)
@@ -127,7 +135,7 @@
 
 2011-04-01 Aleksandar Stojsavljevic
   * Verifier: removed certificateValid flag from SignatureVerification class
-  * Verifier: introduced more complex checking for certification validity with methods getValidationCodes(VerificationResult) and getValidationCode(SignatureVerification, boolean) 
+  * Verifier: introduced more complex checking for certification validity with methods getValidationCodes(VerificationResult) and getValidationCode(SignatureVerification, boolean)
 
 2011-03-30 Josef Cacek
   * Verifier checks the certification levels (and following modifications)
@@ -135,14 +143,14 @@
 2011-03-30 Josef Cacek (1.1.9 test)
   * Verifier doesn't use a given keystores directly, it creates in-memory keystore now
   * Verifier validates the TSA certificates too
-  
+
 2011-03-29 Josef Cacek
-  * Support for SunPKCS11 security provider registration at during application startup (additional configuration in conf.properties)  
-  * Added option which allows to disable Acrobat 6 layer mode (in visible signature settings) tracker#3250105  
-  * Font size setting applied also for "Signature name and description" display mode as a maximal allowed size 
+  * Support for SunPKCS11 security provider registration at during application startup (additional configuration in conf.properties)
+  * Added option which allows to disable Acrobat 6 layer mode (in visible signature settings) tracker#3250105
+  * Font size setting applied also for "Signature name and description" display mode as a maximal allowed size
     - i.e. it can be generated smaller in the result tracker#3201238
-  * Added chapter Advanced application configuration into the documentation (JSignPdf Quick Start Guide)  
-  * Visually separate the Append signature checkbox (it's not related to certification level)  
+  * Added chapter Advanced application configuration into the documentation (JSignPdf Quick Start Guide)
+  * Visually separate the Append signature checkbox (it's not related to certification level)
 
 2011-03-28 Josef Cacek
   * Verifier updates suggested in http://sourceforge.net/projects/jsignpdf/forums/forum/782217/topic/4432329
@@ -160,7 +168,7 @@
   * checking known critical extensions is disabled by default
 
 2010-11-18 Josef Cacek
-  * added some "well-known" certificate critical extensions 
+  * added some "well-known" certificate critical extensions
 
 2010-10-27 Josef Cacek (1.1.0)
   * updated documentation
@@ -169,7 +177,7 @@
 2010-10-26 Josef Cacek
   * added support for a custom TSA policy OID
   * fixed setting hash algorithm from command line (thanks to Jan Klimes)
-  
+
 2010-10-06 Josef Cacek
   * additional Certificate checks implemented
   * Certificate checks can be disabled in conf.properties under following keys:
@@ -179,7 +187,7 @@
 
 2010-08-24 Josef Cacek (1.0.3)
   * Windows verifier launcher Verify.exe
-  * Previous/Next page buttons in PDF preview window 
+  * Previous/Next page buttons in PDF preview window
 
 2010-08-18 Josef Cacek
   * Append mode is the default
@@ -205,13 +213,13 @@
 2010-06-19 Josef Cacek (released 1.0.0)
   * font for visible signature is configurable (set in conf/conf.properties file)
   * certificate validity check and keyUsage can be disabled (set in conf/conf.properties file)
-  
+
 2010-06-16 Josef Cacek
-  * splashscreen and ReleaseNotes for version 1.0.0 
+  * splashscreen and ReleaseNotes for version 1.0.0
 
 2010-06-13 Josef Cacek
-  * WINDOWS-MY keystore type (if it's present) set as the default one in GUI 
-  
+  * WINDOWS-MY keystore type (if it's present) set as the default one in GUI
+
 2010-06-09 Josef Cacek
   * PDFBox enabled again as a second try for rendering PDF (if Sun PdfRenderer fails)
 
@@ -242,11 +250,11 @@
   * fixed handling of empty Output PDF field (it was filled after application restart)
 
 2010-04-26 Josef Cacek & Marcus Schoeller
-  * listing/reloading keys checks certificate validity and KeyUsage attributes (it's still possible 
-    to sign with another private key, but you have to provide the correct alias by hand!) 
+  * listing/reloading keys checks certificate validity and KeyUsage attributes (it's still possible
+    to sign with another private key, but you have to provide the correct alias by hand!)
 
 2010-04-14 Josef Cacek
-  * implemented minimal PDF version for visible signature - 1.3 (not used in append-mode) 
+  * implemented minimal PDF version for visible signature - 1.3 (not used in append-mode)
 
 2010-04-12 Josef Cacek
   * suffix can be empty in batch mode (output to different directory with the same filename)

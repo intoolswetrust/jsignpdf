@@ -1,3 +1,8 @@
+Version 1.5.0
+-------------
+  * Improved Preview functionality
+  * Fixed certificates handling in signature verification - make the OCSP verification more robust
+
 Version 1.4.5
 -------------
   * Fixed non-working --crl option when using CLI (batch mode)
@@ -5,7 +10,7 @@ Version 1.4.5
 Version 1.4.4
 -------------
   * Newly registered SunPKCS11 security provider is removed at the end of the program
-    (to avoid hangs in accessing security tokens second time) 
+    (to avoid hangs in accessing security tokens second time)
 
 Version 1.4.3
 -------------
@@ -17,7 +22,7 @@ Version 1.4.2
 
 Version 1.4.1
 -------------
-  * CLI improvements and bug-fixes for TSA authentication   
+  * CLI improvements and bug-fixes for TSA authentication
 
 Version 1.4.0
 -------------
@@ -29,7 +34,7 @@ Version 1.4.0
 Version 1.3.0
 -------------
   * reporting (status messages) are logged by Log4J appenders
-  * GUI components visibility improved (e.g. for WINDOWS-MY keystore) 
+  * GUI components visibility improved (e.g. for WINDOWS-MY keystore)
   * wildcard (*,?) support in PDF names when using batch signing
   * Updated dependencies (Java runtime for Windows version 6u30, Apache commons libraries)
   * Mac OS X test support (dmg)
@@ -41,14 +46,14 @@ Version 1.2.6
 
 Version 1.2.5
 -------------
-  * fix for removing existing signatures 
+  * fix for removing existing signatures
 
 Version 1.2.4
 -------------
   * Verifier and SignatureCounter tools description added to documentatio
   * SignatureCounter exit codes improved in CLI (codes described in documentation)
   * Verifier updates for OCSP validation
-  * signing fails if PDF version update is not possible (prints only an eror message) 
+  * signing fails if PDF version update is not possible (prints only an eror message)
 
 Version 1.2.3
 -------------
@@ -78,10 +83,10 @@ Version 1.1.10 test (1.2.0 beta2)
 
 Version 1.1.9 test (1.2.0 beta)
 -------------
-  * Support for PKCS11 initialization (additional configuration in conf.properties)  
+  * Support for PKCS11 initialization (additional configuration in conf.properties)
   * Verifier improvements
   * Added option to control which layers will be generated in visible signature (Acrobat 6 layer mode)
-  * Font size setting applied also for "Signature name and description" display mode as a maximal allowed size 
+  * Font size setting applied also for "Signature name and description" display mode as a maximal allowed size
   * Java Runtime Environment update (6u24)
   * setting default OCSP server URL
 
@@ -119,13 +124,13 @@ Version 1.0.0
   * implements PDF preview & selecting position of visible signature using mouse
   * adds support for Certificate Revocation Lists (CRL)
   * provides support for selecting hash algorithm (depends on cryptographic provider for selected keystore type)
-  * adds keystore types provided by BouncyCastle cryptographic library   
-  * checks if a certificates are valid and if they're intended for signing 
+  * adds keystore types provided by BouncyCastle cryptographic library
+  * checks if a certificates are valid and if they're intended for signing
   * includes proxy support for TSA, OCSP and CRL
-  * font used in visible signatures can be changed (using conf/conf.properties file) 
-  * fixes removing old signatures in non-append mode 
-  * fixes embedding font of visible signature if the input PDF is in version 1.2 
-  * adds tool for installing trusted certificate to default Java keystore (InstallCert Tool) 
+  * font used in visible signatures can be changed (using conf/conf.properties file)
+  * fixes removing old signatures in non-append mode
+  * fixes embedding font of visible signature if the input PDF is in version 1.2
+  * adds tool for installing trusted certificate to default Java keystore (InstallCert Tool)
 
 Version 0.9.8
 -------------
@@ -140,22 +145,22 @@ Version 0.9.6
 -------------
   * it's version 0.9.5 with small fixes
   * TSA & OCSP command line switches
-  
+
 Version 0.9.5 (not public)
 -------------
-  * support for timestamp server  
+  * support for timestamp server
   * OCSP support
   * Contact field added
   * fix non-unique key aliases in WINDOWS-MY keystore
   * improvements in command-line version:
 	- possibility to load default property file (-lp parameter)
-	- selecting key by index (e.g. because of national character in key alias, -ki parameter)  
+	- selecting key by index (e.g. because of national character in key alias, -ki parameter)
 
 Version 0.9
 -------------
-  * embedded Unicode font for Layer 2 texts in visible signature (fix for i18n and PDF/A specification) 
+  * embedded Unicode font for Layer 2 texts in visible signature (fix for i18n and PDF/A specification)
   * additional option for setting font size in visible signature
-  
+
 Version 0.8
 -------------
   * command line support (batch mode)

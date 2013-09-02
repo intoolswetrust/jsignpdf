@@ -40,6 +40,7 @@ import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 
 import net.sf.jsignpdf.BasicSignerOptions;
+import net.sf.jsignpdf.Constants;
 import net.sf.jsignpdf.utils.PdfUtils;
 
 import org.apache.pdfbox.pdmodel.PDDocument;
@@ -66,7 +67,7 @@ public class Pdf2Image {
 
 	/**
 	 * Constructor - gets an options object with configured input PDF and
-	 * possibly deconding (owner) password.
+	 * possibly decoding (owner) password.
 	 * 
 	 * @param anOpts
 	 */
@@ -84,12 +85,17 @@ public class Pdf2Image {
 	 * @return image or null if error occures.
 	 */
 	public BufferedImage getImageForPage(final int aPage) {
-		BufferedImage tmpResult = getImageUsingJPedal(aPage);
-		if (tmpResult == null) {
-			tmpResult = getImageUsingPdfRenderer(aPage);
-			if (tmpResult == null) {
+		BufferedImage tmpResult = null;
+		for (String libname : Constants.PDF2IMAGE_LIBRARIES.split("\\s*,\\s*")) {
+			if (Constants.PDF2IMAGE_JPEDAL.equals(libname)) {
+				tmpResult = getImageUsingJPedal(aPage);
+			} else if (Constants.PDF2IMAGE_PDFRENDERER.equals(libname)) {
+				tmpResult = getImageUsingPdfRenderer(aPage);
+			} else if (Constants.PDF2IMAGE_PDFBOX.equals(libname)) {
 				tmpResult = getImageUsingPdfBox(aPage);
 			}
+			if (tmpResult != null)
+				break;
 		}
 		return tmpResult;
 	}

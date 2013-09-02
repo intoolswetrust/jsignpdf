@@ -45,17 +45,7 @@ public class RelRect {
 
 	public static final String PROPERTY_COORDS = "coords";
 
-	/**
-	 * Value returned by getters if {@link #isValid()} method returns false
-	 */
-	public int ERR = -1;
-
-	private final float[] coords = new float[] { 0f, 0f, 1f, 1f };
-
-	private float[] origSize = new float[2];
-
-	private int rotation = 0;
-
+	private final Float[] coords = new Float[] { 0f, 0f, 1f, 1f };
 	private Dimension imageSize = new Dimension(1, 1);
 
 	private FinalPropertyChangeSupport pcs = new FinalPropertyChangeSupport(this);
@@ -74,18 +64,20 @@ public class RelRect {
 		return true;
 	}
 
-	private int getImgWidthRotated() {
-		return rotation % 2 == 0 ? imageSize.width : imageSize.height;
-	}
-
-	private int getImgHeightRotated() {
-		return rotation % 2 == 1 ? imageSize.width : imageSize.height;
-	}
-
+	/**
+	 * Returns startPoint coordinates in the image.
+	 * 
+	 * @return
+	 */
 	public int[] getP1() {
 		return makeImgPoint(0);
 	}
 
+	/**
+	 * Returns endPoint coordinates in the image.
+	 * 
+	 * @return
+	 */
 	public int[] getP2() {
 		return makeImgPoint(2);
 	}
@@ -100,56 +92,14 @@ public class RelRect {
 		setRelPoint(aPoint, 0);
 	}
 
-	public float[] getCoords() {
+	/**
+	 * Returns relative coordinates of the startPoint [x1,y1] and endPoint
+	 * [x2,y2] as Float array [x1,y1,x2,y2]
+	 * 
+	 * @return
+	 */
+	public Float[] getCoords() {
 		return coords;
-	}
-
-	// Page (without rotation) 600x400: [50,100; 150,130]
-	// rot 0: [50, 400-100, 150, 400-130]
-	// rot 1 (90deg): [ 100, 50, 130, 150]
-	// rot 2 (180deg): [ 600 - 50, 100, 600-150, 130]
-	// rot 3 (270deg): [ 400 - 100, 600 - 50, 400 - 130, 600 - 150 ]
-
-	private int[] makeImgPoint(int coordsOffset) {
-		int x = Math.round(coords[coordsOffset] * getImgWidthRotated());
-		int y = Math.round(coords[coordsOffset + 1] * getImgHeightRotated());
-		if (rotation == 0 || rotation == 3) {
-			y = getImgHeightRotated() - y;
-		}
-		if (rotation == 2 || rotation == 3) {
-			x = getImgWidthRotated() - x;
-		}
-		if (rotation % 2 == 1) {
-			int tmp = x;
-			x = y;
-			y = tmp;
-		}
-		return new int[] { x, y };
-	}
-
-	private void setRelPoint(Point point, int offset) {
-		final float[] oldVal = Arrays.copyOf(coords, coords.length);
-		if (point == null) {
-			coords[offset] = 0f;
-			coords[offset + 1] = 0f;
-		} else {
-			float x = (float) point.x / imageSize.width;
-			float y = (float) point.y / imageSize.height;
-			if (rotation % 2 == 1) {
-				float tmp = x;
-				x = y;
-				y = tmp;
-			}
-			if (rotation == 0 || rotation == 3) {
-				y = 1f - y;
-			}
-			if (rotation == 2 || rotation == 3) {
-				x = 1f - x;
-			}
-			coords[offset] = x;
-			coords[offset + 1] = y;
-		}
-		pcs.firePropertyChange(PROPERTY_COORDS, oldVal, coords);
 	}
 
 	/**
@@ -196,18 +146,38 @@ public class RelRect {
 		this.pcs.removePropertyChangeListener(listener);
 	}
 
-	public void setRotation(int degrees) {
-		rotation = Math.round(degrees / 90) % 4;
+	/**
+	 * Calculates point in the image.
+	 * 
+	 * @param coordsOffset
+	 *            use 0 for startPoint and 2 for endPoint.
+	 * @return coordinates [x,y] of a point in the image
+	 */
+	private int[] makeImgPoint(int coordsOffset) {
+		int x = Math.round(coords[coordsOffset] * imageSize.width);
+		int y = imageSize.height - Math.round(coords[coordsOffset + 1] * imageSize.height);
+		return new int[] { x, y };
 	}
 
-	public void setOrigSize(float x, float y) {
-		origSize[0] = x;
-		origSize[1] = y;
+	/**
+	 * Sets coordinates of a relative point (startPoint or endPoint) based on
+	 * given Point in the image.
+	 * 
+	 * @param point
+	 *            point with coordinates in the image
+	 * @param offset
+	 *            use 0 for startPoint and 2 for endPoint.
+	 */
+	private void setRelPoint(Point point, int offset) {
+		final Float[] oldVal = Arrays.copyOf(coords, coords.length);
+		if (point == null) {
+			coords[offset] = null;
+			coords[offset + 1] = null;
+		} else {
+			coords[offset] = (float) point.x / imageSize.width;
+			coords[offset + 1] = 1f - (float) point.y / imageSize.height;
+		}
+		pcs.firePropertyChange(PROPERTY_COORDS, oldVal, coords);
 	}
 
-	@Override
-	public String toString() {
-		return "RelRect [dimension=" + imageSize + ", rotation=" + rotation + ", coords=" + Arrays.toString(coords)
-				+ "]";
-	}
 }

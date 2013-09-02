@@ -87,22 +87,20 @@ public class PdfExtraInfo {
 	}
 
 	/**
-	 * Returns page size identified by upper rigth corner position. If no error
-	 * occures FloatPoint with x as a width and y as a height is returned, null
-	 * otherwise.
+	 * Returns page info.
 	 * 
 	 * @param aPage
 	 *            number of page for which size should be returned
 	 * @return FloatPoint or null
 	 */
-	public PageInfo getPageSize(int aPage) {
+	public PageInfo getPageInfo(int aPage) {
 		PageInfo tmpResult = null;
 		PdfReader reader = null;
 		try {
 			reader = PdfUtils.getPdfReader(options.getInFile(), options.getPdfOwnerPwdStrX().getBytes());
-			final Rectangle tmpRect = reader.getPageSize(aPage);
+			final Rectangle tmpRect = reader.getPageSizeWithRotation(aPage);
 			if (tmpRect != null) {
-				tmpResult = new PageInfo(tmpRect.getRight(), tmpRect.getTop(), reader.getPageRotation(aPage));
+				tmpResult = new PageInfo(tmpRect.getRight(), tmpRect.getTop());
 			}
 		} catch (Exception e) {
 			// nothing to do

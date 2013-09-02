@@ -3,19 +3,19 @@
  * Version 1.1 (the "License"); you may not use this file except in
  * compliance with the License. You may obtain a copy of the License at
  * http://www.mozilla.org/MPL/
- * 
+ *
  * Software distributed under the License is distributed on an "AS IS"
  * basis, WITHOUT WARRANTY OF ANY KIND, either express or implied. See the
  * License for the specific language governing rights and limitations
  * under the License.
- * 
+ *
  * The Original Code is 'JSignPdf, a free application for PDF signing'.
- * 
+ *
  * The Initial Developer of the Original Code is Josef Cacek.
  * Portions created by Josef Cacek are Copyright (C) Josef Cacek. All Rights Reserved.
- * 
+ *
  * Contributor(s): Josef Cacek.
- * 
+ *
  * Alternatively, the contents of this file may be used under the terms
  * of the GNU Lesser General Public License, version 2.1 (the  "LGPL License"), in which case the
  * provisions of LGPL License are applicable instead of those
@@ -90,6 +90,13 @@ public class Constants {
 
 	public static final boolean RELAX_SSL_SECURITY = ConfigProvider.getInstance().getAsBool("relax.ssl.security");
 
+	public static final String PDF2IMAGE_JPEDAL = "jpedal";
+	public static final String PDF2IMAGE_PDFBOX = "pdfbox";
+	public static final String PDF2IMAGE_PDFRENDERER = "pdfrenderer";
+	public static final String PDF2IMAGE_LIBRARIES_DEFAULT = PDF2IMAGE_JPEDAL + "," + PDF2IMAGE_PDFBOX + ","
+			+ PDF2IMAGE_PDFRENDERER;
+	public static final String PDF2IMAGE_LIBRARIES = ConfigProvider.getInstance().getNotEmptyProperty(
+			"pdf2image.libraries", PDF2IMAGE_LIBRARIES_DEFAULT);
 	/**
 	 * Property name.
 	 */

@@ -30,29 +30,25 @@
 package net.sf.jsignpdf.types;
 
 /**
- * Page info.
+ * PDF page info.
  * 
  * @author Josef Cacek
  */
 public class PageInfo {
 
-	private FloatPoint size;
-	private int rotation;
+	private final float width;
+	private final float height;
 
-	public PageInfo(float width, float height, int rotation) {
-		size = new FloatPoint(width, height);
-		this.rotation = rotation;
+	public PageInfo(float width, float height) {
+		this.width = width;
+		this.height = height;
 	}
 
-	public float getX() {
-		return size.getX();
+	public float getWidth() {
+		return width;
 	}
 
-	public float getY() {
-		return size.getY();
-	}
-
-	public int getRotation() {
-		return rotation;
+	public float getHeight() {
+		return height;
 	}
 }
