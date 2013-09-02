@@ -225,7 +225,7 @@ public class VerifierLogic {
 
 					if (url != null) {
 						// OCSP url is found in signing certificate - verify certificate with that url
-						tmpVerif.setOcspInCertValid(validateCertificateOCSP(pkc, url));
+						tmpVerif.setOcspInCertValid(validateCertificateOCSP(pk.getSignCertificateChain(), url));
 					}
 				}
 
@@ -364,7 +364,7 @@ public class VerifierLogic {
 	 * Validates certificate (chain) using OCSP.
 	 * 
 	 * @param pkc
-	 *            certificate chain, 3rd certificate will be validated (pkc[2])
+	 *            certificate chain, 1st certificate will be validated
 	 * @param url
 	 *            OCSP url for validation
 	 * @return
@@ -375,8 +375,9 @@ public class VerifierLogic {
 		}
 
 		try {
-			OcspClientBouncyCastle ocspClient = new OcspClientBouncyCastle((X509Certificate) pkc[2],
-					(X509Certificate) pkc[1], url);
+			X509Certificate sigcer = (X509Certificate) pkc[0];
+			X509Certificate isscer = (X509Certificate) pkc[1];
+			OcspClientBouncyCastle ocspClient = new OcspClientBouncyCastle(sigcer, isscer, url);
 			// TODO implement proxy support
 //			ocspClient.setProxy(new Proxy(Proxy.Type.HTTP, new InetSocketAddress("127.0.0.1", 8888)));
 
@@ -388,8 +389,6 @@ public class VerifierLogic {
 
 			SingleResp sr = basicResp.getResponses()[0];
 			CertificateID cid = sr.getCertID();
-			X509Certificate sigcer = (X509Certificate) pkc[2];
-			X509Certificate isscer = (X509Certificate) pkc[1];
 			CertificateID tis = new CertificateID(CertificateID.HASH_SHA1, isscer, sigcer.getSerialNumber());
 			return tis.equals(cid);
 		} catch (Exception e) {
