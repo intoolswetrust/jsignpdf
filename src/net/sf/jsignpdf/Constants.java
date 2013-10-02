@@ -80,6 +80,12 @@ public class Constants {
 	public static final String L2TEXT_FONT_PATH = "/net/sf/jsignpdf/fonts/DejaVuSans.ttf";
 	public static final String L2TEXT_FONT_NAME = "DejaVuSans.ttf";
 
+	public static final String L2TEXT_PLACEHOLDER_TIMESTAMP = "timestamp";
+	public static final String L2TEXT_PLACEHOLDER_SIGNER = "signer";
+	public static final String L2TEXT_PLACEHOLDER_LOCATION = "location";
+	public static final String L2TEXT_PLACEHOLDER_REASON = "reason";
+	public static final String L2TEXT_PLACEHOLDER_CONTACT = "contact";
+
 	public static final String DEFAULT_OUT_SUFFIX = "_signed";
 
 	public static final String KEYSTORE_TYPE_WINDOWS_MY = "WINDOWS-MY";
@@ -210,7 +216,7 @@ public class Constants {
 	public static final int EXIT_CODE_SOME_SIG_FAILED = 3;
 	public static final int EXIT_CODE_ALL_SIG_FAILED = 4;
 
-	//new in SignatureCounter
+	// new in SignatureCounter
 	public static final int EXIT_CODE_CANT_READ_FILE = 5;
 	public static final int EXIT_CODE_COMMON_ERROR = 6;
 

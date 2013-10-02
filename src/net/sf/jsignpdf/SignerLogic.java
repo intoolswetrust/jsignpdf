@@ -29,7 +29,7 @@
  */
 package net.sf.jsignpdf;
 
-import static net.sf.jsignpdf.Constants.RES;
+import static net.sf.jsignpdf.Constants.*;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -56,6 +56,7 @@ import net.sf.jsignpdf.utils.KeyStoreUtils;
 
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.text.StrSubstitutor;
 import org.apache.log4j.Logger;
 
 import com.lowagie.text.Font;
@@ -130,7 +131,7 @@ public class SignerLogic implements Runnable {
 			final PrivateKey key = pkInfo.getKey();
 			final Certificate[] chain = pkInfo.getChain();
 			if (ArrayUtils.isEmpty(chain)) {
-				//the certificate was not found
+				// the certificate was not found
 				LOGGER.info(RES.get("console.certificateChainEmpty"));
 				return false;
 			}
@@ -155,10 +156,12 @@ public class SignerLogic implements Runnable {
 			LOGGER.info(RES.get("console.createSignature"));
 			char tmpPdfVersion = '\0'; // default version - the same as input
 			if (reader.getPdfVersion() < hashAlgorithm.getPdfVersion()) {
-				//this covers also problems with visible signatures (embedded fonts) in PDF 1.2, because the minimal version
-				//for hash algorithms is 1.3 (for SHA1)
+				// this covers also problems with visible signatures (embedded
+				// fonts) in PDF 1.2, because the minimal version
+				// for hash algorithms is 1.3 (for SHA1)
 				if (options.isAppendX()) {
-					//if we are in append mode and version should be updated then return false (not possible)
+					// if we are in append mode and version should be updated
+					// then return false (not possible)
 					LOGGER.info(RES.get("console.updateVersionNotPossibleInAppendMode"));
 					return false;
 				}
@@ -214,17 +217,20 @@ public class SignerLogic implements Runnable {
 
 			final PdfSignatureAppearance sap = stp.getSignatureAppearance();
 			sap.setCrypto(key, chain, null, PdfSignatureAppearance.WINCER_SIGNED);
-			if (StringUtils.isNotEmpty(options.getReason())) {
-				LOGGER.info(RES.get("console.setReason", options.getReason()));
-				sap.setReason(options.getReason());
+			final String reason = options.getReason();
+			if (StringUtils.isNotEmpty(reason)) {
+				LOGGER.info(RES.get("console.setReason", reason));
+				sap.setReason(reason);
 			}
-			if (StringUtils.isNotEmpty(options.getLocation())) {
-				LOGGER.info(RES.get("console.setLocation", options.getLocation()));
-				sap.setLocation(options.getLocation());
+			final String location = options.getLocation();
+			if (StringUtils.isNotEmpty(location)) {
+				LOGGER.info(RES.get("console.setLocation", location));
+				sap.setLocation(location);
 			}
-			if (StringUtils.isNotEmpty(options.getContact())) {
-				LOGGER.info(RES.get("console.setContact", options.getContact()));
-				sap.setContact(options.getContact());
+			final String contact = options.getContact();
+			if (StringUtils.isNotEmpty(contact)) {
+				LOGGER.info(RES.get("console.setContact", contact));
+				sap.setContact(contact);
 			}
 			LOGGER.info(RES.get("console.setCertificationLevel"));
 			sap.setCertificationLevel(options.getCertLevelX().getLevel());
@@ -252,23 +258,27 @@ public class SignerLogic implements Runnable {
 				LOGGER.info(RES.get("console.setImageScale"));
 				sap.setImageScale(options.getBgImgScale());
 				LOGGER.info(RES.get("console.setL2Text"));
+				final String signer = PdfPKCS7.getSubjectFields((X509Certificate) chain[0]).getField("CN");
+				final String timestamp = new SimpleDateFormat("yyyy.MM.dd HH:mm:ss z").format(sap.getSignDate()
+						.getTime());
 				if (options.getL2Text() != null) {
-					sap.setLayer2Text(options.getL2Text());
+					final Map<String, String> replacements = new HashMap<String, String>();
+					replacements.put(L2TEXT_PLACEHOLDER_SIGNER, StringUtils.defaultString(signer));
+					replacements.put(L2TEXT_PLACEHOLDER_TIMESTAMP, timestamp);
+					replacements.put(L2TEXT_PLACEHOLDER_LOCATION, StringUtils.defaultString(location));
+					replacements.put(L2TEXT_PLACEHOLDER_REASON, StringUtils.defaultString(reason));
+					replacements.put(L2TEXT_PLACEHOLDER_CONTACT, StringUtils.defaultString(contact));
+					final String l2text = StrSubstitutor.replace(options.getL2Text(), replacements);
+					sap.setLayer2Text(l2text);
 				} else {
 					final StringBuilder buf = new StringBuilder();
-					buf.append(RES.get("default.l2text.signedBy")).append(" ");
-					buf.append(PdfPKCS7.getSubjectFields((X509Certificate) chain[0]).getField("CN")).append('\n');
-					final SimpleDateFormat sd = new SimpleDateFormat("yyyy.MM.dd HH:mm:ss z");
-					buf.append(RES.get("default.l2text.date")).append(" ")
-							.append(sd.format(sap.getSignDate().getTime()));
-					if (StringUtils.isNotEmpty(options.getReason()))
-						buf.append('\n').append(RES.get("default.l2text.reason")).append(" ")
-								.append(options.getReason());
-					if (StringUtils.isNotEmpty(options.getLocation()))
-						buf.append('\n').append(RES.get("default.l2text.location")).append(" ")
-								.append(options.getLocation());
+					buf.append(RES.get("default.l2text.signedBy")).append(" ").append(signer).append('\n');
+					buf.append(RES.get("default.l2text.date")).append(" ").append(timestamp);
+					if (StringUtils.isNotEmpty(reason))
+						buf.append('\n').append(RES.get("default.l2text.reason")).append(" ").append(reason);
+					if (StringUtils.isNotEmpty(location))
+						buf.append('\n').append(RES.get("default.l2text.location")).append(" ").append(location);
 					sap.setLayer2Text(buf.toString());
-					;
 				}
 				if (FontUtils.getL2BaseFont() != null) {
 					sap.setLayer2Font(new Font(FontUtils.getL2BaseFont(), options.getL2TextFontSize()));
@@ -291,13 +301,13 @@ public class SignerLogic implements Runnable {
 
 			LOGGER.info(RES.get("console.processing"));
 			final PdfSignature dic = new PdfSignature(PdfName.ADOBE_PPKLITE, new PdfName("adbe.pkcs7.detached"));
-			if (!StringUtils.isEmpty(options.getReason())) {
+			if (!StringUtils.isEmpty(reason)) {
 				dic.setReason(sap.getReason());
 			}
-			if (!StringUtils.isEmpty(options.getLocation())) {
+			if (!StringUtils.isEmpty(location)) {
 				dic.setLocation(sap.getLocation());
 			}
-			if (!StringUtils.isEmpty(options.getContact())) {
+			if (!StringUtils.isEmpty(contact)) {
 				dic.setContact(sap.getContact());
 			}
 			dic.setDate(new PdfDate(sap.getSignDate()));
@@ -329,7 +339,7 @@ public class SignerLogic implements Runnable {
 				LOGGER.info(RES.get("console.getOCSPURL"));
 				String url = PdfPKCS7.getOCSPURL((X509Certificate) chain[0]);
 				if (StringUtils.isEmpty(url)) {
-					//get from options
+					// get from options
 					LOGGER.info(RES.get("console.noOCSPURL"));
 					url = options.getOcspServerUrl();
 				}
