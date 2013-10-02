@@ -1,3 +1,12 @@
+Version 1.5.1
+-------------
+  * Added support for signature field placeholders in custom signature text (L2 text). Possible values are
+    - ${signer}
+    - ${timestamp}
+    - ${location}
+    - ${reason}
+    - ${contact}
+  
 Version 1.5.0
 -------------
   * Improved Preview functionality
