@@ -1,3 +1,9 @@
+2014-05-30 Josef Cacek (1.5.2)
+  * Fix -ff option in Verifier (it's flag without arguments, till now an argument was required)
+  * Fix exit codes in Verifier (the non-zero codes used even if the -ff is not used)
+  * Disable fallbacks for key alias lookup. Originally if the alias name was used
+    and it doesn't existed in the keystore, the first key in the selected keystore was used.
+
 2013-10-02 Josef Cacek (1.5.1)
   * Added support for signature field placeholders in custom L2 texts. Possible values are:
     - ${signer}

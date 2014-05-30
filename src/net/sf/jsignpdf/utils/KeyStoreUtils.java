@@ -216,22 +216,11 @@ public class KeyStoreUtils {
 			throw new NullPointerException(message);
 		}
 		String tmpResult = null;
-		if (StringUtils.isNotEmpty(options.getKeyAliasX())) {
-			try {
-				if (aKs.isKeyEntry(options.getKeyAliasX())) {
-					tmpResult = options.getKeyAliasX();
-					LOGGER.info(RES.get("console.usedKeyAlias", tmpResult));
-					return tmpResult;
-				}
-			} catch (KeyStoreException e) {
-				// nothing to do, fallback to default handling
-			}
-		}
-		final List<String> tmpList = getAliasesList(aKs, options);
 		final String tmpAlias = options.getKeyAliasX();
+		final List<String> tmpList = getAliasesList(aKs, options);
 		final int tmpIndex = options.getKeyIndexX();
 
-		if (tmpAlias != null && tmpList.contains(tmpAlias)) {
+		if (StringUtils.isNotEmpty(tmpAlias)) {
 			tmpResult = tmpAlias;
 		} else if (tmpList.size() > tmpIndex && tmpIndex >= 0) {
 			tmpResult = tmpList.get(tmpIndex);

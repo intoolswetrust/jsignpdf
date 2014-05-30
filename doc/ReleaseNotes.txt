@@ -1,3 +1,9 @@
+Version 1.5.2
+-------------
+  * Exit codes and usage of -ff option fixed in Verifier
+  * Disable fallbacks for key alias lookup in JSignPdf. Originally if the alias name was given
+    and the alias didn't exist in the keystore, then the first key in the selected keystore was used.
+
 Version 1.5.1
 -------------
   * Added support for signature field placeholders in custom signature text (L2 text). Possible values are

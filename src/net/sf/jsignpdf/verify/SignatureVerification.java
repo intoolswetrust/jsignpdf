@@ -125,6 +125,13 @@ public class SignatureVerification {
 	 */
 	public static final int SIG_STAT_CODE_INFO_SIGNATURE_VALID = 0;
 
+	public static final int SIG_STAT_CODE_WARNING_ANY_WARNING = 15;
+
+	public static final int SIG_STAT_CODE_ERROR_FILE_NOT_READABLE = 101;
+
+	public static final int SIG_STAT_CODE_ERROR_UNEXPECTED_PROBLEM = 102;
+	public static final int SIG_STAT_CODE_ERROR_ANY_ERROR = 105;
+
 	// error messages when validating certificate
 	private static final String CERT_PROBLEM_CANT_BE_VERIFIED = "Cannot be verified against the KeyStore";
 	private static final String CERT_PROBLEM_EXPIRED = "certificate expired on";
@@ -185,7 +192,7 @@ public class SignatureVerification {
 	 * Default constructore
 	 */
 	public SignatureVerification() {
-		//nothing to do here
+		// nothing to do here
 	}
 
 	/**
@@ -207,25 +214,31 @@ public class SignatureVerification {
 		int code = SignatureVerification.SIG_STAT_CODE_INFO_SIGNATURE_VALID;
 
 		// TODO Handle case when OCRL checking fails
-		// TODO Handle case when new content is added after signature with certification level set
+		// TODO Handle case when new content is added after signature with
+		// certification level set
 		if (isModified()) {
 			// ERROR: signed revision is altered
 			code = SignatureVerification.SIG_STAT_CODE_ERROR_REVISION_MODIFIED;
 		} else if (!isLastSignature && getCertLevelCode() == PdfSignatureAppearance.CERTIFIED_NO_CHANGES_ALLOWED) {
-			// ERROR: some signature has certification level set but document is changed (at least with some additional signatures)
+			// ERROR: some signature has certification level set but document is
+			// changed (at least with some additional signatures)
 			code = SignatureVerification.SIG_STAT_CODE_ERROR_CERTIFICATION_BROKEN;
 		} else if (isLastSignature && !isWholeDocument() && getCertLevelCode() != PdfSignatureAppearance.NOT_CERTIFIED) {
-			// TODO What if e.g. annotations are added (which is allowed by cert level)?
-			// ERROR: last signature doesn't cover whole document (document is changed) and certification level set
+			// TODO What if e.g. annotations are added (which is allowed by cert
+			// level)?
+			// ERROR: last signature doesn't cover whole document (document is
+			// changed) and certification level set
 			code = SignatureVerification.SIG_STAT_CODE_ERROR_CERTIFICATION_BROKEN;
 		} else if (isLastSignature && !isWholeDocument()) {
-			// WARNING: last signature doesn't cover whole document - there is some unsigned content in the document
+			// WARNING: last signature doesn't cover whole document - there is
+			// some unsigned content in the document
 			code = SignatureVerification.SIG_STAT_CODE_WARNING_UNSIGNED_CONTENT;
 		} else if (!isSignCertTrustedAndValid() && getFails() != null) {
 			// WARNING: there is some problem with certificate
 			String errorMessage = String.valueOf(getFails()[1]).trim().toLowerCase();
 			if (errorMessage.startsWith(CERT_PROBLEM_CANT_BE_VERIFIED.trim().toLowerCase())) {
-				// WARNING: certificate is not trusted (can't be verified against keystore)
+				// WARNING: certificate is not trusted (can't be verified
+				// against keystore)
 				code = SignatureVerification.SIG_STAT_CODE_WARNING_CERTIFICATE_CANT_BE_VERIFIED;
 			} else if (errorMessage.startsWith(CERT_PROBLEM_EXPIRED.trim().toLowerCase())) {
 				// WARNING: certificate expired
@@ -246,19 +259,23 @@ public class SignatureVerification {
 				// WARNING: some other certificate error
 				code = SignatureVerification.SIG_STAT_CODE_WARNING_CERTIFICATE_PROBLEM;
 			}
-		} else if ((!isCrlPresent() || (isCrlPresent() && getFails() != null)) && !isSignCertTrustedAndValid() && (isOcspPresent() || isOcspInCertPresent()) && !isOcspValid()
-				&& !isOcspInCertValid()) {
-			// If certificate is successfully validated against CRL - don't set warning flag for OCSP (set OCSP error only if CRL doesn't exist or there are some errors)  
+		} else if ((!isCrlPresent() || (isCrlPresent() && getFails() != null)) && !isSignCertTrustedAndValid()
+				&& (isOcspPresent() || isOcspInCertPresent()) && !isOcspValid() && !isOcspInCertValid()) {
+			// If certificate is successfully validated against CRL - don't set
+			// warning flag for OCSP (set OCSP error only if CRL doesn't exist
+			// or there are some errors)
 			// WARNING: OCSP validation fails
 			code = SignatureVerification.SIG_STAT_CODE_WARNING_SIGNATURE_OCSP_INVALID;
 		} else if (!isSignCertTrustedAndValid() && !isOcspPresent() && !isOcspInCertPresent() && !isCrlPresent()) {
 			// WARNING: No revocation information (CRL or OCSP) found
 			code = SignatureVerification.SIG_STAT_CODE_WARNING_NO_REVOCATION_INFO;
 		} else if (!isTsTokenPresent()) {
-			// WARNING: signature date/time are from the clock on the signer's computer
+			// WARNING: signature date/time are from the clock on the signer's
+			// computer
 			code = SignatureVerification.SIG_STAT_CODE_WARNING_NO_TIMESTAMP_TOKEN;
 		} else if (isTsTokenPresent() && getTsTokenValidationResult() != null) {
-			// WARNING: signature is timestamped but the timestamp could not be verified
+			// WARNING: signature is timestamped but the timestamp could not be
+			// verified
 			code = SignatureVerification.SIG_STAT_CODE_WARNING_TIMESTAMP_INVALID;
 		}
 		return code;
@@ -585,6 +602,7 @@ public class SignatureVerification {
 		this.certPath = certPath;
 	}
 
+	@Override
 	public String toString() {
 		return "Signature verification [" + "\n signName=" + signName + "\n name=" + name + "\n subject=" + subject
 				+ "\n date=" + date.getTime() + "\n reason=" + reason + "\n location=" + location + "\n revision="
