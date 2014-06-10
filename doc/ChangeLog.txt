@@ -1,3 +1,6 @@
+2014-06-10 Josef Cacek
+  * Verifier - added exit code 10 when no signature field is present in the PDF
+
 2014-05-30 Josef Cacek (1.5.2)
   * Fix -ff option in Verifier (it's flag without arguments, till now an argument was required)
   * Fix exit codes in Verifier (the non-zero codes used even if the -ff is not used)

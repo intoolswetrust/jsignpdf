@@ -125,6 +125,8 @@ public class SignatureVerification {
 	 */
 	public static final int SIG_STAT_CODE_INFO_SIGNATURE_VALID = 0;
 
+	public static final int SIG_STAT_CODE_WARNING_NO_SIGNATURE = 10;
+
 	public static final int SIG_STAT_CODE_WARNING_ANY_WARNING = 15;
 
 	public static final int SIG_STAT_CODE_ERROR_FILE_NOT_READABLE = 101;

@@ -61,6 +61,8 @@ public class VerificationResult {
 	 */
 	private int verificationResultCode;
 
+	private boolean withoutSignature;
+
 	/**
 	 * Constructor - initializes fields.
 	 */
@@ -78,12 +80,7 @@ public class VerificationResult {
 	 */
 	public void addVerification(final SignatureVerification aVerification) {
 		verifications.add(aVerification);
-		final int code = aVerification.getValidationCode();
-		if (code != SignatureVerification.SIG_STAT_CODE_INFO_SIGNATURE_VALID) {
-			if (verificationResultCode < code) {
-				verificationResultCode = code;
-			}
-		}
+		updateVerificationResult(aVerification.getValidationCode());
 	}
 
 	public Exception getException() {
@@ -106,11 +103,27 @@ public class VerificationResult {
 		return verifications;
 	}
 
+	public void setWithoutSignature() {
+		withoutSignature = true;
+		updateVerificationResult(SignatureVerification.SIG_STAT_CODE_WARNING_NO_SIGNATURE);
+	}
+
 	/**
 	 * @return the verificationResultCode
 	 */
 	public int getVerificationResultCode() {
 		return verificationResultCode;
+	}
+
+	/**
+	 * @param code
+	 */
+	private void updateVerificationResult(final int code) {
+		if (code != SignatureVerification.SIG_STAT_CODE_INFO_SIGNATURE_VALID) {
+			if (verificationResultCode < code) {
+				verificationResultCode = code;
+			}
+		}
 	}
 
 }

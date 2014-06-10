@@ -187,6 +187,10 @@ public class VerifierLogic {
 			tmpResult.setTotalRevisions(tmpAcroFields.getTotalRevisions());
 
 			final int lastSignatureIdx = tmpNames.size() - 1;
+			if (lastSignatureIdx < 0) {
+				// there is no signature
+				tmpResult.setWithoutSignature();
+			}
 			for (int i = lastSignatureIdx; i >= 0; i--) {
 				final String name = tmpNames.get(i);
 				final SignatureVerification tmpVerif = new SignatureVerification(name);
