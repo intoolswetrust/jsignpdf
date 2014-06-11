@@ -1,3 +1,6 @@
+2014-06-11 Josef Cacek (1.5.3)
+  * Fixed unregistering PKCS11 keystore type for GUI
+
 2014-06-10 Josef Cacek
   * Verifier - added exit code 10 when no signature field is present in the PDF
 

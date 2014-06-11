@@ -29,7 +29,11 @@
  */
 package net.sf.jsignpdf;
 
-import static net.sf.jsignpdf.Constants.*;
+import static net.sf.jsignpdf.Constants.EXIT_CODE_NO_COMMAND;
+import static net.sf.jsignpdf.Constants.EXIT_CODE_PARSE_ERR;
+import static net.sf.jsignpdf.Constants.NEW_LINE;
+import static net.sf.jsignpdf.Constants.RES;
+import static net.sf.jsignpdf.Constants.VERSION;
 
 import java.io.File;
 import java.io.FileFilter;
@@ -67,6 +71,7 @@ import org.apache.log4j.Logger;
 public class Signer {
 
 	private final static Logger LOGGER = Logger.getLogger(Signer.class);
+	static String pkcs11ProviderName = null;
 
 	/**
 	 * Prints formatted help message (command line arguments).
@@ -88,21 +93,25 @@ public class Signer {
 	 * @param args
 	 */
 	public static void main(String[] args) {
+		SignerOptionsFromCmdLine tmpOpts = null;
+
+		if (args != null && args.length > 0) {
+			tmpOpts = new SignerOptionsFromCmdLine();
+			parseCommandLine(args, tmpOpts);
+		}
+
 		try {
 			SSLInitializer.init();
 		} catch (Exception e) {
 			LOGGER.warn("Unable to re-configure SSL layer", e);
 		}
 
-		final String pkcs11ProviderName = PKCS11Utils.registerProvider(ConfigProvider.getInstance().getProperty(
-				"pkcs11config.path"));
+		pkcs11ProviderName = PKCS11Utils
+				.registerProvider(ConfigProvider.getInstance().getProperty("pkcs11config.path"));
 
 		traceInfo();
 
-		if (args != null && args.length > 0) {
-			final SignerOptionsFromCmdLine tmpOpts = new SignerOptionsFromCmdLine();
-			parseCommandLine(args, tmpOpts);
-
+		if (tmpOpts != null) {
 			if (tmpOpts.isPrintVersion()) {
 				System.out.println("JSignPdf version " + VERSION);
 			}
@@ -132,9 +141,10 @@ public class Signer {
 				if (!tmpCommand) {
 					// no valid command provided - print help and exit
 					printHelp();
-					System.exit(EXIT_CODE_NO_COMMAND);
+					exit(EXIT_CODE_NO_COMMAND);
 				}
 			}
+			exit(0);
 		} else {
 			try {
 				UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
@@ -145,18 +155,6 @@ public class Signer {
 			tmpForm.pack();
 			GuiUtils.center(tmpForm);
 			tmpForm.setVisible(true);
-		}
-
-		// some tokens/card-readers hangs during second usage of the program, they have to be unplugged and plugged again
-		// following code should prevent this issue
-		if (pkcs11ProviderName != null) {
-			Security.removeProvider(pkcs11ProviderName);
-			//we should wait a little bit to de-register provider correctly (is it a driver issue?)
-			try {
-				Thread.sleep(1000);
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-			}
 		}
 	}
 
@@ -201,7 +199,7 @@ public class Signer {
 		if (ArrayUtils.isEmpty(anOpts.getFiles())) {
 			// we've used -lp (loadproperties) parameter
 			if (!tmpLogic.signFile()) {
-				System.exit(Constants.EXIT_CODE_ALL_SIG_FAILED);
+				exit(Constants.EXIT_CODE_ALL_SIG_FAILED);
 			}
 			return;
 		}
@@ -250,7 +248,7 @@ public class Signer {
 			}
 		}
 		if (failedCount > 0) {
-			System.exit(successCount > 0 ? Constants.EXIT_CODE_SOME_SIG_FAILED : Constants.EXIT_CODE_ALL_SIG_FAILED);
+			exit(successCount > 0 ? Constants.EXIT_CODE_SOME_SIG_FAILED : Constants.EXIT_CODE_ALL_SIG_FAILED);
 		}
 	}
 
@@ -265,7 +263,12 @@ public class Signer {
 			opts.loadCmdLine(args);
 		} catch (ParseException exp) {
 			System.err.println("Unable to parse command line (Use -h for the help)\n" + exp.getMessage());
-			System.exit(EXIT_CODE_PARSE_ERR);
+			exit(EXIT_CODE_PARSE_ERR);
 		}
+	}
+
+	private static void exit(int exitCode) {
+		PKCS11Utils.unregisterProvider(pkcs11ProviderName);
+		System.exit(exitCode);
 	}
 }

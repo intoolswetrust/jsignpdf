@@ -1,3 +1,8 @@
+Version 1.5.3
+-------------
+  * Fixed PKCS11 - It didn't work in GUI because of a bug in unregistering SunPKCS11 provider (It was called too early.) 
+  * Verifier - added exit code 10 when no signature field is present in the PDF
+
 Version 1.5.2
 -------------
   * Exit codes and usage of -ff option fixed in Verifier

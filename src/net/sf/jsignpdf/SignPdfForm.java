@@ -51,6 +51,7 @@ import net.sf.jsignpdf.types.PDFEncryption;
 import net.sf.jsignpdf.types.PrintRight;
 import net.sf.jsignpdf.utils.GuiUtils;
 import net.sf.jsignpdf.utils.KeyStoreUtils;
+import net.sf.jsignpdf.utils.PKCS11Utils;
 import net.sf.jsignpdf.utils.PropertyProvider;
 
 import org.apache.commons.lang3.StringUtils;
@@ -1254,6 +1255,7 @@ public class SignPdfForm extends javax.swing.JFrame implements SignResultListene
 	private void formWindowClosing(java.awt.event.WindowEvent evt) {// GEN-FIRST:event_formWindowClosing
 		storeToOptions();
 		options.storeOptions();
+		PKCS11Utils.unregisterProvider(Signer.pkcs11ProviderName);
 	}// GEN-LAST:event_formWindowClosing
 
 	private void btnOutPdfFileActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_btnOutPdfFileActionPerformed

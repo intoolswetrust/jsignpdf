@@ -34,6 +34,7 @@ import java.security.Provider;
 import java.security.Security;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.log4j.Logger;
 
 /**
  * Methods for handling PKCS#11 security providers.
@@ -41,6 +42,8 @@ import org.apache.commons.lang3.StringUtils;
  * @author Josef Cacek
  */
 public class PKCS11Utils {
+
+	private static final Logger LOGGER = Logger.getLogger(PKCS11Utils.class);
 
 	/**
 	 * Tries to register the sun.security.pkcs11.SunPKCS11 provider with
@@ -55,6 +58,7 @@ public class PKCS11Utils {
 		if (StringUtils.isEmpty(configPath)) {
 			return null;
 		}
+		LOGGER.debug("Registering SunPKCS11 provider from configuration in " + configPath);
 		final File cfgFile = new File(configPath);
 		final String absolutePath = cfgFile.getAbsolutePath();
 		if (cfgFile.isFile()) {
@@ -62,7 +66,9 @@ public class PKCS11Utils {
 				Provider pkcs11Provider = (Provider) Class.forName("sun.security.pkcs11.SunPKCS11")
 						.getConstructor(String.class).newInstance(absolutePath);
 				Security.addProvider(pkcs11Provider);
-				return pkcs11Provider.getName();
+				final String name = pkcs11Provider.getName();
+				LOGGER.debug("SunPKCS11 provider registered with name " + name);
+				return name;
 			} catch (Exception e) {
 				System.err.println("Unable to register SunPKCS11 security provider.");
 				e.printStackTrace();
@@ -72,5 +78,28 @@ public class PKCS11Utils {
 					+ absolutePath);
 		}
 		return null;
+	}
+
+	/**
+	 * Unregisters security provider with given name.
+	 * <p>
+	 * Some tokens/card-readers hangs during second usage of the program, they
+	 * have to be unplugged and plugged again following code should prevent this
+	 * issue.
+	 * </p>
+	 * 
+	 * @param providerName
+	 */
+	public static void unregisterProvider(final String providerName) {
+		if (providerName != null) {
+			LOGGER.debug("Removing security provider with name " + providerName);
+			Security.removeProvider(providerName);
+			//we should wait a little bit to de-register provider correctly (is it a driver issue?)
+			try {
+				Thread.sleep(1000);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+		}
 	}
 }
