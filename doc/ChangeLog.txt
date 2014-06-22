@@ -1,3 +1,6 @@
+2014-06-22 Josef Cacek (1.5.4)
+  * Recompiled 1.5.3 - a wrong version of jsignpdf-itxt caused non-working time-stamping
+
 2014-06-11 Josef Cacek (1.5.3)
   * Fixed unregistering PKCS11 keystore type for GUI
 

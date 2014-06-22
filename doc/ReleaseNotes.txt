@@ -1,3 +1,8 @@
+Version 1.5.4
+-------------
+  * No code change!
+  * Recompiled 1.5.3 - a wrong jsignpdf-itxt library version was used there (=> Broken TSA support)
+
 Version 1.5.3
 -------------
   * Fixed PKCS11 - It didn't work in GUI because of a bug in unregistering SunPKCS11 provider (It was called too early.) 
