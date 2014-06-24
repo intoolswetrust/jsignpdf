@@ -1,3 +1,6 @@
+2014-06-24 Josef Cacek
+  * jsignpdf-itxt moved directly under JSignPdf project (on github) 
+
 2014-06-22 Josef Cacek (1.5.4)
   * Recompiled 1.5.3 - a wrong version of jsignpdf-itxt caused non-working time-stamping
 

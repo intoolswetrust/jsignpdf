@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8" ?> 
+<!-- $Header: /cvsroot/jsignpdf/jsignpdf-itxt/www/lowagie/links.xml,v 1.1 2010/04/14 17:50:46 kwart Exp $ -->
+<site:page
+	xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:site="http://www.lowagie.com/iText/site" >
+	<site:metadata>
+		<site:title>Useful links</site:title>
+		<site:summary>Some links on iText, JAVA, PDF,...</site:summary>
+		<site:keywords>PDF, JAVA, iText, links, Lowagie, Bruno</site:keywords>
+		<site:updated>$Date: 2010/04/14 17:50:46 $</site:updated>
+	</site:metadata>
+</site:page>

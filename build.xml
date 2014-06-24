@@ -44,7 +44,7 @@
 		<delete dir="${build.dir}"/>
 		<delete dir="${dist.dir}"/>
 		<delete dir="${output.dir}"/>
-		<ant antfile="../jsignpdf-itxt/src/build.xml" useNativeBasedir="true" target="clean" />
+		<ant antfile="jsignpdf-itxt/src/build.xml" useNativeBasedir="true" target="clean" />
 	</target>
 
 	<target name="jsignpdf-itxt" depends="prepare">
@@ -54,11 +54,11 @@
 		<tstamp>
 			<format property="releasedate" pattern="yyyy-MM-dd"/>
 		</tstamp>
-		<ant antfile="../jsignpdf-itxt/src/build.xml" useNativeBasedir="true" target="release-1.4" />
+		<ant antfile="jsignpdf-itxt/src/build.xml" useNativeBasedir="true" target="release-1.4" />
 
-		<copy todir="${bin.plugin.dir}/lib" file="../jsignpdf-itxt/build/release/dist/jsignpdf-itxt-${jsignpdf.version}.jar"/>
-		<copy todir="${dist.dir}/lib" file="../jsignpdf-itxt/build/release/dist/jsignpdf-itxt-${jsignpdf.version}.jar"/>
-		<copy todir="${output.dir}" file="../jsignpdf-itxt/build/release/dist/jsignpdf-itxt-${jsignpdf.version}-sources.jar"/>
+		<copy todir="${bin.plugin.dir}/lib" file="jsignpdf-itxt/build/release/dist/jsignpdf-itxt-${jsignpdf.version}.jar"/>
+		<copy todir="${dist.dir}/lib" file="jsignpdf-itxt/build/release/dist/jsignpdf-itxt-${jsignpdf.version}.jar"/>
+		<copy todir="${output.dir}" file="jsignpdf-itxt/build/release/dist/jsignpdf-itxt-${jsignpdf.version}-sources.jar"/>
 	</target>
 
 	<!-- Prepare directory structure for the build -->
