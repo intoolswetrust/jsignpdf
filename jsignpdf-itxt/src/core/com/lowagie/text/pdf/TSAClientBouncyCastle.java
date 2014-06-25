@@ -58,7 +58,6 @@ import java.net.URL;
 import java.net.URLConnection;
 
 import org.bouncycastle.asn1.cmp.PKIFailureInfo;
-import org.bouncycastle.asn1.x509.X509ObjectIdentifiers;
 import org.bouncycastle.tsp.TimeStampRequest;
 import org.bouncycastle.tsp.TimeStampRequestGenerator;
 import org.bouncycastle.tsp.TimeStampResponse;
@@ -88,6 +87,8 @@ public class TSAClientBouncyCastle implements TSAClient {
 
 	private Proxy proxy;
 	private String policy;
+
+	private String hashAlgorithm = "SHA-1";
 
 	/**
 	 * Creates an instance of a TSAClient that will use BouncyCastle.
@@ -131,7 +132,8 @@ public class TSAClientBouncyCastle implements TSAClient {
 	 *            int - estimated size of received time stamp token (DER
 	 *            encoded)
 	 */
-	public TSAClientBouncyCastle(String url, String username, String password, int tokSzEstimate) {
+	public TSAClientBouncyCastle(String url, String username, String password,
+			int tokSzEstimate) {
 		this.tsaURL = url;
 		this.tsaUsername = username;
 		this.tsaPassword = password;
@@ -162,7 +164,8 @@ public class TSAClientBouncyCastle implements TSAClient {
 	 * @see com.lowagie.text.pdf.TSAClient#getTimeStampToken(com.lowagie.text.pdf.PdfPKCS7,
 	 *      byte[])
 	 */
-	public byte[] getTimeStampToken(PdfPKCS7 caller, byte[] imprint) throws Exception {
+	public byte[] getTimeStampToken(PdfPKCS7 caller, byte[] imprint)
+			throws Exception {
 		return getTimeStampToken(imprint);
 	}
 
@@ -179,7 +182,9 @@ public class TSAClientBouncyCastle implements TSAClient {
 				tsqGenerator.setReqPolicy(policy);
 			}
 			BigInteger nonce = BigInteger.valueOf(System.currentTimeMillis());
-			TimeStampRequest request = tsqGenerator.generate(X509ObjectIdentifiers.id_SHA1.getId(), imprint, nonce);
+			TimeStampRequest request = tsqGenerator.generate(
+					PdfPKCS7.getDigestAlgorithmOID(hashAlgorithm), imprint,
+					nonce);
 			byte[] requestBytes = request.getEncoded();
 
 			// Call the communications layer
@@ -195,7 +200,8 @@ public class TSAClientBouncyCastle implements TSAClient {
 			if (value != 0) {
 				// TODO: Translate value of 15 error codes defined by
 				// PKIFailureInfo to string
-				throw new Exception("Invalid TSA '" + tsaURL + "' response, code " + value);
+				throw new Exception("Invalid TSA '" + tsaURL
+						+ "' response, code " + value);
 			}
 			// TODO: validate the time stap certificate chain (if we want
 			// assure we do not sign using an invalid timestamp).
@@ -204,7 +210,8 @@ public class TSAClientBouncyCastle implements TSAClient {
 			// info)
 			TimeStampToken tsToken = response.getTimeStampToken();
 			if (tsToken == null) {
-				throw new Exception("TSA '" + tsaURL + "' failed to return time stamp token: "
+				throw new Exception("TSA '" + tsaURL
+						+ "' failed to return time stamp token: "
 						+ response.getStatusString());
 			}
 			// TimeStampTokenInfo info = tsToken.getTimeStampInfo();
@@ -220,7 +227,8 @@ public class TSAClientBouncyCastle implements TSAClient {
 		} catch (Exception e) {
 			throw e;
 		} catch (Throwable t) {
-			throw new Exception("Failed to get TSA response from '" + tsaURL + "'", t);
+			throw new Exception("Failed to get TSA response from '" + tsaURL
+					+ "'", t);
 		}
 	}
 
@@ -233,12 +241,13 @@ public class TSAClientBouncyCastle implements TSAClient {
 		// Setup the TSA connection
 		URL url = new URL(tsaURL);
 		final Proxy tmpProxy = proxy == null ? Proxy.NO_PROXY : proxy;
-		URLConnection tsaConnection = (URLConnection) url.openConnection(tmpProxy);
+		URLConnection tsaConnection = url.openConnection(tmpProxy);
 
 		tsaConnection.setDoInput(true);
 		tsaConnection.setDoOutput(true);
 		tsaConnection.setUseCaches(false);
-		tsaConnection.setRequestProperty("Content-Type", "application/timestamp-query");
+		tsaConnection.setRequestProperty("Content-Type",
+				"application/timestamp-query");
 		// tsaConnection.setRequestProperty("Content-Transfer-Encoding",
 		// "base64");
 		tsaConnection.setRequestProperty("Content-Transfer-Encoding", "binary");
@@ -322,4 +331,11 @@ public class TSAClientBouncyCastle implements TSAClient {
 		return tokSzEstimate;
 	}
 
+	public String getHashAlgorithm() {
+		return hashAlgorithm;
+	}
+
+	public void setHashAlgorithm(String hashAlgorithm) {
+		this.hashAlgorithm = hashAlgorithm;
+	}
 }

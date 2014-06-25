@@ -1,3 +1,6 @@
+2014-06-24 Josef Cacek (1.5.5 test)
+  * tsa.hashAlgorithm support in conf.properties
+
 2014-06-24 Josef Cacek
   * jsignpdf-itxt moved directly under JSignPdf project (on github) 
 
