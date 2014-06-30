@@ -1,3 +1,9 @@
+Version 1.6.0
+-------------
+  * Added support for changing TSA hash algorithm - default value can be configured in conf/conf.properties
+    - new GUI input field added to TSA configuration dialog
+    - new CLI option "-tsh" added to batch mode
+
 Version 1.5.4
 -------------
   * No code change!

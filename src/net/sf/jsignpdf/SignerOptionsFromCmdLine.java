@@ -221,6 +221,8 @@ public class SignerOptionsFromCmdLine extends BasicSignerOptions {
 			setTsaPasswd(line.getOptionValue(ARG_TSA_PWD));
 		if (line.hasOption(ARG_TSA_POLICY_LONG))
 			setTsaPolicy(line.getOptionValue(ARG_TSA_POLICY_LONG));
+		if (line.hasOption(ARG_TSA_HASH_ALG))
+			setTsaHashAlg(line.getOptionValue(ARG_TSA_HASH_ALG));
 		if (line.hasOption(ARG_OCSP_LONG))
 			setOcspEnabled(true);
 		if (line.hasOption(ARG_OCSP_SERVER_LONG))
@@ -411,6 +413,9 @@ public class SignerOptionsFromCmdLine extends BasicSignerOptions {
 
 		OPTS.addOption(OptionBuilder.withLongOpt(ARG_TSA_POLICY_LONG).withDescription(RES.get("hlp.tsaPolicy"))
 				.hasArg().withArgName("policyOID").create());
+		OPTS.addOption(OptionBuilder.withLongOpt(ARG_TSA_HASH_ALG_LONG)
+				.withDescription(RES.get("hlp.tsaHashAlg", Constants.DEFVAL_TSA_HASH_ALG)).hasArg()
+				.withArgName("algorithm").create(ARG_TSA_HASH_ALG));
 
 		OPTS.addOption(OptionBuilder.withLongOpt(ARG_OCSP_LONG).withDescription(RES.get("hlp.ocsp")).create());
 		OPTS.addOption(OptionBuilder.withLongOpt(ARG_OCSP_SERVER_LONG).withDescription(RES.get("hlp.ocspServerUrl"))

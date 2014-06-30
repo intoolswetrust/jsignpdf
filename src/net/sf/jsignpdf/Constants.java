@@ -92,23 +92,20 @@ public class Constants {
 
 	public static final String NEW_LINE = System.getProperty("line.separator");
 
-	public static final ResourceProvider RES = new ResourceProvider(
-			ResourceBundle.getBundle(RESOURCE_BUNDLE_BASE));
+	public static final ResourceProvider RES = new ResourceProvider(ResourceBundle.getBundle(RESOURCE_BUNDLE_BASE));
 
-	public static final boolean RELAX_SSL_SECURITY = ConfigProvider
-			.getInstance().getAsBool("relax.ssl.security");
+	public static final boolean RELAX_SSL_SECURITY = ConfigProvider.getInstance().getAsBool("relax.ssl.security");
 
 	public static final String PDF2IMAGE_JPEDAL = "jpedal";
 	public static final String PDF2IMAGE_PDFBOX = "pdfbox";
 	public static final String PDF2IMAGE_PDFRENDERER = "pdfrenderer";
-	public static final String PDF2IMAGE_LIBRARIES_DEFAULT = PDF2IMAGE_JPEDAL
-			+ "," + PDF2IMAGE_PDFBOX + "," + PDF2IMAGE_PDFRENDERER;
-	public static final String PDF2IMAGE_LIBRARIES = ConfigProvider
-			.getInstance().getNotEmptyProperty("pdf2image.libraries",
-					PDF2IMAGE_LIBRARIES_DEFAULT);
+	public static final String PDF2IMAGE_LIBRARIES_DEFAULT = PDF2IMAGE_JPEDAL + "," + PDF2IMAGE_PDFBOX + ","
+			+ PDF2IMAGE_PDFRENDERER;
+	public static final String PDF2IMAGE_LIBRARIES = ConfigProvider.getInstance().getNotEmptyProperty(
+			"pdf2image.libraries", PDF2IMAGE_LIBRARIES_DEFAULT);
 
-	public static final String TSA_HASH_ALGORITHM = ConfigProvider
-			.getInstance().getNotEmptyProperty("tsa.hashAlgorithm", "SHA-1");
+	public static final String DEFVAL_TSA_HASH_ALG = ConfigProvider.getInstance().getNotEmptyProperty(
+			"tsa.hashAlgorithm", "SHA-1");
 
 	/**
 	 * Property name.
@@ -166,6 +163,7 @@ public class Constants {
 	public static final String EPROPERTY_TSA_CERT_PWD = "enc.tsa.cert.file";
 	public static final String EPROPERTY_TSA_PWD = "enc.tsa.passwd";
 	public static final String PROPERTY_TSA_POLICY = "tsa.policy";
+	public static final String PROPERTY_TSA_HASH_ALG = "tsa.hash.algorithm";
 
 	public static final String PROPERTY_OCSP_ENABLED = "ocsp.enabled";
 	public static final String PROPERTY_OCSP_SERVER_URL = "ocsp.serverUrl";
@@ -362,6 +360,9 @@ public class Constants {
 	public static final String ARG_TSA_PWD_LONG = "tsa-password";
 
 	public static final String ARG_TSA_POLICY_LONG = "tsa-policy-oid";
+
+	public static final String ARG_TSA_HASH_ALG = "tsh";
+	public static final String ARG_TSA_HASH_ALG_LONG = "tsa-hash-algorithm";
 
 	public static final String ARG_OCSP_LONG = "ocsp";
 	public static final String ARG_OCSP_SERVER_LONG = "ocsp-server-url";

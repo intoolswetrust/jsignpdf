@@ -1,3 +1,6 @@
+2014-06-30 Josef Cacek (1.6.0)
+  * TSA hash algorithm support added also as a program option in both modes - CLI (-tsh) and GUI
+
 2014-06-24 Josef Cacek (1.5.5 test)
   * tsa.hashAlgorithm support in conf.properties
 

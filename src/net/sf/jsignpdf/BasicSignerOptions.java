@@ -116,6 +116,7 @@ public class BasicSignerOptions {
 	private String tsaCertFile;
 	private String tsaCertFilePwd;
 	private String tsaPolicy;
+	private String tsaHashAlg;
 
 	// options for certificate validation
 	private boolean ocspEnabled;
@@ -193,6 +194,7 @@ public class BasicSignerOptions {
 		setTsaCertFileType(props.getProperty(Constants.PROPERTY_TSA_CERT_FILE_TYPE));
 		setTsaCertFile(props.getProperty(Constants.PROPERTY_TSA_CERT_FILE));
 		setTsaPolicy(props.getProperty(Constants.PROPERTY_TSA_POLICY));
+		setTsaHashAlg(props.getProperty(Constants.PROPERTY_TSA_HASH_ALG));
 
 		// OCSP & CRL
 		setOcspEnabled(props.getAsBool(Constants.PROPERTY_OCSP_ENABLED));
@@ -271,6 +273,7 @@ public class BasicSignerOptions {
 		props.setProperty(Constants.PROPERTY_TSA_CERT_FILE, getTsaCertFile());
 		props.setProperty(Constants.PROPERTY_TSA_SERVER_AUTHN, getTsaServerAuthn().name());
 		props.setProperty(Constants.PROPERTY_TSA_POLICY, getTsaPolicy());
+		props.setProperty(Constants.PROPERTY_TSA_HASH_ALG, getTsaHashAlg());
 		props.setProperty(Constants.PROPERTY_OCSP_ENABLED, isOcspEnabled());
 		props.setProperty(Constants.PROPERTY_OCSP_SERVER_URL, getOcspServerUrl());
 		props.setProperty(Constants.PROPERTY_CRL_ENABLED, isCrlEnabled());
@@ -1006,6 +1009,28 @@ public class BasicSignerOptions {
 	 */
 	public void setTsaPolicy(final String tsaPolicy) {
 		this.tsaPolicy = tsaPolicy;
+	}
+
+	/**
+	 * @return the tsaHashAlg
+	 */
+	public String getTsaHashAlg() {
+		return tsaHashAlg;
+	}
+
+	/**
+	 * @return
+	 */
+	public String getTsaHashAlgWithFallback() {
+		return StringUtils.defaultIfBlank(tsaHashAlg, Constants.DEFVAL_TSA_HASH_ALG);
+	}
+
+	/**
+	 * @param tsaHashAlg
+	 *            the tsaHashAlg to set
+	 */
+	public void setTsaHashAlg(String tsaHashAlg) {
+		this.tsaHashAlg = tsaHashAlg;
 	}
 
 	/**
