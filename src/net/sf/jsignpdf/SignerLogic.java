@@ -299,9 +299,13 @@ public class SignerLogic implements Runnable {
 				}
 				sap.setRender(renderMode.getRender());
 				LOGGER.info(RES.get("console.setVisibleSignature"));
+				int page = options.getPage();
+				if (page < 1 || page > reader.getNumberOfPages()) {
+					page = reader.getNumberOfPages();
+				}
 				sap.setVisibleSignature(
 						new Rectangle(options.getPositionLLX(), options.getPositionLLY(), options.getPositionURX(),
-								options.getPositionURY()), options.getPage(), null);
+								options.getPositionURY()), page, null);
 			}
 
 			LOGGER.info(RES.get("console.processing"));

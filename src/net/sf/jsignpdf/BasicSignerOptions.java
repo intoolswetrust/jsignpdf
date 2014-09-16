@@ -705,9 +705,6 @@ public class BasicSignerOptions {
 	}
 
 	public void setPage(int aPage) {
-		if (aPage < 1) {
-			aPage = 1;
-		}
 		this.page = aPage;
 	}
 

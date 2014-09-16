@@ -1,3 +1,6 @@
+2014-09-16 Josef Cacek (1.6.1)
+  * page number out of range means the last page in the visible signatures (contrary to the first one used in previous versions)
+
 2014-06-30 Josef Cacek (1.6.0)
   * TSA hash algorithm support added also as a program option in both modes - CLI (-tsh) and GUI
 

@@ -1,3 +1,7 @@
+Version 1.6.1
+-------------
+  * page number out of the range means the last page in the visible signatures (contrary to the first one used in previous versions)
+
 Version 1.6.0
 -------------
   * Added support for changing TSA hash algorithm - default value can be configured in conf/conf.properties
