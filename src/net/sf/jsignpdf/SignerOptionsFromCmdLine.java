@@ -122,6 +122,15 @@ public class SignerOptionsFromCmdLine extends BasicSignerOptions {
 			setKsFile(line.getOptionValue(ARG_KS_FILE));
 		if (line.hasOption(ARG_KS_PWD))
 			setKsPasswd(line.getOptionValue(ARG_KS_PWD));
+		else{
+			System.out.print("Enter private key store password:");
+			char[] keyPasswdX = null;
+			try {
+				keyPasswdX = (new java.io.BufferedReader(new java.io.InputStreamReader(System.in))).readLine().toCharArray();
+			} catch (Exception e) {
+			} 
+			setKsPasswd(keyPasswdX);
+		}
 		if (line.hasOption(ARG_KEY_ALIAS))
 			setKeyAlias(line.getOptionValue(ARG_KEY_ALIAS));
 		if (line.hasOption(ARG_KEY_INDEX))
