@@ -10,6 +10,7 @@
 	<classpathentry kind="lib" path="lib-build/OpenOffice.org/unoil.jar"/>
 	<classpathentry kind="lib" path="lib/jpedal_lgpl.jar"/>
 	<classpathentry kind="lib" path="lib/pdfbox-1.8.2.jar"/>
+	<classpathentry kind="lib" path="lib-build/OpenOffice.org/ridl.jar"/>
 	<classpathentry kind="src" path="jsignpdf-itxt/src/core"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.junit.JUNIT_CONTAINER/4"/>
 	<classpathentry kind="lib" path="lib/bcmail-jdk15-146.jar"/>
