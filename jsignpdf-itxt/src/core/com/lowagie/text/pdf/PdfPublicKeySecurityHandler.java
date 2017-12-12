@@ -92,7 +92,6 @@ package com.lowagie.text.pdf;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-
 import java.security.AlgorithmParameterGenerator;
 import java.security.AlgorithmParameters;
 import java.security.GeneralSecurityException;
@@ -100,15 +99,16 @@ import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.security.cert.Certificate;
 import java.security.cert.X509Certificate;
-
 import java.util.ArrayList;
 
 import javax.crypto.Cipher;
 import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
 
+import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.ASN1InputStream;
-import org.bouncycastle.asn1.DERObject;
+import org.bouncycastle.asn1.ASN1Primitive;
+import org.bouncycastle.asn1.ASN1Set;
 import org.bouncycastle.asn1.DERObjectIdentifier;
 import org.bouncycastle.asn1.DEROctetString;
 import org.bouncycastle.asn1.DEROutputStream;
@@ -244,7 +244,7 @@ public class PdfPublicKeySecurityHandler {
         pkcs7input[22] = two;
         pkcs7input[23] = one;
         
-        DERObject obj = createDERForRecipient(pkcs7input, (X509Certificate)certificate);
+        ASN1Encodable obj = createDERForRecipient(pkcs7input, (X509Certificate)certificate);
             
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
             
@@ -276,7 +276,7 @@ public class PdfPublicKeySecurityHandler {
         return EncodedRecipients;
     }
     
-    private DERObject createDERForRecipient(byte[] in, X509Certificate cert) 
+    private ASN1Encodable createDERForRecipient(byte[] in, X509Certificate cert) 
         throws IOException,  
                GeneralSecurityException 
     {
@@ -287,7 +287,8 @@ public class PdfPublicKeySecurityHandler {
         AlgorithmParameters algorithmparameters = algorithmparametergenerator.generateParameters();
         ByteArrayInputStream bytearrayinputstream = new ByteArrayInputStream(algorithmparameters.getEncoded("ASN.1"));
         ASN1InputStream asn1inputstream = new ASN1InputStream(bytearrayinputstream);
-        DERObject derobject = asn1inputstream.readObject();
+        ASN1Primitive derobject = asn1inputstream.readObject();
+//        DERObject derobject = readObject;
         KeyGenerator keygenerator = KeyGenerator.getInstance(s);
         keygenerator.init(128);
         SecretKey secretkey = keygenerator.generateKey();
@@ -296,14 +297,15 @@ public class PdfPublicKeySecurityHandler {
         byte[] abyte1 = cipher.doFinal(in);
         DEROctetString deroctetstring = new DEROctetString(abyte1);
         KeyTransRecipientInfo keytransrecipientinfo = computeRecipientInfo(cert, secretkey.getEncoded());
+//        ASN1Set derset = ASN1Set.getInstance(new RecipientInfo(keytransrecipientinfo));
         DERSet derset = new DERSet(new RecipientInfo(keytransrecipientinfo));
         AlgorithmIdentifier algorithmidentifier = new AlgorithmIdentifier(new DERObjectIdentifier(s), derobject);
         EncryptedContentInfo encryptedcontentinfo = 
             new EncryptedContentInfo(PKCSObjectIdentifiers.data, algorithmidentifier, deroctetstring);
-        EnvelopedData env = new EnvelopedData(null, derset, encryptedcontentinfo, null);
+        EnvelopedData env = new EnvelopedData(null, derset, encryptedcontentinfo, (ASN1Set) null);
         ContentInfo contentinfo = 
             new ContentInfo(PKCSObjectIdentifiers.envelopedData, env);
-        return contentinfo.getDERObject();        
+        return contentinfo.getContent();        
     }
     
     private KeyTransRecipientInfo computeRecipientInfo(X509Certificate x509certificate, byte[] abyte0)

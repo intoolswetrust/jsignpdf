@@ -54,6 +54,7 @@ import net.sf.jsignpdf.utils.PdfUtils;
 
 import org.bouncycastle.asn1.ASN1InputStream;
 import org.bouncycastle.asn1.ocsp.BasicOCSPResponse;
+import org.bouncycastle.asn1.x500.X500Name;
 import org.bouncycastle.cms.SignerId;
 import org.bouncycastle.cms.SignerInformationVerifier;
 import org.bouncycastle.cms.jcajce.JcaSimpleSignerInfoVerifierBuilder;
@@ -313,7 +314,7 @@ public class VerifierLogic {
 			SignerId signer = token.getSID();
 
 			X509Certificate certificate = null;
-			X500Principal sign_cert_issuer = signer.getIssuer();
+			X500Name sign_cert_issuer = signer.getIssuer();
 			BigInteger sign_cert_serial = signer.getSerialNumber();
 
 			CertStore store = token.getCertificatesAndCRLs("Collection", "BC");
