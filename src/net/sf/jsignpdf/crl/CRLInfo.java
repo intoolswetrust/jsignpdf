@@ -43,12 +43,9 @@ import java.security.cert.X509Certificate;
 import java.util.HashSet;
 import java.util.Set;
 
-import net.sf.jsignpdf.BasicSignerOptions;
-import net.sf.jsignpdf.Constants;
-
 import org.apache.commons.io.input.CountingInputStream;
 import org.apache.log4j.Logger;
-import org.bouncycastle.asn1.DERString;
+import org.bouncycastle.asn1.ASN1String;
 import org.bouncycastle.asn1.x509.CRLDistPoint;
 import org.bouncycastle.asn1.x509.DistributionPoint;
 import org.bouncycastle.asn1.x509.DistributionPointName;
@@ -56,6 +53,9 @@ import org.bouncycastle.asn1.x509.GeneralName;
 import org.bouncycastle.asn1.x509.GeneralNames;
 import org.bouncycastle.asn1.x509.X509Extension;
 import org.bouncycastle.x509.extension.X509ExtensionUtil;
+
+import net.sf.jsignpdf.BasicSignerOptions;
+import net.sf.jsignpdf.Constants;
 
 /**
  * Helper bean for holding CRL related data.
@@ -180,7 +180,7 @@ public class CRLInfo {
             if (generalNameArr != null) {
               for (final GeneralName generalName : generalNameArr) {
                 if (generalName.getTagNo() == GeneralName.uniformResourceIdentifier) {
-                  final DERString derString = (DERString) generalName.getName();
+                  final ASN1String derString = (ASN1String) generalName.getName();
                   final String uri = derString.getString();
                   if (uri != null && uri.startsWith("http")) {
                     // ||uri.startsWith("ftp")
