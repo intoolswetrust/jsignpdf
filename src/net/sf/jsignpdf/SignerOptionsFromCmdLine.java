@@ -161,16 +161,28 @@ public class SignerOptionsFromCmdLine extends BasicSignerOptions {
 			setRightPrinting(line.getOptionValue(ARG_RIGHT_PRINT));
 		if (line.hasOption(ARG_DISABLE_COPY_LONG))
 			setRightCopy(false);
+        else
+			setRightCopy(true);
 		if (line.hasOption(ARG_DISABLE_ASSEMBLY_LONG))
 			setRightAssembly(false);
+        else
+			setRightAssembly(true);
 		if (line.hasOption(ARG_DISABLE_FILL_LONG))
 			setRightFillIn(false);
+        else
+			setRightFillIn(true);
 		if (line.hasOption(ARG_DISABLE_SCREEN_READERS_LONG))
 			setRightScreanReaders(false);
+        else
+			setRightScreanReaders(true);
 		if (line.hasOption(ARG_DISABLE_MODIFY_ANNOT_LONG))
 			setRightModifyAnnotations(false);
+        else
+			setRightModifyAnnotations(true);
 		if (line.hasOption(ARG_DISABLE_MODIFY_CONTENT_LONG))
 			setRightModifyContents(false);
+        else
+			setRightModifyContents(true);
 
 		// visible signature
 		if (line.hasOption(ARG_VISIBLE))
