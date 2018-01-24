@@ -10,7 +10,7 @@ JSignPdf is open-source software and can be freely used in both private and busi
 
 ## Build/Release process
 
-* install `isoimage`
+* install `genisoimage`
 * install InnoSetup installer (use `wine`) in version 5.4.x (http://files.jrsoftware.org/is/5/)
   * check if `unsorted/iscc` script contains correct path
 * update files in `docs`:
@@ -20,7 +20,7 @@ JSignPdf is open-source software and can be freely used in both private and busi
 * update build.properties
 * build the `jsignpdf` (the `jsignpdf-itxt` is built automatically)
 ```
-ant clean build
+ant clean all
 ```
 
 The result bits are located in the `Output` directory.
