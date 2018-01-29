@@ -159,18 +159,12 @@ public class SignerOptionsFromCmdLine extends BasicSignerOptions {
 			setPdfEncryptionCertFile(line.getOptionValue(ARG_ENC_CERT));
 		if (line.hasOption(ARG_RIGHT_PRINT))
 			setRightPrinting(line.getOptionValue(ARG_RIGHT_PRINT));
-		if (line.hasOption(ARG_DISABLE_COPY_LONG))
-			setRightCopy(false);
-		if (line.hasOption(ARG_DISABLE_ASSEMBLY_LONG))
-			setRightAssembly(false);
-		if (line.hasOption(ARG_DISABLE_FILL_LONG))
-			setRightFillIn(false);
-		if (line.hasOption(ARG_DISABLE_SCREEN_READERS_LONG))
-			setRightScreanReaders(false);
-		if (line.hasOption(ARG_DISABLE_MODIFY_ANNOT_LONG))
-			setRightModifyAnnotations(false);
-		if (line.hasOption(ARG_DISABLE_MODIFY_CONTENT_LONG))
-			setRightModifyContents(false);
+		setRightCopy(! line.hasOption(ARG_DISABLE_COPY_LONG));
+		setRightAssembly(! line.hasOption(ARG_DISABLE_ASSEMBLY_LONG));
+		setRightFillIn(! line.hasOption(ARG_DISABLE_FILL_LONG));
+		setRightScreanReaders(! line.hasOption(ARG_DISABLE_SCREEN_READERS_LONG));
+		setRightModifyAnnotations(! line.hasOption(ARG_DISABLE_MODIFY_ANNOT_LONG));
+		setRightModifyContents(! line.hasOption(ARG_DISABLE_MODIFY_CONTENT_LONG));
 
 		// visible signature
 		if (line.hasOption(ARG_VISIBLE))
