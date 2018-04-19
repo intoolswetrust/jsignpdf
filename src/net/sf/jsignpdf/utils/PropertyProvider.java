@@ -38,6 +38,7 @@ import java.util.Properties;
 import net.sf.jsignpdf.Constants;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.log4j.Logger;
 
 /**
  * This class provides basic functionality for work with property files. It
@@ -52,6 +53,8 @@ public class PropertyProvider {
    * Value used as replacement for null in Null Sensitive properties
    */
   public static final String NS_NULL_VALUE = "$$NULL$$";
+
+  private final static Logger LOGGER = Logger.getLogger(KeyStoreUtils.class);
 
   /**
    * Unchecked exception used in PropertyProviders check.
@@ -99,7 +102,7 @@ public class PropertyProvider {
       loadDefault();
     } catch (ProperyProviderException e) {
       // default file probably doesn't exist
-      // do nothing in this case
+      LOGGER.warn(e);
     }
   }
 
@@ -143,7 +146,7 @@ public class PropertyProvider {
         throw new ProperyProviderException("Properties cannot be loaded", e);
       }
     } else {
-      throw new ProperyProviderException("Property file doesn't exist.");
+      throw new ProperyProviderException("Property file " + aFile.getPath() + " doesn't exist.");
     }
   }
 

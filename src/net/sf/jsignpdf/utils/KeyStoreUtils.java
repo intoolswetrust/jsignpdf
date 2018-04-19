@@ -294,7 +294,7 @@ public class KeyStoreUtils {
 	 * @throws NoSuchAlgorithmException
 	 */
 	public static KeyStore createKeyStore() throws KeyStoreException, NoSuchAlgorithmException, CertificateException,
-			IOException {
+	IOException {
 		final KeyStore newKeyStore = KeyStore.getInstance("JKS");
 		newKeyStore.load(null, null);
 		return newKeyStore;
@@ -355,11 +355,7 @@ public class KeyStoreUtils {
 			e.printStackTrace();
 			return null;
 		} finally {
-			if (tmpIS != null)
-				try {
-					tmpIS.close();
-				} catch (Exception e) {
-				}
+			IOUtils.closeQuietly(tmpIS);
 		}
 		return tmpKs;
 	}
@@ -373,9 +369,11 @@ public class KeyStoreUtils {
 	 * @return a <CODE>KeyStore</CODE>
 	 */
 	public static KeyStore loadCacertsKeyStore(String provider) {
-		File file = new File(System.getProperty("java.home"), "lib");
-		file = new File(file, "security");
-		file = new File(file, "cacerts");
+		String trustStorePath = System.getProperty("javax.net.ssl.trustStore");
+		if (StringUtils.isEmpty(trustStorePath)) {
+			trustStorePath = System.getProperty("java.home") + "/lib/security/cacerts";
+		}
+		File file = new File(trustStorePath);
 		FileInputStream fin = null;
 		try {
 			fin = new FileInputStream(file);
@@ -390,12 +388,7 @@ public class KeyStoreUtils {
 			e.printStackTrace();
 			return null;
 		} finally {
-			try {
-				if (fin != null) {
-					fin.close();
-				}
-			} catch (Exception ex) {
-			}
+			IOUtils.closeQuietly(fin);
 		}
 	}
 
@@ -409,7 +402,7 @@ public class KeyStoreUtils {
 	 * @throws UnrecoverableKeyException
 	 */
 	public static PrivateKeyInfo getPkInfo(BasicSignerOptions options) throws UnrecoverableKeyException,
-			KeyStoreException, NoSuchAlgorithmException {
+	KeyStoreException, NoSuchAlgorithmException {
 		final KeyStore tmpKs = loadKeyStore(options.getKsType(), options.getKsFile(), options.getKsPasswd());
 
 		String tmpAlias = getKeyAliasInternal(options, tmpKs);
@@ -468,22 +461,10 @@ public class KeyStoreUtils {
 	}
 
 	public static KeyStore createTrustStore() throws KeyStoreException, NoSuchAlgorithmException, CertificateException,
-			IOException {
+	IOException {
 		final KeyStore trustStore = createKeyStore();
-
-		char SEP = File.separatorChar;
-		final File dir = new File(System.getProperty("java.home") + SEP + "lib" + SEP + "security");
-		final File file = new File(dir, "cacerts");
-		if (file.canRead()) {
-			final KeyStore ks = KeyStore.getInstance("JKS");
-			final InputStream in = new FileInputStream(file);
-			try {
-				ks.load(in, null);
-			} finally {
-				in.close();
-			}
-			copyCertificates(ks, trustStore);
-		}
+		KeyStore ks = loadCacertsKeyStore(null);
+		copyCertificates(ks, trustStore);
 		return trustStore;
 	}
 

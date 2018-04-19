@@ -1,3 +1,7 @@
+2018-04-19 Josef Cacek (1.6.3)
+  * Allow loading truststore specified by "javax.net.ssl.trustStore" System property
+  * Log warning message if conf/conf.properties configuration file is not found
+
 2017-12-12 Josef Cacek (1.6.2)
   * BouncyCastle library updated to version 1.49 (due to http://www.bouncycastle.org/jira/browse/BJA-351)
 
