@@ -413,7 +413,7 @@ public class SignerOptionsFromCmdLine extends BasicSignerOptions {
 
 		OPTS.addOption(OptionBuilder.withLongOpt(ARG_OCSP_LONG).withDescription(RES.get("hlp.ocsp")).create());
 		OPTS.addOption(OptionBuilder.withLongOpt(ARG_OCSP_SERVER_LONG).withDescription(RES.get("hlp.ocspServerUrl"))
-				.create());
+				.hasArg().withArgName("responderUrl").create());
 
 		OPTS.addOption(OptionBuilder.withLongOpt(ARG_CRL_LONG).withDescription(RES.get("hlp.crl")).create());
 
