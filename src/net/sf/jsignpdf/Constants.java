@@ -89,6 +89,7 @@ public class Constants {
 	public static final String DEFAULT_OUT_SUFFIX = "_signed";
 
 	public static final String KEYSTORE_TYPE_WINDOWS_MY = "WINDOWS-MY";
+	public static final String KEYSTORE_TYPE_CLOUDFOXY = "CloudFoxy";
 
 	public static final String NEW_LINE = System.getProperty("line.separator");
 

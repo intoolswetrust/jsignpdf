@@ -51,6 +51,7 @@ import java.util.List;
 import java.util.Map;
 
 import net.sf.jsignpdf.crl.CRLInfo;
+import net.sf.jsignpdf.extcsp.CloudFoxy;
 import net.sf.jsignpdf.ssl.SSLInitializer;
 import net.sf.jsignpdf.types.HashAlgorithm;
 import net.sf.jsignpdf.types.PDFEncryption;
@@ -132,9 +133,24 @@ public class SignerLogic implements Runnable {
 		try {
 			SSLInitializer.init(options);
 
-			final PrivateKeyInfo pkInfo = KeyStoreUtils.getPkInfo(options);
-			final PrivateKey key = pkInfo.getKey();
-			final Certificate[] chain = pkInfo.getChain();
+			final PrivateKeyInfo pkInfo;
+			final PrivateKey key;
+			final Certificate[] chain;
+			// the 'cloudfoxy' crypto provider computes signatures externally and there are no
+			// certificates or keys available via Java CSPs -> they have to be pulled from an
+			// external source in 2 steps: 1. certificate chain, 2. signature itself
+			if (StringUtils.equalsIgnoreCase(options.getKsType(), Constants.KEYSTORE_TYPE_CLOUDFOXY)) {
+				key = null;
+				chain = CloudFoxy.getInstance().getChain(this.options);
+				if (chain == null) {
+					return false;
+				}
+			} else {
+				pkInfo = KeyStoreUtils.getPkInfo(options);
+				key = pkInfo.getKey();
+				chain = pkInfo.getChain();
+			}
+
 			if (ArrayUtils.isEmpty(chain)) {
 				// the certificate was not found
 				LOGGER.info(RES.get("console.certificateChainEmpty"));
@@ -361,7 +377,18 @@ public class SignerLogic implements Runnable {
 				}
 			}
 			byte sh[] = sgn.getAuthenticatedAttributeBytes(hash, cal, ocsp);
-			sgn.update(sh, 0, sh.length);
+
+			// THIS IS THE SIGNING, we need to have a new branch for external signers
+			if (StringUtils.equalsIgnoreCase(options.getKsType(), Constants.KEYSTORE_TYPE_CLOUDFOXY)) {
+				byte[] signature = CloudFoxy.getInstance().getSignature(options, sh);
+				if (signature == null){
+					return false;
+				} else {
+					sgn.setExternalDigest(signature, null, "RSA");
+				}
+			} else {
+				sgn.update(sh, 0, sh.length);
+			}
 
 			TSAClientBouncyCastle tsc = null;
 			if (options.isTimestampX() && !StringUtils.isEmpty(options.getTsaUrl())) {

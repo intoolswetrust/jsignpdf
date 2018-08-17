@@ -9,7 +9,10 @@ bin
 nbproject/private
 Output
 build
-
+out
+out
+.idea
+**/*.iml
 #iText.jar
 #iText-rtf.jar
 #jsignpdf-itxt.jar
