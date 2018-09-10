@@ -64,6 +64,7 @@ import net.sf.jsignpdf.BasicSignerOptions;
 import net.sf.jsignpdf.Constants;
 import net.sf.jsignpdf.PrivateKeyInfo;
 
+import net.sf.jsignpdf.extcsp.CloudFoxy;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -90,7 +91,9 @@ public class KeyStoreUtils {
 	 */
 	public static SortedSet<String> getKeyStores() {
 		final Set<String> tmpKeyStores = java.security.Security.getAlgorithms("KeyStore");
-		return new TreeSet<String>(tmpKeyStores);
+		TreeSet<String> result = new TreeSet<String>(tmpKeyStores);
+		result.add(CloudFoxy.getInstance().getName()); // an external CSP
+		return result;
 	}
 
 	/**
@@ -103,11 +106,17 @@ public class KeyStoreUtils {
 			throw new NullPointerException("Options are empty.");
 		}
 		LOGGER.info(RES.get("console.getKeystoreType", options.getKsType()));
-		final KeyStore tmpKs = loadKeyStore(options.getKsType(), options.getKsFile(), options.getKsPasswd());
-		if (tmpKs == null) {
-			throw new NullPointerException(RES.get("error.keystoreNull"));
+		final List<String> tmpResult;
+		if (StringUtils.equalsIgnoreCase(options.getKsType(), Constants.KEYSTORE_TYPE_CLOUDFOXY)) {
+			tmpResult = CloudFoxy.getInstance().getAliasesList(options);
+		} else {
+			final KeyStore tmpKs = loadKeyStore(options.getKsType(), options.getKsFile(), options.getKsPasswd());
+			if (tmpKs == null) {
+				throw new NullPointerException(RES.get("error.keystoreNull"));
+			}
+			tmpResult = getAliasesList(tmpKs, options);
 		}
-		final List<String> tmpResult = getAliasesList(tmpKs, options);
+
 		return tmpResult.toArray(new String[tmpResult.size()]);
 	}
 
