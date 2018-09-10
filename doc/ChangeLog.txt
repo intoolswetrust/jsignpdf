@@ -1,6 +1,10 @@
-2018-09-09 Dan Cvrcek (1.6.4)
+2018-09-10 Josef Cacek (1.6.4)
+  * Upgrade Java runtime in Windows distributions to Java 8 (u181)
+
+2018-09-09 Dan Cvrcek
   * A new interface for remote/external crypto service providers - net.sf.jsignpdf.extcsp.IExternalCryptoProvider
   * Integration with FoxyProxy (https://gitlab.com/cloudfoxy/foxyproxy) for (eIDAS) external signatures 
+
 2018-04-19 Josef Cacek (1.6.3)
   * Allow loading truststore specified by "javax.net.ssl.trustStore" System property
   * Log warning message if conf/conf.properties configuration file is not found

@@ -1,3 +1,8 @@
+Version 1.6.4
+-------------
+  * Integration with FoxyProxy (https://gitlab.com/cloudfoxy/foxyproxy) for (eIDAS) external signatures
+  * Upgrade Java runtime in Windows distributions to Java 8 (u181)
+
 Version 1.6.3
 -------------
   * Allow loading truststore specified by "javax.net.ssl.trustStore" System property
