@@ -178,10 +178,10 @@ public class SignerLogic implements Runnable {
 
 			LOGGER.info(RES.get("console.createSignature"));
 			char tmpPdfVersion = '\0'; // default version - the same as input
-			SemVer pdfVer = new SemVer(reader.getFullPdfVersion());
-			SemVer hashVer = new SemVer(hashAlgorithm.getPdfVersion());
+			String pdfVer = reader.getFullPdfVersion();
+			String hashVer = hashAlgorithm.getPdfVersion();
 			
-			if (pdfVer.compareTo(hashVer) < 0) {
+			if (new SemVer(pdfVer).compareTo(new SemVer(hashVer)) < 0) {
 				// this covers also problems with visible signatures (embedded
 				// fonts) in PDF 1.2, because the minimal version
 				// for hash algorithms is 1.3 (for SHA1)
