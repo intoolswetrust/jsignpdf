@@ -33,9 +33,11 @@ import static net.sf.jsignpdf.Constants.RES;
 import static net.sf.jsignpdf.Constants.LOGGER;
 
 import java.awt.Toolkit;
+import java.awt.datatransfer.DataFlavor;
 import java.io.File;
 import java.net.URL;
 import java.security.KeyStore;
+import java.util.List;
 import java.util.Set;
 import java.util.logging.Level;
 
@@ -45,6 +47,9 @@ import javax.swing.JComponent;
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 import javax.swing.JTextField;
+import javax.swing.TransferHandler;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
 import javax.swing.filechooser.FileFilter;
 
 import net.sf.jsignpdf.types.CertificationLevel;
@@ -122,11 +127,59 @@ public class SignPdfForm extends javax.swing.JFrame implements SignResultListene
         cbHashAlgorithm.setModel(new DefaultComboBoxModel(HashAlgorithm.values()));
         cbPrinting.setModel(new DefaultComboBoxModel(PrintRight.values()));
 
-        JTextAreaHandler handler = new JTextAreaHandler(infoTextArea);
-        handler.setLevel(Level.ALL);
-        LOGGER.addHandler(handler);
+        JTextAreaHandler textHandler = new JTextAreaHandler(infoTextArea);
+        textHandler.setLevel(Level.ALL);
+        LOGGER.addHandler(textHandler);
 
         updateFromOptions();
+
+        TransferHandler handler = new TransferHandler() {
+            @Override
+            public boolean canImport(TransferHandler.TransferSupport info) {
+                return info.isDataFlavorSupported(DataFlavor.javaFileListFlavor);
+            }
+
+            @Override
+            public boolean importData(TransferHandler.TransferSupport info) {
+                if (!info.isDrop() || !info.isDataFlavorSupported(DataFlavor.javaFileListFlavor)) {
+                    return false;
+                }
+
+                List<File> data;
+                try {
+                    data = (List<File>) info.getTransferable().getTransferData(DataFlavor.javaFileListFlavor);
+                } catch (Exception e) {
+                    return false;
+                }
+
+                String lastFile = "";
+                for (File file : data) {
+                    lastFile = file.getPath();
+                }
+                tfInPdfFile.setText(lastFile);
+
+                return true;
+            }
+        };
+
+        tfInPdfFile.getDocument().addDocumentListener(new DocumentListener() {
+            @Override
+            public void insertUpdate(DocumentEvent e) {
+                fillOutputPdfName();
+            }
+
+            @Override
+            public void removeUpdate(DocumentEvent e) {
+                fillOutputPdfName();
+            }
+
+            @Override
+            public void changedUpdate(DocumentEvent e) {
+                fillOutputPdfName();
+            }
+        });
+        tfInPdfFile.setTransferHandler(handler);
+        this.setTransferHandler(handler);
     }
 
     /**
@@ -351,6 +404,31 @@ public class SignPdfForm extends javax.swing.JFrame implements SignResultListene
      */
     void showFileChooser(final JTextField aFileField, final FileFilter aFilter, final int aType) {
         fc.showFileChooser(aFileField, aFilter, aType);
+    }
+
+    /**
+     * Suggest output file name.
+     */
+    private void fillOutputPdfName() {
+        String oldName = tfInPdfFile.getText();
+        File f = new File(oldName);
+        try {
+            if (f.exists() && f.isFile()) {
+
+                String justName = f.getName();
+                int dotPosition = justName.lastIndexOf('.');
+                if (dotPosition > 0) {
+                    justName = justName.substring(0, dotPosition);
+                }
+
+                File signedPDF = new File(f.getParentFile(), justName + "_signed.pdf");
+
+                tfOutPdfFile.setText(signedPDF.getPath());
+            }
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            LOGGER.fine(ex.getMessage());
+        }
     }
 
     /**
@@ -1169,6 +1247,8 @@ public class SignPdfForm extends javax.swing.JFrame implements SignResultListene
                 }
             }
         } catch (Exception e) {
+            e.printStackTrace();
+            LOGGER.fine(e.getMessage());
         }
 
         final String tmpMsg = RES.get("gui.fileNotExists.error", new String[] { RES.get(aFileDescKey) });
