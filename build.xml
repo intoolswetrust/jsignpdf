@@ -400,13 +400,15 @@
 		<echo message="Creating a windows setup" />
 		<exec failonerror="false"
 				executable="unsorted/iscc">
-			<arg line="${dist.dir}"/>
-			<arg line="${output.dir}"/>
-			<arg line="/dMyAppName=JSignPdf"/>
-			<arg line="/dMyAppVersion=${jsignpdf.version}"/>
-			<arg line="/dMyAppVersionWin=${jsignpdf.version}.0"/>
-			<arg line="/dMyAppId=JSignPdf"/>
-			<arg line="/dMyAppFilename=${jsignpdf.filename}"/>
+			<arg line="/O+"/>
+			<arg line="/DDistDir=${dist.dir}"/>
+			<arg line="/DOutputDir=${output.dir}"/>
+			<arg line="/DMyAppName=JSignPdf"/>
+			<arg line="/DMyAppVersion=${jsignpdf.version}"/>
+			<arg line="/DMyAppVersionWin=${jsignpdf.version}.0"/>
+			<arg line="/DMyAppId=JSignPdf"/>
+			<arg line="/DMyAppFilename=${jsignpdf.filename}"/>
+			<arg line="JSignPdf.iss"/>
 		</exec>
 	</target>
 

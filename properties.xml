@@ -8,7 +8,7 @@
 
 	<property name="app.dir" value="jsignpdf-${jsignpdf.version}" />
 
-	<property name="build.dir" value="${basedir}/build" />
+	<property name="build.dir" value="build" />
 	<property name="dist.dir" value="${build.dir}/${app.dir}" />
 	<property name="lib.dir" value="${basedir}/lib" />
 	<property name="src.dir" value="${basedir}/src" />

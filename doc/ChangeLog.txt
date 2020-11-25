@@ -1,3 +1,6 @@
+2020-11-25 Josef Cacek
+  * SunPKCS11 support for Java 9 and newer
+
 2018-09-10 Josef Cacek (1.6.4)
   * Upgrade Java runtime in Windows distributions to Java 8 (u181)
 

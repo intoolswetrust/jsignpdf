@@ -30,6 +30,7 @@
 package net.sf.jsignpdf.utils;
 
 import java.io.File;
+import java.lang.reflect.InvocationTargetException;
 import java.security.Provider;
 import java.security.Security;
 
@@ -63,8 +64,7 @@ public class PKCS11Utils {
 		final String absolutePath = cfgFile.getAbsolutePath();
 		if (cfgFile.isFile()) {
 			try {
-				Provider pkcs11Provider = (Provider) Class.forName("sun.security.pkcs11.SunPKCS11")
-						.getConstructor(String.class).newInstance(absolutePath);
+				Provider pkcs11Provider = initSunPkcs11(absolutePath);
 				Security.addProvider(pkcs11Provider);
 				final String name = pkcs11Provider.getName();
 				LOGGER.debug("SunPKCS11 provider registered with name " + name);
@@ -78,6 +78,20 @@ public class PKCS11Utils {
 					+ absolutePath);
 		}
 		return null;
+	}
+
+	private static Provider initSunPkcs11(final String configPath) throws ClassNotFoundException,
+			InstantiationException, IllegalAccessException, InvocationTargetException, NoSuchMethodException {
+		Class<?> sunPkcs11Cls = Class.forName("sun.security.pkcs11.SunPKCS11");
+		Provider pkcs11Provider = null;
+		try {
+			pkcs11Provider = (Provider) sunPkcs11Cls.getConstructor(String.class).newInstance(configPath);
+		} catch (NoSuchMethodException e) {
+			pkcs11Provider = (Provider) sunPkcs11Cls.getConstructor().newInstance();
+			Class<Provider> provCls = Provider.class;
+			pkcs11Provider = (Provider) provCls.getMethod("configure", String.class).invoke(pkcs11Provider, configPath);
+		}
+		return pkcs11Provider;
 	}
 
 	/**

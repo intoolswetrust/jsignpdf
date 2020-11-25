@@ -5,7 +5,7 @@ Source: {#DistDir}\*; DestDir: {app}; Flags: recursesubdirs
 AppName={#MyAppName}
 AppId={#MyAppId}
 AppVerName={#MyAppName} {#MyAppVersion}
-DefaultDirName={pf}\{#MyAppName}
+DefaultDirName={autopf}\{#MyAppName}
 DefaultGroupName={#MyAppName}
 LicenseFile=licenses\MPL-1.1.txt
 OutputBaseFilename={#MyAppName}_setup_{#MyAppVersion}_wjre
