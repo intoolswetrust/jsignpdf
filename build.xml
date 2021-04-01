@@ -110,7 +110,9 @@
 				<include name="lib/*.jar"/>
 			</fileset>
 		</copy>
-		
+
+		<copy file="unsorted/jsignpdf" todir="${dist.dir}"/>
+
 		<!-- SF.net handles README automatically (replacement for the old Release Notes) -->
 		<copy file="doc/ReleaseNotes.txt" tofile="${output.dir}/README.txt"/>
 
