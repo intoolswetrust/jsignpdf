@@ -58,6 +58,26 @@ public class Constants {
 	public static final String USER_HOME = System.getProperty("user.home");
 
 	/**
+	 * Value of {@code jsignpdf.home} system property. The property value (when
+	 * provided) can contain path to JSignPdf home directory. It can be used in
+	 * cases where JSignPdf is not executed from it's home directory. This value
+	 * takes precedence over the {@link #ENV_JSIGNPDF_HOME}.
+	 *
+	 * @see #ENV_JSIGNPDF_HOME
+	 */
+	public static final String SYSPROP_JSIGNPDF_HOME = System.getProperty("jsignpdf.home");
+
+	/**
+	 * Value of {@code JSIGNPDF_HOME} environment variable. The variable value (when
+	 * provided) can contain path to JSignPdf home directory. It can be used in
+	 * cases where JSignPdf is not executed from it's home directory. This
+	 * {@link #SYSPROP_JSIGNPDF_HOME} value takes precedence over this one.
+	 *
+	 * @see #SYSPROP_JSIGNPDF_HOME
+	 */
+	public static final String ENV_JSIGNPDF_HOME = System.getenv("JSIGNPDF_HOME");
+
+	/**
 	 * Filename (in USER_HOME), where filled values from JSign application are
 	 * stored.
 	 * 

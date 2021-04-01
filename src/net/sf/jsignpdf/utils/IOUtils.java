@@ -29,36 +29,43 @@
  */
 package net.sf.jsignpdf.utils;
 
+import static net.sf.jsignpdf.Constants.ENV_JSIGNPDF_HOME;
+import static net.sf.jsignpdf.Constants.SYSPROP_JSIGNPDF_HOME;
+
+import java.io.File;
+
 import net.sf.jsignpdf.Constants;
 
 /**
- * Property holder for tweak file.
+ * IO and file utils.
  * 
  * @author Josef Cacek
  */
-public class ConfigProvider extends PropertyProvider {
-
-	private static final ConfigProvider provider = new ConfigProvider();
-
-	protected ConfigProvider() {
-	}
+public class IOUtils {
 
 	/**
-	 * Returns instance of this class. (singleton)
-	 * 
-	 * @return
+	 * Finds given filepath within JSignPdf home - checking the alternative
+	 * locations first.
+	 *
+	 * @see Constants#SYSPROP_JSIGNPDF_HOME
+	 * @see Constants#ENV_JSIGNPDF_HOME
 	 */
-	public static ConfigProvider getInstance() {
-		return provider;
+	public static File findFile(String filePath) {
+		File file = getIfExists(filePath, SYSPROP_JSIGNPDF_HOME);
+		if (file == null) {
+			file = getIfExists(filePath, ENV_JSIGNPDF_HOME);
+			if (file == null) {
+				file = new File(filePath);
+			}
+		}
+		return file;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.sf.jsignpdf.PropertyProvider#loadDefault()
-	 */
-	@Override
-	public void loadDefault() throws ProperyProviderException {
-		loadProperties(IOUtils.findFile(Constants.CONF_FILE));
+	private static File getIfExists(String filePath, String jsignpdfHomeDir) {
+		if (jsignpdfHomeDir == null) {
+			return null;
+		}
+		File file = new File(jsignpdfHomeDir, filePath);
+		return file.isFile() && file.canRead() ? file : null;
 	}
 }

@@ -60,7 +60,7 @@ public class PKCS11Utils {
 			return null;
 		}
 		LOGGER.debug("Registering SunPKCS11 provider from configuration in " + configPath);
-		final File cfgFile = new File(configPath);
+		final File cfgFile = IOUtils.findFile(configPath);
 		final String absolutePath = cfgFile.getAbsolutePath();
 		if (cfgFile.isFile()) {
 			try {
