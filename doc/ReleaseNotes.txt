@@ -1,3 +1,8 @@
+Version 1.6.5
+-------------
+  * Fix SunPKCS11 initialization on newer Java versions
+  * Add bash startup script
+
 Version 1.6.4
 -------------
   * Integration with FoxyProxy (https://gitlab.com/cloudfoxy/foxyproxy) for (eIDAS) external signatures

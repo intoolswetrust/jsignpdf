@@ -1,3 +1,6 @@
+2021-04-01 Josef Cacek (1.6.5)
+  * Bash startup script
+
 2020-11-25 Josef Cacek
   * SunPKCS11 support for Java 9 and newer
 
