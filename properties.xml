@@ -14,7 +14,8 @@
 	<property name="src.dir" value="${basedir}/src" />
 	<property name="res.dir" value="${basedir}/res" />
 	<property name="plugin.dir" value="${basedir}/plugin" />
-	<property name="output.dir" value="${basedir}/Output" />
+	<property name="output.dir.name" value="Output" />
+	<property name="output.dir" value="${basedir}/${output.dir.name}" />
 
 	<property name="dist.doc.dir" value="${dist.dir}/docs" />
 	<property name="bin.dir" value="${build.dir}/bin" />

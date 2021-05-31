@@ -111,7 +111,9 @@
 			</fileset>
 		</copy>
 
-		<copy file="unsorted/jsignpdf" todir="${dist.dir}"/>
+		<copy file="unsorted/jsignpdf" todir="${dist.dir}" />
+		<!-- ant copy task doesn't preserve permissions! We need the executable bit. -->
+		<chmod file="${dist.dir}/jsignpdf" perm="ugo+rx"/>
 
 		<!-- SF.net handles README automatically (replacement for the old Release Notes) -->
 		<copy file="doc/ReleaseNotes.txt" tofile="${output.dir}/README.txt"/>
@@ -404,7 +406,7 @@
 				executable="unsorted/iscc">
 			<arg line="/O+"/>
 			<arg line="/DDistDir=${dist.dir}"/>
-			<arg line="/DOutputDir=${output.dir}"/>
+			<arg line="/DOutputDir=${output.dir.name}"/>
 			<arg line="/DMyAppName=JSignPdf"/>
 			<arg line="/DMyAppVersion=${jsignpdf.version}"/>
 			<arg line="/DMyAppVersionWin=${jsignpdf.version}.0"/>
