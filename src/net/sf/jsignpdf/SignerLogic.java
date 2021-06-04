@@ -50,12 +50,14 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+
 import net.sf.jsignpdf.crl.CRLInfo;
 import net.sf.jsignpdf.extcsp.CloudFoxy;
 import net.sf.jsignpdf.ssl.SSLInitializer;
 import net.sf.jsignpdf.types.HashAlgorithm;
 import net.sf.jsignpdf.types.PDFEncryption;
 import net.sf.jsignpdf.types.RenderMode;
+import net.sf.jsignpdf.types.SemVer;
 import net.sf.jsignpdf.types.ServerAuthentication;
 import net.sf.jsignpdf.utils.FontUtils;
 import net.sf.jsignpdf.utils.KeyStoreUtils;
@@ -176,7 +178,10 @@ public class SignerLogic implements Runnable {
 
 			LOGGER.info(RES.get("console.createSignature"));
 			char tmpPdfVersion = '\0'; // default version - the same as input
-			if (reader.getPdfVersion() < hashAlgorithm.getPdfVersion()) {
+			String pdfVer = reader.getFullPdfVersion();
+			String hashVer = hashAlgorithm.getPdfVersion();
+			
+			if (new SemVer(pdfVer).compareTo(new SemVer(hashVer)) < 0) {
 				// this covers also problems with visible signatures (embedded
 				// fonts) in PDF 1.2, because the minimal version
 				// for hash algorithms is 1.3 (for SHA1)
@@ -186,9 +191,8 @@ public class SignerLogic implements Runnable {
 					LOGGER.info(RES.get("console.updateVersionNotPossibleInAppendMode"));
 					return false;
 				}
-				tmpPdfVersion = hashAlgorithm.getPdfVersion();
-				LOGGER.info(RES.get("console.updateVersion", new String[] { String.valueOf(reader.getPdfVersion()),
-						String.valueOf(tmpPdfVersion) }));
+				tmpPdfVersion = hashVer.charAt(2);
+				LOGGER.info(RES.get("console.updateVersion", new String[] { pdfVer, hashVer }));
 			}
 
 			final PdfStamper stp = PdfStamper.createSignature(reader, fout, tmpPdfVersion, null, options.isAppendX());

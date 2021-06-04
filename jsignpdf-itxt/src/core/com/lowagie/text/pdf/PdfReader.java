@@ -116,6 +116,7 @@ public class PdfReader implements PdfViewerPreferences {
     protected int lastXref;
     protected int eofPos;
     protected char pdfVersion;
+    protected String pdfVersionStr;
     protected PdfEncryption decrypt;
     protected byte password[] = null; //added by ujihara for decryption
     protected Key certificateKey = null; //added by Aiken Sam for certificate decryption
@@ -269,6 +270,7 @@ public class PdfReader implements PdfViewerPreferences {
         this.tampered = reader.tampered;
         this.password = reader.password;
         this.pdfVersion = reader.pdfVersion;
+        this.pdfVersionStr = reader.pdfVersionStr;
         this.eofPos = reader.eofPos;
         this.freeXref = reader.freeXref;
         this.lastXref = reader.lastXref;
@@ -487,7 +489,8 @@ public class PdfReader implements PdfViewerPreferences {
     protected void readPdf() throws IOException {
         try {
             fileLength = tokens.getFile().length();
-            pdfVersion = tokens.checkPdfHeader();
+            pdfVersionStr = tokens.checkPdfHeaderStr();
+            pdfVersion = pdfVersionStr.charAt(2);
             try {
                 readXref();
             }
@@ -2323,6 +2326,15 @@ public class PdfReader implements PdfViewerPreferences {
      */
     public char getPdfVersion() {
         return pdfVersion;
+    }
+
+    /**
+     * Gets the PDF version - the whole friggin thing.
+     * (working with just the last char was "excellent" idea ...).
+     * @return the PDF version
+     */
+    public String getFullPdfVersion() {
+        return pdfVersionStr;
     }
 
     /**

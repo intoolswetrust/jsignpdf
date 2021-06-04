@@ -36,36 +36,37 @@ import com.lowagie.text.pdf.PdfWriter;
  * 
  * @author Josef Cacek
  */
+
 public enum HashAlgorithm {
-	SHA1("SHA-1", PdfWriter.VERSION_1_3),
-	SHA256("SHA-256", PdfWriter.VERSION_1_6),
-	SHA384("SHA-384", PdfWriter.VERSION_1_7),
-	SHA512("SHA-512", PdfWriter.VERSION_1_7),
-	RIPEMD160("RIPEMD160", PdfWriter.VERSION_1_7);
+    SHA1("SHA-1", "1.3"),
+    SHA256("SHA-256", "1.6"),
+    SHA384("SHA-384", "1.7"),
+    SHA512("SHA-512", "1.7"),
+    RIPEMD160("RIPEMD160", "1.7");
 
-	private final char pdfVersion;
-	private final String algorithmName;
+    private final String pdfVersion;
+    private final String algorithmName;
 
-	private HashAlgorithm(final String aName, char aVersion) {
-		algorithmName = aName;
-		pdfVersion = aVersion;
-	}
+    private HashAlgorithm(final String aName, String aVersion) {
+        algorithmName = aName;
+        pdfVersion = aVersion;
+    }
 
-	/**
-	 * Gets algorithm name.
-	 * 
-	 * @return
-	 */
-	public String getAlgorithmName() {
-		return algorithmName;
-	}
+    /**
+     * Gets algorithm name.
+     *
+     * @return
+     */
+    public String getAlgorithmName() {
+        return algorithmName;
+    }
 
-	/**
-	 * Gets minimal PDF version supporting the algorithm.
-	 * 
-	 * @return
-	 */
-	public char getPdfVersion() {
-		return pdfVersion;
-	}
+    /**
+     * Gets minimal PDF version supporting the algorithm.
+     *
+     * @return
+     */
+    public String getPdfVersion() {
+        return pdfVersion;
+    }
 }
