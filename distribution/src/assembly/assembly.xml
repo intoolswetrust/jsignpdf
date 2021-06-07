@@ -1,0 +1,54 @@
+<assembly xmlns="http://maven.apache.org/ASSEMBLY/2.1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:schemaLocation="http://maven.apache.org/ASSEMBLY/2.1.0 http://maven.apache.org/xsd/assembly-2.1.0.xsd">
+
+    <id>JSignPdf Assembly</id>
+    <formats>
+        <format>zip</format>
+    </formats>
+    <dependencySets>
+        <dependencySet>
+            <useProjectArtifact>false</useProjectArtifact>
+            <includes>
+                <include>com.github.kwart.jsign:jsignpdf:jar:jar-with-dependencies</include>
+            </includes>
+            <outputDirectory>/</outputDirectory>
+            <outputFileNameMapping>JSignPdf.jar</outputFileNameMapping>
+        </dependencySet>
+        <dependencySet>
+            <useProjectArtifact>false</useProjectArtifact>
+            <includes>
+                <include>com.github.kwart.jsign:installcert</include>
+            </includes>
+            <outputDirectory>/</outputDirectory>
+            <outputFileNameMapping>InstallCert.jar</outputFileNameMapping>
+        </dependencySet>
+    </dependencySets>
+
+    <fileSets>
+        <fileSet>
+            <directory>bin</directory>
+            <outputDirectory>/</outputDirectory>
+            <fileMode>0755</fileMode>
+            <includes>
+                <include>*.sh</include>
+                <include>*.bat</include>
+            </includes>
+        </fileSet>
+        <fileSet>
+            <directory>conf</directory>
+            <outputDirectory>/conf/</outputDirectory>
+        </fileSet>
+        <fileSet>
+            <directory>licenses</directory>
+            <outputDirectory>/licenses/</outputDirectory>
+        </fileSet>
+        <fileSet>
+            <directory>target/generated-docs</directory>
+            <outputDirectory>/docs/</outputDirectory>
+            <includes>
+                <include>*.txt</include>
+                <include>*.pdf</include>
+            </includes>
+        </fileSet>
+    </fileSets>
+</assembly>

@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<project name="JSignPdf windows launchers" default="launcher" basedir=".">
+
+    <description>Builds JSignPdf Launch4J wrappers</description>
+    <property name="launch4j.dir" value="/opt/launch4j" />
+    <property name="dist.dir" value="${build.dir}/jsignpdf" />
+    <property name="jsignpdf.dir" value="/mnt" />
+
+    <target name="launcher">
+        <echo message="Creating windows launcher (EXE)" />
+
+        <taskdef name="launch4j"
+            classname="net.sf.launch4j.ant.Launch4jTask"
+            classpath="${launch4j.dir}/launch4j.jar:${launch4j.dir}/lib/xstream.jar" />
+
+        <launch4j>
+            <config headerType="gui"
+                outfile="${dist.dir}/JSignPdf.exe" dontWrapJar="true"
+                jarPath="JSignPdf.jar"
+                icon="${jsignpdf.dir}/distribution/doc/icon/icons.ico">
+                <jre path="jre" />
+                <splash file="${jsignpdf.dir}/distribution/doc/icon/splash_1.0.0.bmp" />
+                <versionInfo fileVersion="${jsignpdf.winversion}" txtFileVersion="JSignPdf launcher v. ${jsignpdf.version}" 
+                    fileDescription="Adds digital signatures to PDF files"
+                    copyright="Josef Cacek"
+                    productVersion="${jsignpdf.winversion}"
+                    txtProductVersion="Adds digital signatures to PDF files"
+                    productName="JSignPdf" internalName="JSignPdf"
+                    originalFilename="JSignPdf.exe" />
+            </config>
+        </launch4j>
+        <copy file="${jsignpdf.dir}/distribution/windows/launch4j-template.l4j.ini"
+            tofile="${dist.dir}/JSignPdf.l4j.ini" />
+
+        <launch4j>
+            <config headerType="console"
+                outfile="${dist.dir}/JSignPdfC.exe" dontWrapJar="true"
+                jarPath="JSignPdf.jar"
+                icon="${jsignpdf.dir}/distribution/doc/icon/icons.ico">
+                <jre path="jre" />
+                <versionInfo fileVersion="${jsignpdf.winversion}" txtFileVersion="JSignPdf console launcher v. ${jsignpdf.version}" 
+                    fileDescription="Adds digital signatures to PDF files"
+                    copyright="Josef Cacek"
+                    productVersion="${jsignpdf.winversion}"
+                    txtProductVersion="Adds digital signatures to PDF files"
+                    productName="JSignPdf" internalName="JSignPdf"
+                    originalFilename="JSignPdfC.exe" />
+            </config>
+        </launch4j>
+        <copy file="${jsignpdf.dir}/distribution/windows/launch4j-template.l4j.ini"
+            tofile="${dist.dir}/JSignPdfC.l4j.ini" />
+
+        <launch4j>
+            <config headerType="console"
+                outfile="${dist.dir}/InstallCert.exe" dontWrapJar="true"
+                jarPath="${installcert.filename}.jar"
+                icon="${jsignpdf.dir}/distribution/doc/icon/Certificate.ico">
+                <jre path="jre" />
+                <versionInfo
+                    fileVersion="${jsignpdf.winversion}"
+                    txtFileVersion="InstallCert launcher v. ${jsignpdf.version}"
+                    fileDescription="Installs host SSL certificates to Java keystore"
+                    copyright="Josef Cacek"
+                    productVersion="${jsignpdf.winversion}"
+                    txtProductVersion="Installs host SSL certificates to Java keystore"
+                    productName="InstallCert" internalName="InstallCert"
+                    originalFilename="InstallCert.exe" />
+            </config>
+        </launch4j>
+        <copy file="${jsignpdf.dir}/distribution/windows/launch4j-template.l4j.ini"
+            tofile="${dist.dir}/InstallCert.l4j.ini" />
+    </target>
+</project>

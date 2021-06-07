@@ -1,11 +1,11 @@
 *.class
 
 # Package Files #
-# *.jar
+*.jar
 *.war
 *.ear
+*.zip
 
-bin
 nbproject/private
 Output
 build
@@ -13,9 +13,8 @@ out
 out
 .idea
 **/*.iml
-#iText.jar
-#iText-rtf.jar
-#jsignpdf-itxt.jar
-#jsignpdf-itxt-rtf.jar
-#jsignpdf-itxt-toolbox.jar
 
+target/
+.settings
+.classpath
+.project
