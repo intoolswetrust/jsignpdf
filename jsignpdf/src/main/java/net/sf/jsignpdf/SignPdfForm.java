@@ -1252,8 +1252,12 @@ public class SignPdfForm extends javax.swing.JFrame implements SignResultListene
     }// GEN-LAST:event_btnSignItActionPerformed
 
     private void formWindowClosing(java.awt.event.WindowEvent evt) {// GEN-FIRST:event_formWindowClosing
-        storeToOptions();
-        options.storeOptions();
+        try {
+            storeToOptions();
+            options.storeOptions();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         PKCS11Utils.unregisterProviders();
     }// GEN-LAST:event_formWindowClosing
 
