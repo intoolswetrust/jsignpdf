@@ -15,7 +15,7 @@
     </parent>
 
     <properties>
-        <asciidoctor.maven.plugin.version>2.1.0</asciidoctor.maven.plugin.version>
+        <asciidoctor.maven.plugin.version>2.2.0</asciidoctor.maven.plugin.version>
         <asciidoctorj.pdf.version>1.6.0</asciidoctorj.pdf.version>
         <asciidoctorj.version>2.5.1</asciidoctorj.version>
         <jruby.version>9.2.17.0</jruby.version>
