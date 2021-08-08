@@ -35,6 +35,7 @@ import static net.sf.jsignpdf.Constants.L2TEXT_PLACEHOLDER_REASON;
 import static net.sf.jsignpdf.Constants.L2TEXT_PLACEHOLDER_SIGNER;
 import static net.sf.jsignpdf.Constants.L2TEXT_PLACEHOLDER_TIMESTAMP;
 import static net.sf.jsignpdf.Constants.RES;
+import static net.sf.jsignpdf.Constants.LOGGER;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -49,6 +50,7 @@ import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
 
 import net.sf.jsignpdf.crl.CRLInfo;
 import net.sf.jsignpdf.extcsp.CloudFoxy;
@@ -64,7 +66,6 @@ import net.sf.jsignpdf.utils.PKCS11Utils;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.text.StrSubstitutor;
-import org.apache.log4j.Logger;
 
 import com.lowagie.text.Font;
 import com.lowagie.text.Image;
@@ -89,8 +90,6 @@ import com.lowagie.text.pdf.TSAClientBouncyCastle;
  * @author Josef Cacek
  */
 public class SignerLogic implements Runnable {
-
-    private final static Logger LOGGER = Logger.getLogger(SignerLogic.class);
 
     private final BasicSignerOptions options;
 
@@ -220,18 +219,18 @@ public class SignerLogic implements Runnable {
                     case CERTIFICATE:
                         final X509Certificate encCert = KeyStoreUtils.loadCertificate(options.getPdfEncryptionCertFile());
                         if (encCert == null) {
-                            LOGGER.error(RES.get("console.pdfEncError.wrongCertificateFile",
+                            LOGGER.severe(RES.get("console.pdfEncError.wrongCertificateFile",
                                     StringUtils.defaultString(options.getPdfEncryptionCertFile())));
                             return false;
                         }
                         if (!KeyStoreUtils.isEncryptionSupported(encCert)) {
-                            LOGGER.error(RES.get("console.pdfEncError.cantUseCertificate", encCert.getSubjectDN().getName()));
+                            LOGGER.severe(RES.get("console.pdfEncError.cantUseCertificate", encCert.getSubjectDN().getName()));
                             return false;
                         }
                         stp.setEncryption(new Certificate[] { encCert }, new int[] { tmpRight }, PdfWriter.ENCRYPTION_AES_128);
                         break;
                     default:
-                        LOGGER.error(RES.get("console.unsupportedEncryptionType"));
+                        LOGGER.severe(RES.get("console.unsupportedEncryptionType"));
                         return false;
                 }
             }
@@ -308,7 +307,7 @@ public class SignerLogic implements Runnable {
                 LOGGER.info(RES.get("console.setRender"));
                 RenderMode renderMode = options.getRenderMode();
                 if (renderMode == RenderMode.GRAPHIC_AND_DESCRIPTION && sap.getSignatureGraphic() == null) {
-                    LOGGER.warn(
+                    LOGGER.warning(
                             "Render mode of visible signature is set to GRAPHIC_AND_DESCRIPTION, but no image is loaded. Fallback to DESCRIPTION_ONLY.");
                     LOGGER.info(RES.get("console.renderModeFallback"));
                     renderMode = RenderMode.DESCRIPTION_ONLY;
@@ -428,9 +427,9 @@ public class SignerLogic implements Runnable {
             fout = null;
             finished = true;
         } catch (Exception e) {
-            LOGGER.error(RES.get("console.exception"), e);
+            LOGGER.log(Level.SEVERE, RES.get("console.exception"), e);
         } catch (OutOfMemoryError e) {
-            LOGGER.fatal(RES.get("console.memoryError"), e);
+            LOGGER.log(Level.SEVERE, RES.get("console.memoryError"), e);
         } finally {
             if (fout != null) {
                 try {

@@ -32,6 +32,8 @@ package net.sf.jsignpdf;
 import static net.sf.jsignpdf.Constants.*;
 
 import java.net.Proxy;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import net.sf.jsignpdf.types.CertificationLevel;
 import net.sf.jsignpdf.types.HashAlgorithm;
@@ -47,7 +49,6 @@ import org.apache.commons.cli.OptionBuilder;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.log4j.Logger;
 
 /**
  * This class parses and holds options from command line
@@ -104,7 +105,8 @@ public class SignerOptionsFromCmdLine extends BasicSignerOptions {
 
         if (line.hasOption(ARG_QUIET)) {
             // disable logging
-            Logger.getRootLogger().removeAllAppenders();
+            LOGGER.setLevel(Level.OFF);
+            Logger.getGlobal().setLevel(Level.OFF);
         }
 
         // the arguments, which are not options or option-values should be the

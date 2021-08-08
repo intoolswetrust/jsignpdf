@@ -3,19 +3,19 @@
  * Version 1.1 (the "License"); you may not use this file except in
  * compliance with the License. You may obtain a copy of the License at
  * http://www.mozilla.org/MPL/
- * 
+ *
  * Software distributed under the License is distributed on an "AS IS"
  * basis, WITHOUT WARRANTY OF ANY KIND, either express or implied. See the
  * License for the specific language governing rights and limitations
  * under the License.
- * 
+ *
  * The Original Code is 'JSignPdf, a free application for PDF signing'.
- * 
+ *
  * The Initial Developer of the Original Code is Josef Cacek.
  * Portions created by Josef Cacek are Copyright (C) Josef Cacek. All Rights Reserved.
- * 
+ *
  * Contributor(s): Josef Cacek.
- * 
+ *
  * Alternatively, the contents of this file may be used under the terms
  * of the GNU Lesser General Public License, version 2.1 (the  "LGPL License"), in which case the
  * provisions of LGPL License are applicable instead of those
@@ -30,6 +30,7 @@
 package net.sf.jsignpdf.crl;
 
 import static net.sf.jsignpdf.Constants.RES;
+import static net.sf.jsignpdf.Constants.LOGGER;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -42,9 +43,9 @@ import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.logging.Level;
 
 import org.apache.commons.io.input.CountingInputStream;
-import org.apache.log4j.Logger;
 import org.bouncycastle.asn1.ASN1String;
 import org.bouncycastle.asn1.x509.CRLDistPoint;
 import org.bouncycastle.asn1.x509.DistributionPoint;
@@ -59,13 +60,11 @@ import net.sf.jsignpdf.Constants;
 
 /**
  * Helper bean for holding CRL related data.
- * 
+ *
  * @author Josef Cacek
- * 
+ *
  */
 public class CRLInfo {
-
-    private final static Logger LOGGER = Logger.getLogger(CRLInfo.class);
 
     private CRL[] crls;
     private long byteCount = 0L;
@@ -74,7 +73,7 @@ public class CRLInfo {
 
     /**
      * Constructor
-     * 
+     *
      * @param anOptions
      * @param aChain
      */
@@ -88,7 +87,7 @@ public class CRLInfo {
 
     /**
      * Returns CRLs for the certificate chain.
-     * 
+     *
      * @return
      */
     public CRL[] getCrls() {
@@ -98,7 +97,7 @@ public class CRLInfo {
 
     /**
      * Returns byte count, which should
-     * 
+     *
      * @return
      */
     public long getByteCount() {
@@ -139,13 +138,13 @@ public class CRLInfo {
                 }
                 inStream.close();
             } catch (MalformedURLException e) {
-                LOGGER.warn("", e);
+                LOGGER.log(Level.WARNING, "", e);
             } catch (IOException e) {
-                LOGGER.warn("", e);
+                LOGGER.log(Level.WARNING, "", e);
             } catch (CertificateException e) {
-                LOGGER.warn("", e);
+                LOGGER.log(Level.WARNING, "", e);
             } catch (CRLException e) {
-                LOGGER.warn("", e);
+                LOGGER.log(Level.WARNING, "", e);
             }
         }
         crls = crlSet.toArray(new CRL[crlSet.size()]);
@@ -153,7 +152,7 @@ public class CRLInfo {
 
     /**
      * Returns (initialized, but maybe empty) set of URLs of CRLs for given certificate.
-     * 
+     *
      * @param aCert X509 certificate.
      * @return
      */
@@ -166,7 +165,7 @@ public class CRLInfo {
             try {
                 crlDistPoints = CRLDistPoint.getInstance(X509ExtensionUtil.fromExtensionValue(crlDPExtension));
             } catch (IOException e) {
-                LOGGER.warn("", e);
+                LOGGER.log(Level.WARNING, "", e);
             }
             if (crlDistPoints != null) {
                 final DistributionPoint[] distPoints = crlDistPoints.getDistributionPoints();
