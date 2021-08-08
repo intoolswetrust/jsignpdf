@@ -60,11 +60,6 @@ public class JTextAreaHandler extends Handler {
         this.jTextArea = jTextArea;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see org.apache.log4j.Appender#close()
-     */
     @Override
     public void close() {
         jTextArea = null;
