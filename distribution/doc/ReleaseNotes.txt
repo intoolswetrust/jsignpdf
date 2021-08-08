@@ -1,3 +1,10 @@
+Version 2.0.0
+-------------
+  * Added JSignPKCS11 security provider
+  * Moved from a self-managed iText fork (jsign-itxt) to OpenPDF
+  * Updated project dependencies
+  * Removed log4j dependency
+
 Version 1.6.5
 -------------
   * Fix SunPKCS11 initialization on newer Java versions
