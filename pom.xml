@@ -71,27 +71,6 @@
                 </plugin>
             </plugins>
         </pluginManagement>
-        <plugins>
-            <plugin>
-                <artifactId>maven-enforcer-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <id>enforce-java</id>
-                        <goals>
-                            <goal>enforce</goal>
-                        </goals>
-                        <phase>compile</phase>
-                        <configuration>
-                            <rules>
-                                <requireJavaVersion>
-                                    <version>[1.8,1.9)</version>
-                                </requireJavaVersion>
-                            </rules>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-        </plugins>
     </build>
 
 
@@ -115,9 +94,9 @@
     </developers>
 
     <scm>
-        <connection>scm:git:git://github.com/kwart/jsignpdf.git</connection>
-        <developerConnection>scm:git:git@github.com:kwart/jsignpdf.git</developerConnection>
-        <url>http://github.com/kwart/jsignpdf/</url>
+        <connection>scm:git:git://github.com/intoolswetrust/jsignpdf.git</connection>
+        <developerConnection>scm:git:git@github.com:intoolswetrust/jsignpdf.git</developerConnection>
+        <url>http://github.com/intoolswetrust/jsignpdf/</url>
         <tag>HEAD</tag>
     </scm>
 
@@ -152,6 +131,25 @@
             <build>
                 <plugins>
                     <plugin>
+                        <artifactId>maven-enforcer-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>enforce-java</id>
+                                <goals>
+                                    <goal>enforce</goal>
+                                </goals>
+                                <phase>compile</phase>
+                                <configuration>
+                                    <rules>
+                                        <requireJavaVersion>
+                                            <version>[1.8,1.9)</version>
+                                        </requireJavaVersion>
+                                    </rules>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
                         <groupId>org.sonatype.plugins</groupId>
                         <artifactId>nexus-staging-maven-plugin</artifactId>
                         <version>1.6.8</version>
@@ -165,7 +163,7 @@
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-source-plugin</artifactId>
-                        <version>2.2.1</version>
+                        <version>3.2.1</version>
                         <executions>
                             <execution>
                                 <goals>
@@ -192,7 +190,7 @@
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-gpg-plugin</artifactId>
-                        <version>1.6</version>
+                        <version>3.0.1</version>
                         <executions>
                             <execution>
                                 <phase>verify</phase>
@@ -202,8 +200,6 @@
                             </execution>
                         </executions>
                         <configuration>
-                            <keyname>E6859CD79F1F3E3BE207555C3409C2FF0184B8FB</keyname>
-                            <passphraseServerId>gpg.passphrase</passphraseServerId>
                             <gpgArguments>
                                 <gpgArgument>--pinentry-mode</gpgArgument>
                                 <gpgArgument>loopback</gpgArgument>
