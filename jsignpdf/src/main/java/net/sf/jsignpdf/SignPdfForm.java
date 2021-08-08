@@ -30,12 +30,14 @@
 package net.sf.jsignpdf;
 
 import static net.sf.jsignpdf.Constants.RES;
+import static net.sf.jsignpdf.Constants.LOGGER;
 
 import java.awt.Toolkit;
 import java.io.File;
 import java.net.URL;
 import java.security.KeyStore;
 import java.util.Set;
+import java.util.logging.Level;
 
 import javax.net.ssl.SSLHandshakeException;
 import javax.swing.DefaultComboBoxModel;
@@ -55,10 +57,6 @@ import net.sf.jsignpdf.utils.PKCS11Utils;
 import net.sf.jsignpdf.utils.PropertyProvider;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.log4j.Appender;
-import org.apache.log4j.Layout;
-import org.apache.log4j.Logger;
-import org.apache.log4j.SimpleLayout;
 
 /**
  * GUI for PDFSigner.
@@ -68,8 +66,6 @@ import org.apache.log4j.SimpleLayout;
 public class SignPdfForm extends javax.swing.JFrame implements SignResultListener {
 
     private static final long serialVersionUID = 1L;
-
-    private final static Logger LOGGER = Logger.getLogger(SignPdfForm.class);
 
     private SignerFileChooser fc = new SignerFileChooser();
 
@@ -126,12 +122,9 @@ public class SignPdfForm extends javax.swing.JFrame implements SignResultListene
         cbHashAlgorithm.setModel(new DefaultComboBoxModel(HashAlgorithm.values()));
         cbPrinting.setModel(new DefaultComboBoxModel(PrintRight.values()));
 
-        final JTextAreaAppender jTextAreaAppender = new JTextAreaAppender(infoTextArea);
-        final Logger rootLogger = Logger.getRootLogger();
-        final Appender appender = rootLogger.getAppender("jsignpdf");
-        final Layout layout = appender != null ? appender.getLayout() : new SimpleLayout();
-        jTextAreaAppender.setLayout(layout);
-        rootLogger.addAppender(jTextAreaAppender);
+        JTextAreaHandler handler = new JTextAreaHandler(infoTextArea);
+        handler.setLevel(Level.ALL);
+        LOGGER.addHandler(handler);
 
         updateFromOptions();
     }

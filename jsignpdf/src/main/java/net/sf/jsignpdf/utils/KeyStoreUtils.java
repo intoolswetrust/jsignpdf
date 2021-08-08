@@ -3,19 +3,19 @@
  * Version 1.1 (the "License"); you may not use this file except in
  * compliance with the License. You may obtain a copy of the License at
  * http://www.mozilla.org/MPL/
- * 
+ *
  * Software distributed under the License is distributed on an "AS IS"
  * basis, WITHOUT WARRANTY OF ANY KIND, either express or implied. See the
  * License for the specific language governing rights and limitations
  * under the License.
- * 
+ *
  * The Original Code is 'JSignPdf, a free application for PDF signing'.
- * 
+ *
  * The Initial Developer of the Original Code is Josef Cacek.
  * Portions created by Josef Cacek are Copyright (C) Josef Cacek. All Rights Reserved.
- * 
+ *
  * Contributor(s): Josef Cacek.
- * 
+ *
  * Alternatively, the contents of this file may be used under the terms
  * of the GNU Lesser General Public License, version 2.1 (the  "LGPL License"), in which case the
  * provisions of LGPL License are applicable instead of those
@@ -30,6 +30,7 @@
 package net.sf.jsignpdf.utils;
 
 import static net.sf.jsignpdf.Constants.RES;
+import static net.sf.jsignpdf.Constants.LOGGER;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -57,6 +58,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
+import java.util.logging.Level;
 
 import javax.crypto.Cipher;
 
@@ -68,17 +70,14 @@ import net.sf.jsignpdf.extcsp.CloudFoxy;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.log4j.Logger;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
 /**
  * This class provides methods for KeyStore(s) handling.
- * 
+ *
  * @author Josef Cacek
  */
 public class KeyStoreUtils {
-
-    private final static Logger LOGGER = Logger.getLogger(KeyStoreUtils.class);
 
     static {
         Security.addProvider(new BouncyCastleProvider());
@@ -86,7 +85,7 @@ public class KeyStoreUtils {
 
     /**
      * Returns array of supported KeyStores
-     * 
+     *
      * @return String array with supported KeyStore implementation names
      */
     public static SortedSet<String> getKeyStores() {
@@ -98,7 +97,7 @@ public class KeyStoreUtils {
 
     /**
      * Loads key names (aliases) from the keystore
-     * 
+     *
      * @return array of key aliases
      */
     public static String[] getKeyAliases(final BasicSignerOptions options) {
@@ -122,7 +121,7 @@ public class KeyStoreUtils {
 
     /**
      * Returns list of key aliases in given keystore.
-     * 
+     *
      * @param aKs
      * @param options
      * @return
@@ -200,14 +199,14 @@ public class KeyStoreUtils {
                 }
             }
         } catch (Exception e) {
-            LOGGER.error(RES.get("console.exception"), e);
+            LOGGER.log(Level.SEVERE, RES.get("console.exception"), e);
         }
         return tmpResult;
     }
 
     /**
      * Returns alias defined (either as a string or as an key index) in options
-     * 
+     *
      * @param options
      * @return key alias
      */
@@ -221,7 +220,7 @@ public class KeyStoreUtils {
     private static String getKeyAliasInternal(final BasicSignerOptions options, final KeyStore aKs) {
         if (aKs == null) {
             final String message = RES.get("error.keystoreNull");
-            LOGGER.warn(message);
+            LOGGER.warning(message);
             throw new NullPointerException(message);
         }
         String tmpResult = null;
@@ -243,7 +242,7 @@ public class KeyStoreUtils {
 
     /**
      * Loads certificate names (aliases) from the given keystore
-     * 
+     *
      * @return array of certificate aliases
      */
     public static String[] getCertAliases(KeyStore tmpKs) {
@@ -267,7 +266,7 @@ public class KeyStoreUtils {
 
     /**
      * Loads certificate names (aliases) from the given keystore
-     * 
+     *
      * @param aKsType
      * @param aKsFile
      * @param aKsPasswd
@@ -279,7 +278,7 @@ public class KeyStoreUtils {
 
     /**
      * Opens given keystore.
-     * 
+     *
      * @param aKsType
      * @param aKsFile
      * @param aKsPasswd
@@ -295,7 +294,7 @@ public class KeyStoreUtils {
 
     /**
      * Creates empty JKS keystore..
-     * 
+     *
      * @return new JKS keystore
      * @throws KeyStoreException
      * @throws IOException
@@ -311,7 +310,7 @@ public class KeyStoreUtils {
 
     /**
      * Copies certificates from one keystore to another (both keystore has to be initialized.
-     * 
+     *
      * @param fromKeyStore
      * @param toKeyStore
      * @return
@@ -334,7 +333,7 @@ public class KeyStoreUtils {
 
     /**
      * Opens given keystore.
-     * 
+     *
      * @param aKsType
      * @param aKsFile
      * @param aKsPasswd
@@ -370,7 +369,7 @@ public class KeyStoreUtils {
 
     /**
      * Loads the default root certificates at &lt;java.home&gt;/lib/security/cacerts.
-     * 
+     *
      * @param provider the provider or <code>null</code> for the default provider
      * @return a <CODE>KeyStore</CODE>
      */
@@ -400,7 +399,7 @@ public class KeyStoreUtils {
 
     /**
      * Returns PrivateKey and its certificate chain
-     * 
+     *
      * @param options
      * @return
      * @throws NoSuchAlgorithmException
@@ -422,13 +421,13 @@ public class KeyStoreUtils {
 
     /**
      * Loads a {@link X509Certificate} from the given path. Returns null if the certificate can't be loaded.
-     * 
+     *
      * @param filePath
      * @return
      */
     public static X509Certificate loadCertificate(final String filePath) {
         if (StringUtils.isEmpty(filePath)) {
-            LOGGER.debug("Empty file path");
+            LOGGER.fine("Empty file path");
             return null;
         }
         FileInputStream inStream = null;
@@ -438,7 +437,7 @@ public class KeyStoreUtils {
             inStream = FileUtils.openInputStream(new File(filePath));
             cert = (X509Certificate) certFac.generateCertificate(inStream);
         } catch (Exception e) {
-            LOGGER.debug("Unable to load certificate", e);
+            LOGGER.log(Level.FINE, "Unable to load certificate", e);
         } finally {
             IOUtils.closeQuietly(inStream);
         }
@@ -447,7 +446,7 @@ public class KeyStoreUtils {
 
     /**
      * Returns true if the given certificate can be used for encryption, false otherwise.
-     * 
+     *
      * @param cert
      * @return
      */
@@ -458,7 +457,7 @@ public class KeyStoreUtils {
                 Cipher.getInstance(cert.getPublicKey().getAlgorithm());
                 result = true;
             } catch (Exception e) {
-                LOGGER.debug("Not possible to encrypt with the certificate", e);
+                LOGGER.log(Level.FINE, "Not possible to encrypt with the certificate", e);
             }
         }
         return result;
@@ -474,7 +473,7 @@ public class KeyStoreUtils {
 
     /**
      * For WINDOWS-MY keystore fixes problem with non-unique aliases
-     * 
+     *
      * @param keyStore
      */
     @SuppressWarnings("unchecked")

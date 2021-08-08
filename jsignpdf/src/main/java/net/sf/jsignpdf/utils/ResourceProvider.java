@@ -3,19 +3,19 @@
  * Version 1.1 (the "License"); you may not use this file except in
  * compliance with the License. You may obtain a copy of the License at
  * http://www.mozilla.org/MPL/
- * 
+ *
  * Software distributed under the License is distributed on an "AS IS"
  * basis, WITHOUT WARRANTY OF ANY KIND, either express or implied. See the
  * License for the specific language governing rights and limitations
  * under the License.
- * 
+ *
  * The Original Code is 'JSignPdf, a free application for PDF signing'.
- * 
+ *
  * The Initial Developer of the Original Code is Josef Cacek.
  * Portions created by Josef Cacek are Copyright (C) Josef Cacek. All Rights Reserved.
- * 
+ *
  * Contributor(s): Josef Cacek.
- * 
+ *
  * Alternatively, the contents of this file may be used under the terms
  * of the GNU Lesser General Public License, version 2.1 (the  "LGPL License"), in which case the
  * provisions of LGPL License are applicable instead of those
@@ -29,9 +29,12 @@
  */
 package net.sf.jsignpdf.utils;
 
+import static net.sf.jsignpdf.Constants.LOGGER;
+
 import java.text.MessageFormat;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
+import java.util.logging.Level;
 
 import javax.swing.AbstractButton;
 import javax.swing.JComponent;
@@ -39,11 +42,10 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.border.TitledBorder;
 
-import org.apache.log4j.Logger;
 
 /**
  * Entry point to internationalization. Resource bundles has base "translation/messages".
- * 
+ *
  * @author Josef Cacek [josef.cacek (at) gmail.com]
  * @author $Author: kwart $
  * @version $Revision: 1.5 $
@@ -51,13 +53,11 @@ import org.apache.log4j.Logger;
  */
 public class ResourceProvider {
 
-    private final static Logger LOGGER = Logger.getLogger(ResourceProvider.class);
-
     private ResourceBundle bundle;
 
     /**
      * Constructor which takes a not-<code>null</code> {@link ResourceBundle} as an argument.
-     * 
+     *
      * @param bundle
      */
     public ResourceProvider(ResourceBundle bundle) {
@@ -69,7 +69,7 @@ public class ResourceProvider {
 
     /**
      * Sets translations and mnemonics for labels and different kind of buttons
-     * 
+     *
      * @param aComponent component in which should be label set
      * @param aKey message key
      */
@@ -103,7 +103,7 @@ public class ResourceProvider {
 
     /**
      * Returns message for given key from active ResourceBundle
-     * 
+     *
      * @param aKey name of key in resource bundle
      * @return message for given key
      */
@@ -112,7 +112,7 @@ public class ResourceProvider {
         try {
             tmpMessage = bundle.getString(aKey);
         } catch (MissingResourceException e) {
-            LOGGER.warn("Missing resource " + aKey, e);
+            LOGGER.log(Level.WARNING, "Missing resource " + aKey, e);
         }
         if (tmpMessage == null) {
             tmpMessage = aKey;
@@ -124,7 +124,7 @@ public class ResourceProvider {
 
     /**
      * Returns index of character which should be used as a mnemonic. It returns -1 if such an character doesn't exist.
-     * 
+     *
      * @param aKey resource key
      * @return index (position) of character in translated message
      */
@@ -133,7 +133,7 @@ public class ResourceProvider {
         try {
             tmpMessage = bundle.getString(aKey);
         } catch (MissingResourceException e) {
-            LOGGER.warn("Missing resource " + aKey, e);
+            LOGGER.log(Level.WARNING, "Missing resource " + aKey, e);
         }
 
         int tmpResult = -1;
@@ -161,7 +161,7 @@ public class ResourceProvider {
 
     /**
      * Returns message for given key from active ResourceBundle and replaces parameters with values given in array.
-     * 
+     *
      * @param aKey key in resource bundle
      * @param anArgs array of parameters to replace in message
      * @return message for given key with given arguments

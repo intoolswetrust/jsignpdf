@@ -29,13 +29,15 @@
  */
 package net.sf.jsignpdf.utils;
 
+import static net.sf.jsignpdf.Constants.LOGGER;
+
 import java.io.File;
 import java.security.KeyStore;
 import java.security.Provider;
 import java.security.Security;
+import java.util.logging.Level;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.log4j.Logger;
 
 /**
  * Methods for handling PKCS#11 security providers.
@@ -43,8 +45,6 @@ import org.apache.log4j.Logger;
  * @author Josef Cacek
  */
 public class PKCS11Utils {
-
-    private static final Logger LOGGER = Logger.getLogger(PKCS11Utils.class);
 
     public static volatile Provider SUN_PROVIDER;
     public static volatile Provider JSIGN_PROVIDER;
@@ -59,7 +59,7 @@ public class PKCS11Utils {
         if (StringUtils.isEmpty(configPath)) {
             return;
         }
-        LOGGER.debug("Registering SunPKCS11 provider from configuration in " + configPath);
+        LOGGER.fine("Registering SunPKCS11 provider from configuration in " + configPath);
         final File cfgFile = IOUtils.findFile(configPath);
         final String absolutePath = cfgFile.getAbsolutePath();
         if (cfgFile.isFile()) {
@@ -115,9 +115,9 @@ public class PKCS11Utils {
             }
             Security.addProvider(pkcs11Provider);
             final String name = pkcs11Provider.getName();
-            LOGGER.debug("PKCS11 provider registered with name " + name);
+            LOGGER.fine("PKCS11 provider registered with name " + name);
         } catch (Throwable e) {
-            LOGGER.error("Unable to register SunPKCS11 security provider.", e);
+            LOGGER.log(Level.SEVERE, "Unable to register SunPKCS11 security provider.", e);
         }
         return pkcs11Provider;
     }
@@ -127,11 +127,11 @@ public class PKCS11Utils {
             return null;
         }
         String providerName = provider.getName();
-        LOGGER.debug("Removing security provider with name " + providerName);
+        LOGGER.fine("Removing security provider with name " + providerName);
         try {
             Security.removeProvider(providerName);
         } catch (Exception e) {
-            LOGGER.error("Removing provider failed", e);
+            LOGGER.log(Level.SEVERE, "Removing provider failed", e);
         }
         return null;
     }
@@ -143,10 +143,10 @@ public class PKCS11Utils {
         String providerName = provider.getName();
         try {
             KeyStore.getInstance(type, provider);
-            LOGGER.debug("KeyStore type " + type + " is supported by the provider " + providerName);
+            LOGGER.fine("KeyStore type " + type + " is supported by the provider " + providerName);
             return provider.getName();
         } catch (Exception e) {
-            LOGGER.debug("KeyStore type " + type + " is not supported by the provider " + providerName);
+            LOGGER.fine("KeyStore type " + type + " is not supported by the provider " + providerName);
         }
         return null;
     }

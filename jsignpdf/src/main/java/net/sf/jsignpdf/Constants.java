@@ -37,6 +37,8 @@ import java.util.HashSet;
 import java.util.Properties;
 import java.util.ResourceBundle;
 import java.util.Set;
+import java.util.logging.LogManager;
+import java.util.logging.Logger;
 
 import net.sf.jsignpdf.types.HashAlgorithm;
 import net.sf.jsignpdf.utils.ConfigProvider;
@@ -48,6 +50,17 @@ import net.sf.jsignpdf.utils.ResourceProvider;
  * @author Josef Cacek
  */
 public class Constants {
+
+    static {
+        try (InputStream is = Constants.class.getClassLoader().
+                getResourceAsStream("logging.properties")) {
+            LogManager.getLogManager().readConfiguration(is);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static final Logger LOGGER = Logger.getLogger("net.sf.jsignpdf");
 
     /**
      * Version of JSignPdf

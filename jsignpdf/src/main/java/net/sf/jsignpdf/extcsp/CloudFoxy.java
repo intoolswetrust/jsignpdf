@@ -29,10 +29,11 @@
  */
 package net.sf.jsignpdf.extcsp;
 
+import static net.sf.jsignpdf.Constants.LOGGER;
+
 import net.sf.jsignpdf.BasicSignerOptions;
 import net.sf.jsignpdf.Constants;
 import net.sf.jsignpdf.types.HashAlgorithm;
-import org.apache.log4j.Logger;
 import org.bouncycastle.util.encoders.Base64;
 
 import java.io.*;
@@ -54,11 +55,10 @@ import static net.sf.jsignpdf.Constants.RES;
  * This class implements a connector to CloudFoxy (https://gitlab.com/cloudfoxy) - a remote API for smart cards.
  */
 public class CloudFoxy implements IExternalCryptoProvider {
-    private final static Logger LOGGER = Logger.getLogger(CloudFoxy.class);
 
     /**
      * Creates an instance of the class
-     * 
+     *
      * @return CloudFoxy instance
      */
     public static CloudFoxy getInstance() {
@@ -67,19 +67,21 @@ public class CloudFoxy implements IExternalCryptoProvider {
 
     /**
      * A short method, which simply returns the CSP name for GUI
-     * 
+     *
      * @return String - the CSP name
      */
+    @Override
     public String getName() {
         return Constants.KEYSTORE_TYPE_CLOUDFOXY;
     }
 
     /**
      * The method returns a certificate chain for the provided alias
-     * 
+     *
      * @param options - command line / GUI provided options like keystore, PIN/password, alias, ...
      * @return Certificate[] - a list of certificates, or null if there was an error
      */
+    @Override
     public Certificate[] getChain(BasicSignerOptions options) {
         Certificate[] chain = null;
 
@@ -115,10 +117,10 @@ public class CloudFoxy implements IExternalCryptoProvider {
             }
             String[] certChain = line.split(":");
             if (certChain.length < 2) {
-                LOGGER.error(RES.get("extcsp.nocert", "-"));
+                LOGGER.severe(RES.get("extcsp.nocert", "-"));
                 return null;
             } else if (certChain[1].length() < 5) {
-                LOGGER.error(RES.get("extcsp.nocert", certChain[1]));
+                LOGGER.severe(RES.get("extcsp.nocert", certChain[1]));
                 return null;
             }
             chain = new Certificate[certChain.length - 1];
@@ -131,13 +133,13 @@ public class CloudFoxy implements IExternalCryptoProvider {
                 chain[i - 1] = certFactory.generateCertificate(in);
             }
         } catch (UnknownHostException ex) {
-            LOGGER.error(RES.get("extcsp.nohost", hostname, ex.getMessage()));
+            LOGGER.severe(RES.get("extcsp.nohost", hostname, ex.getMessage()));
             return null;
         } catch (IOException ex) {
-            LOGGER.error(RES.get("extcsp.iohost", ex.getMessage()));
+            LOGGER.severe(RES.get("extcsp.iohost", ex.getMessage()));
             return null;
         } catch (CertificateException ex) {
-            LOGGER.error(RES.get("extcsp.certfactory", ex.getMessage()));
+            LOGGER.severe(RES.get("extcsp.certfactory", ex.getMessage()));
         }
 
         return chain;
@@ -146,17 +148,18 @@ public class CloudFoxy implements IExternalCryptoProvider {
     /**
      * The method takes an initial fingerprint of the document, and creates and external signature, which can be used for the
      * 'setExternalDigest' method.
-     * 
+     *
      * @param options - command line / GUI provided options like keystore, PIN/password, alias, ...
      * @param fingerprint - byte array containing the document fingerprint (only SHA1 and SHA256 are supported)
      * @return byte[] with the signature, null if there was an error
      */
+    @Override
     public byte[] getSignature(BasicSignerOptions options, byte[] fingerprint) {
         byte[] signature = null;
         HashAlgorithm hashAlgorithm = options.getHashAlgorithmX();
 
         if ((hashAlgorithm != HashAlgorithm.SHA1) && (hashAlgorithm != HashAlgorithm.SHA256)) {
-            LOGGER.error(RES.get("extcsp.unknownhashalg", options.getHashAlgorithm().getAlgorithmName()));
+            LOGGER.severe(RES.get("extcsp.unknownhashalg", options.getHashAlgorithm().getAlgorithmName()));
             return null;
         }
 
@@ -205,9 +208,9 @@ public class CloudFoxy implements IExternalCryptoProvider {
 
             socket.close();
             if (signatureParts.length < 2) {
-                LOGGER.error(RES.get("extcsp.nosignature"));
+                LOGGER.severe(RES.get("extcsp.nosignature"));
             } else if (signatureParts[1].length() < 5) {
-                LOGGER.error(RES.get("extcsp.nosignatureerr", signatureParts[1]));
+                LOGGER.severe(RES.get("extcsp.nosignatureerr", signatureParts[1]));
             } else {
                 // convert the signature from hex to binary
                 int len = signatureParts[1].length(); // there's "@@" at the end - now on the new line
@@ -218,20 +221,21 @@ public class CloudFoxy implements IExternalCryptoProvider {
                 }
             }
         } catch (UnknownHostException ex) {
-            LOGGER.error(RES.get("extcsp.nohost", hostname, ex.getMessage()));
+            LOGGER.severe(RES.get("extcsp.nohost", hostname, ex.getMessage()));
         } catch (IOException ex) {
-            LOGGER.error(RES.get("extcsp.iohost", ex.getMessage()));
+            LOGGER.severe(RES.get("extcsp.iohost", ex.getMessage()));
         }
         return signature;
     }
 
     /**
      * Query the crypto provider and return a list of aliases available.
-     * 
+     *
      * @param options - command line / GUI provided options like keystore, PIN/password, alias, ...
      * @return LinkedList<String> - a list of names
      * @throws NullPointerException - when the list can't be created
      */
+    @Override
     public LinkedList<String> getAliasesList(BasicSignerOptions options) throws NullPointerException {
 
         LinkedList<String> aliasList;
@@ -265,10 +269,10 @@ public class CloudFoxy implements IExternalCryptoProvider {
                     }
                 }
             } catch (UnknownHostException ex) {
-                LOGGER.error(RES.get("extcsp.nohost", address[0], ex.getMessage()));
+                LOGGER.severe(RES.get("extcsp.nohost", address[0], ex.getMessage()));
                 throw new NullPointerException(RES.get("error.keystoreNull"));
             } catch (IOException ex) {
-                LOGGER.error(RES.get("extcsp.iohost", ex.getMessage()));
+                LOGGER.severe(RES.get("extcsp.iohost", ex.getMessage()));
                 throw new NullPointerException(RES.get("error.keystoreNull"));
             } catch (Exception ex) {
                 throw new NullPointerException(RES.get("error.keystoreNull"));

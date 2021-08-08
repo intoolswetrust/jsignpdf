@@ -34,6 +34,7 @@ import static net.sf.jsignpdf.Constants.EXIT_CODE_PARSE_ERR;
 import static net.sf.jsignpdf.Constants.NEW_LINE;
 import static net.sf.jsignpdf.Constants.RES;
 import static net.sf.jsignpdf.Constants.VERSION;
+import static net.sf.jsignpdf.Constants.LOGGER;
 
 import java.io.File;
 import java.io.FileFilter;
@@ -43,6 +44,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+import java.util.logging.Level;
 
 import javax.swing.UIManager;
 import javax.swing.WindowConstants;
@@ -60,7 +62,6 @@ import org.apache.commons.io.filefilter.FileFileFilter;
 import org.apache.commons.io.filefilter.WildcardFileFilter;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.log4j.Logger;
 
 /**
  * JSignPdf main class - it either process command line or if no argument is given, sets system Look&Feel and creates
@@ -69,8 +70,6 @@ import org.apache.log4j.Logger;
  * @author Josef Cacek
  */
 public class Signer {
-
-    private final static Logger LOGGER = Logger.getLogger(Signer.class);
 
     /**
      * Prints formatted help message (command line arguments).
@@ -99,7 +98,7 @@ public class Signer {
         try {
             SSLInitializer.init();
         } catch (Exception e) {
-            LOGGER.warn("Unable to re-configure SSL layer", e);
+            LOGGER.log(Level.WARNING, "Unable to re-configure SSL layer", e);
         }
 
         PKCS11Utils.registerProviders(ConfigProvider.getInstance().getProperty("pkcs11config.path"));
@@ -154,31 +153,31 @@ public class Signer {
     }
 
     /**
-     * Writes info about security providers to the {@link Logger} instance. The log-level for messages is TRACE.
+     * Writes info about security providers to the {@link Logger} instance. The log-level for messages is FINER.
      */
     @SuppressWarnings({ "rawtypes", "unchecked" })
     private static void traceInfo() {
-        if (LOGGER.isTraceEnabled()) {
+        if (LOGGER.isLoggable(Level.FINER)) {
             try {
                 Provider[] aProvider = Security.getProviders();
                 for (int i = 0; i < aProvider.length; i++) {
                     Provider provider = aProvider[i];
-                    LOGGER.trace("Provider " + (i + 1) + " : " + provider.getName() + " " + provider.getInfo() + " :");
+                    LOGGER.finer("Provider " + (i + 1) + " : " + provider.getName() + " " + provider.getInfo() + " :");
                     List keyList = new ArrayList(provider.keySet());
                     try {
                         Collections.sort(keyList);
                     } catch (Exception e) {
-                        LOGGER.trace("Provider's properties keys can't be sorted", e);
+                        LOGGER.log(Level.FINER, "Provider's properties keys can't be sorted", e);
                     }
                     Iterator keyIterator = keyList.iterator();
                     while (keyIterator.hasNext()) {
                         String key = (String) keyIterator.next();
-                        LOGGER.trace(key + ": " + provider.getProperty(key));
+                        LOGGER.finer(key + ": " + provider.getProperty(key));
                     }
-                    LOGGER.trace("------------------------------------------------");
+                    LOGGER.finer("------------------------------------------------");
                 }
             } catch (Exception e) {
-                LOGGER.trace("Listing security providers failed", e);
+                LOGGER.log(Level.FINER, "Listing security providers failed", e);
             }
         }
     }
