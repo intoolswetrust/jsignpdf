@@ -13,7 +13,8 @@ The application uses the OpenPDF library for PDF manipulations.
   * ChangeLog.txt
   * ReleaseNotes.txt
 * build the `jsignpdf`
-```
+
+```bash
 mvn clean install
 ```
 
@@ -21,7 +22,7 @@ Resulting bits are located in the `distribution/target`
 
 ### Windows installer
 
-```
+```bash
 docker run -it --rm -v "$(pwd):/mnt" \
   -u $(id -u):$(id -g) kwart/innosetup \
   /mnt/distribution/windows/create-jsignpdf-installer.sh
@@ -37,9 +38,12 @@ mvn clean install deploy
 
 Release
 
-```
-mvn -Prelease release:prepare
-mvn -Prelease release:perform
+```bash
+mvn -P release --batch-mode -Dtag=JSignPdf_2_0_0 release:prepare \
+                 -DreleaseVersion=2.0.0 \
+                 -DdevelopmentVersion=2.1.0-SNAPSHOT
+
+mvn -P release --batch-mode release:perform
 ```
 
 ## Random
