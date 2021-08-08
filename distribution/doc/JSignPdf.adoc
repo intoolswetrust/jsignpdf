@@ -4,7 +4,7 @@ Josef Cacek
 :description: Digital signatures for your PDF documents
 :doctype: book
 :title-logo-image: image:img/jsignpdf-header.png[image,width=200,height=200,align=center]
-:url-repo: https://github.com/kwart/jsignpdf
+:url-repo: https://github.com/intoolswetrust/jsignpdf
 
 
 == JSignPdf Introduction
@@ -43,6 +43,7 @@ A greater change comes in 2021, where the project was switched to use the OpenPD
 
 The author of the JSignPdf is Czech developer Josef Cacek. He works in Java since 2000. Some links to Josef's projects:
 
+* https://github.com/intoolswetrust/
 * https://github.com/kwart/
 * https://sourceforge.net/users/kwart/
 

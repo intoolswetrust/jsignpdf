@@ -10,7 +10,7 @@
 
     <name>${project.artifactId}</name>
     <description>JSignPdf - application for signing PDF files</description>
-    <url>https://github.com/kwart/jsignpdf</url>
+    <url>https://github.com/intoolswetrust/jsignpdf</url>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
