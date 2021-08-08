@@ -1,0 +1,47 @@
+name: Deploy snapshots
+
+# see https://docs.github.com/en/actions/guides/publishing-java-packages-with-maven
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  release:
+    name: Release on Sonatype OSS
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up Apache Maven Central
+        uses: actions/setup-java@v2
+        with:
+          java-version: 8
+          distribution: 'adopt'
+          server-id: ossrh
+          server-username: MAVEN_USERNAME
+          server-password: MAVEN_PASSWORD
+          gpg-private-key: ${{ secrets.MAVEN_GPG_PRIVATE_KEY }}
+          gpg-passphrase: MAVEN_GPG_PASSPHRASE
+
+      - name: Cache Maven packages
+        uses: actions/cache@v2
+        with:
+          path: ~/.m2
+          key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
+          restore-keys: ${{ runner.os }}-m2
+
+      - name: Publish to Apache Maven Central
+        run: |
+          PROJECT_VERSION=$(mvn -q -Dexec.executable=echo -Dexec.args='${project.version}' --non-recursive exec:exec)
+          if [[ "$PROJECT_VERSION" == *-SNAPSHOT ]]; then
+            mvn --batch-mode -Prelease deploy
+          else
+            mvn --batch-mode package
+          fi
+        env:
+          MAVEN_USERNAME: ${{ secrets.OSSRH_USERNAME }}
+          MAVEN_PASSWORD: ${{ secrets.OSSRH_PASSWORD }}
+          MAVEN_GPG_PASSPHRASE: ${{ secrets.MAVEN_GPG_PASSPHRASE }}
+
