@@ -12,7 +12,13 @@ fi
 
 JAVA_VERSION=$("$JAVA" -cp "$DIR/JSignPdf.jar" net.sf.jsignpdf.JavaVersion)
 if [ "$JAVA_VERSION" -gt "8" ]; then
-  JAVA_OPTS="$JAVA_OPTS --add-exports jdk.crypto.cryptoki/sun.security.pkcs11=ALL-UNNAMED --add-exports jdk.crypto.cryptoki/sun.security.pkcs11.wrapper=ALL-UNNAMED --add-exports java.base/sun.security.action=ALL-UNNAMED --add-exports java.base/sun.security.rsa=ALL-UNNAMED --add-opens java.base/sun.security.util=ALL-UNNAMED"
+  JAVA_OPTS="$JAVA_OPTS \
+  --add-exports jdk.crypto.cryptoki/sun.security.pkcs11=ALL-UNNAMED \
+  --add-exports jdk.crypto.cryptoki/sun.security.pkcs11.wrapper=ALL-UNNAMED \
+  --add-exports java.base/sun.security.action=ALL-UNNAMED \
+  --add-exports java.base/sun.security.rsa=ALL-UNNAMED \
+  --add-opens java.base/java.security=ALL-UNNAMED \
+  --add-opens java.base/sun.security.util=ALL-UNNAMED"
 fi
 
 "$JAVA" $JAVA_OPTS "-Djsignpdf.home=$DIR" -jar "$DIR/JSignPdf.jar" $@ 
