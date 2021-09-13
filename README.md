@@ -46,6 +46,9 @@ mvn -P release --batch-mode -Dtag=JSignPdf_2_0_0 release:prepare \
 mvn -P release --batch-mode release:perform
 ```
 
+## Translations
+Help to translate the project on Weblate platform: https://hosted.weblate.org/projects/jsignpdf/messages/
+
 ## Random
 
 ### Testing PKCS11 without a card reader
