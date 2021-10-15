@@ -34,6 +34,7 @@ import static net.sf.jsignpdf.Constants.L2TEXT_PLACEHOLDER_LOCATION;
 import static net.sf.jsignpdf.Constants.L2TEXT_PLACEHOLDER_REASON;
 import static net.sf.jsignpdf.Constants.L2TEXT_PLACEHOLDER_SIGNER;
 import static net.sf.jsignpdf.Constants.L2TEXT_PLACEHOLDER_TIMESTAMP;
+import static net.sf.jsignpdf.Constants.L2TEXT_PLACEHOLDER_CERTIFICATE;
 import static net.sf.jsignpdf.Constants.RES;
 import static net.sf.jsignpdf.Constants.LOGGER;
 
@@ -278,11 +279,16 @@ public class SignerLogic implements Runnable {
                 LOGGER.info(RES.get("console.setImageScale"));
                 sap.setImageScale(options.getBgImgScale());
                 LOGGER.info(RES.get("console.setL2Text"));
-                final String signer = PdfPKCS7.getSubjectFields((X509Certificate) chain[0]).getField("CN");
+                String signer = PdfPKCS7.getSubjectFields((X509Certificate) chain[0]).getField("CN");
+                if (StringUtils.isNotEmpty(options.getSignerName())) {
+                    signer = options.getSignerName();
+                }
+                final String certificate = PdfPKCS7.getSubjectFields((X509Certificate) chain[0]).toString();
                 final String timestamp = new SimpleDateFormat("yyyy.MM.dd HH:mm:ss z").format(sap.getSignDate().getTime());
                 if (options.getL2Text() != null) {
                     final Map<String, String> replacements = new HashMap<String, String>();
                     replacements.put(L2TEXT_PLACEHOLDER_SIGNER, StringUtils.defaultString(signer));
+                    replacements.put(L2TEXT_PLACEHOLDER_CERTIFICATE, certificate);
                     replacements.put(L2TEXT_PLACEHOLDER_TIMESTAMP, timestamp);
                     replacements.put(L2TEXT_PLACEHOLDER_LOCATION, StringUtils.defaultString(location));
                     replacements.put(L2TEXT_PLACEHOLDER_REASON, StringUtils.defaultString(reason));

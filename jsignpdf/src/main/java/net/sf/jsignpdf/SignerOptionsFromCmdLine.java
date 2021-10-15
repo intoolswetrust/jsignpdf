@@ -138,6 +138,8 @@ public class SignerOptionsFromCmdLine extends BasicSignerOptions {
             setOutPrefix(line.getOptionValue(ARG_OPREFIX));
         if (line.hasOption(ARG_OSUFFIX))
             setOutSuffix(line.getOptionValue(ARG_OSUFFIX));
+        if (line.hasOption(ARG_SIGNER_NAME))
+            setSignerName(line.getOptionValue(ARG_SIGNER_NAME));
         if (line.hasOption(ARG_REASON))
             setReason(line.getOptionValue(ARG_REASON));
         if (line.hasOption(ARG_LOCATION))
@@ -300,6 +302,8 @@ public class SignerOptionsFromCmdLine extends BasicSignerOptions {
                 .withArgName("prefix").create(ARG_OPREFIX));
         OPTS.addOption(OptionBuilder.withLongOpt(ARG_OSUFFIX_LONG).withDescription(RES.get("hlp.outSuffix")).hasArg()
                 .withArgName("suffix").create(ARG_OSUFFIX));
+        OPTS.addOption(OptionBuilder.withLongOpt(ARG_SIGNER_NAME_LONG).withDescription(RES.get("hlp.signerName")).hasArg()
+                .withArgName("signer").create(ARG_SIGNER_NAME));
         OPTS.addOption(OptionBuilder.withLongOpt(ARG_REASON_LONG).withDescription(RES.get("hlp.reason")).hasArg()
                 .withArgName("reason").create(ARG_REASON));
         OPTS.addOption(OptionBuilder.withLongOpt(ARG_LOCATION_LONG).withDescription(RES.get("hlp.location")).hasArg()
