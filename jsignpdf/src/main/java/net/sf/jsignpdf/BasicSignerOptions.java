@@ -67,6 +67,7 @@ public class BasicSignerOptions {
     private char[] keyPasswd;
     private String inFile;
     private String outFile;
+    private String signerName;
     private String reason;
     private String location;
     private String contact;
@@ -413,6 +414,14 @@ public class BasicSignerOptions {
 
     public void setOutFile(final String outFile) {
         this.outFile = outFile;
+    }
+
+    public String getSignerName() {
+        return signerName;
+    }
+
+    public void setSignerName(final String signerName) {
+        this.signerName = signerName;
     }
 
     public String getReason() {

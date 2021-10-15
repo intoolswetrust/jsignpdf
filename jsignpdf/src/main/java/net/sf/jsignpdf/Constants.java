@@ -113,6 +113,7 @@ public class Constants {
     public static final String L2TEXT_FONT_PATH = "/net/sf/jsignpdf/fonts/DejaVuSans.ttf";
     public static final String L2TEXT_FONT_NAME = "DejaVuSans.ttf";
 
+    public static final String L2TEXT_PLACEHOLDER_CERTIFICATE = "certificate";
     public static final String L2TEXT_PLACEHOLDER_TIMESTAMP = "timestamp";
     public static final String L2TEXT_PLACEHOLDER_SIGNER = "signer";
     public static final String L2TEXT_PLACEHOLDER_LOCATION = "location";
@@ -303,6 +304,9 @@ public class Constants {
 
     public static final String ARG_OSUFFIX = "os";
     public static final String ARG_OSUFFIX_LONG = "out-suffix";
+
+    public static final String ARG_SIGNER_NAME = "sn";
+    public static final String ARG_SIGNER_NAME_LONG = "signer-name";
 
     public static final String ARG_REASON = "r";
     public static final String ARG_REASON_LONG = "reason";
