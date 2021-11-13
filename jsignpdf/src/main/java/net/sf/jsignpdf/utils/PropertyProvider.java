@@ -38,7 +38,6 @@ import java.io.InputStream;
 import java.util.Properties;
 import java.util.logging.Level;
 
-import net.sf.jsignpdf.Constants;
 
 import org.apache.commons.lang3.StringUtils;
 
@@ -56,39 +55,12 @@ public class PropertyProvider {
     public static final String NS_NULL_VALUE = "$$NULL$$";
 
     /**
-     * Unchecked exception used in PropertyProviders check.
-     *
-     * @author Josef Cacek
-     */
-    public static class ProperyProviderException extends RuntimeException {
-        private static final long serialVersionUID = 1L;
-
-        public ProperyProviderException() {
-            super();
-        }
-
-        public ProperyProviderException(String aMessage) {
-            super(aMessage);
-        }
-
-        public ProperyProviderException(Throwable aCause) {
-            super(aCause);
-        }
-
-        public ProperyProviderException(String aMessage, Throwable aCause) {
-            super(aMessage, aCause);
-        }
-    }
-
-    /**
      * <code>PROPERTY_FILE</code> contains default filename for property file.
      */
-    public static final String PROPERTY_FILE = Constants.USER_HOME + "/" + Constants.PROPERTIES_FILE;
+    public static final String PROPERTY_FILE = System.getProperty("user.home") + "/.JSignPdf";
 
-    /**
-     * Singleton instance
-     */
-    private static PropertyProvider provider = new PropertyProvider();
+    private static final File PROPERTY_FILE_FILE = new File(PROPERTY_FILE);
+
     private Properties properties;
 
     /**
@@ -96,11 +68,14 @@ public class PropertyProvider {
      */
     protected PropertyProvider() {
         properties = new Properties();
-        try {
-            loadDefault();
-        } catch (ProperyProviderException e) {
-            // default file probably doesn't exist
-            LOGGER.log(Level.WARNING, "", e);
+        if (PROPERTY_FILE_FILE.isFile()) {
+            try {
+                loadDefault();
+            } catch (ProperyProviderException e) {
+                LOGGER.log(Level.WARNING, "", e);
+            }
+        } else {
+            LOGGER.fine("Default property file doesn't exists.");
         }
     }
 
@@ -111,7 +86,7 @@ public class PropertyProvider {
      * @see PropertyProvider#PROPERTY_FILE
      */
     public static PropertyProvider getInstance() {
-        return provider;
+        return InstanceHolder.INSTANCE;
     }
 
     /**
@@ -460,6 +435,35 @@ public class PropertyProvider {
     public String getNotEmptyProperty(String aKey, String aDefault) {
         final String tmpVal = properties.getProperty(aKey);
         return StringUtils.isEmpty(tmpVal) ? aDefault : tmpVal;
+    }
+
+    private static class InstanceHolder {
+        static final PropertyProvider INSTANCE = new PropertyProvider();
+    }
+
+    /**
+     * Unchecked exception used in PropertyProviders check.
+     *
+     * @author Josef Cacek
+     */
+    public static class ProperyProviderException extends RuntimeException {
+        private static final long serialVersionUID = 1L;
+
+        public ProperyProviderException() {
+            super();
+        }
+
+        public ProperyProviderException(String aMessage) {
+            super(aMessage);
+        }
+
+        public ProperyProviderException(Throwable aCause) {
+            super(aCause);
+        }
+
+        public ProperyProviderException(String aMessage, Throwable aCause) {
+            super(aMessage, aCause);
+        }
     }
 
 }
