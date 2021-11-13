@@ -42,7 +42,8 @@ echo "WINVERSION=${WINVERSION}"
 TARGET=${BUILDDIR}/jsignpdf
 mv "${BUILDDIR}/${DISTNAME}" ${TARGET}
 
-cp -r /opt/jre64 ${TARGET}/jre
+cp -r /opt/jre{32,64} ${TARGET}/
+ls -al ${TARGET}
 
 # Use Launch4j as the ant task because if used directly it fails to expand variables properly
 ant -f /mnt/distribution/windows/ant-build-create-launchers.xml \

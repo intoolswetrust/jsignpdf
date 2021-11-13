@@ -1,5 +1,12 @@
 [Files]
-Source: {#DistDir}\*; DestDir: {app}; Flags: recursesubdirs
+; Place all x64 files here
+Source: "{#DistDir}\jre64\*"; DestDir: "{app}\jre"; Flags: recursesubdirs; Check: Is64BitInstallMode
+
+; Place all x86 files here, first one should be marked 'solidbreak'
+Source: "{#DistDir}\jre32\*"; DestDir: "{app}\jre"; Flags: recursesubdirs solidbreak; Check: not Is64BitInstallMode;
+
+; Place all common files here, first one should be marked 'solidbreak'
+Source: "{#DistDir}\*"; Excludes: "jre32,jre64"; DestDir: "{app}"; Flags: recursesubdirs solidbreak
 
 [Setup]
 AppName={#MyAppName}
@@ -19,7 +26,6 @@ OutputDir={#OutputDir}
 ;WizardStyle=modern
 Compression=lzma2
 SolidCompression=yes
-ArchitecturesAllowed=x64
 ArchitecturesInstallIn64BitMode=x64
 UninstallDisplayIcon={app}\JSignPdf.exe
 
