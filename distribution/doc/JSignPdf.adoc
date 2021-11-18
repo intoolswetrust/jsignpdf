@@ -259,13 +259,6 @@ The content depends on your driver, you can try to start with a simple 2 lines: 
 name=Test
 library=/path/to/your/PKCSDriver.so
 ----
-+
-If it doesn't work, try to add
-+
-[source]
-----
-slotIndex=1
-----
 . Try to run JSignPdf with PKCS11 debug enabled:
 
 [source]
@@ -274,6 +267,23 @@ java -Djava.security.debug=pkcs11keystore \
      -Djava.security.debug=sunpkcs11 \
      -jar JSignPdf.jar
 ----
+
+
+If it doesn't work, try to add parameter +slot+ or +slotListIndex+ into +pkcs11.cfg+ file, e.g.:
+[source]
+----
+name=Test
+library=/path/to/your/PKCSDriver.so
+slot=2
+----
+or
+[source]
+----
+name=Test
+library=/path/to/your/PKCSDriver.so
+slotListIndex=1
+----
+Value used for +slot+ or +slotListIndex+ depends on how many certificates you have installed.
 
 If the PKCS11 keystore type works properly in the GUI and you can use the certificate on your token, you're ready to use it also in the batch mode.
 
