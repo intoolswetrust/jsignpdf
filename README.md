@@ -5,6 +5,9 @@ Project home-page: [jsignpdf.sourceforge.net](http://jsignpdf.sourceforge.net)
 JSignPdf is a Java application which adds digital signatures to PDF documents. 
 The application uses the OpenPDF library for PDF manipulations.
 
+## Translations
+Help to translate the project on Weblate platform: https://hosted.weblate.org/projects/jsignpdf/messages/
+
 ## Build
 
 ### ZIP distribution
@@ -45,10 +48,18 @@ mvn -P release --batch-mode -Dtag=JSignPdf_2_0_0 release:prepare \
                  -DdevelopmentVersion=2.1.0-SNAPSHOT
 
 mvn -P release --batch-mode release:perform
-```
 
-## Translations
-Help to translate the project on Weblate platform: https://hosted.weblate.org/projects/jsignpdf/messages/
+# and build the Windows installers too
+cd target/checkout
+docker pull kwart/innosetup
+docker run -it --rm -v "$(pwd):/mnt" \
+  -u $(id -u):$(id -g) kwart/innosetup \
+  /mnt/distribution/windows/create-jsignpdf-installer.sh
+
+# copy the bits to a new subdirectory in sftp://<user>@frs.sourceforge.net/home/frs/project/jsignpdf
+# update version in sftp://<user>@frs.sourceforge.net/home/project-web/jsignpdf/htdocs
+
+```
 
 ## Random
 
