@@ -1,4 +1,4 @@
-# JSignPDF
+# JSignPdf
 
 Project home-page: [jsignpdf.sourceforge.net](http://jsignpdf.sourceforge.net)
 
