@@ -23,6 +23,7 @@ Resulting bits are located in the `distribution/target`
 ### Windows installer
 
 ```bash
+docker pull kwart/innosetup
 docker run -it --rm -v "$(pwd):/mnt" \
   -u $(id -u):$(id -g) kwart/innosetup \
   /mnt/distribution/windows/create-jsignpdf-installer.sh
