@@ -1,3 +1,11 @@
+Version 2.1.0
+-------------
+  * Extended L2 text options with DN (${certificate}) and custom signer name (-sn, --signer-name)
+  * Drag&drop and output filename suggestion
+  * Spanish and Norwegian translations (through Weblate)
+  * Fixed ClassCastException in OpenPDF
+  * Updated project dependencies
+
 Version 2.0.0
 -------------
   * Added JSignPKCS11 security provider

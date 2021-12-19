@@ -1,3 +1,22 @@
+2021-12-19 Josef Cacek
+  * Fixed ClassCastException in OpenPDF
+  * Windows installer contains both 64-bit and 32-bit Java versions
+
+2021-12-19 Marcos Alvarado Trasmonte
+  * Spanish translation through Weblate
+
+2021-12-19 Allan Nordhøy
+  * Norwegian Bokmål translation through Weblate
+
+2021-11-21 Miloslav Raus
+  * Drag&drop and output filename suggestion
+
+2021-11-13 Josef Cacek
+  * Add x86 Java runtime to the Windows installer (so both 32b and 64b JREs are included)
+
+2021-10-15 Jesús Alonso Abad
+* Extended L2 text options with DN (${certificate}) and custom signer name (-sn, --signer-name)
+
 2021-08-08 Josef Cacek
   * Project moved to a new Github organization: https://github.com/intoolswetrust/
   * The log4j dependency was remove and java.util.logging is used instead
