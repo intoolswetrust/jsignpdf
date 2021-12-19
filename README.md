@@ -1,5 +1,7 @@
 # JSignPdf
 
+[![Download JSignPdf](https://img.shields.io/sourceforge/dm/jsignpdf.svg)](https://sourceforge.net/projects/jsignpdf/files/latest/download)
+
 Project home-page: [jsignpdf.sourceforge.net](http://jsignpdf.sourceforge.net)
 
 JSignPdf is a Java application which adds digital signatures to PDF documents. 
