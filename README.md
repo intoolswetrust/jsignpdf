@@ -12,12 +12,7 @@ Help to translate the project on Weblate platform: https://hosted.weblate.org/pr
 
 ## Build
 
-### ZIP distribution
-
-* update files in `docs`:
-  * ChangeLog.txt
-  * ReleaseNotes.txt
-* build the `jsignpdf`
+Use Apache Maven to build the project:
 
 ```bash
 mvn clean install
@@ -36,13 +31,18 @@ docker run -it --rm -v "$(pwd):/mnt" \
 
 ## Deploy/Release
 
-Deploy snapshots
+### Deploy snapshots
 
 ```
 mvn clean install deploy
 ```
 
-Release
+### Release
+
+* update files in `docs`:
+  * ChangeLog.txt
+  * ReleaseNotes.txt
+* build the `jsignpdf`
 
 ```bash
 mvn -P release --batch-mode -Dtag=JSignPdf_2_0_0 release:prepare \
@@ -66,6 +66,8 @@ docker run -it --rm -v "$(pwd):/mnt" \
 ## Random
 
 ### Testing PKCS11 without a card reader
+
+*Note: This only works with PKCS11 keystore type. The JSignPKCS11 doesn't support the NSS keystores!*
 
 Use NSS keystore
 
