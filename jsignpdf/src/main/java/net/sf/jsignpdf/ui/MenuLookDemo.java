@@ -9,6 +9,9 @@ import javax.swing.JRadioButtonMenuItem;
 import javax.swing.ButtonGroup;
 import javax.swing.JMenuBar;
 import javax.swing.KeyStroke;
+
+import net.sf.jsignpdf.SignerFileChooser;
+
 import javax.swing.ImageIcon;
 
 import javax.swing.JPanel;
@@ -44,13 +47,11 @@ public class MenuLookDemo {
         menuBar.add(menu);
 
         //a group of JMenuItems
-        menuItem = new JMenuItem("Open",
+        menuItem = new JMenuItem("Open PDF",
                                  KeyEvent.VK_O);
         //menuItem.setMnemonic(KeyEvent.VK_O); //used constructor instead
         menuItem.setAccelerator(KeyStroke.getKeyStroke(
                 KeyEvent.VK_O, ActionEvent.CTRL_MASK));
-        menuItem.getAccessibleContext().setAccessibleDescription(
-                "This doesn't really do anything");
         menu.add(menuItem);
 
 
@@ -106,6 +107,7 @@ public class MenuLookDemo {
      * event-dispatching thread.
      */
     private static void createAndShowGUI() {
+
         //Create and set up the window.
         JFrame frame = new JFrame("MenuLookDemo");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);

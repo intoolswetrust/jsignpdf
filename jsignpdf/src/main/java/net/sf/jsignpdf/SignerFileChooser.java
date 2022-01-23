@@ -3,19 +3,19 @@
  * Version 1.1 (the "License"); you may not use this file except in
  * compliance with the License. You may obtain a copy of the License at
  * http://www.mozilla.org/MPL/
- * 
+ *
  * Software distributed under the License is distributed on an "AS IS"
  * basis, WITHOUT WARRANTY OF ANY KIND, either express or implied. See the
  * License for the specific language governing rights and limitations
  * under the License.
- * 
+ *
  * The Original Code is 'JSignPdf, a free application for PDF signing'.
- * 
+ *
  * The Initial Developer of the Original Code is Josef Cacek.
  * Portions created by Josef Cacek are Copyright (C) Josef Cacek. All Rights Reserved.
- * 
+ *
  * Contributor(s): Josef Cacek.
- * 
+ *
  * Alternatively, the contents of this file may be used under the terms
  * of the GNU Lesser General Public License, version 2.1 (the  "LGPL License"), in which case the
  * provisions of LGPL License are applicable instead of those
@@ -32,6 +32,7 @@ package net.sf.jsignpdf;
 import static net.sf.jsignpdf.Constants.RES;
 
 import java.io.File;
+import java.util.function.Consumer;
 
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
@@ -41,7 +42,7 @@ import javax.swing.plaf.basic.BasicFileChooserUI;
 
 /**
  * Improved JFileChooser. It contains some small bug-fixes.
- * 
+ *
  * @author Josef Cacek
  */
 public class SignerFileChooser extends JFileChooser {
@@ -52,10 +53,12 @@ public class SignerFileChooser extends JFileChooser {
      * File filter for PDF files
      */
     public static final FileFilter FILEFILTER_PDF = new FileFilter() {
+        @Override
         public boolean accept(File f) {
             return f.isDirectory() || f.getName().toLowerCase().endsWith(".pdf");
         }
 
+        @Override
         public String getDescription() {
             return RES.get("filefilter.pdf");
         }
@@ -63,7 +66,7 @@ public class SignerFileChooser extends JFileChooser {
 
     /**
      * Shows rewrite confirmation dialog for SAVE_DIALOGs, when the selected file already exists.
-     * 
+     *
      * @see javax.swing.JFileChooser#approveSelection()
      */
     @Override
@@ -82,7 +85,7 @@ public class SignerFileChooser extends JFileChooser {
 
     /**
      * Shows question dialog "File exists. Overwrite?"
-     * 
+     *
      * @param file file
      * @return
      */
@@ -94,7 +97,7 @@ public class SignerFileChooser extends JFileChooser {
 
     /**
      * Clears file name when null file is provided. See http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=4893572
-     * 
+     *
      * @see javax.swing.JFileChooser#setSelectedFile(java.io.File)
      */
     @Override
@@ -110,7 +113,7 @@ public class SignerFileChooser extends JFileChooser {
 
     /**
      * Displays file chooser dialog of given type and with givet FileFilter.
-     * 
+     *
      * @param aFileField assigned textfield
      * @param aFilter filefilter
      * @param aType dialog type (SAVE_DIALOG, OPEN_DIALOG)
@@ -130,6 +133,24 @@ public class SignerFileChooser extends JFileChooser {
         }
         if (JFileChooser.APPROVE_OPTION == showDialog(this, null)) {
             aFileField.setText(getSelectedFile().getAbsolutePath());
+        }
+    }
+
+    /**
+     * Displays file chooser dialog of given type and with givet FileFilter.
+     *
+     * @param aType dialog type (SAVE_DIALOG, OPEN_DIALOG)
+     * @param aFilter filefilter
+     */
+    public void showFileChooser(final FileFilter aFilter, final int aType, Consumer<File> actionOnApprove) {
+        setDialogType(aType);
+        resetChoosableFileFilters();
+        if (aFilter != null) {
+            setFileFilter(aFilter);
+        }
+//        setSelectedFile(null);
+        if (JFileChooser.APPROVE_OPTION == showDialog(this, null)) {
+            actionOnApprove.accept(getSelectedFile());
         }
     }
 }

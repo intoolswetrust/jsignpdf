@@ -42,6 +42,7 @@ import java.util.ResourceBundle;
 
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
+import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JMenu;
@@ -55,6 +56,7 @@ import javax.swing.KeyStroke;
 import javax.swing.UIManager;
 
 import net.sf.jsignpdf.Constants;
+import net.sf.jsignpdf.SignerFileChooser;
 import net.sf.jsignpdf.preview.SelectionImage;
 import net.sf.jsignpdf.utils.ResourceProvider;
 
@@ -63,6 +65,9 @@ public class MainWindow {
     private SelectionImage previewImage;
     private JPanel settingsPane;
     private int settingsRow;
+
+    private SignerFileChooser fc = new SignerFileChooser();
+
 
     private javax.swing.JComboBox cbAlias;
     private javax.swing.JComboBox cbCertLevel;
@@ -139,6 +144,7 @@ public class MainWindow {
         // menuItem.setMnemonic(KeyEvent.VK_O); //used constructor instead
         menuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_O, ActionEvent.CTRL_MASK));
         menuItem.getAccessibleContext().setAccessibleDescription("This doesn't really do anything");
+        menuItem.addActionListener(e->fc.showFileChooser(JFileChooser.OPEN_DIALOG, SignerFileChooser.FILEFILTER_PDF, file->openFile(file)));
         menu.add(menuItem);
 
         menuItem = new JMenuItem("Generate test keystore", KeyEvent.VK_G);
