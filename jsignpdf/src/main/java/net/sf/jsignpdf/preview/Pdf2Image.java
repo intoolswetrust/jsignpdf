@@ -38,6 +38,7 @@ import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
+import java.util.Objects;
 
 import net.sf.jsignpdf.BasicSignerOptions;
 import net.sf.jsignpdf.Constants;
@@ -73,9 +74,7 @@ public class Pdf2Image {
      * @param anOpts
      */
     public Pdf2Image(BasicSignerOptions anOpts) {
-        if (anOpts == null)
-            throw new NullPointerException("Options have to be not-null");
-        options = anOpts;
+        options = Objects.requireNonNull(anOpts, "Options have to be provided");
     }
 
     /**

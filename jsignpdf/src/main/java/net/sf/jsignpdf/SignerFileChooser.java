@@ -139,8 +139,8 @@ public class SignerFileChooser extends JFileChooser {
     /**
      * Displays file chooser dialog of given type and with givet FileFilter.
      *
-     * @param aType dialog type (SAVE_DIALOG, OPEN_DIALOG)
      * @param aFilter filefilter
+     * @param aType dialog type (SAVE_DIALOG, OPEN_DIALOG)
      */
     public void showFileChooser(final FileFilter aFilter, final int aType, Consumer<File> actionOnApprove) {
         setDialogType(aType);

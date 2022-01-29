@@ -38,6 +38,8 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
+import java.awt.image.BufferedImage;
+import java.io.File;
 import java.util.ResourceBundle;
 
 import javax.swing.ImageIcon;
@@ -55,19 +57,22 @@ import javax.swing.JTextField;
 import javax.swing.KeyStroke;
 import javax.swing.UIManager;
 
+import net.sf.jsignpdf.BasicSignerOptions;
 import net.sf.jsignpdf.Constants;
 import net.sf.jsignpdf.SignerFileChooser;
+import net.sf.jsignpdf.preview.Pdf2Image;
 import net.sf.jsignpdf.preview.SelectionImage;
 import net.sf.jsignpdf.utils.ResourceProvider;
 
 public class MainWindow {
+
+    private BasicSignerOptions options = new BasicSignerOptions();
 
     private SelectionImage previewImage;
     private JPanel settingsPane;
     private int settingsRow;
 
     private SignerFileChooser fc = new SignerFileChooser();
-
 
     private javax.swing.JComboBox cbAlias;
     private javax.swing.JComboBox cbCertLevel;
@@ -144,7 +149,7 @@ public class MainWindow {
         // menuItem.setMnemonic(KeyEvent.VK_O); //used constructor instead
         menuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_O, ActionEvent.CTRL_MASK));
         menuItem.getAccessibleContext().setAccessibleDescription("This doesn't really do anything");
-        menuItem.addActionListener(e->fc.showFileChooser(JFileChooser.OPEN_DIALOG, SignerFileChooser.FILEFILTER_PDF, file->openFile(file)));
+        menuItem.addActionListener(e->fc.showFileChooser(SignerFileChooser.FILEFILTER_PDF, JFileChooser.OPEN_DIALOG, file->openFile(file)));
         menu.add(menuItem);
 
         menuItem = new JMenuItem("Generate test keystore", KeyEvent.VK_G);
@@ -176,12 +181,7 @@ public class MainWindow {
         JPanel contentPane = new JPanel(new BorderLayout());
         contentPane.setOpaque(true);
 
-        JPanel previewPanel = new JPanel(new BorderLayout());
-        previewImage = new SelectionImage();
-        previewPanel.add(previewImage, BorderLayout.CENTER);
-        JButton btnSignIt = new JButton(new ImageIcon(getClass().getResource("/net/sf/jsignpdf/signedpdf26.png")));
-        RES.setLabelAndMnemonic(btnSignIt, "gui.signIt.button");
-        previewPanel.add(btnSignIt, BorderLayout.PAGE_END);
+        JPanel previewPanel = createPreviewPanel();
 
         settingsPane = new JPanel(new GridBagLayout());
         /*
@@ -235,7 +235,9 @@ public class MainWindow {
         tfPosURX = addRowToSettingsPane(new JTextField(), "gui.vs.urx.label");
         tfPosURY = addRowToSettingsPane(new JTextField(), "gui.vs.ury.label");
 
-        JScrollPane settingsScrollPane = new JScrollPane(settingsPane);
+        JPanel jPanelStart = new JPanel(new BorderLayout());
+        jPanelStart.add(settingsPane, BorderLayout.PAGE_START);
+        JScrollPane settingsScrollPane = new JScrollPane(jPanelStart);
 
         JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, settingsScrollPane, previewPanel);
         splitPane.setOneTouchExpandable(true);
@@ -248,6 +250,38 @@ public class MainWindow {
 
         contentPane.add(splitPane, BorderLayout.CENTER);
         return contentPane;
+    }
+
+    private JPanel createPreviewPanel() {
+        JPanel previewPanel = new JPanel(new BorderLayout());
+        previewImage = new SelectionImage();
+        previewImage.setPreferredSize(new Dimension(400, 400));
+        previewPanel.add(previewImage, BorderLayout.CENTER);
+
+        JButton btnSignIt = new JButton(new ImageIcon(getClass().getResource("/net/sf/jsignpdf/signedpdf26.png")));
+        RES.setLabelAndMnemonic(btnSignIt, "gui.signIt.button");
+
+        JPanel jPanel1 = new JPanel();
+//        jPanel1.setMinimumSize(new Dimension(0, 0));
+        jPanel1.setPreferredSize(new Dimension(400, btnSignIt.getPreferredSize().height+2*12));
+        javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
+        jPanel1.setLayout(jPanel1Layout);
+        jPanel1Layout.setHorizontalGroup(
+            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
+                .addContainerGap(246, Short.MAX_VALUE)
+                .addComponent(btnSignIt)
+                .addContainerGap())
+        );
+        jPanel1Layout.setVerticalGroup(
+            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel1Layout.createSequentialGroup()
+                .addGap(12, 12, 12)
+                .addComponent(btnSignIt))
+        );
+
+        previewPanel.add(jPanel1, BorderLayout.PAGE_END);
+        return previewPanel;
     }
 
     private JTextField addRowToSettingsPane(JTextField component, String labelStr) {
@@ -290,5 +324,11 @@ public class MainWindow {
                 createAndShowGUI();
             }
         });
+    }
+
+    void openFile(File file) {
+        options.setInFile(file.getAbsolutePath());
+        BufferedImage img = new Pdf2Image(options).getImageForPage(1);
+        previewImage.setImage(img);
     }
 }
