@@ -55,7 +55,7 @@ import org.apache.commons.lang3.StringUtils;
 
 /**
  * Options dialog for Visible signature settings
- * 
+ *
  * @author Josef Cacek
  */
 public class VisibleSignatureDialog extends javax.swing.JDialog {
@@ -75,18 +75,21 @@ public class VisibleSignatureDialog extends javax.swing.JDialog {
 
     /**
      * Document listener which catches page number change.
-     * 
+     *
      * @author Josef Cacek
      */
     class PageNrDocumentListener implements DocumentListener {
+        @Override
         public void changedUpdate(DocumentEvent e) {
             pageNrChanged();
         }
 
+        @Override
         public void insertUpdate(DocumentEvent e) {
             pageNrChanged();
         }
 
+        @Override
         public void removeUpdate(DocumentEvent e) {
             pageNrChanged();
         }
@@ -103,6 +106,7 @@ public class VisibleSignatureDialog extends javax.swing.JDialog {
         translateLabels();
         tfPage.getDocument().addDocumentListener(new PageNrDocumentListener());
         selectionImage.getRelRect().addPropertyChangeListener(new PropertyChangeListener() {
+            @Override
             public void propertyChange(PropertyChangeEvent evt) {
                 if (previewListenerDisabled)
                     return;
@@ -237,7 +241,7 @@ public class VisibleSignatureDialog extends javax.swing.JDialog {
 
     /**
      * Facade for {@link ResourceProvider#setLabelAndMnemonic(JComponent, String)}
-     * 
+     *
      * @param aComponent
      * @param aKey
      */
@@ -247,7 +251,7 @@ public class VisibleSignatureDialog extends javax.swing.JDialog {
 
     /**
      * Sets tooltip with given key to given component
-     * 
+     *
      * @param aComponent component to which a tooltip should be assigned
      * @param aKey tooltip key (in resource bundle)
      */
@@ -257,7 +261,7 @@ public class VisibleSignatureDialog extends javax.swing.JDialog {
 
     /**
      * Shows/hides position bounds.
-     * 
+     *
      * @param aVisible
      * @return
      */
@@ -351,6 +355,7 @@ public class VisibleSignatureDialog extends javax.swing.JDialog {
         btnPreviewClose.setText("Close");
         btnPreviewClose.setMinimumSize(new java.awt.Dimension(50, 20));
         btnPreviewClose.addActionListener(new java.awt.event.ActionListener() {
+            @Override
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 btnPreviewCloseActionPerformed(evt);
             }
@@ -365,6 +370,7 @@ public class VisibleSignatureDialog extends javax.swing.JDialog {
         btnPrevious.setIcon(new javax.swing.ImageIcon(getClass().getResource("/net/sf/jsignpdf/prev16.png"))); // NOI18N
         btnPrevious.setMinimumSize(new java.awt.Dimension(50, 20));
         btnPrevious.addActionListener(new java.awt.event.ActionListener() {
+            @Override
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 btnPreviousActionPerformed(evt);
             }
@@ -379,6 +385,7 @@ public class VisibleSignatureDialog extends javax.swing.JDialog {
         btnNext.setIcon(new javax.swing.ImageIcon(getClass().getResource("/net/sf/jsignpdf/next16.png"))); // NOI18N
         btnNext.setMinimumSize(new java.awt.Dimension(50, 20));
         btnNext.addActionListener(new java.awt.event.ActionListener() {
+            @Override
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 btnNextActionPerformed(evt);
             }
@@ -411,7 +418,7 @@ public class VisibleSignatureDialog extends javax.swing.JDialog {
         gridBagConstraints.insets = new java.awt.Insets(10, 0, 10, 0);
         getContentPane().add(lblPosition, gridBagConstraints);
 
-        lblPage.setLabelFor(lblPage);
+        lblPage.setLabelFor(tfPage);
         lblPage.setText("Page");
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
@@ -532,6 +539,7 @@ public class VisibleSignatureDialog extends javax.swing.JDialog {
         cbDisplayMode.setMinimumSize(new java.awt.Dimension(200, 20));
         cbDisplayMode.setPreferredSize(new java.awt.Dimension(200, 20));
         cbDisplayMode.addActionListener(new java.awt.event.ActionListener() {
+            @Override
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 cbDisplayModeActionPerformed(evt);
             }
@@ -547,6 +555,7 @@ public class VisibleSignatureDialog extends javax.swing.JDialog {
         chkbL2TextDefault.setBorder(javax.swing.BorderFactory.createEmptyBorder(0, 0, 0, 0));
         chkbL2TextDefault.setMargin(new java.awt.Insets(0, 0, 0, 0));
         chkbL2TextDefault.addActionListener(new java.awt.event.ActionListener() {
+            @Override
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 chkbL2TextDefaultActionPerformed(evt);
             }
@@ -580,6 +589,7 @@ public class VisibleSignatureDialog extends javax.swing.JDialog {
         chkbL4TextDefault.setBorder(javax.swing.BorderFactory.createEmptyBorder(0, 0, 0, 0));
         chkbL4TextDefault.setMargin(new java.awt.Insets(0, 0, 0, 0));
         chkbL4TextDefault.addActionListener(new java.awt.event.ActionListener() {
+            @Override
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 chkbL4TextDefaultActionPerformed(evt);
             }
@@ -613,6 +623,7 @@ public class VisibleSignatureDialog extends javax.swing.JDialog {
         btnImgPathBrowse.setText("Browse");
         btnImgPathBrowse.setHorizontalAlignment(javax.swing.SwingConstants.LEADING);
         btnImgPathBrowse.addActionListener(new java.awt.event.ActionListener() {
+            @Override
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 btnImgPathBrowseActionPerformed(evt);
             }
@@ -646,6 +657,7 @@ public class VisibleSignatureDialog extends javax.swing.JDialog {
         btnBgImgPathBrowse.setText("Browse");
         btnBgImgPathBrowse.setHorizontalAlignment(javax.swing.SwingConstants.LEADING);
         btnBgImgPathBrowse.addActionListener(new java.awt.event.ActionListener() {
+            @Override
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 btnBgImgPathBrowseActionPerformed(evt);
             }
@@ -681,6 +693,7 @@ public class VisibleSignatureDialog extends javax.swing.JDialog {
         btnClose.setText("Close");
         btnClose.setHorizontalAlignment(javax.swing.SwingConstants.LEADING);
         btnClose.addActionListener(new java.awt.event.ActionListener() {
+            @Override
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 btnCloseActionPerformed(evt);
             }
@@ -741,6 +754,7 @@ public class VisibleSignatureDialog extends javax.swing.JDialog {
         btnPreview.setIcon(new javax.swing.ImageIcon(getClass().getResource("/net/sf/jsignpdf/preview16.png"))); // NOI18N
         btnPreview.setText("Preview");
         btnPreview.addActionListener(new java.awt.event.ActionListener() {
+            @Override
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 btnPreviewActionPerformed(evt);
             }
@@ -771,6 +785,7 @@ public class VisibleSignatureDialog extends javax.swing.JDialog {
         chkbAcro6Layers.setBorder(javax.swing.BorderFactory.createEmptyBorder(0, 0, 0, 0));
         chkbAcro6Layers.setMargin(new java.awt.Insets(0, 0, 0, 0));
         chkbAcro6Layers.addActionListener(new java.awt.event.ActionListener() {
+            @Override
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 chkbAcro6LayersActionPerformed(evt);
             }

@@ -32,16 +32,22 @@ package net.sf.jsignpdf.ui;
 import static net.sf.jsignpdf.Constants.RES;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.ComponentOrientation;
 import java.awt.Container;
 import java.awt.Dimension;
+import java.awt.FlowLayout;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
+import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.util.ResourceBundle;
 
+import javax.swing.BorderFactory;
+import javax.swing.BoxLayout;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JFileChooser;
@@ -52,9 +58,11 @@ import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.JSpinner;
 import javax.swing.JSplitPane;
 import javax.swing.JTextField;
 import javax.swing.KeyStroke;
+import javax.swing.SpinnerNumberModel;
 import javax.swing.UIManager;
 
 import net.sf.jsignpdf.BasicSignerOptions;
@@ -261,11 +269,34 @@ public class MainWindow {
         JButton btnSignIt = new JButton(new ImageIcon(getClass().getResource("/net/sf/jsignpdf/signedpdf26.png")));
         RES.setLabelAndMnemonic(btnSignIt, "gui.signIt.button");
 
-        JPanel jPanel1 = new JPanel();
+        JPanel pageEndPanel = new JPanel();
+//        pageEndPanel.setBorder(BorderFactory.createLineBorder(Color.BLACK));
+        pageEndPanel.setLayout(new BoxLayout(pageEndPanel, BoxLayout.PAGE_AXIS));
+
+        JPanel pdfNavigationPanel = new JPanel();
+//        pdfNavigationPanel.setBorder(BorderFactory.createLineBorder(Color.BLACK));
+        pdfNavigationPanel.setLayout(new FlowLayout());
+        JButton btnPrevious = new JButton();
+        btnPrevious.setIcon(new javax.swing.ImageIcon(getClass().getResource("/net/sf/jsignpdf/prev16.png"))); // NOI18N
+        btnPrevious.setMinimumSize(new java.awt.Dimension(50, 20));
+        pdfNavigationPanel.add(btnPrevious);
+        JSpinner jspPdfPage = new JSpinner();
+        JLabel lblPdfPage = new JLabel();
+        RES.setLabelAndMnemonic(lblPdfPage, "gui.vs.page.label");
+        pdfNavigationPanel.add(lblPdfPage);
+        jspPdfPage.setModel(new SpinnerNumberModel(1, 1, 10, 1));
+        pdfNavigationPanel.add(jspPdfPage);
+        JButton btnNext = new JButton();
+        btnNext.setIcon(new javax.swing.ImageIcon(getClass().getResource("/net/sf/jsignpdf/next16.png"))); // NOI18N
+        btnNext.setMinimumSize(new java.awt.Dimension(50, 20));
+        pdfNavigationPanel.add(btnNext);
+
+        JPanel signItPanel = new JPanel();
+//        signItPanel.setBorder(BorderFactory.createLineBorder(Color.BLACK));
 //        jPanel1.setMinimumSize(new Dimension(0, 0));
-        jPanel1.setPreferredSize(new Dimension(400, btnSignIt.getPreferredSize().height+2*12));
-        javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
-        jPanel1.setLayout(jPanel1Layout);
+        signItPanel.setPreferredSize(new Dimension(400, btnSignIt.getPreferredSize().height+2*12));
+        javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(signItPanel);
+        signItPanel.setLayout(jPanel1Layout);
         jPanel1Layout.setHorizontalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
@@ -280,7 +311,10 @@ public class MainWindow {
                 .addComponent(btnSignIt))
         );
 
-        previewPanel.add(jPanel1, BorderLayout.PAGE_END);
+        pageEndPanel.add(pdfNavigationPanel);
+        pageEndPanel.add(signItPanel);
+
+        previewPanel.add(pageEndPanel, BorderLayout.PAGE_END);
         return previewPanel;
     }
 
