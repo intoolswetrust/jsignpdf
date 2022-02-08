@@ -21,4 +21,4 @@ if [ "$JAVA_VERSION" -gt "8" ]; then
   --add-opens java.base/sun.security.util=ALL-UNNAMED"
 fi
 
-"$JAVA" $JAVA_OPTS "-Djsignpdf.home=$DIR" -jar "$DIR/JSignPdf.jar" $@ 
+"$JAVA" $JAVA_OPTS "-Djsignpdf.home=$DIR" -jar "$DIR/JSignPdf.jar" "$@" 
