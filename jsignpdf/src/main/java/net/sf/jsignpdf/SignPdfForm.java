@@ -514,6 +514,8 @@ public class SignPdfForm extends javax.swing.JFrame implements SignResultListene
         infoTextArea.setFont(new java.awt.Font("Courier New", 1, 10)); // NOI18N
         infoTextArea.setRows(25);
         infoTextArea.setMinimumSize(new java.awt.Dimension(200, 180));
+        infoTextArea.setLineWrap(true);
+        infoTextArea.setWrapStyleWord(true);
         infoScrollPane.setViewportView(infoTextArea);
 
         infoDialog.getContentPane().add(infoScrollPane, java.awt.BorderLayout.CENTER);

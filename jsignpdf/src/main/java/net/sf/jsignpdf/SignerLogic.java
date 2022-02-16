@@ -47,6 +47,7 @@ import java.security.PrivateKey;
 import java.security.cert.Certificate;
 import java.security.cert.X509Certificate;
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
@@ -58,6 +59,7 @@ import net.sf.jsignpdf.extcsp.CloudFoxy;
 import net.sf.jsignpdf.ssl.SSLInitializer;
 import net.sf.jsignpdf.types.HashAlgorithm;
 import net.sf.jsignpdf.types.PDFEncryption;
+import net.sf.jsignpdf.types.PdfVersion;
 import net.sf.jsignpdf.types.RenderMode;
 import net.sf.jsignpdf.types.ServerAuthentication;
 import net.sf.jsignpdf.utils.FontUtils;
@@ -179,19 +181,24 @@ public class SignerLogic implements Runnable {
 
             LOGGER.info(RES.get("console.createSignature"));
             char tmpPdfVersion = '\0'; // default version - the same as input
-            if (reader.getPdfVersion() < hashAlgorithm.getPdfVersion()) {
+            char inputPdfVersion = reader.getPdfVersion();
+            char requiredPdfVersionForGivenHash = hashAlgorithm.getPdfVersion().getCharVersion();
+            if (inputPdfVersion < requiredPdfVersionForGivenHash) {
                 // this covers also problems with visible signatures (embedded
                 // fonts) in PDF 1.2, because the minimal version
                 // for hash algorithms is 1.3 (for SHA1)
                 if (options.isAppendX()) {
                     // if we are in append mode and version should be updated
                     // then return false (not possible)
-                    LOGGER.info(RES.get("console.updateVersionNotPossibleInAppendMode"));
+                    LOGGER.info(RES.get("console.updateVersionNotPossibleInAppendModeForGivenHash",
+                            hashAlgorithm.getAlgorithmName(), hashAlgorithm.getPdfVersion().getVersionName(),
+                            PdfVersion.fromCharVersion(inputPdfVersion).getVersionName(),
+                            HashAlgorithm.valuesWithPdfVersionAsString()));
                     return false;
                 }
-                tmpPdfVersion = hashAlgorithm.getPdfVersion();
+                tmpPdfVersion = requiredPdfVersionForGivenHash;
                 LOGGER.info(RES.get("console.updateVersion",
-                        new String[] { String.valueOf(reader.getPdfVersion()), String.valueOf(tmpPdfVersion) }));
+                        new String[] { String.valueOf(inputPdfVersion), String.valueOf(tmpPdfVersion) }));
             }
 
             final PdfStamper stp = PdfStamper.createSignature(reader, fout, tmpPdfVersion, null, options.isAppendX());

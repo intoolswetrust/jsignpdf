@@ -29,50 +29,46 @@
  */
 package net.sf.jsignpdf.types;
 
-import static java.util.stream.Collectors.joining;
-import static net.sf.jsignpdf.types.PdfVersion.PDF_1_3;
-import static net.sf.jsignpdf.types.PdfVersion.PDF_1_6;
-import static net.sf.jsignpdf.types.PdfVersion.PDF_1_7;
-
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
+import com.lowagie.text.pdf.PdfWriter;
 
 /**
- * Enum of hash algorithms supported in PDF signatures.
+ * Enum of PDF versions
  * 
  * @author Josef Cacek
  */
-public enum HashAlgorithm {
-    SHA1("SHA-1", PDF_1_3), SHA256("SHA-256", PDF_1_6), SHA384("SHA-384", PDF_1_7), SHA512("SHA-512",
-            PDF_1_7), RIPEMD160("RIPEMD160", PDF_1_7);
+public enum PdfVersion {
+    PDF_1_2("PDF-1.2", PdfWriter.VERSION_1_2), PDF_1_3("PDF-1.3", PdfWriter.VERSION_1_3), PDF_1_4("PDF-1.4",
+            PdfWriter.VERSION_1_4), PDF_1_5("PDF-1.5", PdfWriter.VERSION_1_5), PDF_1_6("PDF-1.6",
+                    PdfWriter.VERSION_1_6), PDF_1_7("PDF-1.7", PdfWriter.VERSION_1_7);
 
-    private final PdfVersion pdfVersion;
-    private final String algorithmName;
+    private final String name;
+    private final char charVersion;
 
-    private HashAlgorithm(final String aName, PdfVersion aVersion) {
-        algorithmName = aName;
-        pdfVersion = aVersion;
+    private PdfVersion(final String aName, char aVersion) {
+        name = aName;
+        charVersion = aVersion;
     }
 
     /**
-     * Gets algorithm name.
+     * Gets version name.
      */
-    public String getAlgorithmName() {
-        return algorithmName;
+    public String getVersionName() {
+        return name;
     }
 
     /**
-     * Gets minimal PDF version supporting the algorithm.
+     * Gets version as char (representation in PdfReader and PdfWriter).
      */
-    public PdfVersion getPdfVersion() {
-        return pdfVersion;
+    public char getCharVersion() {
+        return charVersion;
     }
 
-    public String toStringWithPdfVersion() {
-        return algorithmName + " (" + pdfVersion.getVersionName() + ")";
-    }
-
-    public static String valuesWithPdfVersionAsString() {
-        return Stream.of(values()).map(ha -> ha.toStringWithPdfVersion()).collect(joining(", "));
+    public static PdfVersion fromCharVersion(char ver) {
+        for (PdfVersion pdfVer: PdfVersion.values()) {
+            if (pdfVer.getCharVersion() == ver) {
+                return pdfVer;
+            }
+        }
+        return null;
     }
 }
