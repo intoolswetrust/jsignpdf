@@ -18,3 +18,5 @@ target/
 .settings
 .classpath
 .project
+
+jsignpdf/conf/
