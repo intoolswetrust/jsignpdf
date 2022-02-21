@@ -260,7 +260,6 @@ public class TsaDialog extends javax.swing.JDialog {
         getContentPane().add(lblTsaUrl, gridBagConstraints);
 
         tfTsaUrl.setMinimumSize(new java.awt.Dimension(200, 20));
-        tfTsaUrl.setPreferredSize(new java.awt.Dimension(200, 20));
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
         gridBagConstraints.gridy = 1;
@@ -365,7 +364,6 @@ public class TsaDialog extends javax.swing.JDialog {
         pnlProxy.add(lblProxyHost, gridBagConstraints);
 
         tfProxyHost.setMinimumSize(new java.awt.Dimension(200, 20));
-        tfProxyHost.setPreferredSize(new java.awt.Dimension(200, 20));
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
         gridBagConstraints.gridy = 1;
@@ -388,7 +386,6 @@ public class TsaDialog extends javax.swing.JDialog {
         pnlProxy.add(lblProxyType, gridBagConstraints);
 
         cbProxyType.setMinimumSize(new java.awt.Dimension(150, 20));
-        cbProxyType.setPreferredSize(new java.awt.Dimension(150, 20));
         cbProxyType.addActionListener(new java.awt.event.ActionListener() {
             @Override
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -406,7 +403,6 @@ public class TsaDialog extends javax.swing.JDialog {
 
         spProxyPort.setModel(new javax.swing.SpinnerNumberModel(80, 0, 65535, 1));
         spProxyPort.setMinimumSize(new java.awt.Dimension(50, 18));
-        spProxyPort.setPreferredSize(new java.awt.Dimension(50, 18));
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 2;
         gridBagConstraints.gridy = 1;
@@ -454,7 +450,6 @@ public class TsaDialog extends javax.swing.JDialog {
         getContentPane().add(lblOcspUrl, gridBagConstraints);
 
         tfOcspUrl.setMinimumSize(new java.awt.Dimension(200, 20));
-        tfOcspUrl.setPreferredSize(new java.awt.Dimension(200, 20));
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
         gridBagConstraints.gridy = 8;
@@ -465,7 +460,6 @@ public class TsaDialog extends javax.swing.JDialog {
         getContentPane().add(tfOcspUrl, gridBagConstraints);
 
         cbTsaAuthn.setMinimumSize(new java.awt.Dimension(150, 20));
-        cbTsaAuthn.setPreferredSize(new java.awt.Dimension(150, 20));
         cbTsaAuthn.addActionListener(new java.awt.event.ActionListener() {
             @Override
             public void actionPerformed(java.awt.event.ActionEvent evt) {

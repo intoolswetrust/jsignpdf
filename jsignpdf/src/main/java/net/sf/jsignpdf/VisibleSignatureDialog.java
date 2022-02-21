@@ -423,7 +423,6 @@ public class VisibleSignatureDialog extends javax.swing.JDialog {
         tfPage.setHorizontalAlignment(javax.swing.JTextField.RIGHT);
         tfPage.setText("1");
         tfPage.setMinimumSize(new java.awt.Dimension(70, 20));
-        tfPage.setPreferredSize(new java.awt.Dimension(70, 20));
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
         gridBagConstraints.gridy = 1;
@@ -443,7 +442,6 @@ public class VisibleSignatureDialog extends javax.swing.JDialog {
         tfPosLLX.setHorizontalAlignment(javax.swing.JTextField.RIGHT);
         tfPosLLX.setText("0.0");
         tfPosLLX.setMinimumSize(new java.awt.Dimension(70, 20));
-        tfPosLLX.setPreferredSize(new java.awt.Dimension(70, 20));
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
         gridBagConstraints.gridy = 2;
@@ -463,7 +461,6 @@ public class VisibleSignatureDialog extends javax.swing.JDialog {
         tfPosLLY.setHorizontalAlignment(javax.swing.JTextField.RIGHT);
         tfPosLLY.setText("0.0");
         tfPosLLY.setMinimumSize(new java.awt.Dimension(70, 20));
-        tfPosLLY.setPreferredSize(new java.awt.Dimension(70, 20));
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
         gridBagConstraints.gridy = 3;
@@ -483,7 +480,6 @@ public class VisibleSignatureDialog extends javax.swing.JDialog {
         tfPosURX.setHorizontalAlignment(javax.swing.JTextField.RIGHT);
         tfPosURX.setText("100.0");
         tfPosURX.setMinimumSize(new java.awt.Dimension(70, 20));
-        tfPosURX.setPreferredSize(new java.awt.Dimension(70, 20));
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
         gridBagConstraints.gridy = 4;
@@ -503,7 +499,6 @@ public class VisibleSignatureDialog extends javax.swing.JDialog {
         tfPosURY.setHorizontalAlignment(javax.swing.JTextField.RIGHT);
         tfPosURY.setText("100.0");
         tfPosURY.setMinimumSize(new java.awt.Dimension(70, 20));
-        tfPosURY.setPreferredSize(new java.awt.Dimension(70, 20));
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
         gridBagConstraints.gridy = 5;
@@ -530,7 +525,6 @@ public class VisibleSignatureDialog extends javax.swing.JDialog {
 
         cbDisplayMode.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
         cbDisplayMode.setMinimumSize(new java.awt.Dimension(200, 20));
-        cbDisplayMode.setPreferredSize(new java.awt.Dimension(200, 20));
         cbDisplayMode.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 cbDisplayModeActionPerformed(evt);
@@ -568,7 +562,6 @@ public class VisibleSignatureDialog extends javax.swing.JDialog {
         getContentPane().add(lblL4Text, gridBagConstraints);
 
         tfL4Text.setMinimumSize(new java.awt.Dimension(200, 20));
-        tfL4Text.setPreferredSize(new java.awt.Dimension(200, 20));
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
         gridBagConstraints.gridy = 10;
@@ -601,7 +594,6 @@ public class VisibleSignatureDialog extends javax.swing.JDialog {
         getContentPane().add(lblImgPath, gridBagConstraints);
 
         tfImgPath.setMinimumSize(new java.awt.Dimension(200, 20));
-        tfImgPath.setPreferredSize(new java.awt.Dimension(200, 20));
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
         gridBagConstraints.gridy = 11;
@@ -634,7 +626,6 @@ public class VisibleSignatureDialog extends javax.swing.JDialog {
         getContentPane().add(lblBgImgPath, gridBagConstraints);
 
         tfBgImgPath.setMinimumSize(new java.awt.Dimension(200, 20));
-        tfBgImgPath.setPreferredSize(new java.awt.Dimension(200, 20));
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
         gridBagConstraints.gridy = 12;
@@ -669,7 +660,6 @@ public class VisibleSignatureDialog extends javax.swing.JDialog {
         tfBgImgScale.setHorizontalAlignment(javax.swing.JTextField.RIGHT);
         tfBgImgScale.setText("-1.0");
         tfBgImgScale.setMinimumSize(new java.awt.Dimension(70, 20));
-        tfBgImgScale.setPreferredSize(new java.awt.Dimension(70, 20));
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
         gridBagConstraints.gridy = 13;

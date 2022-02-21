@@ -653,7 +653,6 @@ public class SignPdfForm extends javax.swing.JFrame implements SignResultListene
 
         cbKeystoreType.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "PKCS#12", "JKS" }));
         cbKeystoreType.setMinimumSize(new java.awt.Dimension(150, 20));
-        cbKeystoreType.setPreferredSize(new java.awt.Dimension(150, 20));
         cbKeystoreType.addActionListener(new java.awt.event.ActionListener() {
             @Override
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -695,7 +694,6 @@ public class SignPdfForm extends javax.swing.JFrame implements SignResultListene
         getContentPane().add(btnVisibleSigSettings, gridBagConstraints);
 
         tfKeystoreFile.setMinimumSize(new java.awt.Dimension(250, 20));
-        tfKeystoreFile.setPreferredSize(new java.awt.Dimension(250, 20));
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
         gridBagConstraints.gridy = 1;
@@ -733,7 +731,6 @@ public class SignPdfForm extends javax.swing.JFrame implements SignResultListene
         getContentPane().add(lblKeystorePwd, gridBagConstraints);
 
         pfKeystorePwd.setMinimumSize(new java.awt.Dimension(150, 20));
-        pfKeystorePwd.setPreferredSize(new java.awt.Dimension(150, 20));
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
         gridBagConstraints.gridy = 2;
@@ -763,7 +760,6 @@ public class SignPdfForm extends javax.swing.JFrame implements SignResultListene
 
         cbAlias.setEditable(true);
         cbAlias.setMinimumSize(new java.awt.Dimension(150, 20));
-        cbAlias.setPreferredSize(new java.awt.Dimension(150, 20));
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
         gridBagConstraints.gridy = 3;
@@ -799,7 +795,6 @@ public class SignPdfForm extends javax.swing.JFrame implements SignResultListene
         getContentPane().add(lblKeyPwd, gridBagConstraints);
 
         pfKeyPwd.setMinimumSize(new java.awt.Dimension(150, 20));
-        pfKeyPwd.setPreferredSize(new java.awt.Dimension(150, 20));
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
         gridBagConstraints.gridy = 4;
@@ -818,7 +813,6 @@ public class SignPdfForm extends javax.swing.JFrame implements SignResultListene
         getContentPane().add(lblInPdfFile, gridBagConstraints);
 
         tfInPdfFile.setMinimumSize(new java.awt.Dimension(150, 20));
-        tfInPdfFile.setPreferredSize(new java.awt.Dimension(150, 20));
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
         gridBagConstraints.gridy = 5;
@@ -854,7 +848,6 @@ public class SignPdfForm extends javax.swing.JFrame implements SignResultListene
         getContentPane().add(lblPdfOwnerPwd, gridBagConstraints);
 
         pfPdfOwnerPwd.setMinimumSize(new java.awt.Dimension(150, 20));
-        pfPdfOwnerPwd.setPreferredSize(new java.awt.Dimension(150, 20));
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
         gridBagConstraints.gridy = 9;
@@ -873,7 +866,6 @@ public class SignPdfForm extends javax.swing.JFrame implements SignResultListene
         getContentPane().add(lblPdfUserPwd, gridBagConstraints);
 
         pfPdfUserPwd.setMinimumSize(new java.awt.Dimension(150, 20));
-        pfPdfUserPwd.setPreferredSize(new java.awt.Dimension(150, 20));
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
         gridBagConstraints.gridy = 10;
@@ -892,7 +884,6 @@ public class SignPdfForm extends javax.swing.JFrame implements SignResultListene
         getContentPane().add(lblOutPdfFile, gridBagConstraints);
 
         tfOutPdfFile.setMinimumSize(new java.awt.Dimension(150, 20));
-        tfOutPdfFile.setPreferredSize(new java.awt.Dimension(150, 20));
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
         gridBagConstraints.gridy = 11;
@@ -928,7 +919,6 @@ public class SignPdfForm extends javax.swing.JFrame implements SignResultListene
         getContentPane().add(lblReason, gridBagConstraints);
 
         tfReason.setMinimumSize(new java.awt.Dimension(150, 20));
-        tfReason.setPreferredSize(new java.awt.Dimension(150, 20));
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
         gridBagConstraints.gridy = 13;
@@ -947,7 +937,6 @@ public class SignPdfForm extends javax.swing.JFrame implements SignResultListene
         getContentPane().add(lblLocation, gridBagConstraints);
 
         tfLocation.setMinimumSize(new java.awt.Dimension(150, 20));
-        tfLocation.setPreferredSize(new java.awt.Dimension(150, 20));
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
         gridBagConstraints.gridy = 14;
@@ -966,7 +955,6 @@ public class SignPdfForm extends javax.swing.JFrame implements SignResultListene
         getContentPane().add(lblCertLevel, gridBagConstraints);
 
         cbCertLevel.setMinimumSize(new java.awt.Dimension(150, 20));
-        cbCertLevel.setPreferredSize(new java.awt.Dimension(150, 20));
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
         gridBagConstraints.gridy = 16;
@@ -1057,7 +1045,6 @@ public class SignPdfForm extends javax.swing.JFrame implements SignResultListene
         getContentPane().add(lblContact, gridBagConstraints);
 
         tfContact.setMinimumSize(new java.awt.Dimension(150, 20));
-        tfContact.setPreferredSize(new java.awt.Dimension(150, 20));
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
         gridBagConstraints.gridy = 15;
@@ -1083,7 +1070,6 @@ public class SignPdfForm extends javax.swing.JFrame implements SignResultListene
         getContentPane().add(btnTsaOcsp, gridBagConstraints);
 
         cbHashAlgorithm.setMinimumSize(new java.awt.Dimension(150, 20));
-        cbHashAlgorithm.setPreferredSize(new java.awt.Dimension(150, 20));
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
         gridBagConstraints.gridy = 17;
@@ -1111,7 +1097,6 @@ public class SignPdfForm extends javax.swing.JFrame implements SignResultListene
         getContentPane().add(lblPdfEncryption, gridBagConstraints);
 
         cbPdfEncryption.setMinimumSize(new java.awt.Dimension(150, 20));
-        cbPdfEncryption.setPreferredSize(new java.awt.Dimension(150, 20));
         cbPdfEncryption.addActionListener(new java.awt.event.ActionListener() {
             @Override
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -1136,7 +1121,6 @@ public class SignPdfForm extends javax.swing.JFrame implements SignResultListene
         getContentPane().add(lblEncCertFile, gridBagConstraints);
 
         tfEncCertFile.setMinimumSize(new java.awt.Dimension(150, 20));
-        tfEncCertFile.setPreferredSize(new java.awt.Dimension(150, 20));
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
         gridBagConstraints.gridy = 8;
