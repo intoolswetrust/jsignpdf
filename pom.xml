@@ -30,7 +30,7 @@
         <commons-io.version>2.11.0</commons-io.version>
         <commons-cli.version>1.5.0</commons-cli.version>
         <commons-lang3.version>3.12.0</commons-lang3.version>
-        <openpdf.version>1.3.27-jsign2</openpdf.version>
+        <openpdf.version>1.3.27-jsign3-SNAPSHOT</openpdf.version>
         <junit.version>4.13.2</junit.version>
     </properties>
 
@@ -195,6 +195,17 @@
             </releases>
             <snapshots>
                 <enabled>true</enabled>
+            </snapshots>
+        </repository>
+        <repository>
+            <id>lobosstudios-nexus-java-dev</id>
+            <name>Lobos Studios java-dev</name>
+            <url>https://repos.lobosstudios.com/repository/java-dev/</url>
+            <releases>
+                <enabled>true</enabled>
+            </releases>
+            <snapshots>
+                <enabled>false</enabled>
             </snapshots>
         </repository>
     </repositories>
