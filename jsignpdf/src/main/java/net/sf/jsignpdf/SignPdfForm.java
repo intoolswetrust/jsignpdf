@@ -77,18 +77,35 @@ public class SignPdfForm extends javax.swing.JFrame implements SignResultListene
     protected final PropertyProvider props = PropertyProvider.getInstance();
 
     private boolean autoclose = false;
-    private BasicSignerOptions options = new BasicSignerOptions();
-    private SignerLogic signerLogic = new SignerLogic(options);
-    private VisibleSignatureDialog vsDialog = new VisibleSignatureDialog(this, true, options, fc);
-    private TsaDialog tsaDialog = new TsaDialog(this, true, options);
+    private BasicSignerOptions options;
+    private SignerLogic signerLogic;
+    private VisibleSignatureDialog vsDialog;
+    private TsaDialog tsaDialog;
 
-    /** Creates new form SignPdfForm */
-    /**
-     * @param aCloseOperation
-     */
     public SignPdfForm(int aCloseOperation) {
+        this(aCloseOperation, null);
+    }
+
+    public SignPdfForm(int aCloseOperation, BasicSignerOptions options) {
         initComponents();
+
+        if (options == null) {
+            options = new BasicSignerOptions();
+        }
+
+        this.options = options;
+
+        signerLogic = new SignerLogic(options);
+        vsDialog = new VisibleSignatureDialog(this, true, options, fc);
+        tsaDialog = new TsaDialog(this, true, options);
+
         options.loadOptions();
+        try {
+            options.loadCmdLine();
+        } catch (Exception e) {
+            e.printStackTrace();
+            LOGGER.fine(e.getMessage());
+        }
         translateLabels();
 
         setDefaultCloseOperation(aCloseOperation);

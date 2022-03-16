@@ -410,6 +410,8 @@ public class Constants {
     public static final String ARG_PROXY_HOST_LONG = "proxy-host";
     public static final String ARG_PROXY_PORT_LONG = "proxy-port";
 
+    public static final String ARG_GUI = "gui";
+
     public static final Set<String> SUPPORTED_CRITICAL_EXTENSION_OIDS;
 
     static {

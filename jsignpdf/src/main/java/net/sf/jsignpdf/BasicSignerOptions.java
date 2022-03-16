@@ -3,19 +3,19 @@
  * Version 1.1 (the "License"); you may not use this file except in
  * compliance with the License. You may obtain a copy of the License at
  * http://www.mozilla.org/MPL/
- * 
+ *
  * Software distributed under the License is distributed on an "AS IS"
  * basis, WITHOUT WARRANTY OF ANY KIND, either express or implied. See the
  * License for the specific language governing rights and limitations
  * under the License.
- * 
+ *
  * The Original Code is 'JSignPdf, a free application for PDF signing'.
- * 
+ *
  * The Initial Developer of the Original Code is Josef Cacek.
  * Portions created by Josef Cacek are Copyright (C) Josef Cacek. All Rights Reserved.
- * 
+ *
  * Contributor(s): Josef Cacek.
- * 
+ *
  * Alternatively, the contents of this file may be used under the terms
  * of the GNU Lesser General Public License, version 2.1 (the  "LGPL License"), in which case the
  * provisions of LGPL License are applicable instead of those
@@ -41,12 +41,13 @@ import net.sf.jsignpdf.types.RenderMode;
 import net.sf.jsignpdf.types.ServerAuthentication;
 import net.sf.jsignpdf.utils.PropertyProvider;
 
+import org.apache.commons.cli.ParseException;
 import org.apache.commons.lang3.StringUtils;
 import org.bouncycastle.crypto.CryptoException;
 
 /**
  * Options for PDF signer.
- * 
+ *
  * @author Josef Cacek
  */
 public class BasicSignerOptions {
@@ -129,6 +130,8 @@ public class BasicSignerOptions {
     private Proxy.Type proxyType;
     private String proxyHost;
     private int proxyPort;
+
+    private String[] cmdLine;
 
     /**
      * Loads options from PropertyProvider
@@ -308,9 +311,12 @@ public class BasicSignerOptions {
         }
     }
 
+    public void loadCmdLine() throws Exception {
+    }
+
     /**
      * Fires event listener
-     * 
+     *
      * @param aResult
      * @see #getListener()
      */
@@ -322,7 +328,7 @@ public class BasicSignerOptions {
 
     /**
      * Converts array of characters to String. If array is null, empty string is returned
-     * 
+     *
      * @param aCharArr char array
      * @return not null string
      */
@@ -390,7 +396,7 @@ public class BasicSignerOptions {
 
     /**
      * Returns output file name if filled or input file name with default output suffix ("_signed")
-     * 
+     *
      * @return
      */
     public String getOutFileX() {
@@ -839,7 +845,7 @@ public class BasicSignerOptions {
 
     /**
      * Returns decrypted property
-     * 
+     *
      * @param aProperty
      * @return
      */
@@ -854,7 +860,7 @@ public class BasicSignerOptions {
 
     /**
      * Sets encrypted property
-     * 
+     *
      * @param aProperty
      * @return
      */
@@ -1173,7 +1179,7 @@ public class BasicSignerOptions {
 
     /**
      * Creates and returns Proxy object, which should be used for URL connections in JSignPdf.
-     * 
+     *
      * @return initialized Proxy object.
      */
     public Proxy createProxy() {
@@ -1183,4 +1189,13 @@ public class BasicSignerOptions {
         }
         return tmpResult;
     }
+
+    protected String[] getCmdLine() {
+        return cmdLine;
+    }
+
+    protected void setCmdLine(String[] cmdLine) {
+        this.cmdLine = cmdLine;
+    }
+
 }

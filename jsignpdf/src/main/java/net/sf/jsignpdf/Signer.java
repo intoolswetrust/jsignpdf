@@ -104,19 +104,24 @@ public class Signer {
         PKCS11Utils.registerProviders(ConfigProvider.getInstance().getProperty("pkcs11config.path"));
 
         traceInfo();
+        boolean showGui = true;
 
         if (tmpOpts != null) {
+            showGui = false;
             if (tmpOpts.isPrintVersion()) {
                 System.out.println("JSignPdf version " + VERSION);
+                return;
             }
             if (tmpOpts.isPrintHelp()) {
                 printHelp();
+                return;
             }
             if (tmpOpts.isListKeyStores()) {
                 LOGGER.info(RES.get("console.keystores"));
                 for (String tmpKsType : KeyStoreUtils.getKeyStores()) {
                     System.out.println(tmpKsType);
                 }
+                return;
             }
             if (tmpOpts.isListKeys()) {
                 final String[] tmpKeyAliases = KeyStoreUtils.getKeyAliases(tmpOpts);
@@ -125,10 +130,14 @@ public class Signer {
                 for (String tmpCert : tmpKeyAliases) {
                     System.out.println(tmpCert);
                 }
+                return;
             }
-            if (ArrayUtils.isNotEmpty(tmpOpts.getFiles())
+            if (tmpOpts.isGui()) {
+                showGui = true;
+            } else if (ArrayUtils.isNotEmpty(tmpOpts.getFiles())
                     || (!StringUtils.isEmpty(tmpOpts.getInFile()) && !StringUtils.isEmpty(tmpOpts.getOutFile()))) {
                 signFiles(tmpOpts);
+                exit(0);
             } else {
                 final boolean tmpCommand = tmpOpts.isPrintVersion() || tmpOpts.isPrintHelp() || tmpOpts.isListKeyStores()
                         || tmpOpts.isListKeys();
@@ -137,15 +146,17 @@ public class Signer {
                     printHelp();
                     exit(EXIT_CODE_NO_COMMAND);
                 }
+                exit(0);
             }
-            exit(0);
-        } else {
+        }
+
+        if (showGui) {
             try {
                 UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
             } catch (Exception e) {
                 System.err.println("Can't set Look&Feel.");
             }
-            SignPdfForm tmpForm = new SignPdfForm(WindowConstants.EXIT_ON_CLOSE);
+            SignPdfForm tmpForm = new SignPdfForm(WindowConstants.EXIT_ON_CLOSE, tmpOpts);
             tmpForm.pack();
             GuiUtils.center(tmpForm);
             tmpForm.setVisible(true);
@@ -252,8 +263,9 @@ public class Signer {
      * @param opts
      */
     private static void parseCommandLine(String[] args, final SignerOptionsFromCmdLine opts) {
+        opts.setCmdLine(args);
         try {
-            opts.loadCmdLine(args);
+            opts.loadCmdLine();
         } catch (ParseException exp) {
             System.err.println("Unable to parse command line (Use -h for the help)\n" + exp.getMessage());
             exit(EXIT_CODE_PARSE_ERR);

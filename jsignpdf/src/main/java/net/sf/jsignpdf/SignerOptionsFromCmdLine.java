@@ -48,6 +48,7 @@ import org.apache.commons.cli.DefaultParser;
 import org.apache.commons.cli.OptionBuilder;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
+import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 
 /**
@@ -74,20 +75,22 @@ public class SignerOptionsFromCmdLine extends BasicSignerOptions {
     private boolean listKeyStores;
     private boolean listKeys;
 
+    private boolean gui;
+
     /**
      * Parses options provided as command line arguments.
-     *
-     * @param anArgs
      * @throws ParseException
      */
-    public void loadCmdLine(final String[] anArgs) throws ParseException {
-        if (anArgs == null)
+    @Override
+    public void loadCmdLine() throws ParseException {
+        String[] cmdLine = getCmdLine();
+        if (cmdLine == null)
             return;
 
         // create the command line parser
         final CommandLineParser parser = new DefaultParser();
         // parse the command line arguments
-        final CommandLine line = parser.parse(OPTS, anArgs);
+        final CommandLine line = parser.parse(OPTS, cmdLine);
 
         if (line.hasOption(ARG_LOADPROPS_FILE)) {
             if (!line.hasOption(ARG_LOADPROPS)) {
@@ -236,6 +239,11 @@ public class SignerOptionsFromCmdLine extends BasicSignerOptions {
             setProxyHost(line.getOptionValue(ARG_PROXY_HOST_LONG));
         if (line.hasOption(ARG_PROXY_PORT_LONG))
             setProxyPort(getInt(line.getParsedOptionValue(ARG_PROXY_PORT_LONG), getProxyPort()));
+
+        setGui(line.hasOption(ARG_GUI));
+        if (ArrayUtils.isNotEmpty(files)) {
+            setInFile(files[0]);
+        }
 
     }
 
@@ -423,6 +431,7 @@ public class SignerOptionsFromCmdLine extends BasicSignerOptions {
         OPTS.addOption(OptionBuilder.withDescription(RES.get("hlp.proxyPort", String.valueOf(DEFVAL_PROXY_PORT)))
                 .withLongOpt(ARG_PROXY_PORT_LONG).hasArg().withType(Number.class).withArgName("port").create());
 
+        OPTS.addOption(OptionBuilder.withLongOpt(ARG_GUI).withDescription(RES.get("hlp.gui")).create());
     }
 
     /**
@@ -570,6 +579,14 @@ public class SignerOptionsFromCmdLine extends BasicSignerOptions {
      */
     public void setOutPath(String outPath) {
         this.outPath = outPath;
+    }
+
+    public boolean isGui() {
+        return gui;
+    }
+
+    public void setGui(boolean gui) {
+        this.gui = gui;
     }
 
 }
