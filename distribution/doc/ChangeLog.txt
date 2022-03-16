@@ -1,3 +1,50 @@
+2022-03-16: [maven-release-plugin] prepare release JSignPdf_2_2_0
+2022-03-16: Add --gui argument to allow partial settings from the command line arguments
+2022-03-16: Bump OpenPDF version (custom build with EC support)
+2022-03-12: Bump maven-dependency-plugin from 3.2.0 to 3.3.0
+2022-03-06: Try ECDSA support
+2022-02-21: Don't use setPreferredSize as it breaks displaying on GNOME environments (GTKLookAndFeel)
+2022-02-20: Use jsign-pkcs11 version 1.1.0 (with the QPIN support)
+2022-02-20: Merge pull request #93 from weblate/weblate-jsignpdf-messages
+2022-02-20: Translated using Weblate (Czech)
+2022-02-20: Revert "Bump nexus-staging-maven-plugin from 1.6.8 to 1.6.10"
+2022-02-20: Use the newer snapshot repository (s01)
+2022-02-20: test with evaluate JSignPKCS11 SNAPSHOT version
+2022-02-17: Merge pull request #92 from weblate/weblate-jsignpdf-messages
+2022-02-16: Translated using Weblate (Czech)
+2022-02-16: Update translation files
+2022-02-16: Improve error message when PDF version change is not possible as the append mode is used.
+2022-02-15: Bump nexus-staging-maven-plugin from 1.6.8 to 1.6.10
+2022-02-13: Bump maven-javadoc-plugin from 3.3.1 to 3.3.2
+2022-02-12: remove space
+2022-02-08: Fix providing jsignpdf.sh arguments
+2022-01-31: Bump asciidoctor-maven-plugin from 2.2.1 to 2.2.2
+2022-01-31: Bump jsign-pkcs11 from 1.0.0 to 1.0.1
+2022-01-26: Merge pull request #85 from intoolswetrust/dependabot/maven/org.jruby-jruby-complete-9.3.3.0
+2022-01-19: Bump jruby-complete from 9.3.2.0 to 9.3.3.0
+2022-01-13: Merge pull request #83 from intoolswetrust/dependabot/maven/org.asciidoctor-asciidoctorj-2.5.3
+2022-01-13: Merge pull request #84 from intoolswetrust/dependabot/maven/org.apache.maven.plugins-maven-jar-plugin-3.2.2
+2022-01-12: Bump maven-jar-plugin from 3.2.0 to 3.2.2
+2022-01-12: Bump asciidoctorj from 2.5.2 to 2.5.3
+2022-01-05: Merge pull request #81 from intoolswetrust/dependabot/maven/org.asciidoctor-asciidoctorj-pdf-1.6.2
+2022-01-04: Bump asciidoctorj-pdf from 1.6.0 to 1.6.2
+2022-01-03: Merge pull request #80 from weblate/weblate-jsignpdf-messages
+2022-01-02: Translated using Weblate (Portuguese)
+2022-01-01: Merge pull request #78 from vitormattos/patch-1
+2022-01-01: Merge pull request #79 from weblate/weblate-jsignpdf-messages
+2021-12-31: Translated using Weblate (Portuguese)
+2021-12-30: Update messages.properties
+2021-12-30: Update messages.properties
+2021-12-30: Merge pull request #77 from weblate/weblate-jsignpdf-messages
+2021-12-29: Translated using Weblate (Portuguese)
+2021-12-20: Merge pull request #76 from intoolswetrust/dependabot/maven/org.apache.pdfbox-pdfbox-2.0.25
+2021-12-20: Bump pdfbox from 2.0.24 to 2.0.25
+2021-12-20: Fixes #75. Adds proper installcert main class to the MANIFEST.MF
+2021-12-20: Update README.md
+2021-12-19: SF downloads badge (https://sourceforge.net/p/jsignpdf/admin/files/badges)
+2021-12-19: add more details to the release steps
+2021-12-19: [maven-release-plugin] prepare for next development iteration
+
 2021-12-19 Josef Cacek
   * Fixed ClassCastException in OpenPDF
   * Windows installer contains both 64-bit and 32-bit Java versions

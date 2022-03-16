@@ -1,3 +1,10 @@
+Version 2.2.0
+-------------
+  * Added QPIN support in JSignPKCS11 provider (i.e. using two different PINs in newer hardware tokens)
+  * Added ECDSA signature algorithm support
+  * Added command line argument --gui for partial settings from the command line (beta feature)
+  * Bug fixes and translation updates; Thanks all the contributors!
+
 Version 2.1.0
 -------------
   * Extended L2 text options with DN (${certificate}) and custom signer name (-sn, --signer-name)
