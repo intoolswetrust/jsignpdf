@@ -72,7 +72,7 @@ public class SignPdfForm extends javax.swing.JFrame implements SignResultListene
 
     private static final long serialVersionUID = 1L;
 
-    private SignerFileChooser fc = new SignerFileChooser();
+    private SignerFileChooser fileChooser = new SignerFileChooser();
 
     protected final PropertyProvider props = PropertyProvider.getInstance();
 
@@ -96,7 +96,7 @@ public class SignPdfForm extends javax.swing.JFrame implements SignResultListene
         this.options = options;
 
         signerLogic = new SignerLogic(options);
-        vsDialog = new VisibleSignatureDialog(this, true, options, fc);
+        vsDialog = new VisibleSignatureDialog(this, true, options, fileChooser);
         tsaDialog = new TsaDialog(this, true, options);
 
         options.loadOptions();
@@ -420,7 +420,7 @@ public class SignPdfForm extends javax.swing.JFrame implements SignResultListene
      * @param aType dialog type (SAVE_DIALOG, OPEN_DIALOG)
      */
     void showFileChooser(final JTextField aFileField, final FileFilter aFilter, final int aType) {
-        fc.showFileChooser(aFileField, aFilter, aType);
+        fileChooser.showFileChooser(aFileField, aFilter, aType);
     }
 
     /**
