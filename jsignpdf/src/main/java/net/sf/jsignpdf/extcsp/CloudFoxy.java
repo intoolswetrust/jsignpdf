@@ -250,11 +250,13 @@ public class CloudFoxy implements IExternalCryptoProvider {
     }
 
     /**
-     * Read input from file.
+     * Makes socket request to the given address and sends the given text challenge. Returns response as a String.
      *
-     * @param hostName,port,requestMessage - contains hostname and port and request message to pass
-     * @return String - return string read from file
-     * @throws IOException - when there is I/O interruptions.
+     * @param hostName hostname part of the socket address
+     * @param port port part of the socket address
+     * @param requestMessage request challenge
+     * @return first line of the response as a String
+     * @throws IOException when the request fails
      */
 
     public String readRequest(String hostName, int port, String requestMessage) throws IOException {
