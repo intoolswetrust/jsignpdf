@@ -98,19 +98,7 @@ public class CloudFoxy implements IExternalCryptoProvider {
         int port = Integer.parseInt(address[1]);
 
         try {
-            Socket socket = new Socket(hostname, port);
-
-            OutputStream output = socket.getOutputStream();
-            PrintWriter writer = new PrintWriter(output, true);
-            writer.println(cert_chain_request);
-
-            InputStream input = socket.getInputStream();
-
-            BufferedReader reader_sock = new BufferedReader(new InputStreamReader(input));
-
-            String line = reader_sock.readLine();
-
-            socket.close();
+            String line = readRequest(hostname,port,cert_chain_request);
 
             if (line == null) {
                 return null;
@@ -193,20 +181,8 @@ public class CloudFoxy implements IExternalCryptoProvider {
         int port = Integer.parseInt(address[1]);
 
         try {
-            Socket socket = new Socket(hostname, port);
-
-            OutputStream output = socket.getOutputStream();
-            PrintWriter writer = new PrintWriter(output, true);
-            writer.println(signing_request);
-
-            InputStream input = socket.getInputStream();
-
-            BufferedReader reader_sock = new BufferedReader(new InputStreamReader(input));
-
-            String line = reader_sock.readLine();
+            String line = readRequest(hostname,port,signing_request);
             String[] signatureParts = line.split(":");
-
-            socket.close();
             if (signatureParts.length < 2) {
                 LOGGER.severe(RES.get("extcsp.nosignature"));
             } else if (signatureParts[1].length() < 5) {
@@ -246,16 +222,8 @@ public class CloudFoxy implements IExternalCryptoProvider {
             int cmdId = (int) (Math.random() * 100000);
             String address[] = options.getKsFile().split(":");
             try {
-                Socket socket = new Socket(address[0], Integer.parseInt(address[1]));
-
                 String alias_request = ">all readers\n>" + cmdId + ":ALIASES";
-                OutputStream output = socket.getOutputStream();
-                PrintWriter writer = new PrintWriter(output, true);
-                writer.println(alias_request);
-                InputStream input = socket.getInputStream();
-                BufferedReader reader_sock = new BufferedReader(new InputStreamReader(input));
-                String aliasesRaw = reader_sock.readLine();
-                socket.close();
+                String aliasesRaw= readRequest(address[0], Integer.parseInt(address[1]),alias_request);
 
                 String aliases_response[] = aliasesRaw.split(":");
                 aliasList = new LinkedList<String>();
@@ -280,4 +248,27 @@ public class CloudFoxy implements IExternalCryptoProvider {
         }
         return aliasList;
     }
+
+    /**
+     * Makes socket request to the given address and sends the given text challenge. Returns response as a String.
+     *
+     * @param hostName hostname part of the socket address
+     * @param port port part of the socket address
+     * @param requestMessage request challenge
+     * @return first line of the response as a String
+     * @throws IOException when the request fails
+     */
+
+    public String readRequest(String hostName, int port, String requestMessage) throws IOException {
+        Socket socket = new Socket(hostName, port);
+        OutputStream output = socket.getOutputStream();
+        PrintWriter writer = new PrintWriter(output, true);
+        writer.println(requestMessage);
+        InputStream input = socket.getInputStream();
+        BufferedReader reader_sock = new BufferedReader(new InputStreamReader(input));
+        String readInfo = reader_sock.readLine();
+        socket.close();
+        return readInfo;
+    }
+
 }
