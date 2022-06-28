@@ -154,15 +154,16 @@ public class MainWindow {
         menuBar.add(menu);
 
         menuItem = new JMenuItem("Open PDF");
-         menuItem.setMnemonic(KeyEvent.VK_O);
+        menuItem.setMnemonic(KeyEvent.VK_O);
         menuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_O, ActionEvent.CTRL_MASK));
-        menuItem.addActionListener(e->fc.showFileChooser(SignerFileChooser.FILEFILTER_PDF, JFileChooser.OPEN_DIALOG, file->openFile(file)));
+        menuItem.addActionListener(
+                e -> fc.showFileChooser(SignerFileChooser.FILEFILTER_PDF, JFileChooser.OPEN_DIALOG, file -> openFile(file)));
         menu.add(menuItem);
 
         menuItem = new JMenuItem("Load certificate", KeyEvent.VK_C);
         menuItem.setMnemonic(KeyEvent.VK_C);
         menuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_C, ActionEvent.CTRL_MASK));
-        menuItem.addActionListener(e->new);
+//        menuItem.addActionListener(e->new);
         menu.add(menuItem);
 
         menuItem = new JMenuItem("Generate test keystore", KeyEvent.VK_G);
