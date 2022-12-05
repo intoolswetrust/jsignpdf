@@ -20,7 +20,7 @@
         <maven.enforcer.plugin.version>3.1.0</maven.enforcer.plugin.version>
         <maven.jar.plugin.version>3.2.2</maven.jar.plugin.version>
         <maven.dependency.plugin.version>3.3.0</maven.dependency.plugin.version>
-        <maven.shade.plugin.version>3.3.0</maven.shade.plugin.version>
+        <maven.shade.plugin.version>3.4.1</maven.shade.plugin.version>
 
         <bouncycastle.version>1.70</bouncycastle.version>
         <jsign.pkcs11.version>1.1.0</jsign.pkcs11.version>
