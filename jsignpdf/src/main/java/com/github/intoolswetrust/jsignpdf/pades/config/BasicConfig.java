@@ -59,8 +59,7 @@ public class BasicConfig {
     @Parameter(names = {"--digest-algorithm", "-da"}, description = "Digest algorithm used in the signature")
     private DigestAlgorithm digestAlgorithm = DigestAlgorithm.SHA256;
 
-    @Parameter(names = {"--tsa-server-url", "-ts"}, description = "Timestamp server URL")
-    private String tsaServerUrl;
+    private final TsaConfig tsaConfig = new TsaConfig();
 
     public List<File> getFiles() {
         return files;
@@ -198,12 +197,8 @@ public class BasicConfig {
         this.digestAlgorithm = digestAlgorithm;
     }
 
-    public String getTsaServerUrl() {
-        return tsaServerUrl;
-    }
-
-    public void setTsaServerUrl(String tsaServerUrl) {
-        this.tsaServerUrl = tsaServerUrl;
+    public TsaConfig getTsaConfig() {
+        return tsaConfig;
     }
 
 }
