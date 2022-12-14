@@ -107,7 +107,7 @@ public class Pkcs11Initializer implements Closeable {
             final String name = pkcs11Provider.getName();
             LOGGER.fine("PKCS11 provider registered with name " + name);
         } catch (Throwable e) {
-            LOGGER.log(Level.SEVERE, "Unable to register SunPKCS11 security provider.", e);
+            LOGGER.log(Level.FINE, "Unable to register " + className + " security provider.", e);
         }
         return pkcs11Provider;
     }

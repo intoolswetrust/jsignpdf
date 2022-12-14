@@ -43,7 +43,7 @@ public class KeyStoreUtils {
     }
 
     public static String[] getKeyAliases(BasicConfig config) throws KeyStoreException, NoSuchAlgorithmException, CertificateException, IOException {
-        KeyStore tmpKs = loadKeyStore(config.getKeyStoreType(), config.getKeyStoreFile(), config.getKeyPassword());
+        KeyStore tmpKs = loadKeyStore(config.getKeyStoreType(), config.getKeyStoreFile(), config.getKeyStorePassword());
         List<String> tmpResult = getAliasesList(tmpKs, config);
 
         return tmpResult.toArray(new String[tmpResult.size()]);
@@ -171,8 +171,18 @@ public class KeyStoreUtils {
 
     public static KeyStoreSignatureTokenConnection createKeyStoreSignatureTokenConnection(BasicConfig config) throws IOException {
         PasswordProtection ksPassword = new PasswordProtection(config.getKeyStorePasswordAsChars());
-        return new KeyStoreSignatureTokenConnection(
-                config.getKeyStoreFile(), getOrDefaultKeyStoreType(config.getKeyStoreType()), ksPassword);
+        File keyStoreFile = config.getKeyStoreFile();
+        KeyStoreSignatureTokenConnection result = null;
+        if (keyStoreFile != null) {
+            try (FileInputStream fis = new FileInputStream(keyStoreFile)) {
+                result =  new KeyStoreSignatureTokenConnection(fis, getOrDefaultKeyStoreType(config.getKeyStoreType()),
+                        ksPassword);
+            }
+        } else {
+            result =  new KeyStoreSignatureTokenConnection((InputStream) null, getOrDefaultKeyStoreType(config.getKeyStoreType()),
+                    ksPassword);
+        }
+        return result;
     }
 
     public static String getOrDefaultKeyStoreType(String ksType) {
