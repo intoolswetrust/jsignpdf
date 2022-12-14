@@ -39,8 +39,7 @@ public class Main {
     public static void main(String[] args) {
         BasicConfig config = new BasicConfig();
         Pkcs11Config p11config = new Pkcs11Config();
-        TsaConfig tsaConfig = config.getTsaConfig();
-        JCommander jcmd = JCommander.newBuilder().addObject(asArray(config, tsaConfig, p11config)).build();
+        JCommander jcmd = JCommander.newBuilder().addObject(asArray(config, p11config)).build();
         jcmd.parse(args);
 
         try (Pkcs11Initializer p11init = new Pkcs11Initializer(p11config)) {
@@ -102,6 +101,7 @@ public class Main {
                 // Create PAdESService for signature
                 PAdESService service = new PAdESService(commonCertificateVerifier);
                 // Set the Timestamp source
+                TsaConfig tsaConfig = config.getTsaConfig();
                 String tspServer = tsaConfig.getTsaServerUrl();
                 if (StringUtils.isNotEmpty(tspServer)) {
                     OnlineTSPSource onlineTSPSource = new OnlineTSPSource(tspServer);
