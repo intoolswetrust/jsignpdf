@@ -65,7 +65,7 @@
 
     <dependencies>
         <dependency>
-            <groupId>com.github.kwart.jsign</groupId>
+            <groupId>com.github.librepdf</groupId>
             <artifactId>openpdf</artifactId>
         </dependency>
         <dependency>
