@@ -77,13 +77,13 @@ const config = {
             position: 'left',
             label: 'Tutorial',
           },
+          */
           {to: '/blog', label: 'Blog', position: 'left'},
           {
             href: 'https://github.com/intoolswetrust/jsignpdf',
             label: 'GitHub',
             position: 'right',
           },
-          */
         ],
       },
       footer: {
@@ -93,8 +93,8 @@ const config = {
             title: 'Docs',
             items: [
               {
-                label: 'Tutorial',
-                to: '/docs/intro',
+                label: 'Guide (PDF)',
+                to: '/JSignPdf.pdf',
               },
             ],
           },

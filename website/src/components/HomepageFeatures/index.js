@@ -4,32 +4,30 @@ import styles from './styles.module.css';
 
 const FeatureList = [
   {
-    title: 'Easy to Use',
-    Svg: require('@site/static/img/undraw_docusaurus_mountain.svg').default,
+    title: 'Multiplatform',
+    Svg: require('@site/static/img/java-icon.svg').default,
     description: (
       <>
-        Docusaurus was designed from the ground up to be easily installed and
-        used to get your website up and running quickly.
+        JSignPdf is written in Java and can be run on Windows, Linux, Mac OS and other OS-es where Java is available.
       </>
     ),
   },
   {
-    title: 'Focus on What Matters',
-    Svg: require('@site/static/img/undraw_docusaurus_tree.svg').default,
+    title: 'Document preview',
+    Svg: require('@site/static/img/preview.svg').default,
     description: (
       <>
-        Docusaurus lets you focus on your docs, and we&apos;ll do the chores. Go
-        ahead and move your docs into the <code>docs</code> directory.
+        JSignPdf supports placing visible signatures by selecting area in document preview mode..
       </>
     ),
   },
   {
-    title: 'Powered by React',
-    Svg: require('@site/static/img/undraw_docusaurus_react.svg').default,
+    title: 'Batch mode supported',
+    Svg: require('@site/static/img/terminal.svg').default,
     description: (
       <>
-        Extend or customize your website layout by reusing React. Docusaurus can
-        be extended while reusing the same header and footer.
+        Even if you like more a command-line, JSignPdf is also for you. It can be fully controlled by
+        command-line arguments, and it can work in a batch mode.
       </>
     ),
   },

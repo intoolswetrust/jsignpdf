@@ -17,7 +17,7 @@ function HomepageHeader() {
         <div className={styles.buttons}>
           <Link
             className="button button--secondary button--lg"
-            to="/docs/intro">
+            to="https://sourceforge.net/projects/jsignpdf/files/latest/download">
             Download 💾
           </Link>
         </div>
