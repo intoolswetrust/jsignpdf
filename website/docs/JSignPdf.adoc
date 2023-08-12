@@ -534,15 +534,24 @@ otherwise you can use JSignPdf in command line batch mode.
 
 === Program exit codes
 
-[cols=",",]
-|=============================================================
+[cols=","]
+|===
 |Code |Meaning
-|0 |program finished without errors
-|1 |command line is in a wrong format
-|2 |no operation requested - e.g. no file for signing provided
-|3 |signing of some, but not all, files failed
-|4 |signing of all files failed
-|=============================================================
+
+|0
+|program finished without errors
+
+|1
+|command line is in a wrong format
+|2
+|no operation requested - e.g. no file for signing provided
+
+|3
+|signing of some, but not all, files failed
+
+|4
+|signing of all files failed
+|===
 
 === Examples
 

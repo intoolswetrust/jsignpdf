@@ -20,3 +20,5 @@ target/
 .project
 
 jsignpdf/conf/
+dependency-reduced-pom.xml
+guide.md
