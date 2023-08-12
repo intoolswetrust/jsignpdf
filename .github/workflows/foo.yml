@@ -13,13 +13,11 @@ jobs:
     steps:
     - name: Checkout
       uses: actions/checkout@v3
-    - name: deploy file to server
-      uses: wlixcc/SFTP-Deploy-Action@v1.2.4
+    - name: SFTP uploader
+      uses: wangyucode/sftp-upload-action@v2.0.2
       with:
-          username: 'kwart'
-          server: 'frs.sourceforge.net'
-          ssh_private_key: ${{ secrets.SSH_PRIVATE_KEY }}
-          local_path: './distribution/licenses/*'
-          remote_path: /home/frs/project/jsignpdf/test
-          sftpArgs: '-o ConnectTimeout=5'
-          sftp_only: true
+        host: 'frs.sourceforge.net'
+        username: 'kwart'
+        privateKey: ${{ secrets.SSH_PRIVATE_KEY }}
+        localDir: './distribution/licenses'
+        remoteDir: '/home/frs/project/jsignpdf/test/foo-123'
