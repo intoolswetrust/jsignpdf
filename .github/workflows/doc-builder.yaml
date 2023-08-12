@@ -31,8 +31,7 @@ jobs:
           cd website
           npm i downdoc
           npx downdoc -o docs/guide.md docs/JSignPdf.adoc
-          npm run build
-          
+          npm run build         
       - uses: actions/configure-pages@v3
       - uses: actions/upload-pages-artifact@v2
         with:
