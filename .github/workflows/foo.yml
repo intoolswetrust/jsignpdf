@@ -20,5 +20,6 @@ jobs:
           server: 'frs.sourceforge.net'
           ssh_private_key: ${{ secrets.SSH_PRIVATE_KEY }}
           local_path: './distribution/licenses/*'
-          remote_path: /home/frs/project/jsignpdf/test/foo-${{ github.event.inputs.release-version }}
+          remote_path: /home/frs/project/jsignpdf/test
           sftpArgs: '-o ConnectTimeout=5'
+          sftp_only: true
