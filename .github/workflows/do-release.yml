@@ -1,0 +1,60 @@
+name: Do Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      release-version:
+        description: 'Version to be released (e.g. 2.3.0).'
+        required: true
+      next-snapshot-version:
+        description: 'Version to be set after the release - without the -SNAPSHOT suffix (e.g. 2.4.0).'
+        required: true
+
+env:
+  GIT_AUTHOR_NAME: Flash Gordon
+  GIT_AUTHOR_EMAIL: <>
+  GIT_COMMITTER_NAME: Terminator the Kitty
+  GIT_COMMITTER_EMAIL: <>
+jobs:
+  do-release:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v3
+    - name: Set up Java and credentials
+      uses: actions/setup-java@v3
+      with:
+        java-version: 8
+        distribution: 'adopt'
+        server-id: ossrh
+        server-username: MAVEN_USERNAME
+        server-password: MAVEN_PASSWORD
+        gpg-private-key: ${{ secrets.MAVEN_GPG_PRIVATE_KEY }}
+        gpg-passphrase: MAVEN_GPG_PASSPHRASE
+        cache: 'maven'
+
+    - name: Do the Deployment and related stuff
+      run: |
+        VERSION=${{ github.event.inputs.release-version }}
+        NEXT_VERSION=${{ github.event.inputs.next-snapshot-version }}-SNAPSHOT
+        TAG=JSignPdf_${VERSION//\./_}
+        mvn -P release --batch-mode "-Dtag=${TAG}" -DdryRun=true release:prepare \
+                 "-DreleaseVersion=${VERSION}" \
+                 "-DdevelopmentVersion=${NEXT_VERSION}"
+        mvn -P release --batch-mode -DdryRun=true release:perform
+        cd target/checkout
+        docker run -it --rm -v "$(pwd):/mnt" \
+          -u $(id -u):$(id -g) kwart/innosetup \
+          /mnt/distribution/windows/create-jsignpdf-installer.sh
+      env:
+        MAVEN_USERNAME: ${{ secrets.SONATYPE_OSS_USERNAME }}
+        MAVEN_PASSWORD: ${{ secrets.SONATYPE_OSS_PASSWORD }}
+        MAVEN_GPG_PASSPHRASE: ${{ secrets.MAVEN_GPG_PASSPHRASE }}
+    - name: SFTP upload to SourceForge
+      uses: wangyucode/sftp-upload-action@v2.0.2
+      with:
+        host: 'frs.sourceforge.net'
+        username: 'kwart'
+        privateKey: ${{ secrets.SSH_PRIVATE_KEY }}
+        localDir: './distribution/licenses'
+        remoteDir: '/home/frs/project/jsignpdf/test/JSignPdf-${{ github.event.inputs.release-version }}'
