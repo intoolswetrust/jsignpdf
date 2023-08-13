@@ -2,7 +2,9 @@ name: Docusaurus build
 
 on:
   push:
-
+    branches: [$default-branch]
+    paths:
+      - website/**
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
 
