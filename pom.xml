@@ -168,7 +168,6 @@
 
     <scm>
         <connection>scm:git:https://github.com/intoolswetrust/jsignpdf.git</connection>
-        <developerConnection>scm:git:git@github.com:intoolswetrust/jsignpdf.git</developerConnection>
         <url>http://github.com/intoolswetrust/jsignpdf/</url>
         <tag>HEAD</tag>
     </scm>
