@@ -42,7 +42,7 @@ jobs:
         mvn -P release --batch-mode "-Dtag=${TAG}" -Dusername=kwart release:prepare \
                  "-DreleaseVersion=${VERSION}" \
                  "-DdevelopmentVersion=${NEXT_VERSION}"
-        mvn -P release --batch-mode release:perform
+        mvn -P release --batch-mode -Dusername=kwart release:perform
         docker run --rm -v "$(pwd):/mnt" \
           -u $(id -u):$(id -g) kwart/innosetup \
           /mnt/distribution/windows/create-jsignpdf-installer.sh
