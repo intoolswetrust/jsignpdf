@@ -1,0 +1,23 @@
+name: Test
+
+on:
+  workflow_dispatch:
+    inputs:
+      release-version:
+        description: 'Version to be released (e.g. 2.3.0).'
+        required: true
+
+jobs:
+  do-release:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v3
+    - name: SFTP uploader
+      uses: wangyucode/sftp-upload-action@v2.0.2
+      with:
+        host: 'frs.sourceforge.net'
+        username: 'kwart'
+        privateKey: ${{ secrets.SSH_PRIVATE_KEY }}
+        localDir: './distribution/licenses'
+        remoteDir: '/home/frs/project/jsignpdf/test/foo-123'
