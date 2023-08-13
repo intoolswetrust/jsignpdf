@@ -39,10 +39,10 @@ jobs:
         FULL_VERSION="JSignPdf-$VERSION"
         NEXT_VERSION=${{ github.event.inputs.next-snapshot-version }}-SNAPSHOT
         TAG=JSignPdf_${VERSION//\./_}
-        mvn -P release --batch-mode "-Dtag=${TAG}" -Dusername=kwart release:prepare \
+        mvn -P release --batch-mode "-Dtag=${TAG}" release:prepare \
                  "-DreleaseVersion=${VERSION}" \
                  "-DdevelopmentVersion=${NEXT_VERSION}"
-        mvn -P release --batch-mode -Dusername=kwart release:perform
+        mvn -P release --batch-mode release:perform
         docker run --rm -v "$(pwd):/mnt" \
           -u $(id -u):$(id -g) kwart/innosetup \
           /mnt/distribution/windows/create-jsignpdf-installer.sh
