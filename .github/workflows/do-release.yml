@@ -39,7 +39,7 @@ jobs:
         FULL_VERSION="JSignPdf-$VERSION"
         NEXT_VERSION=${{ github.event.inputs.next-snapshot-version }}-SNAPSHOT
         TAG=JSignPdf_${VERSION//\./_}
-        mvn -P release --batch-mode "-Dtag=${TAG}" release:prepare \
+        mvn -P release --batch-mode "-Dtag=${TAG}" -Dusername=kwart release:prepare \
                  "-DreleaseVersion=${VERSION}" \
                  "-DdevelopmentVersion=${NEXT_VERSION}"
         mvn -P release --batch-mode release:perform
