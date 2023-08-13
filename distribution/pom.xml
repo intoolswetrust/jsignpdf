@@ -85,7 +85,7 @@
                     </dependency>
                 </dependencies>
                 <configuration>
-                    <sourceDirectory>doc</sourceDirectory>
+                    <sourceDirectory>../website/docs</sourceDirectory>
                     <attributes>
                         <sourcedir>${project.build.sourceDirectory}</sourcedir>
                         <jsignpdf-version>${project.version}</jsignpdf-version>
