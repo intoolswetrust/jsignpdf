@@ -60,6 +60,6 @@ jobs:
         exit
         EOF
       env:
-        MAVEN_USERNAME: ${{ secrets.SONATYPE_OSS_USERNAME }}
-        MAVEN_PASSWORD: ${{ secrets.SONATYPE_OSS_PASSWORD }}
+        MAVEN_USERNAME: ${{ secrets.OSSRH_USERNAME }}
+        MAVEN_PASSWORD: ${{ secrets.OSSRH_PASSWORD }}
         MAVEN_GPG_PASSPHRASE: ${{ secrets.MAVEN_GPG_PASSPHRASE }}
