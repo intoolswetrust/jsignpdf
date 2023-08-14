@@ -34,6 +34,7 @@ jobs:
         cache: 'maven'
 
     - name: Do the Deployment and related stuff
+      id: maven_release
       run: |
         VERSION=${{ github.event.inputs.release-version }}
         FULL_VERSION="JSignPdf-$VERSION"
@@ -59,7 +60,18 @@ jobs:
         put -R "${FULL_VERSION}"
         exit
         EOF
+        mv "$FULL_VERSION" upload
+        echo "TAG=$TAG" >> $GITHUB_OUTPUT
       env:
         MAVEN_USERNAME: ${{ secrets.OSSRH_USERNAME }}
         MAVEN_PASSWORD: ${{ secrets.OSSRH_PASSWORD }}
         MAVEN_GPG_PASSPHRASE: ${{ secrets.MAVEN_GPG_PASSPHRASE }}
+
+    - name: Upload binaries to release
+      uses: svenstaro/upload-release-action@483c1e56f95e88835747b1c7c60581215016cbf2
+      with:
+        repo_token: ${{ secrets.GITHUB_TOKEN }}
+        file: distribution/target/upload/*
+        file_glob: true
+        tag:   ${{ steps.maven_release.outputs.TAG }}
+        overwrite: true
