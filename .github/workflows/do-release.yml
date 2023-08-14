@@ -43,7 +43,9 @@ jobs:
         mvn -P release --batch-mode "-Dtag=${TAG}" release:prepare \
                  "-DreleaseVersion=${VERSION}" \
                  "-DdevelopmentVersion=${NEXT_VERSION}"
-        mvn -P release --batch-mode release:perform
+        mvn -P release --batch-mode release:perform \
+            -DstagingProgressTimeoutMinutes=30 -Dmaven.wagon.rto=7200000 \
+            -Dmaven.wagon.httpconnectionManager.maxPerRoute=60 -Dmaven.wagon.httpconnectionManager.maxTotal=100
         docker run --rm -v "$(pwd):/mnt" \
           -u $(id -u):$(id -g) kwart/innosetup \
           /mnt/distribution/windows/create-jsignpdf-installer.sh
