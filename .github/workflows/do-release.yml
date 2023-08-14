@@ -51,7 +51,7 @@ jobs:
         mkdir "JSignPdf-$VERSION"
         mv *.zip *.exe "$FULL_VERSION/"
         cp generated-docs/JSignPdf.pdf "$FULL_VERSION/$FULL_VERSION.pdf"
-        cp generated-docs/ReleaseNotes.txt "$FULL_VERSION/README.txt"
+        cp ../doc/ReleaseNotes.txt "$FULL_VERSION/README.txt"
         
         echo "${{ secrets.SSH_PRIVATE_KEY }}" >> private_key
         chmod 600 private_key
