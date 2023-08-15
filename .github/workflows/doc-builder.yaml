@@ -2,7 +2,8 @@ name: Docusaurus build
 
 on:
   push:
-    branches: [ ${{ github.event.repository.default_branch }} ]
+    branches:
+      - master
     paths:
       - website/**
       - .github/workflows/doc-builder.yaml
