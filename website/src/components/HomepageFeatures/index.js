@@ -22,12 +22,21 @@ const FeatureList = [
     ),
   },
   {
-    title: 'Batch mode supported',
+    title: 'Batch mode',
     Svg: require('@site/static/img/terminal.svg').default,
     description: (
       <>
         Even if you like more a command-line, JSignPdf is also for you. It can be fully controlled by
         command-line arguments, and it can work in a batch mode.
+      </>
+    ),
+  },
+  {
+    title: 'Timestamps',
+    Svg: require('@site/static/img/alarm-clock.svg').default,
+    description: (
+      <>
+        Prove the time of signing. Request a timestamp from your favorite TSA.
       </>
     ),
   },
