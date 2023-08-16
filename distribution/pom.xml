@@ -16,7 +16,7 @@
         <asciidoctor.maven.plugin.version>2.2.2</asciidoctor.maven.plugin.version>
         <asciidoctorj.pdf.version>2.3.3</asciidoctorj.pdf.version>
         <asciidoctorj.version>2.5.7</asciidoctorj.version>
-        <jruby.version>9.3.3.0</jruby.version>
+        <jruby.version>9.3.10.0</jruby.version>
     </properties>
 
     <build>
