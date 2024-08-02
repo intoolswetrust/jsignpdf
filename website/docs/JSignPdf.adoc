@@ -217,6 +217,8 @@ _Signature Text_, _Status Text_, _Image_, and _Background Image_ inputs define t
 
 _Background image scale_ defines the size of a background image. Any negative number means the best-fit algorithm will be used. Zero value means to stretch, which fills the whole field – it doesn't keep the image ratio. A positive value means the multiplicator of the original size.
 
+Supported file formats for the _Image_, and _Background Image_ are GIF, JPEG, JPEG2000, PNG, WMF, BMP, and TIFF.
+
 === TSA – timestamps
 
 To add timestamp into signature you will need some timestamping authority (TSA). Fill server address into _TSA URL_ field and if the server requires authentication choose the authentication type and fill either _TSA User_ and _TSA Password_ fields or path to the certificate's private key (it has to be PKCS#12 keystore) and the password. You can also set _TSA Policy OID_, which will be sent to the TSA server in the request, but probably you will not need to do so and the server uses the right policy by itself.
