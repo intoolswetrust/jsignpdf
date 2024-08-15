@@ -331,8 +331,8 @@ public class SignerLogic implements Runnable {
                 if (page < 1 || page > reader.getNumberOfPages()) {
                     page = reader.getNumberOfPages();
                 }
-                sap.setVisibleSignature(new Rectangle(options.getPositionLLX(), options.getPositionLLY(),
-                        options.getPositionURX(), options.getPositionURY()), page, null);
+                Rectangle signitureRect = computeSignatureRectangle(reader.getPageSize(page));
+                sap.setVisibleSignature(signitureRect, page, null);
             }
 
             LOGGER.info(RES.get("console.processing"));
@@ -456,6 +456,17 @@ public class SignerLogic implements Runnable {
             options.fireSignerFinishedEvent(tmpException);
         }
         return finished;
+    }
+
+    private Rectangle computeSignatureRectangle(Rectangle pageRect) {
+        float pgWidth = pageRect.getWidth();
+        float pgHeighth = pageRect.getHeight();
+        return new Rectangle(fixPosition(options.getPositionLLX(), pgWidth), fixPosition(options.getPositionLLY(), pgHeighth),
+                fixPosition(options.getPositionURX(), pgWidth), fixPosition(options.getPositionURY(), pgHeighth));
+    }
+
+    private float fixPosition(float origPos, float base) {
+        return origPos >= 0 ? origPos : base + origPos;
     }
 
     /**
