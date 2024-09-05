@@ -31,6 +31,10 @@ package net.sf.jsignpdf.utils;
 
 import net.sf.jsignpdf.Constants;
 
+import java.io.File;
+
+import static net.sf.jsignpdf.Constants.LOGGER;
+
 /**
  * Property holder for tweak file.
  *
@@ -57,7 +61,12 @@ public class ConfigProvider extends PropertyProvider {
      */
     @Override
     public void loadDefault() throws ProperyProviderException {
-        loadProperties(IOUtils.findFile(Constants.CONF_FILE));
+        File file = IOUtils.findFile(Constants.CONF_FILE);
+        if (file != null && file.isFile()) {
+            loadProperties(file);
+        } else {
+            LOGGER.fine("Config file " + file + " doesn't exists.");
+        }
     }
 
     private static class InstanceHolder {

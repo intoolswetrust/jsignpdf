@@ -68,14 +68,10 @@ public class PropertyProvider {
      */
     protected PropertyProvider() {
         properties = new Properties();
-        if (PROPERTY_FILE_FILE.isFile()) {
-            try {
-                loadDefault();
-            } catch (ProperyProviderException e) {
-                LOGGER.log(Level.WARNING, "", e);
-            }
-        } else {
-            LOGGER.fine("Default property file doesn't exists.");
+        try {
+            loadDefault();
+        } catch (ProperyProviderException e) {
+            LOGGER.log(Level.WARNING, "", e);
         }
     }
 
@@ -249,7 +245,11 @@ public class PropertyProvider {
      * @throws ProperyProviderException
      */
     public void loadDefault() throws ProperyProviderException {
-        loadProperties(PROPERTY_FILE);
+        if (PROPERTY_FILE_FILE.isFile()) {
+            loadProperties(PROPERTY_FILE);
+        } else {
+            LOGGER.fine("Default property file " + PROPERTY_FILE_FILE + " doesn't exists.");
+        }
     }
 
     /**
