@@ -13,7 +13,7 @@
     </parent>
 
     <properties>
-        <asciidoctor.maven.plugin.version>2.2.2</asciidoctor.maven.plugin.version>
+        <asciidoctor.maven.plugin.version>3.1.1</asciidoctor.maven.plugin.version>
         <asciidoctorj.pdf.version>2.3.17</asciidoctorj.pdf.version>
         <asciidoctorj.version>2.5.7</asciidoctorj.version>
         <jruby.version>9.3.3.0</jruby.version>
