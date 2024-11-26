@@ -27,7 +27,7 @@
         <jsign.jpedal.version>4.92.13</jsign.jpedal.version>
         <pdfbox.version>2.0.27</pdfbox.version>
         <pdf-renderer.version>140</pdf-renderer.version>
-        <commons-io.version>2.11.0</commons-io.version>
+        <commons-io.version>2.18.0</commons-io.version>
         <commons-cli.version>1.5.0</commons-cli.version>
         <commons-lang3.version>3.12.0</commons-lang3.version>
         <openpdf.version>1.3.30</openpdf.version>
