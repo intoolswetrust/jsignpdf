@@ -1,3 +1,59 @@
+2025-01-04: Bump braces from 3.0.2 to 3.0.3 in /website (#199)
+2025-01-04: Bump webpack-dev-middleware from 5.3.3 to 5.3.4 in /website (#201)
+2025-01-04: Bump org.apache.maven.plugins:maven-source-plugin from 3.2.1 to 3.3.1 (#205)
+2025-01-04: Bump org.apache.maven.plugins:maven-jar-plugin from 3.3.0 to 3.4.2 (#206)
+2025-01-04: Bump cookie and express in /website (#222)
+2025-01-04: Bump nanoid from 3.3.6 to 3.3.8 in /website (#232)
+2025-01-04: Bump micromatch from 4.0.5 to 4.0.8 in /website (#217)
+2025-01-04: Translations update from Hosted Weblate (#233)
+2024-11-27: Bump http-proxy-middleware from 2.0.6 to 2.0.7 in /website (#224)
+2024-11-27: Bump cross-spawn from 7.0.3 to 7.0.6 in /website (#229)
+2024-11-27: Bump webpack from 5.88.2 to 5.96.1 in /website (#230)
+2024-11-26: Translated using Weblate (Slovak) (#221)
+2024-11-26: Bump commons-io:commons-io from 2.11.0 to 2.18.0 (#228)
+2024-09-19: Bump actions/upload-pages-artifact from 2 to 3 (#209)
+2024-09-19: Bump body-parser and express in /website (#218)
+2024-09-05: Don't require default property file in the batch mode
+2024-08-21: Translated using Weblate (Croatian) (#214)
+2024-08-17: Translated using Weblate (Spanish) (#213)
+2024-08-15: Translations update from Hosted Weblate (#212)
+2024-08-15: Negative values of visible position rectangle corners are substracted from page widht/height
+2024-08-15: Translations update from Hosted Weblate (#211)
+2024-08-03: Bump follow-redirects from 1.15.2 to 1.15.6 in /website (#198)
+2024-08-03: Bump org.apache.maven.plugins:maven-assembly-plugin from 3.3.0 to 3.7.1 (#192)
+2024-08-02: Bump org.apache.maven.plugins:maven-dependency-plugin (#188)
+2024-08-02: Bump @babel/traverse from 7.22.10 to 7.23.2 in /website (#173)
+2024-08-02: Bump actions/deploy-pages from 2 to 4 (#195)
+2024-08-02: Bump actions/checkout from 2 to 4 (#193)
+2024-08-02: Bump actions/configure-pages from 3 to 5 (#190)
+2024-08-02: Bump actions/setup-java from 2 to 4 (#191)
+2024-08-02: Bump org.asciidoctor:asciidoctorj-pdf from 2.3.3 to 2.3.17 (#197)
+2024-08-02: Bump postcss from 8.4.27 to 8.4.31 in /website (#171)
+2024-08-02: Dependabot reconfig
+2024-08-02: Document supported image formats. Fixes #183
+2024-08-02: Remove empty translations
+2024-08-02: Translations update from Hosted Weblate (#182)
+2024-03-28: Translations update from Hosted Weblate (#170)
+2023-08-26: Translated using Weblate (Polish) (#167)
+2023-08-15: Bump org.apache.maven.plugins:maven-shade-plugin from 3.3.0 to 3.5.0 (#159)
+2023-08-15: Bump maven-jar-plugin from 3.2.2 to 3.3.0 (#135)
+2023-08-15: Translated using Weblate (Croatian) (#157)
+2023-08-15: Hardcode the default branch name to doc-builder workflow
+2023-08-15: Improve doc-builder
+2023-08-15: alarm-clock icon
+2023-08-15: Add timestamp as a HomepageFeature
+2023-08-14: [maven-release-plugin] prepare for next development iteration
+2023-08-14: [maven-release-plugin] prepare release JSignPdf_2_2_2
+2023-08-14: Increase staging timeouts
+2023-08-14: [maven-release-plugin] prepare for next development iteration
+2023-08-14: [maven-release-plugin] prepare release JSignPdf_2_2_2
+2023-08-14: [maven-release-plugin] prepare for next development iteration
+2023-08-14: [maven-release-plugin] prepare release JSignPdf_2_2_2
+2023-08-14: Add GH upload to release steps
+2023-08-14: Just another workflow fix :picard:
+2023-08-14: [maven-release-plugin] prepare for next development iteration
+2023-08-14: [maven-release-plugin] prepare release JSignPdf_2_2_1
+2023-08-14: Fix the release workflow 
 2023-08-13: Translated using Weblate (Czech) (#154)
 2023-08-13: Release workflow
 2023-08-12: Translated using Weblate (Croatian) (#153)
@@ -24,7 +80,6 @@
 2022-05-08: Translated using Weblate (German)
 2022-03-30: Bump maven-shade-plugin from 3.2.4 to 3.3.0
 2022-03-24: Refactored code with repetitive line of code (#98)
-
 2022-03-16: [maven-release-plugin] prepare release JSignPdf_2_2_0
 2022-03-16: Add --gui argument to allow partial settings from the command line arguments
 2022-03-16: Bump OpenPDF version (custom build with EC support)

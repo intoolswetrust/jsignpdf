@@ -40,7 +40,7 @@ mvn clean install deploy
 ### Release
 
 * update files in `docs`:
-  * ChangeLog.txt
+  * ChangeLog.txt (`git log --since="2023-08-13" --pretty=format:'%ad: %s' --date=short`)
   * ReleaseNotes.txt
 * build the `jsignpdf`
 
