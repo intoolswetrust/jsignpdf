@@ -72,9 +72,8 @@ jobs:
         MAVEN_GPG_PASSPHRASE: ${{ secrets.MAVEN_GPG_PASSPHRASE }}
 
     - name: Upload binaries to release
-      uses: svenstaro/upload-release-action@483c1e56f95e88835747b1c7c60581215016cbf2
+      uses: svenstaro/upload-release-action@04733e069f2d7f7f0b4aebc4fbdbce8613b03ccd
       with:
-        repo_token: ${{ secrets.GITHUB_TOKEN }}
         file: distribution/target/upload/*
         file_glob: true
         tag:   ${{ steps.maven_release.outputs.TAG }}
