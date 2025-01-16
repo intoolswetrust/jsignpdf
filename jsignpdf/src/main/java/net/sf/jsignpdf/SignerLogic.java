@@ -272,9 +272,15 @@ public class SignerLogic implements Runnable {
                 final String tmpImgPath = options.getImgPath();
                 if (tmpImgPath != null) {
                     LOGGER.info(RES.get("console.createImage", tmpImgPath));
-                    final Image img = Image.getInstance(tmpImgPath);
-                    LOGGER.info(RES.get("console.setSignatureGraphic"));
-                    sap.setSignatureGraphic(img);
+                    if (tmpImgPath.endsWith(".pdf")) {
+                        PdfReader sigreader = new PdfReader(tmpImgPath);
+                        LOGGER.info(RES.get("console.setSignatureGraphic"));
+                        sap.setSignaturePDF(sigreader, 1);
+                    } else {
+                        final Image img = Image.getInstance(tmpImgPath);
+                        LOGGER.info(RES.get("console.setSignatureGraphic"));
+                        sap.setSignatureGraphic(img);
+                    }
                 }
                 final String tmpBgImgPath = options.getBgImgPath();
                 if (tmpBgImgPath != null) {
@@ -319,7 +325,7 @@ public class SignerLogic implements Runnable {
                 sap.setLayer4Text(options.getL4Text());
                 LOGGER.info(RES.get("console.setRender"));
                 RenderMode renderMode = options.getRenderMode();
-                if (renderMode == RenderMode.GRAPHIC_AND_DESCRIPTION && sap.getSignatureGraphic() == null) {
+                if (renderMode == RenderMode.GRAPHIC_AND_DESCRIPTION && !sap.hasValidSignatureGraphic()) {
                     LOGGER.warning(
                             "Render mode of visible signature is set to GRAPHIC_AND_DESCRIPTION, but no image is loaded. Fallback to DESCRIPTION_ONLY.");
                     LOGGER.info(RES.get("console.renderModeFallback"));
