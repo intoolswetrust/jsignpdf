@@ -209,9 +209,12 @@ public class Pdf2Image {
 
         try {
             File tmpFile = new File(options.getInFile());
-            tmpDoc = options.getCertLevelX() != CertificationLevel.NOT_CERTIFIED
-                    ? PDDocument.load(tmpFile, options.getPdfOwnerPwdStrX())
-                    : PDDocument.load(tmpFile);
+            // PDFBox 3.x API: Loader.loadPDF() methods
+            if (options.getCertLevelX() != CertificationLevel.NOT_CERTIFIED) {
+                tmpDoc = org.apache.pdfbox.Loader.loadPDF(tmpFile, options.getPdfOwnerPwdStrX());
+            } else {
+                tmpDoc = org.apache.pdfbox.Loader.loadPDF(tmpFile);
+            }
             int resolution;
             try {
                 resolution = Toolkit.getDefaultToolkit().getScreenResolution();
