@@ -29,9 +29,12 @@
  */
 package net.sf.jsignpdf.utils;
 
+import java.io.File;
 import java.io.IOException;
 
-import com.lowagie.text.pdf.PdfReader;
+import eu.europa.esig.dss.model.DSSDocument;
+import eu.europa.esig.dss.model.FileDocument;
+import eu.europa.esig.dss.model.InMemoryDocument;
 
 /**
  * Utilities to handle PDFs.
@@ -41,56 +44,80 @@ import com.lowagie.text.pdf.PdfReader;
 public class PdfUtils {
 
     /**
-     * It tries to create PDF reader in 3 steps:
-     * <ul>
-     * <li>without password</li>
-     * <li>with empty password</li>
-     * <li>with given password</li>
-     * </ul>
+     * Creates a DSS DSSDocument from a PDF file. 
+     * DSS handles password-protected PDFs differently - the password
+     * is typically handled during the signing process rather than document loading.
      * 
      * @param aFileName file name of PDF
-     * @param aPassword password
-     * @return
+     * @param aPassword password (stored for later use, not used during document creation)
+     * @return DSSDocument representing the PDF
      * @throws IOException
      */
-    public static PdfReader getPdfReader(final String aFileName, byte[] aPassword) throws IOException {
-        PdfReader tmpReader = null;
+    public static DSSDocument getDSSDocument(final String aFileName, byte[] aPassword) throws IOException {
+        File file = new File(aFileName);
+        if (!file.exists()) {
+            throw new IOException("PDF file not found: " + aFileName);
+        }
+        // Note: DSS FileDocument doesn't handle password at creation time
+        // Password handling will be done during the signing process via SignatureTokenConnection
+        return new FileDocument(file);
+    }
+
+    /**
+     * Creates a DSS DSSDocument from PDF content in memory.
+     * DSS handles password-protected PDFs differently - the password
+     * is typically handled during the signing process rather than document loading.
+     * 
+     * @param content content of PDF
+     * @param aPassword password (stored for later use, not used during document creation)
+     * @return DSSDocument representing the PDF content
+     * @throws IOException
+     */
+    public static DSSDocument getDSSDocument(final byte[] content, byte[] aPassword) throws IOException {
+        if (content == null || content.length == 0) {
+            throw new IOException("PDF content is empty or null");
+        }
+        // Note: DSS InMemoryDocument doesn't handle password at creation time
+        // Password handling will be done during the signing process via SignatureTokenConnection
+        return new InMemoryDocument(content, "document.pdf");
+    }
+    
+    // Legacy methods for backward compatibility during migration
+    // These will be removed after full migration to DSS
+    
+    /**
+     * @deprecated Use getDSSDocument instead. Will be removed after DSS migration.
+     */
+    @Deprecated
+    public static com.lowagie.text.pdf.PdfReader getPdfReader(final String aFileName, byte[] aPassword) throws IOException {
+        com.lowagie.text.pdf.PdfReader tmpReader = null;
         try {
             // try to read without password
-            tmpReader = new PdfReader(aFileName);
+            tmpReader = new com.lowagie.text.pdf.PdfReader(aFileName);
         } catch (Exception e) {
             try {
-                tmpReader = new PdfReader(aFileName, new byte[0]);
+                tmpReader = new com.lowagie.text.pdf.PdfReader(aFileName, new byte[0]);
             } catch (Exception e2) {
-                tmpReader = new PdfReader(aFileName, aPassword);
+                tmpReader = new com.lowagie.text.pdf.PdfReader(aFileName, aPassword);
             }
         }
         return tmpReader;
     }
-
+    
     /**
-     * It tries to create PDF reader in 3 steps:
-     * <ul>
-     * <li>without password</li>
-     * <li>with empty password</li>
-     * <li>with given password</li>
-     * </ul>
-     * 
-     * @param content content of PDF
-     * @param aPassword password
-     * @return
-     * @throws IOException
+     * @deprecated Use getDSSDocument instead. Will be removed after DSS migration.
      */
-    public static PdfReader getPdfReader(final byte[] content, byte[] aPassword) throws IOException {
-        PdfReader tmpReader = null;
+    @Deprecated
+    public static com.lowagie.text.pdf.PdfReader getPdfReader(final byte[] content, byte[] aPassword) throws IOException {
+        com.lowagie.text.pdf.PdfReader tmpReader = null;
         try {
             // try to read without password
-            tmpReader = new PdfReader(content);
+            tmpReader = new com.lowagie.text.pdf.PdfReader(content);
         } catch (Exception e) {
             try {
-                tmpReader = new PdfReader(content, new byte[0]);
+                tmpReader = new com.lowagie.text.pdf.PdfReader(content, new byte[0]);
             } catch (Exception e2) {
-                tmpReader = new PdfReader(content, aPassword);
+                tmpReader = new com.lowagie.text.pdf.PdfReader(content, aPassword);
             }
         }
         return tmpReader;

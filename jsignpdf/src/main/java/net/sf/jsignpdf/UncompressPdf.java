@@ -38,7 +38,13 @@ import com.lowagie.text.pdf.PdfReader;
 import com.lowagie.text.pdf.PdfStamper;
 
 /**
- * Simple small programm to uncompress PDFs.
+ * Simple small program to uncompress PDFs.
+ * 
+ * NOTE: This utility currently uses legacy OpenPdf methods for PDF decompression.
+ * DSS (Digital Signature Service) is primarily designed for signature operations
+ * and doesn't provide direct equivalents for PDF content decompression.
+ * This functionality may need to be reimplemented using PDFBox directly
+ * or alternative PDF manipulation libraries during the DSS migration.
  * 
  * @author Josef Cacek
  */
