@@ -31,20 +31,18 @@ package net.sf.jsignpdf.types;
 
 import static net.sf.jsignpdf.Constants.RES;
 
-import com.lowagie.text.pdf.PdfSignatureAppearance;
-
 /**
  * Enum of possible certification levels used to Sign PDF.
+ * Constants previously from OpenPdf PdfSignatureAppearance are now defined directly.
  * 
  * @author Josef Cacek
  */
 public enum CertificationLevel {
 
-    NOT_CERTIFIED("certificationLevel.notCertified", PdfSignatureAppearance.NOT_CERTIFIED), CERTIFIED_NO_CHANGES_ALLOWED(
-            "certificationLevel.noChanges",
-            PdfSignatureAppearance.CERTIFIED_NO_CHANGES_ALLOWED), CERTIFIED_FORM_FILLING("certificationLevel.formFill",
-                    PdfSignatureAppearance.CERTIFIED_FORM_FILLING), CERTIFIED_FORM_FILLING_AND_ANNOTATIONS(
-                            "certificationLevel.formFillAnnot", PdfSignatureAppearance.CERTIFIED_FORM_FILLING_AND_ANNOTATIONS);
+    NOT_CERTIFIED("certificationLevel.notCertified", 0), 
+    CERTIFIED_NO_CHANGES_ALLOWED("certificationLevel.noChanges", 1), 
+    CERTIFIED_FORM_FILLING("certificationLevel.formFill", 2), 
+    CERTIFIED_FORM_FILLING_AND_ANNOTATIONS("certificationLevel.formFillAnnot", 3);
 
     private String msgKey;
     private int level;
@@ -62,10 +60,9 @@ public enum CertificationLevel {
     }
 
     /**
-     * Returns Level as defined in iText.
+     * Returns certification level as integer.
      * 
-     * @return
-     * @see PdfSignatureAppearance#setCertificationLevel(int)
+     * @return certification level code
      */
     public int getLevel() {
         return level;

@@ -50,7 +50,6 @@ import org.apache.pdfbox.rendering.PDFRenderer;
 import org.jpedal.PdfDecoder;
 import org.jpedal.exception.PdfException;
 
-import com.lowagie.text.pdf.PdfReader;
 import com.sun.pdfview.PDFFile;
 import com.sun.pdfview.PDFPage;
 import com.sun.pdfview.PDFParseException;
@@ -108,12 +107,22 @@ public class Pdf2Image {
      */
     public BufferedImage getImageUsingJPedal(final int aPage) {
         BufferedImage tmpResult = null;
-        PdfReader reader = null;
+        PDDocument tmpDoc = null;
         PdfDecoder pdfDecoder = null;
         try {
-
-            reader = PdfUtils.getPdfReader(options.getInFile(), options.getPdfOwnerPwdStrX().getBytes());
-            if (JPEDAL_MAX_IMAGE_RENDER_SIZE > reader.getPageSize(aPage).getWidth() * reader.getPageSize(aPage).getHeight()) {
+            // Use PDFBox to get page dimensions for size check
+            File tmpFile = new File(options.getInFile());
+            try {
+                tmpDoc = org.apache.pdfbox.Loader.loadPDF(tmpFile, options.getPdfOwnerPwdStrX());
+            } catch (Exception e) {
+                tmpDoc = org.apache.pdfbox.Loader.loadPDF(tmpFile);
+            }
+            
+            PDPage page = tmpDoc.getPage(aPage - 1); // PDFBox uses 0-based indexing
+            float pageWidth = page.getMediaBox().getWidth();
+            float pageHeight = page.getMediaBox().getHeight();
+            
+            if (JPEDAL_MAX_IMAGE_RENDER_SIZE > pageWidth * pageHeight) {
                 pdfDecoder = new PdfDecoder();
                 try {
                     pdfDecoder.openPdfFile(options.getInFile(), options.getPdfOwnerPwdStrX());
@@ -131,8 +140,12 @@ public class Pdf2Image {
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
-            if (reader != null) {
-                reader.close();
+            if (tmpDoc != null) {
+                try {
+                    tmpDoc.close();
+                } catch (Exception e) {
+                    // ignore
+                }
             }
             if (pdfDecoder != null) {
                 pdfDecoder.closePdfFile();

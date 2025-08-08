@@ -64,11 +64,6 @@
     </build>
 
     <dependencies>
-        <!-- OpenPdf dependency - marked for removal after DSS migration -->
-        <dependency>
-            <groupId>com.github.librepdf</groupId>
-            <artifactId>openpdf</artifactId>
-        </dependency>
         <!-- DSS (Digital Signature Service) dependencies -->
         <dependency>
             <groupId>eu.europa.ec.joinup.sd-dss</groupId>

@@ -82,45 +82,5 @@ public class PdfUtils {
         return new InMemoryDocument(content, "document.pdf");
     }
     
-    // Legacy methods for backward compatibility during migration
-    // These will be removed after full migration to DSS
-    
-    /**
-     * @deprecated Use getDSSDocument instead. Will be removed after DSS migration.
-     */
-    @Deprecated
-    public static com.lowagie.text.pdf.PdfReader getPdfReader(final String aFileName, byte[] aPassword) throws IOException {
-        com.lowagie.text.pdf.PdfReader tmpReader = null;
-        try {
-            // try to read without password
-            tmpReader = new com.lowagie.text.pdf.PdfReader(aFileName);
-        } catch (Exception e) {
-            try {
-                tmpReader = new com.lowagie.text.pdf.PdfReader(aFileName, new byte[0]);
-            } catch (Exception e2) {
-                tmpReader = new com.lowagie.text.pdf.PdfReader(aFileName, aPassword);
-            }
-        }
-        return tmpReader;
-    }
-    
-    /**
-     * @deprecated Use getDSSDocument instead. Will be removed after DSS migration.
-     */
-    @Deprecated
-    public static com.lowagie.text.pdf.PdfReader getPdfReader(final byte[] content, byte[] aPassword) throws IOException {
-        com.lowagie.text.pdf.PdfReader tmpReader = null;
-        try {
-            // try to read without password
-            tmpReader = new com.lowagie.text.pdf.PdfReader(content);
-        } catch (Exception e) {
-            try {
-                tmpReader = new com.lowagie.text.pdf.PdfReader(content, new byte[0]);
-            } catch (Exception e2) {
-                tmpReader = new com.lowagie.text.pdf.PdfReader(content, aPassword);
-            }
-        }
-        return tmpReader;
-    }
 
 }

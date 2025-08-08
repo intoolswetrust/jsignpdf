@@ -97,33 +97,4 @@ public class PdfExtraInfo {
         return null;
     }
     
-    // Legacy method for backward compatibility during migration
-    // Will be removed after full migration to DSS
-    
-    /**
-     * @deprecated Use getPageInfo instead. Will be removed after DSS migration.
-     */
-    @Deprecated
-    public PageInfo getPageInfoLegacy(int aPage) {
-        PageInfo tmpResult = null;
-        com.lowagie.text.pdf.PdfReader reader = null;
-        try {
-            reader = PdfUtils.getPdfReader(options.getInFile(), options.getPdfOwnerPwdStrX().getBytes());
-            final com.lowagie.text.Rectangle tmpRect = reader.getPageSizeWithRotation(aPage);
-            if (tmpRect != null) {
-                tmpResult = new PageInfo(tmpRect.getRight(), tmpRect.getTop());
-            }
-        } catch (Exception e) {
-            // nothing to do
-        } finally {
-            if (reader != null) {
-                try {
-                    reader.close();
-                } catch (Exception e) {
-                }
-            }
-        }
-
-        return tmpResult;
-    }
 }
