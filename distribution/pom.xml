@@ -56,10 +56,8 @@
                     </execution>
                 </executions>
                 <configuration>
-                    <skip>true</skip>
                     <rules>
-                        <!-- Temporarily disabled during DSS migration -->
-                        <!-- <dependencyConvergence /> -->
+                        <dependencyConvergence />
                     </rules>
                 </configuration>
             </plugin>
