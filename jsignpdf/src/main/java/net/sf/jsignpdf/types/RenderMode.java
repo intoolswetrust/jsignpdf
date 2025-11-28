@@ -31,19 +31,17 @@ package net.sf.jsignpdf.types;
 
 import static net.sf.jsignpdf.Constants.RES;
 
-import com.lowagie.text.pdf.PdfSignatureAppearance;
-
 /**
- * Enum for visible sign rendering configuration
+ * Enum for visible sign rendering configuration.
+ * Constants previously from OpenPdf PdfSignatureAppearance are now defined directly.
  * 
  * @author Josef Cacek
  */
 public enum RenderMode {
 
-    DESCRIPTION_ONLY("render.descriptionOnly", PdfSignatureAppearance.SignatureRenderDescription), GRAPHIC_AND_DESCRIPTION(
-            "render.graphicAndDescription",
-            PdfSignatureAppearance.SignatureRenderGraphicAndDescription), SIGNAME_AND_DESCRIPTION(
-                    "render.signameAndDescription", PdfSignatureAppearance.SignatureRenderNameAndDescription);
+    DESCRIPTION_ONLY("render.descriptionOnly", 2), 
+    GRAPHIC_AND_DESCRIPTION("render.graphicAndDescription", 0), 
+    SIGNAME_AND_DESCRIPTION("render.signameAndDescription", 1);
 
     private String msgKey;
     private int render;
@@ -62,10 +60,9 @@ public enum RenderMode {
     }
 
     /**
-     * Returns Visible Signature Render flag.
+     * Returns visible signature render flag.
      * 
-     * @return integer flag
-     * @see PdfSignatureAppearance#setRender(int)
+     * @return integer flag for rendering mode
      */
     public int getRender() {
         return render;

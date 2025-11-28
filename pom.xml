@@ -21,15 +21,16 @@
         <maven.dependency.plugin.version>3.7.1</maven.dependency.plugin.version>
         <maven.shade.plugin.version>3.5.0</maven.shade.plugin.version>
 
-        <bouncycastle.version>1.70</bouncycastle.version>
+        <bouncycastle.version>1.81</bouncycastle.version>
         <jsign.pkcs11.version>1.1.0</jsign.pkcs11.version>
         <jsign.jpedal.version>4.92.13</jsign.jpedal.version>
-        <pdfbox.version>2.0.27</pdfbox.version>
+        <pdfbox.version>3.0.2</pdfbox.version>
         <pdf-renderer.version>140</pdf-renderer.version>
         <commons-io.version>2.18.0</commons-io.version>
         <commons-cli.version>1.5.0</commons-cli.version>
         <commons-lang3.version>3.12.0</commons-lang3.version>
-        <openpdf.version>1.3.30</openpdf.version>
+        <dss.version>6.3</dss.version>
+        <slf4j.version>2.0.17</slf4j.version>
         <junit.version>4.13.2</junit.version>
     </properties>
 
@@ -41,20 +42,61 @@
 
     <dependencyManagement>
         <dependencies>
+            <!-- DSS (Digital Signature Service) dependencies -->
             <dependency>
-                <groupId>com.github.librepdf</groupId>
-                <artifactId>openpdf</artifactId>
-                <version>${openpdf.version}</version>
+                <groupId>eu.europa.ec.joinup.sd-dss</groupId>
+                <artifactId>dss-service</artifactId>
+                <version>${dss.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>eu.europa.ec.joinup.sd-dss</groupId>
+                <artifactId>dss-pades</artifactId>
+                <version>${dss.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>eu.europa.ec.joinup.sd-dss</groupId>
+                <artifactId>dss-pades-pdfbox</artifactId>
+                <version>${dss.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>eu.europa.ec.joinup.sd-dss</groupId>
+                <artifactId>dss-token</artifactId>
+                <version>${dss.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>eu.europa.ec.joinup.sd-dss</groupId>
+                <artifactId>dss-utils-apache-commons</artifactId>
+                <version>${dss.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>eu.europa.ec.joinup.sd-dss</groupId>
+                <artifactId>dss-cms-stream</artifactId>
+                <version>${dss.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>eu.europa.ec.joinup.sd-dss</groupId>
+                <artifactId>dss-validation</artifactId>
+                <version>${dss.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.bouncycastle</groupId>
-                <artifactId>bcprov-jdk15on</artifactId>
+                <artifactId>bcprov-jdk18on</artifactId>
                 <version>${bouncycastle.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.bouncycastle</groupId>
-                <artifactId>bcpkix-jdk15on</artifactId>
+                <artifactId>bcpkix-jdk18on</artifactId>
                 <version>${bouncycastle.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.bouncycastle</groupId>
+                <artifactId>bcutil-jdk18on</artifactId>
+                <version>${bouncycastle.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.slf4j</groupId>
+                <artifactId>slf4j-api</artifactId>
+                <version>${slf4j.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.apache.commons</groupId>

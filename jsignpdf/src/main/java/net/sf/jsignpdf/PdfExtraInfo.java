@@ -29,11 +29,14 @@
  */
 package net.sf.jsignpdf;
 
+import java.io.IOException;
+
 import net.sf.jsignpdf.types.PageInfo;
 import net.sf.jsignpdf.utils.PdfUtils;
 
-import com.lowagie.text.Rectangle;
-import com.lowagie.text.pdf.PdfReader;
+import eu.europa.esig.dss.model.DSSDocument;
+import eu.europa.esig.dss.pdf.AnnotationBox;
+import eu.europa.esig.dss.pdf.pdfbox.PdfBoxDocumentReader;
 
 /**
  * Provides additional information for selected input PDF file.
@@ -52,65 +55,46 @@ public class PdfExtraInfo {
     }
 
     /**
-     * Returns number of pages in PDF document. If error occures (file not found or sth. similar) -1 is returned.
+     * Returns number of pages in PDF document using DSS framework. 
+     * If error occurs (file not found or similar) -1 is returned.
      * 
-     * @return number of pages (or -1 if error occures)
+     * @return number of pages (or -1 if error occurs)
      */
     public int getNumberOfPages() {
-        int tmpResult = 0;
-        PdfReader reader = null;
         try {
-            try {
-                reader = new PdfReader(options.getInFile(), options.getPdfOwnerPwdStrX().getBytes());
-            } catch (Exception e) {
-                try {
-                    reader = new PdfReader(options.getInFile(), new byte[0]);
-                } catch (Exception e2) {
-                    // try to read without password
-                    reader = new PdfReader(options.getInFile());
-                }
+            DSSDocument document = PdfUtils.getDSSDocument(options.getInFile(), options.getPdfOwnerPwdStrX().getBytes());
+            
+            // Use DSS PdfBoxDocumentReader to get page count
+            try (PdfBoxDocumentReader reader = new PdfBoxDocumentReader(document)) {
+                return reader.getNumberOfPages();
             }
-            tmpResult = reader.getNumberOfPages();
         } catch (Exception e) {
-            tmpResult = -1;
-        } finally {
-            if (reader != null) {
-                try {
-                    reader.close();
-                } catch (Exception e) {
-                }
-            }
+            return -1;
         }
-
-        return tmpResult;
     }
 
     /**
-     * Returns page info.
+     * Returns page info using DSS framework.
      * 
      * @param aPage number of page for which size should be returned
-     * @return FloatPoint or null
+     * @return PageInfo or null
      */
     public PageInfo getPageInfo(int aPage) {
-        PageInfo tmpResult = null;
-        PdfReader reader = null;
         try {
-            reader = PdfUtils.getPdfReader(options.getInFile(), options.getPdfOwnerPwdStrX().getBytes());
-            final Rectangle tmpRect = reader.getPageSizeWithRotation(aPage);
-            if (tmpRect != null) {
-                tmpResult = new PageInfo(tmpRect.getRight(), tmpRect.getTop());
+            DSSDocument document = PdfUtils.getDSSDocument(options.getInFile(), options.getPdfOwnerPwdStrX().getBytes());
+            
+            // Use DSS PdfBoxDocumentReader to get page dimensions
+            try (PdfBoxDocumentReader reader = new PdfBoxDocumentReader(document)) {
+                AnnotationBox pageBox = reader.getPageBox(aPage);
+                if (pageBox != null) {
+                    return new PageInfo((float)pageBox.getWidth(), (float)pageBox.getHeight());
+                }
             }
         } catch (Exception e) {
             // nothing to do
-        } finally {
-            if (reader != null) {
-                try {
-                    reader.close();
-                } catch (Exception e) {
-                }
-            }
         }
-
-        return tmpResult;
+        
+        return null;
     }
+    
 }

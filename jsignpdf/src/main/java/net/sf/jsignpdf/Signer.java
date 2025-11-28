@@ -202,7 +202,8 @@ public class Signer {
         final SignerLogic tmpLogic = new SignerLogic(anOpts);
         if (ArrayUtils.isEmpty(anOpts.getFiles())) {
             // we've used -lp (loadproperties) parameter
-            if (!tmpLogic.signFile()) {
+            // Use DSS signing with legacy fallback
+            if (!tmpLogic.runWithResult()) {
                 exit(Constants.EXIT_CODE_ALL_SIG_FAILED);
             }
             return;
@@ -243,7 +244,8 @@ public class Signer {
                 tmpName.append(anOpts.getOutPrefix());
                 tmpName.append(tmpNameBase).append(anOpts.getOutSuffix()).append(tmpSuffix);
                 anOpts.setOutFile(tmpName.toString());
-                if (tmpLogic.signFile()) {
+                // Use DSS signing with legacy fallback
+                if (tmpLogic.runWithResult()) {
                     successCount++;
                 } else {
                     failedCount++;

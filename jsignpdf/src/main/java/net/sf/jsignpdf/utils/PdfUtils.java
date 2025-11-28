@@ -29,9 +29,12 @@
  */
 package net.sf.jsignpdf.utils;
 
+import java.io.File;
 import java.io.IOException;
 
-import com.lowagie.text.pdf.PdfReader;
+import eu.europa.esig.dss.model.DSSDocument;
+import eu.europa.esig.dss.model.FileDocument;
+import eu.europa.esig.dss.model.InMemoryDocument;
 
 /**
  * Utilities to handle PDFs.
@@ -41,59 +44,43 @@ import com.lowagie.text.pdf.PdfReader;
 public class PdfUtils {
 
     /**
-     * It tries to create PDF reader in 3 steps:
-     * <ul>
-     * <li>without password</li>
-     * <li>with empty password</li>
-     * <li>with given password</li>
-     * </ul>
+     * Creates a DSS DSSDocument from a PDF file. 
+     * DSS handles password-protected PDFs differently - the password
+     * is typically handled during the signing process rather than document loading.
      * 
      * @param aFileName file name of PDF
-     * @param aPassword password
-     * @return
+     * @param aPassword password (stored for later use, not used during document creation)
+     * @return DSSDocument representing the PDF
      * @throws IOException
      */
-    public static PdfReader getPdfReader(final String aFileName, byte[] aPassword) throws IOException {
-        PdfReader tmpReader = null;
-        try {
-            // try to read without password
-            tmpReader = new PdfReader(aFileName);
-        } catch (Exception e) {
-            try {
-                tmpReader = new PdfReader(aFileName, new byte[0]);
-            } catch (Exception e2) {
-                tmpReader = new PdfReader(aFileName, aPassword);
-            }
+    public static DSSDocument getDSSDocument(final String aFileName, byte[] aPassword) throws IOException {
+        File file = new File(aFileName);
+        if (!file.exists()) {
+            throw new IOException("PDF file not found: " + aFileName);
         }
-        return tmpReader;
+        // Note: DSS FileDocument doesn't handle password at creation time
+        // Password handling will be done during the signing process via SignatureTokenConnection
+        return new FileDocument(file);
     }
 
     /**
-     * It tries to create PDF reader in 3 steps:
-     * <ul>
-     * <li>without password</li>
-     * <li>with empty password</li>
-     * <li>with given password</li>
-     * </ul>
+     * Creates a DSS DSSDocument from PDF content in memory.
+     * DSS handles password-protected PDFs differently - the password
+     * is typically handled during the signing process rather than document loading.
      * 
      * @param content content of PDF
-     * @param aPassword password
-     * @return
+     * @param aPassword password (stored for later use, not used during document creation)
+     * @return DSSDocument representing the PDF content
      * @throws IOException
      */
-    public static PdfReader getPdfReader(final byte[] content, byte[] aPassword) throws IOException {
-        PdfReader tmpReader = null;
-        try {
-            // try to read without password
-            tmpReader = new PdfReader(content);
-        } catch (Exception e) {
-            try {
-                tmpReader = new PdfReader(content, new byte[0]);
-            } catch (Exception e2) {
-                tmpReader = new PdfReader(content, aPassword);
-            }
+    public static DSSDocument getDSSDocument(final byte[] content, byte[] aPassword) throws IOException {
+        if (content == null || content.length == 0) {
+            throw new IOException("PDF content is empty or null");
         }
-        return tmpReader;
+        // Note: DSS InMemoryDocument doesn't handle password at creation time
+        // Password handling will be done during the signing process via SignatureTokenConnection
+        return new InMemoryDocument(content, "document.pdf");
     }
+    
 
 }

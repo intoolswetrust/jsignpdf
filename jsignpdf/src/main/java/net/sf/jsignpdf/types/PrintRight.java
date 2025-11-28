@@ -31,17 +31,17 @@ package net.sf.jsignpdf.types;
 
 import static net.sf.jsignpdf.Constants.RES;
 
-import com.lowagie.text.pdf.PdfWriter;
-
 /**
- * Enum of possible printing rights
+ * Enum of possible printing rights.
+ * Constants previously from OpenPdf PdfWriter are now defined directly.
  * 
  * @author Josef Cacek
  */
 public enum PrintRight {
 
-    DISALLOW_PRINTING("rights.disallowPrinting", 0), ALLOW_DEGRADED_PRINTING("rights.allowDegradedPrinting",
-            PdfWriter.ALLOW_DEGRADED_PRINTING), ALLOW_PRINTING("rights.allowPrinting", PdfWriter.ALLOW_PRINTING);
+    DISALLOW_PRINTING("rights.disallowPrinting", 0), 
+    ALLOW_DEGRADED_PRINTING("rights.allowDegradedPrinting", 4), 
+    ALLOW_PRINTING("rights.allowPrinting", 2052);
 
     private String msgKey;
     private int right;
@@ -59,10 +59,9 @@ public enum PrintRight {
     }
 
     /**
-     * Returns right (bit mask) as defined in iText.
+     * Returns right (bit mask) for PDF permissions.
      * 
-     * @return
-     * @see PdfWriter#ALLOW_PRINTING
+     * @return permission bit mask
      */
     public int getRight() {
         return right;

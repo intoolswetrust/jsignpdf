@@ -29,17 +29,19 @@
  */
 package net.sf.jsignpdf.types;
 
-import com.lowagie.text.pdf.PdfWriter;
-
 /**
- * Enum of PDF versions
+ * Enum of PDF versions.
+ * Constants previously from OpenPdf PdfWriter are now defined directly.
  * 
  * @author Josef Cacek
  */
 public enum PdfVersion {
-    PDF_1_2("PDF-1.2", PdfWriter.VERSION_1_2), PDF_1_3("PDF-1.3", PdfWriter.VERSION_1_3), PDF_1_4("PDF-1.4",
-            PdfWriter.VERSION_1_4), PDF_1_5("PDF-1.5", PdfWriter.VERSION_1_5), PDF_1_6("PDF-1.6",
-                    PdfWriter.VERSION_1_6), PDF_1_7("PDF-1.7", PdfWriter.VERSION_1_7);
+    PDF_1_2("PDF-1.2", '2'), 
+    PDF_1_3("PDF-1.3", '3'), 
+    PDF_1_4("PDF-1.4", '4'),
+    PDF_1_5("PDF-1.5", '5'), 
+    PDF_1_6("PDF-1.6", '6'), 
+    PDF_1_7("PDF-1.7", '7');
 
     private final String name;
     private final char charVersion;
@@ -57,7 +59,7 @@ public enum PdfVersion {
     }
 
     /**
-     * Gets version as char (representation in PdfReader and PdfWriter).
+     * Gets version as char representation.
      */
     public char getCharVersion() {
         return charVersion;

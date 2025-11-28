@@ -29,16 +29,13 @@
  */
 package net.sf.jsignpdf;
 
-import java.io.FileOutputStream;
+import java.io.File;
 import java.io.IOException;
 
-import com.lowagie.text.Document;
-import com.lowagie.text.DocumentException;
-import com.lowagie.text.pdf.PdfReader;
-import com.lowagie.text.pdf.PdfStamper;
+import org.apache.pdfbox.pdmodel.PDDocument;
 
 /**
- * Simple small programm to uncompress PDFs.
+ * Simple small program to uncompress PDFs using Apache PDFBox.
  * 
  * @author Josef Cacek
  */
@@ -54,7 +51,7 @@ public class UncompressPdf {
             System.out.println("Usage:\njava " + UncompressPdf.class.getName() + " file.pdf [file2.pdf [...]]");
             return;
         }
-        Document.compress = false;
+        
         for (String tmpFile : args) {
             String newFileName = null;
             if (tmpFile.toLowerCase().endsWith(".pdf")) {
@@ -63,19 +60,14 @@ public class UncompressPdf {
                 newFileName = tmpFile + "_uncompressed.pdf";
             }
             System.out.println("Uncompressing " + tmpFile + " to " + newFileName);
-            try {
-                PdfReader reader = new PdfReader(tmpFile);
-                PdfStamper stamper = new PdfStamper(reader, new FileOutputStream(newFileName), '\0');
-                int total = reader.getNumberOfPages() + 1;
-                for (int i = 1; i < total; i++) {
-                    reader.setPageContent(i, reader.getPageContent(i));
-                }
-                stamper.close();
-            } catch (NullPointerException npe) {
-                npe.printStackTrace();
-            } catch (DocumentException e) {
-                e.printStackTrace();
+            
+            try (PDDocument document = org.apache.pdfbox.Loader.loadPDF(new File(tmpFile))) {
+                // PDFBox automatically handles stream decompression when loading
+                // and will save in an uncompressed format by default
+                document.save(new File(newFileName));
+                System.out.println("Successfully uncompressed " + tmpFile + " to " + newFileName);
             } catch (IOException e) {
+                System.err.println("Error processing " + tmpFile + ": " + e.getMessage());
                 e.printStackTrace();
             }
         }
