@@ -29,6 +29,34 @@
                     </archive>
                 </configuration>
             </plugin>
+            <plugin>
+                <artifactId>maven-shade-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>shade</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <createSourcesJar>true</createSourcesJar>
+                    <shadeSourcesContent>true</shadeSourcesContent>
+                    <createDependencyReducedPom>true</createDependencyReducedPom>
+                    <shadedArtifactAttached>true</shadedArtifactAttached>
+                    <shadedClassifierName>jar-with-dependencies</shadedClassifierName>
+                    <transformers>
+                        <transformer implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer" />
+                        <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+                            <manifestEntries>
+                                <Main-Class>${exec.mainClass}</Main-Class>
+                                <Add-Exports>jdk.crypto.cryptoki/sun.security.pkcs11 jdk.crypto.cryptoki/sun.security.pkcs11.wrapper java.base/sun.security.util java.base/sun.security.action java.base/sun.security.rsa</Add-Exports>
+                                <Add-Opens>jdk.crypto.cryptoki/sun.security.pkcs11 jdk.crypto.cryptoki/sun.security.pkcs11.wrapper java.base/sun.security.util java.base/sun.security.action</Add-Opens>
+                            </manifestEntries>
+                        </transformer>
+                    </transformers>
+                </configuration>
+            </plugin>
         </plugins>
     </build>
 </project>
