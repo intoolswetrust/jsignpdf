@@ -1,9 +1,26 @@
 #!/bin/bash
+set -euo pipefail
 
-DIRNAME=$(dirname "$(readlink -e "$0")")
-DIR=$(cd "$DIRNAME" || exit 112; pwd)
+# Follow symlinks until we get the real file.
+SOURCE="$0"
+while [ -L "$SOURCE" ]; do
+  # directory containing the symlink
+  DIR="$(cd -P "$(dirname "$SOURCE")" >/dev/null 2>&1 && pwd -P)"
+  # readlink returns the link target (may be relative)
+  TARGET="$(readlink "$SOURCE")"
+  # if target is relative, make it absolute relative to the symlink dir
+  case "$TARGET" in
+    /*) SOURCE="$TARGET" ;;
+    *)  SOURCE="$DIR/$TARGET" ;;
+  esac
+done
+# Now SOURCE is the real script path. Get its parent directory (script lives in bin/ so go up one)
+DIR="$(cd -P "$(dirname "$SOURCE")" >/dev/null 2>&1 && pwd -P)"
 
 [ "$OSTYPE" = "cygwin" ] && DIR="$( cygpath -m "$DIR" )"
+
+JAVA_HOME="${JAVA_HOME-}"
+JAVA_OPTS="${JAVA_OPTS-}"
 
 JAVA=java
 if [ -n "$JAVA_HOME" ]; then
