@@ -14,8 +14,13 @@ import net.sf.jsignpdf.TestConstants.TestPrivateKey;
 import net.sf.jsignpdf.signing.validation.PdfSignatureValidator;
 import net.sf.jsignpdf.signing.validation.PdfSignatureValidator.ValidationResult;
 
+/**
+ * Tests signing a PDF that already contains a signature. Verifies that append-mode signing
+ * preserves the first signature and adds a second one, both remaining cryptographically valid.
+ */
 public class MultipleSignaturesTest extends SigningTestBase {
 
+    /** Signs a PDF twice (with different keys) in append mode and validates both signatures. */
     @Test
     public void testDoubleSign() throws Exception {
         // First signing

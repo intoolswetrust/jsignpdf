@@ -10,8 +10,13 @@ import net.sf.jsignpdf.BasicSignerOptions;
 import net.sf.jsignpdf.SignerLogic;
 import net.sf.jsignpdf.signing.validation.PdfSignatureValidator.ValidationResult;
 
+/**
+ * Basic smoke tests for {@link SignerLogic#signFile()} verifying that the default signing
+ * flow produces a valid PDF with a correct PKCS#7 signature structure.
+ */
 public class BasicSigningTest extends SigningTestBase {
 
+    /** Verifies signature presence, SubFilter, ByteRange, CMS structure, and cryptographic validity. */
     @Test
     public void testDefaultSigningWorks() throws Exception {
         BasicSignerOptions options = createDefaultOptions();
@@ -27,6 +32,7 @@ public class BasicSigningTest extends SigningTestBase {
         assertTrue("Signature should be cryptographically valid", result.signatureValid);
     }
 
+    /** Verifies that {@link SignerLogic#signFile()} returns {@code true} on success. */
     @Test
     public void testSignFileReturnsTrue() throws Exception {
         BasicSignerOptions options = createDefaultOptions();
@@ -34,6 +40,7 @@ public class BasicSigningTest extends SigningTestBase {
         assertTrue("signFile() should return true", success);
     }
 
+    /** Verifies that the signed output file is larger than the unsigned input (signature adds bytes). */
     @Test
     public void testOutputFileIsLargerThanInput() throws Exception {
         BasicSignerOptions options = createDefaultOptions();

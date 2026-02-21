@@ -7,8 +7,13 @@ import org.junit.Test;
 import net.sf.jsignpdf.BasicSignerOptions;
 import net.sf.jsignpdf.signing.validation.PdfSignatureValidator.ValidationResult;
 
+/**
+ * Tests that signature metadata (reason, location, contact, sign date) is correctly
+ * embedded in the PDF signature dictionary and can be read back from the signed PDF.
+ */
 public class SignatureMetadataTest extends SigningTestBase {
 
+    /** Verifies that the reason field is stored in the signature dictionary. */
     @Test
     public void testReason() throws Exception {
         BasicSignerOptions options = createDefaultOptions();
@@ -19,6 +24,7 @@ public class SignatureMetadataTest extends SigningTestBase {
         assertEquals("Reason should match", "Test signing reason", result.reason);
     }
 
+    /** Verifies that the location field is stored in the signature dictionary. */
     @Test
     public void testLocation() throws Exception {
         BasicSignerOptions options = createDefaultOptions();
@@ -29,6 +35,7 @@ public class SignatureMetadataTest extends SigningTestBase {
         assertEquals("Location should match", "Test Location City", result.location);
     }
 
+    /** Verifies that the contact field is stored in the signature dictionary. */
     @Test
     public void testContact() throws Exception {
         BasicSignerOptions options = createDefaultOptions();
@@ -39,6 +46,7 @@ public class SignatureMetadataTest extends SigningTestBase {
         assertEquals("Contact should match", "test@example.com", result.contactInfo);
     }
 
+    /** Verifies that reason, location, and contact can all be set together. */
     @Test
     public void testAllMetadata() throws Exception {
         BasicSignerOptions options = createDefaultOptions();
@@ -53,6 +61,7 @@ public class SignatureMetadataTest extends SigningTestBase {
         assertEquals("Contact should match", "combined@example.com", result.contactInfo);
     }
 
+    /** Verifies that metadata fields are absent when not configured. */
     @Test
     public void testEmptyMetadata() throws Exception {
         BasicSignerOptions options = createDefaultOptions();
@@ -64,6 +73,7 @@ public class SignatureMetadataTest extends SigningTestBase {
         assertNull("Contact should be null", result.contactInfo);
     }
 
+    /** Verifies that the signing date is present in the signature dictionary. */
     @Test
     public void testSignDate() throws Exception {
         BasicSignerOptions options = createDefaultOptions();

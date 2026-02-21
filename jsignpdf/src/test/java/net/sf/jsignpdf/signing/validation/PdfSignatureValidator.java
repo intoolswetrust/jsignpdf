@@ -18,6 +18,11 @@ import org.bouncycastle.cms.SignerInformationStore;
 import org.bouncycastle.cms.jcajce.JcaSimpleSignerInfoVerifierBuilder;
 import org.bouncycastle.util.Store;
 
+/**
+ * Validates PDF signatures independently from OpenPDF by using Apache PDFBox to extract
+ * signature dictionaries and BouncyCastle CMS to parse and cryptographically verify the
+ * PKCS#7 containers.
+ */
 public class PdfSignatureValidator {
 
     private static final Map<String, String> DIGEST_OID_TO_NAME = new HashMap<>();
@@ -29,10 +34,16 @@ public class PdfSignatureValidator {
         DIGEST_OID_TO_NAME.put("1.3.36.3.2.1", "RIPEMD160");
     }
 
+    /**
+     * Maps a digest algorithm OID to its human-readable name (e.g. "2.16.840.1.101.3.4.2.1" to "SHA-256").
+     */
     public static String digestOidToName(String oid) {
         return DIGEST_OID_TO_NAME.getOrDefault(oid, oid);
     }
 
+    /**
+     * Holds all properties extracted from a PDF signature for test assertions.
+     */
     public static class ValidationResult {
         public int signatureCount;
         public String subFilter;
@@ -51,10 +62,17 @@ public class PdfSignatureValidator {
         public Calendar signDate;
     }
 
+    /**
+     * Validates the first signature in the given signed PDF.
+     */
     public static ValidationResult validate(File signedPdf) throws Exception {
         return validate(signedPdf, 0);
     }
 
+    /**
+     * Validates the signature at the given index. Extracts ByteRange, parses the CMS/PKCS#7
+     * container, verifies cryptographic integrity, and populates a {@link ValidationResult}.
+     */
     @SuppressWarnings("unchecked")
     public static ValidationResult validate(File signedPdf, int signatureIndex) throws Exception {
         byte[] fileBytes = Files.readAllBytes(signedPdf.toPath());
@@ -115,6 +133,9 @@ public class PdfSignatureValidator {
         }
     }
 
+    /**
+     * Returns the number of signature dictionaries in the given PDF.
+     */
     public static int getSignatureCount(File signedPdf) throws Exception {
         PDDocument doc = PDDocument.load(signedPdf);
         try {
