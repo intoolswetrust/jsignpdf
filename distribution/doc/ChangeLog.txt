@@ -1,3 +1,4 @@
+2025-02-21: Add integration tests for the PDF signing pipeline (#292)
 2025-01-04: Bump braces from 3.0.2 to 3.0.3 in /website (#199)
 2025-01-04: Bump webpack-dev-middleware from 5.3.3 to 5.3.4 in /website (#201)
 2025-01-04: Bump org.apache.maven.plugins:maven-source-plugin from 3.2.1 to 3.3.1 (#205)
