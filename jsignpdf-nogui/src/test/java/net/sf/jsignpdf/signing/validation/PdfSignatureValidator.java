@@ -7,6 +7,7 @@ import java.io.InputStream;
 import java.nio.file.Files;
 import java.util.Calendar;
 import java.util.Collection;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -39,6 +40,8 @@ import org.bouncycastle.cms.CMSSignedData;
 import org.bouncycastle.cms.SignerInformation;
 import org.bouncycastle.cms.SignerInformationStore;
 import org.bouncycastle.cms.jcajce.JcaSimpleSignerInfoVerifierBuilder;
+import org.bouncycastle.tsp.TimeStampToken;
+import org.bouncycastle.tsp.TimeStampTokenInfo;
 import org.bouncycastle.util.Store;
 
 /**
@@ -85,6 +88,11 @@ public class PdfSignatureValidator {
         public String location;
         public String contactInfo;
         public Calendar signDate;
+        // Timestamp properties
+        public boolean hasTimestamp;
+        public String timestampDigestAlgorithmOid;
+        public String timestampPolicyOid;
+        public Date timestampDate;
         // Visual / widget annotation properties
         public boolean hasVisibleRect;
         public int signaturePage = -1;
@@ -161,12 +169,43 @@ public class PdfSignatureValidator {
                         new JcaSimpleSignerInfoVerifierBuilder().setProvider("BC").build(certHolder));
             }
 
+            // Extract timestamp token from CMS unsigned attributes
+            extractTimestampInfo(signer, result);
+
             // Extract visual signature properties from the widget annotation
             extractWidgetProperties(doc, sig, result);
 
             return result;
         } finally {
             doc.close();
+        }
+    }
+
+    /**
+     * Extracts timestamp token information from the CMS signer's unsigned attributes.
+     * RFC 3161 timestamps are embedded as {@code id-smime-aa-timeStampToken} attributes.
+     */
+    private static void extractTimestampInfo(SignerInformation signer, ValidationResult result) {
+        try {
+            if (signer.getUnsignedAttributes() == null) {
+                return;
+            }
+            org.bouncycastle.asn1.cms.AttributeTable unsignedAttrs = signer.getUnsignedAttributes();
+            org.bouncycastle.asn1.cms.Attribute tsAttr = unsignedAttrs.get(
+                    org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers.id_aa_signatureTimeStampToken);
+            if (tsAttr == null) {
+                return;
+            }
+            byte[] tokenBytes = tsAttr.getAttrValues().getObjectAt(0).toASN1Primitive().getEncoded();
+            TimeStampToken tsToken = new TimeStampToken(
+                    new org.bouncycastle.cms.CMSSignedData(tokenBytes));
+            TimeStampTokenInfo tsInfo = tsToken.getTimeStampInfo();
+            result.hasTimestamp = true;
+            result.timestampDigestAlgorithmOid = tsInfo.getHashAlgorithm().getAlgorithm().getId();
+            result.timestampPolicyOid = tsInfo.getPolicy().getId();
+            result.timestampDate = tsInfo.getGenTime();
+        } catch (Exception e) {
+            // timestamp extraction failed, leave hasTimestamp as false
         }
     }
 
