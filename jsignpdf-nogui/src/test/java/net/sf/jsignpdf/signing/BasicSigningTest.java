@@ -23,7 +23,7 @@ public class BasicSigningTest extends SigningTestBase {
         ValidationResult result = signAndValidate(options);
 
         assertEquals("Should have 1 signature", 1, result.signatureCount);
-        assertEquals("SubFilter should be adbe.pkcs7.detached", "adbe.pkcs7.detached", result.subFilter);
+        assertEquals("SubFilter should be ETSI.CAdES.detached", "ETSI.CAdES.detached", result.subFilter);
         assertTrue("ByteRange should start at 0", result.byteRangeStartsAtZero);
         assertTrue("ByteRange should end at EOF", result.byteRangeEndsAtEof);
         assertTrue("ByteRange should have gap for Contents", result.byteRangeHasGap);

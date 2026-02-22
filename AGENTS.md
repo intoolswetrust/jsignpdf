@@ -1,60 +1,58 @@
 # AGENTS.md
 
-## Project Overview
+## Project Context
 
 JSignPdf is a multi-module Maven project.
 
-The `jsignpdf` module currently contains:
-
-* CLI logic
-* Core signing logic
-* Swing-based GUI
-* OpenPDF-based PDF manipulation
-
-Main classes:
-
-* Entry point:
-  `jsignpdf/src/main/java/net/sf/jsignpdf/Signer.java`
-
-* Core signing logic:
-  `jsignpdf/src/main/java/net/sf/jsignpdf/SignerLogic.java`
-
-The goal is to prepare a new module:
+The module:
 
 ```
 jsignpdf-nogui
 ```
 
-This module must contain:
+contains:
 
-* CLI entry point
+* CLI logic
 * Core signing logic
-* All non-GUI supporting classes
+* PDF signing implementation
+* Currently depends on OpenPDF (LibrePDF fork of iText)
 
-It must NOT contain:
+The goal of this phase:
 
-* Any Swing UI logic
-* Any AWT logic
-* Any GUI-specific resources
-* Any UI-specific configuration classes
+Replace OpenPDF usage in `jsignpdf-nogui` with the DSS framework:
 
-This is a preparation step for replacing OpenPDF in a later phase.
+[https://github.com/esig/dss/](https://github.com/esig/dss/)
+
+Relevant DSS modules may include:
+
+* dss-service
+* dss-pades
+* dss-document
+* dss-token
+* dss-utils
+* others if required
 
 ---
 
 ## Primary Objective
 
-Create a new module `jsignpdf-nogui` that:
+Replace OpenPDF-based PDF signing implementation with DSS-based PAdES signing.
 
-* Is a clean copy of `jsignpdf`
-* Removes all GUI-related logic
-* Compiles independently
-* Preserves CLI functionality
-* Keeps signing behavior unchanged
+The replacement must:
 
-The existing `jsignpdf` module must remain untouched.
+* Preserve existing CLI behavior
+* Preserve signing semantics
+* Preserve visible signature support (if currently supported)
+* Preserve certification levels (if supported)
+* Preserve incremental update behavior
+* Preserve detached/enveloped signature behavior (if applicable)
 
-No production logic refactoring unless absolutely necessary.
+If any feature cannot be replicated exactly:
+
+* DO NOT silently change behavior
+* Provide a clear report
+* Propose alternatives
+* Wait for confirmation
 
 ---
 
@@ -62,74 +60,102 @@ No production logic refactoring unless absolutely necessary.
 
 AI agents must:
 
-* NOT modify the original `jsignpdf` module
-* NOT change signing behavior
-* NOT change cryptographic logic
-* NOT alter business rules in `SignerLogic`
-* NOT replace OpenPDF in this phase
-* NOT merge modules
-
-The task is structural separation only.
-
----
-
-## Definition of GUI Code
-
-GUI code includes:
-
-* Classes importing:
-
-  * `javax.swing.*`
-  * `java.awt.*`
-  * Swing event handling
-  * UI models, renderers, dialogs, forms
-* Any classes whose primary responsibility is UI interaction
-* GUI resource files
-
-If a class mixes UI and logic:
-
-* Extract only if strictly necessary
-* Prefer removing UI layer rather than modifying logic
-
-Core signing and CLI behavior must remain identical.
+* NOT modify `jsignpdf` module
+* ONLY work inside `jsignpdf-nogui`
+* NOT change CLI argument structure unless absolutely required
+* NOT remove features without approval
+* NOT downgrade cryptographic strength
+* NOT introduce network dependencies
+* NOT introduce unstable timestamp dependencies
+* Keep deterministic behavior
 
 ---
 
-## Build Requirements
+## Required Migration Method
 
-`jsignpdf-nogui` must:
+Before replacing anything:
 
-* Be a proper Maven module
-* Be included in the parent `pom.xml`
-* Compile with `mvn clean verify`
-* Produce a working CLI artifact
-* Have no Swing dependency
-* Have no AWT dependency
+1. Identify all OpenPDF usages.
+2. Identify:
 
-Dependencies must be minimal and identical to original except for GUI-related ones.
+   * How PDFs are loaded
+   * How incremental updates are handled
+   * How signature appearance is created
+   * How ByteRange is constructed
+   * How CMS container is embedded
+   * How certification level is applied
+3. Map each responsibility to DSS equivalent.
+4. Produce a feature parity matrix.
+
+Only after approval may implementation begin.
 
 ---
 
-## CLI Preservation Rules
+## Required Feature Parity Matrix
 
-The CLI:
+The AI must produce a table like:
 
-* Must function the same way as in original module
-* Must keep argument parsing intact
-* Must keep exit codes intact
-* Must keep logging behavior intact
+| Feature | Current (OpenPDF) | DSS Equivalent | Parity | Notes |
+| ------- | ----------------- | -------------- | ------ | ----- |
 
-The new module should behave identically when used from command line.
+Parity values:
+
+* FULL
+* PARTIAL
+* REQUIRES ARCH CHANGE
+* NOT SUPPORTED
+
+If any entry is not FULL, the AI must:
+
+* Propose options
+* Explain trade-offs
+* Ask for confirmation
+
+---
+
+## Acceptable Architectural Changes
+
+If necessary, the following are allowed:
+
+* Introduce adapter layer
+* Introduce abstraction for PDF signing engine
+* Create internal signing service class
+* Separate PDF manipulation from business logic
+
+But:
+
+* CLI interface must remain stable
+* Signing logic semantics must remain identical
+* Tests must pass (if present)
+
+---
+
+## DSS-Specific Requirements
+
+The DSS integration must:
+
+* Use PAdES profile equivalent to current behavior
+* Support baseline B at minimum
+* Not require remote validation services
+* Work offline
+* Use local keystore (PKCS#12 or JKS)
+* Preserve visible signature placement (if currently supported)
+
+If visible signatures are not straightforward in DSS:
+
+* Explain how DSS handles signature appearance
+* Provide migration strategy
 
 ---
 
 ## Definition of Done
 
-The task is complete when:
+Task is complete when:
 
-* `jsignpdf-nogui` exists as a separate Maven module
-* It compiles independently
-* It contains no Swing or AWT imports
+* OpenPDF dependency is removed from `jsignpdf-nogui`
+* DSS dependencies are added
+* Code compiles
 * CLI works
-* Original module remains unchanged
-* `mvn clean verify` succeeds
+* Feature parity report provided
+* Any behavior differences explicitly documented
+* No silent feature loss

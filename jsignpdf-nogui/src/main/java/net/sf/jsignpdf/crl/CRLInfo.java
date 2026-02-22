@@ -46,14 +46,15 @@ import java.util.Set;
 import java.util.logging.Level;
 
 import org.apache.commons.io.input.CountingInputStream;
+import org.bouncycastle.asn1.ASN1OctetString;
+import org.bouncycastle.asn1.ASN1Primitive;
 import org.bouncycastle.asn1.ASN1String;
 import org.bouncycastle.asn1.x509.CRLDistPoint;
 import org.bouncycastle.asn1.x509.DistributionPoint;
 import org.bouncycastle.asn1.x509.DistributionPointName;
+import org.bouncycastle.asn1.x509.Extension;
 import org.bouncycastle.asn1.x509.GeneralName;
 import org.bouncycastle.asn1.x509.GeneralNames;
-import org.bouncycastle.asn1.x509.X509Extension;
-import org.bouncycastle.x509.extension.X509ExtensionUtil;
 
 import net.sf.jsignpdf.BasicSignerOptions;
 import net.sf.jsignpdf.Constants;
@@ -159,11 +160,12 @@ public class CRLInfo {
     private Set<String> getCrlUrls(final X509Certificate aCert) {
         final Set<String> tmpResult = new HashSet<String>();
         LOGGER.info(RES.get("console.crlinfo.retrieveCrlUrl", aCert.getSubjectX500Principal().getName()));
-        final byte[] crlDPExtension = aCert.getExtensionValue(X509Extension.cRLDistributionPoints.getId());
+        final byte[] crlDPExtension = aCert.getExtensionValue(Extension.cRLDistributionPoints.getId());
         if (crlDPExtension != null) {
             CRLDistPoint crlDistPoints = null;
             try {
-                crlDistPoints = CRLDistPoint.getInstance(X509ExtensionUtil.fromExtensionValue(crlDPExtension));
+                crlDistPoints = CRLDistPoint.getInstance(
+                        ASN1Primitive.fromByteArray(ASN1OctetString.getInstance(crlDPExtension).getOctets()));
             } catch (IOException e) {
                 LOGGER.log(Level.WARNING, "", e);
             }

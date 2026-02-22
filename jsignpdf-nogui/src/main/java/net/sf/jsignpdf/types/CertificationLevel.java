@@ -3,19 +3,19 @@
  * Version 1.1 (the "License"); you may not use this file except in
  * compliance with the License. You may obtain a copy of the License at
  * http://www.mozilla.org/MPL/
- * 
+ *
  * Software distributed under the License is distributed on an "AS IS"
  * basis, WITHOUT WARRANTY OF ANY KIND, either express or implied. See the
  * License for the specific language governing rights and limitations
  * under the License.
- * 
+ *
  * The Original Code is 'JSignPdf, a free application for PDF signing'.
- * 
+ *
  * The Initial Developer of the Original Code is Josef Cacek.
  * Portions created by Josef Cacek are Copyright (C) Josef Cacek. All Rights Reserved.
- * 
+ *
  * Contributor(s): Josef Cacek.
- * 
+ *
  * Alternatively, the contents of this file may be used under the terms
  * of the GNU Lesser General Public License, version 2.1 (the  "LGPL License"), in which case the
  * provisions of LGPL License are applicable instead of those
@@ -31,20 +31,19 @@ package net.sf.jsignpdf.types;
 
 import static net.sf.jsignpdf.Constants.RES;
 
-import com.lowagie.text.pdf.PdfSignatureAppearance;
+import eu.europa.esig.dss.enumerations.CertificationPermission;
 
 /**
  * Enum of possible certification levels used to Sign PDF.
- * 
+ *
  * @author Josef Cacek
  */
 public enum CertificationLevel {
 
-    NOT_CERTIFIED("certificationLevel.notCertified", PdfSignatureAppearance.NOT_CERTIFIED), CERTIFIED_NO_CHANGES_ALLOWED(
-            "certificationLevel.noChanges",
-            PdfSignatureAppearance.CERTIFIED_NO_CHANGES_ALLOWED), CERTIFIED_FORM_FILLING("certificationLevel.formFill",
-                    PdfSignatureAppearance.CERTIFIED_FORM_FILLING), CERTIFIED_FORM_FILLING_AND_ANNOTATIONS(
-                            "certificationLevel.formFillAnnot", PdfSignatureAppearance.CERTIFIED_FORM_FILLING_AND_ANNOTATIONS);
+    NOT_CERTIFIED("certificationLevel.notCertified", 0),
+    CERTIFIED_NO_CHANGES_ALLOWED("certificationLevel.noChanges", 1),
+    CERTIFIED_FORM_FILLING("certificationLevel.formFill", 2),
+    CERTIFIED_FORM_FILLING_AND_ANNOTATIONS("certificationLevel.formFillAnnot", 3);
 
     private String msgKey;
     private int level;
@@ -62,19 +61,38 @@ public enum CertificationLevel {
     }
 
     /**
-     * Returns Level as defined in iText.
-     * 
+     * Returns Level constant.
+     *
      * @return
-     * @see PdfSignatureAppearance#setCertificationLevel(int)
      */
     public int getLevel() {
         return level;
     }
 
     /**
+     * Converts to DSS {@link CertificationPermission}.
+     *
+     * @return DSS CertificationPermission or null for NOT_CERTIFIED
+     */
+    public CertificationPermission toDssCertificationPermission() {
+        switch (this) {
+            case NOT_CERTIFIED:
+                return null;
+            case CERTIFIED_NO_CHANGES_ALLOWED:
+                return CertificationPermission.NO_CHANGE_PERMITTED;
+            case CERTIFIED_FORM_FILLING:
+                return CertificationPermission.MINIMAL_CHANGES_PERMITTED;
+            case CERTIFIED_FORM_FILLING_AND_ANNOTATIONS:
+                return CertificationPermission.CHANGES_PERMITTED;
+            default:
+                return null;
+        }
+    }
+
+    /**
      * Returns {@link CertificationLevel} instance for given code. If the code is not found,
      * {@link CertificationLevel#NOT_CERTIFIED} is returned.
-     * 
+     *
      * @param certLevelCode level code
      * @return not-null CertificationLevel instance
      */

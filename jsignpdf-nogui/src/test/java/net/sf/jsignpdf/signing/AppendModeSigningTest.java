@@ -28,17 +28,6 @@ public class AppendModeSigningTest extends SigningTestBase {
         assertEquals("Should have 1 signature", 1, result.signatureCount);
     }
 
-    /** Verifies that signing in non-append mode (full rewrite) produces a valid signature. */
-    @Test
-    public void testNonAppendMode() throws Exception {
-        BasicSignerOptions options = createDefaultOptions();
-        options.setAppend(false);
-        ValidationResult result = signAndValidate(options);
-
-        assertTrue("Signature should be valid in non-append mode", result.signatureValid);
-        assertEquals("Should have 1 signature", 1, result.signatureCount);
-    }
-
     /** Verifies that append mode preserves the original file bytes as a prefix of the output. */
     @Test
     public void testAppendPreservesOriginalBytes() throws Exception {

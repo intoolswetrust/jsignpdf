@@ -37,6 +37,8 @@ import static net.sf.jsignpdf.types.PdfVersion.PDF_1_7;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import eu.europa.esig.dss.enumerations.DigestAlgorithm;
+
 /**
  * Enum of hash algorithms supported in PDF signatures.
  * 
@@ -74,5 +76,27 @@ public enum HashAlgorithm {
 
     public static String valuesWithPdfVersionAsString() {
         return Stream.of(values()).map(ha -> ha.toStringWithPdfVersion()).collect(joining(", "));
+    }
+
+    /**
+     * Converts to DSS {@link DigestAlgorithm}.
+     *
+     * @return DSS DigestAlgorithm
+     */
+    public DigestAlgorithm toDssDigestAlgorithm() {
+        switch (this) {
+            case SHA1:
+                return DigestAlgorithm.SHA1;
+            case SHA256:
+                return DigestAlgorithm.SHA256;
+            case SHA384:
+                return DigestAlgorithm.SHA384;
+            case SHA512:
+                return DigestAlgorithm.SHA512;
+            case RIPEMD160:
+                return DigestAlgorithm.RIPEMD160;
+            default:
+                throw new IllegalArgumentException("Unsupported hash algorithm: " + this);
+        }
     }
 }

@@ -22,9 +22,11 @@
         <maven.shade.plugin.version>3.6.1</maven.shade.plugin.version>
 
         <bouncycastle.version>1.70</bouncycastle.version>
+        <bouncycastle18.version>1.80</bouncycastle18.version>
+        <dss.version>5.13.1</dss.version>
         <jsign.pkcs11.version>1.1.0</jsign.pkcs11.version>
         <jsign.jpedal.version>4.92.13</jsign.jpedal.version>
-        <pdfbox.version>2.0.27</pdfbox.version>
+        <pdfbox.version>2.0.32</pdfbox.version>
         <pdf-renderer.version>140</pdf-renderer.version>
         <commons-io.version>2.21.0</commons-io.version>
         <commons-cli.version>1.11.0</commons-cli.version>
@@ -56,6 +58,23 @@
                 <groupId>org.bouncycastle</groupId>
                 <artifactId>bcpkix-jdk15on</artifactId>
                 <version>${bouncycastle.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.bouncycastle</groupId>
+                <artifactId>bcprov-jdk18on</artifactId>
+                <version>${bouncycastle18.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.bouncycastle</groupId>
+                <artifactId>bcpkix-jdk18on</artifactId>
+                <version>${bouncycastle18.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>eu.europa.ec.joinup.sd-dss</groupId>
+                <artifactId>dss-bom</artifactId>
+                <version>${dss.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
             </dependency>
             <dependency>
                 <groupId>org.apache.commons</groupId>

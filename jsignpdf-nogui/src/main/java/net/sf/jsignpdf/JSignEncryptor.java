@@ -52,7 +52,7 @@ public class JSignEncryptor {
      * @param aKey
      */
     public JSignEncryptor(final byte[] aKey) {
-        cipher = new PaddedBufferedBlockCipher(new CBCBlockCipher(new BlowfishEngine()));
+        cipher = new PaddedBufferedBlockCipher(CBCBlockCipher.newInstance(new BlowfishEngine()));
         key = new KeyParameter(aKey);
     }
 

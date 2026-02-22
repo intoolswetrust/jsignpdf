@@ -1,108 +1,133 @@
-You are working on the JSignPdf project:
-[https://github.com/intoolswetrust/jsignpdf](https://github.com/intoolswetrust/jsignpdf)
+# 🧠 Prompt for Claude Code
 
-This is a multi-module Maven project.
+You are working on the JSignPdf project.
 
-Your task is to create a new module:
+Focus ONLY on the module:
 
 ```
 jsignpdf-nogui
 ```
 
-This module must be a GUI-free copy of the existing `jsignpdf` module.
+Your task:
 
-Do NOT modify the original `jsignpdf` module.
+Replace OpenPDF usage with the DSS framework:
+[https://github.com/esig/dss/](https://github.com/esig/dss/)
 
-Do NOT replace OpenPDF.
+This is a full signing engine migration.
 
-Do NOT refactor signing logic unless strictly required for separation.
-
-Before making any changes, follow the steps below.
+Before changing any code, follow these steps strictly.
 
 ---
 
-## Step 1 — Analyze Current Module Structure
+## Step 1 — Analyze Current OpenPDF Usage
 
-Inspect the `jsignpdf` module and:
+Scan the entire `jsignpdf-nogui` module and:
+
+1. Identify all imports from:
+
+   * com.lowagie
+   * org.openpdf
+   * iText-related packages
+2. List:
+
+   * All classes directly using OpenPDF
+   * What each usage does (loading, signing, appearance, incremental save, etc.)
+3. Extract current signing flow:
+
+   * Input → processing → signature creation → output
+4. Identify:
+
+   * Visible signature logic
+   * Certification level handling
+   * ByteRange handling
+   * CMS creation logic
+   * Keystore handling
+5. Summarize the complete signing pipeline in structured form.
+
+Do NOT modify code yet.
+
+---
+
+## Step 2 — Research DSS Capabilities
+
+Using DSS documentation:
 
 1. Identify:
 
-   * GUI-related packages
-   * CLI-related classes
-   * Core signing classes
-2. Identify all classes importing:
-
-   * `javax.swing`
-   * `java.awt`
-3. Detect any mixed classes (UI + logic).
-4. Produce a structured dependency map:
-
-   * GUI → core
-   * CLI → core
-   * Core → PDF
-5. Explain:
-
-   * Whether CLI depends on GUI
-   * Whether GUI depends on CLI
-   * Whether core is properly separable
-
-Do NOT change anything yet.
+   * How to perform PAdES signing
+   * How to handle visible signatures
+   * How to control certification level
+   * How to perform incremental signing
+   * How to work with local keystore
+2. Determine which DSS modules are required.
+3. Produce a mapping of OpenPDF responsibilities → DSS equivalents.
 
 ---
 
-## Step 2 — Propose a Separation Strategy
+## Step 3 — Produce Feature Parity Matrix
 
-Provide a concrete plan:
+Create a structured matrix:
 
-* Which packages go to `jsignpdf-nogui`
-* Which packages stay only in original module
-* Whether any minimal extraction is needed
-* Whether any interfaces need to be introduced (only if absolutely necessary)
-* Exact steps to create new Maven module
-* Exact `pom.xml` changes required
+| Feature | Current Behavior | DSS Equivalent | Parity | Required Changes |
 
-The plan must:
+If any feature is not FULL parity:
 
-* Avoid modifying business logic
-* Avoid refactoring unless strictly necessary
-* Preserve CLI behavior exactly
+* Explain precisely why
+* Provide alternative solutions
+* Provide at least 2 possible approaches if feasible
+* Wait for user confirmation
 
-Wait for confirmation before implementing.
+Do NOT implement yet.
 
 ---
 
-## Step 3 — Implement Module Copy
+## Step 4 — Propose Migration Architecture
+
+Design a clean replacement approach:
+
+* Direct rewrite inside existing classes?
+* Introduce abstraction layer?
+* Introduce PdfSigningService?
+* Separate appearance handling?
+
+Explain trade-offs.
+
+Keep business logic intact.
+
+Wait for confirmation.
+
+---
+
+## Step 5 — Implement Migration
 
 After approval:
 
-1. Create `jsignpdf-nogui` module.
-2. Copy required source files.
-3. Remove GUI classes.
-4. Remove Swing/AWT imports.
-5. Adjust package references if necessary.
-6. Update parent `pom.xml`.
-7. Ensure:
+1. Remove OpenPDF dependencies from `jsignpdf-nogui`.
+2. Add required DSS dependencies.
+3. Implement signing using DSS.
+4. Preserve CLI behavior.
+5. Preserve feature semantics.
+6. Ensure build passes.
 
-   * `mvn clean verify` passes
-   * CLI works
-   * No Swing/AWT remains in `jsignpdf-nogui`
-
-If any production logic modification is required:
+If unexpected incompatibilities arise:
 
 * Stop
-* Explain precisely why
-* Wait for confirmation
+* Explain
+* Ask for guidance
 
 ---
 
 ## Constraints
 
-* No behavior changes
-* No dependency upgrades
-* No OpenPDF replacement
-* No formatting-only refactors
-* No opportunistic improvements
+* No silent feature loss
+* No behavior downgrade
+* No new network dependencies
+* No reliance on online OCSP unless already present
+* Deterministic behavior
 
-This task is structural only.
+Deliver:
 
-Deliver clean, minimal changes.
+1. Feature parity report
+2. Migration design summary
+3. Implementation
+

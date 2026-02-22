@@ -71,7 +71,7 @@ public class TimestampSigningTest extends SigningTestBase {
     }
 
     @Test
-    public void testTimestampWithSha1HashAlg() throws Exception {
+    public void testTimestampWithDifferentHashAlgSetting() throws Exception {
         BasicSignerOptions options = createDefaultOptions();
         options.setTimestamp(true);
         options.setTsaUrl(tsaServer.getUrl());
@@ -81,9 +81,9 @@ public class TimestampSigningTest extends SigningTestBase {
 
         assertTrue("Signature should be valid", result.signatureValid);
         assertTrue("Should have timestamp", result.hasTimestamp);
-        // SHA-1 OID is 1.3.14.3.2.26
-        assertEquals("Timestamp digest should be SHA-1",
-                "1.3.14.3.2.26", result.timestampDigestAlgorithmOid);
+        // DSS determines the timestamp digest algorithm internally (defaults to SHA-256)
+        assertEquals("Timestamp digest should be SHA-256",
+                "2.16.840.1.101.3.4.2.1", result.timestampDigestAlgorithmOid);
     }
 
     @Test

@@ -32,12 +32,13 @@ package net.sf.jsignpdf;
 import net.sf.jsignpdf.types.PageInfo;
 import net.sf.jsignpdf.utils.PdfUtils;
 
-import com.lowagie.text.Rectangle;
-import com.lowagie.text.pdf.PdfReader;
+import org.apache.pdfbox.pdmodel.PDDocument;
+import org.apache.pdfbox.pdmodel.PDPage;
+import org.apache.pdfbox.pdmodel.common.PDRectangle;
 
 /**
  * Provides additional information for selected input PDF file.
- * 
+ *
  * @author Josef Cacek
  */
 public class PdfExtraInfo {
@@ -52,31 +53,22 @@ public class PdfExtraInfo {
     }
 
     /**
-     * Returns number of pages in PDF document. If error occures (file not found or sth. similar) -1 is returned.
-     * 
-     * @return number of pages (or -1 if error occures)
+     * Returns number of pages in PDF document. If error occurs (file not found or sth. similar) -1 is returned.
+     *
+     * @return number of pages (or -1 if error occurs)
      */
     public int getNumberOfPages() {
         int tmpResult = 0;
-        PdfReader reader = null;
+        PDDocument doc = null;
         try {
-            try {
-                reader = new PdfReader(options.getInFile(), options.getPdfOwnerPwdStrX().getBytes());
-            } catch (Exception e) {
-                try {
-                    reader = new PdfReader(options.getInFile(), new byte[0]);
-                } catch (Exception e2) {
-                    // try to read without password
-                    reader = new PdfReader(options.getInFile());
-                }
-            }
-            tmpResult = reader.getNumberOfPages();
+            doc = PdfUtils.getPdfDocument(options.getInFile(), options.getPdfOwnerPwdStrX().getBytes());
+            tmpResult = doc.getNumberOfPages();
         } catch (Exception e) {
             tmpResult = -1;
         } finally {
-            if (reader != null) {
+            if (doc != null) {
                 try {
-                    reader.close();
+                    doc.close();
                 } catch (Exception e) {
                 }
             }
@@ -87,25 +79,34 @@ public class PdfExtraInfo {
 
     /**
      * Returns page info.
-     * 
-     * @param aPage number of page for which size should be returned
-     * @return FloatPoint or null
+     *
+     * @param aPage number of page for which size should be returned (1-based)
+     * @return PageInfo or null
      */
     public PageInfo getPageInfo(int aPage) {
         PageInfo tmpResult = null;
-        PdfReader reader = null;
+        PDDocument doc = null;
         try {
-            reader = PdfUtils.getPdfReader(options.getInFile(), options.getPdfOwnerPwdStrX().getBytes());
-            final Rectangle tmpRect = reader.getPageSizeWithRotation(aPage);
-            if (tmpRect != null) {
-                tmpResult = new PageInfo(tmpRect.getRight(), tmpRect.getTop());
+            doc = PdfUtils.getPdfDocument(options.getInFile(), options.getPdfOwnerPwdStrX().getBytes());
+            PDPage page = doc.getPage(aPage - 1);
+            PDRectangle mediaBox = page.getMediaBox();
+            int rotation = page.getRotation();
+            float width;
+            float height;
+            if (rotation == 90 || rotation == 270) {
+                width = mediaBox.getHeight();
+                height = mediaBox.getWidth();
+            } else {
+                width = mediaBox.getWidth();
+                height = mediaBox.getHeight();
             }
+            tmpResult = new PageInfo(width, height);
         } catch (Exception e) {
             // nothing to do
         } finally {
-            if (reader != null) {
+            if (doc != null) {
                 try {
-                    reader.close();
+                    doc.close();
                 } catch (Exception e) {
                 }
             }
