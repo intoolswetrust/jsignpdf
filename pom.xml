@@ -35,6 +35,7 @@
 
     <modules>
         <module>jsignpdf</module>
+        <module>jsignpdf-nogui</module>
         <module>installcert</module>
         <module>distribution</module>
     </modules>
