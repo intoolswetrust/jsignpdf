@@ -56,6 +56,8 @@ import javax.naming.ldap.Rdn;
 import net.sf.jsignpdf.extcsp.CloudFoxy;
 import net.sf.jsignpdf.ssl.SSLInitializer;
 import net.sf.jsignpdf.types.HashAlgorithm;
+import net.sf.jsignpdf.types.PDFEncryption;
+import net.sf.jsignpdf.types.PrintRight;
 import net.sf.jsignpdf.types.RenderMode;
 import net.sf.jsignpdf.types.ServerAuthentication;
 import net.sf.jsignpdf.utils.FontUtils;
@@ -68,6 +70,8 @@ import org.apache.commons.lang3.text.StrSubstitutor;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDPage;
 import org.apache.pdfbox.pdmodel.common.PDRectangle;
+import org.apache.pdfbox.pdmodel.encryption.AccessPermission;
+import org.apache.pdfbox.pdmodel.encryption.StandardProtectionPolicy;
 
 import eu.europa.esig.dss.enumerations.CertificationPermission;
 import eu.europa.esig.dss.enumerations.DigestAlgorithm;
@@ -131,6 +135,7 @@ public class SignerLogic implements Runnable {
 
         boolean finished = false;
         Throwable tmpException = null;
+        File encryptedTempFile = null;
         try {
             SSLInitializer.init(options);
 
@@ -211,8 +216,29 @@ public class SignerLogic implements Runnable {
             // Signature size estimation
             parameters.setContentSize(30000);
 
-            // Load input document
-            DSSDocument document = new FileDocument(options.getInFile());
+            // Encrypt PDF if requested (encrypt-before-sign)
+            final PDFEncryption pdfEncryption = options.getPdfEncryption();
+            if (pdfEncryption == PDFEncryption.PASSWORD) {
+                LOGGER.info(RES.get("console.setEncryption"));
+                encryptedTempFile = encryptPdf(options, pdfEncryption);
+                if (encryptedTempFile == null) {
+                    return false;
+                }
+                // Set password protection so DSS can read the encrypted file
+                String encOwnerPwd = options.getPdfOwnerPwdStr();
+                if (StringUtils.isNotEmpty(encOwnerPwd)) {
+                    parameters.setPasswordProtection(encOwnerPwd.toCharArray());
+                }
+            } else if (pdfEncryption == PDFEncryption.CERTIFICATE) {
+                // Certificate-based encryption is not supported: DSS PAdES cannot decrypt
+                // certificate-encrypted PDFs, and post-signing encryption invalidates the signature.
+                LOGGER.info(RES.get("console.encryptionCertificateNotSupported"));
+                return false;
+            }
+
+            // Load input document (encrypted temp file if password encryption was applied)
+            DSSDocument document = new FileDocument(
+                    encryptedTempFile != null ? encryptedTempFile.getAbsolutePath() : options.getInFile());
 
             // Handle visible signature
             if (options.isVisible()) {
@@ -261,10 +287,58 @@ public class SignerLogic implements Runnable {
         } catch (OutOfMemoryError e) {
             LOGGER.log(Level.SEVERE, RES.get("console.memoryError"), e);
         } finally {
+            if (encryptedTempFile != null) {
+                encryptedTempFile.delete();
+            }
             LOGGER.info(RES.get("console.finished." + (finished ? "ok" : "error")));
             options.fireSignerFinishedEvent(tmpException);
         }
         return finished;
+    }
+
+    /**
+     * Builds an {@link AccessPermission} from the options' rights fields.
+     */
+    private AccessPermission buildAccessPermission(BasicSignerOptions options) {
+        AccessPermission ap = new AccessPermission();
+        PrintRight printing = options.getRightPrinting();
+        ap.setCanPrint(printing == PrintRight.ALLOW_PRINTING);
+        ap.setCanPrintDegraded(printing != PrintRight.DISALLOW_PRINTING);
+        ap.setCanExtractContent(options.isRightCopy());
+        ap.setCanAssembleDocument(options.isRightAssembly());
+        ap.setCanFillInForm(options.isRightFillIn());
+        ap.setCanExtractForAccessibility(options.isRightScreanReaders());
+        ap.setCanModifyAnnotations(options.isRightModifyAnnotations());
+        ap.setCanModify(options.isRightModifyContents());
+        return ap;
+    }
+
+    /**
+     * Encrypts the input PDF with password-based encryption (encrypt-before-sign)
+     * and saves the result to a temp file.
+     *
+     * @return the encrypted temp file, or null if encryption failed
+     */
+    private File encryptPdf(BasicSignerOptions options, PDFEncryption pdfEncryption) throws Exception {
+        File inFile = new File(options.getInFile());
+
+        try (PDDocument doc = PDDocument.load(inFile)) {
+            if (!doc.getSignatureDictionaries().isEmpty()) {
+                LOGGER.info(RES.get("console.encryptionExistingSignatures"));
+                return null;
+            }
+
+            AccessPermission ap = buildAccessPermission(options);
+            StandardProtectionPolicy passwordPolicy = new StandardProtectionPolicy(
+                    options.getPdfOwnerPwdStr(), options.getPdfUserPwdStr(), ap);
+            passwordPolicy.setEncryptionKeyLength(128);
+            doc.protect(passwordPolicy);
+
+            File tempFile = File.createTempFile("jsignpdf-enc-", ".pdf");
+            tempFile.deleteOnExit();
+            doc.save(tempFile);
+            return tempFile;
+        }
     }
 
     /**
