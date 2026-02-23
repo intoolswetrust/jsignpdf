@@ -183,6 +183,12 @@ public class PasswordProtectedPdfSigningTest extends SigningTestBase {
         assertTrue("Signing with permissions should succeed", success);
 
         File outFile = new File(options.getOutFileX());
+
+        // Validate signature is cryptographically valid
+        ValidationResult result = PdfSignatureValidator.validate(outFile, OWNER_PASSWORD);
+        assertTrue("Signature should be valid", result.signatureValid);
+        assertEquals("Should have 1 signature", 1, result.signatureCount);
+
         // Load with the user password to see restricted permissions
         // (owner password grants full access per PDF spec)
         try (PDDocument doc = PDDocument.load(outFile, USER_PASSWORD)) {
