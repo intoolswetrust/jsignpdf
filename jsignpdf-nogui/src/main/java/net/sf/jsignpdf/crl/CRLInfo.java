@@ -110,7 +110,7 @@ public class CRLInfo {
      * Initialize CRLs (load URLs from certificates and download the CRLs).
      */
     private void initCrls() {
-        if (!options.isCrlEnabledX() || crls != null) {
+        if (!options.isCrlEnabled() || crls != null) {
             return;
         }
         LOGGER.info(RES.get("console.readingCRLs"));

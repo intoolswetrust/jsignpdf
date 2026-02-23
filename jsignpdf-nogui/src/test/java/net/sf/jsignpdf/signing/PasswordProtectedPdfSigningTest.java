@@ -60,7 +60,7 @@ public class PasswordProtectedPdfSigningTest extends SigningTestBase {
         boolean success = new SignerLogic(options).signFile();
         assertTrue("Signing should succeed", success);
 
-        File outFile = new File(options.getOutFileX());
+        File outFile = new File(options.getEffectiveOutFile());
         assertTrue("Output file should exist", outFile.exists());
 
         // The signed output retains PDF encryption, so the validator needs a password
@@ -114,7 +114,7 @@ public class PasswordProtectedPdfSigningTest extends SigningTestBase {
         boolean success = new SignerLogic(options).signFile();
         assertTrue("Signing with password encryption should succeed", success);
 
-        File outFile = new File(options.getOutFileX());
+        File outFile = new File(options.getEffectiveOutFile());
         assertTrue("Output file should exist", outFile.exists());
 
         // Output should be encrypted — loading without password should fail or report encrypted
@@ -152,7 +152,7 @@ public class PasswordProtectedPdfSigningTest extends SigningTestBase {
         boolean success1 = new SignerLogic(options1).signFile();
         assertTrue("First signing should succeed", success1);
 
-        File signedPdf = new File(options1.getOutFileX());
+        File signedPdf = new File(options1.getEffectiveOutFile());
         assertTrue("Signed PDF should exist", signedPdf.exists());
 
         // Now try to encrypt+sign the already-signed PDF
@@ -182,7 +182,7 @@ public class PasswordProtectedPdfSigningTest extends SigningTestBase {
         boolean success = new SignerLogic(options).signFile();
         assertTrue("Signing with permissions should succeed", success);
 
-        File outFile = new File(options.getOutFileX());
+        File outFile = new File(options.getEffectiveOutFile());
 
         // Validate signature is cryptographically valid
         ValidationResult result = PdfSignatureValidator.validate(outFile, OWNER_PASSWORD);

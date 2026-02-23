@@ -127,14 +127,13 @@ public class SignerLogic implements Runnable {
      * @return true when signing is finished successfully, false otherwise
      */
     public boolean signFile() {
-        final String outFile = options.getOutFileX();
+        final String outFile = options.getEffectiveOutFile();
         if (!validateInOutFiles(options.getInFile(), outFile)) {
             LOGGER.info(RES.get("console.skippingSigning"));
             return false;
         }
 
         boolean finished = false;
-        Throwable tmpException = null;
         File encryptedTempFile = null;
         try {
             SSLInitializer.init(options);
@@ -168,7 +167,7 @@ public class SignerLogic implements Runnable {
             // Build PAdES signature parameters
             PAdESSignatureParameters parameters = new PAdESSignatureParameters();
 
-            final HashAlgorithm hashAlgorithm = options.getHashAlgorithmX();
+            final HashAlgorithm hashAlgorithm = options.getHashAlgorithm();
             DigestAlgorithm digestAlgorithm = hashAlgorithm.toDssDigestAlgorithm();
 
             parameters.setDigestAlgorithm(digestAlgorithm);
@@ -176,7 +175,7 @@ public class SignerLogic implements Runnable {
             parameters.setCertificateChain(keyEntry.getCertificateChain());
 
             // Signature level: BASELINE_T if TSA is configured, otherwise BASELINE_B
-            boolean useTsa = options.isTimestampX() && StringUtils.isNotEmpty(options.getTsaUrl());
+            boolean useTsa = options.isTimestamp() && StringUtils.isNotEmpty(options.getTsaUrl());
             parameters.setSignatureLevel(useTsa ? SignatureLevel.PAdES_BASELINE_T : SignatureLevel.PAdES_BASELINE_B);
 
             // Signing date
@@ -202,13 +201,13 @@ public class SignerLogic implements Runnable {
 
             // Certification level
             LOGGER.info(RES.get("console.setCertificationLevel"));
-            CertificationPermission permission = options.getCertLevelX().toDssCertificationPermission();
+            CertificationPermission permission = options.getCertLevel().toDssCertificationPermission();
             if (permission != null) {
                 parameters.setPermission(permission);
             }
 
             // Password for encrypted PDFs
-            String ownerPwd = options.getPdfOwnerPwdStrX();
+            String ownerPwd = options.getPdfOwnerPwdStr();
             if (StringUtils.isNotEmpty(ownerPwd)) {
                 parameters.setPasswordProtection(ownerPwd.toCharArray());
             }
@@ -291,7 +290,6 @@ public class SignerLogic implements Runnable {
                 encryptedTempFile.delete();
             }
             LOGGER.info(RES.get("console.finished." + (finished ? "ok" : "error")));
-            options.fireSignerFinishedEvent(tmpException);
         }
         return finished;
     }

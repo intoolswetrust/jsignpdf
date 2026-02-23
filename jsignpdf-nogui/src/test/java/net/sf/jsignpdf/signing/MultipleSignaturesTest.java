@@ -29,7 +29,7 @@ public class MultipleSignaturesTest extends SigningTestBase {
         boolean success1 = new SignerLogic(options1).signFile();
         assertTrue("First signing should succeed", success1);
 
-        File firstSigned = new File(options1.getOutFileX());
+        File firstSigned = new File(options1.getEffectiveOutFile());
 
         // Second signing: use the first output as input
         File secondInput = new File(tempFolder.getRoot(), "second_input.pdf");

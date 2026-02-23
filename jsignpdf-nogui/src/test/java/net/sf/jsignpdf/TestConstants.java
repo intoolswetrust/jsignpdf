@@ -69,7 +69,6 @@ public class TestConstants {
 
         public BasicSignerOptions toSignerOptions(final Keystore aKeystore) {
             final BasicSignerOptions options = new BasicSignerOptions();
-            options.setAdvanced(true);
             options.setKsType(aKeystore.getKsType());
             options.setKsFile(aKeystore.getKsFile());
             options.setKsPasswd(aKeystore.getPasswd());

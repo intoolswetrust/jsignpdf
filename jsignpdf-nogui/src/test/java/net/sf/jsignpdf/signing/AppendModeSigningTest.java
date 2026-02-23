@@ -40,7 +40,7 @@ public class AppendModeSigningTest extends SigningTestBase {
         boolean success = new SignerLogic(options).signFile();
         assertTrue("Signing should succeed", success);
 
-        File outFile = new File(options.getOutFileX());
+        File outFile = new File(options.getEffectiveOutFile());
         byte[] signedBytes = Files.readAllBytes(outFile.toPath());
 
         assertTrue("Signed file should be larger than original", signedBytes.length > originalBytes.length);

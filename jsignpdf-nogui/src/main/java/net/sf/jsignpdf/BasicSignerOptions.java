@@ -72,9 +72,7 @@ public class BasicSignerOptions {
     private String reason;
     private String location;
     private String contact;
-    private SignResultListener listener;
     private boolean append = Constants.DEFVAL_APPEND;
-    private boolean advanced;
     private PDFEncryption pdfEncryption;
     private char[] pdfOwnerPwd;
     private char[] pdfUserPwd;
@@ -142,7 +140,6 @@ public class BasicSignerOptions {
         }
 
         setKsType(props.getProperty(Constants.PROPERTY_KSTYPE));
-        setAdvanced(props.getAsBool(Constants.PROPERTY_ADVANCED));
         setKsFile(props.getProperty(Constants.PROPERTY_KEYSTORE));
         setKeyAlias(props.getProperty(Constants.PROPERTY_ALIAS));
         setKeyIndex(props.getAsInt(Constants.PROPERTY_KEY_INDEX, Constants.DEFVAL_KEY_INDEX));
@@ -231,7 +228,6 @@ public class BasicSignerOptions {
      */
     public void storeOptions() {
         props.setProperty(Constants.PROPERTY_KSTYPE, getKsType());
-        props.setProperty(Constants.PROPERTY_ADVANCED, isAdvanced());
         props.setProperty(Constants.PROPERTY_KEYSTORE, getKsFile());
         props.setProperty(Constants.PROPERTY_ALIAS, getKeyAlias());
         props.setProperty(Constants.PROPERTY_KEY_INDEX, getKeyIndex());
@@ -315,18 +311,6 @@ public class BasicSignerOptions {
     }
 
     /**
-     * Fires event listener
-     *
-     * @param aResult
-     * @see #getListener()
-     */
-    protected void fireSignerFinishedEvent(final Throwable aResult) {
-        if (listener != null) {
-            listener.signerFinishedEvent(aResult);
-        }
-    }
-
-    /**
      * Converts array of characters to String. If array is null, empty string is returned
      *
      * @param aCharArr char array
@@ -399,7 +383,7 @@ public class BasicSignerOptions {
      *
      * @return
      */
-    public String getOutFileX() {
+    public String getEffectiveOutFile() {
         String tmpOut = StringUtils.defaultIfBlank(outFile, null);
         if (tmpOut == null) {
             String tmpExtension = "";
@@ -446,23 +430,15 @@ public class BasicSignerOptions {
         this.location = location;
     }
 
-    public SignResultListener getListener() {
-        return listener;
-    }
-
-    public void setListener(final SignResultListener listener) {
-        this.listener = listener;
-    }
-
     public char[] getKeyPasswd() {
         return keyPasswd;
     }
 
-    public char[] getKeyPasswdX() {
+    public char[] getEffectiveKeyPasswd() {
         if (keyPasswd != null && keyPasswd.length == 0) {
             keyPasswd = null;
         }
-        return (advanced && keyPasswd != null) ? keyPasswd : ksPasswd;
+        return keyPasswd != null ? keyPasswd : ksPasswd;
     }
 
     public String getKeyPasswdStr() {
@@ -481,20 +457,12 @@ public class BasicSignerOptions {
         return keyAlias;
     }
 
-    public String getKeyAliasX() {
-        return advanced ? keyAlias : null;
-    }
-
     public void setKeyAlias(final String keyAlias) {
         this.keyAlias = keyAlias;
     }
 
     public int getKeyIndex() {
         return keyIndex;
-    }
-
-    public int getKeyIndexX() {
-        return advanced ? keyIndex : Constants.DEFVAL_KEY_INDEX;
     }
 
     public void setKeyIndex(final int anIndex) {
@@ -507,21 +475,8 @@ public class BasicSignerOptions {
         return append;
     }
 
-    public boolean isAppendX() {
-        return (getPdfEncryption() == PDFEncryption.NONE)
-                && ((!Constants.DEFVAL_APPEND && advanced && append) || (Constants.DEFVAL_APPEND && (append || !advanced)));
-    }
-
     public void setAppend(final boolean append) {
         this.append = append;
-    }
-
-    public boolean isAdvanced() {
-        return advanced;
-    }
-
-    public void setAdvanced(final boolean advanced) {
-        this.advanced = advanced;
     }
 
     /**
@@ -559,10 +514,6 @@ public class BasicSignerOptions {
 
     public String getPdfOwnerPwdStr() {
         return charArrToStr(pdfOwnerPwd);
-    }
-
-    public String getPdfOwnerPwdStrX() {
-        return charArrToStr(advanced ? pdfOwnerPwd : null);
     }
 
     public void setPdfOwnerPwd(final char[] pdfOwnerPwd) {
@@ -608,10 +559,6 @@ public class BasicSignerOptions {
             certLevel = CertificationLevel.NOT_CERTIFIED;
         }
         return certLevel;
-    }
-
-    public CertificationLevel getCertLevelX() {
-        return advanced ? getCertLevel() : CertificationLevel.NOT_CERTIFIED;
     }
 
     public void setCertLevel(final CertificationLevel aCertLevel) {
@@ -880,10 +827,6 @@ public class BasicSignerOptions {
         return timestamp;
     }
 
-    public boolean isTimestampX() {
-        return advanced && timestamp;
-    }
-
     /**
      * @param timestamp the timestamp to set
      */
@@ -1049,10 +992,6 @@ public class BasicSignerOptions {
         return ocspEnabled;
     }
 
-    public boolean isOcspEnabledX() {
-        return advanced && ocspEnabled;
-    }
-
     /**
      * @param ocspEnabled the ocspEnabled to set
      */
@@ -1100,10 +1039,6 @@ public class BasicSignerOptions {
         return crlEnabled;
     }
 
-    public boolean isCrlEnabledX() {
-        return advanced && crlEnabled;
-    }
-
     public void setCrlEnabled(final boolean crlEnabled) {
         this.crlEnabled = crlEnabled;
     }
@@ -1113,13 +1048,6 @@ public class BasicSignerOptions {
             hashAlgorithm = Constants.DEFVAL_HASH_ALGORITHM;
         }
         return hashAlgorithm;
-    }
-
-    public HashAlgorithm getHashAlgorithmX() {
-        if (!advanced) {
-            return Constants.DEFVAL_HASH_ALGORITHM;
-        }
-        return getHashAlgorithm();
     }
 
     public void setHashAlgorithm(final HashAlgorithm hashAlgorithm) {
@@ -1184,7 +1112,7 @@ public class BasicSignerOptions {
      */
     public Proxy createProxy() {
         Proxy tmpResult = Proxy.NO_PROXY;
-        if (isAdvanced() && getProxyType() != Proxy.Type.DIRECT) {
+        if (getProxyType() != Proxy.Type.DIRECT) {
             tmpResult = new Proxy(getProxyType(), new InetSocketAddress(getProxyHost(), getProxyPort()));
         }
         return tmpResult;

@@ -144,7 +144,7 @@ public class CloudFoxy implements IExternalCryptoProvider {
     @Override
     public byte[] getSignature(BasicSignerOptions options, byte[] fingerprint) {
         byte[] signature = null;
-        HashAlgorithm hashAlgorithm = options.getHashAlgorithmX();
+        HashAlgorithm hashAlgorithm = options.getHashAlgorithm();
 
         if ((hashAlgorithm != HashAlgorithm.SHA1) && (hashAlgorithm != HashAlgorithm.SHA256)) {
             LOGGER.severe(RES.get("extcsp.unknownhashalg", options.getHashAlgorithm().getAlgorithmName()));

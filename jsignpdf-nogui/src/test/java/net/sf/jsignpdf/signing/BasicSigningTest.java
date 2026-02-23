@@ -49,7 +49,7 @@ public class BasicSigningTest extends SigningTestBase {
 
         new SignerLogic(options).signFile();
 
-        File outFile = new File(options.getOutFileX());
+        File outFile = new File(options.getEffectiveOutFile());
         assertTrue("Output file should exist", outFile.exists());
         assertTrue("Output should be larger than input", outFile.length() > inputSize);
     }

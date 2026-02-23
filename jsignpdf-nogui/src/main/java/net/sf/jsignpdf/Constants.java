@@ -152,7 +152,6 @@ public class Constants {
     public static final String EPROPERTY_USER_PWD = "enc.pdfUserPwd";
 
     public static final String PROPERTY_KSTYPE = "keystore.type";
-    public static final String PROPERTY_ADVANCED = "view.advanced";
     public static final String PROPERTY_ALIAS = "keystore.alias";
     public static final String PROPERTY_KEY_INDEX = "keystore.keyIndex";
     public static final String PROPERTY_STOREPWD = "store.passwords";
@@ -409,8 +408,6 @@ public class Constants {
     public static final String ARG_PROXY_TYPE_LONG = "proxy-type";
     public static final String ARG_PROXY_HOST_LONG = "proxy-host";
     public static final String ARG_PROXY_PORT_LONG = "proxy-port";
-
-    public static final String ARG_GUI = "gui";
 
     public static final Set<String> SUPPORTED_CRITICAL_EXTENSION_OIDS;
 

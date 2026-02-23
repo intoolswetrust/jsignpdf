@@ -85,7 +85,7 @@ public abstract class SigningTestBase {
     protected ValidationResult signAndValidate(BasicSignerOptions options) throws Exception {
         boolean result = new SignerLogic(options).signFile();
         assertTrue("Signing should succeed", result);
-        File outFile = new File(options.getOutFileX());
+        File outFile = new File(options.getEffectiveOutFile());
         assertTrue("Output file should exist", outFile.exists());
         return PdfSignatureValidator.validate(outFile);
     }

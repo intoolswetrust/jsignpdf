@@ -61,7 +61,7 @@ public class PdfExtraInfo {
         int tmpResult = 0;
         PDDocument doc = null;
         try {
-            doc = PdfUtils.getPdfDocument(options.getInFile(), options.getPdfOwnerPwdStrX().getBytes());
+            doc = PdfUtils.getPdfDocument(options.getInFile(), options.getPdfOwnerPwdStr().getBytes());
             tmpResult = doc.getNumberOfPages();
         } catch (Exception e) {
             tmpResult = -1;
@@ -87,7 +87,7 @@ public class PdfExtraInfo {
         PageInfo tmpResult = null;
         PDDocument doc = null;
         try {
-            doc = PdfUtils.getPdfDocument(options.getInFile(), options.getPdfOwnerPwdStrX().getBytes());
+            doc = PdfUtils.getPdfDocument(options.getInFile(), options.getPdfOwnerPwdStr().getBytes());
             PDPage page = doc.getPage(aPage - 1);
             PDRectangle mediaBox = page.getMediaBox();
             int rotation = page.getRotation();

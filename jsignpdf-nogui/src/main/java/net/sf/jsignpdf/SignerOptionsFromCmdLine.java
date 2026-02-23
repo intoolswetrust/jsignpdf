@@ -75,8 +75,6 @@ public class SignerOptionsFromCmdLine extends BasicSignerOptions {
     private boolean listKeyStores;
     private boolean listKeys;
 
-    private boolean gui;
-
     /**
      * Parses options provided as command line arguments.
      * @throws ParseException
@@ -98,9 +96,6 @@ public class SignerOptionsFromCmdLine extends BasicSignerOptions {
             }
             props.loadProperties(line.getOptionValue(ARG_LOADPROPS_FILE));
         }
-
-        // use the advanced mode for the command line even if the properties file says "view.advanced=false"
-        setAdvanced(true);
 
         if (line.hasOption(ARG_LOADPROPS) || line.hasOption(ARG_LOADPROPS_FILE)) {
             loadOptions();
@@ -240,7 +235,6 @@ public class SignerOptionsFromCmdLine extends BasicSignerOptions {
         if (line.hasOption(ARG_PROXY_PORT_LONG))
             setProxyPort(getInt(line.getParsedOptionValue(ARG_PROXY_PORT_LONG), getProxyPort()));
 
-        setGui(line.hasOption(ARG_GUI));
         if (ArrayUtils.isNotEmpty(files)) {
             setInFile(files[0]);
         }
@@ -431,7 +425,6 @@ public class SignerOptionsFromCmdLine extends BasicSignerOptions {
         OPTS.addOption(OptionBuilder.withDescription(RES.get("hlp.proxyPort", String.valueOf(DEFVAL_PROXY_PORT)))
                 .withLongOpt(ARG_PROXY_PORT_LONG).hasArg().withType(Number.class).withArgName("port").create());
 
-        OPTS.addOption(OptionBuilder.withLongOpt(ARG_GUI).withDescription(RES.get("hlp.gui")).create());
     }
 
     /**
@@ -579,14 +572,6 @@ public class SignerOptionsFromCmdLine extends BasicSignerOptions {
      */
     public void setOutPath(String outPath) {
         this.outPath = outPath;
-    }
-
-    public boolean isGui() {
-        return gui;
-    }
-
-    public void setGui(boolean gui) {
-        this.gui = gui;
     }
 
 }

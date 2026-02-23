@@ -224,9 +224,9 @@ public class KeyStoreUtils {
             throw new NullPointerException(message);
         }
         String tmpResult = null;
-        final String tmpAlias = options.getKeyAliasX();
+        final String tmpAlias = options.getKeyAlias();
         final List<String> tmpList = getAliasesList(aKs, options);
-        final int tmpIndex = options.getKeyIndexX();
+        final int tmpIndex = options.getKeyIndex();
 
         if (StringUtils.isNotEmpty(tmpAlias)) {
             tmpResult = tmpAlias;
@@ -412,7 +412,7 @@ public class KeyStoreUtils {
 
         String tmpAlias = getKeyAliasInternal(options, tmpKs);
         LOGGER.info(RES.get("console.getPrivateKey"));
-        final PrivateKey tmpPk = (PrivateKey) tmpKs.getKey(tmpAlias, options.getKeyPasswdX());
+        final PrivateKey tmpPk = (PrivateKey) tmpKs.getKey(tmpAlias, options.getEffectiveKeyPasswd());
         LOGGER.info(RES.get("console.getCertChain"));
         final Certificate[] tmpChain = tmpKs.getCertificateChain(tmpAlias);
         PrivateKeyInfo tmpResult = new PrivateKeyInfo(tmpPk, tmpChain);
