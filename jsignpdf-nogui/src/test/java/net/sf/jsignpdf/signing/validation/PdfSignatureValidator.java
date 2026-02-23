@@ -14,6 +14,8 @@ import java.util.Map;
 
 import org.apache.pdfbox.cos.COSArray;
 import org.apache.pdfbox.cos.COSBase;
+import org.apache.pdfbox.cos.COSDictionary;
+import org.apache.pdfbox.cos.COSInteger;
 import org.apache.pdfbox.cos.COSName;
 import org.apache.pdfbox.cos.COSString;
 import org.apache.pdfbox.contentstream.operator.Operator;
@@ -93,6 +95,9 @@ public class PdfSignatureValidator {
         public String timestampDigestAlgorithmOid;
         public String timestampPolicyOid;
         public Date timestampDate;
+        // DocMDP / Certification properties
+        public boolean isCertified;
+        public int docMdpPermission = -1;
         // Visual / widget annotation properties
         public boolean hasVisibleRect;
         public int signaturePage = -1;
@@ -107,18 +112,37 @@ public class PdfSignatureValidator {
      * Validates the first signature in the given signed PDF.
      */
     public static ValidationResult validate(File signedPdf) throws Exception {
-        return validate(signedPdf, 0);
+        return validate(signedPdf, 0, null);
+    }
+
+    /**
+     * Validates the first signature in the given signed PDF, using the provided password
+     * to decrypt it if encrypted.
+     */
+    public static ValidationResult validate(File signedPdf, String password) throws Exception {
+        return validate(signedPdf, 0, password);
+    }
+
+    /**
+     * Validates the signature at the given index.
+     */
+    public static ValidationResult validate(File signedPdf, int signatureIndex) throws Exception {
+        return validate(signedPdf, signatureIndex, null);
     }
 
     /**
      * Validates the signature at the given index. Extracts ByteRange, parses the CMS/PKCS#7
      * container, verifies cryptographic integrity, extracts visual properties from the widget
      * annotation, and populates a {@link ValidationResult}.
+     *
+     * @param signedPdf      the signed PDF file
+     * @param signatureIndex index of the signature to validate
+     * @param password       password for encrypted PDFs, or null if not encrypted
      */
     @SuppressWarnings("unchecked")
-    public static ValidationResult validate(File signedPdf, int signatureIndex) throws Exception {
+    public static ValidationResult validate(File signedPdf, int signatureIndex, String password) throws Exception {
         byte[] fileBytes = Files.readAllBytes(signedPdf.toPath());
-        PDDocument doc = PDDocument.load(fileBytes);
+        PDDocument doc = password != null ? PDDocument.load(fileBytes, password) : PDDocument.load(fileBytes);
         try {
             List<PDSignature> signatures = doc.getSignatureDictionaries();
             ValidationResult result = new ValidationResult();
@@ -174,6 +198,9 @@ public class PdfSignatureValidator {
 
             // Extract visual signature properties from the widget annotation
             extractWidgetProperties(doc, sig, result);
+
+            // Extract DocMDP certification level from the signature's /Reference array
+            extractDocMdpInfo(sig, result);
 
             return result;
         } finally {
@@ -256,6 +283,44 @@ public class PdfSignatureValidator {
                 }
             }
             return;
+        }
+    }
+
+    /**
+     * Extracts DocMDP certification level from the signature dictionary's {@code /Reference} array.
+     * DSS-produced certified signatures include a {@code /Reference} entry with
+     * {@code /TransformMethod = DocMDP} and {@code /TransformParams/P} holding the permission
+     * integer (1 = no changes, 2 = form filling, 3 = form filling + annotations).
+     */
+    private static void extractDocMdpInfo(PDSignature sig, ValidationResult result) {
+        try {
+            COSDictionary sigDict = sig.getCOSObject();
+            COSBase refBase = sigDict.getDictionaryObject(COSName.getPDFName("Reference"));
+            if (!(refBase instanceof COSArray)) {
+                return;
+            }
+            COSArray referenceArray = (COSArray) refBase;
+            for (int i = 0; i < referenceArray.size(); i++) {
+                COSBase entryBase = referenceArray.getObject(i);
+                if (!(entryBase instanceof COSDictionary)) {
+                    continue;
+                }
+                COSDictionary ref = (COSDictionary) entryBase;
+                COSName transformMethod = (COSName) ref.getDictionaryObject(COSName.getPDFName("TransformMethod"));
+                if (COSName.getPDFName("DocMDP").equals(transformMethod)) {
+                    result.isCertified = true;
+                    COSBase paramsBase = ref.getDictionaryObject(COSName.getPDFName("TransformParams"));
+                    if (paramsBase instanceof COSDictionary) {
+                        COSBase pValue = ((COSDictionary) paramsBase).getDictionaryObject(COSName.getPDFName("P"));
+                        if (pValue instanceof COSInteger) {
+                            result.docMdpPermission = ((COSInteger) pValue).intValue();
+                        }
+                    }
+                    return;
+                }
+            }
+        } catch (Exception e) {
+            // DocMDP extraction failed, leave defaults
         }
     }
 

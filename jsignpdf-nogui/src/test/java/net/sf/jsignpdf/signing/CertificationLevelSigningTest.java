@@ -44,5 +44,13 @@ public class CertificationLevelSigningTest extends SigningTestBase {
 
         assertTrue("Signature should be valid for " + level, result.signatureValid);
         assertEquals("Should have 1 signature", 1, result.signatureCount);
+
+        if (level == CertificationLevel.NOT_CERTIFIED) {
+            assertFalse("NOT_CERTIFIED should not have DocMDP", result.isCertified);
+        } else {
+            assertTrue(level + " should have DocMDP", result.isCertified);
+            assertEquals("DocMDP permission should match for " + level,
+                    level.getLevel(), result.docMdpPermission);
+        }
     }
 }
