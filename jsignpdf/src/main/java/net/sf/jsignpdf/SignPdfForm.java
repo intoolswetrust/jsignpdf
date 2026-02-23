@@ -81,6 +81,7 @@ public class SignPdfForm extends javax.swing.JFrame implements SignResultListene
     private SignerLogic signerLogic;
     private VisibleSignatureDialog vsDialog;
     private TsaDialog tsaDialog;
+    private BatchFrame batchFrame;
 
     public SignPdfForm(int aCloseOperation) {
         this(aCloseOperation, null);
@@ -98,6 +99,7 @@ public class SignPdfForm extends javax.swing.JFrame implements SignResultListene
         signerLogic = new SignerLogic(options);
         vsDialog = new VisibleSignatureDialog(this, true, options, fileChooser);
         tsaDialog = new TsaDialog(this, true, options);
+        batchFrame = new BatchFrame(this, options, infoDialog);
 
         options.loadOptions();
         try {
@@ -250,6 +252,7 @@ public class SignPdfForm extends javax.swing.JFrame implements SignResultListene
         setLabelAndMnemonic(btnVisibleSigSettings, "gui.visibleSignatureSettings.button");
 
         setLabelAndMnemonic(btnTsaOcsp, "gui.tsaOcsp.button");
+        setLabelAndMnemonic(btnBatchForm, "gui.batchProcessing.button");
     }
 
     /**
@@ -517,6 +520,7 @@ public class SignPdfForm extends javax.swing.JFrame implements SignResultListene
         lblEncCertFile = new javax.swing.JLabel();
         tfEncCertFile = new javax.swing.JTextField();
         btnEncCertFile = new javax.swing.JButton();
+        btnBatchForm = new javax.swing.JButton();
 
         infoDialog.setTitle("PDF Signer Output");
         infoDialog.addWindowListener(new java.awt.event.WindowAdapter() {
@@ -1163,8 +1167,30 @@ public class SignPdfForm extends javax.swing.JFrame implements SignResultListene
         gridBagConstraints.insets = new java.awt.Insets(1, 5, 1, 5);
         getContentPane().add(btnEncCertFile, gridBagConstraints);
 
+        btnBatchForm.setIcon(new javax.swing.ImageIcon(getClass().getResource("/net/sf/jsignpdf/refresh16.png"))); // NOI18N
+        btnBatchForm.setText("Batch signing");
+        btnBatchForm.setMargin(new java.awt.Insets(2, 4, 3, 14));
+        btnBatchForm.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnBatchFormActionPerformed(evt);
+            }
+        });
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 1;
+        gridBagConstraints.gridy = 19;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.VERTICAL;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.EAST;
+        gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
+        getContentPane().add(btnBatchForm, gridBagConstraints);
+            
         pack();
     }// </editor-fold>//GEN-END:initComponents
+
+    private void btnBatchFormActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_btnBatchFormActionPerformed
+        // store current options, we will use them as template for each file in batch
+        storeToOptions();
+        batchFrame.setVisible(true);
+    }// GEN-LAST:event_btnBatchFormActionPerformed
 
     private void btnEncCertFileActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_btnEncCertFileActionPerformed
         showFileChooser(tfEncCertFile, null, JFileChooser.OPEN_DIALOG);
@@ -1285,7 +1311,7 @@ public class SignPdfForm extends javax.swing.JFrame implements SignResultListene
         return tmpResult;
     }
 
-    private boolean checkCertEncryption() {
+    protected boolean checkCertEncryption() {
         boolean tmpResult = true;
         if (chkbAdvanced.isSelected() && cbPdfEncryption.getSelectedItem() == PDFEncryption.CERTIFICATE) {
             tmpResult = checkFileExists(tfEncCertFile, "gui.encryptionCertFile.label");
@@ -1359,6 +1385,7 @@ public class SignPdfForm extends javax.swing.JFrame implements SignResultListene
     }// GEN-LAST:event_btnTsaOcspActionPerformed
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton btnBatchForm;
     private javax.swing.JButton btnEncCertFile;
     private javax.swing.JButton btnInPdfFile;
     private javax.swing.JButton btnInfoClose;
