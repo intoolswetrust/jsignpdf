@@ -29,40 +29,29 @@
  */
 package net.sf.jsignpdf;
 
+import static net.sf.jsignpdf.Constants.L2TEXT_PLACEHOLDER_CERTIFICATE;
 import static net.sf.jsignpdf.Constants.L2TEXT_PLACEHOLDER_CONTACT;
 import static net.sf.jsignpdf.Constants.L2TEXT_PLACEHOLDER_LOCATION;
 import static net.sf.jsignpdf.Constants.L2TEXT_PLACEHOLDER_REASON;
 import static net.sf.jsignpdf.Constants.L2TEXT_PLACEHOLDER_SIGNER;
 import static net.sf.jsignpdf.Constants.L2TEXT_PLACEHOLDER_TIMESTAMP;
-import static net.sf.jsignpdf.Constants.L2TEXT_PLACEHOLDER_CERTIFICATE;
-import static net.sf.jsignpdf.Constants.RES;
 import static net.sf.jsignpdf.Constants.LOGGER;
+import static net.sf.jsignpdf.Constants.RES;
 
 import java.io.File;
 import java.io.FileOutputStream;
+import java.net.URI;
 import java.security.PrivateKey;
 import java.security.cert.Certificate;
 import java.security.cert.X509Certificate;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Level;
 
 import javax.naming.ldap.LdapName;
 import javax.naming.ldap.Rdn;
-
-import net.sf.jsignpdf.extcsp.CloudFoxy;
-import net.sf.jsignpdf.ssl.SSLInitializer;
-import net.sf.jsignpdf.types.HashAlgorithm;
-import net.sf.jsignpdf.types.PDFEncryption;
-import net.sf.jsignpdf.types.PrintRight;
-import net.sf.jsignpdf.types.RenderMode;
-import net.sf.jsignpdf.types.ServerAuthentication;
-import net.sf.jsignpdf.utils.FontUtils;
-import net.sf.jsignpdf.utils.KeyStoreUtils;
-import net.sf.jsignpdf.utils.PrivateKeySignatureToken;
 
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -86,9 +75,19 @@ import eu.europa.esig.dss.pades.SignatureFieldParameters;
 import eu.europa.esig.dss.pades.SignatureImageParameters;
 import eu.europa.esig.dss.pades.SignatureImageTextParameters;
 import eu.europa.esig.dss.pades.signature.PAdESService;
+import eu.europa.esig.dss.service.http.commons.TimestampDataLoader;
 import eu.europa.esig.dss.service.tsp.OnlineTSPSource;
-import eu.europa.esig.dss.validation.CommonCertificateVerifier;
 import eu.europa.esig.dss.token.DSSPrivateKeyEntry;
+import eu.europa.esig.dss.validation.CommonCertificateVerifier;
+import net.sf.jsignpdf.extcsp.CloudFoxy;
+import net.sf.jsignpdf.ssl.SSLInitializer;
+import net.sf.jsignpdf.types.HashAlgorithm;
+import net.sf.jsignpdf.types.PDFEncryption;
+import net.sf.jsignpdf.types.PrintRight;
+import net.sf.jsignpdf.types.ServerAuthentication;
+import net.sf.jsignpdf.utils.FontUtils;
+import net.sf.jsignpdf.utils.KeyStoreUtils;
+import net.sf.jsignpdf.utils.PrivateKeySignatureToken;
 
 /**
  * Main logic of signer application. It uses DSS PAdES for creating signatures in PDF.
@@ -228,11 +227,6 @@ public class SignerLogic implements Runnable {
                 if (StringUtils.isNotEmpty(encOwnerPwd)) {
                     parameters.setPasswordProtection(encOwnerPwd.toCharArray());
                 }
-            } else if (pdfEncryption == PDFEncryption.CERTIFICATE) {
-                // Certificate-based encryption is not supported: DSS PAdES cannot decrypt
-                // certificate-encrypted PDFs, and post-signing encryption invalidates the signature.
-                LOGGER.info(RES.get("console.encryptionCertificateNotSupported"));
-                return false;
             }
 
             // Load input document (encrypted temp file if password encryption was applied)
@@ -254,7 +248,13 @@ public class SignerLogic implements Runnable {
             // Configure TSA
             if (useTsa) {
                 LOGGER.info(RES.get("console.creatingTsaClient"));
-                OnlineTSPSource tspSource = new OnlineTSPSource(options.getTsaUrl());
+                TimestampDataLoader tsDataLoader = new TimestampDataLoader();
+                if (options.getTsaServerAuthn() == ServerAuthentication.PASSWORD) {
+                    URI tsaUri = URI.create(options.getTsaUrl());
+                    tsDataLoader.addAuthentication(tsaUri.getHost(), tsaUri.getPort(), null, options.getTsaUser(),
+                            options.getTsaPasswd().toCharArray());
+                }
+                OnlineTSPSource tspSource = new OnlineTSPSource(options.getTsaUrl(), tsDataLoader);
 
                 final String policyOid = options.getTsaPolicy();
                 if (StringUtils.isNotEmpty(policyOid)) {

@@ -157,8 +157,6 @@ public class Constants {
     public static final String PROPERTY_STOREPWD = "store.passwords";
 
     public static final String PROPERTY_APPEND = "signature.append";
-    @Deprecated
-    public static final String PROPERTY_ENCRYPTED_PDF = "inpdf.encrypted";
     public static final String PROPERTY_PDF_ENCRYPTION = "pdf.encryption";
     public static final String PROPERTY_PDF_ENCRYPTION_CERT_FILE = "pdf.encryption.publicKeyFile";
 
@@ -179,11 +177,9 @@ public class Constants {
     public static final String PROPERTY_VISIBLE_POS_LLY = "visibleSignature.lly";
     public static final String PROPERTY_VISIBLE_POS_URX = "visibleSignature.urx";
     public static final String PROPERTY_VISIBLE_POS_URY = "visibleSignature.ury";
-    public static final String PROPERTY_VISIBLE_BGSCALE = "visibleSignature.bgScale";
     public static final String PROPERTY_VISIBLE_RENDER = "visibleSignature.render";
     public static final String PROPERTY_VISIBLE_L2TEXT = "visibleSignature.l2text";
     public static final String PROPERTY_VISIBLE_L2TEXT_FONT_SIZE = "visibleSignature.l2textFontSize";
-    public static final String PROPERTY_VISIBLE_L4TEXT = "visibleSignature.l4text";
     public static final String PROPERTY_VISIBLE_IMG = "visibleSignature.img";
     public static final String PROPERTY_VISIBLE_BGIMG = "visibleSignature.bgImg";
     public static final String PROPERTY_VISIBLE_ACRO6LAYERS = "visibleSignature.acro6layers";
@@ -199,8 +195,6 @@ public class Constants {
     public static final String PROPERTY_TSA_POLICY = "tsa.policy";
     public static final String PROPERTY_TSA_HASH_ALG = "tsa.hash.algorithm";
 
-    public static final String PROPERTY_OCSP_ENABLED = "ocsp.enabled";
-    public static final String PROPERTY_OCSP_SERVER_URL = "ocsp.serverUrl";
     public static final String PROPERTY_CRL_ENABLED = "crl.enabled";
 
     public static final String PROPERTY_PROXY_TYPE = "proxy.type";
@@ -235,8 +229,6 @@ public class Constants {
 
     public static final HashAlgorithm DEFVAL_HASH_ALGORITHM = HashAlgorithm.SHA1;
 
-    public static final boolean DEFVAL_APPEND = toBoolean(true);
-
     public static final int DEFVAL_KEY_INDEX = 0;
     public static final int DEFVAL_PAGE = 1;
     public static final float DEFVAL_LLX = 0f;
@@ -244,8 +236,6 @@ public class Constants {
     public static final float DEFVAL_URX = 100f;
     public static final float DEFVAL_URY = 100f;
     public static final float DEFVAL_L2_FONT_SIZE = 10f;
-    public static final float DEFVAL_BG_SCALE = -1f;
-    public static final boolean DEFVAL_ACRO6LAYERS = true;
 
     public static final Proxy.Type DEFVAL_PROXY_TYPE = Proxy.Type.DIRECT;
     public static final int DEFVAL_PROXY_PORT = 80;
@@ -264,12 +254,6 @@ public class Constants {
 
     public static final String ARG_VERSION_LONG = "version";
     public static final String ARG_VERSION = "v";
-
-    public static final String ARG_LOADPROPS_LONG = "load-properties";
-    public static final String ARG_LOADPROPS = "lp";
-
-    public static final String ARG_LOADPROPS_FILE_LONG = "load-properties-file";
-    public static final String ARG_LOADPROPS_FILE = "lpf";
 
     public static final String ARG_LIST_KS_TYPES = "lkt";
     public static final String ARG_LIST_KS_TYPES_LONG = "list-keystore-types";
@@ -340,9 +324,6 @@ public class Constants {
     public static final String ARG_PWD_USER = "upwd";
     public static final String ARG_PWD_USER_LONG = "user-password";
 
-    public static final String ARG_ENC_CERT = "ec";
-    public static final String ARG_ENC_CERT_LONG = "encryption-certificate";
-
     public static final String ARG_RIGHT_PRINT = "pr";
     public static final String ARG_RIGHT_PRINT_LONG = "print-right";
 
@@ -362,15 +343,11 @@ public class Constants {
     public static final String ARG_POS_LLY = "lly";
     public static final String ARG_POS_URX = "urx";
     public static final String ARG_POS_URY = "ury";
-    public static final String ARG_BG_SCALE = "bg-scale";
-    public static final String ARG_RENDER_MODE = "render-mode";
     public static final String ARG_L2_TEXT_LONG = "l2-text";
 
     public static final String ARG_L2TEXT_FONT_SIZE = "fs";
     public static final String ARG_L2TEXT_FONT_SIZE_LONG = "font-size";
 
-    public static final String ARG_L4_TEXT_LONG = "l4-text";
-    public static final String ARG_IMG_PATH = "img-path";
     public static final String ARG_BG_PATH = "bg-path";
 
     public static final String ARG_DISABLE_ACRO6LAYERS = "disable-acrobat6-layer-mode";
@@ -401,8 +378,6 @@ public class Constants {
     public static final String ARG_TSA_HASH_ALG = "tsh";
     public static final String ARG_TSA_HASH_ALG_LONG = "tsa-hash-algorithm";
 
-    public static final String ARG_OCSP_LONG = "ocsp";
-    public static final String ARG_OCSP_SERVER_LONG = "ocsp-server-url";
     public static final String ARG_CRL_LONG = "crl";
 
     public static final String ARG_PROXY_TYPE_LONG = "proxy-type";

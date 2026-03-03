@@ -1,11 +1,10 @@
 package net.sf.jsignpdf.signing;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 import java.io.File;
-import java.io.FileOutputStream;
-import java.security.KeyStore;
-import java.security.cert.Certificate;
 
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDPage;
@@ -18,10 +17,10 @@ import org.junit.Test;
 import net.sf.jsignpdf.BasicSignerOptions;
 import net.sf.jsignpdf.SignerLogic;
 import net.sf.jsignpdf.TestConstants;
-import net.sf.jsignpdf.types.PDFEncryption;
-import net.sf.jsignpdf.types.PrintRight;
 import net.sf.jsignpdf.signing.validation.PdfSignatureValidator;
 import net.sf.jsignpdf.signing.validation.PdfSignatureValidator.ValidationResult;
+import net.sf.jsignpdf.types.PDFEncryption;
+import net.sf.jsignpdf.types.PrintRight;
 
 /**
  * Tests signing of password-protected PDF documents and PDF output encryption
@@ -128,22 +127,6 @@ public class PasswordProtectedPdfSigningTest extends SigningTestBase {
         assertEquals("Should have 1 signature", 1, result.signatureCount);
     }
 
-    /**
-     * Certificate-based encryption is not supported because DSS PAdES cannot decrypt
-     * certificate-encrypted PDFs, and post-signing encryption would invalidate the signature.
-     */
-    @Test
-    public void testCertificateEncryptionIsNotSupported() throws Exception {
-        File certFile = exportCertificateFromKeystore();
-
-        BasicSignerOptions options = createDefaultOptions();
-        options.setPdfEncryption(PDFEncryption.CERTIFICATE);
-        options.setPdfEncryptionCertFile(certFile.getAbsolutePath());
-
-        boolean success = new SignerLogic(options).signFile();
-        assertFalse("Certificate encryption should be rejected", success);
-    }
-
     /** Attempting to encrypt a PDF that already has signatures should fail. */
     @Test
     public void testEncryptionBlockedWhenExistingSignatures() throws Exception {
@@ -229,19 +212,4 @@ public class PasswordProtectedPdfSigningTest extends SigningTestBase {
         return protectedPdf;
     }
 
-    /**
-     * Exports the RSA2048 certificate from the test JKS keystore to a DER-encoded temp file.
-     */
-    private File exportCertificateFromKeystore() throws Exception {
-        KeyStore ks = KeyStore.getInstance("JKS");
-        try (java.io.FileInputStream fis = new java.io.FileInputStream(TestConstants.KEYSTORE_FILE_JKS)) {
-            ks.load(fis, TestConstants.KEYSTORE_TEST_PASSWD);
-        }
-        Certificate cert = ks.getCertificate(TestConstants.TestPrivateKey.RSA2048.getAlias());
-        File certFile = new File(tempFolder.getRoot(), "encrypt-cert.cer");
-        try (FileOutputStream fos = new FileOutputStream(certFile)) {
-            fos.write(cert.getEncoded());
-        }
-        return certFile;
-    }
 }

@@ -37,7 +37,7 @@ import static net.sf.jsignpdf.Constants.RES;
  * @author Josef Cacek
  */
 public enum PDFEncryption {
-    NONE("pdfEncryption.notEncrypted"), PASSWORD("pdfEncryption.password"), CERTIFICATE("pdfEncryption.certificate");
+    NONE("pdfEncryption.notEncrypted"), PASSWORD("pdfEncryption.password");
 
     private String msgKey;
 

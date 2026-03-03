@@ -37,13 +37,9 @@ import net.sf.jsignpdf.types.CertificationLevel;
 import net.sf.jsignpdf.types.HashAlgorithm;
 import net.sf.jsignpdf.types.PDFEncryption;
 import net.sf.jsignpdf.types.PrintRight;
-import net.sf.jsignpdf.types.RenderMode;
 import net.sf.jsignpdf.types.ServerAuthentication;
-import net.sf.jsignpdf.utils.PropertyProvider;
 
-import org.apache.commons.cli.ParseException;
 import org.apache.commons.lang3.StringUtils;
-import org.bouncycastle.crypto.CryptoException;
 
 /**
  * Options for PDF signer.
@@ -51,14 +47,6 @@ import org.bouncycastle.crypto.CryptoException;
  * @author Josef Cacek
  */
 public class BasicSignerOptions {
-
-    // private final static Logger LOGGER =
-    // Logger.getLogger(BasicSignerOptions.class);
-
-    protected final PropertyProvider props = PropertyProvider.getInstance();
-    protected final JSignEncryptor encryptor = new JSignEncryptor();
-
-    private String propertiesFilePath;
 
     private String ksType;
     private String ksFile;
@@ -72,15 +60,11 @@ public class BasicSignerOptions {
     private String reason;
     private String location;
     private String contact;
-    private boolean append = Constants.DEFVAL_APPEND;
     private PDFEncryption pdfEncryption;
     private char[] pdfOwnerPwd;
     private char[] pdfUserPwd;
-    private String pdfEncryptionCertFile;
     private CertificationLevel certLevel;
     private HashAlgorithm hashAlgorithm;
-
-    protected boolean storePasswords;
 
     // options from rights dialog
     private PrintRight rightPrinting;
@@ -98,14 +82,9 @@ public class BasicSignerOptions {
     private float positionLLY = Constants.DEFVAL_LLY;
     private float positionURX = Constants.DEFVAL_URX;
     private float positionURY = Constants.DEFVAL_URY;
-    private float bgImgScale = Constants.DEFVAL_BG_SCALE;
-    private RenderMode renderMode;
     private String l2Text;
-    private String l4Text;
     private float l2TextFontSize = Constants.DEFVAL_L2_FONT_SIZE;
-    private String imgPath;
     private String bgImgPath;
-    private boolean acro6Layers = Constants.DEFVAL_ACRO6LAYERS;
 
     // options for timestamps (provided by external TSA)
     private boolean timestamp;
@@ -120,8 +99,6 @@ public class BasicSignerOptions {
     private String tsaHashAlg;
 
     // options for certificate validation
-    private boolean ocspEnabled;
-    private String ocspServerUrl;
     private boolean crlEnabled;
 
     // Proxy connection
@@ -130,182 +107,6 @@ public class BasicSignerOptions {
     private int proxyPort;
 
     private String[] cmdLine;
-
-    /**
-     * Loads options from PropertyProvider
-     */
-    public void loadOptions() {
-        if (propertiesFilePath != null) {
-            props.loadProperties(propertiesFilePath);
-        }
-
-        setKsType(props.getProperty(Constants.PROPERTY_KSTYPE));
-        setKsFile(props.getProperty(Constants.PROPERTY_KEYSTORE));
-        setKeyAlias(props.getProperty(Constants.PROPERTY_ALIAS));
-        setKeyIndex(props.getAsInt(Constants.PROPERTY_KEY_INDEX, Constants.DEFVAL_KEY_INDEX));
-        setInFile(props.getProperty(Constants.PROPERTY_INPDF));
-        setOutFile(props.getProperty(Constants.PROPERTY_OUTPDF));
-        setReason(props.getProperty(Constants.PROPERTY_REASON));
-        setLocation(props.getProperty(Constants.PROPERTY_LOCATION));
-        setContact(props.getProperty(Constants.PROPERTY_CONTACT));
-        setAppend(props.getAsBool(Constants.PROPERTY_APPEND));
-        // backward compatibility
-        setPdfEncryption(props.getProperty(Constants.PROPERTY_PDF_ENCRYPTION));
-        if (pdfEncryption == null && props.getAsBool(Constants.PROPERTY_ENCRYPTED_PDF)) {
-            setPdfEncryption(PDFEncryption.PASSWORD);
-            props.removeProperty(Constants.PROPERTY_ENCRYPTED_PDF);
-        }
-        setPdfEncryptionCertFile(props.getProperty(Constants.PROPERTY_PDF_ENCRYPTION_CERT_FILE));
-        setCertLevel(props.getProperty(Constants.PROPERTY_CERT_LEVEL));
-        setHashAlgorithm(props.getProperty(Constants.PROPERTY_HASH_ALGORITHM));
-
-        setRightPrinting(props.getProperty(Constants.PROPERTY_RIGHT_PRINT));
-        setRightCopy(props.getAsBool(Constants.PROPERTY_RIGHT_COPY));
-        setRightAssembly(props.getAsBool(Constants.PROPERTY_RIGHT_ASSEMBLY));
-        setRightFillIn(props.getAsBool(Constants.PROPERTY_RIGHT_FILL_IN));
-        setRightScreanReaders(props.getAsBool(Constants.PROPERTY_RIGHT_SCR_READ));
-        setRightModifyAnnotations(props.getAsBool(Constants.PROPERTY_RIGHT_MOD_ANNOT));
-        setRightModifyContents(props.getAsBool(Constants.PROPERTY_RIGHT_MOD_CONT));
-
-        // visible signature options
-        setVisible(props.getAsBool(Constants.PROPERTY_VISIBLE_ENABLED));
-        setPage(props.getAsInt(Constants.PROPERTY_VISIBLE_PAGE, Constants.DEFVAL_PAGE));
-        setPositionLLX(props.getAsFloat(Constants.PROPERTY_VISIBLE_POS_LLX, Constants.DEFVAL_LLX));
-        setPositionLLY(props.getAsFloat(Constants.PROPERTY_VISIBLE_POS_LLY, Constants.DEFVAL_LLY));
-        setPositionURX(props.getAsFloat(Constants.PROPERTY_VISIBLE_POS_URX, Constants.DEFVAL_URX));
-        setPositionURY(props.getAsFloat(Constants.PROPERTY_VISIBLE_POS_URY, Constants.DEFVAL_URY));
-        setBgImgScale(props.getAsFloat(Constants.PROPERTY_VISIBLE_BGSCALE, Constants.DEFVAL_BG_SCALE));
-        setRenderMode(props.getProperty(Constants.PROPERTY_VISIBLE_RENDER));
-        setL2Text(props.getPropNullSensitive(Constants.PROPERTY_VISIBLE_L2TEXT));
-        setL2TextFontSize(props.getAsFloat(Constants.PROPERTY_VISIBLE_L2TEXT_FONT_SIZE, Constants.DEFVAL_L2_FONT_SIZE));
-        setL4Text(props.getPropNullSensitive(Constants.PROPERTY_VISIBLE_L4TEXT));
-        setImgPath(props.getProperty(Constants.PROPERTY_VISIBLE_IMG));
-        setBgImgPath(props.getProperty(Constants.PROPERTY_VISIBLE_BGIMG));
-        setAcro6Layers(!props.exists(Constants.PROPERTY_VISIBLE_ACRO6LAYERS)
-                || props.getAsBool(Constants.PROPERTY_VISIBLE_ACRO6LAYERS));
-
-        // TSA
-        setTimestamp(props.getAsBool(Constants.PROPERTY_TSA_ENABLED));
-        setTsaUrl(props.getProperty(Constants.PROPERTY_TSA_URL));
-        setTsaUser(props.getProperty(Constants.PROPERTY_TSA_USER));
-        // backward compatibility
-        setTsaServerAuthn(props.getProperty(Constants.PROPERTY_TSA_SERVER_AUTHN));
-        if (tsaServerAuthn == null && StringUtils.isNotEmpty(tsaUser)) {
-            setTsaServerAuthn(ServerAuthentication.PASSWORD);
-        }
-        setTsaCertFileType(props.getProperty(Constants.PROPERTY_TSA_CERT_FILE_TYPE));
-        setTsaCertFile(props.getProperty(Constants.PROPERTY_TSA_CERT_FILE));
-        setTsaPolicy(props.getProperty(Constants.PROPERTY_TSA_POLICY));
-        setTsaHashAlg(props.getProperty(Constants.PROPERTY_TSA_HASH_ALG));
-
-        // OCSP & CRL
-        setOcspEnabled(props.getAsBool(Constants.PROPERTY_OCSP_ENABLED));
-        setOcspServerUrl(props.getProperty(Constants.PROPERTY_OCSP_SERVER_URL));
-        setCrlEnabled(props.getAsBool(Constants.PROPERTY_CRL_ENABLED));
-
-        // proxy
-        setProxyType(props.getProperty(Constants.PROPERTY_PROXY_TYPE));
-        setProxyHost(props.getProperty(Constants.PROPERTY_PROXY_HOST));
-        setProxyPort(props.getAsInt(Constants.PROPERTY_PROXY_PORT, Constants.DEFVAL_PROXY_PORT));
-
-        // passwords
-        storePasswords = props.getAsBool(Constants.PROPERTY_STOREPWD);
-        final String tmpHome = getDecrypted(Constants.EPROPERTY_USERHOME);
-        final boolean tmpPasswords = storePasswords && Constants.USER_HOME != null && Constants.USER_HOME.equals(tmpHome);
-        if (tmpPasswords) {
-            setKsPasswd(getDecrypted(Constants.EPROPERTY_KS_PWD));
-            setKeyPasswd(getDecrypted(Constants.EPROPERTY_KEY_PWD));
-            setPdfOwnerPwd(getDecrypted(Constants.EPROPERTY_OWNER_PWD));
-            setPdfUserPwd(getDecrypted(Constants.EPROPERTY_USER_PWD));
-            setTsaPasswd(getDecrypted(Constants.EPROPERTY_TSA_PWD));
-            setTsaCertFilePwd(getDecrypted(Constants.EPROPERTY_TSA_CERT_PWD));
-        }
-
-    }
-
-    /**
-     * Stores options to PropertyProvider
-     */
-    public void storeOptions() {
-        props.setProperty(Constants.PROPERTY_KSTYPE, getKsType());
-        props.setProperty(Constants.PROPERTY_KEYSTORE, getKsFile());
-        props.setProperty(Constants.PROPERTY_ALIAS, getKeyAlias());
-        props.setProperty(Constants.PROPERTY_KEY_INDEX, getKeyIndex());
-        props.setProperty(Constants.PROPERTY_INPDF, getInFile());
-        props.setProperty(Constants.PROPERTY_OUTPDF, getOutFile());
-        props.setProperty(Constants.PROPERTY_REASON, getReason());
-        props.setProperty(Constants.PROPERTY_LOCATION, getLocation());
-        props.setProperty(Constants.PROPERTY_CONTACT, getContact());
-        props.setProperty(Constants.PROPERTY_APPEND, isAppend());
-        props.setProperty(Constants.PROPERTY_PDF_ENCRYPTION, getPdfEncryption().name());
-        props.setProperty(Constants.PROPERTY_PDF_ENCRYPTION_CERT_FILE, getPdfEncryptionCertFile());
-        props.setProperty(Constants.PROPERTY_CERT_LEVEL, getCertLevel().name());
-        props.setProperty(Constants.PROPERTY_HASH_ALGORITHM, getHashAlgorithm().name());
-
-        props.setProperty(Constants.PROPERTY_RIGHT_PRINT, getRightPrinting().name());
-        props.setProperty(Constants.PROPERTY_RIGHT_COPY, isRightCopy());
-        props.setProperty(Constants.PROPERTY_RIGHT_ASSEMBLY, isRightAssembly());
-        props.setProperty(Constants.PROPERTY_RIGHT_FILL_IN, isRightFillIn());
-        props.setProperty(Constants.PROPERTY_RIGHT_SCR_READ, isRightScreanReaders());
-        props.setProperty(Constants.PROPERTY_RIGHT_MOD_ANNOT, isRightModifyAnnotations());
-        props.setProperty(Constants.PROPERTY_RIGHT_MOD_CONT, isRightModifyContents());
-
-        // visible signature options
-        props.setProperty(Constants.PROPERTY_VISIBLE_ENABLED, isVisible());
-        props.setProperty(Constants.PROPERTY_VISIBLE_PAGE, getPage());
-        props.setProperty(Constants.PROPERTY_VISIBLE_POS_LLX, getPositionLLX());
-        props.setProperty(Constants.PROPERTY_VISIBLE_POS_LLY, getPositionLLY());
-        props.setProperty(Constants.PROPERTY_VISIBLE_POS_URX, getPositionURX());
-        props.setProperty(Constants.PROPERTY_VISIBLE_POS_URY, getPositionURY());
-        props.setProperty(Constants.PROPERTY_VISIBLE_BGSCALE, getBgImgScale());
-        props.setProperty(Constants.PROPERTY_VISIBLE_RENDER, getRenderMode().name());
-        props.setPropNullSensitive(Constants.PROPERTY_VISIBLE_L2TEXT, getL2Text());
-        props.setProperty(Constants.PROPERTY_VISIBLE_L2TEXT_FONT_SIZE, getL2TextFontSize());
-        props.setPropNullSensitive(Constants.PROPERTY_VISIBLE_L4TEXT, getL4Text());
-        props.setProperty(Constants.PROPERTY_VISIBLE_IMG, getImgPath());
-        props.setProperty(Constants.PROPERTY_VISIBLE_BGIMG, getBgImgPath());
-        props.setProperty(Constants.PROPERTY_VISIBLE_ACRO6LAYERS, isAcro6Layers());
-
-        props.setProperty(Constants.PROPERTY_TSA_ENABLED, isTimestamp());
-        props.setProperty(Constants.PROPERTY_TSA_URL, getTsaUrl());
-        props.setProperty(Constants.PROPERTY_TSA_USER, getTsaUser());
-        props.setProperty(Constants.PROPERTY_TSA_CERT_FILE_TYPE, getTsaCertFileType());
-        props.setProperty(Constants.PROPERTY_TSA_CERT_FILE, getTsaCertFile());
-        props.setProperty(Constants.PROPERTY_TSA_SERVER_AUTHN, getTsaServerAuthn().name());
-        props.setProperty(Constants.PROPERTY_TSA_POLICY, getTsaPolicy());
-        props.setProperty(Constants.PROPERTY_TSA_HASH_ALG, getTsaHashAlg());
-        props.setProperty(Constants.PROPERTY_OCSP_ENABLED, isOcspEnabled());
-        props.setProperty(Constants.PROPERTY_OCSP_SERVER_URL, getOcspServerUrl());
-        props.setProperty(Constants.PROPERTY_CRL_ENABLED, isCrlEnabled());
-
-        props.setProperty(Constants.PROPERTY_PROXY_TYPE, getProxyType().name());
-        props.setProperty(Constants.PROPERTY_PROXY_HOST, getProxyHost());
-        props.setProperty(Constants.PROPERTY_PROXY_PORT, getProxyPort());
-
-        props.setProperty(Constants.PROPERTY_STOREPWD, isStorePasswords());
-        setEncrypted(Constants.EPROPERTY_USERHOME, Constants.USER_HOME);
-        if (isStorePasswords()) {
-            setEncrypted(Constants.EPROPERTY_KS_PWD, new String(getKsPasswd()));
-            setEncrypted(Constants.EPROPERTY_KEY_PWD, new String(getKeyPasswd()));
-            setEncrypted(Constants.EPROPERTY_OWNER_PWD, new String(getPdfOwnerPwd()));
-            setEncrypted(Constants.EPROPERTY_USER_PWD, new String(getPdfUserPwd()));
-            setEncrypted(Constants.EPROPERTY_TSA_PWD, getTsaPasswd());
-            setEncrypted(Constants.EPROPERTY_TSA_CERT_PWD, getTsaCertFilePwd());
-        } else {
-            props.removeProperty(Constants.EPROPERTY_KS_PWD);
-            props.removeProperty(Constants.EPROPERTY_KEY_PWD);
-            props.removeProperty(Constants.EPROPERTY_OWNER_PWD);
-            props.removeProperty(Constants.EPROPERTY_USER_PWD);
-            props.removeProperty(Constants.EPROPERTY_TSA_PWD);
-            props.removeProperty(Constants.EPROPERTY_TSA_CERT_PWD);
-        }
-
-        if (propertiesFilePath != null) {
-            props.saveProperties(propertiesFilePath);
-        } else {
-            props.saveDefault();
-        }
-    }
 
     public void loadCmdLine() throws Exception {
     }
@@ -318,20 +119,6 @@ public class BasicSignerOptions {
      */
     private String charArrToStr(final char[] aCharArr) {
         return aCharArr == null ? "" : new String(aCharArr);
-    }
-
-    /**
-     * @return the propertiesFilePath
-     */
-    public String getPropertiesFilePath() {
-        return propertiesFilePath;
-    }
-
-    /**
-     * @param propertiesFilePath the propertiesFilePath to set
-     */
-    public void setPropertiesFilePath(final String propertiesFilePath) {
-        this.propertiesFilePath = propertiesFilePath;
     }
 
     public String getKsType() {
@@ -352,10 +139,6 @@ public class BasicSignerOptions {
 
     public char[] getKsPasswd() {
         return ksPasswd;
-    }
-
-    public String getKsPasswdStr() {
-        return charArrToStr(ksPasswd);
     }
 
     public void setKsPasswd(final char[] passwd) {
@@ -471,14 +254,6 @@ public class BasicSignerOptions {
             keyIndex = Constants.DEFVAL_KEY_INDEX;
     }
 
-    public boolean isAppend() {
-        return append;
-    }
-
-    public void setAppend(final boolean append) {
-        this.append = append;
-    }
-
     /**
      * @return the pdfEncryption
      */
@@ -518,20 +293,6 @@ public class BasicSignerOptions {
 
     public void setPdfOwnerPwd(final char[] pdfOwnerPwd) {
         this.pdfOwnerPwd = pdfOwnerPwd;
-    }
-
-    /**
-     * @return the pdfEncryptionCertFile
-     */
-    public String getPdfEncryptionCertFile() {
-        return pdfEncryptionCertFile;
-    }
-
-    /**
-     * @param pdfEncryptionCertFile the pdfEncryptionCertFile to set
-     */
-    public void setPdfEncryptionCertFile(final String pdfEncryptionCertFile) {
-        this.pdfEncryptionCertFile = pdfEncryptionCertFile;
     }
 
     public void setPdfOwnerPwd(final String aPasswd) {
@@ -696,59 +457,12 @@ public class BasicSignerOptions {
         this.positionURY = positionURY;
     }
 
-    public float getBgImgScale() {
-        return bgImgScale;
-    }
-
-    public void setBgImgScale(final float bgImgScale) {
-        this.bgImgScale = bgImgScale;
-    }
-
-    public RenderMode getRenderMode() {
-        if (renderMode == null) {
-            renderMode = RenderMode.DESCRIPTION_ONLY;
-        }
-        return renderMode;
-    }
-
-    public void setRenderMode(final RenderMode renderMode) {
-        this.renderMode = renderMode;
-    }
-
-    public void setRenderMode(final String aValue) {
-        RenderMode renderMode = null;
-        if (aValue != null) {
-            try {
-                renderMode = RenderMode.valueOf(aValue.toUpperCase(Locale.ENGLISH));
-            } catch (final Exception e) {
-                // probably illegal value - fallback to default (i.e. null)
-            }
-        }
-        setRenderMode(renderMode);
-    }
-
     public String getL2Text() {
         return l2Text;
     }
 
     public void setL2Text(final String text) {
         l2Text = text;
-    }
-
-    public String getL4Text() {
-        return l4Text;
-    }
-
-    public void setL4Text(final String text) {
-        l4Text = text;
-    }
-
-    public String getImgPath() {
-        return (imgPath = StringUtils.defaultIfBlank(imgPath, null));
-    }
-
-    public void setImgPath(final String imgPath) {
-        this.imgPath = imgPath;
     }
 
     public String getBgImgPath() {
@@ -774,50 +488,6 @@ public class BasicSignerOptions {
      */
     public void setL2TextFontSize(final float textFontSize) {
         l2TextFontSize = textFontSize;
-    }
-
-    /**
-     * @return the acro6Layers
-     */
-    public boolean isAcro6Layers() {
-        return acro6Layers;
-    }
-
-    /**
-     * @param acro6Layers the acro6Layers to set
-     */
-    public void setAcro6Layers(final boolean acro6Layers) {
-        this.acro6Layers = acro6Layers;
-    }
-
-    /**
-     * Returns decrypted property
-     *
-     * @param aProperty
-     * @return
-     */
-    protected String getDecrypted(final String aProperty) {
-        try {
-            return encryptor.decryptString(props.getProperty(aProperty));
-        } catch (final CryptoException e) {
-            e.printStackTrace();
-        }
-        return null;
-    }
-
-    /**
-     * Sets encrypted property
-     *
-     * @param aProperty
-     * @return
-     */
-    protected void setEncrypted(final String aProperty, final String aValue) {
-        try {
-            props.setProperty(aProperty, encryptor.encryptString(aValue));
-        } catch (final CryptoException e) {
-            e.printStackTrace();
-            props.removeProperty(aProperty);
-        }
     }
 
     /**
@@ -983,42 +653,6 @@ public class BasicSignerOptions {
      */
     public void setTsaPasswd(final String tsaPasswd) {
         this.tsaPasswd = tsaPasswd;
-    }
-
-    /**
-     * @return the ocspEnabled
-     */
-    public boolean isOcspEnabled() {
-        return ocspEnabled;
-    }
-
-    /**
-     * @param ocspEnabled the ocspEnabled to set
-     */
-    public void setOcspEnabled(final boolean ocspEnabled) {
-        this.ocspEnabled = ocspEnabled;
-    }
-
-    /**
-     * @return the ocspServerUrl
-     */
-    public String getOcspServerUrl() {
-        return ocspServerUrl;
-    }
-
-    /**
-     * @param ocspServerUrl the ocspServerUrl to set
-     */
-    public void setOcspServerUrl(final String ocspServerUrl) {
-        this.ocspServerUrl = ocspServerUrl;
-    }
-
-    public boolean isStorePasswords() {
-        return storePasswords;
-    }
-
-    public void setStorePasswords(final boolean storePasswords) {
-        this.storePasswords = storePasswords;
     }
 
     /**

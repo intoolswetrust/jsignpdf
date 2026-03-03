@@ -25,7 +25,6 @@ public class MultipleSignaturesTest extends SigningTestBase {
     public void testDoubleSign() throws Exception {
         // First signing
         BasicSignerOptions options1 = createDefaultOptions();
-        options1.setAppend(true);
         boolean success1 = new SignerLogic(options1).signFile();
         assertTrue("First signing should succeed", success1);
 
@@ -39,7 +38,6 @@ public class MultipleSignaturesTest extends SigningTestBase {
         BasicSignerOptions options2 = TestPrivateKey.RSA4096.toSignerOptions(Keystore.JKS);
         options2.setInFile(secondInput.getAbsolutePath());
         options2.setOutFile(secondOutput.getAbsolutePath());
-        options2.setAppend(true);
 
         boolean success2 = new SignerLogic(options2).signFile();
         assertTrue("Second signing should succeed", success2);
