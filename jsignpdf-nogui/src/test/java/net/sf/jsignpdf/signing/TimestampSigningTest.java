@@ -7,8 +7,10 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import net.sf.jsignpdf.BasicSignerOptions;
+import net.sf.jsignpdf.SignerLogic;
 import net.sf.jsignpdf.signing.tsa.EmbeddedTsaServer;
 import net.sf.jsignpdf.signing.validation.PdfSignatureValidator.ValidationResult;
+import net.sf.jsignpdf.types.ServerAuthentication;
 
 /**
  * Integration tests for PDF signing with RFC 3161 timestamping. Uses an
@@ -84,6 +86,51 @@ public class TimestampSigningTest extends SigningTestBase {
         // DSS determines the timestamp digest algorithm internally (defaults to SHA-256)
         assertEquals("Timestamp digest should be SHA-256",
                 "2.16.840.1.101.3.4.2.1", result.timestampDigestAlgorithmOid);
+    }
+
+    @Test
+    public void testSigningWithTsaBasicAuthentication() throws Exception {
+        EmbeddedTsaServer authTsa = new EmbeddedTsaServer();
+        authTsa.requireBasicAuth("tsaUser", "tsaSecret");
+        authTsa.start();
+        try {
+            BasicSignerOptions options = createDefaultOptions();
+            options.setTimestamp(true);
+            options.setTsaUrl(authTsa.getUrl());
+            options.setTsaHashAlg("SHA-256");
+            options.setTsaServerAuthn(ServerAuthentication.PASSWORD);
+            options.setTsaUser("tsaUser");
+            options.setTsaPasswd("tsaSecret");
+
+            ValidationResult result = signAndValidate(options);
+
+            assertEquals("Should have 1 signature", 1, result.signatureCount);
+            assertTrue("Signature should be valid", result.signatureValid);
+            assertTrue("Signature should contain a timestamp token", result.hasTimestamp);
+        } finally {
+            authTsa.stop();
+        }
+    }
+
+    @Test
+    public void testSigningWithTsaBasicAuthenticationWrongPassword() throws Exception {
+        EmbeddedTsaServer authTsa = new EmbeddedTsaServer();
+        authTsa.requireBasicAuth("tsaUser", "tsaSecret");
+        authTsa.start();
+        try {
+            BasicSignerOptions options = createDefaultOptions();
+            options.setTimestamp(true);
+            options.setTsaUrl(authTsa.getUrl());
+            options.setTsaHashAlg("SHA-256");
+            options.setTsaServerAuthn(ServerAuthentication.PASSWORD);
+            options.setTsaUser("tsaUser");
+            options.setTsaPasswd("wrongPassword");
+
+            boolean result = new SignerLogic(options).signFile();
+            assertFalse("Signing should fail when TSA authentication fails", result);
+        } finally {
+            authTsa.stop();
+        }
     }
 
     @Test

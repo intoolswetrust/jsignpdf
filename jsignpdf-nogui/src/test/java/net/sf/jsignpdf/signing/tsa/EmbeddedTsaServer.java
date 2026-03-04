@@ -35,6 +35,8 @@ import org.bouncycastle.tsp.TimeStampResponse;
 import org.bouncycastle.tsp.TimeStampResponseGenerator;
 import org.bouncycastle.tsp.TimeStampTokenGenerator;
 
+import com.sun.net.httpserver.BasicAuthenticator;
+import com.sun.net.httpserver.HttpContext;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpServer;
@@ -60,6 +62,16 @@ public class EmbeddedTsaServer {
     private PrivateKey tsaPrivateKey;
     private X509Certificate tsaCertificate;
     private final AtomicLong serialCounter = new AtomicLong(1);
+    private String requiredUsername;
+    private String requiredPassword;
+
+    /**
+     * Configures the server to require HTTP Basic authentication. Must be called before {@link #start()}.
+     */
+    public void requireBasicAuth(String username, String password) {
+        this.requiredUsername = username;
+        this.requiredPassword = password;
+    }
 
     /**
      * Generates a self-signed RSA key pair and certificate suitable for timestamping,
@@ -90,7 +102,15 @@ public class EmbeddedTsaServer {
 
         // Start HTTP server on a random port
         httpServer = HttpServer.create(new InetSocketAddress("127.0.0.1", 0), 0);
-        httpServer.createContext("/tsa", new TsaHandler());
+        HttpContext context = httpServer.createContext("/tsa", new TsaHandler());
+        if (requiredUsername != null) {
+            context.setAuthenticator(new BasicAuthenticator("tsa") {
+                @Override
+                public boolean checkCredentials(String username, String password) {
+                    return requiredUsername.equals(username) && requiredPassword.equals(password);
+                }
+            });
+        }
         httpServer.start();
     }
 
