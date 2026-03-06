@@ -31,7 +31,7 @@ package net.sf.jsignpdf.extcsp;
 
 import static net.sf.jsignpdf.Constants.LOGGER;
 
-import net.sf.jsignpdf.BasicSignerOptions;
+import net.sf.jsignpdf.SignerConfig;
 import net.sf.jsignpdf.Constants;
 import net.sf.jsignpdf.types.HashAlgorithm;
 import org.bouncycastle.util.encoders.Base64;
@@ -82,7 +82,7 @@ public class CloudFoxy implements IExternalCryptoProvider {
      * @return Certificate[] - a list of certificates, or null if there was an error
      */
     @Override
-    public Certificate[] getChain(BasicSignerOptions options) {
+    public Certificate[] getChain(SignerConfig options) {
         Certificate[] chain = null;
 
         String remoteAddress = options.getKsFile();
@@ -142,7 +142,7 @@ public class CloudFoxy implements IExternalCryptoProvider {
      * @return byte[] with the signature, null if there was an error
      */
     @Override
-    public byte[] getSignature(BasicSignerOptions options, byte[] fingerprint) {
+    public byte[] getSignature(SignerConfig options, byte[] fingerprint) {
         byte[] signature = null;
         HashAlgorithm hashAlgorithm = options.getHashAlgorithm();
 
@@ -212,7 +212,7 @@ public class CloudFoxy implements IExternalCryptoProvider {
      * @throws NullPointerException - when the list can't be created
      */
     @Override
-    public LinkedList<String> getAliasesList(BasicSignerOptions options) throws NullPointerException {
+    public LinkedList<String> getAliasesList(SignerConfig options) throws NullPointerException {
 
         LinkedList<String> aliasList;
 

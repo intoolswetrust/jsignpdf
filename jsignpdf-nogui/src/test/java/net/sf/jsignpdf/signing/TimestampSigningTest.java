@@ -6,7 +6,7 @@ import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import net.sf.jsignpdf.BasicSignerOptions;
+import net.sf.jsignpdf.SignerConfig;
 import net.sf.jsignpdf.SignerLogic;
 import net.sf.jsignpdf.signing.tsa.EmbeddedTsaServer;
 import net.sf.jsignpdf.signing.validation.PdfSignatureValidator.ValidationResult;
@@ -33,8 +33,8 @@ public class TimestampSigningTest extends SigningTestBase {
         }
     }
 
-    private BasicSignerOptions createTimestampOptions() throws Exception {
-        BasicSignerOptions options = createDefaultOptions();
+    private SignerConfig createTimestampOptions() throws Exception {
+        SignerConfig options = createDefaultOptions();
         options.setTimestamp(true);
         options.setTsaUrl(tsaServer.getUrl());
         options.setTsaHashAlg("SHA-256");
@@ -43,7 +43,7 @@ public class TimestampSigningTest extends SigningTestBase {
 
     @Test
     public void testSigningWithTimestamp() throws Exception {
-        BasicSignerOptions options = createTimestampOptions();
+        SignerConfig options = createTimestampOptions();
         ValidationResult result = signAndValidate(options);
 
         assertEquals("Should have 1 signature", 1, result.signatureCount);
@@ -53,7 +53,7 @@ public class TimestampSigningTest extends SigningTestBase {
 
     @Test
     public void testTimestampDigestAlgorithm() throws Exception {
-        BasicSignerOptions options = createTimestampOptions();
+        SignerConfig options = createTimestampOptions();
         ValidationResult result = signAndValidate(options);
 
         assertTrue("Should have timestamp", result.hasTimestamp);
@@ -65,7 +65,7 @@ public class TimestampSigningTest extends SigningTestBase {
 
     @Test
     public void testTimestampHasDate() throws Exception {
-        BasicSignerOptions options = createTimestampOptions();
+        SignerConfig options = createTimestampOptions();
         ValidationResult result = signAndValidate(options);
 
         assertTrue("Should have timestamp", result.hasTimestamp);
@@ -74,7 +74,7 @@ public class TimestampSigningTest extends SigningTestBase {
 
     @Test
     public void testTimestampWithDifferentHashAlgSetting() throws Exception {
-        BasicSignerOptions options = createDefaultOptions();
+        SignerConfig options = createDefaultOptions();
         options.setTimestamp(true);
         options.setTsaUrl(tsaServer.getUrl());
         options.setTsaHashAlg("SHA-1");
@@ -94,7 +94,7 @@ public class TimestampSigningTest extends SigningTestBase {
         authTsa.requireBasicAuth("tsaUser", "tsaSecret");
         authTsa.start();
         try {
-            BasicSignerOptions options = createDefaultOptions();
+            SignerConfig options = createDefaultOptions();
             options.setTimestamp(true);
             options.setTsaUrl(authTsa.getUrl());
             options.setTsaHashAlg("SHA-256");
@@ -118,7 +118,7 @@ public class TimestampSigningTest extends SigningTestBase {
         authTsa.requireBasicAuth("tsaUser", "tsaSecret");
         authTsa.start();
         try {
-            BasicSignerOptions options = createDefaultOptions();
+            SignerConfig options = createDefaultOptions();
             options.setTimestamp(true);
             options.setTsaUrl(authTsa.getUrl());
             options.setTsaHashAlg("SHA-256");
@@ -135,7 +135,7 @@ public class TimestampSigningTest extends SigningTestBase {
 
     @Test
     public void testSignatureWithoutTimestampHasNoToken() throws Exception {
-        BasicSignerOptions options = createDefaultOptions();
+        SignerConfig options = createDefaultOptions();
         // Timestamp NOT enabled
         ValidationResult result = signAndValidate(options);
 

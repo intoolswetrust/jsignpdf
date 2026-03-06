@@ -4,7 +4,7 @@ import static org.junit.Assert.*;
 
 import org.junit.Test;
 
-import net.sf.jsignpdf.BasicSignerOptions;
+import net.sf.jsignpdf.SignerConfig;
 import net.sf.jsignpdf.types.CertificationLevel;
 import net.sf.jsignpdf.signing.validation.PdfSignatureValidator.ValidationResult;
 
@@ -38,7 +38,7 @@ public class CertificationLevelSigningTest extends SigningTestBase {
     }
 
     private void assertCertificationLevel(CertificationLevel level) throws Exception {
-        BasicSignerOptions options = createDefaultOptions();
+        SignerConfig options = createDefaultOptions();
         options.setCertLevel(level);
         ValidationResult result = signAndValidate(options);
 

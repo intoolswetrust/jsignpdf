@@ -14,7 +14,7 @@ import org.apache.pdfbox.pdmodel.encryption.StandardProtectionPolicy;
 import org.apache.pdfbox.pdmodel.font.PDType1Font;
 import org.junit.Test;
 
-import net.sf.jsignpdf.BasicSignerOptions;
+import net.sf.jsignpdf.SignerConfig;
 import net.sf.jsignpdf.SignerLogic;
 import net.sf.jsignpdf.TestConstants;
 import net.sf.jsignpdf.signing.validation.PdfSignatureValidator;
@@ -38,7 +38,7 @@ public class PasswordProtectedPdfSigningTest extends SigningTestBase {
     @Test
     public void testSignWithOwnerPassword() throws Exception {
         File protectedPdf = createPasswordProtectedPdf(OWNER_PASSWORD, "");
-        BasicSignerOptions options = createDefaultOptions();
+        SignerConfig options = createDefaultOptions();
         options.setInFile(protectedPdf.getAbsolutePath());
         options.setPdfOwnerPwd(OWNER_PASSWORD.toCharArray());
 
@@ -52,7 +52,7 @@ public class PasswordProtectedPdfSigningTest extends SigningTestBase {
     @Test
     public void testSignWithOwnerAndUserPassword() throws Exception {
         File protectedPdf = createPasswordProtectedPdf(OWNER_PASSWORD, USER_PASSWORD);
-        BasicSignerOptions options = createDefaultOptions();
+        SignerConfig options = createDefaultOptions();
         options.setInFile(protectedPdf.getAbsolutePath());
         options.setPdfOwnerPwd(OWNER_PASSWORD.toCharArray());
 
@@ -73,7 +73,7 @@ public class PasswordProtectedPdfSigningTest extends SigningTestBase {
     @Test
     public void testSignWithoutPasswordFails() throws Exception {
         File protectedPdf = createPasswordProtectedPdf(OWNER_PASSWORD, USER_PASSWORD);
-        BasicSignerOptions options = createDefaultOptions();
+        SignerConfig options = createDefaultOptions();
         options.setInFile(protectedPdf.getAbsolutePath());
         // Do not set pdfOwnerPwd
 
@@ -85,7 +85,7 @@ public class PasswordProtectedPdfSigningTest extends SigningTestBase {
     @Test
     public void testSignedOutputHasValidStructure() throws Exception {
         File protectedPdf = createPasswordProtectedPdf(OWNER_PASSWORD, "");
-        BasicSignerOptions options = createDefaultOptions();
+        SignerConfig options = createDefaultOptions();
         options.setInFile(protectedPdf.getAbsolutePath());
         options.setPdfOwnerPwd(OWNER_PASSWORD.toCharArray());
 
@@ -105,7 +105,7 @@ public class PasswordProtectedPdfSigningTest extends SigningTestBase {
     /** Encrypts an unprotected PDF with PASSWORD encryption then signs it. */
     @Test
     public void testPasswordEncryptionBeforeSigning() throws Exception {
-        BasicSignerOptions options = createDefaultOptions();
+        SignerConfig options = createDefaultOptions();
         options.setPdfEncryption(PDFEncryption.PASSWORD);
         options.setPdfOwnerPwd(OWNER_PASSWORD.toCharArray());
         options.setPdfUserPwd(USER_PASSWORD.toCharArray());
@@ -131,7 +131,7 @@ public class PasswordProtectedPdfSigningTest extends SigningTestBase {
     @Test
     public void testEncryptionBlockedWhenExistingSignatures() throws Exception {
         // First, sign the PDF normally
-        BasicSignerOptions options1 = createDefaultOptions();
+        SignerConfig options1 = createDefaultOptions();
         boolean success1 = new SignerLogic(options1).signFile();
         assertTrue("First signing should succeed", success1);
 
@@ -139,7 +139,7 @@ public class PasswordProtectedPdfSigningTest extends SigningTestBase {
         assertTrue("Signed PDF should exist", signedPdf.exists());
 
         // Now try to encrypt+sign the already-signed PDF
-        BasicSignerOptions options2 = TestConstants.TestPrivateKey.RSA2048.toSignerOptions(TestConstants.Keystore.JKS);
+        SignerConfig options2 = TestConstants.TestPrivateKey.RSA2048.toSignerOptions(TestConstants.Keystore.JKS);
         options2.setInFile(signedPdf.getAbsolutePath());
         File outFile2 = new File(tempFolder.getRoot(), "output2.pdf");
         options2.setOutFile(outFile2.getAbsolutePath());
@@ -154,7 +154,7 @@ public class PasswordProtectedPdfSigningTest extends SigningTestBase {
     /** Encrypts a PDF with restricted permissions and verifies them in the output. */
     @Test
     public void testEncryptionWithPermissions() throws Exception {
-        BasicSignerOptions options = createDefaultOptions();
+        SignerConfig options = createDefaultOptions();
         options.setPdfEncryption(PDFEncryption.PASSWORD);
         options.setPdfOwnerPwd(OWNER_PASSWORD.toCharArray());
         options.setPdfUserPwd(USER_PASSWORD.toCharArray());

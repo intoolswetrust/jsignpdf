@@ -62,7 +62,7 @@ import java.util.logging.Level;
 
 import javax.crypto.Cipher;
 
-import net.sf.jsignpdf.BasicSignerOptions;
+import net.sf.jsignpdf.SignerConfig;
 import net.sf.jsignpdf.Constants;
 import net.sf.jsignpdf.PrivateKeyInfo;
 
@@ -100,7 +100,7 @@ public class KeyStoreUtils {
      *
      * @return array of key aliases
      */
-    public static String[] getKeyAliases(final BasicSignerOptions options) {
+    public static String[] getKeyAliases(final SignerConfig options) {
         if (options == null) {
             throw new NullPointerException("Options are empty.");
         }
@@ -126,7 +126,7 @@ public class KeyStoreUtils {
      * @param options
      * @return
      */
-    private static List<String> getAliasesList(final KeyStore aKs, final BasicSignerOptions options) {
+    private static List<String> getAliasesList(final KeyStore aKs, final SignerConfig options) {
         if (options == null) {
             throw new NullPointerException("Options are empty.");
         }
@@ -210,14 +210,14 @@ public class KeyStoreUtils {
      * @param options
      * @return key alias
      */
-    public static String getKeyAlias(final BasicSignerOptions options) {
+    public static String getKeyAlias(final SignerConfig options) {
         final KeyStore tmpKs = loadKeyStore(options.getKsType(), options.getKsFile(), options.getKsPasswd());
 
         String tmpResult = getKeyAliasInternal(options, tmpKs);
         return tmpResult;
     }
 
-    private static String getKeyAliasInternal(final BasicSignerOptions options, final KeyStore aKs) {
+    private static String getKeyAliasInternal(final SignerConfig options, final KeyStore aKs) {
         if (aKs == null) {
             final String message = RES.get("error.keystoreNull");
             LOGGER.warning(message);
@@ -406,7 +406,7 @@ public class KeyStoreUtils {
      * @throws KeyStoreException
      * @throws UnrecoverableKeyException
      */
-    public static PrivateKeyInfo getPkInfo(BasicSignerOptions options)
+    public static PrivateKeyInfo getPkInfo(SignerConfig options)
             throws UnrecoverableKeyException, KeyStoreException, NoSuchAlgorithmException {
         final KeyStore tmpKs = loadKeyStore(options.getKsType(), options.getKsFile(), options.getKsPasswd());
 

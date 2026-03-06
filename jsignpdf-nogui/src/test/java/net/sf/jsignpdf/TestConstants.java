@@ -67,8 +67,8 @@ public class TestConstants {
             return (name() + KEY_PASSWD_SUFFIX).toCharArray();
         }
 
-        public BasicSignerOptions toSignerOptions(final Keystore aKeystore) {
-            final BasicSignerOptions options = new BasicSignerOptions();
+        public SignerConfig toSignerOptions(final Keystore aKeystore) {
+            final SignerConfig options = new SignerConfig();
             options.setKsType(aKeystore.getKsType());
             options.setKsFile(aKeystore.getKsFile());
             options.setKsPasswd(aKeystore.getPasswd());

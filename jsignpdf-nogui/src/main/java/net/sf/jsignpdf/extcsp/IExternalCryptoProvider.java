@@ -29,7 +29,7 @@
  */
 package net.sf.jsignpdf.extcsp;
 
-import net.sf.jsignpdf.BasicSignerOptions;
+import net.sf.jsignpdf.SignerConfig;
 
 import java.security.cert.Certificate;
 import java.util.LinkedList;
@@ -49,7 +49,7 @@ public interface IExternalCryptoProvider {
      * @param options - command line / GUI provided options like keystore, PIN/password, alias, ...
      * @return Certificate[] - a list of certificates, or null if there was an error
      */
-    Certificate[] getChain(BasicSignerOptions options);
+    Certificate[] getChain(SignerConfig options);
 
     /**
      * The methods takes an initial fingerprint of the document, and creates and external signature, which can be used for the
@@ -59,7 +59,7 @@ public interface IExternalCryptoProvider {
      * @param fingerprint - byte array containing the document fingerprint (only SHA1 and SHA256 are supported)
      * @return byte[] with the signature, null if there was an error
      */
-    byte[] getSignature(BasicSignerOptions options, byte[] fingerprint);
+    byte[] getSignature(SignerConfig options, byte[] fingerprint);
 
     /**
      * Query the crypto provider and return a list of aliases available.
@@ -68,5 +68,5 @@ public interface IExternalCryptoProvider {
      * @return LinkedList<String> - a list of names
      * @throws NullPointerException - when the list can't be created
      */
-    public LinkedList<String> getAliasesList(BasicSignerOptions options) throws NullPointerException;
+    public LinkedList<String> getAliasesList(SignerConfig options) throws NullPointerException;
 }

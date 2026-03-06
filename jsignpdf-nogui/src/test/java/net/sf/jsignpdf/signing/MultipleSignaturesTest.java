@@ -7,7 +7,7 @@ import java.nio.file.Files;
 
 import org.junit.Test;
 
-import net.sf.jsignpdf.BasicSignerOptions;
+import net.sf.jsignpdf.SignerConfig;
 import net.sf.jsignpdf.SignerLogic;
 import net.sf.jsignpdf.TestConstants.Keystore;
 import net.sf.jsignpdf.TestConstants.TestPrivateKey;
@@ -24,7 +24,7 @@ public class MultipleSignaturesTest extends SigningTestBase {
     @Test
     public void testDoubleSign() throws Exception {
         // First signing
-        BasicSignerOptions options1 = createDefaultOptions();
+        SignerConfig options1 = createDefaultOptions();
         boolean success1 = new SignerLogic(options1).signFile();
         assertTrue("First signing should succeed", success1);
 
@@ -35,7 +35,7 @@ public class MultipleSignaturesTest extends SigningTestBase {
         Files.copy(firstSigned.toPath(), secondInput.toPath());
         File secondOutput = new File(tempFolder.getRoot(), "second_output.pdf");
 
-        BasicSignerOptions options2 = TestPrivateKey.RSA4096.toSignerOptions(Keystore.JKS);
+        SignerConfig options2 = TestPrivateKey.RSA4096.toSignerOptions(Keystore.JKS);
         options2.setInFile(secondInput.getAbsolutePath());
         options2.setOutFile(secondOutput.getAbsolutePath());
 

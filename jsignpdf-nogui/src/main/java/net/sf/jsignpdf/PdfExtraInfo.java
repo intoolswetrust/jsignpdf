@@ -43,12 +43,12 @@ import org.apache.pdfbox.pdmodel.common.PDRectangle;
  */
 public class PdfExtraInfo {
 
-    private BasicSignerOptions options;
+    private SignerConfig options;
 
     /**
      * @param anOptions
      */
-    public PdfExtraInfo(BasicSignerOptions anOptions) {
+    public PdfExtraInfo(SignerConfig anOptions) {
         options = anOptions;
     }
 

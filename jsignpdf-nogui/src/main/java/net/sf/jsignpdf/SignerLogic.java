@@ -96,14 +96,14 @@ import net.sf.jsignpdf.utils.PrivateKeySignatureToken;
  */
 public class SignerLogic implements Runnable {
 
-    private final BasicSignerOptions options;
+    private final SignerConfig options;
 
     /**
      * Constructor with all necessary parameters.
      *
      * @param anOptions options of signer
      */
-    public SignerLogic(final BasicSignerOptions anOptions) {
+    public SignerLogic(final SignerConfig anOptions) {
         if (anOptions == null) {
             throw new NullPointerException("Options has to be filled.");
         }
@@ -297,7 +297,7 @@ public class SignerLogic implements Runnable {
     /**
      * Builds an {@link AccessPermission} from the options' rights fields.
      */
-    private AccessPermission buildAccessPermission(BasicSignerOptions options) {
+    private AccessPermission buildAccessPermission(SignerConfig options) {
         AccessPermission ap = new AccessPermission();
         PrintRight printing = options.getRightPrinting();
         ap.setCanPrint(printing == PrintRight.ALLOW_PRINTING);
@@ -317,7 +317,7 @@ public class SignerLogic implements Runnable {
      *
      * @return the encrypted temp file, or null if encryption failed
      */
-    private File encryptPdf(BasicSignerOptions options, PDFEncryption pdfEncryption) throws Exception {
+    private File encryptPdf(SignerConfig options, PDFEncryption pdfEncryption) throws Exception {
         File inFile = new File(options.getInFile());
 
         try (PDDocument doc = PDDocument.load(inFile)) {
@@ -439,11 +439,11 @@ public class SignerLogic implements Runnable {
         parameters.setImageParameters(imageParams);
     }
 
-    private static String reason(BasicSignerOptions options) {
+    private static String reason(SignerConfig options) {
         return options.getReason();
     }
 
-    private static String location(BasicSignerOptions options) {
+    private static String location(SignerConfig options) {
         return options.getLocation();
     }
 

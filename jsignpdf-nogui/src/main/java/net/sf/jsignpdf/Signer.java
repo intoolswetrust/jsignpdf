@@ -72,7 +72,7 @@ public class Signer {
     private static void printHelp() {
         final HelpFormatter formatter = new HelpFormatter();
         formatter.printHelp(80, "java -jar JSignPdf.jar [file1.pdf [file2.pdf ...]]", RES.get("hlp.header"),
-                SignerOptionsFromCmdLine.OPTS, NEW_LINE + RES.get("hlp.footer.exitCodes") + NEW_LINE
+                SignerConfig.OPTS, NEW_LINE + RES.get("hlp.footer.exitCodes") + NEW_LINE
                         + StringUtils.repeat("-", 80) + NEW_LINE + RES.get("hlp.footer.examples"),
                 true);
     }
@@ -83,10 +83,10 @@ public class Signer {
      * @param args
      */
     public static void main(String[] args) {
-        SignerOptionsFromCmdLine tmpOpts = null;
+        SignerConfig tmpOpts = null;
 
         if (args != null && args.length > 0) {
-            tmpOpts = new SignerOptionsFromCmdLine();
+            tmpOpts = new SignerConfig();
             parseCommandLine(args, tmpOpts);
         }
 
@@ -181,7 +181,7 @@ public class Signer {
      *
      * @param anOpts
      */
-    private static void signFiles(SignerOptionsFromCmdLine anOpts) {
+    private static void signFiles(SignerConfig anOpts) {
         final SignerLogic tmpLogic = new SignerLogic(anOpts);
         if (ArrayUtils.isEmpty(anOpts.getFiles())) {
             // we've used -lp (loadproperties) parameter
@@ -245,7 +245,7 @@ public class Signer {
      * @param args
      * @param opts
      */
-    private static void parseCommandLine(String[] args, final SignerOptionsFromCmdLine opts) {
+    private static void parseCommandLine(String[] args, final SignerConfig opts) {
         opts.setCmdLine(args);
         try {
             opts.loadCmdLine();

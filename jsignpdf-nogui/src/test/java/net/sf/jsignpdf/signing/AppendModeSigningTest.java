@@ -8,7 +8,7 @@ import java.nio.file.Files;
 
 import org.junit.Test;
 
-import net.sf.jsignpdf.BasicSignerOptions;
+import net.sf.jsignpdf.SignerConfig;
 import net.sf.jsignpdf.SignerLogic;
 
 /**
@@ -21,7 +21,7 @@ public class AppendModeSigningTest extends SigningTestBase {
     /** Verifies that append mode preserves the original file bytes as a prefix of the output. */
     @Test
     public void testAppendPreservesOriginalBytes() throws Exception {
-        BasicSignerOptions options = createDefaultOptions();
+        SignerConfig options = createDefaultOptions();
 
         File inFile = new File(options.getInFile());
         byte[] originalBytes = Files.readAllBytes(inFile.toPath());

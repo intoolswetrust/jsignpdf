@@ -47,7 +47,7 @@ import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSession;
 import javax.net.ssl.TrustManager;
 
-import net.sf.jsignpdf.BasicSignerOptions;
+import net.sf.jsignpdf.SignerConfig;
 import net.sf.jsignpdf.Constants;
 import net.sf.jsignpdf.types.ServerAuthentication;
 import net.sf.jsignpdf.utils.KeyStoreUtils;
@@ -101,7 +101,7 @@ public class SSLInitializer {
      * @throws KeyManagementException
      * @throws UnrecoverableKeyException
      */
-    public static void init(BasicSignerOptions options) throws NoSuchAlgorithmException, KeyManagementException,
+    public static void init(SignerConfig options) throws NoSuchAlgorithmException, KeyManagementException,
             KeyStoreException, CertificateException, IOException, UnrecoverableKeyException {
         KeyManager[] km = null;
         if (options != null && options.getTsaServerAuthn() == ServerAuthentication.CERTIFICATE) {

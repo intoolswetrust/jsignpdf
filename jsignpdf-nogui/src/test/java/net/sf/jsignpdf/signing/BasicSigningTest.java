@@ -6,7 +6,7 @@ import java.io.File;
 
 import org.junit.Test;
 
-import net.sf.jsignpdf.BasicSignerOptions;
+import net.sf.jsignpdf.SignerConfig;
 import net.sf.jsignpdf.SignerLogic;
 import net.sf.jsignpdf.signing.validation.PdfSignatureValidator.ValidationResult;
 
@@ -19,7 +19,7 @@ public class BasicSigningTest extends SigningTestBase {
     /** Verifies signature presence, SubFilter, ByteRange, CMS structure, and cryptographic validity. */
     @Test
     public void testDefaultSigningWorks() throws Exception {
-        BasicSignerOptions options = createDefaultOptions();
+        SignerConfig options = createDefaultOptions();
         ValidationResult result = signAndValidate(options);
 
         assertEquals("Should have 1 signature", 1, result.signatureCount);
@@ -35,7 +35,7 @@ public class BasicSigningTest extends SigningTestBase {
     /** Verifies that {@link SignerLogic#signFile()} returns {@code true} on success. */
     @Test
     public void testSignFileReturnsTrue() throws Exception {
-        BasicSignerOptions options = createDefaultOptions();
+        SignerConfig options = createDefaultOptions();
         boolean success = new SignerLogic(options).signFile();
         assertTrue("signFile() should return true", success);
     }
@@ -43,7 +43,7 @@ public class BasicSigningTest extends SigningTestBase {
     /** Verifies that the signed output file is larger than the unsigned input (signature adds bytes). */
     @Test
     public void testOutputFileIsLargerThanInput() throws Exception {
-        BasicSignerOptions options = createDefaultOptions();
+        SignerConfig options = createDefaultOptions();
         File inFile = new File(options.getInFile());
         long inputSize = inFile.length();
 

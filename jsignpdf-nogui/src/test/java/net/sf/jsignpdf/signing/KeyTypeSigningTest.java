@@ -4,7 +4,7 @@ import static org.junit.Assert.*;
 
 import org.junit.Test;
 
-import net.sf.jsignpdf.BasicSignerOptions;
+import net.sf.jsignpdf.SignerConfig;
 import net.sf.jsignpdf.TestConstants.Keystore;
 import net.sf.jsignpdf.TestConstants.TestPrivateKey;
 import net.sf.jsignpdf.signing.validation.PdfSignatureValidator.ValidationResult;
@@ -65,7 +65,7 @@ public class KeyTypeSigningTest extends SigningTestBase {
     }
 
     private void assertKeyType(TestPrivateKey key, Keystore keystore) throws Exception {
-        BasicSignerOptions options = createOptions(key, keystore);
+        SignerConfig options = createOptions(key, keystore);
         ValidationResult result = signAndValidate(options);
 
         assertTrue("Signature should be valid for " + key + " with " + keystore, result.signatureValid);

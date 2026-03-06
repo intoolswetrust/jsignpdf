@@ -4,7 +4,7 @@ import static org.junit.Assert.*;
 
 import org.junit.Test;
 
-import net.sf.jsignpdf.BasicSignerOptions;
+import net.sf.jsignpdf.SignerConfig;
 import net.sf.jsignpdf.types.HashAlgorithm;
 import net.sf.jsignpdf.signing.validation.PdfSignatureValidator;
 import net.sf.jsignpdf.signing.validation.PdfSignatureValidator.ValidationResult;
@@ -46,7 +46,7 @@ public class HashAlgorithmSigningTest extends SigningTestBase {
     }
 
     private void assertHashAlgorithm(HashAlgorithm algorithm, String expectedName) throws Exception {
-        BasicSignerOptions options = createDefaultOptions();
+        SignerConfig options = createDefaultOptions();
         options.setHashAlgorithm(algorithm);
         ValidationResult result = signAndValidate(options);
 

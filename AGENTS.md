@@ -16,8 +16,7 @@ Base path: `jsignpdf-nogui/src/main/java/net/sf/jsignpdf/`
 |---|---|---|
 | `Signer.java` | ~260 | **Main entry point.** CLI dispatcher — parses args, expands wildcards, delegates to `SignerLogic` |
 | `SignerLogic.java` | ~500 | **Core signing orchestrator.** Implements `Runnable`. Workflow: validate files → load key → configure DSS PAdES params → sign → write output. Also handles visible signatures, PDF encryption (encrypt-before-sign), and TSA integration |
-| `SignerOptionsFromCmdLine.java` | ~530 | Extends `BasicSignerOptions`. Parses CLI args via Apache Commons CLI into configuration fields |
-| `BasicSignerOptions.java` | ~760 | POJO holding all signing configuration: keystore, files, signature metadata, PDF security, visible signature, TSA, proxy, CRL settings |
+| `SignerConfig.java` | ~1250 | POJO holding all signing configuration: keystore, files, signature metadata, PDF security, visible signature, TSA, proxy, CRL settings; Parses CLI args via Apache Commons CLI into configuration fields  |
 | `Constants.java` | ~420 | Static config values, logger setup, `ARG_*` CLI option names, `DEFVAL_*` defaults, exit codes, i18n resource bundle |
 
 #### Type Enumerations (`types/`)

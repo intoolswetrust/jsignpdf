@@ -4,7 +4,7 @@ import static org.junit.Assert.*;
 
 import org.junit.Test;
 
-import net.sf.jsignpdf.BasicSignerOptions;
+import net.sf.jsignpdf.SignerConfig;
 import net.sf.jsignpdf.signing.validation.PdfSignatureValidator.ValidationResult;
 
 /**
@@ -16,7 +16,7 @@ public class SignatureMetadataTest extends SigningTestBase {
     /** Verifies that the reason field is stored in the signature dictionary. */
     @Test
     public void testReason() throws Exception {
-        BasicSignerOptions options = createDefaultOptions();
+        SignerConfig options = createDefaultOptions();
         options.setReason("Test signing reason");
         ValidationResult result = signAndValidate(options);
 
@@ -27,7 +27,7 @@ public class SignatureMetadataTest extends SigningTestBase {
     /** Verifies that the location field is stored in the signature dictionary. */
     @Test
     public void testLocation() throws Exception {
-        BasicSignerOptions options = createDefaultOptions();
+        SignerConfig options = createDefaultOptions();
         options.setLocation("Test Location City");
         ValidationResult result = signAndValidate(options);
 
@@ -38,7 +38,7 @@ public class SignatureMetadataTest extends SigningTestBase {
     /** Verifies that the contact field is stored in the signature dictionary. */
     @Test
     public void testContact() throws Exception {
-        BasicSignerOptions options = createDefaultOptions();
+        SignerConfig options = createDefaultOptions();
         options.setContact("test@example.com");
         ValidationResult result = signAndValidate(options);
 
@@ -49,7 +49,7 @@ public class SignatureMetadataTest extends SigningTestBase {
     /** Verifies that reason, location, and contact can all be set together. */
     @Test
     public void testAllMetadata() throws Exception {
-        BasicSignerOptions options = createDefaultOptions();
+        SignerConfig options = createDefaultOptions();
         options.setReason("Combined reason");
         options.setLocation("Combined location");
         options.setContact("combined@example.com");
@@ -64,7 +64,7 @@ public class SignatureMetadataTest extends SigningTestBase {
     /** Verifies that metadata fields are absent when not configured. */
     @Test
     public void testEmptyMetadata() throws Exception {
-        BasicSignerOptions options = createDefaultOptions();
+        SignerConfig options = createDefaultOptions();
         ValidationResult result = signAndValidate(options);
 
         assertTrue("Signature should be valid", result.signatureValid);
@@ -76,7 +76,7 @@ public class SignatureMetadataTest extends SigningTestBase {
     /** Verifies that the signing date is present in the signature dictionary. */
     @Test
     public void testSignDate() throws Exception {
-        BasicSignerOptions options = createDefaultOptions();
+        SignerConfig options = createDefaultOptions();
         ValidationResult result = signAndValidate(options);
 
         assertTrue("Signature should be valid", result.signatureValid);

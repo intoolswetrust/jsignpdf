@@ -4,7 +4,7 @@ import static org.junit.Assert.*;
 
 import org.junit.Test;
 
-import net.sf.jsignpdf.BasicSignerOptions;
+import net.sf.jsignpdf.SignerConfig;
 import net.sf.jsignpdf.signing.validation.PdfSignatureValidator.ValidationResult;
 
 /**
@@ -17,7 +17,7 @@ public class VisibleSignatureSigningTest extends SigningTestBase {
     /** Verifies that the default invisible signature has no visible widget rectangle. */
     @Test
     public void testInvisibleDefault() throws Exception {
-        BasicSignerOptions options = createDefaultOptions();
+        SignerConfig options = createDefaultOptions();
         ValidationResult result = signAndValidate(options);
 
         assertTrue("Signature should be valid", result.signatureValid);
@@ -28,7 +28,7 @@ public class VisibleSignatureSigningTest extends SigningTestBase {
     /** Verifies that a visible signature is placed at the configured rectangle coordinates on the correct page. */
     @Test
     public void testVisibleWithPosition() throws Exception {
-        BasicSignerOptions options = createDefaultOptions();
+        SignerConfig options = createDefaultOptions();
         options.setVisible(true);
         options.setPage(1);
         options.setPositionLLX(50);
@@ -49,7 +49,7 @@ public class VisibleSignatureSigningTest extends SigningTestBase {
     /** Verifies that custom L2 text with placeholder substitution appears in the appearance stream. */
     @Test
     public void testVisibleWithCustomL2Text() throws Exception {
-        BasicSignerOptions options = createDefaultOptions();
+        SignerConfig options = createDefaultOptions();
         options.setVisible(true);
         options.setPage(1);
         options.setPositionLLX(50);
@@ -76,7 +76,7 @@ public class VisibleSignatureSigningTest extends SigningTestBase {
     /** Verifies that all L2 text placeholders are substituted with actual values. */
     @Test
     public void testVisibleWithAllPlaceholders() throws Exception {
-        BasicSignerOptions options = createDefaultOptions();
+        SignerConfig options = createDefaultOptions();
         options.setVisible(true);
         options.setPage(1);
         options.setPositionLLX(10);
@@ -101,7 +101,7 @@ public class VisibleSignatureSigningTest extends SigningTestBase {
     /** Verifies that the default L2 text (no custom template) contains signer information. */
     @Test
     public void testDefaultL2TextContainsSignerInfo() throws Exception {
-        BasicSignerOptions options = createDefaultOptions();
+        SignerConfig options = createDefaultOptions();
         options.setVisible(true);
         options.setPage(1);
         options.setPositionLLX(50);
