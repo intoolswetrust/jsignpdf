@@ -46,13 +46,14 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.logging.Level;
 
+import com.beust.jcommander.JCommander;
+import com.beust.jcommander.ParameterException;
+
 import net.sf.jsignpdf.ssl.SSLInitializer;
 import net.sf.jsignpdf.utils.ConfigProvider;
 import net.sf.jsignpdf.utils.KeyStoreUtils;
 import net.sf.jsignpdf.utils.PKCS11Utils;
 
-import org.apache.commons.cli.HelpFormatter;
-import org.apache.commons.cli.ParseException;
 import org.apache.commons.io.filefilter.AndFileFilter;
 import org.apache.commons.io.filefilter.FileFileFilter;
 import org.apache.commons.io.filefilter.WildcardFileFilter;
@@ -67,14 +68,14 @@ import org.apache.commons.lang3.StringUtils;
 public class Signer {
 
     /**
-     * Prints formatted help message (command line arguments).
+     * Prints formatted help message using JCommander.
      */
-    private static void printHelp() {
-        final HelpFormatter formatter = new HelpFormatter();
-        formatter.printHelp(80, "java -jar JSignPdf.jar [file1.pdf [file2.pdf ...]]", RES.get("hlp.header"),
-                SignerConfig.OPTS, NEW_LINE + RES.get("hlp.footer.exitCodes") + NEW_LINE
-                        + StringUtils.repeat("-", 80) + NEW_LINE + RES.get("hlp.footer.examples"),
-                true);
+    private static void printHelp(JCommander jcmd) {
+        jcmd.setUsageFormatter(new UsageFormatter(jcmd, RES.get("hlp.header"),
+                "java -jar JSignPdf.jar [options] [file1.pdf [file2.pdf ...]]",
+                RES.get("hlp.footer.exitCodes") + NEW_LINE + StringUtils.repeat("-", 80) + NEW_LINE
+                        + RES.get("hlp.footer.examples")));
+        jcmd.usage();
     }
 
     /**
@@ -83,11 +84,18 @@ public class Signer {
      * @param args
      */
     public static void main(String[] args) {
-        SignerConfig tmpOpts = null;
+        SignerConfig tmpOpts = new SignerConfig();
+        JCommander jcmd = JCommander.newBuilder().programName("JSignPdf").addObject(tmpOpts).build();
 
-        if (args != null && args.length > 0) {
-            tmpOpts = new SignerConfig();
-            parseCommandLine(args, tmpOpts);
+        boolean hasArgs = args != null && args.length > 0;
+        if (hasArgs) {
+            try {
+                jcmd.parse(args);
+                tmpOpts.postParseCmdLine();
+            } catch (ParameterException exp) {
+                System.err.println("Unable to parse command line (Use -h for the help)\n" + exp.getMessage());
+                exit(EXIT_CODE_PARSE_ERR);
+            }
         }
 
         try {
@@ -100,8 +108,8 @@ public class Signer {
 
         traceInfo();
 
-        if (tmpOpts == null) {
-            printHelp();
+        if (!hasArgs) {
+            printHelp(jcmd);
             exit(EXIT_CODE_NO_COMMAND);
             return;
         }
@@ -111,7 +119,7 @@ public class Signer {
             return;
         }
         if (tmpOpts.isPrintHelp()) {
-            printHelp();
+            printHelp(jcmd);
             return;
         }
         if (tmpOpts.isListKeyStores()) {
@@ -139,7 +147,7 @@ public class Signer {
                     || tmpOpts.isListKeys();
             if (!tmpCommand) {
                 // no valid command provided - print help and exit
-                printHelp();
+                printHelp(jcmd);
                 exit(EXIT_CODE_NO_COMMAND);
             }
             exit(0);
@@ -236,22 +244,6 @@ public class Signer {
         }
         if (failedCount > 0) {
             exit(successCount > 0 ? Constants.EXIT_CODE_SOME_SIG_FAILED : Constants.EXIT_CODE_ALL_SIG_FAILED);
-        }
-    }
-
-    /**
-     * Parses the command line. Exits with error exit code when parsing fails.
-     *
-     * @param args
-     * @param opts
-     */
-    private static void parseCommandLine(String[] args, final SignerConfig opts) {
-        opts.setCmdLine(args);
-        try {
-            opts.loadCmdLine();
-        } catch (ParseException exp) {
-            System.err.println("Unable to parse command line (Use -h for the help)\n" + exp.getMessage());
-            exit(EXIT_CODE_PARSE_ERR);
         }
     }
 
