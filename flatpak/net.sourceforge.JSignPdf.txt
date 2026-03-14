@@ -1,0 +1,43 @@
+app-id: net.sourceforge.JSignPdf
+runtime: org.freedesktop.Platform
+runtime-version: '25.08'
+sdk: org.freedesktop.Sdk
+sdk-extensions:
+  - org.freedesktop.Sdk.Extension.openjdk21
+
+finish-args:
+  - --env=PATH=/app/jre/bin:/app/bin:/usr/bin
+  - --share=network
+  - --filesystem=home
+  - --socket=x11
+  - --socket=pulseaudio
+
+modules:
+  - name: openjdk
+    buildsystem: simple
+    build-commands:
+      - /usr/lib/sdk/openjdk21/install.sh
+
+  - name: jsignpdf
+    buildsystem: simple
+    sources:
+      - type: archive
+        url: https://downloads.sourceforge.net/project/jsignpdf/stable/JSignPdf-2.3.0/jsignpdf-2.3.0.zip
+        sha256: 8ea04172287296b4db63553751122149ad34ad0474e3a0cdbc6e32fbb77a5833
+      - type: file
+        path: jsignpdf.desktop
+      - type: file
+        path: jsignpdf-flatpak.in
+      - type: file
+        path: net.sourceforge.JSignPdf.metainfo.xml
+      - type: file
+        path: jsignpdf.png
+    build-commands:
+      - mkdir -p ${FLATPAK_DEST}/share/jsignpdf
+      - cp -r JSignPdf.jar InstallCert.jar conf licenses ${FLATPAK_DEST}/share/jsignpdf/
+      - install -Dm755 jsignpdf-flatpak.in ${FLATPAK_DEST}/bin/jsignpdf
+      - install -Dm644 jsignpdf.desktop ${FLATPAK_DEST}/share/applications/net.sourceforge.JSignPdf.desktop
+      - install -Dm644 net.sourceforge.JSignPdf.metainfo.xml ${FLATPAK_DEST}/share/metainfo/net.sourceforge.JSignPdf.metainfo.xml
+      - install -Dm644 jsignpdf.png ${FLATPAK_DEST}/share/icons/hicolor/256x256/apps/net.sourceforge.JSignPdf.png
+      - mkdir -p ${FLATPAK_DEST}/share/licenses/net.sourceforge.JSignPdf
+      - cp -r licenses/* ${FLATPAK_DEST}/share/licenses/net.sourceforge.JSignPdf/
