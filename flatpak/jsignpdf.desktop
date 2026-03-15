@@ -1,0 +1,7 @@
+[Desktop Entry]
+Type=Application
+Name=JSignPdf
+Exec=jsignpdf
+Icon=net.sourceforge.JSignPdf
+Categories=Office;Security;
+Terminal=false
