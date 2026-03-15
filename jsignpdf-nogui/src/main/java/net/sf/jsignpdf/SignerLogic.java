@@ -261,7 +261,9 @@ public class SignerLogic implements Runnable {
                     LOGGER.info(RES.get("console.settingTsaPolicy", policyOid));
                     tspSource.setPolicyOid(policyOid);
                 }
-
+                if (StringUtils.isNotEmpty(options.getTsaHashAlg())) {
+                    parameters.getSignatureTimestampParameters().setDigestAlgorithm(DigestAlgorithm.forJavaName(options.getTsaHashAlg()));
+                }
                 service.setTspSource(tspSource);
             }
 

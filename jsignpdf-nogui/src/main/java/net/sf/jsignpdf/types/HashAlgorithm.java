@@ -34,7 +34,6 @@ import static net.sf.jsignpdf.types.PdfVersion.PDF_1_3;
 import static net.sf.jsignpdf.types.PdfVersion.PDF_1_6;
 import static net.sf.jsignpdf.types.PdfVersion.PDF_1_7;
 
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import eu.europa.esig.dss.enumerations.DigestAlgorithm;

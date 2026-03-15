@@ -60,18 +60,18 @@ public class FontUtils {
                 String fontPath = conf.getNotEmptyProperty("font.path", null);
                 if (fontPath != null) {
                     l2baseFont = new DSSFileFont(new FileInputStream(fontPath));
-                } else {
-                    InputStream tmpIs = FontUtils.class.getResourceAsStream(Constants.L2TEXT_FONT_PATH);
-                    l2baseFont = new DSSFileFont(tmpIs);
-                    tmpIs.close();
+//                } else {
+//                    InputStream tmpIs = FontUtils.class.getResourceAsStream(Constants.L2TEXT_FONT_PATH);
+//                    l2baseFont = new DSSFileFont(tmpIs);
+//                    tmpIs.close();
                 }
             } catch (Exception e) {
                 e.printStackTrace();
-                try {
-                    l2baseFont = new DSSJavaFont(new Font("Helvetica", Font.PLAIN, 12));
-                } catch (Exception ex) {
-                    // where is the problem, dear Watson?
-                }
+//                try {
+//                    l2baseFont = new DSSJavaFont(new Font("Helvetica", Font.PLAIN, 12));
+//                } catch (Exception ex) {
+//                    // where is the problem, dear Watson?
+//                }
             }
         }
         return l2baseFont;
