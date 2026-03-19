@@ -1,3 +1,5 @@
+# Builds flatpak from the git repo source
+
 app-id: io.github.intoolswetrust.JSignPdf.Devel
 runtime: org.freedesktop.Platform
 runtime-version: '25.08'

@@ -1,3 +1,5 @@
+# Builds flatpak using the official binary
+
 app-id: io.github.intoolswetrust.JSignPdf
 runtime: org.freedesktop.Platform
 runtime-version: '25.08'

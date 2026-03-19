@@ -1,14 +1,5 @@
 #!/bin/bash
-# Produces maven-dependencies.json (+ optionally maven-dependencies.tar.gz) for the from-git manifest.
-#
-# Default: Maven runs inside org.freedesktop.Sdk + openjdk21 extension
-# (same toolchain as flatpak-builder) — independent of Toolbx / host Fedora Maven.
-#
-# First-time setup:
-#   flatpak install flathub org.freedesktop.Sdk//25.08 \
-#     org.freedesktop.Sdk.Extension.openjdk21//25.08
-#
-# Optional: USE_HOST_MVN=1 — use system mvn (debugging / CI).
+# Produces maven-dependencies.json for the Devel manifest.
 
 set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
