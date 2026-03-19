@@ -1,0 +1,53 @@
+app-id: io.github.intoolswetrust.JSignPdf.Devel
+runtime: org.freedesktop.Platform
+runtime-version: '25.08'
+sdk: org.freedesktop.Sdk
+sdk-extensions:
+  - org.freedesktop.Sdk.Extension.openjdk21
+
+finish-args:
+  - --env=PATH=/app/jre/bin:/app/bin:/usr/bin
+  - --share=network
+  - --filesystem=home
+  - --socket=x11
+  - --socket=pulseaudio
+
+modules:
+  - name: openjdk
+    buildsystem: simple
+    build-commands:
+      - /usr/lib/sdk/openjdk21/install.sh
+
+  - name: jsignpdf
+    buildsystem: simple
+    sources:
+      - type: git
+        url: https://github.com/intoolswetrust/jsignpdf.git
+        branch: master
+      - maven-dependencies.json
+      - type: file
+        path: jsignpdf.desktop
+      - type: file
+        path: jsignpdf-flatpak.in
+      - type: file
+        path: io.github.intoolswetrust.JSignPdf.metainfo.xml
+      - type: file
+        path: jsignpdf.png
+    build-commands:
+      - |
+        . /usr/lib/sdk/openjdk21/enable.sh
+        mvn -o clean install \
+          -Dmaven.repo.local="$(pwd)/m2local" \
+          -DskipTests \
+          -Dmaven.javadoc.skip=true \
+          -Dmaven.source.skip=true \
+          -Dasciidoctor.skip=true
+      - unzip -o distribution/target/jsignpdf-*.zip -d distro
+      - mkdir -p ${FLATPAK_DEST}/share/jsignpdf
+      - cp -r distro/jsignpdf-*/JSignPdf.jar distro/jsignpdf-*/InstallCert.jar distro/jsignpdf-*/conf distro/jsignpdf-*/licenses ${FLATPAK_DEST}/share/jsignpdf/
+      - install -Dm755 jsignpdf-flatpak.in ${FLATPAK_DEST}/bin/jsignpdf
+      - sed 's/io\.github\.intoolswetrust\.JSignPdf/io.github.intoolswetrust.JSignPdf.Devel/g' jsignpdf.desktop | install -Dm644 /dev/stdin ${FLATPAK_DEST}/share/applications/io.github.intoolswetrust.JSignPdf.Devel.desktop
+      - sed 's/io\.github\.intoolswetrust\.JSignPdf/io.github.intoolswetrust.JSignPdf.Devel/g' io.github.intoolswetrust.JSignPdf.metainfo.xml | install -Dm644 /dev/stdin ${FLATPAK_DEST}/share/metainfo/io.github.intoolswetrust.JSignPdf.Devel.metainfo.xml
+      - install -Dm644 jsignpdf.png ${FLATPAK_DEST}/share/icons/hicolor/256x256/apps/io.github.intoolswetrust.JSignPdf.Devel.png
+      - mkdir -p ${FLATPAK_DEST}/share/licenses/io.github.intoolswetrust.JSignPdf.Devel
+      - cp -r distro/jsignpdf-*/licenses/* ${FLATPAK_DEST}/share/licenses/io.github.intoolswetrust.JSignPdf.Devel/

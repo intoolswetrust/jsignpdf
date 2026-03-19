@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Copyright 2026 Jiri Eischmann -->
+<component type="desktop-application">
+  <id>io.github.intoolswetrust.JSignPdf</id>
+  <metadata_license>CC0-1.0</metadata_license>
+  <project_license>MPL-2.0</project_license>
+  <name>JSignPdf</name>
+  <summary>Add digital signatures to PDF documents</summary>
+  <developer id="io.github.intoolswetrust">
+    <name>JSignPdf Project</name>
+  </developer>
+  <description>
+    <p>JSignPdf is a free, open source application that adds digital signatures to PDF documents. It supports visible and hidden signatures, certificate levels, timestamping, and batch processing from the command line.</p>
+    <p>Features:</p>
+    <ul>
+      <li>Visible and hidden digital signatures</li>
+      <li>Certificate levels and timestamping (TSA)</li>
+      <li>PDF encryption and rights management</li>
+      <li>Certificate revocation checks (CRL, OCSP)</li>
+      <li>Command-line batch processing</li>
+      <li>PKCS#11 hardware token support</li>
+    </ul>
+  </description>
+  <launchable type="desktop-id">io.github.intoolswetrust.JSignPdf.desktop</launchable>
+  <url type="homepage">https://jsignpdf.sourceforge.net/</url>
+  <url type="bugtracker">https://sourceforge.net/p/jsignpdf/bugs-change-requests/</url>
+  <url type="vcs-browser">https://github.com/intoolswetrust/jsignpdf</url>
+  <content_rating type="oars-1.1" />
+  <releases>
+    <release version="2.3.0" date="2025-01-06">
+      <url type="details">https://sourceforge.net/projects/jsignpdf/files/stable/JSignPdf-2.3.0/</url>
+      <description>
+        <p>Version 2.3.0</p>
+        <ul>
+          <li>New and updated translations</li>
+          <li>Feature: Negative values of visible position rectangle corners</li>
+          <li>Fix: Default property file not required in batch mode</li>
+        </ul>
+      </description>
+    </release>
+  </releases>
+  <screenshots>
+    <screenshot type="default">
+      <image>https://sourceforge.net/projects/jsignpdf/screenshot/jsignpdf.png</image>
+      <caption>JSignPdf main window</caption>
+    </screenshot>
+  </screenshots>
+  <recommends>
+    <control>keyboard</control>
+    <control>pointing</control>
+  </recommends>
+</component>
