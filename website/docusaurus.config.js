@@ -78,6 +78,7 @@ const config = {
             label: 'Tutorial',
           },
           */
+          {to: '/docs/guide', label: 'Guide', position: 'left'},
           {to: '/blog', label: 'Blog', position: 'left'},
           {
             href: 'https://github.com/intoolswetrust/jsignpdf',
