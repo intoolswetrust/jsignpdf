@@ -23,7 +23,7 @@
   </description>
   <launchable type="desktop-id">io.github.intoolswetrust.JSignPdf.desktop</launchable>
   <url type="homepage">https://jsignpdf.sourceforge.net/</url>
-  <url type="bugtracker">https://sourceforge.net/p/jsignpdf/bugs-change-requests/</url>
+  <url type="bugtracker">https://github.com/intoolswetrust/jsignpdf/issues</url>
   <url type="vcs-browser">https://github.com/intoolswetrust/jsignpdf</url>
   <content_rating type="oars-1.1" />
   <releases>
