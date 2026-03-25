@@ -28,7 +28,7 @@
   <content_rating type="oars-1.1" />
   <releases>
     <release version="2.3.0" date="2025-01-06">
-      <url type="details">https://sourceforge.net/projects/jsignpdf/files/stable/JSignPdf-2.3.0/</url>
+      <url type="details">https://github.com/intoolswetrust/jsignpdf/releases/tag/JSignPdf_2_3_0</url>
       <description>
         <p>Version 2.3.0</p>
         <ul>
