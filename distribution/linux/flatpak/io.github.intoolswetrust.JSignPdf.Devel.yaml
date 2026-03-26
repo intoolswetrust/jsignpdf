@@ -28,11 +28,11 @@ modules:
         branch: master
       - maven-dependencies.json
       - type: file
-        path: jsignpdf.desktop
+        path: ../jsignpdf.desktop
       - type: file
         path: jsignpdf-flatpak.in
       - type: file
-        path: io.github.intoolswetrust.JSignPdf.metainfo.xml
+        path: ../io.github.intoolswetrust.JSignPdf.metainfo.xml
       - type: file
         path: jsignpdf.png
     build-commands:
