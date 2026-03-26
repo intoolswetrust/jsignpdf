@@ -44,6 +44,14 @@
       <image>https://intoolswetrust.github.io/jsignpdf/img/screenshots/jsignpdf-screenshot.png</image>
       <caption>JSignPdf main window</caption>
     </screenshot>
+    <screenshot type="default">
+      <image>https://intoolswetrust.github.io/jsignpdf/img/screenshots/jsignpdf-screenshot-2.png</image>
+      <caption>JSignPdf visible signature settings</caption>
+    </screenshot>
+    <screenshot type="default">
+      <image>https://intoolswetrust.github.io/jsignpdf/img/screenshots/jsignpdf-screenshot-3.png</image>
+      <caption>JSignPdf main window - advanced view</caption>
+    </screenshot>
   </screenshots>
   <recommends>
     <control>keyboard</control>
