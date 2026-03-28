@@ -2,6 +2,8 @@
 
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.*?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.*?>
 
 <VBox xmlns="http://javafx.com/javafx"
@@ -45,13 +47,21 @@
     <Label text="Signature image:"/>
     <HBox spacing="4">
         <TextField fx:id="txtImgPath" HBox.hgrow="ALWAYS"/>
-        <Button text="..." onAction="#onBrowseImage" minWidth="30"/>
+        <Button onAction="#onBrowseImage" minWidth="30">
+            <graphic><ImageView fitWidth="16" fitHeight="16" preserveRatio="true">
+                <Image url="@/net/sf/jsignpdf/fileopen16.png"/>
+            </ImageView></graphic>
+        </Button>
     </HBox>
 
     <Label text="Background image:"/>
     <HBox spacing="4">
         <TextField fx:id="txtBgImgPath" HBox.hgrow="ALWAYS"/>
-        <Button text="..." onAction="#onBrowseBgImage" minWidth="30"/>
+        <Button onAction="#onBrowseBgImage" minWidth="30">
+            <graphic><ImageView fitWidth="16" fitHeight="16" preserveRatio="true">
+                <Image url="@/net/sf/jsignpdf/fileopen16.png"/>
+            </ImageView></graphic>
+        </Button>
     </HBox>
 
     <CheckBox fx:id="chkAcro6Layers" text="Acrobat 6 layer mode"/>
@@ -60,6 +70,10 @@
     <Label text="Output file:"/>
     <HBox spacing="4">
         <TextField fx:id="txtOutFile" HBox.hgrow="ALWAYS"/>
-        <Button text="..." onAction="#onBrowseOutFile" minWidth="30"/>
+        <Button onAction="#onBrowseOutFile" minWidth="30">
+            <graphic><ImageView fitWidth="16" fitHeight="16" preserveRatio="true">
+                <Image url="@/net/sf/jsignpdf/fileopen16.png"/>
+            </ImageView></graphic>
+        </Button>
     </HBox>
 </VBox>

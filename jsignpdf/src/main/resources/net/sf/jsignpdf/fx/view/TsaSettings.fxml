@@ -2,6 +2,8 @@
 
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.*?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.*?>
 
 <VBox xmlns="http://javafx.com/javafx"
@@ -34,7 +36,11 @@
         <Label text="TSA certificate file:"/>
         <HBox spacing="4">
             <TextField fx:id="txtTsaCertFile" HBox.hgrow="ALWAYS"/>
-            <Button text="..." onAction="#onBrowseTsaCertFile" minWidth="30"/>
+            <Button onAction="#onBrowseTsaCertFile" minWidth="30">
+                <graphic><ImageView fitWidth="16" fitHeight="16" preserveRatio="true">
+                    <Image url="@/net/sf/jsignpdf/fileopen16.png"/>
+                </ImageView></graphic>
+            </Button>
         </HBox>
 
         <Label text="TSA cert password:"/>

@@ -2,6 +2,8 @@
 
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.*?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.*?>
 
 <VBox xmlns="http://javafx.com/javafx"
@@ -18,15 +20,23 @@
     <Label text="Keystore file:"/>
     <HBox spacing="4">
         <TextField fx:id="txtKeystoreFile" HBox.hgrow="ALWAYS"/>
-        <Button fx:id="btnBrowseKeystore" text="..." onAction="#onBrowseKeystore"
-                minWidth="30"/>
+        <Button fx:id="btnBrowseKeystore" onAction="#onBrowseKeystore"
+                minWidth="30">
+            <graphic><ImageView fitWidth="16" fitHeight="16" preserveRatio="true">
+                <Image url="@/net/sf/jsignpdf/fileopen16.png"/>
+            </ImageView></graphic>
+        </Button>
     </HBox>
 
     <Label text="Keystore password:"/>
     <PasswordField fx:id="txtKeystorePassword"/>
 
     <Button fx:id="btnLoadKeys" text="Load Keys" onAction="#onLoadKeys"
-            maxWidth="Infinity"/>
+            maxWidth="Infinity">
+        <graphic><ImageView fitWidth="16" fitHeight="16" preserveRatio="true">
+            <Image url="@/net/sf/jsignpdf/refresh16.png"/>
+        </ImageView></graphic>
+    </Button>
 
     <Label text="Key alias:"/>
     <ComboBox fx:id="cmbKeyAlias" maxWidth="Infinity"/>

@@ -2,6 +2,8 @@
 
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.*?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.*?>
 
 <BorderPane xmlns="http://javafx.com/javafx"
@@ -15,11 +17,19 @@
             <MenuBar>
                 <Menu text="File">
                     <MenuItem fx:id="menuOpen" text="Open PDF..." onAction="#onFileOpen"
-                              accelerator="Shortcut+O"/>
+                              accelerator="Shortcut+O">
+                        <graphic><ImageView fitWidth="16" fitHeight="16" preserveRatio="true">
+                            <Image url="@/net/sf/jsignpdf/fileopen16.png"/>
+                        </ImageView></graphic>
+                    </MenuItem>
                     <MenuItem fx:id="menuClose" text="Close" onAction="#onFileClose"/>
                     <SeparatorMenuItem/>
                     <MenuItem fx:id="menuSign" text="Sign" onAction="#onSign"
-                              accelerator="Shortcut+S"/>
+                              accelerator="Shortcut+S">
+                        <graphic><ImageView fitWidth="16" fitHeight="16" preserveRatio="true">
+                            <Image url="@/net/sf/jsignpdf/signedpdf16.png"/>
+                        </ImageView></graphic>
+                    </MenuItem>
                     <SeparatorMenuItem/>
                     <MenuItem fx:id="menuExit" text="Exit" onAction="#onFileExit"
                               accelerator="Shortcut+Q"/>
@@ -35,38 +45,66 @@
                               onAction="#onToggleSidePanel" accelerator="F9"/>
                 </Menu>
                 <Menu text="Signing">
-                    <MenuItem text="Sign" onAction="#onSign" accelerator="Shortcut+S"/>
+                    <MenuItem text="Sign" onAction="#onSign" accelerator="Shortcut+S">
+                        <graphic><ImageView fitWidth="16" fitHeight="16" preserveRatio="true">
+                            <Image url="@/net/sf/jsignpdf/signedpdf16.png"/>
+                        </ImageView></graphic>
+                    </MenuItem>
                 </Menu>
                 <Menu text="Help">
-                    <MenuItem fx:id="menuAbout" text="About JSignPdf" onAction="#onAbout"/>
+                    <MenuItem fx:id="menuAbout" text="About JSignPdf" onAction="#onAbout">
+                        <graphic><ImageView fitWidth="16" fitHeight="16" preserveRatio="true">
+                            <Image url="@/net/sf/jsignpdf/signedpdf16.png"/>
+                        </ImageView></graphic>
+                    </MenuItem>
                 </Menu>
             </MenuBar>
 
             <!-- Toolbar -->
             <ToolBar styleClass="main-toolbar">
                 <Button fx:id="btnOpen" text="Open" onAction="#onFileOpen"
-                        styleClass="toolbar-button"/>
+                        styleClass="toolbar-button">
+                    <graphic><ImageView fitWidth="16" fitHeight="16" preserveRatio="true">
+                        <Image url="@/net/sf/jsignpdf/fileopen16.png"/>
+                    </ImageView></graphic>
+                </Button>
                 <Separator orientation="VERTICAL"/>
                 <Button fx:id="btnZoomIn" text="+" onAction="#onZoomIn"
-                        styleClass="toolbar-button"/>
+                        styleClass="toolbar-button" mnemonicParsing="false"/>
                 <Button fx:id="btnZoomOut" text="-" onAction="#onZoomOut"
-                        styleClass="toolbar-button"/>
+                        styleClass="toolbar-button" mnemonicParsing="false"/>
                 <Button fx:id="btnZoomFit" text="Fit" onAction="#onZoomFit"
                         styleClass="toolbar-button"/>
                 <ComboBox fx:id="cmbZoom" editable="true" prefWidth="80"/>
                 <Separator orientation="VERTICAL"/>
-                <Button fx:id="btnPrevPage" text="&lt;" onAction="#onPrevPage"
-                        styleClass="toolbar-button"/>
+                <Button fx:id="btnPrevPage" onAction="#onPrevPage"
+                        styleClass="toolbar-button">
+                    <graphic><ImageView fitWidth="16" fitHeight="16" preserveRatio="true">
+                        <Image url="@/net/sf/jsignpdf/prev16.png"/>
+                    </ImageView></graphic>
+                </Button>
                 <TextField fx:id="txtPageNumber" prefColumnCount="3" alignment="CENTER"/>
                 <Label fx:id="lblPageCount" text="/ 0"/>
-                <Button fx:id="btnNextPage" text="&gt;" onAction="#onNextPage"
-                        styleClass="toolbar-button"/>
+                <Button fx:id="btnNextPage" onAction="#onNextPage"
+                        styleClass="toolbar-button">
+                    <graphic><ImageView fitWidth="16" fitHeight="16" preserveRatio="true">
+                        <Image url="@/net/sf/jsignpdf/next16.png"/>
+                    </ImageView></graphic>
+                </Button>
                 <Separator orientation="VERTICAL"/>
                 <ToggleButton fx:id="btnPlaceSig" text="Place Signature"
-                              onAction="#onPlaceSignature" styleClass="toolbar-button"/>
+                              onAction="#onPlaceSignature" styleClass="toolbar-button">
+                    <graphic><ImageView fitWidth="16" fitHeight="16" preserveRatio="true">
+                        <Image url="@/net/sf/jsignpdf/preview16.png"/>
+                    </ImageView></graphic>
+                </ToggleButton>
                 <Separator orientation="VERTICAL"/>
-                <Button fx:id="btnSign" text="SIGN" onAction="#onSign"
-                        styleClass="toolbar-button,sign-button"/>
+                <Button fx:id="btnSign" text="Sign" onAction="#onSign"
+                        styleClass="toolbar-button,sign-button">
+                    <graphic><ImageView fitWidth="26" fitHeight="26" preserveRatio="true">
+                        <Image url="@/net/sf/jsignpdf/signedpdf26.png"/>
+                    </ImageView></graphic>
+                </Button>
             </ToolBar>
         </VBox>
     </top>

@@ -4,6 +4,7 @@ import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.image.Image;
 import javafx.stage.Stage;
 import net.sf.jsignpdf.BasicSignerOptions;
 import net.sf.jsignpdf.Constants;
@@ -37,6 +38,8 @@ public class JSignPdfApp extends Application {
                 getClass().getResource("/net/sf/jsignpdf/fx/styles/jsignpdf.css").toExternalForm());
 
         primaryStage.setTitle("JSignPdf " + Constants.VERSION);
+        primaryStage.getIcons().add(
+                new Image(getClass().getResourceAsStream("/net/sf/jsignpdf/signedpdf32.png")));
         primaryStage.setScene(scene);
         primaryStage.show();
     }
