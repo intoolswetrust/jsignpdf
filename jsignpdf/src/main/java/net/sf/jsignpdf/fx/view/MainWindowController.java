@@ -15,7 +15,6 @@ import javafx.scene.control.ProgressBar;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.SplitPane;
 import javafx.scene.control.TextField;
-import javafx.scene.control.ToggleButton;
 import javafx.scene.input.DragEvent;
 import javafx.scene.input.Dragboard;
 import javafx.scene.input.KeyCode;
@@ -87,7 +86,6 @@ public class MainWindowController {
     @FXML private TextField txtPageNumber;
     @FXML private Label lblPageCount;
     @FXML private Button btnNextPage;
-    @FXML private ToggleButton btnPlaceSig;
     @FXML private Button btnSign;
 
     // Content area
@@ -154,6 +152,20 @@ public class MainWindowController {
         signatureOverlay.setMouseTransparent(false);
         pdfArea.getChildren().add(0, pdfPageView);
         pdfArea.getChildren().add(1, signatureOverlay);
+
+        // Auto-enable visible signature when a rectangle is placed
+        placementVM.placedProperty().addListener((obs, wasPlaced, isPlaced) -> {
+            if (isPlaced) {
+                signingVM.visibleProperty().set(true);
+            }
+        });
+
+        // Clear placement rectangle when visible signature is disabled
+        signingVM.visibleProperty().addListener((obs, wasVisible, isVisible) -> {
+            if (!isVisible) {
+                placementVM.reset();
+            }
+        });
 
         // Keep overlay sized to match the pdf page view
         signatureOverlay.prefWidthProperty().bind(pdfPageView.prefWidthProperty());
@@ -257,7 +269,6 @@ public class MainWindowController {
         btnPrevPage.setDisable(disabled);
         txtPageNumber.setDisable(disabled);
         btnNextPage.setDisable(disabled);
-        btnPlaceSig.setDisable(disabled);
         btnSign.setDisable(disabled);
         menuSign.setDisable(disabled);
         menuClose.setDisable(disabled);
@@ -306,7 +317,6 @@ public class MainWindowController {
             event.consume();
         } else if (event.getCode() == KeyCode.Z && event.isShortcutDown() && placementVM.isPlaced()) {
             placementVM.reset();
-            btnPlaceSig.setSelected(false);
             event.consume();
         }
     }
@@ -416,15 +426,6 @@ public class MainWindowController {
     }
 
     @FXML
-    private void onPlaceSignature() {
-        if (btnPlaceSig.isSelected()) {
-            placementVM.setPlacementMode(true);
-        } else {
-            placementVM.setPlacementMode(false);
-        }
-    }
-
-    @FXML
     private void onToggleSidePanel() {
         if (splitPane.getItems().size() > 1) {
             // Toggle visibility of side panel by manipulating divider position
@@ -523,7 +524,6 @@ public class MainWindowController {
         documentVM.reset();
         placementVM.reset();
         signatureOverlay.setVisible(false);
-        btnPlaceSig.setSelected(false);
         if (options != null) {
             options.setInFile(null);
         }

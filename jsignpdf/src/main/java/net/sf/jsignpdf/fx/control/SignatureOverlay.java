@@ -98,8 +98,6 @@ public class SignatureOverlay extends Pane {
     }
 
     private void onMousePressed(MouseEvent e) {
-        if (!viewModel.isPlacementMode() && !viewModel.isPlaced()) return;
-
         double mx = e.getX();
         double my = e.getY();
         double w = getWidth();
@@ -132,16 +130,17 @@ public class SignatureOverlay extends Pane {
             }
         }
 
-        if (viewModel.isPlacementMode()) {
-            // Start creating a new rectangle
-            dragMode = DragMode.CREATE;
-            viewModel.setRelX(mx / w);
-            viewModel.setRelY(my / h);
-            viewModel.setRelWidth(0.02);
-            viewModel.setRelHeight(0.02);
-            viewModel.setPlaced(true);
-            e.consume();
-        }
+        // Start creating a new rectangle (no button toggle needed)
+        dragMode = DragMode.CREATE;
+        viewModel.setRelX(mx / w);
+        viewModel.setRelY(my / h);
+        viewModel.setRelWidth(0.02);
+        viewModel.setRelHeight(0.02);
+        // Update drag start values to match the new rectangle
+        dragStartRelW = 0.02;
+        dragStartRelH = 0.02;
+        viewModel.setPlaced(true);
+        e.consume();
     }
 
     private void onMouseDragged(MouseEvent e) {
@@ -156,6 +155,10 @@ public class SignatureOverlay extends Pane {
 
         switch (dragMode) {
             case CREATE:
+                // Width/height = distance from press point to current mouse
+                viewModel.setRelWidth(Math.max(0.02, (mx - dragStartX) / w));
+                viewModel.setRelHeight(Math.max(0.02, (my - dragStartY) / h));
+                break;
             case RESIZE_BR:
                 viewModel.setRelWidth(Math.max(0.02, dragStartRelW + dx));
                 viewModel.setRelHeight(Math.max(0.02, dragStartRelH + dy));
@@ -187,16 +190,13 @@ public class SignatureOverlay extends Pane {
     }
 
     private void onMouseReleased(MouseEvent e) {
-        if (dragMode == DragMode.CREATE) {
-            viewModel.setPlacementMode(false);
-        }
         dragMode = DragMode.NONE;
         e.consume();
     }
 
     private void onMouseMoved(MouseEvent e) {
         if (!viewModel.isPlaced()) {
-            setCursor(viewModel.isPlacementMode() ? Cursor.CROSSHAIR : Cursor.DEFAULT);
+            setCursor(Cursor.CROSSHAIR);
             return;
         }
 
@@ -220,7 +220,7 @@ public class SignatureOverlay extends Pane {
                 if (e.getX() >= rx && e.getX() <= rx + rw && e.getY() >= ry && e.getY() <= ry + rh) {
                     setCursor(Cursor.MOVE);
                 } else {
-                    setCursor(viewModel.isPlacementMode() ? Cursor.CROSSHAIR : Cursor.DEFAULT);
+                    setCursor(Cursor.CROSSHAIR);
                 }
                 break;
         }

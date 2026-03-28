@@ -92,13 +92,6 @@
                     </ImageView></graphic>
                 </Button>
                 <Separator orientation="VERTICAL"/>
-                <ToggleButton fx:id="btnPlaceSig" text="Place Signature"
-                              onAction="#onPlaceSignature" styleClass="toolbar-button">
-                    <graphic><ImageView fitWidth="16" fitHeight="16" preserveRatio="true">
-                        <Image url="@/net/sf/jsignpdf/preview16.png"/>
-                    </ImageView></graphic>
-                </ToggleButton>
-                <Separator orientation="VERTICAL"/>
                 <Button fx:id="btnSign" text="Sign" onAction="#onSign"
                         styleClass="toolbar-button,sign-button">
                     <graphic><ImageView fitWidth="26" fitHeight="26" preserveRatio="true">
