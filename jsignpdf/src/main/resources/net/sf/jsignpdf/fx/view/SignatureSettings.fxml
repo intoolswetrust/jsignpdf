@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox xmlns="http://javafx.com/javafx"
+      xmlns:fx="http://javafx.com/fxml"
+      fx:controller="net.sf.jsignpdf.fx.view.SignatureSettingsController"
+      spacing="6">
+    <padding>
+        <Insets top="8" right="8" bottom="8" left="8"/>
+    </padding>
+
+    <Label text="Render mode:"/>
+    <ComboBox fx:id="cmbRenderMode" maxWidth="Infinity"/>
+
+    <Label text="Hash algorithm:"/>
+    <ComboBox fx:id="cmbHashAlgorithm" maxWidth="Infinity"/>
+
+    <Label text="Certification level:"/>
+    <ComboBox fx:id="cmbCertLevel" maxWidth="Infinity"/>
+
+    <Label text="Signer name:"/>
+    <TextField fx:id="txtSignerName"/>
+
+    <Label text="Reason:"/>
+    <TextField fx:id="txtReason"/>
+
+    <Label text="Location:"/>
+    <TextField fx:id="txtLocation"/>
+
+    <Label text="Contact:"/>
+    <TextField fx:id="txtContact"/>
+
+    <Label text="L2 text:"/>
+    <TextField fx:id="txtL2Text"/>
+
+    <Label text="L4 text:"/>
+    <TextField fx:id="txtL4Text"/>
+
+    <Label text="Font size:"/>
+    <TextField fx:id="txtFontSize" text="10.0"/>
+
+    <Label text="Signature image:"/>
+    <HBox spacing="4">
+        <TextField fx:id="txtImgPath" HBox.hgrow="ALWAYS"/>
+        <Button text="..." onAction="#onBrowseImage" minWidth="30"/>
+    </HBox>
+
+    <Label text="Background image:"/>
+    <HBox spacing="4">
+        <TextField fx:id="txtBgImgPath" HBox.hgrow="ALWAYS"/>
+        <Button text="..." onAction="#onBrowseBgImage" minWidth="30"/>
+    </HBox>
+
+    <CheckBox fx:id="chkAcro6Layers" text="Acrobat 6 layer mode"/>
+    <CheckBox fx:id="chkAppend" text="Append signature"/>
+
+    <Label text="Output file:"/>
+    <HBox spacing="4">
+        <TextField fx:id="txtOutFile" HBox.hgrow="ALWAYS"/>
+        <Button text="..." onAction="#onBrowseOutFile" minWidth="30"/>
+    </HBox>
+</VBox>

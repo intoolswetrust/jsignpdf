@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox xmlns="http://javafx.com/javafx"
+      xmlns:fx="http://javafx.com/fxml"
+      fx:controller="net.sf.jsignpdf.fx.view.CertificateSettingsController"
+      spacing="8">
+    <padding>
+        <Insets top="8" right="8" bottom="8" left="8"/>
+    </padding>
+
+    <Label text="Keystore type:"/>
+    <ComboBox fx:id="cmbKeystoreType" maxWidth="Infinity"/>
+
+    <Label text="Keystore file:"/>
+    <HBox spacing="4">
+        <TextField fx:id="txtKeystoreFile" HBox.hgrow="ALWAYS"/>
+        <Button fx:id="btnBrowseKeystore" text="..." onAction="#onBrowseKeystore"
+                minWidth="30"/>
+    </HBox>
+
+    <Label text="Keystore password:"/>
+    <PasswordField fx:id="txtKeystorePassword"/>
+
+    <Button fx:id="btnLoadKeys" text="Load Keys" onAction="#onLoadKeys"
+            maxWidth="Infinity"/>
+
+    <Label text="Key alias:"/>
+    <ComboBox fx:id="cmbKeyAlias" maxWidth="Infinity"/>
+
+    <Label text="Key password:"/>
+    <PasswordField fx:id="txtKeyPassword"/>
+</VBox>

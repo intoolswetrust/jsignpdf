@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox xmlns="http://javafx.com/javafx"
+      xmlns:fx="http://javafx.com/fxml"
+      fx:controller="net.sf.jsignpdf.fx.view.TsaSettingsController"
+      spacing="6">
+    <padding>
+        <Insets top="8" right="8" bottom="8" left="8"/>
+    </padding>
+
+    <!-- TSA Section -->
+    <CheckBox fx:id="chkTsaEnabled" text="Enable Timestamp (TSA)"/>
+
+    <VBox fx:id="tsaDetailsPane" spacing="6">
+        <Label text="TSA server URL:"/>
+        <TextField fx:id="txtTsaUrl"/>
+
+        <Label text="Authentication:"/>
+        <ComboBox fx:id="cmbTsaAuthn" maxWidth="Infinity"/>
+
+        <Label text="TSA user:"/>
+        <TextField fx:id="txtTsaUser"/>
+
+        <Label text="TSA password:"/>
+        <PasswordField fx:id="txtTsaPassword"/>
+
+        <Label text="TSA cert file type:"/>
+        <TextField fx:id="txtTsaCertFileType"/>
+
+        <Label text="TSA certificate file:"/>
+        <HBox spacing="4">
+            <TextField fx:id="txtTsaCertFile" HBox.hgrow="ALWAYS"/>
+            <Button text="..." onAction="#onBrowseTsaCertFile" minWidth="30"/>
+        </HBox>
+
+        <Label text="TSA cert password:"/>
+        <PasswordField fx:id="txtTsaCertFilePassword"/>
+
+        <Label text="TSA policy OID:"/>
+        <TextField fx:id="txtTsaPolicy"/>
+
+        <Label text="TSA hash algorithm:"/>
+        <TextField fx:id="txtTsaHashAlg"/>
+    </VBox>
+
+    <Separator/>
+
+    <!-- OCSP/CRL Section -->
+    <CheckBox fx:id="chkOcspEnabled" text="Enable OCSP"/>
+    <Label text="OCSP server URL:"/>
+    <TextField fx:id="txtOcspServerUrl"/>
+
+    <CheckBox fx:id="chkCrlEnabled" text="Enable CRL"/>
+
+    <Separator/>
+
+    <!-- Proxy Section -->
+    <Label text="Proxy type:"/>
+    <ComboBox fx:id="cmbProxyType" maxWidth="Infinity"/>
+
+    <Label text="Proxy host:"/>
+    <TextField fx:id="txtProxyHost"/>
+
+    <Label text="Proxy port:"/>
+    <TextField fx:id="txtProxyPort" text="80"/>
+</VBox>

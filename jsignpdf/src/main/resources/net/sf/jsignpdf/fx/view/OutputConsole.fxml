@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox xmlns="http://javafx.com/javafx"
+      xmlns:fx="http://javafx.com/fxml"
+      fx:controller="net.sf.jsignpdf.fx.view.OutputConsoleController"
+      spacing="4">
+    <padding>
+        <Insets top="4" right="4" bottom="4" left="4"/>
+    </padding>
+
+    <HBox alignment="CENTER_RIGHT" spacing="4">
+        <Label text="Output Console" HBox.hgrow="ALWAYS" maxWidth="Infinity"
+               style="-fx-font-weight: bold;"/>
+        <Button text="Clear" onAction="#onClear"/>
+    </HBox>
+    <TextArea fx:id="txtOutput" editable="false" wrapText="true"
+              VBox.vgrow="ALWAYS" prefRowCount="8"
+              style="-fx-font-family: monospace; -fx-font-size: 11px;"/>
+</VBox>

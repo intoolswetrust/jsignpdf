@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox xmlns="http://javafx.com/javafx"
+      xmlns:fx="http://javafx.com/fxml"
+      fx:controller="net.sf.jsignpdf.fx.view.EncryptionSettingsController"
+      spacing="6">
+    <padding>
+        <Insets top="8" right="8" bottom="8" left="8"/>
+    </padding>
+
+    <Label text="PDF Encryption:"/>
+    <ComboBox fx:id="cmbEncryption" maxWidth="Infinity"/>
+
+    <VBox fx:id="encryptionDetailsPane" spacing="6">
+        <Label text="Owner password:"/>
+        <PasswordField fx:id="txtOwnerPassword"/>
+
+        <Label text="User password:"/>
+        <PasswordField fx:id="txtUserPassword"/>
+
+        <Label text="Encryption certificate:"/>
+        <HBox spacing="4">
+            <TextField fx:id="txtEncCertFile" HBox.hgrow="ALWAYS"/>
+            <Button text="..." onAction="#onBrowseEncCert" minWidth="30"/>
+        </HBox>
+    </VBox>
+
+    <Separator/>
+
+    <!-- Rights -->
+    <Label text="Print right:" style="-fx-font-weight: bold;"/>
+    <ComboBox fx:id="cmbPrintRight" maxWidth="Infinity"/>
+
+    <CheckBox fx:id="chkCopy" text="Allow Copy"/>
+    <CheckBox fx:id="chkAssembly" text="Allow Assembly"/>
+    <CheckBox fx:id="chkFillIn" text="Allow Fill-in"/>
+    <CheckBox fx:id="chkScreenReaders" text="Allow Screen Readers"/>
+    <CheckBox fx:id="chkModifyAnnotations" text="Allow Modify Annotations"/>
+    <CheckBox fx:id="chkModifyContents" text="Allow Modify Contents"/>
+</VBox>

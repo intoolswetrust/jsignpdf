@@ -1,0 +1,97 @@
+package net.sf.jsignpdf.fx.view;
+
+import java.io.File;
+import java.util.logging.Level;
+
+import javafx.collections.FXCollections;
+import javafx.fxml.FXML;
+import javafx.scene.control.Button;
+import javafx.scene.control.ComboBox;
+import javafx.scene.control.PasswordField;
+import javafx.scene.control.TextField;
+import javafx.stage.FileChooser;
+import net.sf.jsignpdf.BasicSignerOptions;
+import net.sf.jsignpdf.fx.service.KeyStoreService;
+import net.sf.jsignpdf.fx.viewmodel.SigningOptionsViewModel;
+import net.sf.jsignpdf.utils.KeyStoreUtils;
+
+import static net.sf.jsignpdf.Constants.LOGGER;
+
+/**
+ * Controller for the certificate/keystore settings panel.
+ */
+public class CertificateSettingsController {
+
+    @FXML private ComboBox<String> cmbKeystoreType;
+    @FXML private TextField txtKeystoreFile;
+    @FXML private Button btnBrowseKeystore;
+    @FXML private PasswordField txtKeystorePassword;
+    @FXML private Button btnLoadKeys;
+    @FXML private ComboBox<String> cmbKeyAlias;
+    @FXML private PasswordField txtKeyPassword;
+
+    private SigningOptionsViewModel viewModel;
+    private final KeyStoreService keyStoreService = new KeyStoreService();
+
+    @FXML
+    private void initialize() {
+        // Populate keystore types
+        cmbKeystoreType.setItems(FXCollections.observableArrayList(KeyStoreUtils.getKeyStores()));
+
+        // Setup key loading service callbacks
+        keyStoreService.setOnSucceeded(e -> {
+            String[] aliases = keyStoreService.getValue();
+            cmbKeyAlias.setItems(FXCollections.observableArrayList(aliases));
+            if (aliases.length > 0) {
+                cmbKeyAlias.getSelectionModel().selectFirst();
+            }
+        });
+        keyStoreService.setOnFailed(e -> {
+            LOGGER.log(Level.WARNING, "Failed to load key aliases", keyStoreService.getException());
+            cmbKeyAlias.getItems().clear();
+        });
+    }
+
+    public void setViewModel(SigningOptionsViewModel vm) {
+        this.viewModel = vm;
+        bindToViewModel();
+    }
+
+    private void bindToViewModel() {
+        // Bidirectional bindings
+        cmbKeystoreType.valueProperty().bindBidirectional(viewModel.ksTypeProperty());
+        txtKeystoreFile.textProperty().bindBidirectional(viewModel.ksFileProperty());
+        txtKeystorePassword.textProperty().bindBidirectional(viewModel.ksPasswordProperty());
+        cmbKeyAlias.valueProperty().bindBidirectional(viewModel.keyAliasProperty());
+        txtKeyPassword.textProperty().bindBidirectional(viewModel.keyPasswordProperty());
+    }
+
+    @FXML
+    private void onBrowseKeystore() {
+        FileChooser fc = new FileChooser();
+        fc.setTitle("Select Keystore File");
+        fc.getExtensionFilters().addAll(
+                new FileChooser.ExtensionFilter("All Files", "*.*"),
+                new FileChooser.ExtensionFilter("PKCS12", "*.p12", "*.pfx"),
+                new FileChooser.ExtensionFilter("JKS", "*.jks"));
+        File file = fc.showOpenDialog(txtKeystoreFile.getScene().getWindow());
+        if (file != null) {
+            txtKeystoreFile.setText(file.getAbsolutePath());
+        }
+    }
+
+    @FXML
+    private void onLoadKeys() {
+        // Create temporary options to load keys
+        BasicSignerOptions tmpOpts = new BasicSignerOptions();
+        tmpOpts.setKsType(cmbKeystoreType.getValue());
+        tmpOpts.setKsFile(txtKeystoreFile.getText());
+        tmpOpts.setKsPasswd(txtKeystorePassword.getText() != null
+                ? txtKeystorePassword.getText().toCharArray() : null);
+
+        keyStoreService.cancel();
+        keyStoreService.reset();
+        keyStoreService.setOptions(tmpOpts);
+        keyStoreService.start();
+    }
+}

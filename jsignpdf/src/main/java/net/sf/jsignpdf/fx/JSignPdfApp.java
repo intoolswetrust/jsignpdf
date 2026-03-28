@@ -1,0 +1,43 @@
+package net.sf.jsignpdf.fx;
+
+import javafx.application.Application;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
+import javafx.stage.Stage;
+import net.sf.jsignpdf.BasicSignerOptions;
+import net.sf.jsignpdf.Constants;
+import net.sf.jsignpdf.fx.view.MainWindowController;
+
+/**
+ * JavaFX Application entry point for JSignPdf.
+ */
+public class JSignPdfApp extends Application {
+
+    private static BasicSignerOptions initialOptions;
+
+    static void setInitialOptions(BasicSignerOptions opts) {
+        initialOptions = opts;
+    }
+
+    @Override
+    public void start(Stage primaryStage) throws Exception {
+        FXMLLoader loader = new FXMLLoader(
+                getClass().getResource("/net/sf/jsignpdf/fx/view/MainWindow.fxml"));
+        Parent root = loader.load();
+
+        MainWindowController controller = loader.getController();
+        controller.setStage(primaryStage);
+        if (initialOptions != null) {
+            controller.setInitialOptions(initialOptions);
+        }
+
+        Scene scene = new Scene(root, 1100, 750);
+        scene.getStylesheets().add(
+                getClass().getResource("/net/sf/jsignpdf/fx/styles/jsignpdf.css").toExternalForm());
+
+        primaryStage.setTitle("JSignPdf " + Constants.VERSION);
+        primaryStage.setScene(scene);
+        primaryStage.show();
+    }
+}

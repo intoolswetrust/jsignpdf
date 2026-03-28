@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<BorderPane xmlns="http://javafx.com/javafx"
+            xmlns:fx="http://javafx.com/fxml"
+            fx:controller="net.sf.jsignpdf.fx.view.MainWindowController"
+            prefWidth="1100" prefHeight="750">
+
+    <!-- Menu Bar -->
+    <top>
+        <VBox>
+            <MenuBar>
+                <Menu text="File">
+                    <MenuItem fx:id="menuOpen" text="Open PDF..." onAction="#onFileOpen"
+                              accelerator="Shortcut+O"/>
+                    <MenuItem fx:id="menuClose" text="Close" onAction="#onFileClose"/>
+                    <SeparatorMenuItem/>
+                    <MenuItem fx:id="menuSign" text="Sign" onAction="#onSign"
+                              accelerator="Shortcut+S"/>
+                    <SeparatorMenuItem/>
+                    <MenuItem fx:id="menuExit" text="Exit" onAction="#onFileExit"
+                              accelerator="Shortcut+Q"/>
+                </Menu>
+                <Menu text="View">
+                    <MenuItem fx:id="menuZoomIn" text="Zoom In" onAction="#onZoomIn"
+                              accelerator="Shortcut+EQUALS"/>
+                    <MenuItem fx:id="menuZoomOut" text="Zoom Out" onAction="#onZoomOut"
+                              accelerator="Shortcut+MINUS"/>
+                    <MenuItem fx:id="menuZoomFit" text="Fit Page" onAction="#onZoomFit"/>
+                    <SeparatorMenuItem/>
+                    <MenuItem fx:id="menuToggleSidePanel" text="Toggle Side Panel"
+                              onAction="#onToggleSidePanel" accelerator="F9"/>
+                </Menu>
+                <Menu text="Signing">
+                    <MenuItem text="Sign" onAction="#onSign" accelerator="Shortcut+S"/>
+                </Menu>
+                <Menu text="Help">
+                    <MenuItem fx:id="menuAbout" text="About JSignPdf" onAction="#onAbout"/>
+                </Menu>
+            </MenuBar>
+
+            <!-- Toolbar -->
+            <ToolBar styleClass="main-toolbar">
+                <Button fx:id="btnOpen" text="Open" onAction="#onFileOpen"
+                        styleClass="toolbar-button"/>
+                <Separator orientation="VERTICAL"/>
+                <Button fx:id="btnZoomIn" text="+" onAction="#onZoomIn"
+                        styleClass="toolbar-button"/>
+                <Button fx:id="btnZoomOut" text="-" onAction="#onZoomOut"
+                        styleClass="toolbar-button"/>
+                <Button fx:id="btnZoomFit" text="Fit" onAction="#onZoomFit"
+                        styleClass="toolbar-button"/>
+                <ComboBox fx:id="cmbZoom" editable="true" prefWidth="80"/>
+                <Separator orientation="VERTICAL"/>
+                <Button fx:id="btnPrevPage" text="&lt;" onAction="#onPrevPage"
+                        styleClass="toolbar-button"/>
+                <TextField fx:id="txtPageNumber" prefColumnCount="3" alignment="CENTER"/>
+                <Label fx:id="lblPageCount" text="/ 0"/>
+                <Button fx:id="btnNextPage" text="&gt;" onAction="#onNextPage"
+                        styleClass="toolbar-button"/>
+                <Separator orientation="VERTICAL"/>
+                <ToggleButton fx:id="btnPlaceSig" text="Place Signature"
+                              onAction="#onPlaceSignature" styleClass="toolbar-button"/>
+                <Separator orientation="VERTICAL"/>
+                <Button fx:id="btnSign" text="SIGN" onAction="#onSign"
+                        styleClass="toolbar-button,sign-button"/>
+            </ToolBar>
+        </VBox>
+    </top>
+
+    <!-- Main content: vertical split with main area on top and output console on bottom -->
+    <center>
+        <SplitPane fx:id="verticalSplit" orientation="VERTICAL" dividerPositions="0.8">
+            <SplitPane fx:id="splitPane" dividerPositions="0.28"
+                       onDragOver="#onDragOver" onDragDropped="#onDragDropped">
+                <!-- Side panel with accordion for settings -->
+                <AnchorPane minWidth="250" prefWidth="300" styleClass="side-panel">
+                    <Accordion AnchorPane.topAnchor="0" AnchorPane.bottomAnchor="0"
+                               AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0">
+                        <panes>
+                            <TitledPane text="Certificate" expanded="true">
+                                <fx:include fx:id="certificateSettings"
+                                            source="CertificateSettings.fxml"/>
+                            </TitledPane>
+                            <TitledPane text="Signature Appearance">
+                                <ScrollPane fitToWidth="true">
+                                    <fx:include fx:id="signatureSettings"
+                                                source="SignatureSettings.fxml"/>
+                                </ScrollPane>
+                            </TitledPane>
+                            <TitledPane text="Timestamp &amp; Validation">
+                                <ScrollPane fitToWidth="true">
+                                    <fx:include fx:id="tsaSettings"
+                                                source="TsaSettings.fxml"/>
+                                </ScrollPane>
+                            </TitledPane>
+                            <TitledPane text="Encryption &amp; Rights">
+                                <ScrollPane fitToWidth="true">
+                                    <fx:include fx:id="encryptionSettings"
+                                                source="EncryptionSettings.fxml"/>
+                                </ScrollPane>
+                            </TitledPane>
+                        </panes>
+                    </Accordion>
+                </AnchorPane>
+
+                <!-- PDF Preview Area -->
+                <ScrollPane fx:id="scrollPane" fitToWidth="true" fitToHeight="true"
+                            pannable="true" styleClass="pdf-scroll-pane"
+                            onDragOver="#onDragOver" onDragDropped="#onDragDropped">
+                    <StackPane fx:id="pdfArea" styleClass="pdf-area"
+                               minWidth="400" minHeight="500">
+                        <Label fx:id="lblDropHint" text="Drop a PDF file here or use File > Open"
+                               styleClass="drop-hint"/>
+                    </StackPane>
+                </ScrollPane>
+            </SplitPane>
+
+            <!-- Output Console -->
+            <fx:include fx:id="outputConsole" source="OutputConsole.fxml"/>
+        </SplitPane>
+    </center>
+
+    <!-- Status Bar -->
+    <bottom>
+        <HBox styleClass="status-bar" spacing="10" alignment="CENTER_LEFT">
+            <padding>
+                <Insets top="4" bottom="4" left="8" right="8"/>
+            </padding>
+            <Label fx:id="lblStatus" text="Ready" HBox.hgrow="ALWAYS"
+                   maxWidth="Infinity"/>
+            <ProgressBar fx:id="progressBar" prefWidth="150"/>
+        </HBox>
+    </bottom>
+</BorderPane>

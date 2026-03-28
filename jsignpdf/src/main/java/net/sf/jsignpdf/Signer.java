@@ -49,6 +49,7 @@ import java.util.logging.Level;
 import javax.swing.UIManager;
 import javax.swing.WindowConstants;
 
+import net.sf.jsignpdf.fx.FxLauncher;
 import net.sf.jsignpdf.ssl.SSLInitializer;
 import net.sf.jsignpdf.utils.ConfigProvider;
 import net.sf.jsignpdf.utils.GuiUtils;
@@ -151,15 +152,21 @@ public class Signer {
         }
 
         if (showGui) {
-            try {
-                UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-            } catch (Exception e) {
-                System.err.println("Can't set Look&Feel.");
+            if (Boolean.getBoolean("jsignpdf.swing")) {
+                // Legacy Swing GUI (preserved for fallback)
+                try {
+                    UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+                } catch (Exception e) {
+                    System.err.println("Can't set Look&Feel.");
+                }
+                SignPdfForm tmpForm = new SignPdfForm(WindowConstants.EXIT_ON_CLOSE, tmpOpts);
+                tmpForm.pack();
+                GuiUtils.center(tmpForm);
+                tmpForm.setVisible(true);
+            } else {
+                // New JavaFX GUI (default)
+                FxLauncher.launch(tmpOpts);
             }
-            SignPdfForm tmpForm = new SignPdfForm(WindowConstants.EXIT_ON_CLOSE, tmpOpts);
-            tmpForm.pack();
-            GuiUtils.center(tmpForm);
-            tmpForm.setVisible(true);
         }
     }
 
