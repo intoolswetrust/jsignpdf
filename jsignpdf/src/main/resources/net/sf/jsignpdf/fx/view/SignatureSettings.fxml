@@ -14,8 +14,47 @@
         <Insets top="8" right="8" bottom="8" left="8"/>
     </padding>
 
-    <Label text="Render mode:"/>
-    <ComboBox fx:id="cmbRenderMode" maxWidth="Infinity"/>
+    <CheckBox fx:id="chkVisibleSig" text="Enable visible signature"/>
+
+    <Separator/>
+
+    <VBox fx:id="visibleSigPane" spacing="6">
+        <Label text="Render mode:"/>
+        <ComboBox fx:id="cmbRenderMode" maxWidth="Infinity"/>
+
+        <Label text="L2 text:"/>
+        <TextField fx:id="txtL2Text"/>
+
+        <Label text="L4 text:"/>
+        <TextField fx:id="txtL4Text"/>
+
+        <Label text="Font size:"/>
+        <TextField fx:id="txtFontSize" text="10.0"/>
+
+        <Label text="Signature image:"/>
+        <HBox spacing="4">
+            <TextField fx:id="txtImgPath" HBox.hgrow="ALWAYS"/>
+            <Button onAction="#onBrowseImage" minWidth="30">
+                <graphic><ImageView fitWidth="16" fitHeight="16" preserveRatio="true">
+                    <Image url="@/net/sf/jsignpdf/fileopen16.png"/>
+                </ImageView></graphic>
+            </Button>
+        </HBox>
+
+        <Label text="Background image:"/>
+        <HBox spacing="4">
+            <TextField fx:id="txtBgImgPath" HBox.hgrow="ALWAYS"/>
+            <Button onAction="#onBrowseBgImage" minWidth="30">
+                <graphic><ImageView fitWidth="16" fitHeight="16" preserveRatio="true">
+                    <Image url="@/net/sf/jsignpdf/fileopen16.png"/>
+                </ImageView></graphic>
+            </Button>
+        </HBox>
+
+        <CheckBox fx:id="chkAcro6Layers" text="Acrobat 6 layer mode"/>
+    </VBox>
+
+    <Separator/>
 
     <Label text="Hash algorithm:"/>
     <ComboBox fx:id="cmbHashAlgorithm" maxWidth="Infinity"/>
@@ -35,36 +74,6 @@
     <Label text="Contact:"/>
     <TextField fx:id="txtContact"/>
 
-    <Label text="L2 text:"/>
-    <TextField fx:id="txtL2Text"/>
-
-    <Label text="L4 text:"/>
-    <TextField fx:id="txtL4Text"/>
-
-    <Label text="Font size:"/>
-    <TextField fx:id="txtFontSize" text="10.0"/>
-
-    <Label text="Signature image:"/>
-    <HBox spacing="4">
-        <TextField fx:id="txtImgPath" HBox.hgrow="ALWAYS"/>
-        <Button onAction="#onBrowseImage" minWidth="30">
-            <graphic><ImageView fitWidth="16" fitHeight="16" preserveRatio="true">
-                <Image url="@/net/sf/jsignpdf/fileopen16.png"/>
-            </ImageView></graphic>
-        </Button>
-    </HBox>
-
-    <Label text="Background image:"/>
-    <HBox spacing="4">
-        <TextField fx:id="txtBgImgPath" HBox.hgrow="ALWAYS"/>
-        <Button onAction="#onBrowseBgImage" minWidth="30">
-            <graphic><ImageView fitWidth="16" fitHeight="16" preserveRatio="true">
-                <Image url="@/net/sf/jsignpdf/fileopen16.png"/>
-            </ImageView></graphic>
-        </Button>
-    </HBox>
-
-    <CheckBox fx:id="chkAcro6Layers" text="Acrobat 6 layer mode"/>
     <CheckBox fx:id="chkAppend" text="Append signature"/>
 
     <Label text="Output file:"/>

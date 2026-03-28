@@ -57,7 +57,7 @@
 
     <!-- OCSP/CRL Section -->
     <CheckBox fx:id="chkOcspEnabled" text="Enable OCSP"/>
-    <Label text="OCSP server URL:"/>
+    <Label fx:id="lblOcspServerUrl" text="OCSP server URL:"/>
     <TextField fx:id="txtOcspServerUrl"/>
 
     <CheckBox fx:id="chkCrlEnabled" text="Enable CRL"/>
@@ -68,9 +68,9 @@
     <Label text="Proxy type:"/>
     <ComboBox fx:id="cmbProxyType" maxWidth="Infinity"/>
 
-    <Label text="Proxy host:"/>
+    <Label fx:id="lblProxyHost" text="Proxy host:"/>
     <TextField fx:id="txtProxyHost"/>
 
-    <Label text="Proxy port:"/>
+    <Label fx:id="lblProxyPort" text="Proxy port:"/>
     <TextField fx:id="txtProxyPort" text="80"/>
 </VBox>

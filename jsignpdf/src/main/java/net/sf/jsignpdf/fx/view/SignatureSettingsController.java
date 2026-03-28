@@ -7,6 +7,7 @@ import javafx.fxml.FXML;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.TextField;
+import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
 import net.sf.jsignpdf.fx.viewmodel.SigningOptionsViewModel;
 import net.sf.jsignpdf.types.CertificationLevel;
@@ -18,6 +19,8 @@ import net.sf.jsignpdf.types.RenderMode;
  */
 public class SignatureSettingsController {
 
+    @FXML private CheckBox chkVisibleSig;
+    @FXML private VBox visibleSigPane;
     @FXML private ComboBox<RenderMode> cmbRenderMode;
     @FXML private ComboBox<HashAlgorithm> cmbHashAlgorithm;
     @FXML private ComboBox<CertificationLevel> cmbCertLevel;
@@ -41,6 +44,12 @@ public class SignatureSettingsController {
         cmbRenderMode.setItems(FXCollections.observableArrayList(RenderMode.values()));
         cmbHashAlgorithm.setItems(FXCollections.observableArrayList(HashAlgorithm.values()));
         cmbCertLevel.setItems(FXCollections.observableArrayList(CertificationLevel.values()));
+
+        // Toggle visible signature details
+        visibleSigPane.managedProperty().bind(visibleSigPane.visibleProperty());
+        chkVisibleSig.selectedProperty().addListener((obs, o, n) ->
+                visibleSigPane.setVisible(n));
+        visibleSigPane.setVisible(false);
     }
 
     public void setViewModel(SigningOptionsViewModel vm) {
@@ -49,6 +58,7 @@ public class SignatureSettingsController {
     }
 
     private void bindToViewModel() {
+        chkVisibleSig.selectedProperty().bindBidirectional(viewModel.visibleProperty());
         cmbRenderMode.valueProperty().bindBidirectional(viewModel.renderModeProperty());
         cmbHashAlgorithm.valueProperty().bindBidirectional(viewModel.hashAlgorithmProperty());
         cmbCertLevel.valueProperty().bindBidirectional(viewModel.certLevelProperty());
@@ -73,6 +83,9 @@ public class SignatureSettingsController {
             } catch (NumberFormatException ignored) {
             }
         });
+
+        // Update visibility from initial value
+        visibleSigPane.setVisible(viewModel.visibleProperty().get());
     }
 
     @FXML

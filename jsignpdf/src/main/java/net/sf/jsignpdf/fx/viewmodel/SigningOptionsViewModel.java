@@ -34,6 +34,7 @@ public class SigningOptionsViewModel {
     private final StringProperty keyAlias = new SimpleStringProperty();
     private final IntegerProperty keyIndex = new SimpleIntegerProperty(Constants.DEFVAL_KEY_INDEX);
     private final StringProperty keyPassword = new SimpleStringProperty();
+    private final BooleanProperty storePasswords = new SimpleBooleanProperty(false);
 
     // File settings
     private final StringProperty outFile = new SimpleStringProperty();
@@ -112,6 +113,7 @@ public class SigningOptionsViewModel {
         opts.setKeyAlias(keyAlias.get());
         opts.setKeyIndex(keyIndex.get());
         opts.setKeyPasswd(toCharArray(keyPassword.get()));
+        opts.setStorePasswords(storePasswords.get());
         opts.setOutFile(outFile.get());
         opts.setAppend(append.get());
         opts.setSignerName(signerName.get());
@@ -185,6 +187,7 @@ public class SigningOptionsViewModel {
         keyAlias.set(opts.getKeyAlias());
         keyIndex.set(opts.getKeyIndex());
         keyPassword.set(fromCharArray(opts.getKeyPasswd()));
+        storePasswords.set(opts.isStorePasswords());
         outFile.set(opts.getOutFile());
         append.set(opts.isAppend());
         signerName.set(opts.getSignerName());
@@ -257,6 +260,7 @@ public class SigningOptionsViewModel {
     public StringProperty keyAliasProperty() { return keyAlias; }
     public IntegerProperty keyIndexProperty() { return keyIndex; }
     public StringProperty keyPasswordProperty() { return keyPassword; }
+    public BooleanProperty storePasswordsProperty() { return storePasswords; }
     public StringProperty outFileProperty() { return outFile; }
     public BooleanProperty appendProperty() { return append; }
     public StringProperty signerNameProperty() { return signerName; }

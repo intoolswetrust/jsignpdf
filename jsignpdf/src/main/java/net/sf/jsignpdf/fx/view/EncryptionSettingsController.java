@@ -66,6 +66,10 @@ public class EncryptionSettingsController {
         chkScreenReaders.selectedProperty().bindBidirectional(viewModel.rightScreenReadersProperty());
         chkModifyAnnotations.selectedProperty().bindBidirectional(viewModel.rightModifyAnnotationsProperty());
         chkModifyContents.selectedProperty().bindBidirectional(viewModel.rightModifyContentsProperty());
+
+        // Update visibility from initial loaded values
+        PDFEncryption enc = viewModel.pdfEncryptionProperty().get();
+        encryptionDetailsPane.setVisible(enc != null && enc != PDFEncryption.NONE);
     }
 
     @FXML

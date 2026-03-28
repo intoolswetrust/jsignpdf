@@ -29,9 +29,11 @@ public class JSignPdfApp extends Application {
 
         MainWindowController controller = loader.getController();
         controller.setStage(primaryStage);
-        if (initialOptions != null) {
-            controller.setInitialOptions(initialOptions);
-        }
+
+        // Create options and load persisted configuration
+        BasicSignerOptions opts = initialOptions != null ? initialOptions : new BasicSignerOptions();
+        opts.loadOptions();
+        controller.initFromOptions(opts);
 
         Scene scene = new Scene(root, 1100, 750);
         scene.getStylesheets().add(
@@ -41,6 +43,10 @@ public class JSignPdfApp extends Application {
         primaryStage.getIcons().add(
                 new Image(getClass().getResourceAsStream("/net/sf/jsignpdf/signedpdf32.png")));
         primaryStage.setScene(scene);
+
+        // Store configuration on window close
+        primaryStage.setOnCloseRequest(event -> controller.storeAndCleanup());
+
         primaryStage.show();
     }
 }

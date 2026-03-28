@@ -6,6 +6,7 @@ import java.util.logging.Level;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
+import javafx.scene.control.CheckBox;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
@@ -29,6 +30,7 @@ public class CertificateSettingsController {
     @FXML private Button btnLoadKeys;
     @FXML private ComboBox<String> cmbKeyAlias;
     @FXML private PasswordField txtKeyPassword;
+    @FXML private CheckBox chkStorePasswords;
 
     private SigningOptionsViewModel viewModel;
     private final KeyStoreService keyStoreService = new KeyStoreService();
@@ -64,6 +66,7 @@ public class CertificateSettingsController {
         txtKeystorePassword.textProperty().bindBidirectional(viewModel.ksPasswordProperty());
         cmbKeyAlias.valueProperty().bindBidirectional(viewModel.keyAliasProperty());
         txtKeyPassword.textProperty().bindBidirectional(viewModel.keyPasswordProperty());
+        chkStorePasswords.selectedProperty().bindBidirectional(viewModel.storePasswordsProperty());
     }
 
     @FXML

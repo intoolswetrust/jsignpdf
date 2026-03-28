@@ -43,4 +43,7 @@
 
     <Label text="Key password:"/>
     <PasswordField fx:id="txtKeyPassword"/>
+
+    <Separator/>
+    <CheckBox fx:id="chkStorePasswords" text="Store passwords"/>
 </VBox>

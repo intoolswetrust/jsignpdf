@@ -105,8 +105,29 @@ public class MainWindowController {
         stage.addEventFilter(KeyEvent.KEY_PRESSED, this::handleKeyPress);
     }
 
-    public void setInitialOptions(BasicSignerOptions opts) {
+    /**
+     * Initializes the UI from persisted BasicSignerOptions (called after loadOptions()).
+     * Populates all ViewModel properties from the options so the UI is prefilled.
+     */
+    public void initFromOptions(BasicSignerOptions opts) {
         this.options = opts;
+        signingVM.syncFromOptions(opts);
+    }
+
+    /**
+     * Stores current UI state to BasicSignerOptions and persists to disk.
+     * Called on window close.
+     */
+    public void storeAndCleanup() {
+        try {
+            if (options == null) {
+                options = new BasicSignerOptions();
+            }
+            signingVM.syncToOptions(options);
+            options.storeOptions();
+        } catch (Exception e) {
+            LOGGER.log(Level.WARNING, "Failed to store options", e);
+        }
     }
 
     @FXML
@@ -460,6 +481,8 @@ public class MainWindowController {
         try {
             if (options == null) {
                 options = new BasicSignerOptions();
+                options.loadOptions();
+                signingVM.syncFromOptions(options);
             }
             options.setInFile(file.getAbsolutePath());
 
@@ -501,7 +524,9 @@ public class MainWindowController {
         placementVM.reset();
         signatureOverlay.setVisible(false);
         btnPlaceSig.setSelected(false);
-        options = null;
+        if (options != null) {
+            options.setInFile(null);
+        }
         pdfPageView.setVisible(false);
         lblDropHint.setVisible(true);
         setDocumentControlsDisabled(true);
