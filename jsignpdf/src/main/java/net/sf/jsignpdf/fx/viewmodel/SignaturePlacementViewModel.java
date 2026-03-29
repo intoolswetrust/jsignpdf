@@ -65,6 +65,31 @@ public class SignaturePlacementViewModel {
         return new float[]{llx, lly, urx, ury};
     }
 
+    /**
+     * Set relative image coordinates from PDF coordinates.
+     * PDF origin is bottom-left; image origin is top-left.
+     *
+     * @param llx lower-left X in PDF points
+     * @param lly lower-left Y in PDF points
+     * @param urx upper-right X in PDF points
+     * @param ury upper-right Y in PDF points
+     * @param pageWidth  PDF page width in points
+     * @param pageHeight PDF page height in points
+     */
+    public void fromPdfCoordinates(float llx, float lly, float urx, float ury,
+                                   float pageWidth, float pageHeight) {
+        double rX = llx / pageWidth;
+        double rW = (urx - llx) / pageWidth;
+        // PDF Y is inverted: image top=0 corresponds to PDF top=pageHeight
+        double rY = 1.0 - ury / pageHeight;
+        double rH = (ury - lly) / pageHeight;
+        setRelX(rX);
+        setRelY(rY);
+        setRelWidth(rW);
+        setRelHeight(rH);
+        setPlaced(true);
+    }
+
     public void reset() {
         placementMode.set(false);
         placed.set(false);
