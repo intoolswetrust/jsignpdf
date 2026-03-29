@@ -411,6 +411,9 @@ public class KeyStoreUtils {
         final KeyStore tmpKs = loadKeyStore(options.getKsType(), options.getKsFile(), options.getKsPasswd());
 
         String tmpAlias = getKeyAliasInternal(options, tmpKs);
+        if (tmpAlias == null) {
+            return null;
+        }
         LOGGER.info(RES.get("console.getPrivateKey"));
         final PrivateKey tmpPk = (PrivateKey) tmpKs.getKey(tmpAlias, options.getKeyPasswdX());
         LOGGER.info(RES.get("console.getCertChain"));

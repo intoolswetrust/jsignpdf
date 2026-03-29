@@ -152,6 +152,10 @@ public class SignerLogic implements Runnable {
                 }
             } else {
                 pkInfo = KeyStoreUtils.getPkInfo(options);
+                if (pkInfo == null) {
+                    LOGGER.info(RES.get("console.certificateChainEmpty"));
+                    return false;
+                }
                 key = pkInfo.getKey();
                 chain = pkInfo.getChain();
             }
