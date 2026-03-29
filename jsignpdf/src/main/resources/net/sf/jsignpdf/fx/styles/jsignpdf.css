@@ -35,6 +35,11 @@
 
 /* PDF Area */
 .pdf-scroll-pane {
+    -fx-background: #e0e0e0;
+    -fx-background-color: #e0e0e0;
+}
+
+.pdf-scroll-pane > .viewport {
     -fx-background-color: #e0e0e0;
 }
 

@@ -139,11 +139,10 @@
                 </AnchorPane>
 
                 <!-- PDF Preview Area -->
-                <ScrollPane fx:id="scrollPane" fitToWidth="true" fitToHeight="true"
-                            pannable="true" styleClass="pdf-scroll-pane"
+                <ScrollPane fx:id="scrollPane" pannable="true" styleClass="pdf-scroll-pane"
+                            fitToWidth="true" fitToHeight="true"
                             onDragOver="#onDragOver" onDragDropped="#onDragDropped">
-                    <StackPane fx:id="pdfArea" styleClass="pdf-area"
-                               minWidth="400" minHeight="500">
+                    <StackPane fx:id="pdfArea" styleClass="pdf-area">
                         <Label fx:id="lblDropHint" text="Drop a PDF file here or use File > Open"
                                styleClass="drop-hint"/>
                     </StackPane>

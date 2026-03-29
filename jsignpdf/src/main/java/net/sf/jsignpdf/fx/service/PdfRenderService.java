@@ -33,6 +33,8 @@ public class PdfRenderService extends Service<Image> {
         return new Task<Image>() {
             @Override
             protected Image call() {
+                // Clear any leftover interrupt flag from a previous cancel()
+                Thread.interrupted();
                 Pdf2Image p2i = new Pdf2Image(taskOptions);
                 BufferedImage buffered = p2i.getImageForPage(taskPage);
                 return SwingFxImageConverter.toFxImage(buffered);

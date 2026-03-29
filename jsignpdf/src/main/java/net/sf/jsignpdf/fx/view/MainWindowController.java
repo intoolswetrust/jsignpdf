@@ -151,7 +151,8 @@ public class MainWindowController {
         signatureOverlay.setVisible(true);
         LOGGER.info("Reopened last file: " + lastFile);
 
-        // Navigate to stored page
+        // Navigate to stored page (setCurrentPage triggers the listener which
+        // calls renderCurrentPage and updateNavButtonState)
         int storedPage = options.getPage();
         if (storedPage >= 1 && storedPage <= pages) {
             documentVM.setCurrentPage(storedPage);
@@ -163,9 +164,6 @@ public class MainWindowController {
             documentVM.setCurrentPage(1);
         }
         txtPageNumber.setText(String.valueOf(documentVM.getCurrentPage()));
-
-        renderCurrentPage();
-        updateNavButtonState();
 
         // Restore visible signature placement
         if (options.isVisible()) {
@@ -267,6 +265,13 @@ public class MainWindowController {
         signatureOverlay.setMouseTransparent(false);
         pdfArea.getChildren().add(0, pdfPageView);
         pdfArea.getChildren().add(1, signatureOverlay);
+
+        // Bind pdfArea min size to pdfPageView so scrollbars appear when the page
+        // exceeds the viewport. With fitToWidth/fitToHeight on the ScrollPane, the
+        // StackPane expands to fill the viewport (centering children) but minSize
+        // prevents it from shrinking below the rendered page, triggering scrollbars.
+        pdfArea.minWidthProperty().bind(pdfPageView.prefWidthProperty());
+        pdfArea.minHeightProperty().bind(pdfPageView.prefHeightProperty());
 
         // Auto-enable visible signature when a rectangle is placed
         placementVM.placedProperty().addListener((obs, wasPlaced, isPlaced) -> {
@@ -600,6 +605,11 @@ public class MainWindowController {
                 options.loadOptions();
                 signingVM.syncFromOptions(options);
             }
+
+            // Reset visible signature and placement from previous document
+            signingVM.visibleProperty().set(false);
+            placementVM.reset();
+
             options.setInFile(file.getAbsolutePath());
 
             // Get page count
@@ -612,7 +622,6 @@ public class MainWindowController {
 
             documentVM.setDocumentFile(file);
             documentVM.setPageCount(pages);
-            documentVM.setCurrentPage(1);
             documentVM.setZoomLevel(1.0);
 
             lblDropHint.setVisible(false);
@@ -626,6 +635,7 @@ public class MainWindowController {
 
             // Show signature overlay and render first page
             signatureOverlay.setVisible(true);
+            documentVM.setCurrentPage(1);
             renderCurrentPage();
             updateNavButtonState();
         } catch (Exception e) {
@@ -636,6 +646,7 @@ public class MainWindowController {
 
     private void closeDocument() {
         renderService.cancel();
+        signingVM.visibleProperty().set(false);
         documentVM.reset();
         placementVM.reset();
         signatureOverlay.setVisible(false);
