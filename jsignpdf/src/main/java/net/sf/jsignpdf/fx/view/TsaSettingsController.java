@@ -2,6 +2,8 @@ package net.sf.jsignpdf.fx.view;
 
 import java.io.File;
 
+import static net.sf.jsignpdf.Constants.RES;
+
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
 import javafx.scene.control.CheckBox;
@@ -147,7 +149,7 @@ public class TsaSettingsController {
     @FXML
     private void onBrowseTsaCertFile() {
         FileChooser fc = new FileChooser();
-        fc.setTitle("Select TSA Certificate File");
+        fc.setTitle(RES.get("jfx.gui.dialog.selectTsaCertFile"));
         File file = fc.showOpenDialog(txtTsaCertFile.getScene().getWindow());
         if (file != null) txtTsaCertFile.setText(file.getAbsolutePath());
     }

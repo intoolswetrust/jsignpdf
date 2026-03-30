@@ -37,6 +37,7 @@ import net.sf.jsignpdf.fx.viewmodel.SigningOptionsViewModel;
 import net.sf.jsignpdf.types.PageInfo;
 
 import static net.sf.jsignpdf.Constants.LOGGER;
+import static net.sf.jsignpdf.Constants.RES;
 
 /**
  * Controller for the main application window.
@@ -296,7 +297,7 @@ public class MainWindowController {
         signatureOverlay.maxHeightProperty().bind(pdfPageView.maxHeightProperty());
 
         progressBar.setVisible(false);
-        updateStatus("Ready");
+        updateStatus(RES.get("jfx.gui.status.ready"));
 
         cmbZoom.getItems().addAll("50%", "75%", "100%", "125%", "150%", "200%");
         cmbZoom.setValue("100%");
@@ -355,7 +356,7 @@ public class MainWindowController {
         renderService.setOnFailed(e -> {
             LOGGER.log(Level.WARNING, "Failed to render page", renderService.getException());
             progressBar.setVisible(false);
-            updateStatus("Error rendering page");
+            updateStatus(RES.get("jfx.gui.status.renderError"));
         });
 
         // Signing service callbacks
@@ -363,20 +364,24 @@ public class MainWindowController {
             progressBar.setVisible(false);
             boolean success = signingService.getValue();
             if (success) {
-                updateStatus("Signing completed successfully");
-                showAlert(Alert.AlertType.INFORMATION, "Signing Complete",
-                        "The PDF has been signed successfully.");
+                updateStatus(RES.get("jfx.gui.status.signingOk"));
+                showAlert(Alert.AlertType.INFORMATION,
+                        RES.get("jfx.gui.dialog.signingComplete.title"),
+                        RES.get("jfx.gui.dialog.signingComplete.text"));
             } else {
-                updateStatus("Signing failed");
-                showAlert(Alert.AlertType.ERROR, "Signing Failed",
-                        "The signing process failed. Check the output console for details.");
+                updateStatus(RES.get("jfx.gui.status.signingFailed"));
+                showAlert(Alert.AlertType.ERROR,
+                        RES.get("jfx.gui.dialog.signingFailed.title"),
+                        RES.get("jfx.gui.dialog.signingFailed.text"));
             }
         });
         signingService.setOnFailed(e -> {
             progressBar.setVisible(false);
             LOGGER.log(Level.SEVERE, "Signing service error", signingService.getException());
-            updateStatus("Signing error: " + signingService.getException().getMessage());
-            showAlert(Alert.AlertType.ERROR, "Signing Error",
+            updateStatus(RES.get("jfx.gui.status.signingFailed") + ": "
+                    + signingService.getException().getMessage());
+            showAlert(Alert.AlertType.ERROR,
+                    RES.get("jfx.gui.dialog.signingError.title"),
                     signingService.getException().getMessage());
         });
     }
@@ -446,7 +451,7 @@ public class MainWindowController {
     @FXML
     private void onFileOpen() {
         FileChooser fileChooser = new FileChooser();
-        fileChooser.setTitle("Open PDF");
+        fileChooser.setTitle(RES.get("jfx.gui.dialog.openPdf.title"));
         fileChooser.getExtensionFilters().add(
                 new FileChooser.ExtensionFilter("PDF Files", "*.pdf"));
         File file = fileChooser.showOpenDialog(stage);
@@ -468,8 +473,9 @@ public class MainWindowController {
     @FXML
     private void onSign() {
         if (options == null || !documentVM.isDocumentLoaded()) {
-            showAlert(Alert.AlertType.WARNING, "No Document",
-                    "Please open a PDF document first.");
+            showAlert(Alert.AlertType.WARNING,
+                    RES.get("jfx.gui.dialog.noDocument.title"),
+                    RES.get("jfx.gui.dialog.noDocument.text"));
             return;
         }
 
@@ -511,7 +517,7 @@ public class MainWindowController {
         signingService.setOptions(options);
         progressBar.setVisible(true);
         progressBar.setProgress(-1); // indeterminate
-        updateStatus("Signing...");
+        updateStatus(RES.get("jfx.gui.status.signingInProgress"));
         signingService.start();
     }
 
@@ -561,9 +567,9 @@ public class MainWindowController {
     @FXML
     private void onAbout() {
         Alert alert = new Alert(Alert.AlertType.INFORMATION);
-        alert.setTitle("About JSignPdf");
+        alert.setTitle(RES.get("jfx.gui.menu.help.about"));
         alert.setHeaderText("JSignPdf " + Constants.VERSION);
-        alert.setContentText("A free application for PDF signing.");
+        alert.setContentText(RES.get("jfx.gui.dialog.about.description"));
         alert.showAndWait();
     }
 
@@ -616,7 +622,7 @@ public class MainWindowController {
             PdfExtraInfo extraInfo = new PdfExtraInfo(options);
             int pages = extraInfo.getNumberOfPages();
             if (pages < 1) {
-                updateStatus("Error: Cannot read PDF file");
+                updateStatus(RES.get("jfx.gui.status.readError"));
                 return;
             }
 
@@ -658,7 +664,7 @@ public class MainWindowController {
         setDocumentControlsDisabled(true);
         lblPageCount.setText("/ 0");
         txtPageNumber.setText("");
-        updateStatus("Ready");
+        updateStatus(RES.get("jfx.gui.status.ready"));
         stage.setTitle("JSignPdf " + Constants.VERSION);
     }
 

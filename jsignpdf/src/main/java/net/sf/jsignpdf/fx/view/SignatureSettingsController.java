@@ -2,6 +2,8 @@ package net.sf.jsignpdf.fx.view;
 
 import java.io.File;
 
+import static net.sf.jsignpdf.Constants.RES;
+
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
 import javafx.scene.control.CheckBox;
@@ -90,20 +92,20 @@ public class SignatureSettingsController {
 
     @FXML
     private void onBrowseImage() {
-        File file = browseImageFile("Select Signature Image");
+        File file = browseImageFile(RES.get("jfx.gui.dialog.selectSignatureImage"));
         if (file != null) txtImgPath.setText(file.getAbsolutePath());
     }
 
     @FXML
     private void onBrowseBgImage() {
-        File file = browseImageFile("Select Background Image");
+        File file = browseImageFile(RES.get("jfx.gui.dialog.selectBackgroundImage"));
         if (file != null) txtBgImgPath.setText(file.getAbsolutePath());
     }
 
     @FXML
     private void onBrowseOutFile() {
         FileChooser fc = new FileChooser();
-        fc.setTitle("Select Output PDF File");
+        fc.setTitle(RES.get("jfx.gui.dialog.selectOutputPdf"));
         fc.getExtensionFilters().add(new FileChooser.ExtensionFilter("PDF Files", "*.pdf"));
         File file = fc.showSaveDialog(txtOutFile.getScene().getWindow());
         if (file != null) txtOutFile.setText(file.getAbsolutePath());

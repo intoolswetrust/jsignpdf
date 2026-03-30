@@ -17,6 +17,7 @@ import net.sf.jsignpdf.fx.viewmodel.SigningOptionsViewModel;
 import net.sf.jsignpdf.utils.KeyStoreUtils;
 
 import static net.sf.jsignpdf.Constants.LOGGER;
+import static net.sf.jsignpdf.Constants.RES;
 
 /**
  * Controller for the certificate/keystore settings panel.
@@ -72,7 +73,7 @@ public class CertificateSettingsController {
     @FXML
     private void onBrowseKeystore() {
         FileChooser fc = new FileChooser();
-        fc.setTitle("Select Keystore File");
+        fc.setTitle(RES.get("jfx.gui.dialog.selectKeystoreFile"));
         fc.getExtensionFilters().addAll(
                 new FileChooser.ExtensionFilter("All Files", "*.*"),
                 new FileChooser.ExtensionFilter("PKCS12", "*.p12", "*.pfx"),

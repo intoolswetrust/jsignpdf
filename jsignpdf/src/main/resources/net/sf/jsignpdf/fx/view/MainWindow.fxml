@@ -15,44 +15,44 @@
     <top>
         <VBox>
             <MenuBar>
-                <Menu text="File">
-                    <MenuItem fx:id="menuOpen" text="Open PDF..." onAction="#onFileOpen"
+                <Menu text="%jfx.gui.menu.file">
+                    <MenuItem fx:id="menuOpen" text="%jfx.gui.menu.file.open" onAction="#onFileOpen"
                               accelerator="Shortcut+O">
                         <graphic><ImageView fitWidth="16" fitHeight="16" preserveRatio="true">
                             <Image url="@/net/sf/jsignpdf/fileopen16.png"/>
                         </ImageView></graphic>
                     </MenuItem>
-                    <MenuItem fx:id="menuClose" text="Close" onAction="#onFileClose"/>
+                    <MenuItem fx:id="menuClose" text="%jfx.gui.menu.file.close" onAction="#onFileClose"/>
                     <SeparatorMenuItem/>
-                    <MenuItem fx:id="menuSign" text="Sign" onAction="#onSign"
+                    <MenuItem fx:id="menuSign" text="%jfx.gui.menu.file.sign" onAction="#onSign"
                               accelerator="Shortcut+S">
                         <graphic><ImageView fitWidth="16" fitHeight="16" preserveRatio="true">
                             <Image url="@/net/sf/jsignpdf/signedpdf16.png"/>
                         </ImageView></graphic>
                     </MenuItem>
                     <SeparatorMenuItem/>
-                    <MenuItem fx:id="menuExit" text="Exit" onAction="#onFileExit"
+                    <MenuItem fx:id="menuExit" text="%jfx.gui.menu.file.exit" onAction="#onFileExit"
                               accelerator="Shortcut+Q"/>
                 </Menu>
-                <Menu text="View">
-                    <MenuItem fx:id="menuZoomIn" text="Zoom In" onAction="#onZoomIn"
+                <Menu text="%jfx.gui.menu.view">
+                    <MenuItem fx:id="menuZoomIn" text="%jfx.gui.menu.view.zoomIn" onAction="#onZoomIn"
                               accelerator="Shortcut+EQUALS"/>
-                    <MenuItem fx:id="menuZoomOut" text="Zoom Out" onAction="#onZoomOut"
+                    <MenuItem fx:id="menuZoomOut" text="%jfx.gui.menu.view.zoomOut" onAction="#onZoomOut"
                               accelerator="Shortcut+MINUS"/>
-                    <MenuItem fx:id="menuZoomFit" text="Fit Page" onAction="#onZoomFit"/>
+                    <MenuItem fx:id="menuZoomFit" text="%jfx.gui.menu.view.fitPage" onAction="#onZoomFit"/>
                     <SeparatorMenuItem/>
-                    <MenuItem fx:id="menuToggleSidePanel" text="Toggle Side Panel"
+                    <MenuItem fx:id="menuToggleSidePanel" text="%jfx.gui.menu.view.toggleSidePanel"
                               onAction="#onToggleSidePanel" accelerator="F9"/>
                 </Menu>
-                <Menu text="Signing">
-                    <MenuItem text="Sign" onAction="#onSign" accelerator="Shortcut+S">
+                <Menu text="%jfx.gui.menu.signing">
+                    <MenuItem text="%jfx.gui.menu.file.sign" onAction="#onSign" accelerator="Shortcut+S">
                         <graphic><ImageView fitWidth="16" fitHeight="16" preserveRatio="true">
                             <Image url="@/net/sf/jsignpdf/signedpdf16.png"/>
                         </ImageView></graphic>
                     </MenuItem>
                 </Menu>
-                <Menu text="Help">
-                    <MenuItem fx:id="menuAbout" text="About JSignPdf" onAction="#onAbout">
+                <Menu text="%jfx.gui.menu.help">
+                    <MenuItem fx:id="menuAbout" text="%jfx.gui.menu.help.about" onAction="#onAbout">
                         <graphic><ImageView fitWidth="16" fitHeight="16" preserveRatio="true">
                             <Image url="@/net/sf/jsignpdf/signedpdf16.png"/>
                         </ImageView></graphic>
@@ -62,7 +62,7 @@
 
             <!-- Toolbar -->
             <ToolBar styleClass="main-toolbar">
-                <Button fx:id="btnOpen" text="Open" onAction="#onFileOpen"
+                <Button fx:id="btnOpen" text="%jfx.gui.toolbar.open" onAction="#onFileOpen"
                         styleClass="toolbar-button">
                     <graphic><ImageView fitWidth="16" fitHeight="16" preserveRatio="true">
                         <Image url="@/net/sf/jsignpdf/fileopen16.png"/>
@@ -73,7 +73,7 @@
                         styleClass="toolbar-button" mnemonicParsing="false"/>
                 <Button fx:id="btnZoomOut" text="-" onAction="#onZoomOut"
                         styleClass="toolbar-button" mnemonicParsing="false"/>
-                <Button fx:id="btnZoomFit" text="Fit" onAction="#onZoomFit"
+                <Button fx:id="btnZoomFit" text="%jfx.gui.toolbar.fit" onAction="#onZoomFit"
                         styleClass="toolbar-button"/>
                 <ComboBox fx:id="cmbZoom" editable="true" prefWidth="80"/>
                 <Separator orientation="VERTICAL"/>
@@ -92,7 +92,7 @@
                     </ImageView></graphic>
                 </Button>
                 <Separator orientation="VERTICAL"/>
-                <Button fx:id="btnSign" text="Sign" onAction="#onSign"
+                <Button fx:id="btnSign" text="%jfx.gui.toolbar.sign" onAction="#onSign"
                         styleClass="toolbar-button,sign-button">
                     <graphic><ImageView fitWidth="26" fitHeight="26" preserveRatio="true">
                         <Image url="@/net/sf/jsignpdf/signedpdf26.png"/>
@@ -112,23 +112,23 @@
                     <Accordion AnchorPane.topAnchor="0" AnchorPane.bottomAnchor="0"
                                AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0">
                         <panes>
-                            <TitledPane text="Certificate" expanded="true">
+                            <TitledPane text="%jfx.gui.panel.certificate" expanded="true">
                                 <fx:include fx:id="certificateSettings"
                                             source="CertificateSettings.fxml"/>
                             </TitledPane>
-                            <TitledPane text="Signature Appearance">
+                            <TitledPane text="%jfx.gui.panel.signatureAppearance">
                                 <ScrollPane fitToWidth="true">
                                     <fx:include fx:id="signatureSettings"
                                                 source="SignatureSettings.fxml"/>
                                 </ScrollPane>
                             </TitledPane>
-                            <TitledPane text="Timestamp &amp; Validation">
+                            <TitledPane text="%jfx.gui.panel.timestampValidation">
                                 <ScrollPane fitToWidth="true">
                                     <fx:include fx:id="tsaSettings"
                                                 source="TsaSettings.fxml"/>
                                 </ScrollPane>
                             </TitledPane>
-                            <TitledPane text="Encryption &amp; Rights">
+                            <TitledPane text="%jfx.gui.panel.encryptionRights">
                                 <ScrollPane fitToWidth="true">
                                     <fx:include fx:id="encryptionSettings"
                                                 source="EncryptionSettings.fxml"/>
@@ -143,7 +143,7 @@
                             fitToWidth="true" fitToHeight="true"
                             onDragOver="#onDragOver" onDragDropped="#onDragDropped">
                     <StackPane fx:id="pdfArea" styleClass="pdf-area">
-                        <Label fx:id="lblDropHint" text="Drop a PDF file here or use File > Open"
+                        <Label fx:id="lblDropHint" text="%jfx.gui.dropHint"
                                styleClass="drop-hint"/>
                     </StackPane>
                 </ScrollPane>
@@ -160,7 +160,7 @@
             <padding>
                 <Insets top="4" bottom="4" left="8" right="8"/>
             </padding>
-            <Label fx:id="lblStatus" text="Ready" HBox.hgrow="ALWAYS"
+            <Label fx:id="lblStatus" text="%jfx.gui.status.ready" HBox.hgrow="ALWAYS"
                    maxWidth="Infinity"/>
             <ProgressBar fx:id="progressBar" prefWidth="150"/>
         </HBox>

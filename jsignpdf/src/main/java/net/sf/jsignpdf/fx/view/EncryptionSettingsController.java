@@ -2,6 +2,8 @@ package net.sf.jsignpdf.fx.view;
 
 import java.io.File;
 
+import static net.sf.jsignpdf.Constants.RES;
+
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
 import javafx.scene.control.CheckBox;
@@ -75,7 +77,7 @@ public class EncryptionSettingsController {
     @FXML
     private void onBrowseEncCert() {
         FileChooser fc = new FileChooser();
-        fc.setTitle("Select Encryption Certificate");
+        fc.setTitle(RES.get("jfx.gui.dialog.selectEncryptionCert"));
         File file = fc.showOpenDialog(txtEncCertFile.getScene().getWindow());
         if (file != null) txtEncCertFile.setText(file.getAbsolutePath());
     }

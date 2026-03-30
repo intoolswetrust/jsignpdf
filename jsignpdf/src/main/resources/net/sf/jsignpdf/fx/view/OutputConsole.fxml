@@ -13,9 +13,9 @@
     </padding>
 
     <HBox alignment="CENTER_RIGHT" spacing="4">
-        <Label text="Output Console" HBox.hgrow="ALWAYS" maxWidth="Infinity"
+        <Label text="%jfx.gui.console.title" HBox.hgrow="ALWAYS" maxWidth="Infinity"
                style="-fx-font-weight: bold;"/>
-        <Button text="Clear" onAction="#onClear"/>
+        <Button text="%jfx.gui.console.clear" onAction="#onClear"/>
     </HBox>
     <TextArea fx:id="txtOutput" editable="false" wrapText="true"
               VBox.vgrow="ALWAYS" prefRowCount="8"

@@ -1,5 +1,7 @@
 package net.sf.jsignpdf.fx;
 
+import java.util.ResourceBundle;
+
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -23,8 +25,9 @@ public class JSignPdfApp extends Application {
 
     @Override
     public void start(Stage primaryStage) throws Exception {
+        ResourceBundle bundle = ResourceBundle.getBundle(Constants.RESOURCE_BUNDLE_BASE);
         FXMLLoader loader = new FXMLLoader(
-                getClass().getResource("/net/sf/jsignpdf/fx/view/MainWindow.fxml"));
+                getClass().getResource("/net/sf/jsignpdf/fx/view/MainWindow.fxml"), bundle);
         Parent root = loader.load();
 
         MainWindowController controller = loader.getController();

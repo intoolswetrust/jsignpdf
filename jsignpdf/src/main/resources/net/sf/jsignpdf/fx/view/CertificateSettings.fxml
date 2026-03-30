@@ -14,10 +14,10 @@
         <Insets top="8" right="8" bottom="8" left="8"/>
     </padding>
 
-    <Label text="Keystore type:"/>
+    <Label text="%jfx.gui.cert.keystoreType"/>
     <ComboBox fx:id="cmbKeystoreType" maxWidth="Infinity"/>
 
-    <Label text="Keystore file:"/>
+    <Label text="%jfx.gui.cert.keystoreFile"/>
     <HBox spacing="4">
         <TextField fx:id="txtKeystoreFile" HBox.hgrow="ALWAYS"/>
         <Button fx:id="btnBrowseKeystore" onAction="#onBrowseKeystore"
@@ -28,22 +28,22 @@
         </Button>
     </HBox>
 
-    <Label text="Keystore password:"/>
+    <Label text="%jfx.gui.cert.keystorePassword"/>
     <PasswordField fx:id="txtKeystorePassword"/>
 
-    <Button fx:id="btnLoadKeys" text="Load Keys" onAction="#onLoadKeys"
+    <Button fx:id="btnLoadKeys" text="%jfx.gui.cert.loadKeys" onAction="#onLoadKeys"
             maxWidth="Infinity">
         <graphic><ImageView fitWidth="16" fitHeight="16" preserveRatio="true">
             <Image url="@/net/sf/jsignpdf/refresh16.png"/>
         </ImageView></graphic>
     </Button>
 
-    <Label text="Key alias:"/>
+    <Label text="%jfx.gui.cert.keyAlias"/>
     <ComboBox fx:id="cmbKeyAlias" maxWidth="Infinity"/>
 
-    <Label text="Key password:"/>
+    <Label text="%jfx.gui.cert.keyPassword"/>
     <PasswordField fx:id="txtKeyPassword"/>
 
     <Separator/>
-    <CheckBox fx:id="chkStorePasswords" text="Store passwords"/>
+    <CheckBox fx:id="chkStorePasswords" text="%jfx.gui.cert.storePasswords"/>
 </VBox>
