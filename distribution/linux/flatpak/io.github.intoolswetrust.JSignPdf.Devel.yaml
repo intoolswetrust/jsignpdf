@@ -27,10 +27,12 @@ modules:
         url: https://github.com/intoolswetrust/jsignpdf.git
         branch: master
       - maven-dependencies.json
+      # Shared desktop file from parent directory
       - type: file
         path: ../jsignpdf.desktop
       - type: file
         path: jsignpdf-flatpak.in
+      # Shared metainfo file from parent directory
       - type: file
         path: ../io.github.intoolswetrust.JSignPdf.metainfo.xml
       - type: file

@@ -26,12 +26,14 @@ modules:
       - type: archive
         url: https://downloads.sourceforge.net/project/jsignpdf/stable/JSignPdf-2.3.0/jsignpdf-2.3.0.zip
         sha256: 8ea04172287296b4db63553751122149ad34ad0474e3a0cdbc6e32fbb77a5833
+      # Shared desktop file from parent directory
       - type: file
-        path: jsignpdf.desktop
+        path: ../jsignpdf.desktop
       - type: file
         path: jsignpdf-flatpak.in
+      # Shared metainfo file from parent directory
       - type: file
-        path: io.github.intoolswetrust.JSignPdf.metainfo.xml
+        path: ../io.github.intoolswetrust.JSignPdf.metainfo.xml
       - type: file
         path: jsignpdf.png
     build-commands:

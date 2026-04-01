@@ -56,7 +56,7 @@ OUT_JSON="\${WORK_DIR}/maven-dependencies.json"
 
 echo "==> Cloning jsignpdf repository"
 rm -rf "\$BUILD_DIR"
-git clone --depth 1 --branch ${BRANCH} ${REPO_URL} "\$BUILD_DIR"
+git clone --depth 1 --branch "${BRANCH}" "${REPO_URL}" "\$BUILD_DIR"
 
 echo "==> Running Maven to download dependencies"
 cd "\$BUILD_DIR"
@@ -109,7 +109,7 @@ echo "]" >> "\$OUT_JSON"
 # Clean up temp file
 rm -f "\$TEMP_JSON"
 
-echo "==> Generated \$(grep -c '"type": "file"' "\$OUT_JSON") dependency entries"
+echo "==> Generated \$(grep -c '"type": "file"' "\$OUT_JSON" || echo 0) dependency entries"
 
 echo "==> Cleaning up"
 rm -rf "\$BUILD_DIR" "\$M2_DIR"

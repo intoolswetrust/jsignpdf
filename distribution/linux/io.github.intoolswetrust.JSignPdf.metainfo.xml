@@ -3,7 +3,7 @@
 <component type="desktop-application">
   <id>io.github.intoolswetrust.JSignPdf</id>
   <metadata_license>CC0-1.0</metadata_license>
-  <project_license>MPL-2.0</project_license>
+  <project_license>MPL-2.0 AND LGPL-2.1-only</project_license>
   <name>JSignPdf</name>
   <summary>Add digital signatures to PDF documents</summary>
   <developer id="io.github.intoolswetrust">
@@ -44,11 +44,11 @@
       <image>https://intoolswetrust.github.io/jsignpdf/img/screenshots/jsignpdf-screenshot.png</image>
       <caption>JSignPdf main window</caption>
     </screenshot>
-    <screenshot type="default">
+    <screenshot>
       <image>https://intoolswetrust.github.io/jsignpdf/img/screenshots/jsignpdf-screenshot-2.png</image>
       <caption>JSignPdf visible signature settings</caption>
     </screenshot>
-    <screenshot type="default">
+    <screenshot>
       <image>https://intoolswetrust.github.io/jsignpdf/img/screenshots/jsignpdf-screenshot-3.png</image>
       <caption>JSignPdf main window - advanced view</caption>
     </screenshot>
