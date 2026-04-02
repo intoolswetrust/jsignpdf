@@ -1,0 +1,2 @@
+# Mark generated files to exclude from diffs and language statistics
+distribution/linux/flatpak/maven-dependencies.json linguist-generated=true

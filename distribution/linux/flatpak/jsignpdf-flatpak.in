@@ -1,0 +1,6 @@
+#!/bin/sh
+DIR=/app/share/jsignpdf
+JAVA=/app/jre/bin/java
+JAVA_OPTS="--add-exports jdk.crypto.cryptoki/sun.security.pkcs11=ALL-UNNAMED --add-exports jdk.crypto.cryptoki/sun.security.pkcs11.wrapper=ALL-UNNAMED --add-exports java.base/sun.security.action=ALL-UNNAMED --add-exports java.base/sun.security.rsa=ALL-UNNAMED --add-opens java.base/java.security=ALL-UNNAMED --add-opens java.base/sun.security.util=ALL-UNNAMED"
+# Font antialiasing
+exec "$JAVA" $JAVA_OPTS "-Djsignpdf.home=$DIR" "-Dawt.useSystemAAFontSettings=lcd" "-Dswing.aatext=true" -jar "$DIR/JSignPdf.jar" "$@"
