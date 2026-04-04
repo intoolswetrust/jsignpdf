@@ -517,7 +517,7 @@ public class MainWindowController {
         // Start signing
         signingService.cancel();
         signingService.reset();
-        signingService.setOptions(options);
+        signingService.setOptions(options.createCopy());
         progressBar.setVisible(true);
         progressBar.setProgress(-1); // indeterminate
         updateStatus(RES.get("jfx.gui.status.signingInProgress"));
