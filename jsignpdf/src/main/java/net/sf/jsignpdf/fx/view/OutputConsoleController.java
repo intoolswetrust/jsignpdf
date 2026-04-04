@@ -63,6 +63,13 @@ public class OutputConsoleController {
         txtOutput.clear();
     }
 
+    public void dispose() {
+        if (logHandler != null) {
+            LOGGER.removeHandler(logHandler);
+            logHandler = null;
+        }
+    }
+
     public void appendMessage(String message) {
         Platform.runLater(() -> txtOutput.appendText(message + "\n"));
     }

@@ -240,6 +240,9 @@ public class MainWindowController {
         } catch (Exception e) {
             LOGGER.log(Level.WARNING, "Failed to store options", e);
         }
+        if (outputConsoleController != null) {
+            outputConsoleController.dispose();
+        }
     }
 
     @FXML
