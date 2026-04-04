@@ -155,9 +155,17 @@ public class SignatureOverlay extends Pane {
 
         switch (dragMode) {
             case CREATE:
-                // Width/height = distance from press point to current mouse
-                viewModel.setRelWidth(Math.max(0.02, (mx - dragStartX) / w));
-                viewModel.setRelHeight(Math.max(0.02, (my - dragStartY) / h));
+                // Normalize origin and extent so dragging in any direction works
+                double endRelX = mx / w;
+                double endRelY = my / h;
+                double originX = Math.min(dragStartX / w, endRelX);
+                double originY = Math.min(dragStartY / h, endRelY);
+                double extentW = Math.abs(endRelX - dragStartX / w);
+                double extentH = Math.abs(endRelY - dragStartY / h);
+                viewModel.setRelX(originX);
+                viewModel.setRelY(originY);
+                viewModel.setRelWidth(Math.max(0.02, extentW));
+                viewModel.setRelHeight(Math.max(0.02, extentH));
                 break;
             case RESIZE_BR:
                 viewModel.setRelWidth(Math.max(0.02, dragStartRelW + dx));
