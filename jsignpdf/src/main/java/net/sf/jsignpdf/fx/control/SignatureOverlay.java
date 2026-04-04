@@ -2,11 +2,15 @@ package net.sf.jsignpdf.fx.control;
 
 import javafx.beans.binding.Bindings;
 import javafx.scene.Cursor;
+import javafx.scene.control.Alert;
+import javafx.scene.control.ButtonType;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 import net.sf.jsignpdf.fx.viewmodel.SignaturePlacementViewModel;
+
+import static net.sf.jsignpdf.Constants.RES;
 
 /**
  * Transparent overlay pane for click-drag signature rectangle placement
@@ -130,13 +134,26 @@ public class SignatureOverlay extends Pane {
             }
         }
 
-        // Start creating a new rectangle (no button toggle needed)
+        // If a signature rectangle already exists, ask for confirmation before replacing
+        if (viewModel.isPlaced()) {
+            Alert confirm = new Alert(Alert.AlertType.CONFIRMATION,
+                    RES.get("jfx.gui.dialog.replaceSignature.text"),
+                    ButtonType.OK, ButtonType.CANCEL);
+            confirm.setTitle(RES.get("jfx.gui.dialog.replaceSignature.title"));
+            confirm.setHeaderText(null);
+            if (confirm.showAndWait().orElse(ButtonType.CANCEL) != ButtonType.OK) {
+                dragMode = DragMode.NONE;
+                e.consume();
+                return;
+            }
+        }
+
+        // Start creating a new rectangle
         dragMode = DragMode.CREATE;
         viewModel.setRelX(mx / w);
         viewModel.setRelY(my / h);
         viewModel.setRelWidth(0.02);
         viewModel.setRelHeight(0.02);
-        // Update drag start values to match the new rectangle
         dragStartRelW = 0.02;
         dragStartRelH = 0.02;
         viewModel.setPlaced(true);
