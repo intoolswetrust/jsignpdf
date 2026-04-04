@@ -130,7 +130,14 @@ public class SignatureOverlay extends Pane {
             }
         }
 
-        // Start creating a new rectangle (no button toggle needed)
+        // Require Shift to replace an existing rectangle
+        if (viewModel.isPlaced() && !e.isShiftDown()) {
+            dragMode = DragMode.NONE;
+            e.consume();
+            return;
+        }
+
+        // Start creating a new rectangle
         dragMode = DragMode.CREATE;
         viewModel.setRelX(mx / w);
         viewModel.setRelY(my / h);

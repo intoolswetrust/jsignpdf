@@ -282,6 +282,7 @@ public class MainWindowController {
             if (isPlaced) {
                 signingVM.visibleProperty().set(true);
             }
+            updateStatusWithHint();
         });
 
         // Clear placement rectangle when visible signature is disabled
@@ -419,6 +420,14 @@ public class MainWindowController {
         if (file != null) {
             updateStatus(file.getName() + " - Page " + documentVM.getCurrentPage()
                     + "/" + documentVM.getPageCount());
+        }
+    }
+
+    private void updateStatusWithHint() {
+        if (documentVM.isDocumentLoaded() && placementVM.isPlaced()) {
+            updateStatus(RES.get("jfx.gui.status.shiftToReplace"));
+        } else if (documentVM.isDocumentLoaded()) {
+            updateStatusForDocument();
         }
     }
 
