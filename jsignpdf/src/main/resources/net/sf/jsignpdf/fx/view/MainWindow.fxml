@@ -24,13 +24,6 @@
                     </MenuItem>
                     <MenuItem fx:id="menuClose" text="%jfx.gui.menu.file.close" onAction="#onFileClose"/>
                     <SeparatorMenuItem/>
-                    <MenuItem fx:id="menuSign" text="%jfx.gui.menu.file.sign" onAction="#onSign"
-                              accelerator="Shortcut+S">
-                        <graphic><ImageView fitWidth="16" fitHeight="16" preserveRatio="true">
-                            <Image url="@/net/sf/jsignpdf/signedpdf16.png"/>
-                        </ImageView></graphic>
-                    </MenuItem>
-                    <SeparatorMenuItem/>
                     <MenuItem fx:id="menuExit" text="%jfx.gui.menu.file.exit" onAction="#onFileExit"
                               accelerator="Shortcut+Q"/>
                 </Menu>
@@ -45,7 +38,7 @@
                               onAction="#onToggleSidePanel" accelerator="F9"/>
                 </Menu>
                 <Menu text="%jfx.gui.menu.signing">
-                    <MenuItem text="%jfx.gui.menu.file.sign" onAction="#onSign" accelerator="Shortcut+S">
+                    <MenuItem fx:id="menuSign" text="%jfx.gui.menu.file.sign" onAction="#onSign" accelerator="Shortcut+S">
                         <graphic><ImageView fitWidth="16" fitHeight="16" preserveRatio="true">
                             <Image url="@/net/sf/jsignpdf/signedpdf16.png"/>
                         </ImageView></graphic>
