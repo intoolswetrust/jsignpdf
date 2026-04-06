@@ -33,7 +33,14 @@ public class PdfRenderService extends Service<Image> {
         return new Task<Image>() {
             @Override
             protected Image call() {
-                // Clear any leftover interrupt flag from a previous cancel()
+                // JavaFX Service.cancel() interrupts the running thread. When the service is
+                // restarted (cancel → reset → start), the new task may inherit a stale interrupt
+                // flag on the thread because the FX executor can reuse the same pool thread.
+                // Pdf2Image uses blocking I/O (e.g., RandomAccessFile) that throws
+                // ClosedByInterruptException if the flag is set, causing the render to fail
+                // immediately. Clearing the flag here is safe: a "real" interrupt between
+                // cancel() and this point would only mean a redundant cancellation of an already-
+                // cancelled cycle — the next restart will set up a fresh task regardless.
                 Thread.interrupted();
                 Pdf2Image p2i = new Pdf2Image(taskOptions);
                 BufferedImage buffered = p2i.getImageForPage(taskPage);
