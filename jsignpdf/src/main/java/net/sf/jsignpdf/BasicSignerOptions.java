@@ -31,7 +31,9 @@ package net.sf.jsignpdf;
 
 import java.net.InetSocketAddress;
 import java.net.Proxy;
+import java.util.Arrays;
 import java.util.Locale;
+import java.util.Objects;
 
 import net.sf.jsignpdf.types.CertificationLevel;
 import net.sf.jsignpdf.types.HashAlgorithm;
@@ -47,13 +49,8 @@ import org.bouncycastle.crypto.CryptoException;
 
 /**
  * Options for PDF signer.
- *
- * @author Josef Cacek
  */
 public class BasicSignerOptions {
-
-    // private final static Logger LOGGER =
-    // Logger.getLogger(BasicSignerOptions.class);
 
     protected final PropertyProvider props = PropertyProvider.getInstance();
     protected final JSignEncryptor encryptor = new JSignEncryptor();
@@ -289,10 +286,10 @@ public class BasicSignerOptions {
         props.setProperty(Constants.PROPERTY_STOREPWD, isStorePasswords());
         setEncrypted(Constants.EPROPERTY_USERHOME, Constants.USER_HOME);
         if (isStorePasswords()) {
-            setEncrypted(Constants.EPROPERTY_KS_PWD, new String(getKsPasswd()));
-            setEncrypted(Constants.EPROPERTY_KEY_PWD, new String(getKeyPasswd()));
-            setEncrypted(Constants.EPROPERTY_OWNER_PWD, new String(getPdfOwnerPwd()));
-            setEncrypted(Constants.EPROPERTY_USER_PWD, new String(getPdfUserPwd()));
+            setEncrypted(Constants.EPROPERTY_KS_PWD, getKsPasswdStr());
+            setEncrypted(Constants.EPROPERTY_KEY_PWD, getKeyPasswdStr());
+            setEncrypted(Constants.EPROPERTY_OWNER_PWD, getPdfOwnerPwdStr());
+            setEncrypted(Constants.EPROPERTY_USER_PWD, getPdfUserPwdStr());
             setEncrypted(Constants.EPROPERTY_TSA_PWD, getTsaPasswd());
             setEncrypted(Constants.EPROPERTY_TSA_CERT_PWD, getTsaCertFilePwd());
         } else {
@@ -1198,4 +1195,138 @@ public class BasicSignerOptions {
         this.cmdLine = cmdLine;
     }
 
+    /**
+     * Creates a shallow copy of this options instance. Enum and String fields are
+     * effectively immutable, so shallow copy is sufficient for thread-safety.
+     * char[] fields are defensively copied.
+     *
+     * @return a new BasicSignerOptions with the same field values
+     */
+    public BasicSignerOptions createCopy() {
+        BasicSignerOptions copy = new BasicSignerOptions();
+        copy.setKsType(getKsType());
+        copy.setKsFile(getKsFile());
+        copy.setKsPasswd(getKsPasswd() != null ? getKsPasswd().clone() : null);
+        copy.setKeyAlias(getKeyAlias());
+        copy.setKeyIndex(getKeyIndex());
+        copy.setKeyPasswd(getKeyPasswd() != null ? getKeyPasswd().clone() : null);
+        copy.setInFile(getInFile());
+        copy.setOutFile(getOutFile());
+        copy.setSignerName(getSignerName());
+        copy.setReason(getReason());
+        copy.setLocation(getLocation());
+        copy.setContact(getContact());
+        copy.setListener(getListener());
+        copy.setAppend(isAppend());
+        copy.setAdvanced(isAdvanced());
+        copy.setPdfEncryption(getPdfEncryption());
+        copy.setPdfOwnerPwd(getPdfOwnerPwd() != null ? getPdfOwnerPwd().clone() : null);
+        copy.setPdfUserPwd(getPdfUserPwd() != null ? getPdfUserPwd().clone() : null);
+        copy.setPdfEncryptionCertFile(getPdfEncryptionCertFile());
+        copy.setCertLevel(getCertLevel());
+        copy.setHashAlgorithm(getHashAlgorithm());
+        copy.setStorePasswords(isStorePasswords());
+        copy.setRightPrinting(getRightPrinting());
+        copy.setRightCopy(isRightCopy());
+        copy.setRightAssembly(isRightAssembly());
+        copy.setRightFillIn(isRightFillIn());
+        copy.setRightScreanReaders(isRightScreanReaders());
+        copy.setRightModifyAnnotations(isRightModifyAnnotations());
+        copy.setRightModifyContents(isRightModifyContents());
+        copy.setVisible(isVisible());
+        copy.setPage(getPage());
+        copy.setPositionLLX(getPositionLLX());
+        copy.setPositionLLY(getPositionLLY());
+        copy.setPositionURX(getPositionURX());
+        copy.setPositionURY(getPositionURY());
+        copy.setBgImgScale(getBgImgScale());
+        copy.setRenderMode(getRenderMode());
+        copy.setL2Text(getL2Text());
+        copy.setL4Text(getL4Text());
+        copy.setL2TextFontSize(getL2TextFontSize());
+        copy.setImgPath(getImgPath());
+        copy.setBgImgPath(getBgImgPath());
+        copy.setAcro6Layers(isAcro6Layers());
+        copy.setTimestamp(isTimestamp());
+        copy.setTsaUrl(getTsaUrl());
+        copy.setTsaServerAuthn(getTsaServerAuthn());
+        copy.setTsaUser(getTsaUser());
+        copy.setTsaPasswd(getTsaPasswd());
+        copy.setTsaCertFileType(getTsaCertFileType());
+        copy.setTsaCertFile(getTsaCertFile());
+        copy.setTsaCertFilePwd(getTsaCertFilePwd());
+        copy.setTsaPolicy(getTsaPolicy());
+        copy.setTsaHashAlg(getTsaHashAlg());
+        copy.setOcspEnabled(isOcspEnabled());
+        copy.setOcspServerUrl(getOcspServerUrl());
+        copy.setCrlEnabled(isCrlEnabled());
+        copy.setProxyType(getProxyType());
+        copy.setProxyHost(getProxyHost());
+        copy.setProxyPort(getProxyPort());
+        return copy;
+    }
+
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + Arrays.hashCode(cmdLine);
+        result = prime * result + Arrays.hashCode(keyPasswd);
+        result = prime * result + Arrays.hashCode(ksPasswd);
+        result = prime * result + Arrays.hashCode(pdfOwnerPwd);
+        result = prime * result + Arrays.hashCode(pdfUserPwd);
+        result = prime * result + Objects.hash(acro6Layers, advanced, append, bgImgPath, bgImgScale, certLevel, contact,
+                crlEnabled, encryptor, hashAlgorithm, imgPath, inFile, keyAlias, keyIndex, ksFile, ksType, l2Text,
+                l2TextFontSize, l4Text, listener, location, ocspEnabled, ocspServerUrl, outFile, page, pdfEncryption,
+                pdfEncryptionCertFile, positionLLX, positionLLY, positionURX, positionURY, propertiesFilePath, props, proxyHost,
+                proxyPort, proxyType, reason, renderMode, rightAssembly, rightCopy, rightFillIn, rightModifyAnnotations,
+                rightModifyContents, rightPrinting, rightScreanReaders, signerName, storePasswords, timestamp, tsaCertFile,
+                tsaCertFilePwd, tsaCertFileType, tsaHashAlg, tsaPasswd, tsaPolicy, tsaServerAuthn, tsaUrl, tsaUser, visible);
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        BasicSignerOptions other = (BasicSignerOptions) obj;
+        return acro6Layers == other.acro6Layers && advanced == other.advanced && append == other.append
+                && Objects.equals(bgImgPath, other.bgImgPath)
+                && Float.floatToIntBits(bgImgScale) == Float.floatToIntBits(other.bgImgScale) && certLevel == other.certLevel
+                && Arrays.equals(cmdLine, other.cmdLine) && Objects.equals(contact, other.contact)
+                && crlEnabled == other.crlEnabled && Objects.equals(encryptor, other.encryptor)
+                && hashAlgorithm == other.hashAlgorithm && Objects.equals(imgPath, other.imgPath)
+                && Objects.equals(inFile, other.inFile) && Objects.equals(keyAlias, other.keyAlias)
+                && keyIndex == other.keyIndex && Arrays.equals(keyPasswd, other.keyPasswd)
+                && Objects.equals(ksFile, other.ksFile) && Arrays.equals(ksPasswd, other.ksPasswd)
+                && Objects.equals(ksType, other.ksType) && Objects.equals(l2Text, other.l2Text)
+                && Float.floatToIntBits(l2TextFontSize) == Float.floatToIntBits(other.l2TextFontSize)
+                && Objects.equals(l4Text, other.l4Text) && Objects.equals(listener, other.listener)
+                && Objects.equals(location, other.location) && ocspEnabled == other.ocspEnabled
+                && Objects.equals(ocspServerUrl, other.ocspServerUrl) && Objects.equals(outFile, other.outFile)
+                && page == other.page && pdfEncryption == other.pdfEncryption
+                && Objects.equals(pdfEncryptionCertFile, other.pdfEncryptionCertFile)
+                && Arrays.equals(pdfOwnerPwd, other.pdfOwnerPwd) && Arrays.equals(pdfUserPwd, other.pdfUserPwd)
+                && Float.floatToIntBits(positionLLX) == Float.floatToIntBits(other.positionLLX)
+                && Float.floatToIntBits(positionLLY) == Float.floatToIntBits(other.positionLLY)
+                && Float.floatToIntBits(positionURX) == Float.floatToIntBits(other.positionURX)
+                && Float.floatToIntBits(positionURY) == Float.floatToIntBits(other.positionURY)
+                && Objects.equals(propertiesFilePath, other.propertiesFilePath) && Objects.equals(props, other.props)
+                && Objects.equals(proxyHost, other.proxyHost) && proxyPort == other.proxyPort && proxyType == other.proxyType
+                && Objects.equals(reason, other.reason) && renderMode == other.renderMode
+                && rightAssembly == other.rightAssembly && rightCopy == other.rightCopy && rightFillIn == other.rightFillIn
+                && rightModifyAnnotations == other.rightModifyAnnotations && rightModifyContents == other.rightModifyContents
+                && rightPrinting == other.rightPrinting && rightScreanReaders == other.rightScreanReaders
+                && Objects.equals(signerName, other.signerName) && storePasswords == other.storePasswords
+                && timestamp == other.timestamp && Objects.equals(tsaCertFile, other.tsaCertFile)
+                && Objects.equals(tsaCertFilePwd, other.tsaCertFilePwd)
+                && Objects.equals(tsaCertFileType, other.tsaCertFileType) && Objects.equals(tsaHashAlg, other.tsaHashAlg)
+                && Objects.equals(tsaPasswd, other.tsaPasswd) && Objects.equals(tsaPolicy, other.tsaPolicy)
+                && tsaServerAuthn == other.tsaServerAuthn && Objects.equals(tsaUrl, other.tsaUrl)
+                && Objects.equals(tsaUser, other.tsaUser) && visible == other.visible;
+    }
 }

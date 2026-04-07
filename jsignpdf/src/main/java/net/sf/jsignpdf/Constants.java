@@ -208,6 +208,8 @@ public class Constants {
     public static final String PROPERTY_PROXY_HOST = "proxy.host";
     public static final String PROPERTY_PROXY_PORT = "proxy.port";
 
+    public static final String PROPERTY_RECENT_FILE_PREFIX = "recentFile.";
+
     /**
      * Property name.
      */

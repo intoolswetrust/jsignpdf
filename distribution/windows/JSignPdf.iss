@@ -20,7 +20,7 @@ VersionInfoVersion={#MyAppVersionWin}
 VersionInfoCompany=Josef Cacek
 VersionInfoDescription=JSignPdf adds digital signatures to PDF documents
 AppPublisher=Josef Cacek
-AppSupportURL=http://jsignpdf.sourceforge.net/
+AppSupportURL=http://intoolswetrust.github.io/jsignpdf/
 AppVersion={#MyAppVersion}
 OutputDir={#OutputDir}
 ;WizardStyle=modern
@@ -31,6 +31,7 @@ UninstallDisplayIcon={app}\JSignPdf.exe
 
 [Icons]
 Name: {group}\JSignPdf {#MyAppVersion}; Filename: {app}\JSignPdf.exe; Components: ; WorkingDir: {app}
+Name: {group}\JSignPdf {#MyAppVersion} (Swing); Filename: {app}\JSignPdf-swing.exe; Components: ; WorkingDir: {app}
 Name: {group}\InstallCert Tool; Filename: {app}\InstallCert.exe; Components: ; WorkingDir: {app}
 Name: {group}\JSignPdf Guide; Filename: {app}\docs\JSignPdf.pdf; Components: 
 Name: {group}\Uninstall {#MyAppName}; Filename: {uninstallexe}; Components: 

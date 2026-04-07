@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.*?>
+
+<VBox xmlns="http://javafx.com/javafx"
+      xmlns:fx="http://javafx.com/fxml"
+      fx:controller="net.sf.jsignpdf.fx.view.SignatureSettingsController"
+      spacing="6">
+    <padding>
+        <Insets top="8" right="8" bottom="8" left="8"/>
+    </padding>
+
+    <CheckBox fx:id="chkVisibleSig" text="%jfx.gui.sig.enableVisible"/>
+
+    <Separator/>
+
+    <VBox fx:id="visibleSigPane" spacing="6">
+        <Label text="%jfx.gui.sig.renderMode"/>
+        <ComboBox fx:id="cmbRenderMode" maxWidth="Infinity"/>
+
+        <Label text="%jfx.gui.sig.l2Text"/>
+        <TextField fx:id="txtL2Text"/>
+
+        <Label text="%jfx.gui.sig.l4Text"/>
+        <TextField fx:id="txtL4Text"/>
+
+        <Label text="%jfx.gui.sig.fontSize"/>
+        <TextField fx:id="txtFontSize" text="10.0"/>
+
+        <Label text="%jfx.gui.sig.signatureImage"/>
+        <HBox spacing="4">
+            <TextField fx:id="txtImgPath" HBox.hgrow="ALWAYS"/>
+            <Button onAction="#onBrowseImage" minWidth="30">
+                <graphic><ImageView fitWidth="16" fitHeight="16" preserveRatio="true">
+                    <Image url="@/net/sf/jsignpdf/fileopen16.png"/>
+                </ImageView></graphic>
+            </Button>
+        </HBox>
+
+        <Label text="%jfx.gui.sig.backgroundImage"/>
+        <HBox spacing="4">
+            <TextField fx:id="txtBgImgPath" HBox.hgrow="ALWAYS"/>
+            <Button onAction="#onBrowseBgImage" minWidth="30">
+                <graphic><ImageView fitWidth="16" fitHeight="16" preserveRatio="true">
+                    <Image url="@/net/sf/jsignpdf/fileopen16.png"/>
+                </ImageView></graphic>
+            </Button>
+        </HBox>
+
+        <CheckBox fx:id="chkAcro6Layers" text="%jfx.gui.sig.acro6Layers"/>
+    </VBox>
+
+    <Separator/>
+
+    <Label text="%jfx.gui.sig.hashAlgorithm"/>
+    <ComboBox fx:id="cmbHashAlgorithm" maxWidth="Infinity"/>
+
+    <Label text="%jfx.gui.sig.certLevel"/>
+    <ComboBox fx:id="cmbCertLevel" maxWidth="Infinity"/>
+
+    <Label text="%jfx.gui.sig.signerName"/>
+    <TextField fx:id="txtSignerName"/>
+
+    <Label text="%jfx.gui.sig.reason"/>
+    <TextField fx:id="txtReason"/>
+
+    <Label text="%jfx.gui.sig.location"/>
+    <TextField fx:id="txtLocation"/>
+
+    <Label text="%jfx.gui.sig.contact"/>
+    <TextField fx:id="txtContact"/>
+
+    <CheckBox fx:id="chkAppend" text="%jfx.gui.sig.appendSignature"/>
+
+    <Label text="%jfx.gui.sig.outputFile"/>
+    <HBox spacing="4">
+        <TextField fx:id="txtOutFile" HBox.hgrow="ALWAYS"/>
+        <Button onAction="#onBrowseOutFile" minWidth="30">
+            <graphic><ImageView fitWidth="16" fitHeight="16" preserveRatio="true">
+                <Image url="@/net/sf/jsignpdf/fileopen16.png"/>
+            </ImageView></graphic>
+        </Button>
+    </HBox>
+</VBox>

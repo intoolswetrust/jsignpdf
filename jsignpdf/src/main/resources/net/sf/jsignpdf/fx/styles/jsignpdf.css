@@ -1,0 +1,81 @@
+/* JSignPdf JavaFX Light Theme */
+
+.root {
+    -fx-font-family: "System";
+    -fx-font-size: 13px;
+    -fx-base: #f0f0f0;
+    -fx-background: #ffffff;
+}
+
+/* Toolbar */
+.main-toolbar {
+    -fx-padding: 4 8 4 8;
+    -fx-spacing: 4;
+}
+
+.toolbar-button {
+    -fx-padding: 4 8 4 8;
+}
+
+.sign-button {
+    -fx-font-weight: bold;
+    -fx-text-fill: #2e7d32;
+}
+
+/* Side Panel */
+.side-panel {
+    -fx-background-color: #f5f5f5;
+}
+
+.placeholder-label {
+    -fx-text-fill: #888888;
+    -fx-padding: 16;
+    -fx-wrap-text: true;
+}
+
+/* PDF Area */
+.pdf-scroll-pane {
+    -fx-background: #e0e0e0;
+    -fx-background-color: #e0e0e0;
+}
+
+.pdf-scroll-pane > .viewport {
+    -fx-background-color: #e0e0e0;
+}
+
+.pdf-area {
+    -fx-background-color: #e0e0e0;
+    -fx-alignment: center;
+}
+
+.drop-hint {
+    -fx-font-size: 18px;
+    -fx-text-fill: #999999;
+    -fx-font-style: italic;
+}
+
+/* Status Bar */
+.status-bar {
+    -fx-background-color: #f0f0f0;
+    -fx-border-color: #cccccc transparent transparent transparent;
+    -fx-border-width: 1 0 0 0;
+}
+
+/* Signature overlay */
+.signature-rect {
+    -fx-stroke: #1565c0;
+    -fx-stroke-width: 2;
+    -fx-fill: rgba(21, 101, 192, 0.15);
+    -fx-stroke-dash-array: 6 4;
+}
+
+.signature-handle {
+    -fx-fill: #1565c0;
+    -fx-stroke: #ffffff;
+    -fx-stroke-width: 1;
+}
+
+/* Accordion in side panel */
+.titled-pane > .title {
+    -fx-font-weight: bold;
+}
