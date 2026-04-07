@@ -310,6 +310,7 @@ public class MainWindowController {
         } else {
             for (String path : recentFiles) {
                 MenuItem item = new MenuItem(path);
+                item.setMnemonicParsing(false);
                 item.setOnAction(e -> openDocument(new File(path)));
                 menuRecentFiles.getItems().add(item);
             }
