@@ -34,6 +34,24 @@
             tofile="${dist.dir}/JSignPdf.l4j.ini" />
 
         <launch4j>
+            <config headerType="gui"
+                outfile="${dist.dir}/JSignPdf-swing.exe" dontWrapJar="true"
+                jarPath="JSignPdf.jar"
+                icon="${jsignpdf.dir}/distribution/doc/icon/icons.ico">
+                <jre path="jre" />
+                <versionInfo fileVersion="${jsignpdf.winversion}" txtFileVersion="JSignPdf Swing launcher v. ${jsignpdf.version}"
+                    fileDescription="Adds digital signatures to PDF files (Swing UI)"
+                    copyright="Josef Cacek"
+                    productVersion="${jsignpdf.winversion}"
+                    txtProductVersion="Adds digital signatures to PDF files"
+                    productName="JSignPdf" internalName="JSignPdf-swing"
+                    originalFilename="JSignPdf-swing.exe" />
+            </config>
+        </launch4j>
+        <copy file="${jsignpdf.dir}/distribution/windows/JSignPdf-swing.l4j.ini"
+            tofile="${dist.dir}/JSignPdf-swing.l4j.ini" />
+
+        <launch4j>
             <config headerType="console"
                 outfile="${dist.dir}/JSignPdfC.exe" dontWrapJar="true"
                 jarPath="JSignPdf.jar"
