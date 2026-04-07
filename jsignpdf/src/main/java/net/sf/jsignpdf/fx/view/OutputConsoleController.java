@@ -23,6 +23,9 @@ public class OutputConsoleController {
 
     @FXML
     private void initialize() {
+        // Remove any previously registered handler (guards against FXML reload leaks)
+        dispose();
+
         // Attach a log handler to capture signing output
         logHandler = new Handler() {
             @Override

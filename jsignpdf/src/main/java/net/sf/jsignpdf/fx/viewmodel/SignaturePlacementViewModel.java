@@ -34,11 +34,27 @@ public class SignaturePlacementViewModel {
     // --- Relative coordinates ---
     public DoubleProperty relXProperty() { return relX; }
     public double getRelX() { return relX.get(); }
-    public void setRelX(double v) { relX.set(clamp(v, 0, 1)); }
+    public void setRelX(double v) {
+        double clamped = clamp(v, 0, 1);
+        relX.set(clamped);
+        // Re-clamp width so relX + relWidth never exceeds 1.0
+        double maxW = 1 - clamped;
+        if (relWidth.get() > maxW) {
+            relWidth.set(Math.max(0.02, maxW));
+        }
+    }
 
     public DoubleProperty relYProperty() { return relY; }
     public double getRelY() { return relY.get(); }
-    public void setRelY(double v) { relY.set(clamp(v, 0, 1)); }
+    public void setRelY(double v) {
+        double clamped = clamp(v, 0, 1);
+        relY.set(clamped);
+        // Re-clamp height so relY + relHeight never exceeds 1.0
+        double maxH = 1 - clamped;
+        if (relHeight.get() > maxH) {
+            relHeight.set(Math.max(0.02, maxH));
+        }
+    }
 
     public DoubleProperty relWidthProperty() { return relWidth; }
     public double getRelWidth() { return relWidth.get(); }
