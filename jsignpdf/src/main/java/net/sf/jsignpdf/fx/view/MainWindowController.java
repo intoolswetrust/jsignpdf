@@ -4,7 +4,6 @@ import java.io.File;
 import java.util.List;
 import java.util.logging.Level;
 
-import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
@@ -111,105 +110,10 @@ public class MainWindowController {
     /**
      * Initializes the UI from persisted BasicSignerOptions (called after loadOptions()).
      * Populates all ViewModel properties from the options so the UI is prefilled.
-     * Attempts to reopen the last used file and restore visible signature placement.
      */
     public void initFromOptions(BasicSignerOptions opts) {
         this.options = opts;
         signingVM.syncFromOptions(opts);
-
-        // Defer restore to after the stage is shown so rendering works
-        Platform.runLater(this::restoreLastSession);
-    }
-
-    /**
-     * Tries to reopen the last used PDF file from stored options.
-     * If visible signature was enabled, restores the page and placement rectangle.
-     */
-    private void restoreLastSession() {
-        String lastFile = options.getInFile();
-        if (lastFile == null || lastFile.isEmpty()) {
-            return;
-        }
-        File file = new File(lastFile);
-        if (!file.isFile() || !file.canRead()) {
-            LOGGER.warning("Cannot reopen last file (not found or not readable): " + lastFile);
-            return;
-        }
-
-        // Try to open the document
-        PdfExtraInfo extraInfo = new PdfExtraInfo(options);
-        int pages = extraInfo.getNumberOfPages();
-        if (pages < 1) {
-            LOGGER.warning("Cannot reopen last file (failed to read PDF): " + lastFile);
-            return;
-        }
-
-        documentVM.setDocumentFile(file);
-        documentVM.setPageCount(pages);
-        documentVM.setZoomLevel(1.0);
-
-        lblDropHint.setVisible(false);
-        setDocumentControlsDisabled(false);
-        lblPageCount.setText("/ " + pages);
-        cmbZoom.setValue("100%");
-        stage.setTitle("JSignPdf " + Constants.VERSION + " - " + file.getName());
-        signatureOverlay.setVisible(true);
-        LOGGER.info("Reopened last file: " + lastFile);
-
-        // Navigate to stored page (setCurrentPage triggers the listener which
-        // calls renderCurrentPage and updateNavButtonState)
-        int storedPage = options.getPage();
-        if (storedPage >= 1 && storedPage <= pages) {
-            documentVM.setCurrentPage(storedPage);
-        } else {
-            if (storedPage > 1) {
-                LOGGER.warning("Stored page " + storedPage + " exceeds page count " + pages
-                        + ", showing page 1");
-            }
-            documentVM.setCurrentPage(1);
-        }
-        txtPageNumber.setText(String.valueOf(documentVM.getCurrentPage()));
-
-        // Restore visible signature placement
-        if (options.isVisible()) {
-            try {
-                PageInfo pageInfo = extraInfo.getPageInfo(documentVM.getCurrentPage());
-                if (pageInfo == null) {
-                    LOGGER.warning("Cannot get page info for visible signature placement, disabling");
-                    signingVM.visibleProperty().set(false);
-                    return;
-                }
-                // Normalize coordinates (user may have drawn rectangle in any direction)
-                float llx = Math.min(options.getPositionLLX(), options.getPositionURX());
-                float lly = Math.min(options.getPositionLLY(), options.getPositionURY());
-                float urx = Math.max(options.getPositionLLX(), options.getPositionURX());
-                float ury = Math.max(options.getPositionLLY(), options.getPositionURY());
-
-                float pw = pageInfo.getWidth();
-                float ph = pageInfo.getHeight();
-
-                // Validate that the rectangle has positive area and fits within the page
-                if (urx <= llx || ury <= lly
-                        || llx > pw || lly > ph || urx < 0 || ury < 0) {
-                    LOGGER.warning("Stored signature rectangle [" + llx + "," + lly + ","
-                            + urx + "," + ury + "] does not fit page dimensions ["
-                            + pw + "x" + ph + "], disabling visible signature");
-                    signingVM.visibleProperty().set(false);
-                    return;
-                }
-
-                // Clamp to page bounds
-                llx = Math.max(0, llx);
-                lly = Math.max(0, lly);
-                urx = Math.min(pw, urx);
-                ury = Math.min(ph, ury);
-
-                placementVM.fromPdfCoordinates(llx, lly, urx, ury, pw, ph);
-            } catch (Exception e) {
-                LOGGER.log(Level.WARNING, "Failed to restore visible signature placement, disabling", e);
-                signingVM.visibleProperty().set(false);
-            }
-        }
     }
 
     /**

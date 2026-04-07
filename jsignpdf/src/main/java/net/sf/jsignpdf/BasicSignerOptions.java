@@ -286,10 +286,10 @@ public class BasicSignerOptions {
         props.setProperty(Constants.PROPERTY_STOREPWD, isStorePasswords());
         setEncrypted(Constants.EPROPERTY_USERHOME, Constants.USER_HOME);
         if (isStorePasswords()) {
-            setEncrypted(Constants.EPROPERTY_KS_PWD, new String(getKsPasswd()));
-            setEncrypted(Constants.EPROPERTY_KEY_PWD, new String(getKeyPasswd()));
-            setEncrypted(Constants.EPROPERTY_OWNER_PWD, new String(getPdfOwnerPwd()));
-            setEncrypted(Constants.EPROPERTY_USER_PWD, new String(getPdfUserPwd()));
+            setEncrypted(Constants.EPROPERTY_KS_PWD, getKsPasswdStr());
+            setEncrypted(Constants.EPROPERTY_KEY_PWD, getKeyPasswdStr());
+            setEncrypted(Constants.EPROPERTY_OWNER_PWD, getPdfOwnerPwdStr());
+            setEncrypted(Constants.EPROPERTY_USER_PWD, getPdfUserPwdStr());
             setEncrypted(Constants.EPROPERTY_TSA_PWD, getTsaPasswd());
             setEncrypted(Constants.EPROPERTY_TSA_CERT_PWD, getTsaCertFilePwd());
         } else {
