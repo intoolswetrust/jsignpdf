@@ -42,11 +42,11 @@ public class SignaturePlacementViewModel {
 
     public DoubleProperty relWidthProperty() { return relWidth; }
     public double getRelWidth() { return relWidth.get(); }
-    public void setRelWidth(double v) { relWidth.set(Math.max(0.02, Math.min(v, 1))); }
+    public void setRelWidth(double v) { relWidth.set(Math.max(0.02, Math.min(v, 1 - getRelX()))); }
 
     public DoubleProperty relHeightProperty() { return relHeight; }
     public double getRelHeight() { return relHeight.get(); }
-    public void setRelHeight(double v) { relHeight.set(Math.max(0.02, Math.min(v, 1))); }
+    public void setRelHeight(double v) { relHeight.set(Math.max(0.02, Math.min(v, 1 - getRelY()))); }
 
     /**
      * Convert relative image coordinates to PDF coordinates.
