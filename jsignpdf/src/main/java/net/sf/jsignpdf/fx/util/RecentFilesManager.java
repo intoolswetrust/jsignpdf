@@ -2,22 +2,18 @@ package net.sf.jsignpdf.fx.util;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
-import java.util.prefs.Preferences;
+
+import net.sf.jsignpdf.Constants;
+import net.sf.jsignpdf.utils.PropertyProvider;
 
 /**
- * Manages a list of recently opened PDF files, persisted via java.util.prefs.
+ * Manages a list of recently opened PDF files, persisted via PropertyProvider.
  */
 public class RecentFilesManager {
 
-    private static final String PREFS_KEY_PREFIX = "recentFile_";
     private static final int MAX_RECENT = 10;
-    private final Preferences prefs;
-
-    public RecentFilesManager() {
-        prefs = Preferences.userNodeForPackage(RecentFilesManager.class);
-    }
+    private final PropertyProvider props = PropertyProvider.getInstance();
 
     public void addFile(File file) {
         List<String> files = getRecentFiles();
@@ -33,8 +29,8 @@ public class RecentFilesManager {
     public List<String> getRecentFiles() {
         List<String> result = new ArrayList<>();
         for (int i = 0; i < MAX_RECENT; i++) {
-            String path = prefs.get(PREFS_KEY_PREFIX + i, null);
-            if (path != null && new File(path).exists()) {
+            String path = props.getProperty(Constants.PROPERTY_RECENT_FILE_PREFIX + i);
+            if (path != null && !path.isEmpty() && new File(path).exists()) {
                 result.add(path);
             }
         }
@@ -44,9 +40,9 @@ public class RecentFilesManager {
     private void saveFiles(List<String> files) {
         for (int i = 0; i < MAX_RECENT; i++) {
             if (i < files.size()) {
-                prefs.put(PREFS_KEY_PREFIX + i, files.get(i));
+                props.setProperty(Constants.PROPERTY_RECENT_FILE_PREFIX + i, files.get(i));
             } else {
-                prefs.remove(PREFS_KEY_PREFIX + i);
+                props.removeProperty(Constants.PROPERTY_RECENT_FILE_PREFIX + i);
             }
         }
     }

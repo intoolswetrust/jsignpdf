@@ -100,9 +100,9 @@ public class FxTranslationsTest {
                     bundle.getString("jfx.gui.menu.file.open"), fileMenu.getItems().get(0).getText());
             assertEquals("Close for " + locale,
                     bundle.getString("jfx.gui.menu.file.close"), fileMenu.getItems().get(1).getText());
-            // index 2 = separator
+            // index 2 = separator, index 3 = Recent Files submenu, index 4 = separator
             assertEquals("Exit for " + locale,
-                    bundle.getString("jfx.gui.menu.file.exit"), fileMenu.getItems().get(3).getText());
+                    bundle.getString("jfx.gui.menu.file.exit"), fileMenu.getItems().get(5).getText());
         }
     }
 

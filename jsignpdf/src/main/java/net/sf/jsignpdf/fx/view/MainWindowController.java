@@ -10,6 +10,7 @@ import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
+import javafx.scene.control.Menu;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.ProgressBar;
 import javafx.scene.control.ScrollPane;
@@ -31,6 +32,7 @@ import net.sf.jsignpdf.fx.control.PdfPageView;
 import net.sf.jsignpdf.fx.control.SignatureOverlay;
 import net.sf.jsignpdf.fx.service.PdfRenderService;
 import net.sf.jsignpdf.fx.service.SigningService;
+import net.sf.jsignpdf.fx.util.RecentFilesManager;
 import net.sf.jsignpdf.fx.viewmodel.DocumentViewModel;
 import net.sf.jsignpdf.fx.viewmodel.SignaturePlacementViewModel;
 import net.sf.jsignpdf.fx.viewmodel.SigningOptionsViewModel;
@@ -51,6 +53,7 @@ public class MainWindowController {
     private final SignaturePlacementViewModel placementVM = new SignaturePlacementViewModel();
     private final PdfRenderService renderService = new PdfRenderService();
     private final SigningService signingService = new SigningService();
+    private final RecentFilesManager recentFilesManager = new RecentFilesManager();
     private PdfPageView pdfPageView;
     private SignatureOverlay signatureOverlay;
 
@@ -69,6 +72,7 @@ public class MainWindowController {
     // Menu items
     @FXML private MenuItem menuOpen;
     @FXML private MenuItem menuClose;
+    @FXML private Menu menuRecentFiles;
     @FXML private MenuItem menuSign;
     @FXML private MenuItem menuExit;
     @FXML private MenuItem menuZoomIn;
@@ -388,6 +392,24 @@ public class MainWindowController {
                     RES.get("jfx.gui.dialog.signingError.title"),
                     signingService.getException().getMessage());
         });
+
+        refreshRecentFilesMenu();
+    }
+
+    private void refreshRecentFilesMenu() {
+        menuRecentFiles.getItems().clear();
+        List<String> recentFiles = recentFilesManager.getRecentFiles();
+        if (recentFiles.isEmpty()) {
+            MenuItem empty = new MenuItem(RES.get("jfx.gui.menu.file.recentFiles.empty"));
+            empty.setDisable(true);
+            menuRecentFiles.getItems().add(empty);
+        } else {
+            for (String path : recentFiles) {
+                MenuItem item = new MenuItem(path);
+                item.setOnAction(e -> openDocument(new File(path)));
+                menuRecentFiles.getItems().add(item);
+            }
+        }
     }
 
     private void setDocumentControlsDisabled(boolean disabled) {
@@ -650,6 +672,9 @@ public class MainWindowController {
 
             stage.setTitle("JSignPdf " + Constants.VERSION + " - " + file.getName());
             LOGGER.info("Opened document: " + file.getAbsolutePath());
+
+            recentFilesManager.addFile(file);
+            refreshRecentFilesMenu();
 
             // Show signature overlay and render first page
             signatureOverlay.setVisible(true);

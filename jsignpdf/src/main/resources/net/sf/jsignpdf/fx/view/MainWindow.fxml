@@ -24,6 +24,8 @@
                     </MenuItem>
                     <MenuItem fx:id="menuClose" text="%jfx.gui.menu.file.close" onAction="#onFileClose"/>
                     <SeparatorMenuItem/>
+                    <Menu fx:id="menuRecentFiles" text="%jfx.gui.menu.file.recentFiles"/>
+                    <SeparatorMenuItem/>
                     <MenuItem fx:id="menuExit" text="%jfx.gui.menu.file.exit" onAction="#onFileExit"
                               accelerator="Shortcut+Q"/>
                 </Menu>
