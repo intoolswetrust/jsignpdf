@@ -429,6 +429,14 @@ public class MainWindowController {
             return;
         }
 
+        // Validate encryption passwords before signing
+        if (encryptionSettingsController != null && !encryptionSettingsController.isEncryptionConfigValid()) {
+            showAlert(Alert.AlertType.WARNING,
+                    RES.get("jfx.gui.dialog.missingPasswords.title"),
+                    RES.get("jfx.gui.dialog.missingPasswords.text"));
+            return;
+        }
+
         // Sync ViewModel to options
         signingVM.syncToOptions(options);
 

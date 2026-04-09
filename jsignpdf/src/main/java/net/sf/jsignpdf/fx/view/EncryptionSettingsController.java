@@ -4,6 +4,7 @@ import java.io.File;
 
 import static net.sf.jsignpdf.Constants.RES;
 
+import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
 import javafx.scene.control.CheckBox;
@@ -20,6 +21,8 @@ import net.sf.jsignpdf.types.PrintRight;
  * Controller for PDF encryption and rights settings.
  */
 public class EncryptionSettingsController {
+
+    private static final String STYLE_VALIDATION_ERROR = "-fx-border-color: red; -fx-border-width: 1;";
 
     @FXML private ComboBox<PDFEncryption> cmbEncryption;
     @FXML private VBox encryptionDetailsPane;
@@ -44,10 +47,18 @@ public class EncryptionSettingsController {
         cmbPrintRight.setItems(FXCollections.observableArrayList(PrintRight.values()));
 
         // Toggle encryption details visibility
-        cmbEncryption.valueProperty().addListener((obs, o, n) ->
-                encryptionDetailsPane.setVisible(n != null && n != PDFEncryption.NONE));
+        cmbEncryption.valueProperty().addListener((obs, o, n) -> {
+            encryptionDetailsPane.setVisible(n != null && n != PDFEncryption.NONE);
+            updatePasswordValidation();
+        });
         encryptionDetailsPane.setVisible(false);
         encryptionDetailsPane.managedProperty().bind(encryptionDetailsPane.visibleProperty());
+
+        // Live validation on password fields
+        txtOwnerPassword.textProperty().addListener((ObservableValue<? extends String> obs, String o, String n) ->
+                updatePasswordValidation());
+        txtUserPassword.textProperty().addListener((ObservableValue<? extends String> obs, String o, String n) ->
+                updatePasswordValidation());
     }
 
     public void setViewModel(SigningOptionsViewModel vm) {
@@ -72,6 +83,37 @@ public class EncryptionSettingsController {
         // Update visibility from initial loaded values
         PDFEncryption enc = viewModel.pdfEncryptionProperty().get();
         encryptionDetailsPane.setVisible(enc != null && enc != PDFEncryption.NONE);
+        updatePasswordValidation();
+    }
+
+    private void updatePasswordValidation() {
+        if (!isPasswordEncryptionSelected()) {
+            txtOwnerPassword.setStyle(null);
+            txtUserPassword.setStyle(null);
+            return;
+        }
+        txtOwnerPassword.setStyle(isBlank(txtOwnerPassword.getText()) ? STYLE_VALIDATION_ERROR : null);
+        txtUserPassword.setStyle(isBlank(txtUserPassword.getText()) ? STYLE_VALIDATION_ERROR : null);
+    }
+
+    /**
+     * Returns true if password encryption is selected and both passwords are filled in.
+     * Used by the main controller to gate the Sign action.
+     */
+    public boolean isEncryptionConfigValid() {
+        if (!isPasswordEncryptionSelected()) {
+            return true;
+        }
+        return !isBlank(txtOwnerPassword.getText()) && !isBlank(txtUserPassword.getText());
+    }
+
+    private boolean isPasswordEncryptionSelected() {
+        PDFEncryption enc = cmbEncryption.getValue();
+        return enc == PDFEncryption.PASSWORD;
+    }
+
+    private static boolean isBlank(String s) {
+        return s == null || s.trim().isEmpty();
     }
 
     @FXML
