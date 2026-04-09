@@ -41,7 +41,6 @@ import java.nio.channels.FileChannel;
 
 import net.sf.jsignpdf.BasicSignerOptions;
 import net.sf.jsignpdf.Constants;
-import net.sf.jsignpdf.types.CertificationLevel;
 import net.sf.jsignpdf.utils.PdfUtils;
 
 import org.apache.pdfbox.pdmodel.PDDocument;
@@ -209,9 +208,7 @@ public class Pdf2Image {
 
         try {
             File tmpFile = new File(options.getInFile());
-            tmpDoc = options.getCertLevelX() != CertificationLevel.NOT_CERTIFIED
-                    ? PDDocument.load(tmpFile, options.getPdfOwnerPwdStrX())
-                    : PDDocument.load(tmpFile);
+            tmpDoc = PDDocument.load(tmpFile, options.getPdfOwnerPwdStrX());
             int resolution;
             try {
                 resolution = Toolkit.getDefaultToolkit().getScreenResolution();

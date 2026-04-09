@@ -2,15 +2,22 @@ package net.sf.jsignpdf.fx.view;
 
 import java.io.File;
 import java.util.List;
+import java.util.Optional;
 import java.util.logging.Level;
 
+import javafx.application.Platform;
 import javafx.fxml.FXML;
+import javafx.geometry.Insets;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
+import javafx.scene.control.ButtonBar;
+import javafx.scene.control.ButtonType;
 import javafx.scene.control.ComboBox;
+import javafx.scene.control.Dialog;
 import javafx.scene.control.Label;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuItem;
+import javafx.scene.control.PasswordField;
 import javafx.scene.control.ProgressBar;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.SplitPane;
@@ -20,9 +27,13 @@ import javafx.scene.input.Dragboard;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.TransferMode;
+import javafx.scene.layout.GridPane;
 import javafx.scene.layout.StackPane;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
+
+import com.lowagie.text.exceptions.BadPasswordException;
+
 import net.sf.jsignpdf.BasicSignerOptions;
 import net.sf.jsignpdf.Constants;
 import net.sf.jsignpdf.PdfExtraInfo;
@@ -557,9 +568,15 @@ public class MainWindowController {
 
             options.setInFile(file.getAbsolutePath());
 
-            // Get page count
-            PdfExtraInfo extraInfo = new PdfExtraInfo(options);
-            int pages = extraInfo.getNumberOfPages();
+            // Try to open PDF, prompting for owner password if needed
+            int pages;
+            try {
+                PdfExtraInfo extraInfo = new PdfExtraInfo(options);
+                pages = extraInfo.getNumberOfPages();
+            } catch (BadPasswordException e) {
+                pages = promptPasswordAndRetry(file);
+            }
+
             if (pages < 1) {
                 updateStatus(RES.get("jfx.gui.status.readError"));
                 return;
@@ -590,6 +607,85 @@ public class MainWindowController {
             LOGGER.log(Level.SEVERE, "Failed to open document", e);
             updateStatus("Error: " + e.getMessage());
         }
+    }
+
+    /**
+     * Prompts the user for the owner password and retries opening the PDF.
+     * Loops until the password works, or the user cancels.
+     *
+     * @return number of pages, or -1 if cancelled/failed
+     */
+    private int promptPasswordAndRetry(File file) {
+        boolean firstAttempt = true;
+        while (true) {
+            Optional<String> password = showPasswordDialog(firstAttempt);
+            if (password.isEmpty()) {
+                // User cancelled
+                return -1;
+            }
+            firstAttempt = false;
+
+            options.setPdfOwnerPwd(password.get().toCharArray());
+            options.setAdvanced(true);
+            signingVM.syncFromOptions(options);
+
+            try {
+                PdfExtraInfo extraInfo = new PdfExtraInfo(options);
+                return extraInfo.getNumberOfPages();
+            } catch (BadPasswordException e) {
+                // Wrong password - loop to ask again
+            }
+        }
+    }
+
+    /**
+     * Shows a dialog asking the user for the PDF owner password.
+     *
+     * @param firstAttempt true for the initial prompt, false after a wrong password
+     * @return the entered password, or empty if cancelled
+     */
+    private Optional<String> showPasswordDialog(boolean firstAttempt) {
+        Dialog<String> dialog = new Dialog<>();
+        dialog.setTitle(RES.get("jfx.gui.dialog.ownerPassword.title"));
+        dialog.setHeaderText(firstAttempt
+                ? RES.get("jfx.gui.dialog.ownerPassword.header")
+                : RES.get("jfx.gui.dialog.ownerPassword.headerRetry"));
+        dialog.initOwner(stage);
+
+        ButtonType okButtonType = new ButtonType(RES.get("jfx.gui.dialog.ownerPassword.ok"),
+                ButtonBar.ButtonData.OK_DONE);
+        dialog.getDialogPane().getButtonTypes().addAll(okButtonType, ButtonType.CANCEL);
+
+        PasswordField passwordField = new PasswordField();
+        passwordField.setPromptText(RES.get("jfx.gui.dialog.ownerPassword.prompt"));
+        passwordField.setPrefColumnCount(20);
+
+        GridPane grid = new GridPane();
+        grid.setHgap(10);
+        grid.setVgap(10);
+        grid.setPadding(new Insets(20, 10, 10, 10));
+        grid.add(new Label(RES.get("jfx.gui.dialog.ownerPassword.label")), 0, 0);
+        grid.add(passwordField, 1, 0);
+
+        dialog.getDialogPane().setContent(grid);
+
+        // Disable OK button when password field is empty
+        Button okButton = (Button) dialog.getDialogPane().lookupButton(okButtonType);
+        okButton.setDisable(true);
+        passwordField.textProperty().addListener((obs, oldVal, newVal) ->
+                okButton.setDisable(newVal.trim().isEmpty()));
+
+        // Focus the password field when dialog opens
+        Platform.runLater(passwordField::requestFocus);
+
+        dialog.setResultConverter(buttonType -> {
+            if (buttonType == okButtonType) {
+                return passwordField.getText();
+            }
+            return null;
+        });
+
+        return dialog.showAndWait();
     }
 
     private void closeDocument() {
