@@ -67,9 +67,6 @@ public class PdfExtraInfo {
             } catch (BadPasswordException e) {
                 try {
                     reader = new PdfReader(options.getInFile(), new byte[0]);
-                } catch (BadPasswordException e2) {
-                    // try to read without password
-                    reader = new PdfReader(options.getInFile());
                 } catch (Exception e2) {
                     reader = new PdfReader(options.getInFile());
                 }
