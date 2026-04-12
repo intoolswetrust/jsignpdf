@@ -281,7 +281,11 @@ public class VisibleSignatureDialog extends javax.swing.JDialog {
      * Reads number of pages from PDF.
      */
     private void readPdfInfo() {
-        numberOfPages = extraInfo.getNumberOfPages();
+        try {
+            numberOfPages = extraInfo.getNumberOfPages();
+        } catch (Exception e) {
+            numberOfPages = -1;
+        }
         tfPage.setEnabled(numberOfPages != 1);
         lblPageBounds.setVisible(numberOfPages > 0);
         switchBounds(false);

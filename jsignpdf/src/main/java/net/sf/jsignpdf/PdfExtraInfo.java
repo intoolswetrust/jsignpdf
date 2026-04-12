@@ -33,6 +33,7 @@ import net.sf.jsignpdf.types.PageInfo;
 import net.sf.jsignpdf.utils.PdfUtils;
 
 import com.lowagie.text.Rectangle;
+import com.lowagie.text.exceptions.BadPasswordException;
 import com.lowagie.text.pdf.PdfReader;
 
 /**
@@ -53,15 +54,22 @@ public class PdfExtraInfo {
 
     /**
      * Returns number of pages in PDF document. If error occures (file not found or sth. similar) -1 is returned.
-     * 
+     *
      * @return number of pages (or -1 if error occures)
+     * @throws BadPasswordException if the PDF is password-protected and the configured password is wrong or missing
      */
-    public int getNumberOfPages() {
+    public int getNumberOfPages() throws BadPasswordException {
         int tmpResult = 0;
         PdfReader reader = null;
         try {
             try {
                 reader = new PdfReader(options.getInFile(), options.getPdfOwnerPwdStrX().getBytes());
+            } catch (BadPasswordException e) {
+                try {
+                    reader = new PdfReader(options.getInFile(), new byte[0]);
+                } catch (Exception e2) {
+                    reader = new PdfReader(options.getInFile());
+                }
             } catch (Exception e) {
                 try {
                     reader = new PdfReader(options.getInFile(), new byte[0]);
@@ -71,6 +79,8 @@ public class PdfExtraInfo {
                 }
             }
             tmpResult = reader.getNumberOfPages();
+        } catch (BadPasswordException e) {
+            throw e;
         } catch (Exception e) {
             tmpResult = -1;
         } finally {

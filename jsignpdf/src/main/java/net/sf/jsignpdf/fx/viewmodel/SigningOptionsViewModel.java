@@ -107,6 +107,9 @@ public class SigningOptionsViewModel {
      * Sync values from this ViewModel into a BasicSignerOptions instance.
      */
     public void syncToOptions(BasicSignerOptions opts) {
+        // The JavaFX UI always exposes all settings (no simple/advanced toggle),
+        // so options must be in advanced mode for all features to take effect.
+        opts.setAdvanced(true);
         opts.setKsType(ksType.get());
         opts.setKsFile(ksFile.get());
         opts.setKsPasswd(toCharArray(ksPassword.get()));
