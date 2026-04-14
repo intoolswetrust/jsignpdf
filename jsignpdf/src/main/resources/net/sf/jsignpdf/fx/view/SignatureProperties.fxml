@@ -14,6 +14,18 @@
         <Insets top="8" right="8" bottom="8" left="8"/>
     </padding>
 
+    <Label text="%jfx.gui.sig.outputFile"/>
+    <HBox spacing="4">
+        <TextField fx:id="txtOutFile" HBox.hgrow="ALWAYS"/>
+        <Button onAction="#onBrowseOutFile" minWidth="30">
+            <graphic><ImageView fitWidth="16" fitHeight="16" preserveRatio="true">
+                <Image url="@/net/sf/jsignpdf/fileopen16.png"/>
+            </ImageView></graphic>
+        </Button>
+    </HBox>
+
+    <CheckBox fx:id="chkAppend" text="%jfx.gui.sig.appendSignature"/>
+
     <Label text="%jfx.gui.sig.hashAlgorithm"/>
     <ComboBox fx:id="cmbHashAlgorithm" maxWidth="Infinity"/>
 
@@ -31,16 +43,4 @@
 
     <Label text="%jfx.gui.sig.contact"/>
     <TextField fx:id="txtContact"/>
-
-    <CheckBox fx:id="chkAppend" text="%jfx.gui.sig.appendSignature"/>
-
-    <Label text="%jfx.gui.sig.outputFile"/>
-    <HBox spacing="4">
-        <TextField fx:id="txtOutFile" HBox.hgrow="ALWAYS"/>
-        <Button onAction="#onBrowseOutFile" minWidth="30">
-            <graphic><ImageView fitWidth="16" fitHeight="16" preserveRatio="true">
-                <Image url="@/net/sf/jsignpdf/fileopen16.png"/>
-            </ImageView></graphic>
-        </Button>
-    </HBox>
 </VBox>

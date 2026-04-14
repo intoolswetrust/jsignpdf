@@ -281,10 +281,10 @@ public class FxTranslationsTest {
             VBox root = (VBox) loadFxml("/net/sf/jsignpdf/fx/view/SignatureProperties.fxml", bundle);
             assertNotNull("SignatureProperties load failed for " + locale, root);
 
-            // First child is the "Hash algorithm:" label
-            Label hashLabel = (Label) root.getChildren().get(0);
-            assertEquals("Hash algorithm label for " + locale,
-                    bundle.getString("jfx.gui.sig.hashAlgorithm"), hashLabel.getText());
+            // First child is the "Output file:" label
+            Label outFileLabel = (Label) root.getChildren().get(0);
+            assertEquals("Output file label for " + locale,
+                    bundle.getString("jfx.gui.sig.outputFile"), outFileLabel.getText());
         }
     }
 
