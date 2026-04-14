@@ -72,6 +72,8 @@ public class MainWindowController {
     // Included sub-controllers (fx:id + "Controller" naming convention)
     @FXML private VBox certificateSettings;
     @FXML private CertificateSettingsController certificateSettingsController;
+    @FXML private VBox signatureProperties;
+    @FXML private SignaturePropertiesController signaturePropertiesController;
     @FXML private VBox signatureSettings;
     @FXML private SignatureSettingsController signatureSettingsController;
     @FXML private VBox tsaSettings;
@@ -181,6 +183,9 @@ public class MainWindowController {
         // Wire sub-controllers
         if (certificateSettingsController != null) {
             certificateSettingsController.setViewModel(signingVM);
+        }
+        if (signaturePropertiesController != null) {
+            signaturePropertiesController.setViewModel(signingVM);
         }
         if (signatureSettingsController != null) {
             signatureSettingsController.setViewModel(signingVM);
@@ -501,18 +506,6 @@ public class MainWindowController {
         return nameBase + Constants.DEFAULT_OUT_SUFFIX + suffix;
     }
 
-    /**
-     * Returns true if the given output path appears to be the auto-suggested
-     * "{x}_signed.pdf" form for some other input file (i.e. stale from a prior session).
-     */
-    private static boolean isStaleAutoSuggestion(String outPath, File currentInput) {
-        if (outPath == null || outPath.isEmpty() || currentInput == null) return false;
-        String suggestedForCurrent = suggestedOutFileFor(currentInput);
-        if (outPath.equals(suggestedForCurrent)) return false;
-        // Heuristic: looks auto-generated (ends with _signed.pdf) but doesn't match this input
-        String lower = outPath.toLowerCase();
-        return lower.endsWith(Constants.DEFAULT_OUT_SUFFIX.toLowerCase() + ".pdf");
-    }
 
     private void updateNavButtonState() {
         btnPrevPage.setDisable(!documentVM.canGoPrev());
@@ -780,11 +773,10 @@ public class MainWindowController {
 
             options.setInFile(file.getAbsolutePath());
 
-            // Auto-suggest output path when empty or stale from a different input
-            String currentOut = signingVM.outFileProperty().get();
-            if (currentOut == null || currentOut.isEmpty() || isStaleAutoSuggestion(currentOut, file)) {
-                signingVM.outFileProperty().set(suggestedOutFileFor(file));
-            }
+            // Always reset the output path to the default for the new input file.
+            // Any custom path from a previous session is intentionally discarded —
+            // the user can still override via the field or File > Save Output As.
+            signingVM.outFileProperty().set(suggestedOutFileFor(file));
 
             // Try to open PDF, prompting for owner password if needed
             int pages;

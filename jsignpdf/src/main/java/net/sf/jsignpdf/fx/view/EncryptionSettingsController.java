@@ -31,6 +31,7 @@ public class EncryptionSettingsController {
     @FXML private TextField txtEncCertFile;
 
     // Rights
+    @FXML private VBox rightsPane;
     @FXML private ComboBox<PrintRight> cmbPrintRight;
     @FXML private CheckBox chkCopy;
     @FXML private CheckBox chkAssembly;
@@ -46,13 +47,19 @@ public class EncryptionSettingsController {
         cmbEncryption.setItems(FXCollections.observableArrayList(PDFEncryption.values()));
         cmbPrintRight.setItems(FXCollections.observableArrayList(PrintRight.values()));
 
-        // Toggle encryption details visibility
+        // Toggle encryption details and rights visibility together. Rights
+        // only apply to encrypted output, so there's no point showing them
+        // when encryption is off.
         cmbEncryption.valueProperty().addListener((obs, o, n) -> {
-            encryptionDetailsPane.setVisible(n != null && n != PDFEncryption.NONE);
+            boolean encOn = n != null && n != PDFEncryption.NONE;
+            encryptionDetailsPane.setVisible(encOn);
+            rightsPane.setVisible(encOn);
             updatePasswordValidation();
         });
         encryptionDetailsPane.setVisible(false);
         encryptionDetailsPane.managedProperty().bind(encryptionDetailsPane.visibleProperty());
+        rightsPane.setVisible(false);
+        rightsPane.managedProperty().bind(rightsPane.visibleProperty());
 
         // Live validation on password fields
         txtOwnerPassword.textProperty().addListener((ObservableValue<? extends String> obs, String o, String n) ->
@@ -82,7 +89,9 @@ public class EncryptionSettingsController {
 
         // Update visibility from initial loaded values
         PDFEncryption enc = viewModel.pdfEncryptionProperty().get();
-        encryptionDetailsPane.setVisible(enc != null && enc != PDFEncryption.NONE);
+        boolean encOn = enc != null && enc != PDFEncryption.NONE;
+        encryptionDetailsPane.setVisible(encOn);
+        rightsPane.setVisible(encOn);
         updatePasswordValidation();
     }
 

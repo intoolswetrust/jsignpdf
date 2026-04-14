@@ -166,7 +166,9 @@ public class FxTranslationsTest {
             assertEquals("Sign button for " + locale,
                     bundle.getString("jfx.gui.toolbar.sign"), signBtn.getText());
 
-            // The toolbar must contain the clear-visible-signature button (matched by text)
+            // The toolbar must contain the clear-visible-signature button. The
+            // button shows only its icon (contentDisplay=GRAPHIC_ONLY) but the
+            // translated label is still set as text for accessibility.
             String expectedClearText = bundle.getString("jfx.gui.toolbar.clearVisibleSig");
             boolean foundClear = toolBar.getItems().stream()
                     .filter(n -> n instanceof Button)
@@ -212,15 +214,18 @@ public class FxTranslationsTest {
             assertEquals("Certificate panel for " + locale,
                     bundle.getString("jfx.gui.panel.certificate"),
                     accordion.getPanes().get(0).getText());
-            assertEquals("Signature panel for " + locale,
-                    bundle.getString("jfx.gui.panel.signatureAppearance"),
+            assertEquals("Signature properties panel for " + locale,
+                    bundle.getString("jfx.gui.panel.signatureProperties"),
                     accordion.getPanes().get(1).getText());
+            assertEquals("Signature appearance panel for " + locale,
+                    bundle.getString("jfx.gui.panel.signatureAppearance"),
+                    accordion.getPanes().get(2).getText());
             assertEquals("TSA panel for " + locale,
                     bundle.getString("jfx.gui.panel.timestampValidation"),
-                    accordion.getPanes().get(2).getText());
+                    accordion.getPanes().get(3).getText());
             assertEquals("Encryption panel for " + locale,
                     bundle.getString("jfx.gui.panel.encryptionRights"),
-                    accordion.getPanes().get(3).getText());
+                    accordion.getPanes().get(4).getText());
         }
     }
 
@@ -266,6 +271,20 @@ public class FxTranslationsTest {
             CheckBox visibleSig = (CheckBox) root.getChildren().get(0);
             assertEquals("Enable visible sig for " + locale,
                     bundle.getString("jfx.gui.sig.enableVisible"), visibleSig.getText());
+        }
+    }
+
+    @Test
+    public void testSignaturePropertiesLabels() throws Exception {
+        for (Locale locale : TEST_LOCALES) {
+            ResourceBundle bundle = ResourceBundle.getBundle(BUNDLE_BASE, locale);
+            VBox root = (VBox) loadFxml("/net/sf/jsignpdf/fx/view/SignatureProperties.fxml", bundle);
+            assertNotNull("SignatureProperties load failed for " + locale, root);
+
+            // First child is the "Hash algorithm:" label
+            Label hashLabel = (Label) root.getChildren().get(0);
+            assertEquals("Hash algorithm label for " + locale,
+                    bundle.getString("jfx.gui.sig.hashAlgorithm"), hashLabel.getText());
         }
     }
 
@@ -389,8 +408,15 @@ public class FxTranslationsTest {
             fail("FXML loading timed out for " + fxmlPath);
         }
         if (error.get() != null) {
+            Throwable t = error.get();
+            StringBuilder msg = new StringBuilder(t.toString());
+            Throwable cause = t.getCause();
+            while (cause != null) {
+                msg.append(" | caused by: ").append(cause);
+                cause = cause.getCause();
+            }
             fail("FXML loading failed for " + fxmlPath + " with " + bundle.getLocale()
-                    + ": " + error.get().getMessage());
+                    + ": " + msg);
         }
         return result.get();
     }

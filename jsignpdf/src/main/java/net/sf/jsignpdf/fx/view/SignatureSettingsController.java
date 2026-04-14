@@ -12,40 +12,32 @@ import javafx.scene.control.TextField;
 import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
 import net.sf.jsignpdf.fx.viewmodel.SigningOptionsViewModel;
-import net.sf.jsignpdf.types.CertificationLevel;
-import net.sf.jsignpdf.types.HashAlgorithm;
 import net.sf.jsignpdf.types.RenderMode;
 
 /**
- * Controller for signature appearance and metadata settings.
+ * Controller for the visible-signature appearance section.
+ * Holds only the fields that affect how a visible signature rectangle is
+ * rendered on the PDF. Non-appearance signature settings (hash algorithm,
+ * certification level, signer metadata, output file, append) live in
+ * {@link SignaturePropertiesController}.
  */
 public class SignatureSettingsController {
 
     @FXML private CheckBox chkVisibleSig;
     @FXML private VBox visibleSigPane;
     @FXML private ComboBox<RenderMode> cmbRenderMode;
-    @FXML private ComboBox<HashAlgorithm> cmbHashAlgorithm;
-    @FXML private ComboBox<CertificationLevel> cmbCertLevel;
-    @FXML private TextField txtSignerName;
-    @FXML private TextField txtReason;
-    @FXML private TextField txtLocation;
-    @FXML private TextField txtContact;
     @FXML private TextField txtL2Text;
     @FXML private TextField txtL4Text;
     @FXML private TextField txtFontSize;
     @FXML private TextField txtImgPath;
     @FXML private TextField txtBgImgPath;
     @FXML private CheckBox chkAcro6Layers;
-    @FXML private CheckBox chkAppend;
-    @FXML private TextField txtOutFile;
 
     private SigningOptionsViewModel viewModel;
 
     @FXML
     private void initialize() {
         cmbRenderMode.setItems(FXCollections.observableArrayList(RenderMode.values()));
-        cmbHashAlgorithm.setItems(FXCollections.observableArrayList(HashAlgorithm.values()));
-        cmbCertLevel.setItems(FXCollections.observableArrayList(CertificationLevel.values()));
 
         // Toggle visible signature details
         visibleSigPane.managedProperty().bind(visibleSigPane.visibleProperty());
@@ -71,19 +63,11 @@ public class SignatureSettingsController {
     private void bindToViewModel() {
         chkVisibleSig.selectedProperty().bindBidirectional(viewModel.visibleProperty());
         cmbRenderMode.valueProperty().bindBidirectional(viewModel.renderModeProperty());
-        cmbHashAlgorithm.valueProperty().bindBidirectional(viewModel.hashAlgorithmProperty());
-        cmbCertLevel.valueProperty().bindBidirectional(viewModel.certLevelProperty());
-        txtSignerName.textProperty().bindBidirectional(viewModel.signerNameProperty());
-        txtReason.textProperty().bindBidirectional(viewModel.reasonProperty());
-        txtLocation.textProperty().bindBidirectional(viewModel.locationProperty());
-        txtContact.textProperty().bindBidirectional(viewModel.contactProperty());
         txtL2Text.textProperty().bindBidirectional(viewModel.l2TextProperty());
         txtL4Text.textProperty().bindBidirectional(viewModel.l4TextProperty());
         txtImgPath.textProperty().bindBidirectional(viewModel.imgPathProperty());
         txtBgImgPath.textProperty().bindBidirectional(viewModel.bgImgPathProperty());
         chkAcro6Layers.selectedProperty().bindBidirectional(viewModel.acro6LayersProperty());
-        chkAppend.selectedProperty().bindBidirectional(viewModel.appendProperty());
-        txtOutFile.textProperty().bindBidirectional(viewModel.outFileProperty());
 
         // Font size needs manual sync (String <-> float)
         viewModel.l2TextFontSizeProperty().addListener((obs, o, n) ->
@@ -109,15 +93,6 @@ public class SignatureSettingsController {
     private void onBrowseBgImage() {
         File file = browseImageFile(RES.get("jfx.gui.dialog.selectBackgroundImage"));
         if (file != null) txtBgImgPath.setText(file.getAbsolutePath());
-    }
-
-    @FXML
-    private void onBrowseOutFile() {
-        FileChooser fc = new FileChooser();
-        fc.setTitle(RES.get("jfx.gui.dialog.selectOutputPdf"));
-        fc.getExtensionFilters().add(new FileChooser.ExtensionFilter("PDF Files", "*.pdf"));
-        File file = fc.showSaveDialog(txtOutFile.getScene().getWindow());
-        if (file != null) txtOutFile.setText(file.getAbsolutePath());
     }
 
     private File browseImageFile(String title) {

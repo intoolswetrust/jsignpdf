@@ -35,16 +35,18 @@
         </HBox>
     </VBox>
 
-    <Separator/>
+    <!-- Rights (only meaningful when encryption is enabled) -->
+    <VBox fx:id="rightsPane" spacing="6">
+        <Separator/>
 
-    <!-- Rights -->
-    <Label text="%jfx.gui.enc.printRight" style="-fx-font-weight: bold;"/>
-    <ComboBox fx:id="cmbPrintRight" maxWidth="Infinity"/>
+        <Label text="%jfx.gui.enc.printRight" style="-fx-font-weight: bold;"/>
+        <ComboBox fx:id="cmbPrintRight" maxWidth="Infinity"/>
 
-    <CheckBox fx:id="chkCopy" text="%jfx.gui.enc.allowCopy"/>
-    <CheckBox fx:id="chkAssembly" text="%jfx.gui.enc.allowAssembly"/>
-    <CheckBox fx:id="chkFillIn" text="%jfx.gui.enc.allowFillIn"/>
-    <CheckBox fx:id="chkScreenReaders" text="%jfx.gui.enc.allowScreenReaders"/>
-    <CheckBox fx:id="chkModifyAnnotations" text="%jfx.gui.enc.allowModifyAnnotations"/>
-    <CheckBox fx:id="chkModifyContents" text="%jfx.gui.enc.allowModifyContents"/>
+        <CheckBox fx:id="chkCopy" text="%jfx.gui.enc.allowCopy"/>
+        <CheckBox fx:id="chkAssembly" text="%jfx.gui.enc.allowAssembly"/>
+        <CheckBox fx:id="chkFillIn" text="%jfx.gui.enc.allowFillIn"/>
+        <CheckBox fx:id="chkScreenReaders" text="%jfx.gui.enc.allowScreenReaders"/>
+        <CheckBox fx:id="chkModifyAnnotations" text="%jfx.gui.enc.allowModifyAnnotations"/>
+        <CheckBox fx:id="chkModifyContents" text="%jfx.gui.enc.allowModifyContents"/>
+    </VBox>
 </VBox>
