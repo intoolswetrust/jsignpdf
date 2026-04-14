@@ -26,6 +26,8 @@ public class EncryptionSettingsController {
 
     @FXML private ComboBox<PDFEncryption> cmbEncryption;
     @FXML private VBox encryptionDetailsPane;
+    @FXML private VBox passwordPane;
+    @FXML private VBox certPane;
     @FXML private PasswordField txtOwnerPassword;
     @FXML private PasswordField txtUserPassword;
     @FXML private TextField txtEncCertFile;
@@ -47,19 +49,21 @@ public class EncryptionSettingsController {
         cmbEncryption.setItems(FXCollections.observableArrayList(PDFEncryption.values()));
         cmbPrintRight.setItems(FXCollections.observableArrayList(PrintRight.values()));
 
-        // Toggle encryption details and rights visibility together. Rights
-        // only apply to encrypted output, so there's no point showing them
-        // when encryption is off.
+        // Toggle encryption details and rights visibility based on selection.
+        // Rights only apply to encrypted output, and within the details pane
+        // we show only the subset of fields relevant to the chosen type:
+        // - PASSWORD:    owner/user passwords
+        // - CERTIFICATE: encryption certificate
+        // - NONE:        nothing (whole details pane and rights hidden)
         cmbEncryption.valueProperty().addListener((obs, o, n) -> {
-            boolean encOn = n != null && n != PDFEncryption.NONE;
-            encryptionDetailsPane.setVisible(encOn);
-            rightsPane.setVisible(encOn);
+            applyEncryptionVisibility(n);
             updatePasswordValidation();
         });
-        encryptionDetailsPane.setVisible(false);
         encryptionDetailsPane.managedProperty().bind(encryptionDetailsPane.visibleProperty());
-        rightsPane.setVisible(false);
         rightsPane.managedProperty().bind(rightsPane.visibleProperty());
+        passwordPane.managedProperty().bind(passwordPane.visibleProperty());
+        certPane.managedProperty().bind(certPane.visibleProperty());
+        applyEncryptionVisibility(null);
 
         // Live validation on password fields
         txtOwnerPassword.textProperty().addListener((ObservableValue<? extends String> obs, String o, String n) ->
@@ -88,11 +92,16 @@ public class EncryptionSettingsController {
         chkModifyContents.selectedProperty().bindBidirectional(viewModel.rightModifyContentsProperty());
 
         // Update visibility from initial loaded values
-        PDFEncryption enc = viewModel.pdfEncryptionProperty().get();
+        applyEncryptionVisibility(viewModel.pdfEncryptionProperty().get());
+        updatePasswordValidation();
+    }
+
+    private void applyEncryptionVisibility(PDFEncryption enc) {
         boolean encOn = enc != null && enc != PDFEncryption.NONE;
         encryptionDetailsPane.setVisible(encOn);
         rightsPane.setVisible(encOn);
-        updatePasswordValidation();
+        passwordPane.setVisible(enc == PDFEncryption.PASSWORD);
+        certPane.setVisible(enc == PDFEncryption.CERTIFICATE);
     }
 
     private void updatePasswordValidation() {

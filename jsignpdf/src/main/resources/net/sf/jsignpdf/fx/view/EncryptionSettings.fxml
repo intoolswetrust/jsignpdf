@@ -18,21 +18,25 @@
     <ComboBox fx:id="cmbEncryption" maxWidth="Infinity"/>
 
     <VBox fx:id="encryptionDetailsPane" spacing="6">
-        <Label text="%jfx.gui.enc.ownerPassword"/>
-        <PasswordField fx:id="txtOwnerPassword"/>
+        <VBox fx:id="passwordPane" spacing="6">
+            <Label text="%jfx.gui.enc.ownerPassword"/>
+            <PasswordField fx:id="txtOwnerPassword"/>
 
-        <Label text="%jfx.gui.enc.userPassword"/>
-        <PasswordField fx:id="txtUserPassword"/>
+            <Label text="%jfx.gui.enc.userPassword"/>
+            <PasswordField fx:id="txtUserPassword"/>
+        </VBox>
 
-        <Label text="%jfx.gui.enc.encryptionCert"/>
-        <HBox spacing="4">
-            <TextField fx:id="txtEncCertFile" HBox.hgrow="ALWAYS"/>
-            <Button onAction="#onBrowseEncCert" minWidth="30">
-                <graphic><ImageView fitWidth="16" fitHeight="16" preserveRatio="true">
-                    <Image url="@/net/sf/jsignpdf/fileopen16.png"/>
-                </ImageView></graphic>
-            </Button>
-        </HBox>
+        <VBox fx:id="certPane" spacing="6">
+            <Label text="%jfx.gui.enc.encryptionCert"/>
+            <HBox spacing="4">
+                <TextField fx:id="txtEncCertFile" HBox.hgrow="ALWAYS"/>
+                <Button onAction="#onBrowseEncCert" minWidth="30">
+                    <graphic><ImageView fitWidth="16" fitHeight="16" preserveRatio="true">
+                        <Image url="@/net/sf/jsignpdf/fileopen16.png"/>
+                    </ImageView></graphic>
+                </Button>
+            </HBox>
+        </VBox>
     </VBox>
 
     <!-- Rights (only meaningful when encryption is enabled) -->
