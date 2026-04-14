@@ -626,11 +626,12 @@ public class MainWindowController {
             return;
         }
 
-        // Validate encryption passwords before signing
+        // Validate encryption-dependent required fields before signing
         if (encryptionSettingsController != null && !encryptionSettingsController.isEncryptionConfigValid()) {
+            String prefix = encryptionSettingsController.getValidationErrorKeyPrefix();
             showAlert(Alert.AlertType.WARNING,
-                    RES.get("jfx.gui.dialog.missingPasswords.title"),
-                    RES.get("jfx.gui.dialog.missingPasswords.text"));
+                    RES.get(prefix + ".title"),
+                    RES.get(prefix + ".text"));
             return;
         }
 
