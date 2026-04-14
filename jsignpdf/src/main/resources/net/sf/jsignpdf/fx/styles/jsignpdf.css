@@ -61,6 +61,19 @@
     -fx-border-width: 1 0 0 0;
 }
 
+.visible-sig-badge {
+    -fx-background-color: #2e7d32;
+    -fx-text-fill: #ffffff;
+    -fx-font-weight: bold;
+    -fx-padding: 2 8 2 8;
+    -fx-background-radius: 3;
+}
+
+.output-path-label {
+    -fx-text-fill: #555555;
+    -fx-font-style: italic;
+}
+
 /* Signature overlay */
 .signature-rect {
     -fx-stroke: #1565c0;

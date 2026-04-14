@@ -24,6 +24,9 @@
                     </MenuItem>
                     <MenuItem fx:id="menuClose" text="%jfx.gui.menu.file.close" onAction="#onFileClose"/>
                     <SeparatorMenuItem/>
+                    <MenuItem fx:id="menuSaveAs" text="%jfx.gui.menu.file.saveAs" onAction="#onSaveAs"
+                              accelerator="Shortcut+Shift+S"/>
+                    <SeparatorMenuItem/>
                     <Menu fx:id="menuRecentFiles" text="%jfx.gui.menu.file.recentFiles"/>
                     <SeparatorMenuItem/>
                     <MenuItem fx:id="menuExit" text="%jfx.gui.menu.file.exit" onAction="#onFileExit"
@@ -40,6 +43,10 @@
                               onAction="#onToggleSidePanel" accelerator="F9"/>
                 </Menu>
                 <Menu text="%jfx.gui.menu.signing">
+                    <CheckMenuItem fx:id="menuVisibleSig" text="%jfx.gui.menu.signing.visibleSig"/>
+                    <MenuItem fx:id="menuClearVisibleSig" text="%jfx.gui.menu.signing.clearVisibleSig"
+                              onAction="#onClearVisibleSig" accelerator="Shortcut+Shift+V"/>
+                    <SeparatorMenuItem/>
                     <MenuItem fx:id="menuSign" text="%jfx.gui.menu.file.sign" onAction="#onSign" accelerator="Shortcut+S">
                         <graphic><ImageView fitWidth="16" fitHeight="16" preserveRatio="true">
                             <Image url="@/net/sf/jsignpdf/signedpdf16.png"/>
@@ -86,6 +93,10 @@
                         <Image url="@/net/sf/jsignpdf/next16.png"/>
                     </ImageView></graphic>
                 </Button>
+                <Separator orientation="VERTICAL"/>
+                <Button fx:id="btnClearVisibleSig" text="%jfx.gui.toolbar.clearVisibleSig"
+                        onAction="#onClearVisibleSig" mnemonicParsing="false"
+                        styleClass="toolbar-button"/>
                 <Separator orientation="VERTICAL"/>
                 <Button fx:id="btnSign" text="%jfx.gui.toolbar.sign" onAction="#onSign"
                         styleClass="toolbar-button,sign-button">
@@ -157,6 +168,10 @@
             </padding>
             <Label fx:id="lblStatus" text="%jfx.gui.status.ready" HBox.hgrow="ALWAYS"
                    maxWidth="Infinity"/>
+            <Label fx:id="lblVisibleSigBadge" text="%jfx.gui.status.visibleSigEnabled"
+                   styleClass="visible-sig-badge" managed="false" visible="false"/>
+            <Label fx:id="lblOutputPath" styleClass="output-path-label"
+                   managed="false" visible="false"/>
             <ProgressBar fx:id="progressBar" prefWidth="150"/>
         </HBox>
     </bottom>

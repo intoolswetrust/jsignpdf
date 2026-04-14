@@ -12,12 +12,14 @@ import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonBar;
 import javafx.scene.control.ButtonType;
+import javafx.scene.control.CheckMenuItem;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Dialog;
 import javafx.scene.control.Label;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.PasswordField;
+import javafx.scene.control.Tooltip;
 import javafx.scene.control.ProgressBar;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.SplitPane;
@@ -82,7 +84,10 @@ public class MainWindowController {
     // Menu items
     @FXML private MenuItem menuOpen;
     @FXML private MenuItem menuClose;
+    @FXML private MenuItem menuSaveAs;
     @FXML private Menu menuRecentFiles;
+    @FXML private CheckMenuItem menuVisibleSig;
+    @FXML private MenuItem menuClearVisibleSig;
     @FXML private MenuItem menuSign;
     @FXML private MenuItem menuExit;
     @FXML private MenuItem menuZoomIn;
@@ -101,6 +106,7 @@ public class MainWindowController {
     @FXML private TextField txtPageNumber;
     @FXML private Label lblPageCount;
     @FXML private Button btnNextPage;
+    @FXML private Button btnClearVisibleSig;
     @FXML private Button btnSign;
 
     // Content area
@@ -111,6 +117,8 @@ public class MainWindowController {
 
     // Status bar
     @FXML private Label lblStatus;
+    @FXML private Label lblVisibleSigBadge;
+    @FXML private Label lblOutputPath;
     @FXML private ProgressBar progressBar;
 
     public void setStage(Stage stage) {
@@ -209,7 +217,24 @@ public class MainWindowController {
             if (!isVisible) {
                 placementVM.reset();
             }
+            updateVisibleSigIndicators();
         });
+
+        // Bind visible-signature CheckMenuItem bidirectionally to the ViewModel
+        menuVisibleSig.selectedProperty().bindBidirectional(signingVM.visibleProperty());
+
+        // Status-bar badge: visible only when visible signature is enabled
+        lblVisibleSigBadge.managedProperty().bind(lblVisibleSigBadge.visibleProperty());
+        lblVisibleSigBadge.visibleProperty().bind(signingVM.visibleProperty());
+
+        // Status-bar output path label: visible when a document is loaded
+        lblOutputPath.managedProperty().bind(lblOutputPath.visibleProperty());
+        signingVM.outFileProperty().addListener((obs, oldVal, newVal) -> updateOutputPathLabel());
+        documentVM.documentFileProperty().addListener((obs, oldVal, newVal) -> updateOutputPathLabel());
+
+        // Initial state for the visible-signature controls
+        updateVisibleSigIndicators();
+        updateOutputPathLabel();
 
         // Keep overlay sized to match the pdf page view
         signatureOverlay.prefWidthProperty().bind(pdfPageView.prefWidthProperty());
@@ -339,9 +364,86 @@ public class MainWindowController {
         btnSign.setDisable(disabled);
         menuSign.setDisable(disabled);
         menuClose.setDisable(disabled);
+        menuSaveAs.setDisable(disabled);
+        menuVisibleSig.setDisable(disabled);
         menuZoomIn.setDisable(disabled);
         menuZoomOut.setDisable(disabled);
         menuZoomFit.setDisable(disabled);
+        // Visible-signature controls track both document state and current toggle
+        updateVisibleSigIndicators();
+    }
+
+    /**
+     * Refreshes the enabled state of "clear visible signature" controls.
+     * They are only meaningful when a document is loaded and the visible
+     * signature is currently enabled.
+     */
+    private void updateVisibleSigIndicators() {
+        boolean canClear = documentVM.isDocumentLoaded() && signingVM.visibleProperty().get();
+        if (btnClearVisibleSig != null) {
+            btnClearVisibleSig.setDisable(!canClear);
+        }
+        if (menuClearVisibleSig != null) {
+            menuClearVisibleSig.setDisable(!canClear);
+        }
+    }
+
+    /**
+     * Updates the status-bar output path label to show the destination filename
+     * (or the default "{input}_signed.pdf" suggestion if no explicit path is set).
+     */
+    private void updateOutputPathLabel() {
+        if (lblOutputPath == null) {
+            return;
+        }
+        if (!documentVM.isDocumentLoaded()) {
+            lblOutputPath.setVisible(false);
+            lblOutputPath.setText("");
+            lblOutputPath.setTooltip(null);
+            return;
+        }
+        String outPath = signingVM.outFileProperty().get();
+        String displayPath = (outPath != null && !outPath.isEmpty())
+                ? outPath
+                : suggestedOutFileFor(documentVM.getDocumentFile());
+        if (displayPath == null || displayPath.isEmpty()) {
+            lblOutputPath.setVisible(false);
+            lblOutputPath.setTooltip(null);
+            return;
+        }
+        File f = new File(displayPath);
+        lblOutputPath.setText("→ " + f.getName());
+        lblOutputPath.setTooltip(new Tooltip(displayPath));
+        lblOutputPath.setVisible(true);
+    }
+
+    /**
+     * Computes the default "{input}_signed.pdf" output path for a given input file.
+     * Returns null if the input is null.
+     */
+    private static String suggestedOutFileFor(File inputFile) {
+        if (inputFile == null) return null;
+        String inFile = inputFile.getAbsolutePath();
+        String suffix = ".pdf";
+        String nameBase = inFile;
+        if (inFile.toLowerCase().endsWith(suffix)) {
+            nameBase = inFile.substring(0, inFile.length() - 4);
+            suffix = inFile.substring(inFile.length() - 4);
+        }
+        return nameBase + Constants.DEFAULT_OUT_SUFFIX + suffix;
+    }
+
+    /**
+     * Returns true if the given output path appears to be the auto-suggested
+     * "{x}_signed.pdf" form for some other input file (i.e. stale from a prior session).
+     */
+    private static boolean isStaleAutoSuggestion(String outPath, File currentInput) {
+        if (outPath == null || outPath.isEmpty() || currentInput == null) return false;
+        String suggestedForCurrent = suggestedOutFileFor(currentInput);
+        if (outPath.equals(suggestedForCurrent)) return false;
+        // Heuristic: looks auto-generated (ends with _signed.pdf) but doesn't match this input
+        String lower = outPath.toLowerCase();
+        return lower.endsWith(Constants.DEFAULT_OUT_SUFFIX.toLowerCase() + ".pdf");
     }
 
     private void updateNavButtonState() {
@@ -418,6 +520,40 @@ public class MainWindowController {
     @FXML
     private void onFileExit() {
         stage.close();
+    }
+
+    @FXML
+    private void onSaveAs() {
+        if (!documentVM.isDocumentLoaded()) {
+            showAlert(Alert.AlertType.WARNING,
+                    RES.get("jfx.gui.dialog.noDocument.title"),
+                    RES.get("jfx.gui.dialog.noDocument.text"));
+            return;
+        }
+        FileChooser fc = new FileChooser();
+        fc.setTitle(RES.get("jfx.gui.dialog.selectOutputPdf"));
+        fc.getExtensionFilters().add(new FileChooser.ExtensionFilter("PDF Files", "*.pdf"));
+        String current = signingVM.outFileProperty().get();
+        if (current == null || current.isEmpty()) {
+            current = suggestedOutFileFor(documentVM.getDocumentFile());
+        }
+        if (current != null && !current.isEmpty()) {
+            File currentFile = new File(current);
+            File parent = currentFile.getParentFile();
+            if (parent != null && parent.isDirectory()) {
+                fc.setInitialDirectory(parent);
+            }
+            fc.setInitialFileName(currentFile.getName());
+        }
+        File file = fc.showSaveDialog(stage);
+        if (file != null) {
+            signingVM.outFileProperty().set(file.getAbsolutePath());
+        }
+    }
+
+    @FXML
+    private void onClearVisibleSig() {
+        signingVM.visibleProperty().set(false);
     }
 
     @FXML
@@ -576,6 +712,12 @@ public class MainWindowController {
 
             options.setInFile(file.getAbsolutePath());
 
+            // Auto-suggest output path when empty or stale from a different input
+            String currentOut = signingVM.outFileProperty().get();
+            if (currentOut == null || currentOut.isEmpty() || isStaleAutoSuggestion(currentOut, file)) {
+                signingVM.outFileProperty().set(suggestedOutFileFor(file));
+            }
+
             // Try to open PDF, prompting for owner password if needed
             int pages;
             try {
@@ -711,6 +853,7 @@ public class MainWindowController {
         lblPageCount.setText("/ 0");
         txtPageNumber.setText("");
         updateStatus(RES.get("jfx.gui.status.ready"));
+        updateOutputPathLabel();
         stage.setTitle("JSignPdf " + Constants.VERSION);
     }
 
