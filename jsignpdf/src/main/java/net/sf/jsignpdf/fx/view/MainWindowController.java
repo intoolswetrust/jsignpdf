@@ -8,6 +8,7 @@ import java.util.logging.Level;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.geometry.Insets;
+import javafx.scene.Node;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonBar;
@@ -68,6 +69,8 @@ public class MainWindowController {
     private final RecentFilesManager recentFilesManager = new RecentFilesManager();
     private PdfPageView pdfPageView;
     private SignatureOverlay signatureOverlay;
+    /** Holds the side panel node while it's detached from the SplitPane (hidden). */
+    private Node detachedSidePanel;
 
     // Included sub-controllers (fx:id + "Controller" naming convention)
     @FXML private VBox certificateSettings;
@@ -709,14 +712,17 @@ public class MainWindowController {
 
     @FXML
     private void onToggleSidePanel() {
-        if (splitPane.getItems().size() > 1) {
-            // Toggle visibility of side panel by manipulating divider position
-            double pos = splitPane.getDividerPositions()[0];
-            if (pos < 0.05) {
-                splitPane.setDividerPositions(0.28);
-            } else {
-                splitPane.setDividerPositions(0.0);
-            }
+        // Simply moving the SplitPane divider doesn't hide the accordion:
+        // the side-panel container has a minWidth, so the SplitPane refuses
+        // to shrink it below that. Instead, detach the node entirely when
+        // hiding and re-insert it when showing.
+        if (detachedSidePanel == null) {
+            if (splitPane.getItems().size() < 2) return;
+            detachedSidePanel = splitPane.getItems().remove(0);
+        } else {
+            splitPane.getItems().add(0, detachedSidePanel);
+            detachedSidePanel = null;
+            splitPane.setDividerPositions(0.28);
         }
     }
 
