@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.*?>
+
+<VBox xmlns="http://javafx.com/javafx"
+      xmlns:fx="http://javafx.com/fxml"
+      fx:controller="net.sf.jsignpdf.fx.view.EncryptionSettingsController"
+      spacing="6">
+    <padding>
+        <Insets top="8" right="8" bottom="8" left="8"/>
+    </padding>
+
+    <Label text="%jfx.gui.enc.pdfEncryption"/>
+    <ComboBox fx:id="cmbEncryption" maxWidth="Infinity"/>
+
+    <VBox fx:id="encryptionDetailsPane" spacing="6">
+        <VBox fx:id="passwordPane" spacing="6">
+            <Label text="%jfx.gui.enc.ownerPassword"/>
+            <PasswordField fx:id="txtOwnerPassword"/>
+
+            <Label text="%jfx.gui.enc.userPassword"/>
+            <PasswordField fx:id="txtUserPassword"/>
+        </VBox>
+
+        <VBox fx:id="certPane" spacing="6">
+            <Label text="%jfx.gui.enc.encryptionCert"/>
+            <HBox spacing="4">
+                <TextField fx:id="txtEncCertFile" HBox.hgrow="ALWAYS"/>
+                <Button onAction="#onBrowseEncCert" minWidth="30">
+                    <graphic><ImageView fitWidth="16" fitHeight="16" preserveRatio="true">
+                        <Image url="@/net/sf/jsignpdf/fileopen16.png"/>
+                    </ImageView></graphic>
+                </Button>
+            </HBox>
+        </VBox>
+    </VBox>
+
+    <!-- Rights (only meaningful when encryption is enabled) -->
+    <VBox fx:id="rightsPane" spacing="6">
+        <Separator/>
+
+        <Label text="%jfx.gui.enc.printRight" style="-fx-font-weight: bold;"/>
+        <ComboBox fx:id="cmbPrintRight" maxWidth="Infinity"/>
+
+        <CheckBox fx:id="chkCopy" text="%jfx.gui.enc.allowCopy"/>
+        <CheckBox fx:id="chkAssembly" text="%jfx.gui.enc.allowAssembly"/>
+        <CheckBox fx:id="chkFillIn" text="%jfx.gui.enc.allowFillIn"/>
+        <CheckBox fx:id="chkScreenReaders" text="%jfx.gui.enc.allowScreenReaders"/>
+        <CheckBox fx:id="chkModifyAnnotations" text="%jfx.gui.enc.allowModifyAnnotations"/>
+        <CheckBox fx:id="chkModifyContents" text="%jfx.gui.enc.allowModifyContents"/>
+    </VBox>
+</VBox>

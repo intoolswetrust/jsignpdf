@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.*?>
+
+<VBox xmlns="http://javafx.com/javafx"
+      xmlns:fx="http://javafx.com/fxml"
+      fx:controller="net.sf.jsignpdf.fx.view.SignaturePropertiesController"
+      spacing="6">
+    <padding>
+        <Insets top="8" right="8" bottom="8" left="8"/>
+    </padding>
+
+    <Label text="%jfx.gui.sig.outputFile"/>
+    <HBox spacing="4">
+        <TextField fx:id="txtOutFile" HBox.hgrow="ALWAYS"/>
+        <Button onAction="#onBrowseOutFile" minWidth="30">
+            <graphic><ImageView fitWidth="16" fitHeight="16" preserveRatio="true">
+                <Image url="@/net/sf/jsignpdf/fileopen16.png"/>
+            </ImageView></graphic>
+        </Button>
+    </HBox>
+
+    <CheckBox fx:id="chkAppend" text="%jfx.gui.sig.appendSignature"/>
+
+    <Label text="%jfx.gui.sig.hashAlgorithm"/>
+    <ComboBox fx:id="cmbHashAlgorithm" maxWidth="Infinity"/>
+
+    <Label text="%jfx.gui.sig.certLevel"/>
+    <ComboBox fx:id="cmbCertLevel" maxWidth="Infinity"/>
+
+    <Label text="%jfx.gui.sig.signerName"/>
+    <TextField fx:id="txtSignerName"/>
+
+    <Label text="%jfx.gui.sig.reason"/>
+    <TextField fx:id="txtReason"/>
+
+    <Label text="%jfx.gui.sig.location"/>
+    <TextField fx:id="txtLocation"/>
+
+    <Label text="%jfx.gui.sig.contact"/>
+    <TextField fx:id="txtContact"/>
+</VBox>

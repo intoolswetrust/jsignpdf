@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.*?>
+
+<VBox xmlns="http://javafx.com/javafx"
+      xmlns:fx="http://javafx.com/fxml"
+      fx:controller="net.sf.jsignpdf.fx.view.TsaSettingsController"
+      spacing="6">
+    <padding>
+        <Insets top="8" right="8" bottom="8" left="8"/>
+    </padding>
+
+    <!-- TSA Section -->
+    <CheckBox fx:id="chkTsaEnabled" text="%jfx.gui.tsa.enableTimestamp"/>
+
+    <VBox fx:id="tsaDetailsPane" spacing="6">
+        <Label text="%jfx.gui.tsa.serverUrl"/>
+        <TextField fx:id="txtTsaUrl"/>
+
+        <Label text="%jfx.gui.tsa.authentication"/>
+        <ComboBox fx:id="cmbTsaAuthn" maxWidth="Infinity"/>
+
+        <Label text="%jfx.gui.tsa.user"/>
+        <TextField fx:id="txtTsaUser"/>
+
+        <Label text="%jfx.gui.tsa.password"/>
+        <PasswordField fx:id="txtTsaPassword"/>
+
+        <Label text="%jfx.gui.tsa.certFileType"/>
+        <TextField fx:id="txtTsaCertFileType"/>
+
+        <Label text="%jfx.gui.tsa.certFile"/>
+        <HBox spacing="4">
+            <TextField fx:id="txtTsaCertFile" HBox.hgrow="ALWAYS"/>
+            <Button onAction="#onBrowseTsaCertFile" minWidth="30">
+                <graphic><ImageView fitWidth="16" fitHeight="16" preserveRatio="true">
+                    <Image url="@/net/sf/jsignpdf/fileopen16.png"/>
+                </ImageView></graphic>
+            </Button>
+        </HBox>
+
+        <Label text="%jfx.gui.tsa.certPassword"/>
+        <PasswordField fx:id="txtTsaCertFilePassword"/>
+
+        <Label text="%jfx.gui.tsa.policyOid"/>
+        <TextField fx:id="txtTsaPolicy"/>
+
+        <Label text="%jfx.gui.tsa.hashAlgorithm"/>
+        <TextField fx:id="txtTsaHashAlg"/>
+    </VBox>
+
+    <Separator/>
+
+    <!-- OCSP/CRL Section -->
+    <CheckBox fx:id="chkOcspEnabled" text="%jfx.gui.tsa.enableOcsp"/>
+    <Label fx:id="lblOcspServerUrl" text="%jfx.gui.tsa.ocspServerUrl"/>
+    <TextField fx:id="txtOcspServerUrl"/>
+
+    <CheckBox fx:id="chkCrlEnabled" text="%jfx.gui.tsa.enableCrl"/>
+
+    <Separator/>
+
+    <!-- Proxy Section -->
+    <Label text="%jfx.gui.tsa.proxyType"/>
+    <ComboBox fx:id="cmbProxyType" maxWidth="Infinity"/>
+
+    <Label fx:id="lblProxyHost" text="%jfx.gui.tsa.proxyHost"/>
+    <TextField fx:id="txtProxyHost"/>
+
+    <Label fx:id="lblProxyPort" text="%jfx.gui.tsa.proxyPort"/>
+    <TextField fx:id="txtProxyPort" text="80"/>
+</VBox>

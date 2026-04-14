@@ -152,6 +152,10 @@ public class SignerLogic implements Runnable {
                 }
             } else {
                 pkInfo = KeyStoreUtils.getPkInfo(options);
+                if (pkInfo == null) {
+                    LOGGER.info(RES.get("console.certificateChainEmpty"));
+                    return false;
+                }
                 key = pkInfo.getKey();
                 chain = pkInfo.getChain();
             }
@@ -222,6 +226,14 @@ public class SignerLogic implements Runnable {
                         | (options.isRightModifyContents() ? PdfWriter.ALLOW_MODIFY_CONTENTS : 0);
                 switch (options.getPdfEncryption()) {
                     case PASSWORD:
+                        if (StringUtils.isEmpty(options.getPdfOwnerPwdStrX())) {
+                            LOGGER.severe(RES.get("console.pdfEncError.missingOwnerPassword"));
+                            return false;
+                        }
+                        if (StringUtils.isEmpty(options.getPdfUserPwdStr())) {
+                            LOGGER.severe(RES.get("console.pdfEncError.missingUserPassword"));
+                            return false;
+                        }
                         stp.setEncryption(true, options.getPdfUserPwdStr(), options.getPdfOwnerPwdStrX(), tmpRight);
                         break;
                     case CERTIFICATE:
