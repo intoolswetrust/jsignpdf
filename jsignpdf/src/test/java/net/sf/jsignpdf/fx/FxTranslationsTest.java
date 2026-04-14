@@ -17,9 +17,11 @@ import javafx.scene.Parent;
 import javafx.scene.control.Accordion;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
+import javafx.scene.control.CheckMenuItem;
 import javafx.scene.control.Label;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuBar;
+import javafx.scene.control.MenuItem;
 import javafx.scene.control.SplitPane;
 import javafx.scene.control.ToolBar;
 import javafx.scene.layout.AnchorPane;
@@ -96,14 +98,55 @@ public class FxTranslationsTest {
             BorderPane root = (BorderPane) loadFxml("/net/sf/jsignpdf/fx/view/MainWindow.fxml", bundle);
             Menu fileMenu = getMenuBar(root).getMenus().get(0);
 
-            assertEquals("Open for " + locale,
-                    bundle.getString("jfx.gui.menu.file.open"), fileMenu.getItems().get(0).getText());
-            assertEquals("Close for " + locale,
-                    bundle.getString("jfx.gui.menu.file.close"), fileMenu.getItems().get(1).getText());
-            // index 2 = separator, index 3 = Recent Files submenu, index 4 = separator
-            assertEquals("Exit for " + locale,
-                    bundle.getString("jfx.gui.menu.file.exit"), fileMenu.getItems().get(5).getText());
+            // Find items by fx:id semantics (search for matching translated text rather
+            // than relying on positional indices, which are fragile)
+            assertMenuContains(fileMenu, bundle, "jfx.gui.menu.file.open", locale);
+            assertMenuContains(fileMenu, bundle, "jfx.gui.menu.file.close", locale);
+            assertMenuContains(fileMenu, bundle, "jfx.gui.menu.file.saveAs", locale);
+            assertMenuContains(fileMenu, bundle, "jfx.gui.menu.file.exit", locale);
         }
+    }
+
+    @Test
+    public void testSigningMenuItemTextsMatchTranslations() throws Exception {
+        for (Locale locale : TEST_LOCALES) {
+            ResourceBundle bundle = ResourceBundle.getBundle(BUNDLE_BASE, locale);
+            BorderPane root = (BorderPane) loadFxml("/net/sf/jsignpdf/fx/view/MainWindow.fxml", bundle);
+            Menu signingMenu = getMenuBar(root).getMenus().get(2);
+
+            assertMenuContains(signingMenu, bundle, "jfx.gui.menu.signing.visibleSig", locale);
+            assertMenuContains(signingMenu, bundle, "jfx.gui.menu.file.sign", locale);
+
+            // The visible-signature item must be a CheckMenuItem so it reflects state
+            boolean hasCheck = signingMenu.getItems().stream()
+                    .anyMatch(it -> it instanceof CheckMenuItem
+                            && bundle.getString("jfx.gui.menu.signing.visibleSig").equals(it.getText()));
+            assertEquals("Visible-signature item must be a CheckMenuItem for " + locale,
+                    true, hasCheck);
+
+            // The Signing menu should contain exactly one CheckMenuItem (visible sig)
+            // and exactly one enabled MenuItem (Sign) — no separate Clear entry.
+            long checkItems = signingMenu.getItems().stream()
+                    .filter(it -> it instanceof CheckMenuItem).count();
+            long signItems = signingMenu.getItems().stream()
+                    .filter(it -> !(it instanceof CheckMenuItem)
+                            && it.getText() != null
+                            && it.getText().equals(bundle.getString("jfx.gui.menu.file.sign")))
+                    .count();
+            assertEquals("Exactly one visible-sig CheckMenuItem for " + locale, 1L, checkItems);
+            assertEquals("Exactly one Sign menu item for " + locale, 1L, signItems);
+        }
+    }
+
+    private static void assertMenuContains(Menu menu, ResourceBundle bundle, String key, Locale locale) {
+        String expected = bundle.getString(key);
+        for (MenuItem item : menu.getItems()) {
+            if (expected.equals(item.getText())) {
+                return;
+            }
+        }
+        fail("Menu " + menu.getText() + " missing item '" + expected + "' (key " + key
+                + ") for locale " + locale);
     }
 
     @Test
@@ -122,6 +165,41 @@ public class FxTranslationsTest {
             Button signBtn = (Button) toolBar.getItems().get(toolBar.getItems().size() - 1);
             assertEquals("Sign button for " + locale,
                     bundle.getString("jfx.gui.toolbar.sign"), signBtn.getText());
+
+            // The toolbar must contain the clear-visible-signature button. The
+            // button shows only its icon (contentDisplay=GRAPHIC_ONLY) but the
+            // translated label is still set as text for accessibility.
+            String expectedClearText = bundle.getString("jfx.gui.toolbar.clearVisibleSig");
+            boolean foundClear = toolBar.getItems().stream()
+                    .filter(n -> n instanceof Button)
+                    .map(n -> ((Button) n).getText())
+                    .anyMatch(expectedClearText::equals);
+            assertEquals("Clear visible signature button missing for " + locale,
+                    true, foundClear);
+        }
+    }
+
+    @Test
+    public void testStatusBarBadgeAndOutputLabelExist() throws Exception {
+        for (Locale locale : TEST_LOCALES) {
+            ResourceBundle bundle = ResourceBundle.getBundle(BUNDLE_BASE, locale);
+            BorderPane root = (BorderPane) loadFxml("/net/sf/jsignpdf/fx/view/MainWindow.fxml", bundle);
+            HBox statusBar = (HBox) root.getBottom();
+            assertNotNull("Status bar missing for " + locale, statusBar);
+
+            // Both translations must exist in the bundle, and the badge label
+            // must carry one of them (the initial state when no document is
+            // loaded shows "invisible signature").
+            String expectedVisible = bundle.getString("jfx.gui.status.visibleSigEnabled");
+            String expectedInvisible = bundle.getString("jfx.gui.status.invisibleSig");
+            assertNotNull("visibleSig text missing for " + locale, expectedVisible);
+            assertNotNull("invisibleSig text missing for " + locale, expectedInvisible);
+
+            boolean badgeFound = statusBar.getChildren().stream()
+                    .filter(n -> n instanceof Label)
+                    .map(n -> ((Label) n).getText())
+                    .anyMatch(t -> expectedVisible.equals(t) || expectedInvisible.equals(t));
+            assertEquals("Sig-state badge missing for " + locale, true, badgeFound);
         }
     }
 
@@ -136,15 +214,18 @@ public class FxTranslationsTest {
             assertEquals("Certificate panel for " + locale,
                     bundle.getString("jfx.gui.panel.certificate"),
                     accordion.getPanes().get(0).getText());
-            assertEquals("Signature panel for " + locale,
-                    bundle.getString("jfx.gui.panel.signatureAppearance"),
+            assertEquals("Signature properties panel for " + locale,
+                    bundle.getString("jfx.gui.panel.signatureProperties"),
                     accordion.getPanes().get(1).getText());
+            assertEquals("Signature appearance panel for " + locale,
+                    bundle.getString("jfx.gui.panel.signatureAppearance"),
+                    accordion.getPanes().get(2).getText());
             assertEquals("TSA panel for " + locale,
                     bundle.getString("jfx.gui.panel.timestampValidation"),
-                    accordion.getPanes().get(2).getText());
+                    accordion.getPanes().get(3).getText());
             assertEquals("Encryption panel for " + locale,
                     bundle.getString("jfx.gui.panel.encryptionRights"),
-                    accordion.getPanes().get(3).getText());
+                    accordion.getPanes().get(4).getText());
         }
     }
 
@@ -190,6 +271,20 @@ public class FxTranslationsTest {
             CheckBox visibleSig = (CheckBox) root.getChildren().get(0);
             assertEquals("Enable visible sig for " + locale,
                     bundle.getString("jfx.gui.sig.enableVisible"), visibleSig.getText());
+        }
+    }
+
+    @Test
+    public void testSignaturePropertiesLabels() throws Exception {
+        for (Locale locale : TEST_LOCALES) {
+            ResourceBundle bundle = ResourceBundle.getBundle(BUNDLE_BASE, locale);
+            VBox root = (VBox) loadFxml("/net/sf/jsignpdf/fx/view/SignatureProperties.fxml", bundle);
+            assertNotNull("SignatureProperties load failed for " + locale, root);
+
+            // First child is the "Output file:" label
+            Label outFileLabel = (Label) root.getChildren().get(0);
+            assertEquals("Output file label for " + locale,
+                    bundle.getString("jfx.gui.sig.outputFile"), outFileLabel.getText());
         }
     }
 
@@ -313,8 +408,15 @@ public class FxTranslationsTest {
             fail("FXML loading timed out for " + fxmlPath);
         }
         if (error.get() != null) {
+            Throwable t = error.get();
+            StringBuilder msg = new StringBuilder(t.toString());
+            Throwable cause = t.getCause();
+            while (cause != null) {
+                msg.append(" | caused by: ").append(cause);
+                cause = cause.getCause();
+            }
             fail("FXML loading failed for " + fxmlPath + " with " + bundle.getLocale()
-                    + ": " + error.get().getMessage());
+                    + ": " + msg);
         }
         return result.get();
     }

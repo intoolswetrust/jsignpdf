@@ -5,6 +5,7 @@
 <?import javafx.scene.image.Image?>
 <?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.*?>
+<?import javafx.scene.shape.SVGPath?>
 
 <BorderPane xmlns="http://javafx.com/javafx"
             xmlns:fx="http://javafx.com/fxml"
@@ -24,6 +25,9 @@
                     </MenuItem>
                     <MenuItem fx:id="menuClose" text="%jfx.gui.menu.file.close" onAction="#onFileClose"/>
                     <SeparatorMenuItem/>
+                    <MenuItem fx:id="menuSaveAs" text="%jfx.gui.menu.file.saveAs" onAction="#onSaveAs"
+                              accelerator="Shortcut+Shift+S"/>
+                    <SeparatorMenuItem/>
                     <Menu fx:id="menuRecentFiles" text="%jfx.gui.menu.file.recentFiles"/>
                     <SeparatorMenuItem/>
                     <MenuItem fx:id="menuExit" text="%jfx.gui.menu.file.exit" onAction="#onFileExit"
@@ -40,6 +44,8 @@
                               onAction="#onToggleSidePanel" accelerator="F9"/>
                 </Menu>
                 <Menu text="%jfx.gui.menu.signing">
+                    <CheckMenuItem fx:id="menuVisibleSig" text="%jfx.gui.menu.signing.visibleSig"/>
+                    <SeparatorMenuItem/>
                     <MenuItem fx:id="menuSign" text="%jfx.gui.menu.file.sign" onAction="#onSign" accelerator="Shortcut+S">
                         <graphic><ImageView fitWidth="16" fitHeight="16" preserveRatio="true">
                             <Image url="@/net/sf/jsignpdf/signedpdf16.png"/>
@@ -87,6 +93,16 @@
                     </ImageView></graphic>
                 </Button>
                 <Separator orientation="VERTICAL"/>
+                <Button fx:id="btnClearVisibleSig" text="%jfx.gui.toolbar.clearVisibleSig"
+                        onAction="#onClearVisibleSig" mnemonicParsing="false"
+                        contentDisplay="GRAPHIC_ONLY"
+                        styleClass="toolbar-button">
+                    <graphic>
+                        <SVGPath styleClass="eraser-icon"
+                                 content="M8.086 2.207a2 2 0 0 1 2.828 0l3.879 3.879a2 2 0 0 1 0 2.828l-5.5 5.5A2 2 0 0 1 7.879 15H5.12a2 2 0 0 1-1.414-.586l-2.5-2.5a2 2 0 0 1 0-2.828zm.66 11.34L3.453 8.254 1.914 9.793a1 1 0 0 0 0 1.414l2.5 2.5a1 1 0 0 0 .707.293H7.88a1 1 0 0 0 .707-.293z"/>
+                    </graphic>
+                </Button>
+                <Separator orientation="VERTICAL"/>
                 <Button fx:id="btnSign" text="%jfx.gui.toolbar.sign" onAction="#onSign"
                         styleClass="toolbar-button,sign-button">
                     <graphic><ImageView fitWidth="26" fitHeight="26" preserveRatio="true">
@@ -110,6 +126,12 @@
                             <TitledPane text="%jfx.gui.panel.certificate" expanded="true">
                                 <fx:include fx:id="certificateSettings"
                                             source="CertificateSettings.fxml"/>
+                            </TitledPane>
+                            <TitledPane text="%jfx.gui.panel.signatureProperties">
+                                <ScrollPane fitToWidth="true">
+                                    <fx:include fx:id="signatureProperties"
+                                                source="SignatureProperties.fxml"/>
+                                </ScrollPane>
                             </TitledPane>
                             <TitledPane text="%jfx.gui.panel.signatureAppearance">
                                 <ScrollPane fitToWidth="true">
@@ -157,6 +179,10 @@
             </padding>
             <Label fx:id="lblStatus" text="%jfx.gui.status.ready" HBox.hgrow="ALWAYS"
                    maxWidth="Infinity"/>
+            <Label fx:id="lblSigStateBadge" text="%jfx.gui.status.invisibleSig"
+                   styleClass="invisible-sig-badge" managed="false" visible="false"/>
+            <Label fx:id="lblOutputPath" styleClass="output-path-label"
+                   managed="false" visible="false"/>
             <ProgressBar fx:id="progressBar" prefWidth="150"/>
         </HBox>
     </bottom>

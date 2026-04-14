@@ -8,16 +8,19 @@ import java.util.logging.Level;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.geometry.Insets;
+import javafx.scene.Node;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonBar;
 import javafx.scene.control.ButtonType;
+import javafx.scene.control.CheckMenuItem;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Dialog;
 import javafx.scene.control.Label;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.PasswordField;
+import javafx.scene.control.Tooltip;
 import javafx.scene.control.ProgressBar;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.SplitPane;
@@ -66,10 +69,14 @@ public class MainWindowController {
     private final RecentFilesManager recentFilesManager = new RecentFilesManager();
     private PdfPageView pdfPageView;
     private SignatureOverlay signatureOverlay;
+    /** Holds the side panel node while it's detached from the SplitPane (hidden). */
+    private Node detachedSidePanel;
 
     // Included sub-controllers (fx:id + "Controller" naming convention)
     @FXML private VBox certificateSettings;
     @FXML private CertificateSettingsController certificateSettingsController;
+    @FXML private VBox signatureProperties;
+    @FXML private SignaturePropertiesController signaturePropertiesController;
     @FXML private VBox signatureSettings;
     @FXML private SignatureSettingsController signatureSettingsController;
     @FXML private VBox tsaSettings;
@@ -82,7 +89,9 @@ public class MainWindowController {
     // Menu items
     @FXML private MenuItem menuOpen;
     @FXML private MenuItem menuClose;
+    @FXML private MenuItem menuSaveAs;
     @FXML private Menu menuRecentFiles;
+    @FXML private CheckMenuItem menuVisibleSig;
     @FXML private MenuItem menuSign;
     @FXML private MenuItem menuExit;
     @FXML private MenuItem menuZoomIn;
@@ -101,6 +110,7 @@ public class MainWindowController {
     @FXML private TextField txtPageNumber;
     @FXML private Label lblPageCount;
     @FXML private Button btnNextPage;
+    @FXML private Button btnClearVisibleSig;
     @FXML private Button btnSign;
 
     // Content area
@@ -111,6 +121,8 @@ public class MainWindowController {
 
     // Status bar
     @FXML private Label lblStatus;
+    @FXML private Label lblSigStateBadge;
+    @FXML private Label lblOutputPath;
     @FXML private ProgressBar progressBar;
 
     public void setStage(Stage stage) {
@@ -125,6 +137,11 @@ public class MainWindowController {
     public void initFromOptions(BasicSignerOptions opts) {
         this.options = opts;
         signingVM.syncFromOptions(opts);
+        // No document is loaded at startup, so the visible-signature toggle must
+        // start disabled. The persisted position coordinates on signingVM are
+        // preserved so we can auto-place at the last-known location once a
+        // document is opened and the user re-enables it.
+        signingVM.visibleProperty().set(false);
     }
 
     /**
@@ -170,6 +187,9 @@ public class MainWindowController {
         if (certificateSettingsController != null) {
             certificateSettingsController.setViewModel(signingVM);
         }
+        if (signaturePropertiesController != null) {
+            signaturePropertiesController.setViewModel(signingVM);
+        }
         if (signatureSettingsController != null) {
             signatureSettingsController.setViewModel(signingVM);
         }
@@ -204,12 +224,38 @@ public class MainWindowController {
             updateStatusWithHint();
         });
 
-        // Clear placement rectangle when visible signature is disabled
+        // React to visible-signature state changes:
+        //  - disabled: clear the placement rectangle
+        //  - enabled:  auto-place at last-known PDF coordinates (or safe default)
+        //              if no rectangle is already placed (e.g. via drag)
         signingVM.visibleProperty().addListener((obs, wasVisible, isVisible) -> {
             if (!isVisible) {
                 placementVM.reset();
+            } else {
+                autoPlaceVisibleSignature();
             }
+            updateVisibleSigIndicators();
+            updateSigStateBadge();
         });
+
+        // Bind visible-signature CheckMenuItem bidirectionally to the ViewModel
+        menuVisibleSig.selectedProperty().bindBidirectional(signingVM.visibleProperty());
+
+        // Status-bar badge: visible whenever a document is loaded. Its text and
+        // colour swap based on whether visible signature is on or off.
+        lblSigStateBadge.managedProperty().bind(lblSigStateBadge.visibleProperty());
+        lblSigStateBadge.visibleProperty().bind(documentVM.documentLoadedProperty());
+
+        // Status-bar output path label: visible when a document is loaded
+        lblOutputPath.managedProperty().bind(lblOutputPath.visibleProperty());
+        signingVM.outFileProperty().addListener((obs, oldVal, newVal) -> updateOutputPathLabel());
+        documentVM.documentFileProperty().addListener((obs, oldVal, newVal) -> updateOutputPathLabel());
+
+        // Initial state for the visible-signature controls.
+        // The badge's initial text and style come from FXML (correct for
+        // visibleProperty=false on startup); listeners take over on state changes.
+        updateVisibleSigIndicators();
+        updateOutputPathLabel();
 
         // Keep overlay sized to match the pdf page view
         signatureOverlay.prefWidthProperty().bind(pdfPageView.prefWidthProperty());
@@ -339,10 +385,130 @@ public class MainWindowController {
         btnSign.setDisable(disabled);
         menuSign.setDisable(disabled);
         menuClose.setDisable(disabled);
+        menuSaveAs.setDisable(disabled);
+        menuVisibleSig.setDisable(disabled);
         menuZoomIn.setDisable(disabled);
         menuZoomOut.setDisable(disabled);
         menuZoomFit.setDisable(disabled);
+        if (signatureSettingsController != null) {
+            signatureSettingsController.setVisibleSigCheckBoxDisabled(disabled);
+        }
+        // Visible-signature controls track both document state and current toggle
+        updateVisibleSigIndicators();
     }
+
+    /**
+     * Refreshes the enabled state of the "clear visible signature" toolbar button.
+     * It is only meaningful when a document is loaded and the visible signature
+     * is currently enabled.
+     */
+    private void updateVisibleSigIndicators() {
+        boolean canClear = documentVM.isDocumentLoaded() && signingVM.visibleProperty().get();
+        if (btnClearVisibleSig != null) {
+            btnClearVisibleSig.setDisable(!canClear);
+        }
+    }
+
+    /**
+     * Updates the status-bar badge that reflects whether the visible signature
+     * is currently enabled. The badge swaps between two distinct styles so the
+     * state is always obvious at a glance when a document is loaded.
+     */
+    private void updateSigStateBadge() {
+        if (lblSigStateBadge == null) return;
+        boolean on = signingVM.visibleProperty().get();
+        lblSigStateBadge.setText(on
+                ? RES.get("jfx.gui.status.visibleSigEnabled")
+                : RES.get("jfx.gui.status.invisibleSig"));
+        lblSigStateBadge.getStyleClass().removeAll("visible-sig-badge", "invisible-sig-badge");
+        lblSigStateBadge.getStyleClass().add(on ? "visible-sig-badge" : "invisible-sig-badge");
+    }
+
+    /**
+     * Auto-places the signature rectangle when the user enables visible
+     * signature without dragging a rectangle first. Prefers the last-known PDF
+     * coordinates persisted in the ViewModel — if they form a valid rectangle
+     * that fits the current page — and falls back to a safe bottom-right
+     * default otherwise. Always re-targets the current page.
+     */
+    private void autoPlaceVisibleSignature() {
+        if (!documentVM.isDocumentLoaded() || placementVM.isPlaced() || options == null) {
+            return;
+        }
+        PageInfo pageInfo = new PdfExtraInfo(options).getPageInfo(documentVM.getCurrentPage());
+        if (pageInfo == null) {
+            return;
+        }
+        float pw = pageInfo.getWidth();
+        float ph = pageInfo.getHeight();
+
+        float llx = signingVM.positionLLXProperty().get();
+        float lly = signingVM.positionLLYProperty().get();
+        float urx = signingVM.positionURXProperty().get();
+        float ury = signingVM.positionURYProperty().get();
+
+        boolean fits = urx - llx > 1f && ury - lly > 1f
+                && llx >= 0f && lly >= 0f
+                && urx <= pw && ury <= ph;
+
+        if (fits) {
+            placementVM.fromPdfCoordinates(llx, lly, urx, ury, pw, ph);
+        } else {
+            // Safe default: bottom-right, 15% × 8% of the page with ~5% margins.
+            placementVM.setRelWidth(0.15);
+            placementVM.setRelHeight(0.08);
+            placementVM.setRelX(0.80);
+            placementVM.setRelY(0.87);
+            placementVM.setPlaced(true);
+        }
+        signingVM.pageProperty().set(documentVM.getCurrentPage());
+    }
+
+    /**
+     * Updates the status-bar output path label to show the destination filename
+     * (or the default "{input}_signed.pdf" suggestion if no explicit path is set).
+     */
+    private void updateOutputPathLabel() {
+        if (lblOutputPath == null) {
+            return;
+        }
+        if (!documentVM.isDocumentLoaded()) {
+            lblOutputPath.setVisible(false);
+            lblOutputPath.setText("");
+            lblOutputPath.setTooltip(null);
+            return;
+        }
+        String outPath = signingVM.outFileProperty().get();
+        String displayPath = (outPath != null && !outPath.isEmpty())
+                ? outPath
+                : suggestedOutFileFor(documentVM.getDocumentFile());
+        if (displayPath == null || displayPath.isEmpty()) {
+            lblOutputPath.setVisible(false);
+            lblOutputPath.setTooltip(null);
+            return;
+        }
+        File f = new File(displayPath);
+        lblOutputPath.setText("→ " + f.getName());
+        lblOutputPath.setTooltip(new Tooltip(displayPath));
+        lblOutputPath.setVisible(true);
+    }
+
+    /**
+     * Computes the default "{input}_signed.pdf" output path for a given input file.
+     * Returns null if the input is null.
+     */
+    private static String suggestedOutFileFor(File inputFile) {
+        if (inputFile == null) return null;
+        String inFile = inputFile.getAbsolutePath();
+        String suffix = ".pdf";
+        String nameBase = inFile;
+        if (inFile.toLowerCase().endsWith(suffix)) {
+            nameBase = inFile.substring(0, inFile.length() - 4);
+            suffix = inFile.substring(inFile.length() - 4);
+        }
+        return nameBase + Constants.DEFAULT_OUT_SUFFIX + suffix;
+    }
+
 
     private void updateNavButtonState() {
         btnPrevPage.setDisable(!documentVM.canGoPrev());
@@ -421,6 +587,40 @@ public class MainWindowController {
     }
 
     @FXML
+    private void onSaveAs() {
+        if (!documentVM.isDocumentLoaded()) {
+            showAlert(Alert.AlertType.WARNING,
+                    RES.get("jfx.gui.dialog.noDocument.title"),
+                    RES.get("jfx.gui.dialog.noDocument.text"));
+            return;
+        }
+        FileChooser fc = new FileChooser();
+        fc.setTitle(RES.get("jfx.gui.dialog.selectOutputPdf"));
+        fc.getExtensionFilters().add(new FileChooser.ExtensionFilter("PDF Files", "*.pdf"));
+        String current = signingVM.outFileProperty().get();
+        if (current == null || current.isEmpty()) {
+            current = suggestedOutFileFor(documentVM.getDocumentFile());
+        }
+        if (current != null && !current.isEmpty()) {
+            File currentFile = new File(current);
+            File parent = currentFile.getParentFile();
+            if (parent != null && parent.isDirectory()) {
+                fc.setInitialDirectory(parent);
+            }
+            fc.setInitialFileName(currentFile.getName());
+        }
+        File file = fc.showSaveDialog(stage);
+        if (file != null) {
+            signingVM.outFileProperty().set(file.getAbsolutePath());
+        }
+    }
+
+    @FXML
+    private void onClearVisibleSig() {
+        signingVM.visibleProperty().set(false);
+    }
+
+    @FXML
     private void onSign() {
         if (options == null || !documentVM.isDocumentLoaded()) {
             showAlert(Alert.AlertType.WARNING,
@@ -429,11 +629,12 @@ public class MainWindowController {
             return;
         }
 
-        // Validate encryption passwords before signing
+        // Validate encryption-dependent required fields before signing
         if (encryptionSettingsController != null && !encryptionSettingsController.isEncryptionConfigValid()) {
+            String prefix = encryptionSettingsController.getValidationErrorKeyPrefix();
             showAlert(Alert.AlertType.WARNING,
-                    RES.get("jfx.gui.dialog.missingPasswords.title"),
-                    RES.get("jfx.gui.dialog.missingPasswords.text"));
+                    RES.get(prefix + ".title"),
+                    RES.get(prefix + ".text"));
             return;
         }
 
@@ -511,14 +712,17 @@ public class MainWindowController {
 
     @FXML
     private void onToggleSidePanel() {
-        if (splitPane.getItems().size() > 1) {
-            // Toggle visibility of side panel by manipulating divider position
-            double pos = splitPane.getDividerPositions()[0];
-            if (pos < 0.05) {
-                splitPane.setDividerPositions(0.28);
-            } else {
-                splitPane.setDividerPositions(0.0);
-            }
+        // Simply moving the SplitPane divider doesn't hide the accordion:
+        // the side-panel container has a minWidth, so the SplitPane refuses
+        // to shrink it below that. Instead, detach the node entirely when
+        // hiding and re-insert it when showing.
+        if (detachedSidePanel == null) {
+            if (splitPane.getItems().size() < 2) return;
+            detachedSidePanel = splitPane.getItems().remove(0);
+        } else {
+            splitPane.getItems().add(0, detachedSidePanel);
+            detachedSidePanel = null;
+            splitPane.setDividerPositions(0.28);
         }
     }
 
@@ -575,6 +779,11 @@ public class MainWindowController {
             placementVM.reset();
 
             options.setInFile(file.getAbsolutePath());
+
+            // Always reset the output path to the default for the new input file.
+            // Any custom path from a previous session is intentionally discarded —
+            // the user can still override via the field or File > Save Output As.
+            signingVM.outFileProperty().set(suggestedOutFileFor(file));
 
             // Try to open PDF, prompting for owner password if needed
             int pages;
@@ -711,6 +920,8 @@ public class MainWindowController {
         lblPageCount.setText("/ 0");
         txtPageNumber.setText("");
         updateStatus(RES.get("jfx.gui.status.ready"));
+        updateOutputPathLabel();
+        updateSigStateBadge();
         stage.setTitle("JSignPdf " + Constants.VERSION);
     }
 

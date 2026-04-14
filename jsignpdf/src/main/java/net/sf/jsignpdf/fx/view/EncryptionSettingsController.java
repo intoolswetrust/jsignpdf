@@ -26,11 +26,14 @@ public class EncryptionSettingsController {
 
     @FXML private ComboBox<PDFEncryption> cmbEncryption;
     @FXML private VBox encryptionDetailsPane;
+    @FXML private VBox passwordPane;
+    @FXML private VBox certPane;
     @FXML private PasswordField txtOwnerPassword;
     @FXML private PasswordField txtUserPassword;
     @FXML private TextField txtEncCertFile;
 
     // Rights
+    @FXML private VBox rightsPane;
     @FXML private ComboBox<PrintRight> cmbPrintRight;
     @FXML private CheckBox chkCopy;
     @FXML private CheckBox chkAssembly;
@@ -46,19 +49,29 @@ public class EncryptionSettingsController {
         cmbEncryption.setItems(FXCollections.observableArrayList(PDFEncryption.values()));
         cmbPrintRight.setItems(FXCollections.observableArrayList(PrintRight.values()));
 
-        // Toggle encryption details visibility
+        // Toggle encryption details and rights visibility based on selection.
+        // Rights only apply to encrypted output, and within the details pane
+        // we show only the subset of fields relevant to the chosen type:
+        // - PASSWORD:    owner/user passwords
+        // - CERTIFICATE: encryption certificate
+        // - NONE:        nothing (whole details pane and rights hidden)
         cmbEncryption.valueProperty().addListener((obs, o, n) -> {
-            encryptionDetailsPane.setVisible(n != null && n != PDFEncryption.NONE);
-            updatePasswordValidation();
+            applyEncryptionVisibility(n);
+            updateValidation();
         });
-        encryptionDetailsPane.setVisible(false);
         encryptionDetailsPane.managedProperty().bind(encryptionDetailsPane.visibleProperty());
+        rightsPane.managedProperty().bind(rightsPane.visibleProperty());
+        passwordPane.managedProperty().bind(passwordPane.visibleProperty());
+        certPane.managedProperty().bind(certPane.visibleProperty());
+        applyEncryptionVisibility(null);
 
-        // Live validation on password fields
+        // Live validation on the encryption-dependent required fields
         txtOwnerPassword.textProperty().addListener((ObservableValue<? extends String> obs, String o, String n) ->
-                updatePasswordValidation());
+                updateValidation());
         txtUserPassword.textProperty().addListener((ObservableValue<? extends String> obs, String o, String n) ->
-                updatePasswordValidation());
+                updateValidation());
+        txtEncCertFile.textProperty().addListener((ObservableValue<? extends String> obs, String o, String n) ->
+                updateValidation());
     }
 
     public void setViewModel(SigningOptionsViewModel vm) {
@@ -81,35 +94,66 @@ public class EncryptionSettingsController {
         chkModifyContents.selectedProperty().bindBidirectional(viewModel.rightModifyContentsProperty());
 
         // Update visibility from initial loaded values
-        PDFEncryption enc = viewModel.pdfEncryptionProperty().get();
-        encryptionDetailsPane.setVisible(enc != null && enc != PDFEncryption.NONE);
-        updatePasswordValidation();
+        applyEncryptionVisibility(viewModel.pdfEncryptionProperty().get());
+        updateValidation();
     }
 
-    private void updatePasswordValidation() {
-        if (!isPasswordEncryptionSelected()) {
-            txtOwnerPassword.setStyle(null);
-            txtUserPassword.setStyle(null);
-            return;
-        }
-        txtOwnerPassword.setStyle(isBlank(txtOwnerPassword.getText()) ? STYLE_VALIDATION_ERROR : null);
-        txtUserPassword.setStyle(isBlank(txtUserPassword.getText()) ? STYLE_VALIDATION_ERROR : null);
+    private void applyEncryptionVisibility(PDFEncryption enc) {
+        boolean encOn = enc != null && enc != PDFEncryption.NONE;
+        encryptionDetailsPane.setVisible(encOn);
+        rightsPane.setVisible(encOn);
+        passwordPane.setVisible(enc == PDFEncryption.PASSWORD);
+        certPane.setVisible(enc == PDFEncryption.CERTIFICATE);
     }
 
     /**
-     * Returns true if password encryption is selected and both passwords are filled in.
-     * Used by the main controller to gate the Sign action.
+     * Applies or clears a red-border style on the fields required by the
+     * currently selected encryption type.
      */
-    public boolean isEncryptionConfigValid() {
-        if (!isPasswordEncryptionSelected()) {
-            return true;
+    private void updateValidation() {
+        PDFEncryption enc = cmbEncryption.getValue();
+        if (enc == PDFEncryption.PASSWORD) {
+            txtOwnerPassword.setStyle(isBlank(txtOwnerPassword.getText()) ? STYLE_VALIDATION_ERROR : null);
+            txtUserPassword.setStyle(isBlank(txtUserPassword.getText()) ? STYLE_VALIDATION_ERROR : null);
+            txtEncCertFile.setStyle(null);
+        } else if (enc == PDFEncryption.CERTIFICATE) {
+            txtOwnerPassword.setStyle(null);
+            txtUserPassword.setStyle(null);
+            txtEncCertFile.setStyle(isBlank(txtEncCertFile.getText()) ? STYLE_VALIDATION_ERROR : null);
+        } else {
+            txtOwnerPassword.setStyle(null);
+            txtUserPassword.setStyle(null);
+            txtEncCertFile.setStyle(null);
         }
-        return !isBlank(txtOwnerPassword.getText()) && !isBlank(txtUserPassword.getText());
     }
 
-    private boolean isPasswordEncryptionSelected() {
+    /**
+     * Returns true if the encryption settings are valid for the currently
+     * selected encryption type (both passwords set for PASSWORD, certificate
+     * file set for CERTIFICATE). Used by the main controller to gate Sign.
+     */
+    public boolean isEncryptionConfigValid() {
         PDFEncryption enc = cmbEncryption.getValue();
-        return enc == PDFEncryption.PASSWORD;
+        if (enc == PDFEncryption.PASSWORD) {
+            return !isBlank(txtOwnerPassword.getText()) && !isBlank(txtUserPassword.getText());
+        }
+        if (enc == PDFEncryption.CERTIFICATE) {
+            return !isBlank(txtEncCertFile.getText());
+        }
+        return true;
+    }
+
+    /**
+     * Returns the bundle-key prefix of the dialog to show when
+     * {@link #isEncryptionConfigValid()} is false. Callers append
+     * ".title" / ".text" to build the dialog fields.
+     */
+    public String getValidationErrorKeyPrefix() {
+        PDFEncryption enc = cmbEncryption.getValue();
+        if (enc == PDFEncryption.CERTIFICATE) {
+            return "jfx.gui.dialog.missingEncCert";
+        }
+        return "jfx.gui.dialog.missingPasswords";
     }
 
     private static boolean isBlank(String s) {

@@ -22,6 +22,18 @@
     -fx-text-fill: #2e7d32;
 }
 
+.eraser-icon {
+    -fx-fill: #555555;
+}
+
+.toolbar-button:hover .eraser-icon {
+    -fx-fill: #d32f2f;
+}
+
+.toolbar-button:disabled .eraser-icon {
+    -fx-fill: #bbbbbb;
+}
+
 /* Side Panel */
 .side-panel {
     -fx-background-color: #f5f5f5;
@@ -59,6 +71,27 @@
     -fx-background-color: #f0f0f0;
     -fx-border-color: #cccccc transparent transparent transparent;
     -fx-border-width: 1 0 0 0;
+}
+
+.visible-sig-badge {
+    -fx-background-color: #2e7d32;
+    -fx-text-fill: #ffffff;
+    -fx-font-weight: bold;
+    -fx-padding: 2 8 2 8;
+    -fx-background-radius: 3;
+}
+
+.invisible-sig-badge {
+    -fx-background-color: #9e9e9e;
+    -fx-text-fill: #ffffff;
+    -fx-font-weight: bold;
+    -fx-padding: 2 8 2 8;
+    -fx-background-radius: 3;
+}
+
+.output-path-label {
+    -fx-text-fill: #555555;
+    -fx-font-style: italic;
 }
 
 /* Signature overlay */
