@@ -9,11 +9,9 @@
 set -eu
 
 HERE="$(cd "$(dirname "$0")" && pwd)"
-SRC_ADOC="${HERE}/../website/docs/JSignPdf.adoc"
-SRC_GUIDE_IMG="${HERE}/../website/docs/img"
-SRC_STATIC_IMG="${HERE}/../website/static/img"
+SRC_ADOC="${HERE}/docs/JSignPdf.adoc"
+SRC_GUIDE_IMG="${HERE}/docs/img"
 DEST_GUIDE="${HERE}/content/docs/guide"
-DEST_STATIC_IMG="${HERE}/static/img"
 
 if [ ! -f "${SRC_ADOC}" ]; then
   echo "ERROR: ${SRC_ADOC} not found" >&2
@@ -40,10 +38,4 @@ mkdir -p "${DEST_GUIDE}"
 rm -rf "${DEST_GUIDE}/img"
 cp -r  "${SRC_GUIDE_IMG}" "${DEST_GUIDE}/img"
 
-# Site static assets: logo, screenshots, social card
-rm -rf "${DEST_STATIC_IMG}"
-cp -r  "${SRC_STATIC_IMG}" "${DEST_STATIC_IMG}"
-
-echo "Prepared:"
-echo "  ${DEST_GUIDE}"
-echo "  ${DEST_STATIC_IMG}"
+echo "Prepared ${DEST_GUIDE}"
