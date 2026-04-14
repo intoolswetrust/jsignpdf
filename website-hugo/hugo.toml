@@ -1,0 +1,96 @@
+baseURL = "https://intoolswetrust.github.io/jsignpdf/"
+title    = "JSignPdf"
+
+languageCode      = "en-us"
+defaultContentLanguage = "en"
+enableRobotsTXT   = true
+enableGitInfo     = true
+hasCJKLanguage    = false
+
+# ---------------------------------------------------------------------------
+# Hextra theme via Hugo modules
+# ---------------------------------------------------------------------------
+[module]
+  [[module.imports]]
+    path = "github.com/imfing/hextra"
+
+# ---------------------------------------------------------------------------
+# Hugo's exec policy locks down which binaries the renderer may call.
+# We need `asciidoctor` for the .adoc guide.
+# ---------------------------------------------------------------------------
+[security]
+  [security.exec]
+    allow = ['^(dart-)?sass(-embedded)?$', '^go$', '^git$', '^npx$', '^postcss$', '^tailwindcss$', '^asciidoctor$']
+
+# ---------------------------------------------------------------------------
+# Markup: enable AsciiDoc through the asciidoctor CLI
+# ---------------------------------------------------------------------------
+[markup]
+  [markup.highlight]
+    noClasses = false
+  [markup.goldmark.renderer]
+    unsafe = true
+
+  [markup.asciidocExt]
+    backend           = "html5"
+    safeMode          = "unsafe"
+    sectionNumbers    = false
+    trace             = false
+    verbose           = false
+    workingFolderCurrent = true
+    [markup.asciidocExt.attributes]
+      jsignpdf-version  = "2.3.3"
+      icons             = "font"
+      idprefix          = ""
+      idseparator       = "-"
+
+# ---------------------------------------------------------------------------
+# Navigation
+# ---------------------------------------------------------------------------
+[menu]
+  [[menu.main]]
+    name     = "Guide"
+    pageRef  = "/docs/guide"
+    weight   = 1
+  [[menu.main]]
+    name     = "Screenshots"
+    pageRef  = "/screenshots"
+    weight   = 2
+  [[menu.main]]
+    name     = "Blog"
+    pageRef  = "/blog"
+    weight   = 3
+  [[menu.main]]
+    name     = "GitHub"
+    weight   = 4
+    url      = "https://github.com/intoolswetrust/jsignpdf"
+    [menu.main.params]
+      icon = "github"
+
+# ---------------------------------------------------------------------------
+# Hextra params
+# ---------------------------------------------------------------------------
+[params]
+  description = "JSignPdf — sign PDF documents for free"
+
+  [params.navbar]
+    displayTitle = true
+    displayLogo  = true
+    [params.navbar.logo]
+      path   = "img/signedpdf.png"
+      link   = "/"
+      width  = 28
+      height = 28
+
+  [params.theme]
+    default       = "system"
+    displayToggle = true
+
+  [params.footer]
+    enable           = true
+    displayCopyright = true
+    displayPoweredBy = false
+
+  [params.editURL]
+    enable = true
+    base   = "https://github.com/intoolswetrust/jsignpdf/edit/master/website-hugo/content"

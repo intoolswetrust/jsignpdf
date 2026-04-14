@@ -1,0 +1,214 @@
+/* JSignPdf custom landing-page styles.
+ * Hextra auto-loads this file via layouts/_partials/head.html.
+ * Everything here is plain CSS — Hextra's Tailwind is precompiled, so
+ * arbitrary utility classes are not available.
+ */
+
+/* -------------------------------------------------------------------
+ * Primary download button — the page's centrepiece.
+ * ------------------------------------------------------------------- */
+.jsp-download-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.625rem;
+  font-weight: 600;
+  font-size: 1.0625rem;
+  padding: 0.9rem 1.9rem;
+  border-radius: 9999px;
+  color: #fff !important;
+  text-decoration: none;
+  background-image: linear-gradient(135deg, #2563eb 0%, #7c3aed 100%);
+  box-shadow:
+    0 10px 25px -5px rgba(37, 99, 235, 0.45),
+    0 6px 12px -5px rgba(124, 58, 237, 0.30);
+  transition: transform 0.15s ease, box-shadow 0.15s ease, filter 0.15s ease;
+}
+.jsp-download-btn:hover {
+  transform: translateY(-1px);
+  filter: brightness(1.08);
+  box-shadow:
+    0 14px 30px -5px rgba(37, 99, 235, 0.55),
+    0 8px 14px -5px rgba(124, 58, 237, 0.35);
+}
+.jsp-download-btn svg {
+  height: 1.25rem;
+  width: 1.25rem;
+  stroke: currentColor;
+  fill: none;
+}
+
+/* Secondary "Read the guide" button */
+.jsp-secondary-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: 600;
+  font-size: 1.0625rem;
+  padding: 0.9rem 1.9rem;
+  border-radius: 9999px;
+  border: 1px solid rgb(209, 213, 219);
+  color: inherit;
+  text-decoration: none;
+  transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+}
+.jsp-secondary-btn:hover {
+  background-color: rgb(243, 244, 246);
+  border-color: rgb(156, 163, 175);
+}
+html.dark .jsp-secondary-btn {
+  border-color: rgb(64, 64, 64);
+}
+html.dark .jsp-secondary-btn:hover {
+  background-color: rgb(38, 38, 38);
+  border-color: rgb(115, 115, 115);
+}
+
+/* Fine-print line under the hero buttons */
+.jsp-meta {
+  text-align: center;
+  font-size: 0.875rem;
+  color: rgb(107, 114, 128);
+  margin-top: 0.25rem;
+  margin-bottom: 3.5rem;
+}
+html.dark .jsp-meta {
+  color: rgb(156, 163, 175);
+}
+
+/* -------------------------------------------------------------------
+ * Hero showcase screenshot
+ * ------------------------------------------------------------------- */
+.jsp-hero-showcase {
+  display: block;
+  max-width: min(100%, 920px);
+  margin: 0 auto 5rem;
+  padding: 0 1rem;
+}
+.jsp-hero-showcase img {
+  width: 100%;
+  height: auto;
+  border-radius: 1rem;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  box-shadow:
+    0 25px 50px -12px rgba(0, 0, 0, 0.28),
+    0 12px 24px -6px rgba(0, 0, 0, 0.12);
+}
+html.dark .jsp-hero-showcase img {
+  border-color: rgba(255, 255, 255, 0.08);
+  box-shadow:
+    0 25px 50px -12px rgba(0, 0, 0, 0.65),
+    0 12px 24px -6px rgba(0, 0, 0, 0.45);
+}
+
+/* -------------------------------------------------------------------
+ * Section headings (centered, for landing page sections)
+ * ------------------------------------------------------------------- */
+.jsp-section-heading {
+  text-align: center;
+  font-size: 2rem;
+  font-weight: 600;
+  margin: 4rem 0 0.5rem;
+  letter-spacing: -0.015em;
+}
+.jsp-section-sub {
+  text-align: center;
+  color: rgb(107, 114, 128);
+  font-size: 1rem;
+  margin-bottom: 2.5rem;
+}
+html.dark .jsp-section-sub {
+  color: rgb(156, 163, 175);
+}
+
+/* -------------------------------------------------------------------
+ * "Two ways to use it" cards
+ * ------------------------------------------------------------------- */
+.jsp-ways {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.25rem;
+  margin: 0 auto 4rem;
+  max-width: 62rem;
+}
+@media (min-width: 768px) {
+  .jsp-ways {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+.jsp-way {
+  padding: 1.75rem 1.75rem 1.5rem;
+  border: 1px solid rgb(229, 231, 235);
+  border-radius: 1.25rem;
+  background: rgba(255, 255, 255, 0.55);
+  backdrop-filter: blur(4px);
+}
+html.dark .jsp-way {
+  border-color: rgb(38, 38, 38);
+  background: rgba(23, 23, 23, 0.45);
+}
+.jsp-way-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin: 0 0 0.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.jsp-way-title svg {
+  height: 1.35rem;
+  width: 1.35rem;
+  color: rgb(124, 58, 237);
+}
+.jsp-way p {
+  color: rgb(75, 85, 99);
+  font-size: 0.95rem;
+  margin: 0 0 1rem;
+}
+html.dark .jsp-way p {
+  color: rgb(163, 163, 163);
+}
+.jsp-way pre {
+  margin: 1rem 0 0.75rem;
+  padding: 0.85rem 1rem;
+  border-radius: 0.65rem;
+  background: rgb(17, 24, 39);
+  color: rgb(229, 231, 235);
+  font-size: 0.8125rem;
+  line-height: 1.55;
+  overflow-x: auto;
+  white-space: pre;
+}
+html.dark .jsp-way pre {
+  background: rgb(10, 10, 10);
+}
+.jsp-way-link {
+  display: inline-block;
+  margin-top: 0.5rem;
+  font-weight: 600;
+  color: rgb(124, 58, 237);
+  text-decoration: none;
+}
+.jsp-way-link:hover {
+  text-decoration: underline;
+}
+html.dark .jsp-way-link {
+  color: rgb(167, 139, 250);
+}
+
+/* -------------------------------------------------------------------
+ * Final CTA strip
+ * ------------------------------------------------------------------- */
+.jsp-closing-cta {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+  margin: 3rem 0 4rem;
+}
+.jsp-closing-cta small {
+  color: rgb(107, 114, 128);
+  font-size: 0.8125rem;
+}
+html.dark .jsp-closing-cta small {
+  color: rgb(156, 163, 175);
+}
