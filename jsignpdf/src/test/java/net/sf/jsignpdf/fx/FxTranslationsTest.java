@@ -115,7 +115,6 @@ public class FxTranslationsTest {
             Menu signingMenu = getMenuBar(root).getMenus().get(2);
 
             assertMenuContains(signingMenu, bundle, "jfx.gui.menu.signing.visibleSig", locale);
-            assertMenuContains(signingMenu, bundle, "jfx.gui.menu.signing.clearVisibleSig", locale);
             assertMenuContains(signingMenu, bundle, "jfx.gui.menu.file.sign", locale);
 
             // The visible-signature item must be a CheckMenuItem so it reflects state
@@ -124,6 +123,18 @@ public class FxTranslationsTest {
                             && bundle.getString("jfx.gui.menu.signing.visibleSig").equals(it.getText()));
             assertEquals("Visible-signature item must be a CheckMenuItem for " + locale,
                     true, hasCheck);
+
+            // The Signing menu should contain exactly one CheckMenuItem (visible sig)
+            // and exactly one enabled MenuItem (Sign) — no separate Clear entry.
+            long checkItems = signingMenu.getItems().stream()
+                    .filter(it -> it instanceof CheckMenuItem).count();
+            long signItems = signingMenu.getItems().stream()
+                    .filter(it -> !(it instanceof CheckMenuItem)
+                            && it.getText() != null
+                            && it.getText().equals(bundle.getString("jfx.gui.menu.file.sign")))
+                    .count();
+            assertEquals("Exactly one visible-sig CheckMenuItem for " + locale, 1L, checkItems);
+            assertEquals("Exactly one Sign menu item for " + locale, 1L, signItems);
         }
     }
 
@@ -174,13 +185,19 @@ public class FxTranslationsTest {
             HBox statusBar = (HBox) root.getBottom();
             assertNotNull("Status bar missing for " + locale, statusBar);
 
-            // Find the visible-sig badge by its translated text
-            String expectedBadge = bundle.getString("jfx.gui.status.visibleSigEnabled");
+            // Both translations must exist in the bundle, and the badge label
+            // must carry one of them (the initial state when no document is
+            // loaded shows "invisible signature").
+            String expectedVisible = bundle.getString("jfx.gui.status.visibleSigEnabled");
+            String expectedInvisible = bundle.getString("jfx.gui.status.invisibleSig");
+            assertNotNull("visibleSig text missing for " + locale, expectedVisible);
+            assertNotNull("invisibleSig text missing for " + locale, expectedInvisible);
+
             boolean badgeFound = statusBar.getChildren().stream()
                     .filter(n -> n instanceof Label)
                     .map(n -> ((Label) n).getText())
-                    .anyMatch(expectedBadge::equals);
-            assertEquals("Visible-sig badge missing for " + locale, true, badgeFound);
+                    .anyMatch(t -> expectedVisible.equals(t) || expectedInvisible.equals(t));
+            assertEquals("Sig-state badge missing for " + locale, true, badgeFound);
         }
     }
 

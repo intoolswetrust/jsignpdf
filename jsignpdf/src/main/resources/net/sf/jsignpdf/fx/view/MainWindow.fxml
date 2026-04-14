@@ -44,8 +44,6 @@
                 </Menu>
                 <Menu text="%jfx.gui.menu.signing">
                     <CheckMenuItem fx:id="menuVisibleSig" text="%jfx.gui.menu.signing.visibleSig"/>
-                    <MenuItem fx:id="menuClearVisibleSig" text="%jfx.gui.menu.signing.clearVisibleSig"
-                              onAction="#onClearVisibleSig" accelerator="Shortcut+Shift+V"/>
                     <SeparatorMenuItem/>
                     <MenuItem fx:id="menuSign" text="%jfx.gui.menu.file.sign" onAction="#onSign" accelerator="Shortcut+S">
                         <graphic><ImageView fitWidth="16" fitHeight="16" preserveRatio="true">
@@ -168,8 +166,8 @@
             </padding>
             <Label fx:id="lblStatus" text="%jfx.gui.status.ready" HBox.hgrow="ALWAYS"
                    maxWidth="Infinity"/>
-            <Label fx:id="lblVisibleSigBadge" text="%jfx.gui.status.visibleSigEnabled"
-                   styleClass="visible-sig-badge" managed="false" visible="false"/>
+            <Label fx:id="lblSigStateBadge" text="%jfx.gui.status.invisibleSig"
+                   styleClass="invisible-sig-badge" managed="false" visible="false"/>
             <Label fx:id="lblOutputPath" styleClass="output-path-label"
                    managed="false" visible="false"/>
             <ProgressBar fx:id="progressBar" prefWidth="150"/>

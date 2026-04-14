@@ -59,6 +59,15 @@ public class SignatureSettingsController {
         bindToViewModel();
     }
 
+    /**
+     * Disables/enables the visible-signature toggle checkbox. Called by the main
+     * controller when a document is (un)loaded, so the user cannot enable a
+     * visible signature without a document on which to place it.
+     */
+    public void setVisibleSigCheckBoxDisabled(boolean disabled) {
+        chkVisibleSig.setDisable(disabled);
+    }
+
     private void bindToViewModel() {
         chkVisibleSig.selectedProperty().bindBidirectional(viewModel.visibleProperty());
         cmbRenderMode.valueProperty().bindBidirectional(viewModel.renderModeProperty());

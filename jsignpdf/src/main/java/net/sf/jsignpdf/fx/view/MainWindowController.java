@@ -87,7 +87,6 @@ public class MainWindowController {
     @FXML private MenuItem menuSaveAs;
     @FXML private Menu menuRecentFiles;
     @FXML private CheckMenuItem menuVisibleSig;
-    @FXML private MenuItem menuClearVisibleSig;
     @FXML private MenuItem menuSign;
     @FXML private MenuItem menuExit;
     @FXML private MenuItem menuZoomIn;
@@ -117,7 +116,7 @@ public class MainWindowController {
 
     // Status bar
     @FXML private Label lblStatus;
-    @FXML private Label lblVisibleSigBadge;
+    @FXML private Label lblSigStateBadge;
     @FXML private Label lblOutputPath;
     @FXML private ProgressBar progressBar;
 
@@ -133,6 +132,11 @@ public class MainWindowController {
     public void initFromOptions(BasicSignerOptions opts) {
         this.options = opts;
         signingVM.syncFromOptions(opts);
+        // No document is loaded at startup, so the visible-signature toggle must
+        // start disabled. The persisted position coordinates on signingVM are
+        // preserved so we can auto-place at the last-known location once a
+        // document is opened and the user re-enables it.
+        signingVM.visibleProperty().set(false);
     }
 
     /**
@@ -212,27 +216,36 @@ public class MainWindowController {
             updateStatusWithHint();
         });
 
-        // Clear placement rectangle when visible signature is disabled
+        // React to visible-signature state changes:
+        //  - disabled: clear the placement rectangle
+        //  - enabled:  auto-place at last-known PDF coordinates (or safe default)
+        //              if no rectangle is already placed (e.g. via drag)
         signingVM.visibleProperty().addListener((obs, wasVisible, isVisible) -> {
             if (!isVisible) {
                 placementVM.reset();
+            } else {
+                autoPlaceVisibleSignature();
             }
             updateVisibleSigIndicators();
+            updateSigStateBadge();
         });
 
         // Bind visible-signature CheckMenuItem bidirectionally to the ViewModel
         menuVisibleSig.selectedProperty().bindBidirectional(signingVM.visibleProperty());
 
-        // Status-bar badge: visible only when visible signature is enabled
-        lblVisibleSigBadge.managedProperty().bind(lblVisibleSigBadge.visibleProperty());
-        lblVisibleSigBadge.visibleProperty().bind(signingVM.visibleProperty());
+        // Status-bar badge: visible whenever a document is loaded. Its text and
+        // colour swap based on whether visible signature is on or off.
+        lblSigStateBadge.managedProperty().bind(lblSigStateBadge.visibleProperty());
+        lblSigStateBadge.visibleProperty().bind(documentVM.documentLoadedProperty());
 
         // Status-bar output path label: visible when a document is loaded
         lblOutputPath.managedProperty().bind(lblOutputPath.visibleProperty());
         signingVM.outFileProperty().addListener((obs, oldVal, newVal) -> updateOutputPathLabel());
         documentVM.documentFileProperty().addListener((obs, oldVal, newVal) -> updateOutputPathLabel());
 
-        // Initial state for the visible-signature controls
+        // Initial state for the visible-signature controls.
+        // The badge's initial text and style come from FXML (correct for
+        // visibleProperty=false on startup); listeners take over on state changes.
         updateVisibleSigIndicators();
         updateOutputPathLabel();
 
@@ -369,23 +382,78 @@ public class MainWindowController {
         menuZoomIn.setDisable(disabled);
         menuZoomOut.setDisable(disabled);
         menuZoomFit.setDisable(disabled);
+        if (signatureSettingsController != null) {
+            signatureSettingsController.setVisibleSigCheckBoxDisabled(disabled);
+        }
         // Visible-signature controls track both document state and current toggle
         updateVisibleSigIndicators();
     }
 
     /**
-     * Refreshes the enabled state of "clear visible signature" controls.
-     * They are only meaningful when a document is loaded and the visible
-     * signature is currently enabled.
+     * Refreshes the enabled state of the "clear visible signature" toolbar button.
+     * It is only meaningful when a document is loaded and the visible signature
+     * is currently enabled.
      */
     private void updateVisibleSigIndicators() {
         boolean canClear = documentVM.isDocumentLoaded() && signingVM.visibleProperty().get();
         if (btnClearVisibleSig != null) {
             btnClearVisibleSig.setDisable(!canClear);
         }
-        if (menuClearVisibleSig != null) {
-            menuClearVisibleSig.setDisable(!canClear);
+    }
+
+    /**
+     * Updates the status-bar badge that reflects whether the visible signature
+     * is currently enabled. The badge swaps between two distinct styles so the
+     * state is always obvious at a glance when a document is loaded.
+     */
+    private void updateSigStateBadge() {
+        if (lblSigStateBadge == null) return;
+        boolean on = signingVM.visibleProperty().get();
+        lblSigStateBadge.setText(on
+                ? RES.get("jfx.gui.status.visibleSigEnabled")
+                : RES.get("jfx.gui.status.invisibleSig"));
+        lblSigStateBadge.getStyleClass().removeAll("visible-sig-badge", "invisible-sig-badge");
+        lblSigStateBadge.getStyleClass().add(on ? "visible-sig-badge" : "invisible-sig-badge");
+    }
+
+    /**
+     * Auto-places the signature rectangle when the user enables visible
+     * signature without dragging a rectangle first. Prefers the last-known PDF
+     * coordinates persisted in the ViewModel — if they form a valid rectangle
+     * that fits the current page — and falls back to a safe bottom-right
+     * default otherwise. Always re-targets the current page.
+     */
+    private void autoPlaceVisibleSignature() {
+        if (!documentVM.isDocumentLoaded() || placementVM.isPlaced() || options == null) {
+            return;
         }
+        PageInfo pageInfo = new PdfExtraInfo(options).getPageInfo(documentVM.getCurrentPage());
+        if (pageInfo == null) {
+            return;
+        }
+        float pw = pageInfo.getWidth();
+        float ph = pageInfo.getHeight();
+
+        float llx = signingVM.positionLLXProperty().get();
+        float lly = signingVM.positionLLYProperty().get();
+        float urx = signingVM.positionURXProperty().get();
+        float ury = signingVM.positionURYProperty().get();
+
+        boolean fits = urx - llx > 1f && ury - lly > 1f
+                && llx >= 0f && lly >= 0f
+                && urx <= pw && ury <= ph;
+
+        if (fits) {
+            placementVM.fromPdfCoordinates(llx, lly, urx, ury, pw, ph);
+        } else {
+            // Safe default: bottom-right, 15% × 8% of the page with ~5% margins.
+            placementVM.setRelWidth(0.15);
+            placementVM.setRelHeight(0.08);
+            placementVM.setRelX(0.80);
+            placementVM.setRelY(0.87);
+            placementVM.setPlaced(true);
+        }
+        signingVM.pageProperty().set(documentVM.getCurrentPage());
     }
 
     /**
@@ -854,6 +922,7 @@ public class MainWindowController {
         txtPageNumber.setText("");
         updateStatus(RES.get("jfx.gui.status.ready"));
         updateOutputPathLabel();
+        updateSigStateBadge();
         stage.setTitle("JSignPdf " + Constants.VERSION);
     }
 
