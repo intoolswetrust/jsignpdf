@@ -37,6 +37,7 @@ jobs:
       id: maven_release
       run: |
         VERSION=${{ github.event.inputs.release-version }}
+        BASE_VERSION="${VERSION%%-*}"
         FULL_VERSION="JSignPdf-$VERSION"
         NEXT_VERSION=${{ github.event.inputs.next-snapshot-version }}-SNAPSHOT
         TAG=JSignPdf_${VERSION//\./_}
@@ -56,7 +57,7 @@ jobs:
         mkdir "JSignPdf-$VERSION"
         mv *.zip *.exe "$FULL_VERSION/"
         cp generated-docs/JSignPdf.pdf "$FULL_VERSION/$FULL_VERSION.pdf"
-        cp ../doc/ReleaseNotes.txt "$FULL_VERSION/README.txt"
+        cp "../doc/release-notes/${BASE_VERSION}.md" "$FULL_VERSION/README.md"
         
         echo "${{ secrets.SSH_PRIVATE_KEY }}" >> private_key
         chmod 600 private_key
@@ -66,6 +67,7 @@ jobs:
         EOF
         mv "$FULL_VERSION" upload
         echo "TAG=$TAG" >> $GITHUB_OUTPUT
+        echo "BASE_VERSION=$BASE_VERSION" >> $GITHUB_OUTPUT
       env:
         MAVEN_USERNAME: ${{ secrets.OSSRH_USERNAME }}
         MAVEN_PASSWORD: ${{ secrets.OSSRH_PASSWORD }}
@@ -78,3 +80,4 @@ jobs:
         file_glob: true
         tag:   ${{ steps.maven_release.outputs.TAG }}
         overwrite: true
+        body_path: distribution/doc/release-notes/${{ steps.maven_release.outputs.BASE_VERSION }}.md
