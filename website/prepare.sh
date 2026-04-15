@@ -12,39 +12,52 @@ HERE="$(cd "$(dirname "$0")" && pwd)"
 SRC_ADOC="${HERE}/docs/JSignPdf.adoc"
 SRC_GUIDE_IMG="${HERE}/docs/img"
 DEST_GUIDE="${HERE}/content/docs/guide"
-ROOT_POM="${HERE}/../pom.xml"
 
 if [ ! -f "${SRC_ADOC}" ]; then
   echo "ERROR: ${SRC_ADOC} not found" >&2
   exit 1
 fi
 
-# Resolve the JSignPdf version. Prefer an explicit JSIGNPDF_VERSION override
-# (handy for CI or dry-runs), otherwise read it from the root pom.xml so the
-# website stays in lock-step with the Maven build's ${project.version}.
+# Resolve the JSignPdf version to show in the guide.
+#   1. $JSIGNPDF_VERSION — explicit override (offline dev, tight edit loops)
+#   2. GitHub Releases API — tag_name of the latest published release
+# The Releases API is authoritative: do-release.yml uploads the built
+# binaries to that release, so "latest release" is exactly what users can
+# download. Reading pom.xml would leak the in-progress -SNAPSHOT instead.
+# If $GITHUB_TOKEN is set (CI), it bumps the rate limit from 60/hr to
+# 1000/hr — not required for correctness.
 if [ -n "${JSIGNPDF_VERSION:-}" ]; then
   VERSION="${JSIGNPDF_VERSION}"
-elif [ -f "${ROOT_POM}" ]; then
+else
   if ! command -v python3 >/dev/null 2>&1; then
-    echo "ERROR: python3 not found — set JSIGNPDF_VERSION to bypass pom.xml parsing" >&2
+    echo "ERROR: python3 not found — set JSIGNPDF_VERSION to bypass the GitHub API lookup" >&2
     exit 1
   fi
-  # Parse the root <version> (direct child of <project>) with a real XML
-  # parser so namespaces and stray <version> tags in dependencies/plugins
-  # don't trip us up.
-  VERSION=$(python3 - "${ROOT_POM}" <<'PY'
-import sys, xml.etree.ElementTree as ET
-root = ET.parse(sys.argv[1]).getroot()
-ns = root.tag[1:root.tag.index('}')] if root.tag.startswith('{') else ''
-elem = root.find('{%s}version' % ns) if ns else root.find('version')
-if elem is None or not (elem.text or '').strip():
-    sys.exit("could not find /project/version")
-print(elem.text.strip())
+  if ! VERSION=$(python3 - <<'PY'
+import json, os, sys, urllib.request
+url = "https://api.github.com/repos/intoolswetrust/jsignpdf/releases/latest"
+headers = {
+    "Accept": "application/vnd.github+json",
+    "User-Agent": "jsignpdf-prepare",
+}
+token = os.environ.get("GITHUB_TOKEN")
+if token:
+    headers["Authorization"] = "Bearer " + token
+try:
+    req = urllib.request.Request(url, headers=headers)
+    with urllib.request.urlopen(req, timeout=10) as resp:
+        tag = json.load(resp)["tag_name"]
+except Exception as e:
+    sys.exit("failed to fetch latest release: %s" % e)
+# Release tags look like "JSignPdf_2_3_3" — normalize to "2.3.3".
+if tag.startswith("JSignPdf_"):
+    tag = tag[len("JSignPdf_"):]
+print(tag.replace("_", "."))
 PY
-)
-else
-  echo "ERROR: JSIGNPDF_VERSION not set and ${ROOT_POM} not found" >&2
-  exit 1
+  ); then
+    echo "ERROR: could not resolve version from GitHub — set JSIGNPDF_VERSION to override" >&2
+    exit 1
+  fi
 fi
 
 if [ -z "${VERSION}" ]; then

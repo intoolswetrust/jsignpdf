@@ -28,6 +28,8 @@ If you'd rather install the toolchain natively:
 - Hugo **extended** ≥ 0.130
 - Go ≥ 1.22
 - Asciidoctor (`gem install asciidoctor` or `apt install asciidoctor`)
+- Python 3 (used by `prepare.sh` to resolve the latest release version
+  from the GitHub API — or export `JSIGNPDF_VERSION` to skip it)
 
 ## Local development (Docker)
 
@@ -63,12 +65,16 @@ hugo server                                # http://localhost:1313/jsignpdf/
 
 ## Deployment
 
-The site is deployed to GitHub Pages by `.github/workflows/doc-builder.yaml`,
-which runs on every push to `master` that touches `website/**`. The workflow
-runs `prepare.sh`, builds with `hugo --gc --minify`, and uploads the result via
-`actions/deploy-pages`.
+The site is deployed to GitHub Pages by `.github/workflows/doc-builder.yaml`.
+It runs on:
 
-You can also trigger it manually from the Actions tab.
+- every push to `master` that touches `website/**` or the workflow itself;
+- every published GitHub release (so the `jsignpdf-version` displayed in
+  the guide refreshes as soon as a new release goes out);
+- manual `workflow_dispatch` from the Actions tab.
+
+The workflow runs `prepare.sh`, builds with `hugo --gc --minify`, and uploads
+the result via `actions/deploy-pages`.
 
 ## Layout
 
@@ -103,11 +109,13 @@ website/
 - **Hextra version** — `go.mod` currently asks for `v0.9.7` but
   `hugo mod get -u` will resolve to whatever is current (locally we ended up on
   v0.12.1). Run `hugo mod get -u github.com/imfing/hextra` periodically.
-- **`jsignpdf-version` attribute** — resolved by `prepare.sh`: it reads the
-  root `pom.xml`'s `<version>` (mirroring how the Maven PDF build passes
-  `${project.version}`) and substitutes `{jsignpdf-version}` in the copied
-  guide. Override it for a one-off build by exporting `JSIGNPDF_VERSION`
-  before running `prepare.sh`.
+- **`jsignpdf-version` attribute** — resolved at build time by `prepare.sh`
+  from the GitHub Releases API (`tag_name` of the latest published
+  release) and substituted into the copied guide. This always matches
+  what users can download, regardless of the current branch's pom
+  version. Set `JSIGNPDF_VERSION` to override for offline dev or to test
+  an unreleased version; the CI workflow also forwards `GITHUB_TOKEN` to
+  lift the API rate limit.
 - **Blog** — not migrated from the previous Docusaurus site. If you want one,
   add `content/blog/_index.md` with `cascade: { type: blog }` and Hextra will
   render a blog section.
