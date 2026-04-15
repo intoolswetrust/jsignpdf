@@ -103,10 +103,11 @@ website/
 - **Hextra version** — `go.mod` currently asks for `v0.9.7` but
   `hugo mod get -u` will resolve to whatever is current (locally we ended up on
   v0.12.1). Run `hugo mod get -u github.com/imfing/hextra` periodically.
-- **`jsignpdf-version` attribute** — hard-coded in `hugo.toml` under
-  `[markup.asciidocExt.attributes]`. Either bump it on each release or have
-  the CI workflow inject it via an env var, mirroring how the Maven build
-  passes `${project.version}`.
+- **`jsignpdf-version` attribute** — resolved by `prepare.sh`: it reads the
+  root `pom.xml`'s `<version>` (mirroring how the Maven PDF build passes
+  `${project.version}`) and substitutes `{jsignpdf-version}` in the copied
+  guide. Override it for a one-off build by exporting `JSIGNPDF_VERSION`
+  before running `prepare.sh`.
 - **Blog** — not migrated from the previous Docusaurus site. If you want one,
   add `content/blog/_index.md` with `cascade: { type: blog }` and Hextra will
   render a blog section.
