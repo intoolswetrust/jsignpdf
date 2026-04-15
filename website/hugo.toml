@@ -40,10 +40,17 @@ hasCJKLanguage    = false
     workingFolderCurrent = true
     [markup.asciidocExt.attributes]
       # jsignpdf-version is substituted into the copied guide by prepare.sh
-      # (sourced from the root pom.xml, or $JSIGNPDF_VERSION if set).
+      # (sourced from the GitHub Releases API, or $JSIGNPDF_VERSION if set).
       icons             = "font"
       idprefix          = ""
       idseparator       = "-"
+      # Ask asciidoctor to build a TOC. Hugo's AsciiDoc converter reads
+      # that generated TOC to populate Page.Fragments.Headings, which is
+      # exactly what Hextra's stock right-hand "On this page" partial
+      # consumes — so enabling this is enough to get the sidebar TOC
+      # working for the guide without any layout overrides.
+      toc               = ""
+      toclevels         = "3"
 
 # ---------------------------------------------------------------------------
 # Navigation

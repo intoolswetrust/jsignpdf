@@ -75,7 +75,6 @@ mkdir -p "${DEST_GUIDE}"
   printf -- '---\n'
   printf -- 'title: "JSignPdf Quick Start Guide"\n'
   printf -- 'linkTitle: "Guide"\n'
-  printf -- 'toc: false\n'
   printf -- 'excludeSearch: true\n'
   printf -- 'sidebar:\n'
   printf -- '  open: true\n'

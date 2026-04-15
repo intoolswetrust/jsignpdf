@@ -33,16 +33,21 @@ If you'd rather install the toolchain natively:
 
 ## Local development (Docker)
 
-From the repo root:
+From the repo root. Note that `hugomods/hugo:exts` is Alpine-based and
+doesn't ship `python3`, so `prepare.sh` can't hit the GitHub Releases API
+from inside the container — pass `JSIGNPDF_VERSION` explicitly. Mount the
+whole repo (not just `website/`) so Hugo's `enableGitInfo` has access to
+`.git`.
 
 ```bash
 # Production build → website/public/
-docker run --rm -v "$PWD:/src" -w /src/website hugomods/hugo:exts \
+docker run --rm -e JSIGNPDF_VERSION=3.0.0-BETA-3 \
+  -v "$PWD:/src" -w /src/website hugomods/hugo:exts \
   sh -c './prepare.sh && hugo --gc --minify'
 
 # Live preview at http://localhost:1313/jsignpdf/
-docker run --rm -it -p 1313:1313 -v "$PWD:/src" -w /src/website \
-  hugomods/hugo:exts \
+docker run --rm -it -p 1313:1313 -e JSIGNPDF_VERSION=3.0.0-BETA-3 \
+  -v "$PWD:/src" -w /src/website hugomods/hugo:exts \
   sh -c './prepare.sh && hugo server --bind 0.0.0.0 --baseURL http://localhost:1313/jsignpdf/'
 ```
 
@@ -119,7 +124,15 @@ website/
 - **Blog** — not migrated from the previous Docusaurus site. If you want one,
   add `content/blog/_index.md` with `cascade: { type: blog }` and Hextra will
   render a blog section.
-- **Search** — Hextra's FlexSearch indexer can't read AsciiDoc-rendered pages
-  (Hugo's `Page.Fragments` is Goldmark-only), so the user guide is excluded
-  from search via `excludeSearch: true` in the front matter prepended by
-  `prepare.sh`. Markdown-authored content is still searchable.
+- **Guide TOC** — the right-hand "On this page" sidebar is powered by
+  Hextra's stock `_partials/toc.html`, which reads `Page.Fragments.Headings`.
+  Hugo populates those fragments for AsciiDoc only when asciidoctor is
+  told to build a TOC, which we do via `toc = ""` / `toclevels = "3"`
+  under `[markup.asciidocExt.attributes]` in `hugo.toml`. Remove either
+  and the guide loses its sidebar TOC.
+- **Search** — the user guide is currently excluded from Hextra's
+  FlexSearch index via `excludeSearch: true` in the front matter prepended
+  by `prepare.sh`. That was added before we enabled asciidoctor TOC
+  generation (which now populates `Page.Fragments`), so it may be worth
+  retrying without the exclusion to see if the indexer now handles the
+  guide cleanly. Markdown-authored content is always searchable.
