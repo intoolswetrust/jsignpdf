@@ -81,6 +81,14 @@ jobs:
         tag:   ${{ steps.maven_release.outputs.TAG }}
         overwrite: true
 
+    - name: Publish PDF guide for downstream jobs
+      uses: actions/upload-artifact@v4
+      with:
+        name: jsignpdf-pdf-guide
+        path: distribution/target/generated-docs/JSignPdf.pdf
+        if-no-files-found: error
+        retention-days: 1
+
   windows-installers:
     needs: do-release
     runs-on: windows-latest
@@ -100,6 +108,12 @@ jobs:
     - name: Build jsignpdf and installcert jars
       shell: bash
       run: mvn -B -DskipTests -pl jsignpdf,installcert -am package
+
+    - name: Download PDF guide from the release job
+      uses: actions/download-artifact@v4
+      with:
+        name: jsignpdf-pdf-guide
+        path: distribution/target/pdf-guide
 
     - name: Build Windows installers (EXE / MSI / ZIP)
       shell: pwsh

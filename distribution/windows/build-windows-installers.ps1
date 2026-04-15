@@ -28,9 +28,24 @@ $out     = Join-Path $target 'jpackage-out'
 $upload  = Join-Path $target 'upload'
 $jpkgCfg = Join-Path $root 'distribution/jpackage'
 
+# jpackage --app-version accepts only numeric MAJOR[.MINOR[.MICRO]]. Strip any
+# non-numeric suffix (e.g. "-RC1", ".Final", "-SNAPSHOT") and keep up to three
+# numeric components. $Version itself is preserved for release-tag-aligned
+# filenames; $appVersion is what we hand to jpackage.
+$numericParts = @(
+    (($Version -split '[^0-9.]', 2)[0]) -split '\.' |
+        Where-Object { $_ -match '^\d+$' } |
+        Select-Object -First 3
+)
+if ($numericParts.Count -eq 0) {
+    throw "Cannot derive jpackage --app-version from '$Version' (no numeric component)."
+}
+$appVersion = $numericParts -join '.'
+
 Write-Host "JSignPdf jpackage build"
-Write-Host "  version : $Version"
-Write-Host "  root    : $root"
+Write-Host "  version   : $Version"
+Write-Host "  appVersion: $appVersion"
+Write-Host "  root      : $root"
 
 foreach ($d in @($staging, $out)) {
     if (Test-Path $d) { Remove-Item -Recurse -Force $d }
@@ -50,6 +65,28 @@ if (-not (Test-Path $installCertJar)) {
 Copy-Item $shadedJar      (Join-Path $staging 'JSignPdf.jar')
 Copy-Item $installCertJar (Join-Path $staging 'InstallCert.jar')
 
+# Optional: bundle the JSignPdf user guide PDF alongside the app payload.
+# The CI workflow downloads it from a workflow artifact into
+# distribution/target/pdf-guide/. Local builds may leave it absent — in that
+# case we skip the --app-content entry and log a warning.
+$guideSrcDir = Join-Path $target 'pdf-guide'
+$guideContentRoot = Join-Path $target 'jpackage-app-content'
+$guideContentDocs = Join-Path $guideContentRoot 'docs'
+Remove-Item -Recurse -Force $guideContentRoot -ErrorAction SilentlyContinue
+$guideFound = $false
+if (Test-Path $guideSrcDir) {
+    $guidePdf = Get-ChildItem -Path $guideSrcDir -Filter '*.pdf' -File -ErrorAction SilentlyContinue | Select-Object -First 1
+    if ($guidePdf) {
+        New-Item -ItemType Directory -Force -Path $guideContentDocs | Out-Null
+        Copy-Item $guidePdf.FullName (Join-Path $guideContentDocs 'JSignPdf.pdf')
+        $guideFound = $true
+        Write-Host "  guide   : $($guidePdf.Name) -> app/docs/JSignPdf.pdf"
+    }
+}
+if (-not $guideFound) {
+    Write-Warning "No PDF guide found under $guideSrcDir; app-image will not include docs/JSignPdf.pdf"
+}
+
 $mainJvmOptions = @(
     '--java-options','-Xms1g',
     '--java-options','-Xmx1g',
@@ -68,7 +105,7 @@ $appImageArgs = @(
     '--main-jar','JSignPdf.jar',
     '--main-class','net.sf.jsignpdf.Signer',
     '--name','JSignPdf',
-    '--app-version',$Version,
+    '--app-version',$appVersion,
     '--vendor','Josef Cacek',
     '--copyright','Josef Cacek',
     '--description','JSignPdf adds digital signatures to PDF documents',
@@ -79,6 +116,9 @@ $appImageArgs = @(
     '--add-launcher',"JSignPdfC=$jpkgCfg/JSignPdfC.properties",
     '--add-launcher',"InstallCert=$jpkgCfg/InstallCert.properties"
 )
+if ($guideFound) {
+    $appImageArgs += @('--app-content', $guideContentDocs)
+}
 & jpackage @appImageArgs
 if ($LASTEXITCODE -ne 0) { throw "jpackage app-image failed with exit code $LASTEXITCODE" }
 
@@ -95,7 +135,7 @@ Compress-Archive -Path $appImage -DestinationPath $zipPath
 $installerArgs = @(
     '--app-image',$appImage,
     '--name','JSignPdf',
-    '--app-version',$Version,
+    '--app-version',$appVersion,
     '--vendor','Josef Cacek',
     '--copyright','Josef Cacek',
     '--description','JSignPdf adds digital signatures to PDF documents',
@@ -117,8 +157,8 @@ Write-Host "==> jpackage --type msi"
 & jpackage --type msi @installerArgs
 if ($LASTEXITCODE -ne 0) { throw "jpackage msi failed with exit code $LASTEXITCODE" }
 
-Move-Item (Join-Path $out "JSignPdf-$Version.exe") (Join-Path $upload "JSignPdf-$Version-win-x64.exe") -Force
-Move-Item (Join-Path $out "JSignPdf-$Version.msi") (Join-Path $upload "JSignPdf-$Version-win-x64.msi") -Force
+Move-Item (Join-Path $out "JSignPdf-$appVersion.exe") (Join-Path $upload "JSignPdf-$Version-win-x64.exe") -Force
+Move-Item (Join-Path $out "JSignPdf-$appVersion.msi") (Join-Path $upload "JSignPdf-$Version-win-x64.msi") -Force
 
 Write-Host ""
 Write-Host "Done. Artifacts:"
