@@ -39,9 +39,9 @@ mvn clean install deploy
 
 ### Release
 
-* update files in `docs`:
-  * ChangeLog.txt (`git log --since="2023-08-13" --pretty=format:'%ad: %s' --date=short`)
-  * ReleaseNotes.txt
+* add release notes for the new version as `distribution/doc/release-notes/<version>.md`
+  (the release workflow picks this file to populate both the bundled `README.md` and
+  the GitHub release body)
 * build the `jsignpdf`
 
 ```bash

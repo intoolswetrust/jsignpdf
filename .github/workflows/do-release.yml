@@ -25,6 +25,17 @@ jobs:
     steps:
     - name: Checkout
       uses: actions/checkout@v6
+    - name: Verify release notes file exists
+      run: |
+        VERSION=${{ github.event.inputs.release-version }}
+        BASE_VERSION="${VERSION%%-*}"
+        NOTES_FILE="distribution/doc/release-notes/${BASE_VERSION}.md"
+        if [ ! -f "$NOTES_FILE" ]; then
+          echo "::error::Release notes file not found: $NOTES_FILE"
+          echo "Create it before triggering the release workflow."
+          exit 1
+        fi
+        echo "Found release notes: $NOTES_FILE"
     - name: Set up Java and credentials
       uses: actions/setup-java@v5
       with:
@@ -41,6 +52,7 @@ jobs:
       id: maven_release
       run: |
         VERSION=${{ github.event.inputs.release-version }}
+        BASE_VERSION="${VERSION%%-*}"
         FULL_VERSION="JSignPdf-$VERSION"
         NEXT_VERSION=${{ github.event.inputs.next-snapshot-version }}-SNAPSHOT
         TAG=JSignPdf_${VERSION//\./_}
@@ -57,7 +69,7 @@ jobs:
         mkdir "JSignPdf-$VERSION"
         mv *.zip "$FULL_VERSION/"
         cp generated-docs/JSignPdf.pdf "$FULL_VERSION/$FULL_VERSION.pdf"
-        cp ../doc/ReleaseNotes.txt "$FULL_VERSION/README.txt"
+        cp "../doc/release-notes/${BASE_VERSION}.md" "$FULL_VERSION/README.md"
 
         echo "${{ secrets.SSH_PRIVATE_KEY }}" >> private_key
         chmod 600 private_key
@@ -68,6 +80,7 @@ jobs:
         mv "$FULL_VERSION" upload
         echo "TAG=$TAG" >> $GITHUB_OUTPUT
         echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
+        echo "BASE_VERSION=$BASE_VERSION" >> $GITHUB_OUTPUT
       env:
         MAVEN_USERNAME: ${{ secrets.OSSRH_USERNAME }}
         MAVEN_PASSWORD: ${{ secrets.OSSRH_PASSWORD }}
@@ -80,6 +93,7 @@ jobs:
         file_glob: true
         tag:   ${{ steps.maven_release.outputs.TAG }}
         overwrite: true
+        body_path: distribution/doc/release-notes/${{ steps.maven_release.outputs.BASE_VERSION }}.md
 
     - name: Publish PDF guide for downstream jobs
       uses: actions/upload-artifact@v4
