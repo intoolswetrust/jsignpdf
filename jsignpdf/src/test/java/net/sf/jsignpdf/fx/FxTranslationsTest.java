@@ -103,6 +103,7 @@ public class FxTranslationsTest {
             assertMenuContains(fileMenu, bundle, "jfx.gui.menu.file.open", locale);
             assertMenuContains(fileMenu, bundle, "jfx.gui.menu.file.close", locale);
             assertMenuContains(fileMenu, bundle, "jfx.gui.menu.file.saveAs", locale);
+            assertMenuContains(fileMenu, bundle, "jfx.gui.menu.file.resetSettings", locale);
             assertMenuContains(fileMenu, bundle, "jfx.gui.menu.file.exit", locale);
         }
     }

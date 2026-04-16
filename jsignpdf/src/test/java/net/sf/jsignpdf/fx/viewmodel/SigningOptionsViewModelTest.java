@@ -2,15 +2,21 @@ package net.sf.jsignpdf.fx.viewmodel;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
+
+import java.security.KeyStore;
 
 import net.sf.jsignpdf.BasicSignerOptions;
 import net.sf.jsignpdf.Constants;
 import net.sf.jsignpdf.types.CertificationLevel;
 import net.sf.jsignpdf.types.HashAlgorithm;
 import net.sf.jsignpdf.types.PDFEncryption;
+import net.sf.jsignpdf.types.PrintRight;
+import net.sf.jsignpdf.types.RenderMode;
+import net.sf.jsignpdf.types.ServerAuthentication;
 
 /**
  * Tests for {@link SigningOptionsViewModel}, verifying that the advanced flag
@@ -153,6 +159,95 @@ public class SigningOptionsViewModelTest {
                 opts.isOcspEnabledX());
         assertFalse("isCrlEnabledX should be false when advanced=false",
                 opts.isCrlEnabledX());
+    }
+
+    @Test
+    public void testResetToDefaults_clearsAllProperties() {
+        SigningOptionsViewModel vm = new SigningOptionsViewModel();
+        // Set non-default values on various properties
+        vm.ksFileProperty().set("/path/to/keystore.p12");
+        vm.ksPasswordProperty().set("secret");
+        vm.keyAliasProperty().set("mykey");
+        vm.keyIndexProperty().set(5);
+        vm.storePasswordsProperty().set(true);
+        vm.outFileProperty().set("/tmp/output.pdf");
+        vm.appendProperty().set(!Constants.DEFVAL_APPEND);
+        vm.signerNameProperty().set("Test Signer");
+        vm.reasonProperty().set("Testing");
+        vm.locationProperty().set("Prague");
+        vm.contactProperty().set("test@example.com");
+        vm.certLevelProperty().set(CertificationLevel.CERTIFIED_NO_CHANGES_ALLOWED);
+        vm.hashAlgorithmProperty().set(HashAlgorithm.SHA512);
+        vm.visibleProperty().set(true);
+        vm.pageProperty().set(3);
+        vm.positionLLXProperty().set(100f);
+        vm.positionLLYProperty().set(200f);
+        vm.positionURXProperty().set(300f);
+        vm.positionURYProperty().set(400f);
+        vm.pdfEncryptionProperty().set(PDFEncryption.PASSWORD);
+        vm.pdfOwnerPasswordProperty().set("owner");
+        vm.pdfUserPasswordProperty().set("user");
+        vm.tsaEnabledProperty().set(true);
+        vm.tsaUrlProperty().set("http://tsa.example.com");
+        vm.ocspEnabledProperty().set(true);
+        vm.crlEnabledProperty().set(true);
+        vm.proxyPortProperty().set(9999);
+
+        // Reset
+        vm.resetToDefaults();
+
+        // Verify all values are back to defaults
+        assertEquals("ksType", KeyStore.getDefaultType(), vm.ksTypeProperty().get());
+        assertNull("ksFile", vm.ksFileProperty().get());
+        assertNull("ksPassword", vm.ksPasswordProperty().get());
+        assertNull("keyAlias", vm.keyAliasProperty().get());
+        assertEquals("keyIndex", Constants.DEFVAL_KEY_INDEX, vm.keyIndexProperty().get());
+        assertFalse("storePasswords", vm.storePasswordsProperty().get());
+        assertNull("outFile", vm.outFileProperty().get());
+        assertEquals("append", Constants.DEFVAL_APPEND, vm.appendProperty().get());
+        assertNull("signerName", vm.signerNameProperty().get());
+        assertNull("reason", vm.reasonProperty().get());
+        assertNull("location", vm.locationProperty().get());
+        assertNull("contact", vm.contactProperty().get());
+        assertEquals("certLevel", CertificationLevel.NOT_CERTIFIED, vm.certLevelProperty().get());
+        assertEquals("hashAlgorithm", Constants.DEFVAL_HASH_ALGORITHM, vm.hashAlgorithmProperty().get());
+        assertFalse("visible", vm.visibleProperty().get());
+        assertEquals("page", Constants.DEFVAL_PAGE, vm.pageProperty().get());
+        assertEquals("positionLLX", Constants.DEFVAL_LLX, vm.positionLLXProperty().get(), 0.001f);
+        assertEquals("positionLLY", Constants.DEFVAL_LLY, vm.positionLLYProperty().get(), 0.001f);
+        assertEquals("positionURX", Constants.DEFVAL_URX, vm.positionURXProperty().get(), 0.001f);
+        assertEquals("positionURY", Constants.DEFVAL_URY, vm.positionURYProperty().get(), 0.001f);
+        assertEquals("renderMode", RenderMode.DESCRIPTION_ONLY, vm.renderModeProperty().get());
+        assertEquals("pdfEncryption", PDFEncryption.NONE, vm.pdfEncryptionProperty().get());
+        assertNull("pdfOwnerPassword", vm.pdfOwnerPasswordProperty().get());
+        assertNull("pdfUserPassword", vm.pdfUserPasswordProperty().get());
+        assertEquals("rightPrinting", PrintRight.ALLOW_PRINTING, vm.rightPrintingProperty().get());
+        assertFalse("tsaEnabled", vm.tsaEnabledProperty().get());
+        assertNull("tsaUrl", vm.tsaUrlProperty().get());
+        assertEquals("tsaServerAuthn", ServerAuthentication.NONE, vm.tsaServerAuthnProperty().get());
+        assertFalse("ocspEnabled", vm.ocspEnabledProperty().get());
+        assertFalse("crlEnabled", vm.crlEnabledProperty().get());
+        assertEquals("proxyType", Constants.DEFVAL_PROXY_TYPE, vm.proxyTypeProperty().get());
+        assertEquals("proxyPort", Constants.DEFVAL_PROXY_PORT, vm.proxyPortProperty().get());
+    }
+
+    @Test
+    public void testResetToDefaults_thenSyncToOptions_producesDefaults() {
+        SigningOptionsViewModel vm = new SigningOptionsViewModel();
+        // Set non-default values, then reset
+        vm.pdfEncryptionProperty().set(PDFEncryption.PASSWORD);
+        vm.tsaEnabledProperty().set(true);
+        vm.hashAlgorithmProperty().set(HashAlgorithm.SHA512);
+        vm.resetToDefaults();
+
+        // Sync to a fresh options object
+        BasicSignerOptions opts = new BasicSignerOptions();
+        vm.syncToOptions(opts);
+
+        // The options should reflect defaults (with advanced=true from syncToOptions)
+        assertEquals(PDFEncryption.NONE, opts.getPdfEncryption());
+        assertFalse(opts.isTimestampX());
+        assertEquals(Constants.DEFVAL_HASH_ALGORITHM, opts.getHashAlgorithmX());
     }
 
     @Test
