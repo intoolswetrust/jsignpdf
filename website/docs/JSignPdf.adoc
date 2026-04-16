@@ -1,5 +1,5 @@
 = JSignPdf Quick Start Guide
-Josef Cacek
+Josef (kwart) Cacek
 {jsignpdf-version}
 :description: Digital signatures for your PDF documents
 :doctype: book
@@ -35,7 +35,7 @@ JSignPdf is released under LGPL and/or MPL license. It means, it can be freely u
 
 === History
 
-The project started at the beginning of 2008. It was switched to a maintenance-only mode in 2012.
+The project started at the beginning of 2008.
 
 A greater change comes in 2021, where the project was switched to use the OpenPDF library instead of the old version of the iText library.
 
@@ -43,11 +43,10 @@ Starting with version 3.0.0, JSignPdf ships with a new document-centric JavaFX i
 
 === Author
 
-The author of the JSignPdf is Czech developer Josef Cacek. He works in Java since 2000. Some links to Josef's projects:
+The author of the JSignPdf is Czech developer Josef (kwart) Cacek. He works in Java since 2000. Some links to Josef's projects:
 
 * https://github.com/intoolswetrust/
 * https://github.com/kwart/
-* https://sourceforge.net/users/kwart/
 
 === Getting support
 
