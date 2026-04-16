@@ -47,6 +47,7 @@ import net.sf.jsignpdf.fx.service.PdfRenderService;
 import net.sf.jsignpdf.fx.service.SigningService;
 import net.sf.jsignpdf.fx.util.RecentFilesManager;
 import net.sf.jsignpdf.fx.viewmodel.DocumentViewModel;
+import net.sf.jsignpdf.utils.PropertyProvider;
 import net.sf.jsignpdf.fx.viewmodel.SignaturePlacementViewModel;
 import net.sf.jsignpdf.fx.viewmodel.SigningOptionsViewModel;
 import net.sf.jsignpdf.types.PageInfo;
@@ -98,6 +99,7 @@ public class MainWindowController {
     @FXML private MenuItem menuZoomOut;
     @FXML private MenuItem menuZoomFit;
     @FXML private MenuItem menuToggleSidePanel;
+    @FXML private MenuItem menuResetSettings;
     @FXML private MenuItem menuAbout;
 
     // Toolbar
@@ -584,6 +586,42 @@ public class MainWindowController {
     @FXML
     private void onFileExit() {
         stage.close();
+    }
+
+    @FXML
+    private void onResetSettings() {
+        Alert confirm = new Alert(Alert.AlertType.CONFIRMATION);
+        confirm.setTitle(RES.get("jfx.gui.dialog.resetSettings.title"));
+        confirm.setHeaderText(null);
+        confirm.setContentText(RES.get("jfx.gui.dialog.resetSettings.text"));
+        confirm.initOwner(stage);
+
+        Optional<ButtonType> result = confirm.showAndWait();
+        if (result.isPresent() && result.get() == ButtonType.OK) {
+            // Delete the settings file
+            File settingsFile = new File(PropertyProvider.PROPERTY_FILE);
+            if (settingsFile.exists()) {
+                settingsFile.delete();
+            }
+
+            // Clear the in-memory properties and reset the options object
+            PropertyProvider.getInstance().clear();
+            options = new BasicSignerOptions();
+
+            // Reset the ViewModel (which updates all bound UI controls)
+            signingVM.resetToDefaults();
+
+            // Clear placement and close any open document
+            if (documentVM.isDocumentLoaded()) {
+                closeDocument();
+            }
+            placementVM.reset();
+
+            // Refresh the recent files menu (now empty)
+            refreshRecentFilesMenu();
+
+            updateStatus(RES.get("jfx.gui.status.settingsReset"));
+        }
     }
 
     @FXML

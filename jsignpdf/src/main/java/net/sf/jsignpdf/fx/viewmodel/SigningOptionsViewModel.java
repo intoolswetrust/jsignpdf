@@ -248,6 +248,68 @@ public class SigningOptionsViewModel {
         proxyPort.set(opts.getProxyPort());
     }
 
+    /**
+     * Resets all ViewModel properties to their default values.
+     */
+    public void resetToDefaults() {
+        ksType.set(null);
+        ksFile.set(null);
+        ksPassword.set(null);
+        keyAlias.set(null);
+        keyIndex.set(Constants.DEFVAL_KEY_INDEX);
+        keyPassword.set(null);
+        storePasswords.set(false);
+        outFile.set(null);
+        append.set(Constants.DEFVAL_APPEND);
+        signerName.set(null);
+        reason.set(null);
+        location.set(null);
+        contact.set(null);
+        certLevel.set(null);
+        hashAlgorithm.set(null);
+        visible.set(false);
+        page.set(Constants.DEFVAL_PAGE);
+        positionLLX.set(Constants.DEFVAL_LLX);
+        positionLLY.set(Constants.DEFVAL_LLY);
+        positionURX.set(Constants.DEFVAL_URX);
+        positionURY.set(Constants.DEFVAL_URY);
+        bgImgScale.set(Constants.DEFVAL_BG_SCALE);
+        renderMode.set(null);
+        l2Text.set(null);
+        l4Text.set(null);
+        l2TextFontSize.set(Constants.DEFVAL_L2_FONT_SIZE);
+        imgPath.set(null);
+        bgImgPath.set(null);
+        acro6Layers.set(Constants.DEFVAL_ACRO6LAYERS);
+        pdfEncryption.set(null);
+        pdfOwnerPassword.set(null);
+        pdfUserPassword.set(null);
+        pdfEncryptionCertFile.set(null);
+        rightPrinting.set(null);
+        rightCopy.set(true);
+        rightAssembly.set(true);
+        rightFillIn.set(true);
+        rightScreenReaders.set(true);
+        rightModifyAnnotations.set(true);
+        rightModifyContents.set(true);
+        tsaEnabled.set(false);
+        tsaUrl.set(null);
+        tsaServerAuthn.set(null);
+        tsaUser.set(null);
+        tsaPassword.set(null);
+        tsaCertFileType.set(null);
+        tsaCertFile.set(null);
+        tsaCertFilePassword.set(null);
+        tsaPolicy.set(null);
+        tsaHashAlg.set(null);
+        ocspEnabled.set(false);
+        ocspServerUrl.set(null);
+        crlEnabled.set(false);
+        proxyType.set(Constants.DEFVAL_PROXY_TYPE);
+        proxyHost.set(null);
+        proxyPort.set(Constants.DEFVAL_PROXY_PORT);
+    }
+
     private static char[] toCharArray(String s) {
         return s != null ? s.toCharArray() : null;
     }
