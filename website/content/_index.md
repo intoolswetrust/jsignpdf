@@ -35,11 +35,11 @@ toc: false
 </div>
 
 <p class="jsp-meta">
-  Runs on Windows, macOS and Linux · Java 8+ · LGPL / MPL licensed
+  Runs on Windows, macOS and Linux · Java 11+ · LGPL / MPL licensed
 </p>
 
 <div class="jsp-hero-showcase">
-  <img src="img/screenshots/jsignpdf-screenshot.png" alt="JSignPdf desktop application — main signing window"/>
+  <img src="img/screenshots/jsignpdf-javafx-main.png" alt="JSignPdf JavaFX application — document loaded with signing options"/>
 </div>
 
 <h2 class="jsp-section-heading">Built for real-world signing</h2>
