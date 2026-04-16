@@ -9,7 +9,7 @@ Josef (kwart) Cacek
 
 == JSignPdf Introduction
 
-JSignPdf is an open-source application that adds digital signatures to PDF documents. It's written in Java programming language and it can be launched on the most of current OS. Users can control the application using a modern JavaFX graphical interface, the classic Swing GUI, or command line arguments. Main features:
+JSignPdf is an open-source application that adds digital signatures to PDF documents. It's written in the Java programming language and can be launched on most current operating systems. Users can control the application using a modern JavaFX graphical interface, the classic Swing GUI, or command line arguments. Main features:
 
 * supports visible signatures
 * can set certification level
@@ -50,9 +50,9 @@ The author of the JSignPdf is Czech developer Josef (kwart) Cacek. He works in J
 
 === Getting support
 
-If you don't find the relevant information in this document or on the JSignPdf web page (http://jsignpdf.sourceforge.net/) use JSignPdf Google Group to ask the community.
+If you don't find the relevant information in this document or on the JSignPdf GitHub page ({url-repo}) use the JSignPdf Google Group to ask the community.
 
-https://groups.google.com/d/jsignpdf/[https://groups.google.com/d/jsignpdf/]
+https://groups.google.com/g/jsignpdf[JSignPdf Google Group]
 
 == Prerequisites
 
@@ -161,9 +161,9 @@ _JavaFX panel: Signature Properties_
 
 ==== Input and output PDF files
 
-_Input PDF file_ is an existing PDF file to which should be added digital signature.
+_Input PDF file_ is the existing PDF file to which a digital signature will be added.
 
-_Output PDF file_ is the name of the result PDF file. If the value is not filled, automatically will be used the _Input PDF file_ with additional suffix "__signed_" (e.g. input _test.pdf_ will result in _test_signed.pdf_)
+_Output PDF file_ is the name of the resulting PDF file. If not specified, the _Input PDF file_ name with the suffix `_signed` is used automatically (e.g. input _test.pdf_ will produce _test_signed.pdf_)
 
 _*The Input and Output files have to be different!*_
 
@@ -262,7 +262,7 @@ JSignPdf supports two standard ways of certificate revocation checking – CRL a
 
 ==== CRL
 
-RFC 3280, Internet X.509 Public Key Infrastructure, Certificate and Certificate Revocation List (CRL) Profile.
+RFC 5280, Internet X.509 Public Key Infrastructure, Certificate and Certificate Revocation List (CRL) Profile.
 
 Wikipedia says: In the operation of some cryptosystems, usually public key infrastructures (PKIs), a certificate revocation list (CRL) is a list of certificates (or more specifically, a list of serial numbers for certificates) that have been revoked or are no longer valid, and therefore should not be relied upon.
 
@@ -270,7 +270,7 @@ Such a list will be downloaded from CA and stored in PDF during the signing proc
 
 ==== OCSP
 
-RFC 2560, X.509 Internet PKI Online Certificate Status Protocol-OCSP.
+RFC 6960, X.509 Internet PKI Online Certificate Status Protocol-OCSP.
 
 Wikipedia says: The Online Certificate Status Protocol (OCSP) is an Internet protocol used for obtaining the revocation status of an X.509 digital certificate. It is described in RFC 2560 and is on the Internet standards track. It was created as an alternative to certificate revocation lists (CRL), specifically addressing certain problems associated with using CRLs in public key infrastructure (PKI). Messages communicated via OCSP are encoded in ASN.1 and are usually communicated over HTTP. The "request/response" nature of these messages leads to OCSP servers being termed OCSP responders.
 
@@ -378,7 +378,7 @@ The arguments should be separated with spaces or newlines, environment variable 
 
 === Out of memory error
 
-If you will see OutOfMemoryError in the program console, you need to allow java to use more memory.
+If you see an OutOfMemoryError in the program console, you need to allow Java to use more memory.
 
 Add -Xmx<size> switch to your java. Following example allows java to use 512MB (heap size).
 
@@ -396,14 +396,14 @@ usage: java -jar JSignPdf.jar [file1.pdf [file2.pdf ...]] [-a] [--bg-path
        <path>] [--disable-acrobat6-layer-mode] [--disable-assembly]
        [--disable-copy] [--disable-fill] [--disable-modify-annotations]
        [--disable-modify-content] [--disable-screen-readers] [-e] [-ec <file>]
-       [-fs <size>] [-h] [-ha <algorithm>] [--img-path <file>] [-ka <alias>]
+       [-fs <size>] [--gui] [-h] [-ha <algorithm>] [--img-path <file>] [-ka <alias>]
        [-ki <index>] [-kp <password>] [-ksf <file>] [-ksp <password>] [-kst
        <type>] [-l <location>] [--l2-text <text>] [--l4-text <text>] [-lk]
        [-lkt] [-llx <position>] [-lly <position>] [-lp] [-lpf <file>] [--ocsp]
        [--ocsp-server-url <responderUrl>] [-op <prefix>] [-opwd <password>] [-os
        <suffix>] [-pe <mode>] [-pg <pageNumber>] [-pr <right>] [--proxy-host
        <hostname>] [--proxy-port <port>] [--proxy-type <type>] [-q] [-r
-       <reason>] [--render-mode <mode>] [-ta <method>] [-ts <URL>]
+       <reason>] [--render-mode <mode>] [-sn <signer>] [-ta <method>] [-ts <URL>]
        [--tsa-policy-oid <policyOID>] [-tscf <file>] [-tscp <password>] [-tsct
        <ks-type>] [-tsh <algorithm>] [-tsp <password>] [-tsu <username>] [-upwd
        <password>] [-urx <position>] [-ury <position>] [-v] [-V]
@@ -486,20 +486,25 @@ otherwise you can use JSignPdf in command line batch mode.
  -kst,--keystore-type <type>             sets KeyStore type (you can list
                                          possible values for this option -lkt
                                          argument)
- -l,--location <location>                location of a signatue (e.g. Washington
+ -l,--location <location>                location of a signature (e.g. Washington
                                          DC). Empty by default.
+    --gui                                (beta) show GUI even when other command
+                                         line arguments are provided
     --l2-text <text>                     signature text, you can also use
                                          placeholders for signature properties
-                                         (${signer}, ${timestamp}, ${location},
-                                         ${reason}, ${contact})
+                                         (${signer}, ${certificate},
+                                         ${timestamp}, ${location}, ${reason},
+                                         ${contact})
     --l4-text <text>                     status text
- -lk,--list-keys                         lists keys in choosen keystore
+ -lk,--list-keys                         lists keys in chosen keystore
  -lkt,--list-keystore-types              lists keystore types, which can be used
                                          as values -kst option
- -llx <position>                         lower left corner postion on X-axe of a
-                                         visible signature
- -lly <position>                         lower left corner postion on Y-axe of a
-                                         visible signature
+ -llx <position>                         lower left corner position on X-axis of
+                                         a visible signature (negative value is
+                                         subtracted from page width)
+ -lly <position>                         lower left corner position on Y-axis of
+                                         a visible signature (negative value is
+                                         subtracted from page height)
  -lp,--load-properties                   Loads properties from a default file
                                          (created by GUI application).
  -lpf,--load-properties-file <file>      Loads properties from the given file.
@@ -518,10 +523,10 @@ otherwise you can use JSignPdf in command line batch mode.
                                          value is "_signed". (e.g. sign process
                                          on file mydocument.pdf will create new
                                          file mydocument_signed.pdf)
- -pe,--encryption <mode>                 encryption mode for the output PDF
+ -pe,--encryption <mode>                 encryption mode for the output PDF.
                                          Default value is NONE. Possible values
                                          are NONE, PASSWORD, CERTIFICATE. Use
-                                         togethter with -upwd and -opwd in case
+                                         together with -upwd and -opwd in case
                                          of PASSWORD mode, and -ec in case of
                                          CERTIFICATE
  -pg,--page <pageNumber>                 page with visible signature. Default
@@ -542,6 +547,8 @@ otherwise you can use JSignPdf in command line batch mode.
  -q,--quiet                              quiet mode - without info messages
                                          during process
  -r,--reason <reason>                    reason of signature. Empty by default.
+ -sn,--signer-name <signer>              signer name. Defaults to the common name
+                                         (CN) of the chosen certificate.
     --render-mode <mode>                 render mode for visible signatures.
                                          Default value is DESCRIPTION_ONLY.
                                          Possible values are DESCRIPTION_ONLY,
@@ -553,11 +560,7 @@ otherwise you can use JSignPdf in command line batch mode.
                                          PASSWORD, CERTIFICATE
  -ts,--tsa-server-url <URL>              address of timestamping server (TSA).
                                          If you use this argument, the timestamp
-                                         will be included to signature. (For
-                                         testing purposes you can try following
-                                         URL
-                                         http://dse200.ncipher.com/TSS/HttpTspSe
-                                         rver)
+                                         will be included in the signature.
     --tsa-policy-oid <policyOID>         TSA policy OID which should be set to
                                          timestamp request.
  -tscf,--tsa-cert-file <file>            path to keystore file, which contains
@@ -579,10 +582,12 @@ otherwise you can use JSignPdf in command line batch mode.
                                          requires authentication.
  -upwd,--user-password <password>        user password for encrypted documents
                                          (used when -e option is given)
- -urx <position>                         upper right corner postion on X-axe of
-                                         a visible signature
- -ury <position>                         upper right corner postion on Y-axe of
-                                         a visible signature
+ -urx <position>                         upper right corner position on X-axis of
+                                         a visible signature (negative value is
+                                         subtracted from page width)
+ -ury <position>                         upper right corner position on Y-axis of
+                                         a visible signature (negative value is
+                                         subtracted from page height)
  -v,--version                            shows the application version
  -V,--visible-signature                  enables visible signature
 ----
@@ -606,6 +611,12 @@ otherwise you can use JSignPdf in command line batch mode.
 
 |4
 |signing of all files failed
+
+|5
+|input file cannot be read
+
+|6
+|common error
 |===
 
 === Examples
