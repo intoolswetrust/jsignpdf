@@ -86,7 +86,7 @@ hasCJKLanguage    = false
     displayLogo  = true
     [params.navbar.logo]
       path   = "img/signedpdf.png"
-      link   = "/"
+      link   = "/jsignpdf/"
       width  = 28
       height = 28
 
