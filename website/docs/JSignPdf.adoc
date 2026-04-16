@@ -9,7 +9,7 @@ Josef Cacek
 
 == JSignPdf Introduction
 
-JSignPdf is an open-source application that adds digital signatures to PDF documents. It's written in Java programming language and it can be launched on the most of current OS. Users can control the application using simple GUI or command line arguments. Main features:
+JSignPdf is an open-source application that adds digital signatures to PDF documents. It's written in Java programming language and it can be launched on the most of current OS. Users can control the application using a modern JavaFX graphical interface, the classic Swing GUI, or command line arguments. Main features:
 
 * supports visible signatures
 * can set certification level
@@ -35,9 +35,11 @@ JSignPdf is released under LGPL and/or MPL license. It means, it can be freely u
 
 === History
 
-The project started at the beginning of 2008. It was switched to a maintenance-only mode in 2012. 
+The project started at the beginning of 2008. It was switched to a maintenance-only mode in 2012.
 
 A greater change comes in 2021, where the project was switched to use the OpenPDF library instead of the old version of the iText library.
+
+Starting with version 3.0.0, JSignPdf ships with a new document-centric JavaFX interface as the default graphical frontend. The classic Swing GUI remains available for backward compatibility.
 
 === Author
 
@@ -74,40 +76,95 @@ JSignPdf has been also extended to support external keystore types like smart ca
 
 == Launching
 
-
 All platforms (with Java installed) should support the launching of jar file _JSignPdf.jar_. Use the following command in the directory, where the application is located.
 
-$ java -jar JSignPdf.jar
+ $ java -jar JSignPdf.jar
 
-== Using JSignPdf – signing PDF files
+By default, JSignPdf opens the JavaFX graphical interface (see <<Using the JavaFX UI>>). To start the classic Swing GUI instead, set the `jsignpdf.swing` system property:
 
-=== Simple version
+ $ java -Djsignpdf.swing=true -jar JSignPdf.jar
 
-Fill text fields and press the _Sign It_ button.
+If command line arguments for signing are provided, JSignPdf runs in batch mode without opening any GUI (see <<Command line (batch mode)>>).
 
-image:img/simple-view.png[image,width=263,height=162]
+== Using the JavaFX UI
 
-=== More detailed version
+The JavaFX interface is the default graphical frontend for JSignPdf. It uses a document-centric workflow: you open a single PDF, configure the signature, and sign it. For signing multiple files in one go, use the <<Command line (batch mode),command line>>.
 
-==== Select Key Store Type
+=== Opening a PDF document
+
+When JSignPdf starts, the main window is empty and invites you to load a document. You can either drag and drop a PDF file onto the window or use _File > Open_ (or the _Open_ button in the toolbar).
+
+image:img/javafx/main-window-empty.png[JSignPdf main window,width=562,height=403]
+
+Once a PDF is loaded, the document preview appears on the right, and the configuration panels on the left become active. The status bar at the bottom shows the file name and page count.
+
+image:img/javafx/document-loaded.png[PDF document loaded,width=562,height=403]
+
+=== Configuring signature options
+
+The left sidebar contains five collapsible panels that expose all signing options. Expand a panel by clicking its header.
+
+* **Certificate** – keystore type, keystore file & password, key alias & password (see <<Keystore selection>> and <<Key alias & key password>>)
+* **Signature Properties** – hash algorithm, certification level, append mode, reason / location / contact, input & output file paths (see <<Signing properties>>)
+* **Signature Appearance** – visible signature toggle, render mode, texts, images, font size (see <<Visible signature options>>)
+* **Timestamp & Validation** – TSA server, CRL, OCSP (see <<TSA – timestamps>> and <<Certificate revocation checking>>)
+* **Encryption & Rights** – encryption mode, passwords, certificate, document rights (see <<Encryption>>)
+
+image:img/javafx/signature-properties.png[Signature properties panel,width=562,height=403]
+
+At a minimum, you need to select a keystore and provide its password in the _Certificate_ panel. All other options have sensible defaults.
+
+=== Placing a visible signature
+
+To add a visible signature to the PDF, enable _Visible signature_ in the _Signature Appearance_ panel. You can then configure the render mode, signature text, status text, images, and font size.
+
+To position the signature on the page, hold *Shift* and drag a rectangle directly on the document preview. The coordinates are updated automatically in the sidebar.
+
+image:img/javafx/visible-signature-placement.png[Placing visible signature,width=562,height=403]
+
+=== Signing the document
+
+When you are ready, click the _Sign_ button in the toolbar. JSignPdf signs the document and displays the result in the Output Console at the bottom of the window.
+
+image:img/javafx/signing-result.png[Signing complete,width=562,height=400]
+
+The signed PDF is saved to the output path shown in the _Signature Properties_ panel. By default, it is the input file name with a `_signed` suffix (e.g. `document_signed.pdf`).
+
+== Signing options
+
+This chapter describes all signing options in detail. The options are the same regardless of which interface you use (JavaFX GUI, Swing GUI, or command line). In the JavaFX interface the options are organized into sidebar panels; the corresponding panel name is noted in each section header.
+
+=== Keystore selection
+
+_JavaFX panel: Certificate_
 
 The Keystore means the location where the private keys are located.
 
-image:img/keystore-types.png[image,width=263,height=162]
-
 By default, JSignPdf displays keystore types provided by Java Runtime itself and the Bouncy Castle cryptographic provider.
 
-JSignPdf has been extended to support remote/external keystore types. The first entry is “CloudFoxy” (https://gitlab.com/cloudfoxy), which is a REST API for physical smart cards, initially developed to support eIDAS signatures.
+JSignPdf has been extended to support remote/external keystore types. The first entry is "CloudFoxy" (https://gitlab.com/cloudfoxy), which is a REST API for physical smart cards, initially developed to support eIDAS signatures.
 
-==== Keystore file and password
+If you use PKCS#12 or Java keystore types (JKS, JCEKS), you have to select the file where the keys are stored and provide the password of this file. Path to the keystore file can be inserted directly by typing or you can use the browse button to navigate through the file system with Open File Dialog.
 
-If you use PKCS#12 or Java keystore types (JKS, JCEKS), you have to select the file where the keys are stored and provide the password of this file. Path to the keystore file can be inserted directly by typing or you can use the _Browse_ button to navigate through the file system with Open File Dialog.
+=== Key alias & key password
 
-==== Input and Output PDF files
+_JavaFX panel: Certificate_
+
+When you have more private keys stored in the keystore, you can select which one will be used to sign the PDF file by filling the _Key alias_ field. Either you can type alias name directly (combo box is editable) or you can load all names by pressing the _Load keys_ button and then select one from the drop-down list.footnote:[Only the private keys, which are valid (at the time of the signing) are displayed in the list. If the certificate supports the Key Usage extension, the private key will only be displayed if it is meant for signing.]
+
+If you don't fill the _Key alias_ field the first alias read from keystore will be used.
+
+Each key in the keystore can be protected with its password. If this password differs from the password of keystore, fill it in the _Key password_ input field.
+
+=== Signing properties
+
+_JavaFX panel: Signature Properties_
+
+==== Input and output PDF files
 
 _Input PDF file_ is an existing PDF file to which should be added digital signature.
 
-_Output PDF file_ is the name of the result PDF file. If the value is not filled, automatically will be used the _Input PDF file_ with additional suffix “__signed_” (e.g. input _test.pdf_ will result in _test_signed.pdf_)
+_Output PDF file_ is the name of the result PDF file. If the value is not filled, automatically will be used the _Input PDF file_ with additional suffix "__signed_" (e.g. input _test.pdf_ will result in _test_signed.pdf_)
 
 _*The Input and Output files have to be different!*_
 
@@ -115,53 +172,34 @@ _*The Input and Output files have to be different!*_
 
 The reason, location, and contact fields provide additional information about the signature. Filled values will be stored in the result PDF.
 
-==== Remember passwords
-
-JSignPdf stores filled information when you are exiting the application, so it's present when you run it the next time. Passwords are not stored by default, but you can allow them by selecting checkbox _Remember passwords_.
-
-_*Even if the password is stored in the encrypted form, we do not recommend storing passwords if your computer is used by more users!*_
-
-==== Sign It
-
-Button _Sign It_ starts the signing process. It displays a console window and you can see what the program is doing.
-
-image:img/output-console-window.png[image,width=316,height=231]
-
-=== Advanced view
-
-If you are a more experienced user or you have to handle encrypted PDFs or you have more keys stored in your keystore, you can use the _Advanced view_ checkbox to enable additional functionality.
-
-image:img/advanced-view.png[image,width=338,height=282]
-
-==== Key alias
-
-When you have more private keys stored in the keystore, you can select which one will be used to sign the PDF file by filling the _Key alias_ field. Either you can type alias name directly (combo box is editable) or you can load all names by pressing the _Load keys_ button and then select one from the drop-down list.footnote:[Only the private keys, which are valid (at the time of the signing) are displayed in the list. If the certificate supports the Key Usage extension, the private key will only be displayed if it is meant for signing.]
-
-If you don't fill the _Key alias_ field the first alias read from keystore will be used.
-
-==== Key password
-
-Each key in the keystore can be protected with its password. If this password differs from the password of keystore, fill it in the _Key password_ input field.
-
 ==== Append signature
 
-JSignPdf can work in two signing modes. It replaces existing signatures with the new ones by default. If you select the _Append signature_ checkbox, the new one will be appended and the old signatures will stay unchanged. _*This option is disabled for encrypted documents.*_
+JSignPdf can work in two signing modes. It replaces existing signatures with the new ones by default. If you enable the _Append signature_ option, the new one will be appended and the old signatures will stay unchanged. _*This option is disabled for encrypted documents.*_
 
 ==== Certification level
 
-The JSignPdf application can add a certificate to the signed PDF. There are four levels of certification as you can see from the screenshot:
+The JSignPdf application can add a certificate to the signed PDF. There are four levels of certification:
 
-image:img/cert-level.png[image,width=338,height=282]
+* NOT_CERTIFIED
+* CERTIFIED_NO_CHANGES_ALLOWED
+* CERTIFIED_FORM_FILLING
+* CERTIFIED_FORM_FILLING_AND_ANNOTATIONS
 
 ==== Hash algorithms
 
-You can choose, which hash function will be used for the signature.
+You can choose which hash function will be used for the signature. Available algorithms include SHA-256, SHA-384, SHA-512, and others.
 
-image:img/hash-algorithm.png[image,width=338,height=282]
+==== Remember passwords
+
+JSignPdf stores filled information when you are exiting the application, so it's present when you run it the next time. Passwords are not stored by default, but you can allow them by enabling the _Remember passwords_ option.
+
+_*Even if the password is stored in the encrypted form, we do not recommend storing passwords if your computer is used by more users!*_
 
 === Encryption
 
-__PDF Encryption __combobox enables additional fields for support of PDF security. By using this you can either sign secured PDFs (and change the rights and user password) or you can add encryption to unencrypted PDF during the signing.
+_JavaFX panel: Encryption & Rights_
+
+The _Encryption_ option enables additional fields for support of PDF security. By using this you can either sign secured PDFs (and change the rights and user password) or you can add encryption to unencrypted PDF during the signing.
 
 ==== Encryption: Passwords
 
@@ -173,19 +211,15 @@ Fill the path to a certificate file (*.cer, *.crt, …) which should be used for
 
 ==== Rights
 
-You can set allowed actions in encrypted result PDF by pressing the _Rights_ button. A new modal window will be displayed and you can set the possible options there.
+You can set allowed actions in encrypted result PDF by configuring the document rights. Normal rights are represented by checkboxes. Printing right has 3 levels, so the combo box is used for it.
 
-image:img/rights.png[image,width=155,height=106]
+=== Visible signature options
 
-Normal rights are represented by checkboxes. Printing right has 3 levels, so the combo box is used for it.
+_JavaFX panel: Signature Appearance_
 
-=== Visible signature
+Enabling the _Visible signature_ option allows you to create a visible field with signature directly in the signed PDF. You can configure parameters (position/texts/images) of the visible signature.
 
-Checkbox _Visible signature_ allows you to create a visible field with signature directly in the signed PDF. If the checkbox is checked, button _Settings_ is enabled and you can configure parameters (position/texts/images) of visible signature.
-
-image:img/visible-dialog.png[image,width=299,height=302]
-
-Read ToolTip texts, which are assigned to some input fields. You will get information, how to fill them correctly.
+image:img/javafx/visible-signature-panel.png[Signature Appearance panel,width=312,height=544]
 
 ==== Page
 
@@ -193,27 +227,23 @@ Page number (counted from 1) to which the signature will be added.
 
 ==== Signature corners
 
-Next four inputs __Lower Left (X, Y) __and _Upper Right (X, Y)_ define the position of the signature on the page. You can fill in float numbers (with decimal places) as input. If you have already selected input PDF in the main window you will see a possible range for X and Y values on the right side of _Lower Left (X, Y)_ input fields.
+Next four inputs __Lower Left (X, Y) __and _Upper Right (X, Y)_ define the position of the signature on the page. You can fill in float numbers (with decimal places) as input.
 
 The position of a signature on the page is bounded by the lower-left corner and upper-right corner. The zero ([0,0]) position on the page is in the left bottom corner.
 
-==== Preview / Select button
-
-The PDF preview is supported from version 1.0.0. The borders of the visible signature are displayed on the chosen page. You can select a new position by pressing the left mouse button at the start corner, moving to the end corner, and releasing the mouse.
-
-image:img/preview-select.png[image,width=347,height=402]
+In the JavaFX interface you can place the signature visually by holding Shift and dragging a rectangle on the document preview.
 
 ==== Display
 
-In combo box _Display_ you can set which fields will be generated to visible signature.
+In the _Display_ / _Render mode_ option you can set which fields will be generated to visible signature.
 
 ==== Acrobat 6 layers
 
-The checkbox _Acrobat 6 layer mode _(checked by default) allows you to control which signature layers will be added to the signed document. Acrobat 6.0 and higher recommends that only layers n2 and n4 be present. If the checkbox is not selected then all layers will be created.
+The _Acrobat 6 layer mode_ option (enabled by default) allows you to control which signature layers will be added to the signed document. Acrobat 6.0 and higher recommends that only layers n2 and n4 be present. If the option is disabled then all layers will be created.
 
 ==== Texts and Images
 
-_Signature Text_, _Status Text_, _Image_, and _Background Image_ inputs define the content of fields in a visible signature. _Signature Font Size_ is used for setting the size of _Signature Text_, it should contain a positive decimal number.
+_Signature Text_, _Status Text_, _Image_, and _Background Image_ inputs define the content of fields in a visible signature. _Font Size_ is used for setting the size of _Signature Text_, it should contain a positive decimal number.
 
 _Background image scale_ defines the size of a background image. Any negative number means the best-fit algorithm will be used. Zero value means to stretch, which fills the whole field – it doesn't keep the image ratio. A positive value means the multiplicator of the original size.
 
@@ -221,11 +251,13 @@ Supported file formats for the _Image_, and _Background Image_ are GIF, JPEG, JP
 
 === TSA – timestamps
 
+_JavaFX panel: Timestamp & Validation_
+
 To add timestamp into signature you will need some timestamping authority (TSA). Fill server address into _TSA URL_ field and if the server requires authentication choose the authentication type and fill either _TSA User_ and _TSA Password_ fields or path to the certificate's private key (it has to be PKCS#12 keystore) and the password. You can also set _TSA Policy OID_, which will be sent to the TSA server in the request, but probably you will not need to do so and the server uses the right policy by itself.
 
-image:img/tsa-settings.png[image,title="tsa-dialog-outdated-screenshot",width=234,height=217]
-
 === Certificate revocation checking
+
+_JavaFX panel: Timestamp & Validation_
 
 JSignPdf supports two standard ways of certificate revocation checking – CRL and OCSP. Most of the X.509 certificates support CRL, but it has some disadvantages (for instance the size of the list and possibly outdated information). The second – OCSP solves the mentioned issues, but not all Certification Authorities (CA) support this protocol.
 
@@ -247,7 +279,29 @@ If OCSP is enabled in JSignPdf and the protocol is supported for the certificate
 
 === Proxy settings
 
-If some “online” feature (TSA, CRL, OCSP) is enabled and JSignPdf runs behind a firewall, you can set the proxy, which will be used for all internet connections. Proxy type DIRECT means no proxy will be used.
+If some "online" feature (TSA, CRL, OCSP) is enabled and JSignPdf runs behind a firewall, you can set the proxy, which will be used for all internet connections. Proxy type DIRECT means no proxy will be used.
+
+== Classic Swing UI
+
+The classic Swing GUI is the original graphical interface from earlier versions of JSignPdf. It remains available for backward compatibility.
+
+To start the Swing GUI, set the `jsignpdf.swing` system property:
+
+ $ java -Djsignpdf.swing=true -jar JSignPdf.jar
+
+=== Simple view
+
+The Swing GUI opens in a simplified view. Fill in the keystore type, keystore file and password, the input PDF file, and press _Sign It_.
+
+image:img/simple-view.png[Swing simple view,width=263,height=162]
+
+=== Advanced view
+
+Select the _Advanced view_ checkbox to access additional options such as key alias, append signature, certification level, hash algorithm, encryption, visible signature, TSA, and certificate revocation settings.
+
+image:img/advanced-view.png[Swing advanced view,width=338,height=282]
+
+All options available in the Swing GUI correspond to the options described in the <<Signing options>> chapter. Refer to those sections for detailed descriptions.
 
 == Using hardware tokens for signing
 
@@ -584,7 +638,7 @@ password for keystore. Quiet mode is enabled so no debug info is printed.
 
 === InstallCert Tool
 
-In some cases, when the JSignPdf connects to server through HTTPS protocol (e.g. to TSA server for timestamping), it can fail with console message “SSLHandshakeException”. It's caused because Java uses keystore (named “cacerts”) with preinstalled well-known certification authorities root certificates and if the HTTPS server doesn't have certificate signed by a such registered authority, the connection is refused.
+In some cases, when the JSignPdf connects to server through HTTPS protocol (e.g. to TSA server for timestamping), it can fail with console message "SSLHandshakeException". It's caused because Java uses keystore (named "cacerts") with preinstalled well-known certification authorities root certificates and if the HTTPS server doesn't have certificate signed by a such registered authority, the connection is refused.
 
 If you trust the server, which was refused, you can add its certificate (or some parent certificate in the certificate chain) to the Java cacerts keystore. JSignPdf comes with command line utility for it – InstallCert.
 
@@ -604,4 +658,3 @@ If you don't provide a hostname argument, you will be asked for it.
 image:img/installcert-tool.png[image,width=428,height=216]
 
 The certificate chain will be displayed and you can choose which one will be imported.
-  
