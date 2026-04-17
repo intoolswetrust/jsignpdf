@@ -20,6 +20,7 @@ import net.sf.jsignpdf.types.RenderMode;
 import net.sf.jsignpdf.types.ServerAuthentication;
 
 import java.net.Proxy;
+import java.security.KeyStore;
 
 /**
  * JavaFX property adapter wrapping BasicSignerOptions.
@@ -246,6 +247,81 @@ public class SigningOptionsViewModel {
         proxyType.set(opts.getProxyType());
         proxyHost.set(opts.getProxyHost());
         proxyPort.set(opts.getProxyPort());
+    }
+
+    /**
+     * Resets all ViewModel properties to their default values.
+     */
+    public void resetToDefaults() {
+        // Certificate settings
+        ksType.set(KeyStore.getDefaultType());
+        ksFile.set(null);
+        ksPassword.set(null);
+        keyAlias.set(null);
+        keyIndex.set(Constants.DEFVAL_KEY_INDEX);
+        keyPassword.set(null);
+        storePasswords.set(false);
+
+        // File & metadata
+        outFile.set(null);
+        append.set(Constants.DEFVAL_APPEND);
+        signerName.set(null);
+        reason.set(null);
+        location.set(null);
+        contact.set(null);
+        certLevel.set(CertificationLevel.NOT_CERTIFIED);
+        hashAlgorithm.set(Constants.DEFVAL_HASH_ALGORITHM);
+
+        // Visible signature
+        visible.set(false);
+        page.set(Constants.DEFVAL_PAGE);
+        positionLLX.set(Constants.DEFVAL_LLX);
+        positionLLY.set(Constants.DEFVAL_LLY);
+        positionURX.set(Constants.DEFVAL_URX);
+        positionURY.set(Constants.DEFVAL_URY);
+        bgImgScale.set(Constants.DEFVAL_BG_SCALE);
+        renderMode.set(RenderMode.DESCRIPTION_ONLY);
+        l2Text.set(null);
+        l4Text.set(null);
+        l2TextFontSize.set(Constants.DEFVAL_L2_FONT_SIZE);
+        imgPath.set(null);
+        bgImgPath.set(null);
+        acro6Layers.set(Constants.DEFVAL_ACRO6LAYERS);
+
+        // Encryption & rights
+        pdfEncryption.set(PDFEncryption.NONE);
+        pdfOwnerPassword.set(null);
+        pdfUserPassword.set(null);
+        pdfEncryptionCertFile.set(null);
+        rightPrinting.set(PrintRight.ALLOW_PRINTING);
+        rightCopy.set(true);
+        rightAssembly.set(true);
+        rightFillIn.set(true);
+        rightScreenReaders.set(true);
+        rightModifyAnnotations.set(true);
+        rightModifyContents.set(true);
+
+        // TSA
+        tsaEnabled.set(false);
+        tsaUrl.set(null);
+        tsaServerAuthn.set(ServerAuthentication.NONE);
+        tsaUser.set(null);
+        tsaPassword.set(null);
+        tsaCertFileType.set(null);
+        tsaCertFile.set(null);
+        tsaCertFilePassword.set(null);
+        tsaPolicy.set(null);
+        tsaHashAlg.set(null);
+
+        // OCSP/CRL
+        ocspEnabled.set(false);
+        ocspServerUrl.set(null);
+        crlEnabled.set(false);
+
+        // Proxy
+        proxyType.set(Constants.DEFVAL_PROXY_TYPE);
+        proxyHost.set(null);
+        proxyPort.set(Constants.DEFVAL_PROXY_PORT);
     }
 
     private static char[] toCharArray(String s) {
