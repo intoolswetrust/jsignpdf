@@ -23,7 +23,7 @@ jsignpdf-root/
 ├── jsignpdf/          # Main application (signing logic + GUI + CLI)
 ├── installcert/       # Certificate installer utility
 ├── distribution/      # Packaging: ZIP assembly, Windows installer, docs
-└── website/           # Docusaurus documentation site (not a Maven module)
+└── website/           # Hugo documentation site (not a Maven module)
 ```
 
 ## Source Code Layout
