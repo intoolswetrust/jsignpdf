@@ -111,6 +111,17 @@ if (-not $guideFound) {
     Write-Warning "No PDF guide found under $guideSrcDir; app-image will not include docs/JSignPdf.pdf"
 }
 
+# Bundle the demo folder (sample PDF + demo keystore + usage README) so users
+# have something to try immediately after install. Lands at app/demo/ in the
+# installed tree.
+$demoSrc = Join-Path $root 'distribution/demo'
+$demoFound = Test-Path $demoSrc
+if ($demoFound) {
+    Write-Host "  demo    : $demoSrc -> app/demo/"
+} else {
+    Write-Warning "Demo folder not found at $demoSrc; app-image will not include demo/"
+}
+
 # Load shared JVM options from the single source of truth. The main launcher
 # gets them as --java-options on the jpackage command line; JSignPdfC and
 # InstallCert inherit them (their .properties files leave java-options unset);
@@ -175,8 +186,11 @@ $appImageArgs = @(
     '--add-launcher',"JSignPdfC=$jpkgCfg/JSignPdfC.properties",
     '--add-launcher',"InstallCert=$installCertLauncherProps"
 )
-if ($guideFound) {
-    $appImageArgs += @('--app-content', $guideContentDocs)
+$appContentPaths = @()
+if ($guideFound) { $appContentPaths += $guideContentDocs }
+if ($demoFound)  { $appContentPaths += $demoSrc }
+foreach ($p in $appContentPaths) {
+    $appImageArgs += @('--app-content', $p)
 }
 & jpackage @appImageArgs
 if ($LASTEXITCODE -ne 0) { throw "jpackage app-image failed with exit code $LASTEXITCODE" }
