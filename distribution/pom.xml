@@ -8,7 +8,7 @@
     <parent>
         <groupId>com.github.kwart.jsign</groupId>
         <artifactId>jsignpdf-root</artifactId>
-        <version>3.0.0-SNAPSHOT</version>
+        <version>3.0.0-BETA-4</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
