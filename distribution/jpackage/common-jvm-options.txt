@@ -1,0 +1,15 @@
+# Shared JVM options for every JSignPdf launcher.
+#
+# Single source of truth consumed by distribution/windows/build-windows-installers.ps1:
+#   * Main launcher (JSignPdf) — passed as --java-options on the jpackage command line.
+#   * JSignPdfC / InstallCert — inherited automatically from the main launcher
+#     because their add-launcher .properties files leave java-options unset.
+#   * JSignPdf-swing — the build script generates the add-launcher .properties file
+#     at build time, concatenating these options with the Swing-specific ones.
+#
+# Format: one option per line; blank lines and lines starting with '#' are ignored.
+--add-exports=jdk.crypto.cryptoki/sun.security.pkcs11=ALL-UNNAMED
+--add-exports=jdk.crypto.cryptoki/sun.security.pkcs11.wrapper=ALL-UNNAMED
+--add-exports=java.base/sun.security.action=ALL-UNNAMED
+--add-exports=java.base/sun.security.rsa=ALL-UNNAMED
+--add-opens=java.base/sun.security.util=ALL-UNNAMED

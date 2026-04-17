@@ -50,10 +50,26 @@ JSignPdf releases are available on the GitHub releases page:
 
 {url-repo}/releases
 
-Each release provides:
+Each release provides the following artifacts:
 
-* a platform-independent ZIP archive containing JAR files (works on any OS with Java installed)
-* a Windows installer (`.exe`) that bundles a Java runtime — no separate Java installation is needed
+[cols="1,3"]
+|===
+|Artifact |Description
+
+|`jsignpdf-${VERSION}.zip`
+|Platform-independent ZIP archive containing the JAR files (`JSignPdf.jar`, `InstallCert.jar`), a shell launcher for Linux/macOS, the documentation and the demo material. Works on any OS with Java 11 or newer installed.
+
+|`JSignPdf-${VERSION}-win-x64.exe`
+|Windows 64-bit EXE installer. Bundles its own Java runtime, installs to _Program Files_ by default, creates Start Menu shortcuts and registers an Add/Remove Programs entry.
+
+|`JSignPdf-${VERSION}-win-x64.msi`
+|Windows 64-bit MSI installer. Functionally equivalent to the EXE installer; preferred for deployment via group policy or enterprise software-distribution tools.
+
+|`JSignPdf-${VERSION}-win-x64.zip`
+|Windows 64-bit portable ZIP. Contains the fully packaged application (including a bundled JRE); just unzip and run `JSignPdf.exe`.
+|===
+
+NOTE: 32-bit Windows is no longer supported by the dedicated Windows installers. Users on 32-bit Windows can still run JSignPdf from the platform-independent ZIP with their own 32-bit JRE.
 
 === Java
 
@@ -62,7 +78,7 @@ If you use the platform-independent ZIP archive, you need Java Runtime Environme
 * https://adoptium.net/[Eclipse Adoptium]
 * https://www.azul.com/downloads/?package=jre#download-openjdk[Azul Zulu]
 
-NOTE: The Windows installer bundles its own JRE, so a separate Java installation is not required.
+NOTE: The Windows EXE / MSI / portable ZIP variants all bundle their own JRE, so a separate Java installation is not required on Windows.
 
 === Obtaining a keystore
 
@@ -81,11 +97,64 @@ The most common keystore types supported by Java are:
 
 JSignPdf has been also extended to support external keystore types like smart cards, or network HSMs. The first example is CloudFoxy (https://gitlab.com/cloudfoxy).
 
+=== Demo files
+
+Every release bundles a small `demo/` folder so you can try JSignPdf immediately without generating your own certificate or finding a sample PDF:
+
+[cols="1,3"]
+|===
+|File |Description
+
+|`service-agreeement.pdf`
+|Sample unsigned PDF document.
+
+|`jsmith.p12`
+|Demo PKCS#12 keystore with a self-signed certificate for `CN=John Smith`. The keystore and key password is `123456`.
+
+|`README.md`
+|Walk-through of the most common command-line scenarios (basic signature, visible signature, timestamped signature with FreeTSA, appending a signature, listing keys).
+|===
+
+You can find the folder:
+
+* at the top level of the platform-independent ZIP (`jsignpdf-${VERSION}.zip`)
+* under `<install dir>\app\demo\` after installing with the Windows EXE / MSI installer
+* under `JSignPdf\app\demo\` in the Windows portable ZIP (`JSignPdf-${VERSION}-win-x64.zip`)
+
+WARNING: The bundled keystore is meant purely for experimentation. Do not use it to sign real documents.
+
 == Launching JSignPdf
 
-All platforms (with Java installed) should support the launching of jar file _JSignPdf.jar_. Use the following command in the directory where the application is located.
+=== From the Windows installer or portable ZIP
+
+When JSignPdf is installed via the Windows EXE / MSI installer (or extracted from the `win-x64.zip` portable archive), four launchers are available:
+
+[cols="1,3"]
+|===
+|Launcher |Purpose
+
+|`JSignPdf.exe`
+|Starts the JavaFX graphical interface (the default). Also available as a Start Menu shortcut after installation.
+
+|`JSignPdf-swing.exe`
+|Starts the classic Swing graphical interface (equivalent to passing `-Djsignpdf.swing=true` on the command line).
+
+|`JSignPdfC.exe`
+|Console-mode launcher for the signer. Use this in batch scripts, CI pipelines or whenever you want the output to appear in the current terminal window.
+
+|`InstallCert.exe`
+|Command-line tool for importing a server certificate into the bundled JRE's `cacerts` truststore (see <<InstallCert Tool>>).
+|===
+
+All four launchers share the bundled JRE -- you do **not** need to have Java installed separately. For installer-based deployments the launchers live in `<install dir>\` (with Start Menu shortcuts to the GUI launchers); in the portable ZIP they are directly in the extracted folder.
+
+=== From the platform-independent ZIP
+
+All platforms (with Java 11 or newer installed) can run the JAR file _JSignPdf.jar_ directly. Use the following command in the directory where the application is located:
 
  $ java -jar JSignPdf.jar
+
+On Linux and macOS a convenience shell script is bundled in `bin/jsignpdf.sh` which adds the JVM options required on Java 11+ and then launches the JAR.
 
 By default, JSignPdf opens the JavaFX graphical interface (see <<Using the JavaFX UI>>). To start the classic Swing GUI instead, set the `jsignpdf.swing` system property:
 
@@ -707,19 +776,38 @@ The property file _conf/conf.properties_ contain several option groups:
 * PKCS#11 support
 * enable more strict SSL handling
 
-=== Java VM options using EXE launchers
+=== Java VM options for the Windows EXE launchers
 
-If the Java VM properties have to be changed (e.g. maximum memory allowed) and the EXE wrapper is used, you can edit the appropriate _.l4j.ini_ file (e.g. _JSignPdf.l4j.ini_).
+If you need to change JVM properties for the Windows launchers (for example to increase the maximum heap), edit the corresponding `.cfg` file under the `app` subfolder of the installation. jpackage creates one `.cfg` per launcher:
 
-The arguments should be separated with spaces or newlines, environment variable expansion is supported, for example:
+[cols="1,3"]
+|===
+|Launcher |Configuration file
+
+|`JSignPdf.exe`
+|`app\JSignPdf.cfg`
+
+|`JSignPdf-swing.exe`
+|`app\JSignPdf-swing.cfg`
+
+|`JSignPdfC.exe`
+|`app\JSignPdfC.cfg`
+
+|`InstallCert.exe`
+|`app\InstallCert.cfg`
+|===
+
+Each `.cfg` file contains a `[JavaOptions]` section with one `java-options=` entry per option. Add additional options as further `java-options=` lines, for example:
 
 [source]
 ----
--Dswing.aatext=true
--Dsomevar="%SOMEVAR%"
--Xms32m
--Xmx512m
+[JavaOptions]
+java-options=--add-exports=java.base/sun.security.util=ALL-UNNAMED
+java-options=-Xmx1g
+java-options=-Dswing.aatext=true
 ----
+
+NOTE: The configuration files are shared between the installed build (`%ProgramFiles%\JSignPdf\app\`) and the portable ZIP (`JSignPdf\app\` inside the extracted archive).
 
 == Troubleshooting
 
@@ -727,12 +815,14 @@ The arguments should be separated with spaces or newlines, environment variable 
 
 If you see an OutOfMemoryError in the program console, you need to allow Java to use more memory.
 
-Add `-Xmx<size>` to your Java command. The following example allows Java to use 512 MB of heap:
+When running from the platform-independent ZIP, add `-Xmx<size>` to your Java command. The following example allows Java to use 512 MB of heap:
 
 [source]
 ----
 $ java -Xmx512m -jar JSignPdf.jar
 ----
+
+When running from the Windows EXE / MSI / portable ZIP, add a new `java-options=-Xmx512m` line to the `.cfg` file of the affected launcher (see <<Java VM options for the Windows EXE launchers>>).
 
 === SSL/TLS certificate errors
 

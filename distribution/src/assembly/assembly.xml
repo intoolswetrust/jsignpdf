@@ -50,5 +50,9 @@
                 <include>*.pdf</include>
             </includes>
         </fileSet>
+        <fileSet>
+            <directory>demo</directory>
+            <outputDirectory>/demo/</outputDirectory>
+        </fileSet>
     </fileSets>
 </assembly>

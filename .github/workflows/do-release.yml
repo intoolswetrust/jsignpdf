@@ -15,9 +15,13 @@ env:
   GIT_AUTHOR_EMAIL: <>
   GIT_COMMITTER_NAME: Terminator the Kitty
   GIT_COMMITTER_EMAIL: <>
+
 jobs:
   do-release:
     runs-on: ubuntu-latest
+    outputs:
+      tag: ${{ steps.maven_release.outputs.TAG }}
+      version: ${{ steps.maven_release.outputs.VERSION }}
     steps:
     - name: Checkout
       uses: actions/checkout@v6
@@ -60,16 +64,13 @@ jobs:
         mvn -P release --batch-mode release:perform \
             -DstagingProgressTimeoutMinutes=30 -Dmaven.wagon.rto=7200000 \
             -Dmaven.wagon.httpconnectionManager.maxPerRoute=60 -Dmaven.wagon.httpconnectionManager.maxTotal=100
-        docker run --rm -v "$(pwd):/mnt" \
-          -u $(id -u):$(id -g) kwart/innosetup \
-          /mnt/distribution/windows/create-jsignpdf-installer.sh
         cd distribution/target
         ls -R
         mkdir "JSignPdf-$VERSION"
-        mv *.zip *.exe "$FULL_VERSION/"
+        mv *.zip "$FULL_VERSION/"
         cp generated-docs/JSignPdf.pdf "$FULL_VERSION/$FULL_VERSION.pdf"
         cp "../doc/release-notes/${BASE_VERSION}.md" "$FULL_VERSION/README.md"
-        
+
         echo "${{ secrets.SSH_PRIVATE_KEY }}" >> private_key
         chmod 600 private_key
         sftp -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -i private_key kwart@frs.sourceforge.net:/home/frs/project/jsignpdf/stable <<EOF
@@ -78,6 +79,7 @@ jobs:
         EOF
         mv "$FULL_VERSION" upload
         echo "TAG=$TAG" >> $GITHUB_OUTPUT
+        echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
         echo "BASE_VERSION=$BASE_VERSION" >> $GITHUB_OUTPUT
       env:
         MAVEN_USERNAME: ${{ secrets.OSSRH_USERNAME }}
@@ -92,3 +94,49 @@ jobs:
         tag:   ${{ steps.maven_release.outputs.TAG }}
         overwrite: true
         body_path: distribution/doc/release-notes/${{ steps.maven_release.outputs.BASE_VERSION }}.md
+
+    - name: Publish PDF guide for downstream jobs
+      uses: actions/upload-artifact@v4
+      with:
+        name: jsignpdf-pdf-guide
+        path: distribution/target/generated-docs/JSignPdf.pdf
+        if-no-files-found: error
+        retention-days: 1
+
+  windows-installers:
+    needs: do-release
+    runs-on: windows-latest
+    steps:
+    - name: Checkout release tag
+      uses: actions/checkout@v6
+      with:
+        ref: ${{ needs.do-release.outputs.tag }}
+
+    - name: Set up JDK 21
+      uses: actions/setup-java@v5
+      with:
+        java-version: 21
+        distribution: 'temurin'
+        cache: 'maven'
+
+    - name: Build jsignpdf and installcert jars
+      shell: bash
+      run: mvn -B -DskipTests -pl jsignpdf,installcert -am package
+
+    - name: Download PDF guide from the release job
+      uses: actions/download-artifact@v4
+      with:
+        name: jsignpdf-pdf-guide
+        path: distribution/target/pdf-guide
+
+    - name: Build Windows installers (EXE / MSI / ZIP)
+      shell: pwsh
+      run: ./distribution/windows/build-windows-installers.ps1 -Version ${{ needs.do-release.outputs.version }}
+
+    - name: Upload Windows installers to release
+      uses: svenstaro/upload-release-action@29e53e917877a24fad85510ded594ab3c9ca12de
+      with:
+        file: distribution/target/upload/*
+        file_glob: true
+        tag: ${{ needs.do-release.outputs.tag }}
+        overwrite: true
