@@ -128,8 +128,8 @@ public class DynamicX509TrustManager implements X509TrustManager {
         // acquire X509 trust manager from factory
         TrustManager tms[] = trustManagerFactory.getTrustManagers();
         for (int i = 0; i < tms.length; i++) {
-            if (tms[i] instanceof X509TrustManager) {
-                trustManager = (X509TrustManager) tms[i];
+            if (tms[i] instanceof X509TrustManager x509Tm) {
+                trustManager = x509Tm;
                 return;
             }
         }

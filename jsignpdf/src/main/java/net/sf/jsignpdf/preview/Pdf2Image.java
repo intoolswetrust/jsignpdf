@@ -86,13 +86,12 @@ public class Pdf2Image {
     public BufferedImage getImageForPage(final int aPage) {
         BufferedImage tmpResult = null;
         for (String libname : Constants.PDF2IMAGE_LIBRARIES.split("\\s*,\\s*")) {
-            if (Constants.PDF2IMAGE_JPEDAL.equals(libname)) {
-                tmpResult = getImageUsingJPedal(aPage);
-            } else if (Constants.PDF2IMAGE_PDFBOX.equals(libname)) {
-                tmpResult = getImageUsingPdfBox(aPage);
-            } else if (Constants.PDF2IMAGE_OPENPDF.equals(libname)) {
-                tmpResult = getImageUsingOpenPdfRenderer(aPage);
-            }
+            tmpResult = switch (libname) {
+                case Constants.PDF2IMAGE_JPEDAL -> getImageUsingJPedal(aPage);
+                case Constants.PDF2IMAGE_PDFBOX -> getImageUsingPdfBox(aPage);
+                case Constants.PDF2IMAGE_OPENPDF -> getImageUsingOpenPdfRenderer(aPage);
+                default -> null;
+            };
             if (tmpResult != null)
                 break;
         }

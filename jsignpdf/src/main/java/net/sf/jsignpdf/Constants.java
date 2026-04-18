@@ -52,7 +52,7 @@ import net.sf.jsignpdf.utils.ResourceProvider;
 public class Constants {
 
     static {
-        try (InputStream is = Constants.class.getClassLoader().
+        try (var is = Constants.class.getClassLoader().
                 getResourceAsStream("logging.properties")) {
             LogManager.getLogManager().readConfiguration(is);
         } catch (IOException e) {
@@ -426,10 +426,10 @@ public class Constants {
         SUPPORTED_CRITICAL_EXTENSION_OIDS = Collections.unmodifiableSet(oidSet);
 
         String version = "[UNKNOWN]";
-        try (InputStream is = Constants.class
+        try (var is = Constants.class
                 .getResourceAsStream("/META-INF/maven/com.github.kwart.jsign/jsignpdf/pom.properties")) {
             if (is != null) {
-                Properties props = new Properties();
+                var props = new Properties();
                 props.load(is);
                 if (props.containsKey("version")) {
                     version = props.getProperty("version");
