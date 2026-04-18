@@ -1,0 +1,65 @@
+name: Refresh Flatpak maven-dependencies
+
+on:
+  push:
+    branches: [master]
+    paths:
+      - 'pom.xml'
+      - '**/pom.xml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: refresh-flatpak-deps
+  cancel-in-progress: true
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v6
+
+    - name: Install Flatpak + Flathub remote
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y flatpak
+        sudo flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
+
+    - name: Install Flatpak SDK + openjdk21 extension
+      run: |
+        sudo flatpak install -y --noninteractive flathub \
+          org.freedesktop.Sdk//25.08 \
+          org.freedesktop.Sdk.Extension.openjdk21//25.08
+
+    - name: Regenerate maven-dependencies.json
+      run: ./distribution/linux/flatpak/generate-dependencies.sh
+
+    - name: Open self-healing PR on drift
+      uses: peter-evans/create-pull-request@5f6978faf089d4d20b00c7766989d076bb2fc7f1
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
+        base: master
+        branch: chore/flatpak-deps-refresh
+        delete-branch: true
+        add-paths: distribution/linux/flatpak/maven-dependencies.json
+        commit-message: |
+          chore(flatpak): regenerate maven-dependencies.json
+        title: "chore(flatpak): refresh maven-dependencies.json"
+        body: |
+          Automated refresh of `distribution/linux/flatpak/maven-dependencies.json`.
+
+          The `refresh-flatpak-deps` workflow detected drift after a change to a
+          `pom.xml` on `master` and regenerated the offline Maven manifest used by
+          the Devel Flatpak build.
+
+          Safe to merge once review passes. If the regeneration itself is broken,
+          the fix belongs in `distribution/linux/flatpak/generate-dependencies.sh`.
+
+          **Note:** CI does not run automatically on PRs opened by `GITHUB_TOKEN`.
+          Close and reopen this PR, or push any commit to its branch, to trigger
+          the usual `pr-builder` / `codeql-analysis` workflows. Upgrading this job
+          to a PAT or GitHub App token would remove that limitation.
