@@ -22,6 +22,7 @@ jobs:
     outputs:
       tag: ${{ steps.maven_release.outputs.TAG }}
       version: ${{ steps.maven_release.outputs.VERSION }}
+      base-version: ${{ steps.maven_release.outputs.BASE_VERSION }}
     steps:
     - name: Checkout
       uses: actions/checkout@v6
@@ -86,14 +87,13 @@ jobs:
         MAVEN_PASSWORD: ${{ secrets.OSSRH_PASSWORD }}
         MAVEN_GPG_PASSPHRASE: ${{ secrets.MAVEN_GPG_PASSPHRASE }}
 
-    - name: Upload binaries to release
-      uses: svenstaro/upload-release-action@29e53e917877a24fad85510ded594ab3c9ca12de
+    - name: Stage Linux release assets for the publish job
+      uses: actions/upload-artifact@v4
       with:
-        file: distribution/target/upload/*
-        file_glob: true
-        tag:   ${{ steps.maven_release.outputs.TAG }}
-        overwrite: true
-        body_path: distribution/doc/release-notes/${{ steps.maven_release.outputs.BASE_VERSION }}.md
+        name: jsignpdf-linux-assets
+        path: distribution/target/upload/*
+        if-no-files-found: error
+        retention-days: 1
 
     - name: Publish PDF guide for downstream jobs
       uses: actions/upload-artifact@v4
@@ -133,10 +133,61 @@ jobs:
       shell: pwsh
       run: ./distribution/windows/build-windows-installers.ps1 -Version ${{ needs.do-release.outputs.version }}
 
-    - name: Upload Windows installers to release
-      uses: svenstaro/upload-release-action@29e53e917877a24fad85510ded594ab3c9ca12de
+    - name: Stage Windows installers for the publish job
+      uses: actions/upload-artifact@v4
       with:
-        file: distribution/target/upload/*
-        file_glob: true
-        tag: ${{ needs.do-release.outputs.tag }}
-        overwrite: true
+        name: jsignpdf-windows-assets
+        path: distribution/target/upload/*
+        if-no-files-found: error
+        retention-days: 1
+
+  publish-release:
+    needs: [do-release, windows-installers]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+    - name: Checkout release tag
+      uses: actions/checkout@v6
+      with:
+        ref: ${{ needs.do-release.outputs.tag }}
+
+    - name: Download Linux assets
+      uses: actions/download-artifact@v4
+      with:
+        name: jsignpdf-linux-assets
+        path: release-assets
+
+    - name: Download Windows assets
+      uses: actions/download-artifact@v4
+      with:
+        name: jsignpdf-windows-assets
+        path: release-assets
+
+    - name: Create GitHub release with all assets
+      env:
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        TAG: ${{ needs.do-release.outputs.tag }}
+        BASE_VERSION: ${{ needs.do-release.outputs.base-version }}
+      run: |
+        set -euo pipefail
+        NOTES_FILE="distribution/doc/release-notes/${BASE_VERSION}.md"
+        if [ ! -f "$NOTES_FILE" ]; then
+          echo "::error::Release notes file not found at $NOTES_FILE"
+          exit 1
+        fi
+        # Delete any auto-created release so we publish a single release event
+        # with the correct body and the full asset set in one shot.
+        if gh release view "$TAG" >/dev/null 2>&1; then
+          gh release delete "$TAG" --yes --cleanup-tag=false
+        fi
+        shopt -s nullglob
+        assets=(release-assets/*)
+        if [ ${#assets[@]} -eq 0 ]; then
+          echo "::error::No assets found under release-assets/"
+          exit 1
+        fi
+        gh release create "$TAG" \
+          --title "$TAG" \
+          --notes-file "$NOTES_FILE" \
+          "${assets[@]}"
