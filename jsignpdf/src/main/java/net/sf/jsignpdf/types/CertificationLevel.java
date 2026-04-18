@@ -31,7 +31,7 @@ package net.sf.jsignpdf.types;
 
 import static net.sf.jsignpdf.Constants.RES;
 
-import com.lowagie.text.pdf.PdfSignatureAppearance;
+import org.openpdf.text.pdf.PdfSignatureAppearance;
 
 /**
  * Enum of possible certification levels used to Sign PDF.

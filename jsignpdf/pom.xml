@@ -191,6 +191,10 @@
             <artifactId>openpdf</artifactId>
         </dependency>
         <dependency>
+            <groupId>com.github.librepdf</groupId>
+            <artifactId>openpdf-renderer</artifactId>
+        </dependency>
+        <dependency>
             <groupId>org.bouncycastle</groupId>
             <artifactId>bcprov-jdk18on</artifactId>
         </dependency>
@@ -209,10 +213,6 @@
         <dependency>
             <groupId>commons-io</groupId>
             <artifactId>commons-io</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.github.rjolly</groupId>
-            <artifactId>pdf-renderer</artifactId>
         </dependency>
         <dependency>
             <groupId>org.apache.pdfbox</groupId>

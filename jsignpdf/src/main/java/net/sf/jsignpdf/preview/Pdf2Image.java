@@ -49,11 +49,11 @@ import org.apache.pdfbox.rendering.PDFRenderer;
 import org.jpedal.PdfDecoder;
 import org.jpedal.exception.PdfException;
 
-import com.lowagie.text.pdf.PdfReader;
-import com.sun.pdfview.PDFFile;
-import com.sun.pdfview.PDFPage;
-import com.sun.pdfview.PDFParseException;
-import com.sun.pdfview.decrypt.PDFPassword;
+import org.openpdf.renderer.PDFFile;
+import org.openpdf.renderer.PDFPage;
+import org.openpdf.renderer.PDFParseException;
+import org.openpdf.renderer.decrypt.PDFPassword;
+import org.openpdf.text.pdf.PdfReader;
 
 /**
  * Helper class for converting a page in PDF to a {@link BufferedImage} object.
@@ -88,10 +88,10 @@ public class Pdf2Image {
         for (String libname : Constants.PDF2IMAGE_LIBRARIES.split("\\s*,\\s*")) {
             if (Constants.PDF2IMAGE_JPEDAL.equals(libname)) {
                 tmpResult = getImageUsingJPedal(aPage);
-            } else if (Constants.PDF2IMAGE_PDFRENDERER.equals(libname)) {
-                tmpResult = getImageUsingPdfRenderer(aPage);
             } else if (Constants.PDF2IMAGE_PDFBOX.equals(libname)) {
                 tmpResult = getImageUsingPdfBox(aPage);
+            } else if (Constants.PDF2IMAGE_OPENPDF.equals(libname)) {
+                tmpResult = getImageUsingOpenPdfRenderer(aPage);
             }
             if (tmpResult != null)
                 break;
@@ -141,12 +141,13 @@ public class Pdf2Image {
     }
 
     /**
-     * Returns image (or null if failed) generated from given page in PDF using Sun PDFRender.
+     * Returns image (or null if failed) generated from given page in PDF using the OpenPDF renderer
+     * (actively-maintained descendant of the Sun Labs PDFRenderer).
      *
      * @param aPage page in PDF (1 based)
      * @return image or null
      */
-    public BufferedImage getImageUsingPdfRenderer(final int aPage) {
+    public BufferedImage getImageUsingOpenPdfRenderer(final int aPage) {
         BufferedImage tmpResult = null;
         RandomAccessFile raf = null;
         try {

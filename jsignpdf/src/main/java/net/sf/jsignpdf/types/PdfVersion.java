@@ -29,7 +29,7 @@
  */
 package net.sf.jsignpdf.types;
 
-import com.lowagie.text.pdf.PdfWriter;
+import org.openpdf.text.pdf.PdfWriter;
 
 /**
  * Enum of PDF versions
@@ -42,11 +42,11 @@ public enum PdfVersion {
                     PdfWriter.VERSION_1_6), PDF_1_7("PDF-1.7", PdfWriter.VERSION_1_7);
 
     private final String name;
-    private final char charVersion;
+    private final String stringVersion;
 
-    private PdfVersion(final String aName, char aVersion) {
+    private PdfVersion(final String aName, String aVersion) {
         name = aName;
-        charVersion = aVersion;
+        stringVersion = aVersion;
     }
 
     /**
@@ -57,15 +57,18 @@ public enum PdfVersion {
     }
 
     /**
-     * Gets version as char (representation in PdfReader and PdfWriter).
+     * Gets version as String (representation in PdfReader and PdfWriter since OpenPDF 3.x).
      */
-    public char getCharVersion() {
-        return charVersion;
+    public String getStringVersion() {
+        return stringVersion;
     }
 
-    public static PdfVersion fromCharVersion(char ver) {
+    public static PdfVersion fromStringVersion(String ver) {
+        if (ver == null) {
+            return null;
+        }
         for (PdfVersion pdfVer: PdfVersion.values()) {
-            if (pdfVer.getCharVersion() == ver) {
+            if (pdfVer.getStringVersion().equals(ver)) {
                 return pdfVer;
             }
         }
