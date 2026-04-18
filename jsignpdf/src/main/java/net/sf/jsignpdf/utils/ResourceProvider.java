@@ -76,24 +76,20 @@ public class ResourceProvider {
     public void setLabelAndMnemonic(final JComponent aComponent, final String aKey) {
         final String tmpLabelText = get(aKey);
         final int tmpMnemIndex = getMnemonicIndex(aKey);
-        if (aComponent instanceof JLabel) {
-            final JLabel tmpLabel = (JLabel) aComponent;
+        if (aComponent instanceof JLabel tmpLabel) {
             tmpLabel.setText(tmpLabelText);
             if (tmpMnemIndex > -1) {
                 tmpLabel.setDisplayedMnemonic(tmpLabelText.toLowerCase().charAt(tmpMnemIndex));
                 tmpLabel.setDisplayedMnemonicIndex(tmpMnemIndex);
             }
-        } else if (aComponent instanceof AbstractButton) {
+        } else if (aComponent instanceof AbstractButton tmpBtn) {
             // handles Buttons, Checkboxes and Radiobuttons
-            final AbstractButton tmpBtn = (AbstractButton) aComponent;
             tmpBtn.setText(tmpLabelText);
             if (tmpMnemIndex > -1) {
                 tmpBtn.setMnemonic(tmpLabelText.toLowerCase().charAt(tmpMnemIndex));
             }
-        } else if (aComponent instanceof JPanel) {
-            final JPanel panel = (JPanel) aComponent;
-            if (panel.getBorder() instanceof TitledBorder) {
-                final TitledBorder titledBorder = (TitledBorder) panel.getBorder();
+        } else if (aComponent instanceof JPanel panel) {
+            if (panel.getBorder() instanceof TitledBorder titledBorder) {
                 titledBorder.setTitle(tmpLabelText);
             }
         } else {

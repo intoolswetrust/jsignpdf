@@ -101,9 +101,8 @@ public class SignerFileChooser extends JFileChooser {
     public void setSelectedFile(File file) {
         super.setSelectedFile(file);
         // safety check
-        if (getUI() instanceof BasicFileChooserUI) {
+        if (getUI() instanceof BasicFileChooserUI tmpUi) {
             // grab the ui and set the filename
-            BasicFileChooserUI tmpUi = (BasicFileChooserUI) getUI();
             tmpUi.setFileName(file == null ? "" : file.getName());
         }
     }

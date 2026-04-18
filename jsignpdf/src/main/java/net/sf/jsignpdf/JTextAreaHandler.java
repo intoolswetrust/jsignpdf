@@ -70,7 +70,7 @@ public class JTextAreaHandler extends Handler {
         jTextArea.append(record.getLevel() + " " + record.getMessage() + NEW_LINE);
         Throwable thrown = record.getThrown();
         if (thrown != null) {
-            try (StringWriter stringWriter = new StringWriter()) {
+            try (var stringWriter = new StringWriter()) {
                 thrown.printStackTrace(new PrintWriter(stringWriter, true));
                 jTextArea.append(stringWriter.toString());
             } catch (IOException e) {

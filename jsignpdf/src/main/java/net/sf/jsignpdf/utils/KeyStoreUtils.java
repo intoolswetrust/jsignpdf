@@ -146,8 +146,7 @@ public class KeyStoreUtils {
                 if (aKs.isKeyEntry(tmpAlias)) {
                     final Certificate tmpCert = aKs.getCertificate(tmpAlias);
                     boolean tmpAddAlias = true;
-                    if (tmpCert instanceof X509Certificate) {
-                        final X509Certificate tmpX509 = (X509Certificate) tmpCert;
+                    if (tmpCert instanceof X509Certificate tmpX509) {
                         if (checkValidity) {
                             try {
                                 tmpX509.checkValidity();
