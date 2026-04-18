@@ -19,7 +19,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 
-import com.lowagie.text.exceptions.BadPasswordException;
+import org.openpdf.text.exceptions.BadPasswordException;
 
 /**
  * Tests for {@link PdfExtraInfo}, focusing on password-protected PDF handling.

@@ -70,22 +70,22 @@ import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.text.StrSubstitutor;
 
-import com.lowagie.text.Font;
-import com.lowagie.text.Image;
-import com.lowagie.text.Rectangle;
-import com.lowagie.text.pdf.AcroFields;
-import com.lowagie.text.pdf.OcspClientBouncyCastle;
-import com.lowagie.text.pdf.PdfDate;
-import com.lowagie.text.pdf.PdfDictionary;
-import com.lowagie.text.pdf.PdfName;
-import com.lowagie.text.pdf.PdfPKCS7;
-import com.lowagie.text.pdf.PdfReader;
-import com.lowagie.text.pdf.PdfSignature;
-import com.lowagie.text.pdf.PdfSignatureAppearance;
-import com.lowagie.text.pdf.PdfStamper;
-import com.lowagie.text.pdf.PdfString;
-import com.lowagie.text.pdf.PdfWriter;
-import com.lowagie.text.pdf.TSAClientBouncyCastle;
+import org.openpdf.text.Font;
+import org.openpdf.text.Image;
+import org.openpdf.text.Rectangle;
+import org.openpdf.text.pdf.AcroFields;
+import org.openpdf.text.pdf.OcspClientBouncyCastle;
+import org.openpdf.text.pdf.PdfDate;
+import org.openpdf.text.pdf.PdfDictionary;
+import org.openpdf.text.pdf.PdfName;
+import org.openpdf.text.pdf.PdfPKCS7;
+import org.openpdf.text.pdf.PdfReader;
+import org.openpdf.text.pdf.PdfSignature;
+import org.openpdf.text.pdf.PdfSignatureAppearance;
+import org.openpdf.text.pdf.PdfStamper;
+import org.openpdf.text.pdf.PdfString;
+import org.openpdf.text.pdf.PdfWriter;
+import org.openpdf.text.pdf.TSAClientBouncyCastle;
 
 /**
  * Main logic of signer application. It uses iText to create signature in PDF.
@@ -184,10 +184,10 @@ public class SignerLogic implements Runnable {
             final HashAlgorithm hashAlgorithm = options.getHashAlgorithmX();
 
             LOGGER.info(RES.get("console.createSignature"));
-            char tmpPdfVersion = '\0'; // default version - the same as input
-            char inputPdfVersion = reader.getPdfVersion();
-            char requiredPdfVersionForGivenHash = hashAlgorithm.getPdfVersion().getCharVersion();
-            if (inputPdfVersion < requiredPdfVersionForGivenHash) {
+            String tmpPdfVersion = null; // default version - the same as input
+            String inputPdfVersion = reader.getPdfVersion();
+            String requiredPdfVersionForGivenHash = hashAlgorithm.getPdfVersion().getStringVersion();
+            if (inputPdfVersion != null && inputPdfVersion.compareTo(requiredPdfVersionForGivenHash) < 0) {
                 // this covers also problems with visible signatures (embedded
                 // fonts) in PDF 1.2, because the minimal version
                 // for hash algorithms is 1.3 (for SHA1)
@@ -196,13 +196,13 @@ public class SignerLogic implements Runnable {
                     // then return false (not possible)
                     LOGGER.info(RES.get("console.updateVersionNotPossibleInAppendModeForGivenHash",
                             hashAlgorithm.getAlgorithmName(), hashAlgorithm.getPdfVersion().getVersionName(),
-                            PdfVersion.fromCharVersion(inputPdfVersion).getVersionName(),
+                            PdfVersion.fromStringVersion(inputPdfVersion).getVersionName(),
                             HashAlgorithm.valuesWithPdfVersionAsString()));
                     return false;
                 }
                 tmpPdfVersion = requiredPdfVersionForGivenHash;
                 LOGGER.info(RES.get("console.updateVersion",
-                        new String[] { String.valueOf(inputPdfVersion), String.valueOf(tmpPdfVersion) }));
+                        new String[] { inputPdfVersion, tmpPdfVersion }));
             }
 
             final PdfStamper stp = PdfStamper.createSignature(reader, fout, tmpPdfVersion, null, options.isAppendX());
@@ -211,7 +211,7 @@ public class SignerLogic implements Runnable {
                 // (otherwise we're getting to troubles)
                 final AcroFields acroFields = stp.getAcroFields();
                 @SuppressWarnings("unchecked")
-                final List<String> sigNames = acroFields.getSignatureNames();
+                final List<String> sigNames = acroFields.getSignedFieldNames();
                 for (String sigName : sigNames) {
                     acroFields.removeField(sigName);
                 }
@@ -303,7 +303,7 @@ public class SignerLogic implements Runnable {
                     signer = options.getSignerName();
                 }
                 final String certificate = PdfPKCS7.getSubjectFields((X509Certificate) chain[0]).toString();
-                final String timestamp = new SimpleDateFormat("yyyy.MM.dd HH:mm:ss z").format(sap.getSignDate().getTime());
+                final String timestamp = new SimpleDateFormat("yyyy.MM.dd HH:mm:ss z").format(sap.getSignDateNullSafe().getTime());
                 if (options.getL2Text() != null) {
                     final Map<String, String> replacements = new HashMap<String, String>();
                     replacements.put(L2TEXT_PLACEHOLDER_SIGNER, StringUtils.defaultString(signer));
@@ -358,7 +358,7 @@ public class SignerLogic implements Runnable {
             if (!StringUtils.isEmpty(contact)) {
                 dic.setContact(sap.getContact());
             }
-            dic.setDate(new PdfDate(sap.getSignDate()));
+            dic.setDate(new PdfDate(sap.getSignDateNullSafe()));
             sap.setCryptoDictionary(dic);
 
             final Proxy tmpProxy = options.createProxy();

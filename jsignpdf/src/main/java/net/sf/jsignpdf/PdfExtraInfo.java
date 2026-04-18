@@ -32,9 +32,9 @@ package net.sf.jsignpdf;
 import net.sf.jsignpdf.types.PageInfo;
 import net.sf.jsignpdf.utils.PdfUtils;
 
-import com.lowagie.text.Rectangle;
-import com.lowagie.text.exceptions.BadPasswordException;
-import com.lowagie.text.pdf.PdfReader;
+import org.openpdf.text.Rectangle;
+import org.openpdf.text.exceptions.BadPasswordException;
+import org.openpdf.text.pdf.PdfReader;
 
 /**
  * Provides additional information for selected input PDF file.

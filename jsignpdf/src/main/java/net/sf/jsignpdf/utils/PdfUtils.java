@@ -31,7 +31,7 @@ package net.sf.jsignpdf.utils;
 
 import java.io.IOException;
 
-import com.lowagie.text.pdf.PdfReader;
+import org.openpdf.text.pdf.PdfReader;
 
 /**
  * Utilities to handle PDFs.

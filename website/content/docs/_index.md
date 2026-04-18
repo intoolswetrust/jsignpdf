@@ -11,7 +11,7 @@ cascade:
 
 - Download the latest release from the [GitHub releases page](https://github.com/intoolswetrust/jsignpdf/releases/latest).
 - On Windows 64-bit, pick one of the `win-x64` artifacts — the **EXE** or **MSI** installer, or the **portable ZIP**. All three bundle their own Java runtime.
-- On Linux, macOS or 32-bit Windows, download `jsignpdf-*.zip` (the platform-independent archive) and install Java 11 or newer, e.g. from [Eclipse Adoptium](https://adoptium.net/).
+- On Linux, macOS or 32-bit Windows, download `jsignpdf-*.zip` (the platform-independent archive) and install Java 21 or newer, e.g. from [Eclipse Adoptium](https://adoptium.net/).
 - Extract the archive if you chose a ZIP.
 
 ### 2. Get a keystore

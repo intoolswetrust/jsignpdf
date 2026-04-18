@@ -4,7 +4,7 @@
 
 JSignPdf is a Java application for adding digital signatures to PDF documents. It provides both a GUI (JavaFX default, Swing fallback via `-Djsignpdf.swing=true`) and a CLI interface.
 
-- **Java**: 11+
+- **Java**: 21+
 - **Build**: Apache Maven multi-module
 - **Repository**: https://github.com/intoolswetrust/jsignpdf
 
@@ -86,6 +86,6 @@ GUI (JavaFX / Swing)            ──┘         (model)              (signing 
 
 | Workflow | Trigger | Purpose |
 |---|---|---|
-| `pr-builder.yaml` | PR/push to master | `mvn verify` with Java 11 |
+| `pr-builder.yaml` | PR/push to master | `mvn verify` with Java 21 |
 | `push-snapshots.yaml` | Push to master | Deploy SNAPSHOTs to Maven Central |
 | `do-release.yml` | Manual dispatch | Full release |
