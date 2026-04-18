@@ -11,6 +11,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.pdfbox.Loader;
 import org.apache.pdfbox.cos.COSArray;
 import org.apache.pdfbox.cos.COSBase;
 import org.apache.pdfbox.cos.COSName;
@@ -110,7 +111,7 @@ public class PdfSignatureValidator {
     @SuppressWarnings("unchecked")
     public static ValidationResult validate(File signedPdf, int signatureIndex) throws Exception {
         byte[] fileBytes = Files.readAllBytes(signedPdf.toPath());
-        PDDocument doc = PDDocument.load(fileBytes);
+        PDDocument doc = Loader.loadPDF(fileBytes);
         try {
             List<PDSignature> signatures = doc.getSignatureDictionaries();
             ValidationResult result = new ValidationResult();
@@ -244,8 +245,7 @@ public class PdfSignatureValidator {
     private static String extractText(PDFormXObject formXObject) throws IOException {
         StringBuilder text = new StringBuilder();
         PDFStreamParser parser = new PDFStreamParser(formXObject);
-        parser.parse();
-        List<Object> tokens = parser.getTokens();
+        List<Object> tokens = parser.parse();
         PDResources resources = formXObject.getResources();
         PDFont currentFont = null;
 
@@ -328,7 +328,7 @@ public class PdfSignatureValidator {
      * Returns the number of signature dictionaries in the given PDF.
      */
     public static int getSignatureCount(File signedPdf) throws Exception {
-        PDDocument doc = PDDocument.load(signedPdf);
+        PDDocument doc = Loader.loadPDF(signedPdf);
         try {
             return doc.getSignatureDictionaries().size();
         } finally {
