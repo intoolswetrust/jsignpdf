@@ -58,7 +58,7 @@ jobs:
         NEXT_VERSION=${{ github.event.inputs.next-snapshot-version }}-SNAPSHOT
         TAG=JSignPdf_${VERSION//\./_}
         set -x
-        mvn clean install
+        mvn --batch-mode clean install
         mvn -P release --batch-mode "-Dtag=${TAG}" release:prepare \
                  "-DreleaseVersion=${VERSION}" \
                  "-DdevelopmentVersion=${NEXT_VERSION}"

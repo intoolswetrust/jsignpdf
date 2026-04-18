@@ -62,7 +62,7 @@ echo "==> Running Maven to download dependencies"
 cd "\$BUILD_DIR"
 rm -rf "\$M2_DIR"
 mkdir -p "\$M2_DIR"
-mvn clean install \
+mvn --batch-mode clean install \
   -Dmaven.repo.local="\$M2_DIR" \
   -DskipTests \
   -Dmaven.javadoc.skip=true \
