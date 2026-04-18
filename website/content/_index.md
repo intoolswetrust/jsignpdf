@@ -35,7 +35,7 @@ toc: false
 </div>
 
 <p class="jsp-meta">
-  Runs on Windows, macOS and Linux · Java 11+ · LGPL / MPL licensed
+  Runs on Windows, macOS and Linux · Java 21+ · LGPL / MPL licensed
 </p>
 
 <div class="jsp-hero-showcase">

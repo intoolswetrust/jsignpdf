@@ -12,7 +12,7 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <maven.compiler.release>11</maven.compiler.release>
+        <maven.compiler.release>21</maven.compiler.release>
 
         <maven.checkstyle.plugin.version>3.1.0</maven.checkstyle.plugin.version>
         <maven.assembly.plugin.version>3.8.0</maven.assembly.plugin.version>
@@ -24,14 +24,13 @@
         <bouncycastle.version>1.84</bouncycastle.version>
         <jsign.pkcs11.version>1.1.0</jsign.pkcs11.version>
         <jsign.jpedal.version>4.92.13</jsign.jpedal.version>
-        <pdfbox.version>2.0.27</pdfbox.version>
-        <pdf-renderer.version>140</pdf-renderer.version>
+        <pdfbox.version>2.0.36</pdfbox.version>
         <commons-io.version>2.21.0</commons-io.version>
         <commons-cli.version>1.11.0</commons-cli.version>
         <commons-lang3.version>3.20.0</commons-lang3.version>
-        <openpdf.version>1.3.30</openpdf.version>
+        <openpdf.version>3.0.3</openpdf.version>
         <junit.version>4.13.2</junit.version>
-        <openjfx.version>17.0.15</openjfx.version>
+        <openjfx.version>21.0.7</openjfx.version>
     </properties>
 
     <modules>
@@ -45,6 +44,11 @@
             <dependency>
                 <groupId>com.github.librepdf</groupId>
                 <artifactId>openpdf</artifactId>
+                <version>${openpdf.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.github.librepdf</groupId>
+                <artifactId>openpdf-renderer</artifactId>
                 <version>${openpdf.version}</version>
             </dependency>
             <dependency>
@@ -71,11 +75,6 @@
                 <groupId>commons-io</groupId>
                 <artifactId>commons-io</artifactId>
                 <version>${commons-io.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.github.rjolly</groupId>
-                <artifactId>pdf-renderer</artifactId>
-                <version>${pdf-renderer.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.apache.pdfbox</groupId>
@@ -214,7 +213,7 @@
                                 <configuration>
                                     <rules>
                                         <requireJavaVersion>
-                                            <version>[11,12)</version>
+                                            <version>[21,22)</version>
                                         </requireJavaVersion>
                                     </rules>
                                 </configuration>

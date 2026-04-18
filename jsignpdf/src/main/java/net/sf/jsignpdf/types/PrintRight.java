@@ -31,7 +31,7 @@ package net.sf.jsignpdf.types;
 
 import static net.sf.jsignpdf.Constants.RES;
 
-import com.lowagie.text.pdf.PdfWriter;
+import org.openpdf.text.pdf.PdfWriter;
 
 /**
  * Enum of possible printing rights

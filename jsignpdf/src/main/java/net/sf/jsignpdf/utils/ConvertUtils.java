@@ -106,10 +106,10 @@ public class ConvertUtils {
         if (anObj == null)
             return null;
         Integer tmpResult = null;
-        if (anObj instanceof Integer) {
-            tmpResult = (Integer) anObj;
-        } else if (anObj instanceof Number) {
-            tmpResult = new Integer(((Number) anObj).intValue());
+        if (anObj instanceof Integer i) {
+            tmpResult = i;
+        } else if (anObj instanceof Number n) {
+            tmpResult = new Integer(n.intValue());
         } else {
             try {
                 tmpResult = new Integer(toString(anObj));
@@ -142,10 +142,10 @@ public class ConvertUtils {
         if (anObj == null)
             return null;
         Float tmpResult = null;
-        if (anObj instanceof Float) {
-            tmpResult = (Float) anObj;
-        } else if (anObj instanceof Number) {
-            tmpResult = new Float(((Number) anObj).floatValue());
+        if (anObj instanceof Float f) {
+            tmpResult = f;
+        } else if (anObj instanceof Number n) {
+            tmpResult = new Float(n.floatValue());
         } else {
             try {
                 tmpResult = new Float(toString(anObj));
@@ -189,8 +189,8 @@ public class ConvertUtils {
         Boolean tmpResult = null;
         if (anObj == null) {
             // nothing to do
-        } else if (anObj instanceof Boolean) {
-            tmpResult = (Boolean) anObj;
+        } else if (anObj instanceof Boolean b) {
+            tmpResult = b;
         } else {
             final String tmpStr = toString(anObj);
             if ("true".equalsIgnoreCase(tmpStr) || "yes".equalsIgnoreCase(tmpStr) || "on".equalsIgnoreCase(tmpStr)) {

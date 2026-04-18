@@ -35,7 +35,7 @@ import javafx.scene.layout.StackPane;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 
-import com.lowagie.text.exceptions.BadPasswordException;
+import org.openpdf.text.exceptions.BadPasswordException;
 
 import net.sf.jsignpdf.BasicSignerOptions;
 import net.sf.jsignpdf.Constants;

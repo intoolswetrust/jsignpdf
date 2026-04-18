@@ -57,7 +57,7 @@ Each release provides the following artifacts:
 |Artifact |Description
 
 |`jsignpdf-${VERSION}.zip`
-|Platform-independent ZIP archive containing the JAR files (`JSignPdf.jar`, `InstallCert.jar`), a shell launcher for Linux/macOS, the documentation and the demo material. Works on any OS with Java 11 or newer installed.
+|Platform-independent ZIP archive containing the JAR files (`JSignPdf.jar`, `InstallCert.jar`), a shell launcher for Linux/macOS, the documentation and the demo material. Works on any OS with Java 21 or newer installed.
 
 |`JSignPdf-${VERSION}-win-x64.exe`
 |Windows 64-bit EXE installer. Bundles its own Java runtime, installs to _Program Files_ by default, creates Start Menu shortcuts and registers an Add/Remove Programs entry.
@@ -150,11 +150,11 @@ All four launchers share the bundled JRE -- you do **not** need to have Java ins
 
 === From the platform-independent ZIP
 
-All platforms (with Java 11 or newer installed) can run the JAR file _JSignPdf.jar_ directly. Use the following command in the directory where the application is located:
+All platforms (with Java 21 or newer installed) can run the JAR file _JSignPdf.jar_ directly. Use the following command in the directory where the application is located:
 
  $ java -jar JSignPdf.jar
 
-On Linux and macOS a convenience shell script is bundled in `bin/jsignpdf.sh` which adds the JVM options required on Java 11+ and then launches the JAR.
+On Linux and macOS a convenience shell script is bundled in `bin/jsignpdf.sh` which adds the JVM options required on Java 21+ and then launches the JAR.
 
 By default, JSignPdf opens the JavaFX graphical interface (see <<Using the JavaFX UI>>). To start the classic Swing GUI instead, set the `jsignpdf.swing` system property:
 

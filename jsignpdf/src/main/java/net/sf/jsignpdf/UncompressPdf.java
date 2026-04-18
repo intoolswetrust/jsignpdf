@@ -32,10 +32,10 @@ package net.sf.jsignpdf;
 import java.io.FileOutputStream;
 import java.io.IOException;
 
-import com.lowagie.text.Document;
-import com.lowagie.text.DocumentException;
-import com.lowagie.text.pdf.PdfReader;
-import com.lowagie.text.pdf.PdfStamper;
+import org.openpdf.text.Document;
+import org.openpdf.text.DocumentException;
+import org.openpdf.text.pdf.PdfReader;
+import org.openpdf.text.pdf.PdfStamper;
 
 /**
  * Simple small programm to uncompress PDFs.
@@ -65,7 +65,7 @@ public class UncompressPdf {
             System.out.println("Uncompressing " + tmpFile + " to " + newFileName);
             try {
                 PdfReader reader = new PdfReader(tmpFile);
-                PdfStamper stamper = new PdfStamper(reader, new FileOutputStream(newFileName), '\0');
+                PdfStamper stamper = new PdfStamper(reader, new FileOutputStream(newFileName), (String) null);
                 int total = reader.getNumberOfPages() + 1;
                 for (int i = 1; i < total; i++) {
                     reader.setPageContent(i, reader.getPageContent(i));

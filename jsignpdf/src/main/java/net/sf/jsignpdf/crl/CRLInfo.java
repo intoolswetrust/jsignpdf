@@ -115,8 +115,8 @@ public class CRLInfo {
         LOGGER.info(RES.get("console.readingCRLs"));
         final Set<String> urls = new HashSet<String>();
         for (Certificate cert : certChain) {
-            if (cert instanceof X509Certificate) {
-                urls.addAll(getCrlUrls((X509Certificate) cert));
+            if (cert instanceof X509Certificate x509Cert) {
+                urls.addAll(getCrlUrls(x509Cert));
             }
         }
         final Set<CRL> crlSet = new HashSet<CRL>();

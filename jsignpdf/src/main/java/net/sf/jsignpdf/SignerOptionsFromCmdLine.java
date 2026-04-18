@@ -255,8 +255,8 @@ public class SignerOptionsFromCmdLine extends BasicSignerOptions {
      * @return
      */
     private int getInt(Object aVal, int aDefVal) {
-        if (aVal instanceof Number) {
-            return ((Number) aVal).intValue();
+        if (aVal instanceof Number n) {
+            return n.intValue();
         }
         return aDefVal;
     }
@@ -269,8 +269,8 @@ public class SignerOptionsFromCmdLine extends BasicSignerOptions {
      * @return
      */
     private float getFloat(Object aVal, float aDefVal) {
-        if (aVal instanceof Number) {
-            return ((Number) aVal).floatValue();
+        if (aVal instanceof Number n) {
+            return n.floatValue();
         }
         return aDefVal;
     }
