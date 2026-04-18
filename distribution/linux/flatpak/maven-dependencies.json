@@ -184,7 +184,7 @@
   {
     "type": "file",
     "url": "https://repo1.maven.org/maven2/com/github/kwart/jsign/installcert/3.0.0-SNAPSHOT/installcert-3.0.0-SNAPSHOT.jar",
-    "sha256": "71030699a071a39a46bc0888361b3c02b69bed037ca17b9158ac4a7553c590fa",
+    "sha256": "0f929ddc3b79ddd09330f859dd50f44a6383f00a2b9ac7644a7718bba868adff",
     "dest": "m2local/com/github/kwart/jsign/installcert/3.0.0-SNAPSHOT",
     "dest-filename": "installcert-3.0.0-SNAPSHOT.jar"
   },
@@ -247,79 +247,100 @@
   {
     "type": "file",
     "url": "https://repo1.maven.org/maven2/com/github/kwart/jsign/jsignpdf-root/3.0.0-SNAPSHOT/jsignpdf-root-3.0.0-SNAPSHOT.pom",
-    "sha256": "f1586933735d018fb4ad377f8894ab059daa6737c1d53c98178bb8c498e5a304",
+    "sha256": "f1a058cd2824097feeef36cccb4ab9f80b8916cb6c8e4c1960a8800c393ddb9a",
     "dest": "m2local/com/github/kwart/jsign/jsignpdf-root/3.0.0-SNAPSHOT",
     "dest-filename": "jsignpdf-root-3.0.0-SNAPSHOT.pom"
   },
   {
     "type": "file",
-    "url": "https://repo1.maven.org/maven2/com/github/kwart/jsign/jsignpdf/3.0.0-SNAPSHOT/jsignpdf-3.0.0-20260418.171934-21-sources.jar",
-    "sha256": "bd87010ead5f14fd2aae0e69a83a3c51ade22bdef2642323081a1fb486e07458",
+    "url": "https://repo1.maven.org/maven2/com/github/kwart/jsign/jsignpdf/3.0.0-SNAPSHOT/jsignpdf-3.0.0-20260418.172935-24-sources.jar",
+    "sha256": "ee5c795320e277c367d7e77c67dd369a3b799d64b98709c5a2d7d49c8cf7a601",
     "dest": "m2local/com/github/kwart/jsign/jsignpdf/3.0.0-SNAPSHOT",
-    "dest-filename": "jsignpdf-3.0.0-20260418.171934-21-sources.jar"
+    "dest-filename": "jsignpdf-3.0.0-20260418.172935-24-sources.jar"
   },
   {
     "type": "file",
     "url": "https://repo1.maven.org/maven2/com/github/kwart/jsign/jsignpdf/3.0.0-SNAPSHOT/jsignpdf-3.0.0-SNAPSHOT-jar-with-dependencies-sources.jar",
-    "sha256": "148abb0425caf40ce3f8944d0a41a3c6ca6ebccbc3aaaffb45a58b8cb97ee133",
+    "sha256": "0169bf6277d052abda84286f2303584e7fb636ccf847c084122b552fa7f7f955",
     "dest": "m2local/com/github/kwart/jsign/jsignpdf/3.0.0-SNAPSHOT",
     "dest-filename": "jsignpdf-3.0.0-SNAPSHOT-jar-with-dependencies-sources.jar"
   },
   {
     "type": "file",
     "url": "https://repo1.maven.org/maven2/com/github/kwart/jsign/jsignpdf/3.0.0-SNAPSHOT/jsignpdf-3.0.0-SNAPSHOT-jar-with-dependencies.jar",
-    "sha256": "18aee2b5f8180253b285e9384f30c43f8f7b2846f545c86bb67c1965af88a222",
+    "sha256": "01288bc8c69adb1bd50ef2e843fa5ad97ce4d051119b9167febcdb8ad663dc2d",
     "dest": "m2local/com/github/kwart/jsign/jsignpdf/3.0.0-SNAPSHOT",
     "dest-filename": "jsignpdf-3.0.0-SNAPSHOT-jar-with-dependencies.jar"
   },
   {
     "type": "file",
     "url": "https://repo1.maven.org/maven2/com/github/kwart/jsign/jsignpdf/3.0.0-SNAPSHOT/jsignpdf-3.0.0-SNAPSHOT-sources.jar",
-    "sha256": "bd87010ead5f14fd2aae0e69a83a3c51ade22bdef2642323081a1fb486e07458",
+    "sha256": "ee5c795320e277c367d7e77c67dd369a3b799d64b98709c5a2d7d49c8cf7a601",
     "dest": "m2local/com/github/kwart/jsign/jsignpdf/3.0.0-SNAPSHOT",
     "dest-filename": "jsignpdf-3.0.0-SNAPSHOT-sources.jar"
   },
   {
     "type": "file",
     "url": "https://repo1.maven.org/maven2/com/github/kwart/jsign/jsignpdf/3.0.0-SNAPSHOT/jsignpdf-3.0.0-SNAPSHOT.jar",
-    "sha256": "7eeb5870781dbee6678e3ab41a08b792ca5de00af460bdbd8ab6dd8bbb071f22",
+    "sha256": "4c2a7c48223cdd8ae16ed04098ed5a636bd978611f5e65050c4840f83fdb253d",
     "dest": "m2local/com/github/kwart/jsign/jsignpdf/3.0.0-SNAPSHOT",
     "dest-filename": "jsignpdf-3.0.0-SNAPSHOT.jar"
   },
   {
     "type": "file",
     "url": "https://repo1.maven.org/maven2/com/github/kwart/jsign/jsignpdf/3.0.0-SNAPSHOT/jsignpdf-3.0.0-SNAPSHOT.pom",
-    "sha256": "36db8ab55170fe98d54763359d80ba3fd1db4ee05375bf6ab14a2980e7b381d5",
+    "sha256": "25da446e460c86ac0299e907986b5e372a88e907ac958c67a5c005523ebbbc71",
     "dest": "m2local/com/github/kwart/jsign/jsignpdf/3.0.0-SNAPSHOT",
     "dest-filename": "jsignpdf-3.0.0-SNAPSHOT.pom"
   },
   {
     "type": "file",
-    "url": "https://repo1.maven.org/maven2/com/github/librepdf/openpdf-parent/1.3.30/openpdf-parent-1.3.30.pom",
-    "sha256": "a0c6d23299beb1c64d0ccb7981f81a98df1826deb824aa0a1412c94514e09f89",
-    "dest": "m2local/com/github/librepdf/openpdf-parent/1.3.30",
-    "dest-filename": "openpdf-parent-1.3.30.pom"
+    "url": "https://repo1.maven.org/maven2/com/github/librepdf/openpdf-parent/3.0.3/openpdf-parent-3.0.3.pom",
+    "sha256": "956576bc12f7da86e306c091c79849739a606460236e8a89ae0ffe8b8af5ba78",
+    "dest": "m2local/com/github/librepdf/openpdf-parent/3.0.3",
+    "dest-filename": "openpdf-parent-3.0.3.pom"
   },
   {
     "type": "file",
-    "url": "https://repo1.maven.org/maven2/com/github/librepdf/openpdf/1.3.30/openpdf-1.3.30-sources.jar",
-    "sha256": "1a8916303b9307b4f2f3a46ecf99fba45c751810b467df5a1c498593397c4e9e",
-    "dest": "m2local/com/github/librepdf/openpdf/1.3.30",
-    "dest-filename": "openpdf-1.3.30-sources.jar"
+    "url": "https://repo1.maven.org/maven2/com/github/librepdf/openpdf-renderer/3.0.3/openpdf-renderer-3.0.3-sources.jar",
+    "sha256": "8f0487245a6d5cebdfb4b5400df716e764d85f693a37d9b2b8e7fa7a626f0bcf",
+    "dest": "m2local/com/github/librepdf/openpdf-renderer/3.0.3",
+    "dest-filename": "openpdf-renderer-3.0.3-sources.jar"
   },
   {
     "type": "file",
-    "url": "https://repo1.maven.org/maven2/com/github/librepdf/openpdf/1.3.30/openpdf-1.3.30.jar",
-    "sha256": "6249b9b450af456f743ca3085663d7bb54814f7cc16644368795495457fd320a",
-    "dest": "m2local/com/github/librepdf/openpdf/1.3.30",
-    "dest-filename": "openpdf-1.3.30.jar"
+    "url": "https://repo1.maven.org/maven2/com/github/librepdf/openpdf-renderer/3.0.3/openpdf-renderer-3.0.3.jar",
+    "sha256": "5f3c7d9e6a314a61a1ec26add41c28158e158d4aedcb61fd38a24f36e1e7aeab",
+    "dest": "m2local/com/github/librepdf/openpdf-renderer/3.0.3",
+    "dest-filename": "openpdf-renderer-3.0.3.jar"
   },
   {
     "type": "file",
-    "url": "https://repo1.maven.org/maven2/com/github/librepdf/openpdf/1.3.30/openpdf-1.3.30.pom",
-    "sha256": "88cc3dae74b9146897c6df1ea1717cda488db0422ff6b2cd10afc30b33ff456c",
-    "dest": "m2local/com/github/librepdf/openpdf/1.3.30",
-    "dest-filename": "openpdf-1.3.30.pom"
+    "url": "https://repo1.maven.org/maven2/com/github/librepdf/openpdf-renderer/3.0.3/openpdf-renderer-3.0.3.pom",
+    "sha256": "8d9c60e2ff2219efb88a31e366b88abe121df40e1b98ae84f07187b9cad111ba",
+    "dest": "m2local/com/github/librepdf/openpdf-renderer/3.0.3",
+    "dest-filename": "openpdf-renderer-3.0.3.pom"
+  },
+  {
+    "type": "file",
+    "url": "https://repo1.maven.org/maven2/com/github/librepdf/openpdf/3.0.3/openpdf-3.0.3-sources.jar",
+    "sha256": "addd362a4ee54cfd5afe84e11cd2d7e51b0bd90aa57fd57ad55e3c306216780b",
+    "dest": "m2local/com/github/librepdf/openpdf/3.0.3",
+    "dest-filename": "openpdf-3.0.3-sources.jar"
+  },
+  {
+    "type": "file",
+    "url": "https://repo1.maven.org/maven2/com/github/librepdf/openpdf/3.0.3/openpdf-3.0.3.jar",
+    "sha256": "59002ad85de1066cbc58ffdf216294698390f65902c2543e98b33d160ad3d3dd",
+    "dest": "m2local/com/github/librepdf/openpdf/3.0.3",
+    "dest-filename": "openpdf-3.0.3.jar"
+  },
+  {
+    "type": "file",
+    "url": "https://repo1.maven.org/maven2/com/github/librepdf/openpdf/3.0.3/openpdf-3.0.3.pom",
+    "sha256": "450e9413dca09607c0eb387b5da134e6ede9c5eaa8682a5d25972e634ee1c4ff",
+    "dest": "m2local/com/github/librepdf/openpdf/3.0.3",
+    "dest-filename": "openpdf-3.0.3.pom"
   },
   {
     "type": "file",
@@ -348,27 +369,6 @@
     "sha256": "794d9b995ed59165c54243dcc73fe9483d7fe1af7fb80fcd89a5ae5b693f3eb7",
     "dest": "m2local/com/github/luben/zstd-jni/1.5.7-6",
     "dest-filename": "zstd-jni-1.5.7-6.pom"
-  },
-  {
-    "type": "file",
-    "url": "https://repo1.maven.org/maven2/com/google/code/findbugs/jsr305/3.0.2/jsr305-3.0.2-sources.jar",
-    "sha256": "1c9e85e272d0708c6a591dc74828c71603053b48cc75ae83cce56912a2aa063b",
-    "dest": "m2local/com/google/code/findbugs/jsr305/3.0.2",
-    "dest-filename": "jsr305-3.0.2-sources.jar"
-  },
-  {
-    "type": "file",
-    "url": "https://repo1.maven.org/maven2/com/google/code/findbugs/jsr305/3.0.2/jsr305-3.0.2.jar",
-    "sha256": "766ad2a0783f2687962c8ad74ceecc38a28b9f72a2d085ee438b7813e928d0c7",
-    "dest": "m2local/com/google/code/findbugs/jsr305/3.0.2",
-    "dest-filename": "jsr305-3.0.2.jar"
-  },
-  {
-    "type": "file",
-    "url": "https://repo1.maven.org/maven2/com/google/code/findbugs/jsr305/3.0.2/jsr305-3.0.2.pom",
-    "sha256": "19889dbdf1b254b2601a5ee645b8147a974644882297684c798afe5d63d78dfe",
-    "dest": "m2local/com/google/code/findbugs/jsr305/3.0.2",
-    "dest-filename": "jsr305-3.0.2.pom"
   },
   {
     "type": "file",
@@ -2479,52 +2479,52 @@
   },
   {
     "type": "file",
-    "url": "https://repo1.maven.org/maven2/org/apache/pdfbox/fontbox/2.0.27/fontbox-2.0.27-sources.jar",
-    "sha256": "842ad9d8908688272f9b735f64ba663f0a12bcc25183596c9859bbf944bb536e",
-    "dest": "m2local/org/apache/pdfbox/fontbox/2.0.27",
-    "dest-filename": "fontbox-2.0.27-sources.jar"
+    "url": "https://repo1.maven.org/maven2/org/apache/pdfbox/fontbox/2.0.36/fontbox-2.0.36-sources.jar",
+    "sha256": "acb0c69d88d6d598e03f7ac0837e5848f7cdc42eb0726d4c43052966ed8d12ac",
+    "dest": "m2local/org/apache/pdfbox/fontbox/2.0.36",
+    "dest-filename": "fontbox-2.0.36-sources.jar"
   },
   {
     "type": "file",
-    "url": "https://repo1.maven.org/maven2/org/apache/pdfbox/fontbox/2.0.27/fontbox-2.0.27.jar",
-    "sha256": "dc7429868aaf3d313c524b9aab846a405e89ca4927f35762ca4d1a60bce1d7f4",
-    "dest": "m2local/org/apache/pdfbox/fontbox/2.0.27",
-    "dest-filename": "fontbox-2.0.27.jar"
+    "url": "https://repo1.maven.org/maven2/org/apache/pdfbox/fontbox/2.0.36/fontbox-2.0.36.jar",
+    "sha256": "199f6844d1aaa7c7361791e940189469db39a554fa6418efde46525302d079fe",
+    "dest": "m2local/org/apache/pdfbox/fontbox/2.0.36",
+    "dest-filename": "fontbox-2.0.36.jar"
   },
   {
     "type": "file",
-    "url": "https://repo1.maven.org/maven2/org/apache/pdfbox/fontbox/2.0.27/fontbox-2.0.27.pom",
-    "sha256": "abf98d0c685445825a06ce6aeb00ebb35a91920ae19ced46125d5a7e10283106",
-    "dest": "m2local/org/apache/pdfbox/fontbox/2.0.27",
-    "dest-filename": "fontbox-2.0.27.pom"
+    "url": "https://repo1.maven.org/maven2/org/apache/pdfbox/fontbox/2.0.36/fontbox-2.0.36.pom",
+    "sha256": "2299e892b853a6ddb4ea90c346609c130f532c198653f83f9d418d899014eb34",
+    "dest": "m2local/org/apache/pdfbox/fontbox/2.0.36",
+    "dest-filename": "fontbox-2.0.36.pom"
   },
   {
     "type": "file",
-    "url": "https://repo1.maven.org/maven2/org/apache/pdfbox/pdfbox-parent/2.0.27/pdfbox-parent-2.0.27.pom",
-    "sha256": "e266df0d2492ef5f89a29510ae4bf7e5bd115bcd9dbb0167f9b65a3d9cc1dcfa",
-    "dest": "m2local/org/apache/pdfbox/pdfbox-parent/2.0.27",
-    "dest-filename": "pdfbox-parent-2.0.27.pom"
+    "url": "https://repo1.maven.org/maven2/org/apache/pdfbox/pdfbox-parent/2.0.36/pdfbox-parent-2.0.36.pom",
+    "sha256": "4b21048bfd7275802c5d1b0f9c7bb91f112dc587f03fba72571f2c8ac6931135",
+    "dest": "m2local/org/apache/pdfbox/pdfbox-parent/2.0.36",
+    "dest-filename": "pdfbox-parent-2.0.36.pom"
   },
   {
     "type": "file",
-    "url": "https://repo1.maven.org/maven2/org/apache/pdfbox/pdfbox/2.0.27/pdfbox-2.0.27-sources.jar",
-    "sha256": "28acb4279c51100e99225c92178a3a39b1a80e670302181aa8c23c1780b917e2",
-    "dest": "m2local/org/apache/pdfbox/pdfbox/2.0.27",
-    "dest-filename": "pdfbox-2.0.27-sources.jar"
+    "url": "https://repo1.maven.org/maven2/org/apache/pdfbox/pdfbox/2.0.36/pdfbox-2.0.36-sources.jar",
+    "sha256": "f94b09bfa36efcadd51398173ad0b88db854c3821e3e5879b1f6bcacc9c76f0f",
+    "dest": "m2local/org/apache/pdfbox/pdfbox/2.0.36",
+    "dest-filename": "pdfbox-2.0.36-sources.jar"
   },
   {
     "type": "file",
-    "url": "https://repo1.maven.org/maven2/org/apache/pdfbox/pdfbox/2.0.27/pdfbox-2.0.27.jar",
-    "sha256": "a25ad2a0be6b0bf9eb0e972abd09c34c0e797a3ce2a980d5ff035ff4cf078037",
-    "dest": "m2local/org/apache/pdfbox/pdfbox/2.0.27",
-    "dest-filename": "pdfbox-2.0.27.jar"
+    "url": "https://repo1.maven.org/maven2/org/apache/pdfbox/pdfbox/2.0.36/pdfbox-2.0.36.jar",
+    "sha256": "7b9208af4c1aa3423bdc1ac062b99770b67f2815b78dc6dfea3ff703c4403ccb",
+    "dest": "m2local/org/apache/pdfbox/pdfbox/2.0.36",
+    "dest-filename": "pdfbox-2.0.36.jar"
   },
   {
     "type": "file",
-    "url": "https://repo1.maven.org/maven2/org/apache/pdfbox/pdfbox/2.0.27/pdfbox-2.0.27.pom",
-    "sha256": "6ca157727aff6342026d46e4b4b7afefeae7ac5e4824c94d7f6fa1de42007f10",
-    "dest": "m2local/org/apache/pdfbox/pdfbox/2.0.27",
-    "dest-filename": "pdfbox-2.0.27.pom"
+    "url": "https://repo1.maven.org/maven2/org/apache/pdfbox/pdfbox/2.0.36/pdfbox-2.0.36.pom",
+    "sha256": "0ac042268ce0d1f7a78264053c35aeba8c00b502188c4d61b49b04d79e6faf43",
+    "dest": "m2local/org/apache/pdfbox/pdfbox/2.0.36",
+    "dest-filename": "pdfbox-2.0.36.pom"
   },
   {
     "type": "file",
@@ -3879,213 +3879,213 @@
   },
   {
     "type": "file",
-    "url": "https://repo1.maven.org/maven2/org/openjfx/javafx-base/17.0.15/javafx-base-17.0.15-linux.jar",
-    "sha256": "1cdbbdc14e58b6efa4e9a5fee5e04b37f0b020a41bf39dd2148971a08a662d2d",
-    "dest": "m2local/org/openjfx/javafx-base/17.0.15",
-    "dest-filename": "javafx-base-17.0.15-linux.jar"
+    "url": "https://repo1.maven.org/maven2/org/openjfx/javafx-base/21.0.7/javafx-base-21.0.7-linux.jar",
+    "sha256": "4cb5a46623138bc80ca61647f8705eea16a0ccb6efaf7dbffc994d1cc83da596",
+    "dest": "m2local/org/openjfx/javafx-base/21.0.7",
+    "dest-filename": "javafx-base-21.0.7-linux.jar"
   },
   {
     "type": "file",
-    "url": "https://repo1.maven.org/maven2/org/openjfx/javafx-base/17.0.15/javafx-base-17.0.15-mac-aarch64.jar",
-    "sha256": "e577b54ec9be8760d101f000e3daeb6a7f95448504606c08d934b3a3612b4a55",
-    "dest": "m2local/org/openjfx/javafx-base/17.0.15",
-    "dest-filename": "javafx-base-17.0.15-mac-aarch64.jar"
+    "url": "https://repo1.maven.org/maven2/org/openjfx/javafx-base/21.0.7/javafx-base-21.0.7-mac-aarch64.jar",
+    "sha256": "5a58dc2169489f5f5d865ca7f84a3e744681932c8396b965bf3e74824ff0514a",
+    "dest": "m2local/org/openjfx/javafx-base/21.0.7",
+    "dest-filename": "javafx-base-21.0.7-mac-aarch64.jar"
   },
   {
     "type": "file",
-    "url": "https://repo1.maven.org/maven2/org/openjfx/javafx-base/17.0.15/javafx-base-17.0.15-mac.jar",
-    "sha256": "3f2069b970f74f565c2374ab00ea46b09d664a6ee4f8f2c36cd7d05d5d73157e",
-    "dest": "m2local/org/openjfx/javafx-base/17.0.15",
-    "dest-filename": "javafx-base-17.0.15-mac.jar"
+    "url": "https://repo1.maven.org/maven2/org/openjfx/javafx-base/21.0.7/javafx-base-21.0.7-mac.jar",
+    "sha256": "5b9182e1f6549d02518448d8919f39964860aac80c53651a3beaa2702173209d",
+    "dest": "m2local/org/openjfx/javafx-base/21.0.7",
+    "dest-filename": "javafx-base-21.0.7-mac.jar"
   },
   {
     "type": "file",
-    "url": "https://repo1.maven.org/maven2/org/openjfx/javafx-base/17.0.15/javafx-base-17.0.15-sources.jar",
-    "sha256": "6275ac4cd418048539b262b86891ec30062b8e1aeacf9837418de2de642ec643",
-    "dest": "m2local/org/openjfx/javafx-base/17.0.15",
-    "dest-filename": "javafx-base-17.0.15-sources.jar"
+    "url": "https://repo1.maven.org/maven2/org/openjfx/javafx-base/21.0.7/javafx-base-21.0.7-sources.jar",
+    "sha256": "7b0d2c92a8ce12222f575e79568d7548babe04c96450693460da4e96a12ea8c3",
+    "dest": "m2local/org/openjfx/javafx-base/21.0.7",
+    "dest-filename": "javafx-base-21.0.7-sources.jar"
   },
   {
     "type": "file",
-    "url": "https://repo1.maven.org/maven2/org/openjfx/javafx-base/17.0.15/javafx-base-17.0.15-win.jar",
-    "sha256": "40900f87b32905943844ff6a9778f974da418f47791192b4b7244e7bdae68b63",
-    "dest": "m2local/org/openjfx/javafx-base/17.0.15",
-    "dest-filename": "javafx-base-17.0.15-win.jar"
+    "url": "https://repo1.maven.org/maven2/org/openjfx/javafx-base/21.0.7/javafx-base-21.0.7-win.jar",
+    "sha256": "3b3fcd57062e59d6e382b22fe82bb358a90958852d166cc3dd4056c6ba551b65",
+    "dest": "m2local/org/openjfx/javafx-base/21.0.7",
+    "dest-filename": "javafx-base-21.0.7-win.jar"
   },
   {
     "type": "file",
-    "url": "https://repo1.maven.org/maven2/org/openjfx/javafx-base/17.0.15/javafx-base-17.0.15.jar",
-    "sha256": "dc7d87e4661c4bc9420b91115789178ff403cd0d424ae14dbfdba2da1de99d0e",
-    "dest": "m2local/org/openjfx/javafx-base/17.0.15",
-    "dest-filename": "javafx-base-17.0.15.jar"
+    "url": "https://repo1.maven.org/maven2/org/openjfx/javafx-base/21.0.7/javafx-base-21.0.7.jar",
+    "sha256": "5cc5052a3db7caed9961a616b067e75e2f428f65d3213d533143207e70724bb7",
+    "dest": "m2local/org/openjfx/javafx-base/21.0.7",
+    "dest-filename": "javafx-base-21.0.7.jar"
   },
   {
     "type": "file",
-    "url": "https://repo1.maven.org/maven2/org/openjfx/javafx-base/17.0.15/javafx-base-17.0.15.pom",
-    "sha256": "a2a18a461ad99ff83d092e0f2d218d43fbcbec07ec223c9a4b0617c2212c9670",
-    "dest": "m2local/org/openjfx/javafx-base/17.0.15",
-    "dest-filename": "javafx-base-17.0.15.pom"
+    "url": "https://repo1.maven.org/maven2/org/openjfx/javafx-base/21.0.7/javafx-base-21.0.7.pom",
+    "sha256": "4d538399c3aa36b5acbedd8e1c103ad3d644e8107c7244daeb455805bfc362c9",
+    "dest": "m2local/org/openjfx/javafx-base/21.0.7",
+    "dest-filename": "javafx-base-21.0.7.pom"
   },
   {
     "type": "file",
-    "url": "https://repo1.maven.org/maven2/org/openjfx/javafx-controls/17.0.15/javafx-controls-17.0.15-linux.jar",
-    "sha256": "243b66a9d4b2ec82153e90ee24abc814eb47e07a852e82309e79f1afa78ec385",
-    "dest": "m2local/org/openjfx/javafx-controls/17.0.15",
-    "dest-filename": "javafx-controls-17.0.15-linux.jar"
+    "url": "https://repo1.maven.org/maven2/org/openjfx/javafx-controls/21.0.7/javafx-controls-21.0.7-linux.jar",
+    "sha256": "af92f44c41f494da3358fc1572c115413a72d9824243086851c1cba87167dd86",
+    "dest": "m2local/org/openjfx/javafx-controls/21.0.7",
+    "dest-filename": "javafx-controls-21.0.7-linux.jar"
   },
   {
     "type": "file",
-    "url": "https://repo1.maven.org/maven2/org/openjfx/javafx-controls/17.0.15/javafx-controls-17.0.15-sources.jar",
-    "sha256": "7a15efc6febc4fef07998098aa35fc273d8a9aacdd7734b0e1ca4b09fcdb39e6",
-    "dest": "m2local/org/openjfx/javafx-controls/17.0.15",
-    "dest-filename": "javafx-controls-17.0.15-sources.jar"
+    "url": "https://repo1.maven.org/maven2/org/openjfx/javafx-controls/21.0.7/javafx-controls-21.0.7-sources.jar",
+    "sha256": "a88c31e7d68230b535044daa57d2461b1b50128f498c0c95a6438b254d00456f",
+    "dest": "m2local/org/openjfx/javafx-controls/21.0.7",
+    "dest-filename": "javafx-controls-21.0.7-sources.jar"
   },
   {
     "type": "file",
-    "url": "https://repo1.maven.org/maven2/org/openjfx/javafx-controls/17.0.15/javafx-controls-17.0.15.jar",
-    "sha256": "5fa67993ce41f2e801268308e2a3fca53763998d068cd4c32135849759811b23",
-    "dest": "m2local/org/openjfx/javafx-controls/17.0.15",
-    "dest-filename": "javafx-controls-17.0.15.jar"
+    "url": "https://repo1.maven.org/maven2/org/openjfx/javafx-controls/21.0.7/javafx-controls-21.0.7.jar",
+    "sha256": "907c7a78dee823be00d09ea05387c01cde2d1ea42b9d698dfe961546b26ce60a",
+    "dest": "m2local/org/openjfx/javafx-controls/21.0.7",
+    "dest-filename": "javafx-controls-21.0.7.jar"
   },
   {
     "type": "file",
-    "url": "https://repo1.maven.org/maven2/org/openjfx/javafx-controls/17.0.15/javafx-controls-17.0.15.pom",
-    "sha256": "d0482241dcd01b4dd80613ff8c31bedb100a4dba4634fdf80db794926034babd",
-    "dest": "m2local/org/openjfx/javafx-controls/17.0.15",
-    "dest-filename": "javafx-controls-17.0.15.pom"
+    "url": "https://repo1.maven.org/maven2/org/openjfx/javafx-controls/21.0.7/javafx-controls-21.0.7.pom",
+    "sha256": "565a7db60700eb4768969ec32871dadaa205a8f5215bc71bfe564d7d6d19d7d2",
+    "dest": "m2local/org/openjfx/javafx-controls/21.0.7",
+    "dest-filename": "javafx-controls-21.0.7.pom"
   },
   {
     "type": "file",
-    "url": "https://repo1.maven.org/maven2/org/openjfx/javafx-fxml/17.0.15/javafx-fxml-17.0.15-linux.jar",
-    "sha256": "d7d6ffc5c5cc17e7b5fff763c141e234d7a762f8c5a21876d39850c8449bc46e",
-    "dest": "m2local/org/openjfx/javafx-fxml/17.0.15",
-    "dest-filename": "javafx-fxml-17.0.15-linux.jar"
+    "url": "https://repo1.maven.org/maven2/org/openjfx/javafx-fxml/21.0.7/javafx-fxml-21.0.7-linux.jar",
+    "sha256": "70817918d687353880319e49b0cb0dfbd671c33f4111fbd27ea09298c6720b08",
+    "dest": "m2local/org/openjfx/javafx-fxml/21.0.7",
+    "dest-filename": "javafx-fxml-21.0.7-linux.jar"
   },
   {
     "type": "file",
-    "url": "https://repo1.maven.org/maven2/org/openjfx/javafx-fxml/17.0.15/javafx-fxml-17.0.15-sources.jar",
-    "sha256": "d865bdcc0773303717092bd4d3430dc089b25278af279d3128695c2d0002dbf5",
-    "dest": "m2local/org/openjfx/javafx-fxml/17.0.15",
-    "dest-filename": "javafx-fxml-17.0.15-sources.jar"
+    "url": "https://repo1.maven.org/maven2/org/openjfx/javafx-fxml/21.0.7/javafx-fxml-21.0.7-sources.jar",
+    "sha256": "f1b2f3f5540cdbab74220090cf319e1620ef1ee1a249b8d37a966bbc0abb482c",
+    "dest": "m2local/org/openjfx/javafx-fxml/21.0.7",
+    "dest-filename": "javafx-fxml-21.0.7-sources.jar"
   },
   {
     "type": "file",
-    "url": "https://repo1.maven.org/maven2/org/openjfx/javafx-fxml/17.0.15/javafx-fxml-17.0.15.jar",
-    "sha256": "edc64a44e6bda14b2d7f5265e9d8da185888f2d2ac2be0d2eefd8291ab87a9cd",
-    "dest": "m2local/org/openjfx/javafx-fxml/17.0.15",
-    "dest-filename": "javafx-fxml-17.0.15.jar"
+    "url": "https://repo1.maven.org/maven2/org/openjfx/javafx-fxml/21.0.7/javafx-fxml-21.0.7.jar",
+    "sha256": "5bd355c18a357413662a1926a66d79544b338ec0d3c7d5607ad4e88ce782f189",
+    "dest": "m2local/org/openjfx/javafx-fxml/21.0.7",
+    "dest-filename": "javafx-fxml-21.0.7.jar"
   },
   {
     "type": "file",
-    "url": "https://repo1.maven.org/maven2/org/openjfx/javafx-fxml/17.0.15/javafx-fxml-17.0.15.pom",
-    "sha256": "e13361418bfd5f1c6643069497110242fc82f3d97b59c7d42fa05fb0fe104fcc",
-    "dest": "m2local/org/openjfx/javafx-fxml/17.0.15",
-    "dest-filename": "javafx-fxml-17.0.15.pom"
+    "url": "https://repo1.maven.org/maven2/org/openjfx/javafx-fxml/21.0.7/javafx-fxml-21.0.7.pom",
+    "sha256": "407f4d58f7a01a9dc60444939b4a32375e0da8a98dfe002e80ec2fd54702b54e",
+    "dest": "m2local/org/openjfx/javafx-fxml/21.0.7",
+    "dest-filename": "javafx-fxml-21.0.7.pom"
   },
   {
     "type": "file",
-    "url": "https://repo1.maven.org/maven2/org/openjfx/javafx-graphics/17.0.15/javafx-graphics-17.0.15-linux.jar",
-    "sha256": "72ad6c519c0153668dad488f67ad8419e465b6af5c1f6443321c2bf0648a1e0d",
-    "dest": "m2local/org/openjfx/javafx-graphics/17.0.15",
-    "dest-filename": "javafx-graphics-17.0.15-linux.jar"
+    "url": "https://repo1.maven.org/maven2/org/openjfx/javafx-graphics/21.0.7/javafx-graphics-21.0.7-linux.jar",
+    "sha256": "623ee7182486b30d6d4b2977685f5689157fa3307e7ce127ffe0bdc2a58832fe",
+    "dest": "m2local/org/openjfx/javafx-graphics/21.0.7",
+    "dest-filename": "javafx-graphics-21.0.7-linux.jar"
   },
   {
     "type": "file",
-    "url": "https://repo1.maven.org/maven2/org/openjfx/javafx-graphics/17.0.15/javafx-graphics-17.0.15-mac-aarch64.jar",
-    "sha256": "43201e8f75d3acb58385deb15510a4d0d58917d97d4e25f17f26f3c4e4e508ba",
-    "dest": "m2local/org/openjfx/javafx-graphics/17.0.15",
-    "dest-filename": "javafx-graphics-17.0.15-mac-aarch64.jar"
+    "url": "https://repo1.maven.org/maven2/org/openjfx/javafx-graphics/21.0.7/javafx-graphics-21.0.7-mac-aarch64.jar",
+    "sha256": "6758ce2327a603d70b15f0286e131185002ec479c06c3efe3dca678965ebbc98",
+    "dest": "m2local/org/openjfx/javafx-graphics/21.0.7",
+    "dest-filename": "javafx-graphics-21.0.7-mac-aarch64.jar"
   },
   {
     "type": "file",
-    "url": "https://repo1.maven.org/maven2/org/openjfx/javafx-graphics/17.0.15/javafx-graphics-17.0.15-mac.jar",
-    "sha256": "10abc3be92da45a2d6e24a6076db9a619112b7113fcea626038ee5e0a2e75c95",
-    "dest": "m2local/org/openjfx/javafx-graphics/17.0.15",
-    "dest-filename": "javafx-graphics-17.0.15-mac.jar"
+    "url": "https://repo1.maven.org/maven2/org/openjfx/javafx-graphics/21.0.7/javafx-graphics-21.0.7-mac.jar",
+    "sha256": "369fe123c896784cebb167bc41ecfb0d293416870a232f7852ff05456c4f17fd",
+    "dest": "m2local/org/openjfx/javafx-graphics/21.0.7",
+    "dest-filename": "javafx-graphics-21.0.7-mac.jar"
   },
   {
     "type": "file",
-    "url": "https://repo1.maven.org/maven2/org/openjfx/javafx-graphics/17.0.15/javafx-graphics-17.0.15-sources.jar",
-    "sha256": "2cd8699b001a5413313583295bb122ea0b819cb8c9640bcaff644326936a5356",
-    "dest": "m2local/org/openjfx/javafx-graphics/17.0.15",
-    "dest-filename": "javafx-graphics-17.0.15-sources.jar"
+    "url": "https://repo1.maven.org/maven2/org/openjfx/javafx-graphics/21.0.7/javafx-graphics-21.0.7-sources.jar",
+    "sha256": "13c4177a8d0a1b7747123d93ee0ddac82b5b937f844838a5089a2b50d261b3e8",
+    "dest": "m2local/org/openjfx/javafx-graphics/21.0.7",
+    "dest-filename": "javafx-graphics-21.0.7-sources.jar"
   },
   {
     "type": "file",
-    "url": "https://repo1.maven.org/maven2/org/openjfx/javafx-graphics/17.0.15/javafx-graphics-17.0.15-win.jar",
-    "sha256": "3dca1447349c87f029de1c33aae5300068ec7f86db8e20d5906047900bb8ffc7",
-    "dest": "m2local/org/openjfx/javafx-graphics/17.0.15",
-    "dest-filename": "javafx-graphics-17.0.15-win.jar"
+    "url": "https://repo1.maven.org/maven2/org/openjfx/javafx-graphics/21.0.7/javafx-graphics-21.0.7-win.jar",
+    "sha256": "b256fff6bc846a618263d8ff731ab2c19bbb05df789db0828a2dc3a3d8686991",
+    "dest": "m2local/org/openjfx/javafx-graphics/21.0.7",
+    "dest-filename": "javafx-graphics-21.0.7-win.jar"
   },
   {
     "type": "file",
-    "url": "https://repo1.maven.org/maven2/org/openjfx/javafx-graphics/17.0.15/javafx-graphics-17.0.15.jar",
-    "sha256": "903b92c6998fe5b96f61faf32524415b5b5484df677c9e3208cde54287fa16e9",
-    "dest": "m2local/org/openjfx/javafx-graphics/17.0.15",
-    "dest-filename": "javafx-graphics-17.0.15.jar"
+    "url": "https://repo1.maven.org/maven2/org/openjfx/javafx-graphics/21.0.7/javafx-graphics-21.0.7.jar",
+    "sha256": "0422e0390a14cb3193e66b8c3c492fa507932bcbeb2b3800cc4ddb7811c7e68b",
+    "dest": "m2local/org/openjfx/javafx-graphics/21.0.7",
+    "dest-filename": "javafx-graphics-21.0.7.jar"
   },
   {
     "type": "file",
-    "url": "https://repo1.maven.org/maven2/org/openjfx/javafx-graphics/17.0.15/javafx-graphics-17.0.15.pom",
-    "sha256": "24d639f407a6100aa803b909ba174d6edf3dec6b1813f840b4986ea11d07a204",
-    "dest": "m2local/org/openjfx/javafx-graphics/17.0.15",
-    "dest-filename": "javafx-graphics-17.0.15.pom"
+    "url": "https://repo1.maven.org/maven2/org/openjfx/javafx-graphics/21.0.7/javafx-graphics-21.0.7.pom",
+    "sha256": "1abdc0d66d9d893cf76f348f14402d925185d3337d23f1d0b3c25af552428ae9",
+    "dest": "m2local/org/openjfx/javafx-graphics/21.0.7",
+    "dest-filename": "javafx-graphics-21.0.7.pom"
   },
   {
     "type": "file",
-    "url": "https://repo1.maven.org/maven2/org/openjfx/javafx-swing/17.0.15/javafx-swing-17.0.15-linux.jar",
-    "sha256": "c2e4c9c641afaf44de85ff55eca9e19749724cd2cec4c582a3fe9967a5b119e4",
-    "dest": "m2local/org/openjfx/javafx-swing/17.0.15",
-    "dest-filename": "javafx-swing-17.0.15-linux.jar"
+    "url": "https://repo1.maven.org/maven2/org/openjfx/javafx-swing/21.0.7/javafx-swing-21.0.7-linux.jar",
+    "sha256": "09005bd82f9647367c1a0b06b2806fc9b0f53e009a72f4eaa92570f714b50b59",
+    "dest": "m2local/org/openjfx/javafx-swing/21.0.7",
+    "dest-filename": "javafx-swing-21.0.7-linux.jar"
   },
   {
     "type": "file",
-    "url": "https://repo1.maven.org/maven2/org/openjfx/javafx-swing/17.0.15/javafx-swing-17.0.15-mac-aarch64.jar",
-    "sha256": "e4aed7d27413b1541773e49b11bad0e591b372e4106ee8c3729167e697536ed5",
-    "dest": "m2local/org/openjfx/javafx-swing/17.0.15",
-    "dest-filename": "javafx-swing-17.0.15-mac-aarch64.jar"
+    "url": "https://repo1.maven.org/maven2/org/openjfx/javafx-swing/21.0.7/javafx-swing-21.0.7-mac-aarch64.jar",
+    "sha256": "30cac0b27dff717521ad3b0511478a73e7e384a16af7c2fcd4bf806633bf7515",
+    "dest": "m2local/org/openjfx/javafx-swing/21.0.7",
+    "dest-filename": "javafx-swing-21.0.7-mac-aarch64.jar"
   },
   {
     "type": "file",
-    "url": "https://repo1.maven.org/maven2/org/openjfx/javafx-swing/17.0.15/javafx-swing-17.0.15-mac.jar",
-    "sha256": "96c11eb0461dffbaf07a018e503cc4a4984abb4ff6cb2350b0fca0a6790e007b",
-    "dest": "m2local/org/openjfx/javafx-swing/17.0.15",
-    "dest-filename": "javafx-swing-17.0.15-mac.jar"
+    "url": "https://repo1.maven.org/maven2/org/openjfx/javafx-swing/21.0.7/javafx-swing-21.0.7-mac.jar",
+    "sha256": "73207d6a0e1b2711ac81705676f69e1fa6d82cb93e70039093d7af3bbaa83818",
+    "dest": "m2local/org/openjfx/javafx-swing/21.0.7",
+    "dest-filename": "javafx-swing-21.0.7-mac.jar"
   },
   {
     "type": "file",
-    "url": "https://repo1.maven.org/maven2/org/openjfx/javafx-swing/17.0.15/javafx-swing-17.0.15-sources.jar",
-    "sha256": "fe0892073422924238962dd613f43fca670c65221c4b719e2d96955b3f8b3612",
-    "dest": "m2local/org/openjfx/javafx-swing/17.0.15",
-    "dest-filename": "javafx-swing-17.0.15-sources.jar"
+    "url": "https://repo1.maven.org/maven2/org/openjfx/javafx-swing/21.0.7/javafx-swing-21.0.7-sources.jar",
+    "sha256": "f02346d6436ae3516d05a570bd8076aaf0c2e28a81c5efda5c6f39042fe531b0",
+    "dest": "m2local/org/openjfx/javafx-swing/21.0.7",
+    "dest-filename": "javafx-swing-21.0.7-sources.jar"
   },
   {
     "type": "file",
-    "url": "https://repo1.maven.org/maven2/org/openjfx/javafx-swing/17.0.15/javafx-swing-17.0.15-win.jar",
-    "sha256": "a9a0926310b02d71d18449066cec8593e65f345623ad6f730e113377b4d7089a",
-    "dest": "m2local/org/openjfx/javafx-swing/17.0.15",
-    "dest-filename": "javafx-swing-17.0.15-win.jar"
+    "url": "https://repo1.maven.org/maven2/org/openjfx/javafx-swing/21.0.7/javafx-swing-21.0.7-win.jar",
+    "sha256": "95782392503f03a0aa81d7f23c0e47889928af74c51991327863d479428a1170",
+    "dest": "m2local/org/openjfx/javafx-swing/21.0.7",
+    "dest-filename": "javafx-swing-21.0.7-win.jar"
   },
   {
     "type": "file",
-    "url": "https://repo1.maven.org/maven2/org/openjfx/javafx-swing/17.0.15/javafx-swing-17.0.15.jar",
-    "sha256": "49d30388266af4069f35c6e2034a3bb29488a90fdc08429de3f1c65a386e0c37",
-    "dest": "m2local/org/openjfx/javafx-swing/17.0.15",
-    "dest-filename": "javafx-swing-17.0.15.jar"
+    "url": "https://repo1.maven.org/maven2/org/openjfx/javafx-swing/21.0.7/javafx-swing-21.0.7.jar",
+    "sha256": "e1d925d8877d23f758c7fb6e584a692a2267e865d26a87bc5cad9b96a1422189",
+    "dest": "m2local/org/openjfx/javafx-swing/21.0.7",
+    "dest-filename": "javafx-swing-21.0.7.jar"
   },
   {
     "type": "file",
-    "url": "https://repo1.maven.org/maven2/org/openjfx/javafx-swing/17.0.15/javafx-swing-17.0.15.pom",
-    "sha256": "86d7547fe939d90e40835c28b9d80e6b3cc4e3e12797534b0587916cea810261",
-    "dest": "m2local/org/openjfx/javafx-swing/17.0.15",
-    "dest-filename": "javafx-swing-17.0.15.pom"
+    "url": "https://repo1.maven.org/maven2/org/openjfx/javafx-swing/21.0.7/javafx-swing-21.0.7.pom",
+    "sha256": "210aaa28bc33088305de066a0edc3cd7a8590f9ff95d64aed70a9fdcb1039e36",
+    "dest": "m2local/org/openjfx/javafx-swing/21.0.7",
+    "dest-filename": "javafx-swing-21.0.7.pom"
   },
   {
     "type": "file",
-    "url": "https://repo1.maven.org/maven2/org/openjfx/javafx/17.0.15/javafx-17.0.15.pom",
-    "sha256": "b41fbfb99e1104386c0d209d02c9a5ae7670b32e99e9b8d899c45a00904cd0ba",
-    "dest": "m2local/org/openjfx/javafx/17.0.15",
-    "dest-filename": "javafx-17.0.15.pom"
+    "url": "https://repo1.maven.org/maven2/org/openjfx/javafx/21.0.7/javafx-21.0.7.pom",
+    "sha256": "3c67def7ba1c5d2c74f428b6f345c99173171f0a2c35e83d8ae31bd8cc5babf3",
+    "dest": "m2local/org/openjfx/javafx/21.0.7",
+    "dest-filename": "javafx-21.0.7.pom"
   },
   {
     "type": "file",
@@ -4530,17 +4530,17 @@
   },
   {
     "type": "file",
-    "url": "https://repo1.maven.org/maven2/org/testfx/openjfx-monocle/11.0.2/openjfx-monocle-11.0.2.jar",
-    "sha256": "f50a3048a5e6b32872b9c64444761cf8db5a3952b5431b894ecd154e6a46160a",
-    "dest": "m2local/org/testfx/openjfx-monocle/11.0.2",
-    "dest-filename": "openjfx-monocle-11.0.2.jar"
+    "url": "https://repo1.maven.org/maven2/org/testfx/openjfx-monocle/21.0.2/openjfx-monocle-21.0.2.jar",
+    "sha256": "3d0b0c186a9f495aa4e3d058c612b2a9cf44a97ffbcecd75d441aed8263fac50",
+    "dest": "m2local/org/testfx/openjfx-monocle/21.0.2",
+    "dest-filename": "openjfx-monocle-21.0.2.jar"
   },
   {
     "type": "file",
-    "url": "https://repo1.maven.org/maven2/org/testfx/openjfx-monocle/11.0.2/openjfx-monocle-11.0.2.pom",
-    "sha256": "ab541e05c37d04650726224abab6e61276aac437a8232ab1cb41fc0e99c0d5c8",
-    "dest": "m2local/org/testfx/openjfx-monocle/11.0.2",
-    "dest-filename": "openjfx-monocle-11.0.2.pom"
+    "url": "https://repo1.maven.org/maven2/org/testfx/openjfx-monocle/21.0.2/openjfx-monocle-21.0.2.pom",
+    "sha256": "3895327d077ed3548874b86b26b7d403ae7da2111c218ed739bc47a8e4f1f71b",
+    "dest": "m2local/org/testfx/openjfx-monocle/21.0.2",
+    "dest-filename": "openjfx-monocle-21.0.2.pom"
   },
   {
     "type": "file",
