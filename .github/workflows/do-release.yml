@@ -22,6 +22,7 @@ jobs:
     outputs:
       tag: ${{ steps.maven_release.outputs.TAG }}
       version: ${{ steps.maven_release.outputs.VERSION }}
+      base-version: ${{ steps.maven_release.outputs.BASE_VERSION }}
     steps:
     - name: Checkout
       uses: actions/checkout@v6
@@ -48,7 +49,7 @@ jobs:
         gpg-passphrase: MAVEN_GPG_PASSPHRASE
         cache: 'maven'
 
-    - name: Do the Deployment and related stuff
+    - name: Do the Maven release and prepare Linux assets
       id: maven_release
       run: |
         VERSION=${{ github.event.inputs.release-version }}
@@ -66,18 +67,10 @@ jobs:
             -Dmaven.wagon.httpconnectionManager.maxPerRoute=60 -Dmaven.wagon.httpconnectionManager.maxTotal=100
         cd distribution/target
         ls -R
-        mkdir "JSignPdf-$VERSION"
-        mv *.zip "$FULL_VERSION/"
-        cp generated-docs/JSignPdf.pdf "$FULL_VERSION/$FULL_VERSION.pdf"
-        cp "../doc/release-notes/${BASE_VERSION}.md" "$FULL_VERSION/README.md"
-
-        echo "${{ secrets.SSH_PRIVATE_KEY }}" >> private_key
-        chmod 600 private_key
-        sftp -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -i private_key kwart@frs.sourceforge.net:/home/frs/project/jsignpdf/stable <<EOF
-        put -R "${FULL_VERSION}"
-        exit
-        EOF
-        mv "$FULL_VERSION" upload
+        mkdir upload
+        mv *.zip upload/
+        cp generated-docs/JSignPdf.pdf "upload/$FULL_VERSION.pdf"
+        cp "../doc/release-notes/${BASE_VERSION}.md" upload/README.md
         echo "TAG=$TAG" >> $GITHUB_OUTPUT
         echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
         echo "BASE_VERSION=$BASE_VERSION" >> $GITHUB_OUTPUT
@@ -86,14 +79,13 @@ jobs:
         MAVEN_PASSWORD: ${{ secrets.OSSRH_PASSWORD }}
         MAVEN_GPG_PASSPHRASE: ${{ secrets.MAVEN_GPG_PASSPHRASE }}
 
-    - name: Upload binaries to release
-      uses: svenstaro/upload-release-action@29e53e917877a24fad85510ded594ab3c9ca12de
+    - name: Stage Linux release assets for the publish job
+      uses: actions/upload-artifact@v4
       with:
-        file: distribution/target/upload/*
-        file_glob: true
-        tag:   ${{ steps.maven_release.outputs.TAG }}
-        overwrite: true
-        body_path: distribution/doc/release-notes/${{ steps.maven_release.outputs.BASE_VERSION }}.md
+        name: jsignpdf-linux-assets
+        path: distribution/target/upload/*
+        if-no-files-found: error
+        retention-days: 1
 
     - name: Publish PDF guide for downstream jobs
       uses: actions/upload-artifact@v4
@@ -133,10 +125,82 @@ jobs:
       shell: pwsh
       run: ./distribution/windows/build-windows-installers.ps1 -Version ${{ needs.do-release.outputs.version }}
 
-    - name: Upload Windows installers to release
-      uses: svenstaro/upload-release-action@29e53e917877a24fad85510ded594ab3c9ca12de
+    - name: Stage Windows installers for the publish job
+      uses: actions/upload-artifact@v4
       with:
-        file: distribution/target/upload/*
-        file_glob: true
-        tag: ${{ needs.do-release.outputs.tag }}
-        overwrite: true
+        name: jsignpdf-windows-assets
+        path: distribution/target/upload/*
+        if-no-files-found: error
+        retention-days: 1
+
+  publish-release:
+    needs: [do-release, windows-installers]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    env:
+      TAG: ${{ needs.do-release.outputs.tag }}
+      VERSION: ${{ needs.do-release.outputs.version }}
+      BASE_VERSION: ${{ needs.do-release.outputs.base-version }}
+      FULL_VERSION: JSignPdf-${{ needs.do-release.outputs.version }}
+    steps:
+    - name: Checkout release tag
+      uses: actions/checkout@v6
+      with:
+        ref: ${{ needs.do-release.outputs.tag }}
+
+    - name: Download Linux assets
+      uses: actions/download-artifact@v4
+      with:
+        name: jsignpdf-linux-assets
+        path: release-assets/JSignPdf-${{ needs.do-release.outputs.version }}
+
+    - name: Download Windows assets
+      uses: actions/download-artifact@v4
+      with:
+        name: jsignpdf-windows-assets
+        path: release-assets/JSignPdf-${{ needs.do-release.outputs.version }}
+
+    - name: List staged assets
+      run: ls -R release-assets
+
+    - name: Upload all assets to SourceForge
+      env:
+        SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+      run: |
+        set -euo pipefail
+        echo "$SSH_PRIVATE_KEY" > private_key
+        chmod 600 private_key
+        cd release-assets
+        sftp -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -i ../private_key kwart@frs.sourceforge.net:/home/frs/project/jsignpdf/stable <<EOF
+        put -R "${FULL_VERSION}"
+        exit
+        EOF
+        cd ..
+        rm -f private_key
+
+    - name: Create GitHub release with all assets
+      env:
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: |
+        set -euo pipefail
+        NOTES_FILE="distribution/doc/release-notes/${BASE_VERSION}.md"
+        if [ ! -f "$NOTES_FILE" ]; then
+          echo "::error::Release notes file not found at $NOTES_FILE"
+          exit 1
+        fi
+        # Delete any pre-existing release so we publish a single release event
+        # with the correct body and the full asset set in one shot.
+        if gh release view "$TAG" >/dev/null 2>&1; then
+          gh release delete "$TAG" --yes --cleanup-tag=false
+        fi
+        shopt -s nullglob
+        assets=(release-assets/"$FULL_VERSION"/*)
+        if [ ${#assets[@]} -eq 0 ]; then
+          echo "::error::No assets found under release-assets/$FULL_VERSION/"
+          exit 1
+        fi
+        gh release create "$TAG" \
+          --title "$TAG" \
+          --notes-file "$NOTES_FILE" \
+          "${assets[@]}"
