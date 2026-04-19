@@ -1,92 +1,132 @@
 # JSignPdf
 
-[![Download JSignPdf](https://img.shields.io/sourceforge/dm/jsignpdf.svg)](https://sourceforge.net/projects/jsignpdf/files/latest/download)
+[![CI](https://github.com/intoolswetrust/jsignpdf/actions/workflows/pr-builder.yaml/badge.svg)](https://github.com/intoolswetrust/jsignpdf/actions/workflows/pr-builder.yaml)
+[![GitHub release](https://img.shields.io/github/v/release/intoolswetrust/jsignpdf?include_prereleases&sort=semver)](https://github.com/intoolswetrust/jsignpdf/releases)
+[![SourceForge downloads](https://img.shields.io/sourceforge/dm/jsignpdf.svg)](https://sourceforge.net/projects/jsignpdf/files/latest/download)
+[![Translation status](https://hosted.weblate.org/widget/jsignpdf/messages/svg-badge.svg)](https://hosted.weblate.org/projects/jsignpdf/messages/)
+[![License: MPL 2.0 / LGPL 2.1](https://img.shields.io/badge/license-MPL%202.0%20%2F%20LGPL%202.1-blue)](License.md)
 
-Project home-page: [intoolswetrust.github.io/jsignpdf/](https://intoolswetrust.github.io/jsignpdf/)
+JSignPdf is a Java desktop application for adding digital signatures to PDF documents.
+It supports both software keystores (PKCS#12) and hardware tokens / smartcards (PKCS#11),
+RFC 3161 timestamping (TSA), OCSP and CRL embedding for long-term validation (LTV),
+drag-to-place visible signatures, and a scriptable command-line / batch mode.
 
-JSignPdf is a Java application which adds digital signatures to PDF documents. 
-The application uses the OpenPDF library for PDF manipulations.
+Project home page: [intoolswetrust.github.io/jsignpdf](https://intoolswetrust.github.io/jsignpdf/)
+
+![JSignPdf JavaFX UI](https://raw.githubusercontent.com/intoolswetrust/jsignpdf/master/website/static/img/screenshots/jsignpdf-javafx-main.png)
+
+## Features
+
+- **JavaFX desktop UI** — PDF preview, drag-to-place visible signatures, zoom / page navigation, drag-and-drop document loading, collapsible options panel. Legacy Swing UI remains available via `-Djsignpdf.swing=true`.
+- **Command-line / batch mode** — sign many PDFs non-interactively; full CLI parity with the GUI.
+- **Keystores**: PKCS#12, Java keystore, and PKCS#11 (hardware tokens, smartcards, HSMs via `conf/pkcs11.cfg`).
+- **Timestamping**: RFC 3161 TSA with optional user/password authentication.
+- **Revocation info**: CRL and OCSP embedding for LTV workflows.
+- **Visible signatures**: customizable layout with `${signer}`, `${timestamp}`, and other placeholders.
+- **Internationalization**: maintained via [Weblate](https://hosted.weblate.org/projects/jsignpdf/messages/) (15+ languages).
+
+## Install
+
+Requires a **Java 21 (or newer) JRE** unless you use an installer that bundles its own runtime.
+
+| Platform | Artifact | Notes |
+|---|---|---|
+| **Windows** | EXE / MSI / portable ZIP from [GitHub Releases](https://github.com/intoolswetrust/jsignpdf/releases) | Built with `jpackage`, ships a bundled Java 21 runtime. 64-bit only. |
+| **Linux** | Flatpak (Flathub submission in progress — tracked in [#307](https://github.com/intoolswetrust/jsignpdf/issues/307)) or cross-platform ZIP | Flatpak bundles its own Java runtime. |
+| **macOS** | Cross-platform ZIP | Requires Java 21 on `PATH`. |
+| **Any OS with Java 21** | `jsignpdf-<version>.zip` | Run `JSignPdf.sh` / `JSignPdf.bat` from the extracted folder. |
+| **Mirror** | [SourceForge](https://sourceforge.net/projects/jsignpdf/files/latest/download) | Same artifacts as GitHub Releases. |
+
+Maven-Central-published artifacts (for embedding the signing engine in your own project) live under `com.github.kwart.jsign`.
+
+## Documentation
+
+- User guide: <https://intoolswetrust.github.io/jsignpdf/>
+- Release notes: [`distribution/doc/release-notes/`](distribution/doc/release-notes/)
+- Developer / architecture guide: [AGENTS.md](AGENTS.md)
+- Design notes: [`design-doc/`](design-doc/)
+- Issue tracker: <https://github.com/intoolswetrust/jsignpdf/issues>
 
 ## Translations
-Help to translate the project on Weblate platform: https://hosted.weblate.org/projects/jsignpdf/messages/
 
-## Build
+Help translate JSignPdf on Weblate: <https://hosted.weblate.org/projects/jsignpdf/messages/>
 
-Use Apache Maven to build the project:
+## Build from source
+
+Requires **Java 21** and Apache Maven.
 
 ```bash
 mvn clean install
 ```
 
-Resulting bits are located in the `distribution/target`
+The resulting artifacts are produced under `distribution/target/`. See [AGENTS.md](AGENTS.md) for module layout, source-tree overview, and test commands.
 
-### Windows installer
+### Windows installers
 
-```bash
-docker pull kwart/innosetup
-docker run -it --rm -v "$(pwd):/mnt" \
-  -u $(id -u):$(id -g) kwart/innosetup \
-  /mnt/distribution/windows/create-jsignpdf-installer.sh
-```
+Windows installers are built with `jpackage` as part of the release workflow
+(`.github/workflows/do-release.yml`) and produce three artifacts:
 
-## Deploy/Release
+- `JSignPdf-<version>.exe` — EXE installer with bundled Java 21 runtime
+- `JSignPdf-<version>.msi` — MSI installer with bundled Java 21 runtime
+- `JSignPdf-<version>-win-x64.zip` — portable ZIP with bundled Java 21 runtime
 
-### Deploy snapshots
+For a local experiment on Linux, cross-building requires a Windows JDK + WiX;
+the supported path is to let the release workflow build the installers.
 
-```
-mvn clean install deploy
-```
+### Flatpak
 
-### Release
+Flatpak packaging lives under [`distribution/linux/flatpak/`](distribution/linux/flatpak/).
+Maven dependencies for the Flatpak build are captured in `maven-dependencies.json`
+and regenerated by `generate-dependencies.sh` (run by the
+`refresh-flatpak-deps.yml` workflow).
 
-* add release notes for the new version as `distribution/doc/release-notes/<version>.md`
-  (the release workflow picks this file to populate both the bundled `README.md` and
-  the GitHub release body)
-* build the `jsignpdf`
+## Release process
 
-```bash
-mvn -P release --batch-mode -Dtag=JSignPdf_2_0_0 release:prepare \
-                 -DreleaseVersion=2.0.0 \
-                 -DdevelopmentVersion=2.1.0-SNAPSHOT
+Releases are workflow-driven via [`.github/workflows/do-release.yml`](.github/workflows/do-release.yml):
 
-mvn -P release --batch-mode release:perform
+1. Add release notes for the new version as
+   `distribution/doc/release-notes/<version>.md`. The release workflow uses
+   this file as both the bundled README and the GitHub Release body.
+2. Trigger the `do-release` workflow manually, supplying the target version.
+3. SNAPSHOT builds are published to Maven Central on every push to `master`
+   via [`push-snapshots.yaml`](.github/workflows/push-snapshots.yaml).
 
-# and build the Windows installers too
-cd target/checkout
-docker pull kwart/innosetup
-docker run -it --rm -v "$(pwd):/mnt" \
-  -u $(id -u):$(id -g) kwart/innosetup \
-  /mnt/distribution/windows/create-jsignpdf-installer.sh
+## License
 
-# copy the bits to a new subdirectory in sftp://<user>@frs.sourceforge.net/home/frs/project/jsignpdf
-# update version in sftp://<user>@frs.sourceforge.net/home/project-web/jsignpdf/htdocs
+Dual-licensed under **MPL 2.0** and **LGPL 2.1** — see [License.md](License.md).
 
-```
+---
 
-## Random
+## Appendix: Testing PKCS#11 without a card reader
 
-### Testing PKCS11 without a card reader
+A minimal way to exercise the PKCS#11 code path without real hardware is to
+back `SunPKCS11` with a software NSS database.
 
-*Note: This only works with PKCS11 keystore type. The JSignPKCS11 doesn't support the NSS keystores!*
-
-Use NSS keystore
+> **Note:** this only works with the `PKCS11` keystore type. `JSignPKCS11`
+> does not support NSS keystores.
 
 ```bash
 echo "pass123+" > /tmp/newpass.txt
 echo "dsadasdasdasdadasdasdasdasdsadfwerwerjfdksdjfksdlfhjsdk" > /tmp/noise.txt
 mkdir /tmp/nssdb
+
 MODUTIL_CMD="modutil -force -dbdir /tmp/nssdb"
 $MODUTIL_CMD -create
 $MODUTIL_CMD -changepw "NSS Certificate DB" -newpwfile /tmp/newpass.txt
-certutil -S -v 240 -k rsa -n "CN=localhost"  -t "u,u,u" -x -s "CN=localhost" -d /tmp/nssdb -f /tmp/newpass.txt -z /tmp/noise.txt
 
-# https://bugzilla.redhat.com/show_bug.cgi?id=1760437
+certutil -S -v 240 -k rsa -n "CN=localhost" -t "u,u,u" -x \
+         -s "CN=localhost" -d /tmp/nssdb \
+         -f /tmp/newpass.txt -z /tmp/noise.txt
+
+# Workaround for https://bugzilla.redhat.com/show_bug.cgi?id=1760437
 touch /tmp/nssdb/secmod.db
 
-cat <<EOT >conf/pkcs11.cfg
+cat <<EOT > conf/pkcs11.cfg
 name=testPkcs11
 nssLibraryDirectory=/usr/lib/x86_64-linux-gnu
 nssSecmodDirectory=/tmp/nssdb
 nssModule=keystore
 EOT
 ```
+
+Then select the `PKCS11` keystore type in JSignPdf and use `pass123+` as the token PIN.
