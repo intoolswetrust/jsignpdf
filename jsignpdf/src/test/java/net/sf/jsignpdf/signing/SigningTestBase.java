@@ -10,6 +10,7 @@ import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDPage;
 import org.apache.pdfbox.pdmodel.PDPageContentStream;
 import org.apache.pdfbox.pdmodel.font.PDType1Font;
+import org.apache.pdfbox.pdmodel.font.Standard14Fonts;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.junit.BeforeClass;
 import org.junit.Rule;
@@ -49,7 +50,7 @@ public abstract class SigningTestBase {
         doc.addPage(page);
         PDPageContentStream cs = new PDPageContentStream(doc, page);
         cs.beginText();
-        cs.setFont(PDType1Font.HELVETICA, 12);
+        cs.setFont(new PDType1Font(Standard14Fonts.FontName.HELVETICA), 12);
         cs.newLineAtOffset(100, 700);
         cs.showText("Test PDF for signing");
         cs.endText();

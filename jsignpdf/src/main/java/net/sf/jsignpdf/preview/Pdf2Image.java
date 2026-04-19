@@ -43,6 +43,7 @@ import net.sf.jsignpdf.BasicSignerOptions;
 import net.sf.jsignpdf.Constants;
 import net.sf.jsignpdf.utils.PdfUtils;
 
+import org.apache.pdfbox.Loader;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDPage;
 import org.apache.pdfbox.rendering.PDFRenderer;
@@ -208,7 +209,7 @@ public class Pdf2Image {
 
         try {
             File tmpFile = new File(options.getInFile());
-            tmpDoc = PDDocument.load(tmpFile, options.getPdfOwnerPwdStrX());
+            tmpDoc = Loader.loadPDF(tmpFile, options.getPdfOwnerPwdStrX());
             int resolution;
             try {
                 resolution = Toolkit.getDefaultToolkit().getScreenResolution();

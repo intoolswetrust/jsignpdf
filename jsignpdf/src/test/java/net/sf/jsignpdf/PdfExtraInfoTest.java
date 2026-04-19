@@ -13,6 +13,7 @@ import org.apache.pdfbox.pdmodel.PDPageContentStream;
 import org.apache.pdfbox.pdmodel.encryption.AccessPermission;
 import org.apache.pdfbox.pdmodel.encryption.StandardProtectionPolicy;
 import org.apache.pdfbox.pdmodel.font.PDType1Font;
+import org.apache.pdfbox.pdmodel.font.Standard14Fonts;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.junit.BeforeClass;
 import org.junit.Rule;
@@ -190,7 +191,7 @@ public class PdfExtraInfoTest {
             doc.addPage(page);
             try (PDPageContentStream cs = new PDPageContentStream(doc, page)) {
                 cs.beginText();
-                cs.setFont(PDType1Font.HELVETICA, 12);
+                cs.setFont(new PDType1Font(Standard14Fonts.FontName.HELVETICA), 12);
                 cs.newLineAtOffset(100, 700);
                 cs.showText("Unprotected test PDF");
                 cs.endText();
@@ -208,7 +209,7 @@ public class PdfExtraInfoTest {
             doc.addPage(page);
             try (PDPageContentStream cs = new PDPageContentStream(doc, page)) {
                 cs.beginText();
-                cs.setFont(PDType1Font.HELVETICA, 12);
+                cs.setFont(new PDType1Font(Standard14Fonts.FontName.HELVETICA), 12);
                 cs.newLineAtOffset(100, 700);
                 cs.showText("Owner password only test PDF");
                 cs.endText();
@@ -231,7 +232,7 @@ public class PdfExtraInfoTest {
             doc.addPage(page);
             try (PDPageContentStream cs = new PDPageContentStream(doc, page)) {
                 cs.beginText();
-                cs.setFont(PDType1Font.HELVETICA, 12);
+                cs.setFont(new PDType1Font(Standard14Fonts.FontName.HELVETICA), 12);
                 cs.newLineAtOffset(100, 700);
                 cs.showText("Both passwords test PDF");
                 cs.endText();
