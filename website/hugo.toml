@@ -65,8 +65,8 @@ hasCJKLanguage    = false
     pageRef  = "/screenshots"
     weight   = 2
   [[menu.main]]
-    name     = "Blog"
-    pageRef  = "/blog"
+    name     = "Documentation"
+    pageRef  = "/docs"
     weight   = 3
   [[menu.main]]
     name     = "GitHub"
