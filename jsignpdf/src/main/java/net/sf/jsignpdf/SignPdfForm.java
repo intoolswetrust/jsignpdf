@@ -528,7 +528,7 @@ public class SignPdfForm extends javax.swing.JFrame implements SignResultListene
 
         infoTextArea.setColumns(80);
         infoTextArea.setEditable(false);
-        infoTextArea.setFont(new java.awt.Font("Courier New", 1, 10)); // NOI18N
+        infoTextArea.setFont(new java.awt.Font("Monospaced", 1, 10)); // NOI18N
         infoTextArea.setRows(25);
         infoTextArea.setMinimumSize(new java.awt.Dimension(200, 180));
         infoTextArea.setLineWrap(true);
@@ -990,7 +990,7 @@ public class SignPdfForm extends javax.swing.JFrame implements SignResultListene
         gridBagConstraints.insets = new java.awt.Insets(2, 0, 2, 0);
         getContentPane().add(chkbAppendSignature, gridBagConstraints);
 
-        btnSignIt.setFont(new java.awt.Font("Tahoma", 1, 12)); // NOI18N
+        btnSignIt.setFont(new java.awt.Font("SansSerif", 1, 12)); // NOI18N
         btnSignIt.setIcon(new javax.swing.ImageIcon(getClass().getResource("/net/sf/jsignpdf/signedpdf26.png"))); // NOI18N
         btnSignIt.setText("Sign It");
         btnSignIt.addActionListener(new java.awt.event.ActionListener() {
