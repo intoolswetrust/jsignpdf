@@ -23,7 +23,9 @@ import javafx.scene.control.Menu;
 import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.SplitPane;
+import javafx.scene.control.ToggleButton;
 import javafx.scene.control.ToolBar;
+import javafx.scene.control.Tooltip;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
@@ -167,16 +169,31 @@ public class FxTranslationsTest {
             assertEquals("Sign button for " + locale,
                     bundle.getString("jfx.gui.toolbar.sign"), signBtn.getText());
 
-            // The toolbar must contain the clear-visible-signature button. The
-            // button shows only its icon (contentDisplay=GRAPHIC_ONLY) but the
-            // translated label is still set as text for accessibility.
-            String expectedClearText = bundle.getString("jfx.gui.toolbar.clearVisibleSig");
-            boolean foundClear = toolBar.getItems().stream()
-                    .filter(n -> n instanceof Button)
-                    .map(n -> ((Button) n).getText())
-                    .anyMatch(expectedClearText::equals);
-            assertEquals("Clear visible signature button missing for " + locale,
-                    true, foundClear);
+            // The toolbar must contain two icon-only ToggleButtons (visible
+            // signature + TSA), each with a translated tooltip.
+            String expectedVisibleTip = bundle.getString("jfx.gui.toolbar.visibleSig.tooltip");
+            String expectedTsaTip = bundle.getString("jfx.gui.toolbar.tsa.tooltip");
+            long toggleCount = toolBar.getItems().stream()
+                    .filter(n -> n instanceof ToggleButton)
+                    .count();
+            assertEquals("Two toolbar ToggleButtons expected for " + locale, 2L, toggleCount);
+
+            boolean foundVisibleTip = toolBar.getItems().stream()
+                    .filter(n -> n instanceof ToggleButton)
+                    .map(n -> ((ToggleButton) n).getTooltip())
+                    .filter(t -> t != null)
+                    .map(Tooltip::getText)
+                    .anyMatch(expectedVisibleTip::equals);
+            boolean foundTsaTip = toolBar.getItems().stream()
+                    .filter(n -> n instanceof ToggleButton)
+                    .map(n -> ((ToggleButton) n).getTooltip())
+                    .filter(t -> t != null)
+                    .map(Tooltip::getText)
+                    .anyMatch(expectedTsaTip::equals);
+            assertEquals("Visible-signature toggle tooltip missing for " + locale,
+                    true, foundVisibleTip);
+            assertEquals("TSA toggle tooltip missing for " + locale,
+                    true, foundTsaTip);
         }
     }
 

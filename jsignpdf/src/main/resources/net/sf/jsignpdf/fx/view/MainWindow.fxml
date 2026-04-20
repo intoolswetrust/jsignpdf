@@ -96,15 +96,28 @@
                     </ImageView></graphic>
                 </Button>
                 <Separator orientation="VERTICAL"/>
-                <Button fx:id="btnClearVisibleSig" text="%jfx.gui.toolbar.clearVisibleSig"
-                        onAction="#onClearVisibleSig" mnemonicParsing="false"
-                        contentDisplay="GRAPHIC_ONLY"
-                        styleClass="toolbar-button">
+                <ToggleButton fx:id="btnVisibleSig" mnemonicParsing="false"
+                              contentDisplay="GRAPHIC_ONLY"
+                              styleClass="toolbar-button,toolbar-toggle">
                     <graphic>
-                        <SVGPath styleClass="eraser-icon"
-                                 content="M8.086 2.207a2 2 0 0 1 2.828 0l3.879 3.879a2 2 0 0 1 0 2.828l-5.5 5.5A2 2 0 0 1 7.879 15H5.12a2 2 0 0 1-1.414-.586l-2.5-2.5a2 2 0 0 1 0-2.828zm.66 11.34L3.453 8.254 1.914 9.793a1 1 0 0 0 0 1.414l2.5 2.5a1 1 0 0 0 .707.293H7.88a1 1 0 0 0 .707-.293z"/>
+                        <SVGPath styleClass="eye-icon"
+                                 content="M16 8s-3-5.5-8-5.5S0 8 0 8s3 5.5 8 5.5S16 8 16 8zM1.173 8a13.133 13.133 0 0 1 1.66-2.043C4.12 4.668 5.88 3.5 8 3.5c2.12 0 3.879 1.168 5.168 2.457A13.133 13.133 0 0 1 14.828 8c-.058.087-.122.183-.195.288-.335.48-.83 1.12-1.465 1.755C11.879 11.332 10.119 12.5 8 12.5c-2.12 0-3.879-1.168-5.168-2.457A13.134 13.134 0 0 1 1.172 8zM8 5.5a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5zM4.5 8a3.5 3.5 0 1 1 7 0 3.5 3.5 0 0 1-7 0z"/>
                     </graphic>
-                </Button>
+                    <tooltip>
+                        <Tooltip text="%jfx.gui.toolbar.visibleSig.tooltip"/>
+                    </tooltip>
+                </ToggleButton>
+                <ToggleButton fx:id="btnTsa" mnemonicParsing="false"
+                              contentDisplay="GRAPHIC_ONLY"
+                              styleClass="toolbar-button,toolbar-toggle">
+                    <graphic>
+                        <SVGPath styleClass="clock-icon"
+                                 content="M8 3.5a.5.5 0 0 0-1 0V9a.5.5 0 0 0 .252.434l3.5 2a.5.5 0 0 0 .496-.868L8 8.71V3.5zM8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zm7-8A7 7 0 1 1 1 8a7 7 0 0 1 14 0z"/>
+                    </graphic>
+                    <tooltip>
+                        <Tooltip text="%jfx.gui.toolbar.tsa.tooltip"/>
+                    </tooltip>
+                </ToggleButton>
                 <Separator orientation="VERTICAL"/>
                 <Button fx:id="btnSign" text="%jfx.gui.toolbar.sign" onAction="#onSign"
                         styleClass="toolbar-button,sign-button">

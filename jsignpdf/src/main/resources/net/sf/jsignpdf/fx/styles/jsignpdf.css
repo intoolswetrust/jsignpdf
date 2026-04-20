@@ -22,16 +22,28 @@
     -fx-text-fill: #2e7d32;
 }
 
-.eraser-icon {
+.eye-icon,
+.clock-icon {
     -fx-fill: #555555;
 }
 
-.toolbar-button:hover .eraser-icon {
-    -fx-fill: #d32f2f;
+.toolbar-button:hover .eye-icon,
+.toolbar-button:hover .clock-icon {
+    -fx-fill: #1565c0;
 }
 
-.toolbar-button:disabled .eraser-icon {
+.toolbar-button:disabled .eye-icon,
+.toolbar-button:disabled .clock-icon {
     -fx-fill: #bbbbbb;
+}
+
+.toolbar-toggle:selected {
+    -fx-background-color: #c8e6c9;
+}
+
+.toolbar-toggle:selected .eye-icon,
+.toolbar-toggle:selected .clock-icon {
+    -fx-fill: #2e7d32;
 }
 
 /* Side Panel */

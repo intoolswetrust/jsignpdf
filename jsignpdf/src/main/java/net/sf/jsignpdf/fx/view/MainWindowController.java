@@ -25,6 +25,7 @@ import javafx.scene.control.ProgressBar;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.SplitPane;
 import javafx.scene.control.TextField;
+import javafx.scene.control.ToggleButton;
 import javafx.scene.input.DragEvent;
 import javafx.scene.input.Dragboard;
 import javafx.scene.input.KeyCode;
@@ -112,7 +113,8 @@ public class MainWindowController {
     @FXML private TextField txtPageNumber;
     @FXML private Label lblPageCount;
     @FXML private Button btnNextPage;
-    @FXML private Button btnClearVisibleSig;
+    @FXML private ToggleButton btnVisibleSig;
+    @FXML private ToggleButton btnTsa;
     @FXML private Button btnSign;
 
     // Content area
@@ -236,12 +238,14 @@ public class MainWindowController {
             } else {
                 autoPlaceVisibleSignature();
             }
-            updateVisibleSigIndicators();
             updateSigStateBadge();
         });
 
-        // Bind visible-signature CheckMenuItem bidirectionally to the ViewModel
+        // Bind the visible-signature controls (CheckMenuItem + toolbar toggle)
+        // bidirectionally to the ViewModel so they mirror the side-panel checkbox.
         menuVisibleSig.selectedProperty().bindBidirectional(signingVM.visibleProperty());
+        btnVisibleSig.selectedProperty().bindBidirectional(signingVM.visibleProperty());
+        btnTsa.selectedProperty().bindBidirectional(signingVM.tsaEnabledProperty());
 
         // Status-bar badge: visible whenever a document is loaded. Its text and
         // colour swap based on whether visible signature is on or off.
@@ -256,7 +260,6 @@ public class MainWindowController {
         // Initial state for the visible-signature controls.
         // The badge's initial text and style come from FXML (correct for
         // visibleProperty=false on startup); listeners take over on state changes.
-        updateVisibleSigIndicators();
         updateOutputPathLabel();
 
         // Keep overlay sized to match the pdf page view
@@ -385,6 +388,7 @@ public class MainWindowController {
         txtPageNumber.setDisable(disabled);
         btnNextPage.setDisable(disabled);
         btnSign.setDisable(disabled);
+        btnVisibleSig.setDisable(disabled);
         menuSign.setDisable(disabled);
         menuClose.setDisable(disabled);
         menuSaveAs.setDisable(disabled);
@@ -394,20 +398,6 @@ public class MainWindowController {
         menuZoomFit.setDisable(disabled);
         if (signatureSettingsController != null) {
             signatureSettingsController.setVisibleSigCheckBoxDisabled(disabled);
-        }
-        // Visible-signature controls track both document state and current toggle
-        updateVisibleSigIndicators();
-    }
-
-    /**
-     * Refreshes the enabled state of the "clear visible signature" toolbar button.
-     * It is only meaningful when a document is loaded and the visible signature
-     * is currently enabled.
-     */
-    private void updateVisibleSigIndicators() {
-        boolean canClear = documentVM.isDocumentLoaded() && signingVM.visibleProperty().get();
-        if (btnClearVisibleSig != null) {
-            btnClearVisibleSig.setDisable(!canClear);
         }
     }
 
@@ -654,11 +644,6 @@ public class MainWindowController {
     }
 
     @FXML
-    private void onClearVisibleSig() {
-        signingVM.visibleProperty().set(false);
-    }
-
-    @FXML
     private void onSign() {
         if (options == null || !documentVM.isDocumentLoaded()) {
             showAlert(Alert.AlertType.WARNING,
@@ -732,9 +717,11 @@ public class MainWindowController {
     private void onZoomFit() {
         if (!documentVM.isDocumentLoaded() || documentVM.getCurrentPageImage() == null) return;
         double imgWidth = documentVM.getCurrentPageImage().getWidth();
+        double imgHeight = documentVM.getCurrentPageImage().getHeight();
         double viewWidth = scrollPane.getViewportBounds().getWidth();
-        if (imgWidth > 0 && viewWidth > 0) {
-            documentVM.setZoomLevel(viewWidth / imgWidth);
+        double viewHeight = scrollPane.getViewportBounds().getHeight();
+        if (imgWidth > 0 && imgHeight > 0 && viewWidth > 0 && viewHeight > 0) {
+            documentVM.setZoomLevel(Math.min(viewWidth / imgWidth, viewHeight / imgHeight));
         }
     }
 
