@@ -9,11 +9,13 @@ import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.geometry.Insets;
 import javafx.scene.Node;
+import javafx.scene.control.Accordion;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonBar;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.CheckMenuItem;
+import javafx.scene.control.TitledPane;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Dialog;
 import javafx.scene.control.Label;
@@ -119,6 +121,8 @@ public class MainWindowController {
 
     // Content area
     @FXML private SplitPane splitPane;
+    @FXML private Accordion sidePanelAccordion;
+    @FXML private TitledPane tsaAccordionPane;
     @FXML private ScrollPane scrollPane;
     @FXML private StackPane pdfArea;
     @FXML private Label lblDropHint;
@@ -246,6 +250,14 @@ public class MainWindowController {
         menuVisibleSig.selectedProperty().bindBidirectional(signingVM.visibleProperty());
         btnVisibleSig.selectedProperty().bindBidirectional(signingVM.visibleProperty());
         btnTsa.selectedProperty().bindBidirectional(signingVM.tsaEnabledProperty());
+
+        // When TSA is turned on but no URL is configured yet, jump the side-panel
+        // accordion to the TSA section so the user can fill the required field.
+        signingVM.tsaEnabledProperty().addListener((obs, was, on) -> {
+            if (on && isBlank(signingVM.tsaUrlProperty().get())) {
+                expandTsaPane();
+            }
+        });
 
         // Status-bar badge: visible whenever a document is loaded. Its text and
         // colour swap based on whether visible signature is on or off.
@@ -507,6 +519,16 @@ public class MainWindowController {
         btnNextPage.setDisable(!documentVM.canGoNext());
     }
 
+    private void expandTsaPane() {
+        if (sidePanelAccordion != null && tsaAccordionPane != null) {
+            sidePanelAccordion.setExpandedPane(tsaAccordionPane);
+        }
+    }
+
+    private static boolean isBlank(String s) {
+        return s == null || s.trim().isEmpty();
+    }
+
     private void updateStatus(String message) {
         lblStatus.setText(message);
     }
@@ -658,6 +680,15 @@ public class MainWindowController {
             showAlert(Alert.AlertType.WARNING,
                     RES.get(prefix + ".title"),
                     RES.get(prefix + ".text"));
+            return;
+        }
+
+        // Validate TSA: when enabled, the TSA server URL is mandatory.
+        if (tsaSettingsController != null && !tsaSettingsController.isTsaConfigValid()) {
+            expandTsaPane();
+            showAlert(Alert.AlertType.WARNING,
+                    RES.get("jfx.gui.dialog.missingTsaUrl.title"),
+                    RES.get("jfx.gui.dialog.missingTsaUrl.text"));
             return;
         }
 

@@ -25,6 +25,8 @@ import java.net.Proxy;
  */
 public class TsaSettingsController {
 
+    private static final String STYLE_VALIDATION_ERROR = "-fx-border-color: red; -fx-border-width: 1;";
+
     @FXML private CheckBox chkTsaEnabled;
     @FXML private TextField txtTsaUrl;
     @FXML private ComboBox<ServerAuthentication> cmbTsaAuthn;
@@ -61,9 +63,14 @@ public class TsaSettingsController {
 
         // Toggle TSA details visibility
         tsaDetailsPane.managedProperty().bind(tsaDetailsPane.visibleProperty());
-        chkTsaEnabled.selectedProperty().addListener((obs, o, n) ->
-                tsaDetailsPane.setVisible(n));
+        chkTsaEnabled.selectedProperty().addListener((obs, o, n) -> {
+            tsaDetailsPane.setVisible(n);
+            updateValidation();
+        });
         tsaDetailsPane.setVisible(false);
+
+        // Live validation: TSA URL is required when TSA is enabled.
+        txtTsaUrl.textProperty().addListener((obs, o, n) -> updateValidation());
 
         // Toggle auth-dependent panes: show only the inputs relevant to the
         // selected authentication method (user/password vs certificate file).
@@ -142,6 +149,7 @@ public class TsaSettingsController {
 
         // Update visibility from initial loaded values
         tsaDetailsPane.setVisible(viewModel.tsaEnabledProperty().get());
+        updateValidation();
         applyAuthVisibility(viewModel.tsaServerAuthnProperty().get());
         boolean ocspOn = viewModel.ocspEnabledProperty().get();
         lblOcspServerUrl.setVisible(ocspOn);
@@ -163,6 +171,27 @@ public class TsaSettingsController {
     private void applyAuthVisibility(ServerAuthentication authn) {
         tsaUserPane.setVisible(authn == ServerAuthentication.PASSWORD);
         tsaCertPane.setVisible(authn == ServerAuthentication.CERTIFICATE);
+    }
+
+    /**
+     * Applies or clears a red-border style on the TSA URL field. The URL is
+     * required whenever TSA is enabled.
+     */
+    private void updateValidation() {
+        boolean invalid = chkTsaEnabled.isSelected() && isBlank(txtTsaUrl.getText());
+        txtTsaUrl.setStyle(invalid ? STYLE_VALIDATION_ERROR : null);
+    }
+
+    /**
+     * Returns true if TSA is either disabled or has a non-blank server URL.
+     * Used by the main controller to gate Sign.
+     */
+    public boolean isTsaConfigValid() {
+        return !chkTsaEnabled.isSelected() || !isBlank(txtTsaUrl.getText());
+    }
+
+    private static boolean isBlank(String s) {
+        return s == null || s.trim().isEmpty();
     }
 
     @FXML

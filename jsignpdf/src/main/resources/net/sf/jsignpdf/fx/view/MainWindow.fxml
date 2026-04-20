@@ -136,7 +136,8 @@
                        onDragOver="#onDragOver" onDragDropped="#onDragDropped">
                 <!-- Side panel with accordion for settings -->
                 <AnchorPane minWidth="250" prefWidth="300" styleClass="side-panel">
-                    <Accordion AnchorPane.topAnchor="0" AnchorPane.bottomAnchor="0"
+                    <Accordion fx:id="sidePanelAccordion"
+                               AnchorPane.topAnchor="0" AnchorPane.bottomAnchor="0"
                                AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0">
                         <panes>
                             <TitledPane text="%jfx.gui.panel.certificate" expanded="true">
@@ -155,7 +156,8 @@
                                                 source="SignatureSettings.fxml"/>
                                 </ScrollPane>
                             </TitledPane>
-                            <TitledPane text="%jfx.gui.panel.timestampValidation">
+                            <TitledPane fx:id="tsaAccordionPane"
+                                        text="%jfx.gui.panel.timestampValidation">
                                 <ScrollPane fitToWidth="true">
                                     <fx:include fx:id="tsaSettings"
                                                 source="TsaSettings.fxml"/>
