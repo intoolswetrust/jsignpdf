@@ -116,7 +116,7 @@ jobs:
       run: mvn -B -DskipTests -pl jsignpdf,installcert -am package
 
     - name: Download PDF guide from the release job
-      uses: actions/download-artifact@v4
+      uses: actions/download-artifact@v8
       with:
         name: jsignpdf-pdf-guide
         path: distribution/target/pdf-guide
@@ -150,13 +150,13 @@ jobs:
         ref: ${{ needs.do-release.outputs.tag }}
 
     - name: Download Linux assets
-      uses: actions/download-artifact@v4
+      uses: actions/download-artifact@v8
       with:
         name: jsignpdf-linux-assets
         path: release-assets/JSignPdf-${{ needs.do-release.outputs.version }}
 
     - name: Download Windows assets
-      uses: actions/download-artifact@v4
+      uses: actions/download-artifact@v8
       with:
         name: jsignpdf-windows-assets
         path: release-assets/JSignPdf-${{ needs.do-release.outputs.version }}
