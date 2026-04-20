@@ -80,7 +80,7 @@ jobs:
         MAVEN_GPG_PASSPHRASE: ${{ secrets.MAVEN_GPG_PASSPHRASE }}
 
     - name: Stage Linux release assets for the publish job
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v7
       with:
         name: jsignpdf-linux-assets
         path: distribution/target/upload/*
@@ -88,7 +88,7 @@ jobs:
         retention-days: 1
 
     - name: Publish PDF guide for downstream jobs
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v7
       with:
         name: jsignpdf-pdf-guide
         path: distribution/target/generated-docs/JSignPdf.pdf
@@ -126,7 +126,7 @@ jobs:
       run: ./distribution/windows/build-windows-installers.ps1 -Version ${{ needs.do-release.outputs.version }}
 
     - name: Stage Windows installers for the publish job
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v7
       with:
         name: jsignpdf-windows-assets
         path: distribution/target/upload/*
