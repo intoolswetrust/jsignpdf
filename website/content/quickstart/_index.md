@@ -1,8 +1,7 @@
 ---
 linkTitle: "Quickstart"
 title: Quickstart
-cascade:
-  type: docs
+type: docs
 ---
 
 ## Quick start

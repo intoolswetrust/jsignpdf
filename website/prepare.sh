@@ -65,22 +65,25 @@ if [ -z "${VERSION}" ]; then
   exit 1
 fi
 
-# Guide page bundle: index.adoc + img/ resources at the /docs/ URL.
-# Prepend a Hugo YAML front-matter block so the page renders with Hextra's
-# docs layout (type: docs) without a parent _index.md cascade, and so we
-# can opt out of the FlexSearch index.
+# Guide section (branch bundle): _index.adoc + img/ resources at the /docs/
+# URL. Using _index.adoc (not index.adoc) makes this a section page so
+# Hextra's docs list layout applies cleanly. Prepend a Hugo YAML
+# front-matter block to set type: docs, redirect the old /docs/guide/
+# URL, and opt out of the FlexSearch index.
 mkdir -p "${DEST_GUIDE}"
 {
   printf -- '---\n'
   printf -- 'title: "JSignPdf User Guide"\n'
   printf -- 'linkTitle: "Docs"\n'
   printf -- 'type: docs\n'
+  printf -- 'aliases:\n'
+  printf -- '  - /docs/guide/\n'
   printf -- 'excludeSearch: true\n'
   printf -- 'sidebar:\n'
   printf -- '  open: true\n'
   printf -- '---\n'
   sed "s|{jsignpdf-version}|${VERSION}|g" "${SRC_ADOC}"
-} > "${DEST_GUIDE}/index.adoc"
+} > "${DEST_GUIDE}/_index.adoc"
 rm -rf "${DEST_GUIDE}/img"
 cp -r  "${SRC_GUIDE_IMG}" "${DEST_GUIDE}/img"
 
