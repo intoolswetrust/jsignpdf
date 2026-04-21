@@ -29,7 +29,7 @@ toc: false
     </svg>
     Download latest release
   </a>
-  <a class="jsp-secondary-btn" href="docs/guide/">
+  <a class="jsp-secondary-btn" href="docs/">
     Read the Guide
   </a>
 </div>
@@ -84,7 +84,7 @@ toc: false
       Desktop application
     </h3>
     <p>Launch the Java GUI, pick a keystore, drop a PDF in and click Sign. Switch to the advanced view when you need timestamps, certification levels or visible signatures.</p>
-    <a class="jsp-way-link" href="docs/guide/#launching">Start with the GUI →</a>
+    <a class="jsp-way-link" href="docs/#launching">Start with the GUI →</a>
   </div>
 
   <div class="jsp-way">
@@ -98,7 +98,7 @@ toc: false
 <pre><code>jsignpdf -kst PKCS12 -ksf my.p12 \
          -ksp "$PASS" -d output/ \
          contract.pdf</code></pre>
-    <a class="jsp-way-link" href="docs/guide/#command-line-batch-mode">CLI reference →</a>
+    <a class="jsp-way-link" href="docs/#command-line-batch-mode">CLI reference →</a>
   </div>
 </div>
 

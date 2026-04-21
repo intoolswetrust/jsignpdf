@@ -11,7 +11,7 @@ set -eu
 HERE="$(cd "$(dirname "$0")" && pwd)"
 SRC_ADOC="${HERE}/docs/JSignPdf.adoc"
 SRC_GUIDE_IMG="${HERE}/docs/img"
-DEST_GUIDE="${HERE}/content/docs/guide"
+DEST_GUIDE="${HERE}/content/docs"
 
 if [ ! -f "${SRC_ADOC}" ]; then
   echo "ERROR: ${SRC_ADOC} not found" >&2
@@ -65,22 +65,25 @@ if [ -z "${VERSION}" ]; then
   exit 1
 fi
 
-# Guide page bundle: index.adoc + img/ resources.
-# Prepend a Hugo YAML front-matter block so the page gets a stable URL
-# slug ("guide") and so we can opt out of Hextra's sidebar TOC — Hugo's
-# Page.Fragments isn't populated for asciidoc-rendered content, which
-# trips up Hextra's TOC partial.
+# Guide section (branch bundle): _index.adoc + img/ resources at the /docs/
+# URL. Using _index.adoc (not index.adoc) makes this a section page so
+# Hextra's docs list layout applies cleanly. Prepend a Hugo YAML
+# front-matter block to set type: docs, redirect the old /docs/guide/
+# URL, and opt out of the FlexSearch index.
 mkdir -p "${DEST_GUIDE}"
 {
   printf -- '---\n'
   printf -- 'title: "JSignPdf User Guide"\n'
-  printf -- 'linkTitle: "Guide"\n'
+  printf -- 'linkTitle: "Docs"\n'
+  printf -- 'type: docs\n'
+  printf -- 'aliases:\n'
+  printf -- '  - /docs/guide/\n'
   printf -- 'excludeSearch: true\n'
   printf -- 'sidebar:\n'
-  printf -- '  open: true\n'
+  printf -- '  hide: true\n'
   printf -- '---\n'
   sed "s|{jsignpdf-version}|${VERSION}|g" "${SRC_ADOC}"
-} > "${DEST_GUIDE}/index.adoc"
+} > "${DEST_GUIDE}/_index.adoc"
 rm -rf "${DEST_GUIDE}/img"
 cp -r  "${SRC_GUIDE_IMG}" "${DEST_GUIDE}/img"
 

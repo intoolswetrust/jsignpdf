@@ -58,15 +58,15 @@ hasCJKLanguage    = false
 [menu]
   [[menu.main]]
     name     = "Guide"
-    pageRef  = "/docs/guide"
+    pageRef  = "/docs"
     weight   = 1
   [[menu.main]]
     name     = "Screenshots"
     pageRef  = "/screenshots"
     weight   = 2
   [[menu.main]]
-    name     = "Documentation"
-    pageRef  = "/docs"
+    name     = "Quickstart"
+    pageRef  = "/quickstart"
     weight   = 3
   [[menu.main]]
     name     = "GitHub"

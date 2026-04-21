@@ -1,8 +1,9 @@
 ---
-linkTitle: "Documentation"
-title: Documentation
-cascade:
-  type: docs
+linkTitle: "Quickstart"
+title: Quickstart
+type: docs
+sidebar:
+  hide: true
 ---
 
 ## Quick start
@@ -52,4 +53,4 @@ Add `-ts https://freetsa.org/tsr -ha SHA256` to attach a trusted timestamp, or `
 
 ## Full documentation
 
-For every option, the JavaFX and Swing interfaces, hardware tokens, timestamping, encryption and troubleshooting, see the **[JSignPdf Guide](guide/)**.
+For every option, the JavaFX and Swing interfaces, hardware tokens, timestamping, encryption and troubleshooting, see the **[JSignPdf Guide](../docs/)**.

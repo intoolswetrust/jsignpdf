@@ -1,6 +1,8 @@
 ---
 title: Screenshots
 toc: false
+sidebar:
+  hide: true
 ---
 
 A look at the JSignPdf desktop UI. Click any image to see it full-size.
