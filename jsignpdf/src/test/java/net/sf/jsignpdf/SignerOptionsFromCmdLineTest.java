@@ -202,6 +202,31 @@ public class SignerOptionsFromCmdLineTest {
     }
 
     @Test
+    public void dashFromPropertiesFile_isNotReinterpretedAsSentinel() throws Exception {
+        // Per design-doc §3.5: a '-' set from a properties file is not a sentinel.
+        // Simulate loadOptions() having set the password before CLI parse. With no matching
+        // password option on the CLI, the resolver must leave the props-loaded value alone —
+        // even when --enable-stdin-passwords is set, and the reader must not be consulted.
+        Fixture f = new Fixture("POISON\n");
+        f.opts.setKsPasswd("-");
+        f.opts.setCmdLine(new String[] { "--enable-stdin-passwords" });
+        f.opts.loadCmdLine();
+        assertEquals("-", new String(f.opts.getKsPasswd()));
+        assertTrue(f.warnings().isEmpty());
+    }
+
+    @Test
+    public void cliSentinelOverridesPropertiesFileValue() throws Exception {
+        // Per design-doc §3.5: when a password is set by a properties file and the same option
+        // is also given on the CLI as the stdin sentinel, the CLI wins and stdin is consulted.
+        Fixture f = new Fixture("from-stdin\n");
+        f.opts.setKsPasswd("from-props");
+        f.opts.setCmdLine(new String[] { "--enable-stdin-passwords", "-ksp", "-" });
+        f.opts.loadCmdLine();
+        assertEquals("from-stdin", new String(f.opts.getKsPasswd()));
+    }
+
+    @Test
     public void parseFailureForUnknownOption_doesNotTouchReader() {
         // Sanity check: commons-cli throws before we reach the resolver, reader is untouched.
         Fixture f = new Fixture("POISON\n");
