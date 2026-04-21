@@ -163,7 +163,8 @@
                                                 source="TsaSettings.fxml"/>
                                 </ScrollPane>
                             </TitledPane>
-                            <TitledPane text="%jfx.gui.panel.encryptionRights">
+                            <TitledPane fx:id="encryptionAccordionPane"
+                                        text="%jfx.gui.panel.encryptionRights">
                                 <ScrollPane fitToWidth="true">
                                     <fx:include fx:id="encryptionSettings"
                                                 source="EncryptionSettings.fxml"/>

@@ -123,6 +123,7 @@ public class MainWindowController {
     @FXML private SplitPane splitPane;
     @FXML private Accordion sidePanelAccordion;
     @FXML private TitledPane tsaAccordionPane;
+    @FXML private TitledPane encryptionAccordionPane;
     @FXML private ScrollPane scrollPane;
     @FXML private StackPane pdfArea;
     @FXML private Label lblDropHint;
@@ -525,6 +526,12 @@ public class MainWindowController {
         }
     }
 
+    private void expandEncryptionPane() {
+        if (sidePanelAccordion != null && encryptionAccordionPane != null) {
+            sidePanelAccordion.setExpandedPane(encryptionAccordionPane);
+        }
+    }
+
     private static boolean isBlank(String s) {
         return s == null || s.trim().isEmpty();
     }
@@ -676,6 +683,7 @@ public class MainWindowController {
 
         // Validate encryption-dependent required fields before signing
         if (encryptionSettingsController != null && !encryptionSettingsController.isEncryptionConfigValid()) {
+            expandEncryptionPane();
             String prefix = encryptionSettingsController.getValidationErrorKeyPrefix();
             showAlert(Alert.AlertType.WARNING,
                     RES.get(prefix + ".title"),
