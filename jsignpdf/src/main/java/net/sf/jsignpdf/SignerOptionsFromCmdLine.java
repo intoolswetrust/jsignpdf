@@ -300,9 +300,7 @@ public class SignerOptionsFromCmdLine extends BasicSignerOptions {
                 } else {
                     if (!quiet) {
                         PrintStream w = warningOut != null ? warningOut : System.err;
-                        w.println("[jsignpdf] Warning: --" + slot.longArg() + " value is '-'. Did you mean to pass --"
-                                + ARG_ENABLE_STDIN_PWDS_LONG
-                                + " to read it from stdin? Using '-' as the literal password.");
+                        w.println(RES.get("console.stdinSentinelWarning", slot.longArg(), ARG_ENABLE_STDIN_PWDS_LONG));
                     }
                     slot.setter().accept(raw);
                 }
