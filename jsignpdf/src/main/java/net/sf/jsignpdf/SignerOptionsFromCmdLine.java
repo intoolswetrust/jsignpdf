@@ -31,7 +31,10 @@ package net.sf.jsignpdf;
 
 import static net.sf.jsignpdf.Constants.*;
 
+import java.io.IOException;
+import java.io.PrintStream;
 import java.net.Proxy;
+import java.util.function.Consumer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -76,6 +79,19 @@ public class SignerOptionsFromCmdLine extends BasicSignerOptions {
     private boolean listKeys;
 
     private boolean gui;
+
+    private StdinPasswordReader passwordReader;
+    private PrintStream warningOut;
+
+    /** Test seam: override the stdin password reader. */
+    void setPasswordReader(StdinPasswordReader passwordReader) {
+        this.passwordReader = passwordReader;
+    }
+
+    /** Test seam: override the stream the stdin-sentinel warning is written to (default {@link System#err}). */
+    void setWarningOut(PrintStream warningOut) {
+        this.warningOut = warningOut;
+    }
 
     /**
      * Parses options provided as command line arguments.
@@ -127,14 +143,10 @@ public class SignerOptionsFromCmdLine extends BasicSignerOptions {
             setKsType(line.getOptionValue(ARG_KS_TYPE));
         if (line.hasOption(ARG_KS_FILE))
             setKsFile(line.getOptionValue(ARG_KS_FILE));
-        if (line.hasOption(ARG_KS_PWD))
-            setKsPasswd(line.getOptionValue(ARG_KS_PWD));
         if (line.hasOption(ARG_KEY_ALIAS))
             setKeyAlias(line.getOptionValue(ARG_KEY_ALIAS));
         if (line.hasOption(ARG_KEY_INDEX))
             setKeyIndex(getInt(line.getParsedOptionValue(ARG_KEY_INDEX), getKeyIndex()));
-        if (line.hasOption(ARG_KEY_PWD))
-            setKeyPasswd(line.getOptionValue(ARG_KEY_PWD));
         if (line.hasOption(ARG_OUTPATH))
             setOutPath(line.getOptionValue(ARG_OUTPATH));
         if (line.hasOption(ARG_OPREFIX))
@@ -160,10 +172,6 @@ public class SignerOptionsFromCmdLine extends BasicSignerOptions {
             setPdfEncryption(PDFEncryption.PASSWORD);
         if (line.hasOption(ARG_ENCRYPTION))
             setPdfEncryption(line.getOptionValue(ARG_ENCRYPTION));
-        if (line.hasOption(ARG_PWD_OWNER))
-            setPdfOwnerPwd(line.getOptionValue(ARG_PWD_OWNER));
-        if (line.hasOption(ARG_PWD_USER))
-            setPdfUserPwd(line.getOptionValue(ARG_PWD_USER));
         if (line.hasOption(ARG_ENC_CERT))
             setPdfEncryptionCertFile(line.getOptionValue(ARG_ENC_CERT));
         if (line.hasOption(ARG_RIGHT_PRINT))
@@ -215,13 +223,9 @@ public class SignerOptionsFromCmdLine extends BasicSignerOptions {
             setTsaCertFileType(line.getOptionValue(ARG_TSA_CERT_FILE_TYPE));
         if (line.hasOption(ARG_TSA_CERT_FILE))
             setTsaCertFile(line.getOptionValue(ARG_TSA_CERT_FILE));
-        if (line.hasOption(ARG_TSA_CERT_PWD))
-            setTsaCertFilePwd(line.getOptionValue(ARG_TSA_CERT_PWD));
 
         if (line.hasOption(ARG_TSA_USER))
             setTsaUser(line.getOptionValue(ARG_TSA_USER));
-        if (line.hasOption(ARG_TSA_PWD))
-            setTsaPasswd(line.getOptionValue(ARG_TSA_PWD));
         if (line.hasOption(ARG_TSA_POLICY_LONG))
             setTsaPolicy(line.getOptionValue(ARG_TSA_POLICY_LONG));
         if (line.hasOption(ARG_TSA_HASH_ALG))
@@ -245,6 +249,78 @@ public class SignerOptionsFromCmdLine extends BasicSignerOptions {
             setInFile(files[0]);
         }
 
+        resolvePasswords(line);
+    }
+
+    /**
+     * Processes the six password options in a fixed canonical order, substituting values read from stdin
+     * (or the interactive console) wherever the user gave the sentinel {@code "-"} together with
+     * {@code --enable-stdin-passwords}. When the flag is missing, a {@code "-"} value is treated as a
+     * literal password (backwards compatible) and a warning is written to stderr unless {@code -q} is set.
+     * See {@code design-doc/3.0.0-stdin-passwords.md}.
+     */
+    private void resolvePasswords(CommandLine line) throws ParseException {
+        final boolean stdinEnabled = line.hasOption(ARG_ENABLE_STDIN_PWDS_LONG);
+        final boolean quiet = line.hasOption(ARG_QUIET);
+
+        final String[][] slots = {
+                { ARG_KS_PWD, ARG_KS_PWD_LONG },
+                { ARG_KEY_PWD, ARG_KEY_PWD_LONG },
+                { ARG_PWD_OWNER, ARG_PWD_OWNER_LONG },
+                { ARG_PWD_USER, ARG_PWD_USER_LONG },
+                { ARG_TSA_CERT_PWD, ARG_TSA_CERT_PWD_LONG },
+                { ARG_TSA_PWD, ARG_TSA_PWD_LONG },
+        };
+        @SuppressWarnings("unchecked")
+        final Consumer<String>[] setters = new Consumer[] {
+                (Consumer<String>) this::setKsPasswd,
+                (Consumer<String>) this::setKeyPasswd,
+                (Consumer<String>) this::setPdfOwnerPwd,
+                (Consumer<String>) this::setPdfUserPwd,
+                (Consumer<String>) this::setTsaCertFilePwd,
+                (Consumer<String>) this::setTsaPasswd,
+        };
+
+        int total = 0;
+        for (String[] slot : slots) {
+            if (line.hasOption(slot[0]) && STDIN_PWD_SENTINEL.equals(line.getOptionValue(slot[0]))) {
+                total++;
+            }
+        }
+
+        int index = 0;
+        for (int i = 0; i < slots.length; i++) {
+            final String shortArg = slots[i][0];
+            final String longArg = slots[i][1];
+            if (!line.hasOption(shortArg)) {
+                continue;
+            }
+            final String raw = line.getOptionValue(shortArg);
+            if (STDIN_PWD_SENTINEL.equals(raw)) {
+                if (stdinEnabled) {
+                    index++;
+                    try {
+                        if (passwordReader == null) {
+                            passwordReader = StdinPasswordReader.systemDefault(quiet);
+                        }
+                        char[] chars = passwordReader.readNext(longArg, index, total);
+                        setters[i].accept(new String(chars));
+                    } catch (IOException ioe) {
+                        throw new ParseException(ioe.getMessage());
+                    }
+                } else {
+                    if (!quiet) {
+                        PrintStream w = warningOut != null ? warningOut : System.err;
+                        w.println("[jsignpdf] Warning: --" + longArg + " value is '-'. Did you mean to pass --"
+                                + ARG_ENABLE_STDIN_PWDS_LONG
+                                + " to read it from stdin? Using '-' as the literal password.");
+                    }
+                    setters[i].accept(raw);
+                }
+            } else {
+                setters[i].accept(raw);
+            }
+        }
     }
 
     /**
@@ -303,6 +379,8 @@ public class SignerOptionsFromCmdLine extends BasicSignerOptions {
                 .withType(Number.class).withArgName("index").create(ARG_KEY_INDEX));
         OPTS.addOption(OptionBuilder.withLongOpt(ARG_KEY_PWD_LONG).withDescription(RES.get("hlp.keyPwd")).hasArg()
                 .withArgName("password").create(ARG_KEY_PWD));
+        OPTS.addOption(OptionBuilder.withLongOpt(ARG_ENABLE_STDIN_PWDS_LONG)
+                .withDescription(RES.get("hlp.enableStdinPasswords")).create());
 
         OPTS.addOption(OptionBuilder.withLongOpt(ARG_OUTPATH_LONG).withDescription(RES.get("hlp.outPath")).hasArg()
                 .withArgName("path").create(ARG_OUTPATH));
