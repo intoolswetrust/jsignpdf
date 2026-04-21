@@ -34,6 +34,7 @@ import static net.sf.jsignpdf.Constants.*;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.net.Proxy;
+import java.util.List;
 import java.util.function.Consumer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -263,39 +264,27 @@ public class SignerOptionsFromCmdLine extends BasicSignerOptions {
         final boolean stdinEnabled = line.hasOption(ARG_ENABLE_STDIN_PWDS_LONG);
         final boolean quiet = line.hasOption(ARG_QUIET);
 
-        final String[][] slots = {
-                { ARG_KS_PWD, ARG_KS_PWD_LONG },
-                { ARG_KEY_PWD, ARG_KEY_PWD_LONG },
-                { ARG_PWD_OWNER, ARG_PWD_OWNER_LONG },
-                { ARG_PWD_USER, ARG_PWD_USER_LONG },
-                { ARG_TSA_CERT_PWD, ARG_TSA_CERT_PWD_LONG },
-                { ARG_TSA_PWD, ARG_TSA_PWD_LONG },
-        };
-        @SuppressWarnings("unchecked")
-        final Consumer<String>[] setters = new Consumer[] {
-                (Consumer<String>) this::setKsPasswd,
-                (Consumer<String>) this::setKeyPasswd,
-                (Consumer<String>) this::setPdfOwnerPwd,
-                (Consumer<String>) this::setPdfUserPwd,
-                (Consumer<String>) this::setTsaCertFilePwd,
-                (Consumer<String>) this::setTsaPasswd,
-        };
+        final List<PwdSlot> slots = List.of(
+                new PwdSlot(ARG_KS_PWD, ARG_KS_PWD_LONG, this::setKsPasswd),
+                new PwdSlot(ARG_KEY_PWD, ARG_KEY_PWD_LONG, this::setKeyPasswd),
+                new PwdSlot(ARG_PWD_OWNER, ARG_PWD_OWNER_LONG, this::setPdfOwnerPwd),
+                new PwdSlot(ARG_PWD_USER, ARG_PWD_USER_LONG, this::setPdfUserPwd),
+                new PwdSlot(ARG_TSA_CERT_PWD, ARG_TSA_CERT_PWD_LONG, this::setTsaCertFilePwd),
+                new PwdSlot(ARG_TSA_PWD, ARG_TSA_PWD_LONG, this::setTsaPasswd));
 
         int total = 0;
-        for (String[] slot : slots) {
-            if (line.hasOption(slot[0]) && STDIN_PWD_SENTINEL.equals(line.getOptionValue(slot[0]))) {
+        for (PwdSlot slot : slots) {
+            if (line.hasOption(slot.shortArg()) && STDIN_PWD_SENTINEL.equals(line.getOptionValue(slot.shortArg()))) {
                 total++;
             }
         }
 
         int index = 0;
-        for (int i = 0; i < slots.length; i++) {
-            final String shortArg = slots[i][0];
-            final String longArg = slots[i][1];
-            if (!line.hasOption(shortArg)) {
+        for (PwdSlot slot : slots) {
+            if (!line.hasOption(slot.shortArg())) {
                 continue;
             }
-            final String raw = line.getOptionValue(shortArg);
+            final String raw = line.getOptionValue(slot.shortArg());
             if (STDIN_PWD_SENTINEL.equals(raw)) {
                 if (stdinEnabled) {
                     index++;
@@ -303,24 +292,27 @@ public class SignerOptionsFromCmdLine extends BasicSignerOptions {
                         if (passwordReader == null) {
                             passwordReader = StdinPasswordReader.systemDefault(quiet);
                         }
-                        char[] chars = passwordReader.readNext(longArg, index, total);
-                        setters[i].accept(new String(chars));
+                        char[] chars = passwordReader.readNext(slot.longArg(), index, total);
+                        slot.setter().accept(new String(chars));
                     } catch (IOException ioe) {
                         throw new ParseException(ioe.getMessage());
                     }
                 } else {
                     if (!quiet) {
                         PrintStream w = warningOut != null ? warningOut : System.err;
-                        w.println("[jsignpdf] Warning: --" + longArg + " value is '-'. Did you mean to pass --"
+                        w.println("[jsignpdf] Warning: --" + slot.longArg() + " value is '-'. Did you mean to pass --"
                                 + ARG_ENABLE_STDIN_PWDS_LONG
                                 + " to read it from stdin? Using '-' as the literal password.");
                     }
-                    setters[i].accept(raw);
+                    slot.setter().accept(raw);
                 }
             } else {
-                setters[i].accept(raw);
+                slot.setter().accept(raw);
             }
         }
+    }
+
+    private record PwdSlot(String shortArg, String longArg, Consumer<String> setter) {
     }
 
     /**
