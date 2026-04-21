@@ -721,20 +721,19 @@ public class MainWindowController {
 
         Optional<ButtonType> result = confirm.showAndWait();
         if (result.isPresent() && result.get() == ButtonType.OK) {
-            // Delete the settings file on disk
+            // Wipe the entire config directory (main config file + presets/*).
             PropertyProvider mainConfig = PropertyStoreFactory.getInstance().mainConfig();
-            java.nio.file.Path configPath = mainConfig.getPath();
-            if (configPath != null) {
-                try {
-                    java.nio.file.Files.deleteIfExists(configPath);
-                } catch (java.io.IOException e) {
-                    LOGGER.log(Level.WARNING, "Failed to delete config file " + configPath, e);
-                }
+            java.nio.file.Path configDir = PropertyStoreFactory.getInstance().getResolver().getConfigDir();
+            if (configDir != null) {
+                deleteDirectoryContents(configDir);
             }
 
             // Clear the in-memory properties and reset the options object
             mainConfig.clear();
             options = new BasicSignerOptions();
+
+            // Refresh preset list from disk (now empty) — this updates the toolbar combo.
+            presetManager.scan();
 
             // Reset the ViewModel (which updates all bound UI controls)
             signingVM.resetToDefaults();
@@ -749,6 +748,37 @@ public class MainWindowController {
             refreshRecentFilesMenu();
 
             updateStatus(RES.get("jfx.gui.status.settingsReset"));
+        }
+    }
+
+    /**
+     * Recursively deletes everything under {@code dir}, but keeps {@code dir} itself. Missing entries and individual
+     * deletion failures are logged at WARNING level rather than aborted — a partial reset is better than a stuck dialog.
+     */
+    private static void deleteDirectoryContents(java.nio.file.Path dir) {
+        if (!java.nio.file.Files.isDirectory(dir)) {
+            return;
+        }
+        try {
+            java.nio.file.Files.walkFileTree(dir, new java.nio.file.SimpleFileVisitor<>() {
+                @Override
+                public java.nio.file.FileVisitResult visitFile(java.nio.file.Path file,
+                        java.nio.file.attribute.BasicFileAttributes attrs) throws java.io.IOException {
+                    java.nio.file.Files.deleteIfExists(file);
+                    return java.nio.file.FileVisitResult.CONTINUE;
+                }
+
+                @Override
+                public java.nio.file.FileVisitResult postVisitDirectory(java.nio.file.Path d,
+                        java.io.IOException exc) throws java.io.IOException {
+                    if (!d.equals(dir)) {
+                        java.nio.file.Files.deleteIfExists(d);
+                    }
+                    return java.nio.file.FileVisitResult.CONTINUE;
+                }
+            });
+        } catch (java.io.IOException e) {
+            LOGGER.log(Level.WARNING, "Failed to wipe config directory " + dir, e);
         }
     }
 
