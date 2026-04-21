@@ -24,7 +24,22 @@ jsignpdf-root/
 ├── installcert/       # Certificate installer utility
 ├── distribution/      # Packaging: ZIP assembly, Windows installer, docs
 └── website/           # Hugo documentation site (not a Maven module)
+    └── docs/JSignPdf.adoc  # ★ authoritative user guide (see below)
 ```
+
+## Key Documentation Artifacts
+
+Keep these in sync with the code; user-facing features are not "done" until they land here too.
+
+| File | Role | When to update |
+|---|---|---|
+| `website/docs/JSignPdf.adoc` | **Authoritative user guide.** Single source of truth consumed by both the Hugo site (`website/content/docs/guide/index.adoc` is regenerated from it by `website/prepare.sh`) and the Maven PDF build in `distribution/`. | Any new or changed user-visible feature: new CLI flags, new GUI panels, changed defaults, new keystore types, new exit codes, etc. Update the synopsis block, the relevant option table, and add a dedicated subsection if the feature has non-obvious usage. |
+| `distribution/doc/release-notes/<version>.md` | Release notes bundled with the artifact and used as the GitHub Release body. | Every release-worthy change. |
+| `README.md` | Top-level project landing page. Concise feature overview + pointers to the guide. | Only for high-signal changes (new feature categories, platform support, install paths). |
+| `jsignpdf/src/main/resources/net/sf/jsignpdf/translations/messages.properties` | Canonical English resource bundle (all others are Weblate-synced). CLI `--help` text comes from here. | Any new CLI option or GUI string. Do not hand-edit non-English `messages_*.properties` files. |
+| `design-doc/<version>-<topic>.md` | Design notes for larger changes. | Before implementing a non-trivial feature. |
+
+When a PR touches a user-visible feature without updating `JSignPdf.adoc`, flag it as incomplete.
 
 ## Source Code Layout
 

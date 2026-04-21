@@ -235,7 +235,8 @@ usage: java -jar JSignPdf.jar [file1.pdf [file2.pdf ...]] [-a] [--bg-path
        <path>] [--disable-acrobat6-layer-mode] [--disable-assembly]
        [--disable-copy] [--disable-fill] [--disable-modify-annotations]
        [--disable-modify-content] [--disable-screen-readers] [-e] [-ec <file>]
-       [-fs <size>] [--gui] [-h] [-ha <algorithm>] [--img-path <file>] [-ka <alias>]
+       [--enable-stdin-passwords] [-fs <size>] [--gui] [-h] [-ha <algorithm>]
+       [--img-path <file>] [-ka <alias>]
        [-ki <index>] [-kp <password>] [-ksf <file>] [-ksp <password>] [-kst
        <type>] [-l <location>] [--l2-text <text>] [--l4-text <text>] [-lk]
        [-lkt] [-llx <position>] [-lly <position>] [-lp] [-lpf <file>] [--ocsp]
@@ -277,6 +278,9 @@ usage: java -jar JSignPdf.jar [file1.pdf [file2.pdf ...]] [-a] [--bg-path
 
 | `-lpf, --load-properties-file <file>`
 | Loads properties from the given file. The file can be created by copying the default property file `.JSignPdf` from the user's home directory.
+
+| `--enable-stdin-passwords`
+| Allow reading password values from standard input. When set, a password option value of `-` means "read one line from stdin" (or prompt, on an interactive console). See <<Reading passwords from standard input>>.
 |===
 
 === Keystore and key options
@@ -294,7 +298,7 @@ See <<Keystore selection>> and <<Key alias & key password>> for details.
 | Path to the keystore file (`.p12`, `.pfx`, `.jks`, ...). Not needed for keystores without files (e.g. `WINDOWS-MY`).
 
 | `-ksp, --keystore-password <password>`
-| Password for the keystore.
+| Password for the keystore. Use `-` to read from stdin (requires `--enable-stdin-passwords`).
 
 | `-ka, --key-alias <alias>`
 | Name (alias) of the key to use for signing. If not given, the first key in the keystore is used. Use `-lk` to list available aliases.
@@ -303,7 +307,7 @@ See <<Keystore selection>> and <<Key alias & key password>> for details.
 | Zero-based index of the key to use. Lower priority than `-ka`.
 
 | `-kp, --key-password <password>`
-| Password for the individual key (if different from the keystore password).
+| Password for the individual key (if different from the keystore password). Use `-` to read from stdin (requires `--enable-stdin-passwords`).
 |===
 
 === Signature options
@@ -418,10 +422,10 @@ See <<Encryption>> for details.
 | _Deprecated._ Use `-pe PASSWORD` instead.
 
 | `-opwd, --owner-password <password>`
-| Owner password for encrypted documents.
+| Owner password for encrypted documents. Use `-` to read from stdin (requires `--enable-stdin-passwords`).
 
 | `-upwd, --user-password <password>`
-| User password for encrypted documents.
+| User password for encrypted documents. Use `-` to read from stdin (requires `--enable-stdin-passwords`).
 
 | `-ec, --encryption-certificate <file>`
 | Path to certificate file for `CERTIFICATE` encryption.
@@ -466,13 +470,13 @@ See <<TSA -- timestamps>> and <<Certificate revocation checking>> for details.
 | TSA username (for `PASSWORD` authentication).
 
 | `-tsp, --tsa-password <password>`
-| TSA password (for `PASSWORD` authentication).
+| TSA password (for `PASSWORD` authentication). Use `-` to read from stdin (requires `--enable-stdin-passwords`).
 
 | `-tscf, --tsa-cert-file <file>`
 | Path to keystore file with private key for TSA `CERTIFICATE` authentication.
 
 | `-tscp, --tsa-cert-password <password>`
-| Password for the TSA certificate keystore.
+| Password for the TSA certificate keystore. Use `-` to read from stdin (requires `--enable-stdin-passwords`).
 
 | `-tsct, --tsa-cert-file-type <ks-type>`
 | Keystore type for TSA certificate authentication. Default: `PKCS12`.
@@ -572,6 +576,61 @@ List key aliases in a keystore (quiet mode):
 $ java -jar JSignPdf.jar -kst PKCS12 -ksf my_certificate.pfx \
   -ksp myVeryPrivatePassword -lk -q
 ----
+
+=== Reading passwords from standard input
+
+Passing a password on the command line exposes it to every local process that can read `/proc/<pid>/cmdline` (and to shell history). To avoid that, JSignPdf can read password values from standard input (or, in an interactive terminal, from the console) instead.
+
+Opt in with `--enable-stdin-passwords` and use `-` as the value of any password option. Any of the six password options can use the sentinel: `-ksp`, `-kp`, `-opwd`, `-upwd`, `-tscp`, `-tsp`.
+
+.Single password, piped from the environment
+[source,shell]
+----
+$ printf '%s\n' "$KS_PASSWORD" \
+  | java -jar JSignPdf.jar --enable-stdin-passwords \
+      -kst PKCS12 -ksf keystore.p12 -ksp - -ka mykey \
+      -d out/ input.pdf
+----
+
+When more than one option uses `-`, the values are consumed from stdin in a *fixed canonical order* regardless of the order in which they appear on the command line:
+
+. `--keystore-password` (`-ksp`)
+. `--key-password` (`-kp`)
+. `--owner-password` (`-opwd`)
+. `--user-password` (`-upwd`)
+. `--tsa-cert-password` (`-tscp`)
+. `--tsa-password` (`-tsp`)
+
+.Keystore password first, then TSA password -- even though the CLI lists them in the other order
+[source,shell]
+----
+$ { printf '%s\n' "$KS_PASSWORD"; printf '%s\n' "$TSA_PASSWORD"; } \
+  | java -jar JSignPdf.jar --enable-stdin-passwords \
+      -kst PKCS12 -ksf keystore.p12 -ksp - -ka mykey \
+      -ts https://tsa.example/ -tsu tsauser -tsp - \
+      -d out/ input.pdf
+----
+
+Before blocking on each read, JSignPdf prints a progress line such as `[jsignpdf] Reading password for --keystore-password (1/2) from stdin...` to _stderr_ so you can verify the order matches what your pipe is feeding. Use `-q` / `--quiet` to suppress it.
+
+When a console is attached (an interactive terminal), `-` switches to a prompted, no-echo read via `java.io.Console.readPassword`:
+
+[source,shell]
+----
+$ java -jar JSignPdf.jar --enable-stdin-passwords \
+      -kst PKCS12 -ksf keystore.p12 -ksp - -ka mykey input.pdf
+Enter password for --keystore-password: ****
+----
+
+[NOTE]
+====
+Without `--enable-stdin-passwords`, a literal `-` is still accepted as a password value (backwards compatible). JSignPdf will emit a one-time warning naming the flag, so a typo does not silently turn into a `-` password. The warning is suppressed by `-q`.
+====
+
+[NOTE]
+====
+Only exactly `-` is the stdin sentinel -- values such as `-abc` or `abc-` are treated as literal passwords. Note that Apache Commons CLI intercepts a bare `--` as the end-of-options marker before JSignPdf sees it, so `--` itself cannot be used as a literal password via `-ksp --`; this is a parser limitation.
+====
 
 == Signing options
 

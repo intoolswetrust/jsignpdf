@@ -289,6 +289,9 @@ public class Constants {
     public static final String ARG_KS_PWD_LONG = "keystore-password";
     public static final String ARG_KS_PWD = "ksp";
 
+    public static final String ARG_ENABLE_STDIN_PWDS_LONG = "enable-stdin-passwords";
+    public static final String STDIN_PWD_SENTINEL = "-";
+
     public static final String ARG_KEY_PWD_LONG = "key-password";
     public static final String ARG_KEY_PWD = "kp";
 
