@@ -35,7 +35,7 @@ public class SigningOptionsViewModel {
     private final StringProperty keyAlias = new SimpleStringProperty();
     private final IntegerProperty keyIndex = new SimpleIntegerProperty(Constants.DEFVAL_KEY_INDEX);
     private final StringProperty keyPassword = new SimpleStringProperty();
-    private final BooleanProperty storePasswords = new SimpleBooleanProperty(false);
+    private final BooleanProperty storePasswords = new SimpleBooleanProperty(Constants.DEFVAL_STOREPWD);
 
     // File settings
     private final StringProperty outFile = new SimpleStringProperty();
@@ -261,7 +261,7 @@ public class SigningOptionsViewModel {
         keyAlias.set(null);
         keyIndex.set(Constants.DEFVAL_KEY_INDEX);
         keyPassword.set(null);
-        storePasswords.set(false);
+        storePasswords.set(Constants.DEFVAL_STOREPWD);
 
         // File & metadata
         outFile.set(null);

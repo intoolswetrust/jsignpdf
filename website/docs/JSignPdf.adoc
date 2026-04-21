@@ -676,7 +676,7 @@ The reason, location, and contact fields provide additional information about th
 
 ==== Append signature
 
-JSignPdf can work in two signing modes. It replaces existing signatures with the new ones by default. If you enable the _Append signature_ option, the new one will be appended and the old signatures will stay unchanged. _*This option is disabled for encrypted documents.*_
+JSignPdf can work in two signing modes. When _Append signature_ is enabled, the new signature is appended and any previously-existing signatures stay unchanged; when it is disabled, existing signatures are replaced. The GUI enables _Append signature_ by default; on the CLI the default is replace (pass `-a` to append). _*This option is disabled for encrypted documents.*_
 
 ==== Certification level
 
@@ -693,7 +693,7 @@ You can choose which hash function will be used for the signature. Available alg
 
 ==== Remember passwords
 
-JSignPdf stores filled information when you are exiting the application, so it's present when you run it the next time. Passwords are not stored by default, but you can allow them by enabling the _Remember passwords_ option.
+JSignPdf stores filled information when you are exiting the application, so it's present when you run it the next time. Passwords are stored (encrypted) when the _Remember passwords_ option (labelled _Store passwords_ in the JavaFX GUI) is enabled. The option is enabled by default; uncheck it if you prefer to re-enter passwords on every launch.
 
 _*Even if the password is stored in the encrypted form, we do not recommend storing passwords if your computer is used by more users!*_
 

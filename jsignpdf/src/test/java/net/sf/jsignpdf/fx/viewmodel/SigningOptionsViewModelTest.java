@@ -161,6 +161,19 @@ public class SigningOptionsViewModelTest {
                 opts.isCrlEnabledX());
     }
 
+    /**
+     * On a fresh install (no persisted preferences) the JavaFX UI must show
+     * Store passwords and Append signature as checked by default.
+     */
+    @Test
+    public void testInitialDefaults_storePasswordsAndAppendChecked() {
+        SigningOptionsViewModel vm = new SigningOptionsViewModel();
+        assertTrue("storePasswords should default to true", vm.storePasswordsProperty().get());
+        assertTrue("append should default to true", vm.appendProperty().get());
+        assertEquals("DEFVAL_STOREPWD is expected to be true", true, Constants.DEFVAL_STOREPWD);
+        assertEquals("DEFVAL_APPEND is expected to be true", true, Constants.DEFVAL_APPEND);
+    }
+
     @Test
     public void testResetToDefaults_clearsAllProperties() {
         SigningOptionsViewModel vm = new SigningOptionsViewModel();
@@ -169,7 +182,7 @@ public class SigningOptionsViewModelTest {
         vm.ksPasswordProperty().set("secret");
         vm.keyAliasProperty().set("mykey");
         vm.keyIndexProperty().set(5);
-        vm.storePasswordsProperty().set(true);
+        vm.storePasswordsProperty().set(!Constants.DEFVAL_STOREPWD);
         vm.outFileProperty().set("/tmp/output.pdf");
         vm.appendProperty().set(!Constants.DEFVAL_APPEND);
         vm.signerNameProperty().set("Test Signer");
@@ -202,7 +215,7 @@ public class SigningOptionsViewModelTest {
         assertNull("ksPassword", vm.ksPasswordProperty().get());
         assertNull("keyAlias", vm.keyAliasProperty().get());
         assertEquals("keyIndex", Constants.DEFVAL_KEY_INDEX, vm.keyIndexProperty().get());
-        assertFalse("storePasswords", vm.storePasswordsProperty().get());
+        assertEquals("storePasswords", Constants.DEFVAL_STOREPWD, vm.storePasswordsProperty().get());
         assertNull("outFile", vm.outFileProperty().get());
         assertEquals("append", Constants.DEFVAL_APPEND, vm.appendProperty().get());
         assertNull("signerName", vm.signerNameProperty().get());

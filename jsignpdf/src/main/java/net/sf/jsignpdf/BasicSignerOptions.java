@@ -79,7 +79,7 @@ public class BasicSignerOptions {
     private CertificationLevel certLevel;
     private HashAlgorithm hashAlgorithm;
 
-    protected boolean storePasswords;
+    protected boolean storePasswords = Constants.DEFVAL_STOREPWD;
 
     // options from rights dialog
     private PrintRight rightPrinting;
@@ -148,7 +148,7 @@ public class BasicSignerOptions {
         setReason(props.getProperty(Constants.PROPERTY_REASON));
         setLocation(props.getProperty(Constants.PROPERTY_LOCATION));
         setContact(props.getProperty(Constants.PROPERTY_CONTACT));
-        setAppend(props.getAsBool(Constants.PROPERTY_APPEND));
+        setAppend(props.getAsBool(Constants.PROPERTY_APPEND, Constants.DEFVAL_APPEND));
         // backward compatibility
         setPdfEncryption(props.getProperty(Constants.PROPERTY_PDF_ENCRYPTION));
         if (pdfEncryption == null && props.getAsBool(Constants.PROPERTY_ENCRYPTED_PDF)) {
@@ -209,7 +209,7 @@ public class BasicSignerOptions {
         setProxyPort(props.getAsInt(Constants.PROPERTY_PROXY_PORT, Constants.DEFVAL_PROXY_PORT));
 
         // passwords
-        storePasswords = props.getAsBool(Constants.PROPERTY_STOREPWD);
+        storePasswords = props.getAsBool(Constants.PROPERTY_STOREPWD, Constants.DEFVAL_STOREPWD);
         final String tmpHome = getDecrypted(Constants.EPROPERTY_USERHOME);
         final boolean tmpPasswords = storePasswords && Constants.USER_HOME != null && Constants.USER_HOME.equals(tmpHome);
         if (tmpPasswords) {
