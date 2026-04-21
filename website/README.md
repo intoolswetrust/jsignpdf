@@ -51,6 +51,37 @@ docker run --rm -it -p 1313:1313 -e JSIGNPDF_VERSION=3.0.0-BETA-3 \
   sh -c './prepare.sh && hugo server --bind 0.0.0.0 --baseURL http://localhost:1313/jsignpdf/'
 ```
 
+### Running from a git worktree
+
+A worktree's `.git` is a file pointing at `<main-repo>/.git/worktrees/<name>/`,
+and both `.git` and the common git dir contain absolute host-path references
+that git sanity-checks against the paths it was invoked from. Mounting the
+tree at `/src` breaks those checks (`fatal: not a git repository`). Bind both
+the worktree and the common git dir at their host paths so every path resolves
+identically inside the container, and tell git to trust the bind-mounted dirs
+(the container runs as root but the files are owned by the host user, which
+otherwise trips git's "dubious ownership" check):
+
+```bash
+GIT_COMMON_DIR="$(cd "$(git rev-parse --git-common-dir)" && pwd)"
+
+docker run --rm -it -p 1313:1313 -e JSIGNPDF_VERSION=3.0.0-BETA-3 \
+  -v "${PWD}:${PWD}" \
+  -v "${GIT_COMMON_DIR}:${GIT_COMMON_DIR}:ro" \
+  -w "${PWD}/website" hugomods/hugo:exts \
+  sh -c 'git config --global --add safe.directory "*" && ./prepare.sh && hugo server --bind 0.0.0.0 --baseURL http://localhost:1313/jsignpdf/'
+```
+
+The braces around `${GIT_COMMON_DIR}` are required under zsh: unbraced,
+`$GIT_COMMON_DIR:ro` is parsed as the `:r` history modifier (strip extension)
+plus a literal `o`, silently rewriting the path to `.../jsignpdf/o`. Bash
+doesn't do this, but bracing is safe in both shells.
+
+In a regular clone the second mount resolves to a path already under the
+first, so the snippet is safe to use either way. As an escape hatch, pass
+`-e HUGO_ENABLEGITINFO=false` to skip git-log lookups entirely (trades away
+the "last modified" timestamp for a one-flag fix).
+
 `prepare.sh` is idempotent — when running `hugo server`, edit
 `docs/JSignPdf.adoc`, re-run `prepare.sh` from another shell (or just restart
 the container), and the browser will pick the change up.
