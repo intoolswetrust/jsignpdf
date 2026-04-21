@@ -18,6 +18,7 @@ import javafx.scene.control.CheckMenuItem;
 import javafx.scene.control.TitledPane;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Dialog;
+import javafx.scene.control.TextInputDialog;
 import javafx.scene.control.Label;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuItem;
@@ -48,9 +49,14 @@ import net.sf.jsignpdf.fx.control.PdfPageView;
 import net.sf.jsignpdf.fx.control.SignatureOverlay;
 import net.sf.jsignpdf.fx.service.PdfRenderService;
 import net.sf.jsignpdf.fx.service.SigningService;
+import net.sf.jsignpdf.fx.preset.ManagePresetsDialog;
+import net.sf.jsignpdf.fx.preset.Preset;
+import net.sf.jsignpdf.fx.preset.PresetManager;
+import net.sf.jsignpdf.fx.preset.PresetValidation;
 import net.sf.jsignpdf.fx.util.RecentFilesManager;
 import net.sf.jsignpdf.fx.viewmodel.DocumentViewModel;
 import net.sf.jsignpdf.utils.PropertyProvider;
+import net.sf.jsignpdf.utils.PropertyStoreFactory;
 import net.sf.jsignpdf.fx.viewmodel.SignaturePlacementViewModel;
 import net.sf.jsignpdf.fx.viewmodel.SigningOptionsViewModel;
 import net.sf.jsignpdf.types.PageInfo;
@@ -71,6 +77,7 @@ public class MainWindowController {
     private final PdfRenderService renderService = new PdfRenderService();
     private final SigningService signingService = new SigningService();
     private final RecentFilesManager recentFilesManager = new RecentFilesManager();
+    private final PresetManager presetManager = new PresetManager();
     private PdfPageView pdfPageView;
     private SignatureOverlay signatureOverlay;
     /** Holds the side panel node while it's detached from the SplitPane (hidden). */
@@ -103,6 +110,8 @@ public class MainWindowController {
     @FXML private MenuItem menuZoomFit;
     @FXML private MenuItem menuToggleSidePanel;
     @FXML private MenuItem menuResetSettings;
+    @FXML private MenuItem menuSavePresetAsNew;
+    @FXML private MenuItem menuManagePresets;
     @FXML private MenuItem menuAbout;
 
     // Toolbar
@@ -117,6 +126,7 @@ public class MainWindowController {
     @FXML private Button btnNextPage;
     @FXML private ToggleButton btnVisibleSig;
     @FXML private ToggleButton btnTsa;
+    @FXML private ComboBox<Preset> cmbPresets;
     @FXML private Button btnSign;
 
     // Content area
@@ -373,6 +383,100 @@ public class MainWindowController {
         });
 
         refreshRecentFilesMenu();
+        setupPresetCombo();
+    }
+
+    private void setupPresetCombo() {
+        cmbPresets.setItems(presetManager.getPresets());
+        updatePresetComboState();
+        presetManager.getPresets().addListener((javafx.collections.ListChangeListener<Preset>) c -> updatePresetComboState());
+        cmbPresets.getSelectionModel().selectedItemProperty().addListener((obs, oldP, newP) -> {
+            if (newP == null) {
+                return;
+            }
+            Preset toLoad = newP;
+            // Run the actual load after the selection event finishes — JavaFX doesn't like mutating
+            // the combo's selection from inside its own change listener.
+            Platform.runLater(() -> {
+                loadPreset(toLoad);
+                cmbPresets.getSelectionModel().clearSelection();
+                cmbPresets.setValue(null);
+            });
+        });
+    }
+
+    private void updatePresetComboState() {
+        boolean empty = presetManager.getPresets().isEmpty();
+        cmbPresets.setDisable(empty);
+        cmbPresets.setPromptText(RES.get(empty
+                ? "jfx.gui.preset.placeholder.empty"
+                : "jfx.gui.preset.placeholder"));
+    }
+
+    private void loadPreset(Preset preset) {
+        if (options == null) {
+            options = new BasicSignerOptions();
+        }
+        // Flush any pending edits from the VM so that "load" is clearly "replace current".
+        signingVM.syncToOptions(options);
+        presetManager.load(preset, options);
+        signingVM.syncFromOptions(options);
+        updateStatus(java.text.MessageFormat.format(
+                RES.get("jfx.gui.status.presetLoaded"), preset.getDisplayName()));
+    }
+
+    @FXML
+    private void onSavePresetAsNew() {
+        if (options == null) {
+            options = new BasicSignerOptions();
+        }
+        signingVM.syncToOptions(options);
+
+        TextInputDialog dialog = new TextInputDialog();
+        dialog.setTitle(RES.get("jfx.gui.preset.dialog.saveAsNew.title"));
+        dialog.setHeaderText(RES.get("jfx.gui.preset.dialog.saveAsNew.header"));
+        dialog.setContentText(RES.get("jfx.gui.preset.dialog.saveAsNew.prompt"));
+        dialog.initOwner(stage);
+
+        while (true) {
+            Optional<String> result = dialog.showAndWait();
+            if (result.isEmpty()) {
+                return;
+            }
+            String name = result.get();
+            PresetValidation.Result validation = PresetValidation.validate(name, presetManager::hasDisplayName);
+            if (validation != PresetValidation.Result.OK) {
+                showAlert(Alert.AlertType.ERROR,
+                        RES.get("jfx.gui.preset.dialog.saveAsNew.title"),
+                        validationMessage(validation));
+                dialog.getEditor().setText(PresetValidation.trim(name));
+                continue;
+            }
+            Preset saved = presetManager.saveAsNew(options, PresetValidation.trim(name));
+            updateStatus(java.text.MessageFormat.format(
+                    RES.get("jfx.gui.status.presetSaved"), saved.getDisplayName()));
+            return;
+        }
+    }
+
+    @FXML
+    private void onManagePresets() {
+        if (options == null) {
+            options = new BasicSignerOptions();
+        }
+        signingVM.syncToOptions(options);
+        ManagePresetsDialog dialog = new ManagePresetsDialog(presetManager, options, stage);
+        dialog.showAndWait();
+    }
+
+    private String validationMessage(PresetValidation.Result result) {
+        switch (result) {
+            case EMPTY: return RES.get("jfx.gui.preset.validation.empty");
+            case ILLEGAL_CHAR: return RES.get("jfx.gui.preset.validation.illegalChar");
+            case TOO_LONG: return RES.get("jfx.gui.preset.validation.tooLong");
+            case DUPLICATE: return RES.get("jfx.gui.preset.validation.duplicate");
+            default: return "";
+        }
     }
 
     private void refreshRecentFilesMenu() {
@@ -617,14 +721,19 @@ public class MainWindowController {
 
         Optional<ButtonType> result = confirm.showAndWait();
         if (result.isPresent() && result.get() == ButtonType.OK) {
-            // Delete the settings file
-            File settingsFile = new File(PropertyProvider.PROPERTY_FILE);
-            if (settingsFile.exists()) {
-                settingsFile.delete();
+            // Delete the settings file on disk
+            PropertyProvider mainConfig = PropertyStoreFactory.getInstance().mainConfig();
+            java.nio.file.Path configPath = mainConfig.getPath();
+            if (configPath != null) {
+                try {
+                    java.nio.file.Files.deleteIfExists(configPath);
+                } catch (java.io.IOException e) {
+                    LOGGER.log(Level.WARNING, "Failed to delete config file " + configPath, e);
+                }
             }
 
             // Clear the in-memory properties and reset the options object
-            PropertyProvider.getInstance().clear();
+            mainConfig.clear();
             options = new BasicSignerOptions();
 
             // Reset the ViewModel (which updates all bound UI controls)

@@ -60,6 +60,7 @@ import net.sf.jsignpdf.utils.GuiUtils;
 import net.sf.jsignpdf.utils.KeyStoreUtils;
 import net.sf.jsignpdf.utils.PKCS11Utils;
 import net.sf.jsignpdf.utils.PropertyProvider;
+import net.sf.jsignpdf.utils.PropertyStoreFactory;
 
 import org.apache.commons.lang3.StringUtils;
 
@@ -74,7 +75,7 @@ public class SignPdfForm extends javax.swing.JFrame implements SignResultListene
 
     private SignerFileChooser fileChooser = new SignerFileChooser();
 
-    protected final PropertyProvider props = PropertyProvider.getInstance();
+    protected final PropertyProvider props = PropertyStoreFactory.getInstance().mainConfig();
 
     private boolean autoclose = false;
     private BasicSignerOptions options;

@@ -55,6 +55,12 @@
                         </ImageView></graphic>
                     </MenuItem>
                 </Menu>
+                <Menu text="%jfx.gui.menu.presets">
+                    <MenuItem fx:id="menuSavePresetAsNew" text="%jfx.gui.menu.presets.saveAsNew"
+                              onAction="#onSavePresetAsNew"/>
+                    <MenuItem fx:id="menuManagePresets" text="%jfx.gui.menu.presets.manage"
+                              onAction="#onManagePresets"/>
+                </Menu>
                 <Menu text="%jfx.gui.menu.help">
                     <MenuItem fx:id="menuAbout" text="%jfx.gui.menu.help.about" onAction="#onAbout">
                         <graphic><ImageView fitWidth="16" fitHeight="16" preserveRatio="true">
@@ -118,6 +124,13 @@
                         <Tooltip text="%jfx.gui.toolbar.tsa.tooltip"/>
                     </tooltip>
                 </ToggleButton>
+                <Separator orientation="VERTICAL"/>
+                <Label text="%jfx.gui.preset.label"/>
+                <ComboBox fx:id="cmbPresets" prefWidth="180">
+                    <tooltip>
+                        <Tooltip text="%jfx.gui.preset.tooltip"/>
+                    </tooltip>
+                </ComboBox>
                 <Separator orientation="VERTICAL"/>
                 <Button fx:id="btnSign" text="%jfx.gui.toolbar.sign" onAction="#onSign"
                         styleClass="toolbar-button,sign-button">
