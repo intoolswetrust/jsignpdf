@@ -92,7 +92,7 @@ public class SigningOptionsViewModel {
     private final StringProperty tsaCertFile = new SimpleStringProperty();
     private final StringProperty tsaCertFilePassword = new SimpleStringProperty();
     private final StringProperty tsaPolicy = new SimpleStringProperty();
-    private final StringProperty tsaHashAlg = new SimpleStringProperty();
+    private final ObjectProperty<HashAlgorithm> tsaHashAlg = new SimpleObjectProperty<>();
 
     // OCSP/CRL
     private final BooleanProperty ocspEnabled = new SimpleBooleanProperty(false);
@@ -168,7 +168,8 @@ public class SigningOptionsViewModel {
         opts.setTsaCertFile(tsaCertFile.get());
         opts.setTsaCertFilePwd(tsaCertFilePassword.get());
         opts.setTsaPolicy(tsaPolicy.get());
-        opts.setTsaHashAlg(tsaHashAlg.get());
+        HashAlgorithm tsaHa = tsaHashAlg.get();
+        opts.setTsaHashAlg(tsaHa != null ? tsaHa.getAlgorithmName() : null);
 
         // OCSP/CRL
         opts.setOcspEnabled(ocspEnabled.get());
@@ -234,11 +235,11 @@ public class SigningOptionsViewModel {
         tsaServerAuthn.set(opts.getTsaServerAuthn());
         tsaUser.set(opts.getTsaUser());
         tsaPassword.set(opts.getTsaPasswd());
-        tsaCertFileType.set(opts.getTsaCertFileType());
+        tsaCertFileType.set(resolveTsaCertFileType(opts.getTsaCertFileType()));
         tsaCertFile.set(opts.getTsaCertFile());
         tsaCertFilePassword.set(opts.getTsaCertFilePwd());
         tsaPolicy.set(opts.getTsaPolicy());
-        tsaHashAlg.set(opts.getTsaHashAlg());
+        tsaHashAlg.set(resolveTsaHashAlg(opts.getTsaHashAlg()));
 
         ocspEnabled.set(opts.isOcspEnabled());
         ocspServerUrl.set(opts.getOcspServerUrl());
@@ -307,11 +308,11 @@ public class SigningOptionsViewModel {
         tsaServerAuthn.set(ServerAuthentication.NONE);
         tsaUser.set(null);
         tsaPassword.set(null);
-        tsaCertFileType.set(null);
+        tsaCertFileType.set(resolveTsaCertFileType(null));
         tsaCertFile.set(null);
         tsaCertFilePassword.set(null);
         tsaPolicy.set(null);
-        tsaHashAlg.set(null);
+        tsaHashAlg.set(resolveTsaHashAlg(null));
 
         // OCSP/CRL
         ocspEnabled.set(false);
@@ -322,6 +323,32 @@ public class SigningOptionsViewModel {
         proxyType.set(Constants.DEFVAL_PROXY_TYPE);
         proxyHost.set(null);
         proxyPort.set(Constants.DEFVAL_PROXY_PORT);
+    }
+
+    /**
+     * Defaults a blank TSA cert file type to PKCS12 — the TSA panel always
+     * exposes a concrete keystore-type selection, matching the CLI default
+     * (see {@link net.sf.jsignpdf.ssl.SSLInitializer}).
+     */
+    private static String resolveTsaCertFileType(String stored) {
+        if (stored == null || stored.trim().isEmpty()) {
+            return "PKCS12";
+        }
+        return stored;
+    }
+
+    /**
+     * Resolves a persisted TSA hash algorithm name to the matching enum value.
+     * Falls back to the configured default when the stored value is blank or
+     * not recognised — the TSA panel always exposes a concrete selection.
+     */
+    private static HashAlgorithm resolveTsaHashAlg(String stored) {
+        HashAlgorithm ha = HashAlgorithm.fromAlgorithmName(stored);
+        if (ha != null) {
+            return ha;
+        }
+        HashAlgorithm fallback = HashAlgorithm.fromAlgorithmName(Constants.DEFVAL_TSA_HASH_ALG);
+        return fallback != null ? fallback : HashAlgorithm.SHA256;
     }
 
     private static char[] toCharArray(String s) {
@@ -382,7 +409,7 @@ public class SigningOptionsViewModel {
     public StringProperty tsaCertFileProperty() { return tsaCertFile; }
     public StringProperty tsaCertFilePasswordProperty() { return tsaCertFilePassword; }
     public StringProperty tsaPolicyProperty() { return tsaPolicy; }
-    public StringProperty tsaHashAlgProperty() { return tsaHashAlg; }
+    public ObjectProperty<HashAlgorithm> tsaHashAlgProperty() { return tsaHashAlg; }
     public BooleanProperty ocspEnabledProperty() { return ocspEnabled; }
     public StringProperty ocspServerUrlProperty() { return ocspServerUrl; }
     public BooleanProperty crlEnabledProperty() { return crlEnabled; }

@@ -140,7 +140,7 @@ public class Constants {
             PDF2IMAGE_LIBRARIES_DEFAULT);
 
     public static final String DEFVAL_TSA_HASH_ALG = ConfigProvider.getInstance().getNotEmptyProperty("tsa.hashAlgorithm",
-            "SHA-1");
+            "SHA-256");
 
     /**
      * Property name.

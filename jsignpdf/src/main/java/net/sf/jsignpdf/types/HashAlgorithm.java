@@ -75,4 +75,25 @@ public enum HashAlgorithm {
     public static String valuesWithPdfVersionAsString() {
         return Stream.of(values()).map(ha -> ha.toStringWithPdfVersion()).collect(joining(", "));
     }
+
+    /**
+     * Resolves a {@link HashAlgorithm} by its algorithm name (case-insensitive,
+     * e.g. {@code "SHA-256"} or {@code "sha256"}). Returns {@code null} if the
+     * name is blank or does not match any supported algorithm.
+     */
+    public static HashAlgorithm fromAlgorithmName(String name) {
+        if (name == null) {
+            return null;
+        }
+        String normalized = name.replace("-", "").trim();
+        if (normalized.isEmpty()) {
+            return null;
+        }
+        for (HashAlgorithm ha : values()) {
+            if (ha.getAlgorithmName().replace("-", "").equalsIgnoreCase(normalized)) {
+                return ha;
+            }
+        }
+        return null;
+    }
 }

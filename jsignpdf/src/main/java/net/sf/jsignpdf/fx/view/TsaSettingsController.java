@@ -14,7 +14,9 @@ import javafx.scene.control.TextField;
 import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
 import net.sf.jsignpdf.fx.viewmodel.SigningOptionsViewModel;
+import net.sf.jsignpdf.types.HashAlgorithm;
 import net.sf.jsignpdf.types.ServerAuthentication;
+import net.sf.jsignpdf.utils.KeyStoreUtils;
 
 import java.net.Proxy;
 
@@ -23,16 +25,20 @@ import java.net.Proxy;
  */
 public class TsaSettingsController {
 
+    private static final String STYLE_VALIDATION_ERROR = "-fx-border-color: red; -fx-border-width: 1;";
+
     @FXML private CheckBox chkTsaEnabled;
     @FXML private TextField txtTsaUrl;
     @FXML private ComboBox<ServerAuthentication> cmbTsaAuthn;
+    @FXML private VBox tsaUserPane;
     @FXML private TextField txtTsaUser;
     @FXML private PasswordField txtTsaPassword;
-    @FXML private TextField txtTsaCertFileType;
+    @FXML private VBox tsaCertPane;
+    @FXML private ComboBox<String> cmbTsaCertFileType;
     @FXML private TextField txtTsaCertFile;
     @FXML private PasswordField txtTsaCertFilePassword;
     @FXML private TextField txtTsaPolicy;
-    @FXML private TextField txtTsaHashAlg;
+    @FXML private ComboBox<HashAlgorithm> cmbTsaHashAlg;
     @FXML private VBox tsaDetailsPane;
 
     @FXML private CheckBox chkOcspEnabled;
@@ -51,13 +57,27 @@ public class TsaSettingsController {
     @FXML
     private void initialize() {
         cmbTsaAuthn.setItems(FXCollections.observableArrayList(ServerAuthentication.values()));
+        cmbTsaHashAlg.setItems(FXCollections.observableArrayList(HashAlgorithm.values()));
+        cmbTsaCertFileType.setItems(FXCollections.observableArrayList(KeyStoreUtils.getKeyStores()));
         cmbProxyType.setItems(FXCollections.observableArrayList(Proxy.Type.values()));
 
         // Toggle TSA details visibility
         tsaDetailsPane.managedProperty().bind(tsaDetailsPane.visibleProperty());
-        chkTsaEnabled.selectedProperty().addListener((obs, o, n) ->
-                tsaDetailsPane.setVisible(n));
+        chkTsaEnabled.selectedProperty().addListener((obs, o, n) -> {
+            tsaDetailsPane.setVisible(n);
+            updateValidation();
+        });
         tsaDetailsPane.setVisible(false);
+
+        // Live validation: TSA URL is required when TSA is enabled.
+        txtTsaUrl.textProperty().addListener((obs, o, n) -> updateValidation());
+
+        // Toggle auth-dependent panes: show only the inputs relevant to the
+        // selected authentication method (user/password vs certificate file).
+        tsaUserPane.managedProperty().bind(tsaUserPane.visibleProperty());
+        tsaCertPane.managedProperty().bind(tsaCertPane.visibleProperty());
+        cmbTsaAuthn.valueProperty().addListener((obs, o, n) -> applyAuthVisibility(n));
+        applyAuthVisibility(null);
 
         // Toggle OCSP URL visibility
         chkOcspEnabled.selectedProperty().addListener((obs, o, n) -> {
@@ -104,11 +124,11 @@ public class TsaSettingsController {
         cmbTsaAuthn.valueProperty().bindBidirectional(viewModel.tsaServerAuthnProperty());
         txtTsaUser.textProperty().bindBidirectional(viewModel.tsaUserProperty());
         txtTsaPassword.textProperty().bindBidirectional(viewModel.tsaPasswordProperty());
-        txtTsaCertFileType.textProperty().bindBidirectional(viewModel.tsaCertFileTypeProperty());
+        cmbTsaCertFileType.valueProperty().bindBidirectional(viewModel.tsaCertFileTypeProperty());
         txtTsaCertFile.textProperty().bindBidirectional(viewModel.tsaCertFileProperty());
         txtTsaCertFilePassword.textProperty().bindBidirectional(viewModel.tsaCertFilePasswordProperty());
         txtTsaPolicy.textProperty().bindBidirectional(viewModel.tsaPolicyProperty());
-        txtTsaHashAlg.textProperty().bindBidirectional(viewModel.tsaHashAlgProperty());
+        cmbTsaHashAlg.valueProperty().bindBidirectional(viewModel.tsaHashAlgProperty());
 
         chkOcspEnabled.selectedProperty().bindBidirectional(viewModel.ocspEnabledProperty());
         txtOcspServerUrl.textProperty().bindBidirectional(viewModel.ocspServerUrlProperty());
@@ -129,6 +149,8 @@ public class TsaSettingsController {
 
         // Update visibility from initial loaded values
         tsaDetailsPane.setVisible(viewModel.tsaEnabledProperty().get());
+        updateValidation();
+        applyAuthVisibility(viewModel.tsaServerAuthnProperty().get());
         boolean ocspOn = viewModel.ocspEnabledProperty().get();
         lblOcspServerUrl.setVisible(ocspOn);
         txtOcspServerUrl.setVisible(ocspOn);
@@ -144,6 +166,32 @@ public class TsaSettingsController {
         txtProxyHost.setManaged(proxyOn);
         lblProxyPort.setManaged(proxyOn);
         txtProxyPort.setManaged(proxyOn);
+    }
+
+    private void applyAuthVisibility(ServerAuthentication authn) {
+        tsaUserPane.setVisible(authn == ServerAuthentication.PASSWORD);
+        tsaCertPane.setVisible(authn == ServerAuthentication.CERTIFICATE);
+    }
+
+    /**
+     * Applies or clears a red-border style on the TSA URL field. The URL is
+     * required whenever TSA is enabled.
+     */
+    private void updateValidation() {
+        boolean invalid = chkTsaEnabled.isSelected() && isBlank(txtTsaUrl.getText());
+        txtTsaUrl.setStyle(invalid ? STYLE_VALIDATION_ERROR : null);
+    }
+
+    /**
+     * Returns true if TSA is either disabled or has a non-blank server URL.
+     * Used by the main controller to gate Sign.
+     */
+    public boolean isTsaConfigValid() {
+        return !chkTsaEnabled.isSelected() || !isBlank(txtTsaUrl.getText());
+    }
+
+    private static boolean isBlank(String s) {
+        return s == null || s.trim().isEmpty();
     }
 
     @FXML
