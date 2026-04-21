@@ -80,7 +80,7 @@ mkdir -p "${DEST_GUIDE}"
   printf -- '  - /docs/guide/\n'
   printf -- 'excludeSearch: true\n'
   printf -- 'sidebar:\n'
-  printf -- '  open: true\n'
+  printf -- '  hide: true\n'
   printf -- '---\n'
   sed "s|{jsignpdf-version}|${VERSION}|g" "${SRC_ADOC}"
 } > "${DEST_GUIDE}/_index.adoc"

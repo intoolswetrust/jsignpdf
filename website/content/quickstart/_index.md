@@ -2,6 +2,8 @@
 linkTitle: "Quickstart"
 title: Quickstart
 type: docs
+sidebar:
+  hide: true
 ---
 
 ## Quick start
