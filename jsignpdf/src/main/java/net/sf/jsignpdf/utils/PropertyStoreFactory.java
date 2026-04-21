@@ -32,8 +32,11 @@ package net.sf.jsignpdf.utils;
 import static net.sf.jsignpdf.Constants.LOGGER;
 
 import java.io.IOException;
+import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.SimpleFileVisitor;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.util.logging.Level;
 
 /**
@@ -130,5 +133,45 @@ public final class PropertyStoreFactory {
 
     public ConfigLocationResolver getResolver() {
         return resolver;
+    }
+
+    /**
+     * Wipes every file under the resolved config directory (main config file, presets, anything else) and clears the in-memory
+     * state of the cached main-config provider so every existing holder sees the reset. The config directory itself is kept
+     * so subsequent writes don't race with directory creation.
+     */
+    public synchronized void resetAll() {
+        Path dir = resolver.getConfigDir();
+        if (dir != null) {
+            deleteDirectoryContents(dir);
+        }
+        if (mainConfig != null) {
+            mainConfig.clear();
+        }
+    }
+
+    private static void deleteDirectoryContents(Path dir) {
+        if (!Files.isDirectory(dir)) {
+            return;
+        }
+        try {
+            Files.walkFileTree(dir, new SimpleFileVisitor<>() {
+                @Override
+                public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
+                    Files.deleteIfExists(file);
+                    return FileVisitResult.CONTINUE;
+                }
+
+                @Override
+                public FileVisitResult postVisitDirectory(Path d, IOException exc) throws IOException {
+                    if (!d.equals(dir)) {
+                        Files.deleteIfExists(d);
+                    }
+                    return FileVisitResult.CONTINUE;
+                }
+            });
+        } catch (IOException e) {
+            LOGGER.log(Level.WARNING, "Failed to wipe config directory " + dir, e);
+        }
     }
 }

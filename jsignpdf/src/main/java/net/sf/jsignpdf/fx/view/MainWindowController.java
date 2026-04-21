@@ -55,10 +55,10 @@ import net.sf.jsignpdf.fx.preset.PresetManager;
 import net.sf.jsignpdf.fx.preset.PresetValidation;
 import net.sf.jsignpdf.fx.util.RecentFilesManager;
 import net.sf.jsignpdf.fx.viewmodel.DocumentViewModel;
-import net.sf.jsignpdf.utils.PropertyProvider;
 import net.sf.jsignpdf.utils.PropertyStoreFactory;
 import net.sf.jsignpdf.fx.viewmodel.SignaturePlacementViewModel;
 import net.sf.jsignpdf.fx.viewmodel.SigningOptionsViewModel;
+import net.sf.jsignpdf.fx.viewmodel.VisibleSignatureCoordinator;
 import net.sf.jsignpdf.types.PageInfo;
 
 import static net.sf.jsignpdf.Constants.LOGGER;
@@ -174,21 +174,7 @@ public class MainWindowController {
             }
 
             // Sync placement rectangle coordinates to the signing ViewModel before persisting
-            if (placementVM.isPlaced() && documentVM.isDocumentLoaded()) {
-                signingVM.visibleProperty().set(true);
-                signingVM.pageProperty().set(documentVM.getCurrentPage());
-
-                PdfExtraInfo extraInfo = new PdfExtraInfo(options);
-                PageInfo pageInfo = extraInfo.getPageInfo(documentVM.getCurrentPage());
-                if (pageInfo != null) {
-                    float[] coords = placementVM.toPdfCoordinates(
-                            pageInfo.getWidth(), pageInfo.getHeight());
-                    signingVM.positionLLXProperty().set(coords[0]);
-                    signingVM.positionLLYProperty().set(coords[1]);
-                    signingVM.positionURXProperty().set(coords[2]);
-                    signingVM.positionURYProperty().set(coords[3]);
-                }
-            }
+            capturePlacementToSigningVM();
 
             signingVM.syncToOptions(options);
             options.storeOptions();
@@ -421,8 +407,42 @@ public class MainWindowController {
         signingVM.syncToOptions(options);
         presetManager.load(preset, options);
         signingVM.syncFromOptions(options);
+        // Move the on-screen rectangle to match the preset's position.
+        applySigningVMPositionToPlacement();
         updateStatus(java.text.MessageFormat.format(
                 RES.get("jfx.gui.status.presetLoaded"), preset.getDisplayName()));
+    }
+
+    /**
+     * Writes the current placement rectangle to the signing VM (as PDF coords) if one is placed and a document is loaded.
+     * Called before saving to preset, storing the main config, and signing.
+     */
+    private void capturePlacementToSigningVM() {
+        if (!placementVM.isPlaced() || !documentVM.isDocumentLoaded() || options == null) {
+            return;
+        }
+        PageInfo pageInfo = new PdfExtraInfo(options).getPageInfo(documentVM.getCurrentPage());
+        if (pageInfo == null) {
+            return;
+        }
+        VisibleSignatureCoordinator.pushPlacementToSigning(placementVM, signingVM,
+                documentVM.getCurrentPage(), pageInfo.getWidth(), pageInfo.getHeight());
+    }
+
+    /**
+     * Moves the on-screen placement rectangle to match the coordinates currently held by the signing VM. Used right after
+     * loading a preset, so the canvas reflects the new position even if {@code visible} hasn't toggled.
+     */
+    private void applySigningVMPositionToPlacement() {
+        if (!documentVM.isDocumentLoaded() || options == null) {
+            return;
+        }
+        PageInfo pageInfo = new PdfExtraInfo(options).getPageInfo(documentVM.getCurrentPage());
+        if (pageInfo == null) {
+            return;
+        }
+        VisibleSignatureCoordinator.pushSigningToPlacement(signingVM, placementVM,
+                pageInfo.getWidth(), pageInfo.getHeight());
     }
 
     @FXML
@@ -430,6 +450,7 @@ public class MainWindowController {
         if (options == null) {
             options = new BasicSignerOptions();
         }
+        capturePlacementToSigningVM();
         signingVM.syncToOptions(options);
 
         TextInputDialog dialog = new TextInputDialog();
@@ -464,6 +485,7 @@ public class MainWindowController {
         if (options == null) {
             options = new BasicSignerOptions();
         }
+        capturePlacementToSigningVM();
         signingVM.syncToOptions(options);
         ManagePresetsDialog dialog = new ManagePresetsDialog(presetManager, options, stage);
         dialog.showAndWait();
@@ -721,15 +743,8 @@ public class MainWindowController {
 
         Optional<ButtonType> result = confirm.showAndWait();
         if (result.isPresent() && result.get() == ButtonType.OK) {
-            // Wipe the entire config directory (main config file + presets/*).
-            PropertyProvider mainConfig = PropertyStoreFactory.getInstance().mainConfig();
-            java.nio.file.Path configDir = PropertyStoreFactory.getInstance().getResolver().getConfigDir();
-            if (configDir != null) {
-                deleteDirectoryContents(configDir);
-            }
-
-            // Clear the in-memory properties and reset the options object
-            mainConfig.clear();
+            // Wipe the config directory (main config + presets) and clear in-memory state.
+            PropertyStoreFactory.getInstance().resetAll();
             options = new BasicSignerOptions();
 
             // Refresh preset list from disk (now empty) — this updates the toolbar combo.
@@ -748,37 +763,6 @@ public class MainWindowController {
             refreshRecentFilesMenu();
 
             updateStatus(RES.get("jfx.gui.status.settingsReset"));
-        }
-    }
-
-    /**
-     * Recursively deletes everything under {@code dir}, but keeps {@code dir} itself. Missing entries and individual
-     * deletion failures are logged at WARNING level rather than aborted — a partial reset is better than a stuck dialog.
-     */
-    private static void deleteDirectoryContents(java.nio.file.Path dir) {
-        if (!java.nio.file.Files.isDirectory(dir)) {
-            return;
-        }
-        try {
-            java.nio.file.Files.walkFileTree(dir, new java.nio.file.SimpleFileVisitor<>() {
-                @Override
-                public java.nio.file.FileVisitResult visitFile(java.nio.file.Path file,
-                        java.nio.file.attribute.BasicFileAttributes attrs) throws java.io.IOException {
-                    java.nio.file.Files.deleteIfExists(file);
-                    return java.nio.file.FileVisitResult.CONTINUE;
-                }
-
-                @Override
-                public java.nio.file.FileVisitResult postVisitDirectory(java.nio.file.Path d,
-                        java.io.IOException exc) throws java.io.IOException {
-                    if (!d.equals(dir)) {
-                        java.nio.file.Files.deleteIfExists(d);
-                    }
-                    return java.nio.file.FileVisitResult.CONTINUE;
-                }
-            });
-        } catch (java.io.IOException e) {
-            LOGGER.log(Level.WARNING, "Failed to wipe config directory " + dir, e);
         }
     }
 
@@ -839,25 +823,9 @@ public class MainWindowController {
             return;
         }
 
-        // Sync ViewModel to options
+        // Capture live placement into the signing VM, then sync VM → options.
+        capturePlacementToSigningVM();
         signingVM.syncToOptions(options);
-
-        // Apply signature placement coordinates if placed
-        if (placementVM.isPlaced()) {
-            options.setVisible(true);
-            options.setPage(documentVM.getCurrentPage());
-
-            PdfExtraInfo extraInfo = new PdfExtraInfo(options);
-            PageInfo pageInfo = extraInfo.getPageInfo(documentVM.getCurrentPage());
-            if (pageInfo != null) {
-                float[] coords = placementVM.toPdfCoordinates(
-                        pageInfo.getWidth(), pageInfo.getHeight());
-                options.setPositionLLX(coords[0]);
-                options.setPositionLLY(coords[1]);
-                options.setPositionURX(coords[2]);
-                options.setPositionURY(coords[3]);
-            }
-        }
 
         // Generate output file name if not set
         if (options.getOutFile() == null || options.getOutFile().isEmpty()) {
