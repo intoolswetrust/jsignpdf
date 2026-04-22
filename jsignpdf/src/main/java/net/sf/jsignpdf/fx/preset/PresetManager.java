@@ -184,7 +184,10 @@ public class PresetManager {
     }
 
     /**
-     * Loads the preset's signing configuration into the given options. Passwords and session state are not touched.
+     * Loads the preset's signing configuration into the given options. Session state (input/output paths) is not touched.
+     * Passwords are loaded only when the preset was saved with _Store passwords_ on a machine with a matching
+     * {@code user.home}; otherwise the in-memory password fields are cleared so a prior preset's credentials cannot
+     * bleed into this load.
      */
     public void load(Preset preset, BasicSignerOptions options) {
         PropertyProvider store = factory.preset(preset.getFilename());

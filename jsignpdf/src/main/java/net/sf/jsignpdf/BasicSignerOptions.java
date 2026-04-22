@@ -142,8 +142,10 @@ public class BasicSignerOptions {
     }
 
     /**
-     * Loads the signing-configuration subset of options from a preset store. Passwords and session-only state (input/output
-     * paths) are intentionally skipped — the live values stay in place.
+     * Loads the signing-configuration subset of options from a preset store. Session-only state (input/output paths) is
+     * intentionally skipped — the live values stay in place. Passwords are loaded only when the preset was saved with
+     * {@code storePasswords=true} on a machine with a matching {@code user.home}; otherwise the in-memory password fields
+     * are cleared so stale credentials from a previously loaded preset cannot bleed into this one.
      *
      * @param store the preset property store to read from
      */
@@ -152,8 +154,9 @@ public class BasicSignerOptions {
     }
 
     /**
-     * Common per-field load. When {@code includeMainConfigOnly} is {@code false} the method skips session state and password
-     * fields, yielding the preset subset.
+     * Common per-field load. When {@code includeAllConfig} is {@code true} the full main configuration is loaded (including
+     * session state); when {@code false} the method loads only the preset subset — session state (input/output paths) is
+     * skipped and password fields are cleared on the preset path unless the preset legitimately carries them for this user.
      */
     private void loadFromStore(PropertyProvider store, boolean includeAllConfig) {
         setKsType(store.getProperty(Constants.PROPERTY_KSTYPE));
@@ -227,7 +230,7 @@ public class BasicSignerOptions {
         setProxyHost(store.getProperty(Constants.PROPERTY_PROXY_HOST));
         setProxyPort(store.getAsInt(Constants.PROPERTY_PROXY_PORT, Constants.DEFVAL_PROXY_PORT));
 
-        // passwords — main config only
+        // passwords — gated by storePasswords and a matching user.home
         storePasswords = store.getAsBool(Constants.PROPERTY_STOREPWD, Constants.DEFVAL_STOREPWD);
         final String tmpHome = getDecrypted(store, Constants.EPROPERTY_USERHOME);
         final boolean tmpPasswords = storePasswords && Constants.USER_HOME != null && Constants.USER_HOME.equals(tmpHome);
@@ -238,6 +241,18 @@ public class BasicSignerOptions {
             setPdfUserPwd(getDecrypted(store, Constants.EPROPERTY_USER_PWD));
             setTsaPasswd(getDecrypted(store, Constants.EPROPERTY_TSA_PWD));
             setTsaCertFilePwd(getDecrypted(store, Constants.EPROPERTY_TSA_CERT_PWD));
+        } else if (!includeAllConfig) {
+            // Preset load: clear any stale passwords carried over from a previously
+            // loaded preset. Otherwise a user who switches to a password-less or
+            // foreign-host preset would silently sign with the earlier preset's
+            // credentials. The main-config path keeps the in-memory values so an
+            // interactive password entry on a fresh session is still possible.
+            setKsPasswd((String) null);
+            setKeyPasswd((String) null);
+            setPdfOwnerPwd((String) null);
+            setPdfUserPwd((String) null);
+            setTsaPasswd(null);
+            setTsaCertFilePwd(null);
         }
     }
 
@@ -254,8 +269,9 @@ public class BasicSignerOptions {
     }
 
     /**
-     * Writes the signing-configuration subset of options into a preset store. Passwords and session-only state are skipped.
-     * The caller is responsible for persisting the store via {@link PropertyProvider#save()}.
+     * Writes the signing-configuration subset of options into a preset store. Session-only state (input/output paths) is
+     * skipped. Passwords are written encrypted when {@code storePasswords} is {@code true}; otherwise the password keys are
+     * removed from the store. The caller is responsible for persisting the store via {@link PropertyProvider#save()}.
      *
      * @param store the preset property store to write to
      */
@@ -264,8 +280,9 @@ public class BasicSignerOptions {
     }
 
     /**
-     * Common per-field store. When {@code includeMainConfigOnly} is {@code false} the method skips session state and password
-     * fields, yielding the preset subset.
+     * Common per-field store. When {@code includeAllConfig} is {@code true} the full main configuration is written (including
+     * session state); when {@code false} the method writes only the preset subset (no session state). Password fields are
+     * written encrypted in either case when {@code storePasswords} is set, and otherwise cleared from the target store.
      */
     private void storeToStore(PropertyProvider store, boolean includeAllConfig) {
         store.setProperty(Constants.PROPERTY_KSTYPE, getKsType());

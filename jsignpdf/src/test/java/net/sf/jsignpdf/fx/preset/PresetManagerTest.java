@@ -100,6 +100,35 @@ public class PresetManagerTest {
     }
 
     @Test
+    public void load_passwordlessPreset_clearsStalePasswords() {
+        // Save a preset explicitly opting out of storing passwords. The file
+        // therefore contains no encrypted password keys.
+        PresetManager mgr = new PresetManager(factory);
+        BasicSignerOptions source = sampleOptions();
+        source.setStorePasswords(false);
+        source.setKsPasswd("not-persisted");
+        Preset p = mgr.saveAsNew(source, "Shareable");
+
+        // Simulate the bleed scenario: a previous preset load left credentials
+        // in the live options; the user now switches to the passwordless preset.
+        BasicSignerOptions target = new BasicSignerOptions();
+        target.setKsPasswd("stale-from-earlier");
+        target.setKeyPasswd("stale-key");
+        target.setPdfOwnerPwd("stale-owner");
+        target.setPdfUserPwd("stale-user");
+        target.setTsaPasswd("stale-tsa");
+        target.setTsaCertFilePwd("stale-tsa-cert");
+        mgr.load(p, target);
+
+        assertNull("ks password must be cleared on passwordless preset load", target.getKsPasswd());
+        assertNull(target.getKeyPasswd());
+        assertNull(target.getPdfOwnerPwd());
+        assertNull(target.getPdfUserPwd());
+        assertNull(target.getTsaPasswd());
+        assertNull(target.getTsaCertFilePwd());
+    }
+
+    @Test
     public void rename_preservesFilenameAndCreatedAt() {
         PresetManager mgr = new PresetManager(factory);
         Preset p = mgr.saveAsNew(sampleOptions(), "Old name");
