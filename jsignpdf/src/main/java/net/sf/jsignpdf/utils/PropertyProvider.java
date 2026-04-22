@@ -135,31 +135,13 @@ public class PropertyProvider {
      */
     public void loadProperties(File aFile) throws ProperyProviderException {
         if (aFile != null && aFile.canRead()) {
-            try {
-                properties.load(new FileInputStream(aFile));
+            try (var fis = new FileInputStream(aFile)) {
+                properties.load(fis);
             } catch (Exception e) {
                 throw new ProperyProviderException("Properties cannot be loaded", e);
             }
         } else {
             throw new ProperyProviderException("Property file " + (aFile == null ? "null" : aFile.getPath()) + " doesn't exist.");
-        }
-    }
-
-    /**
-     * Loads properties from given inputstream.
-     *
-     * @param anIS input stream to read properties from
-     * @throws ProperyProviderException
-     */
-    public void loadProperties(InputStream anIS) throws ProperyProviderException {
-        if (anIS != null) {
-            try {
-                properties.load(anIS);
-            } catch (Exception e) {
-                throw new ProperyProviderException("Properties cannot be loaded", e);
-            }
-        } else {
-            throw new ProperyProviderException("InputStream can't be null.");
         }
     }
 
@@ -275,12 +257,12 @@ public class PropertyProvider {
      */
     public void saveProperties(File aFile) throws ProperyProviderException {
         if (aFile != null) {
-            try {
-                synchronized (properties) {
-                    properties.store(new FileOutputStream(aFile), "Properties saved by PropertyProvider");
+            synchronized (properties) {
+                try (var fos = new FileOutputStream(aFile)){
+                    properties.store(fos, "Properties saved by PropertyProvider");
+                } catch (Exception e) {
+                    throw new ProperyProviderException("Properties cannot be stored", e);
                 }
-            } catch (Exception e) {
-                throw new ProperyProviderException("Properties cannot be stored", e);
             }
         } else {
             throw new ProperyProviderException("Property-file is null!");
