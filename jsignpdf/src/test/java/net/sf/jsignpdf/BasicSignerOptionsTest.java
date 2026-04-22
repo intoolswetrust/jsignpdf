@@ -3,6 +3,7 @@ package net.sf.jsignpdf;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotSame;
+import static org.junit.Assert.assertTrue;
 
 import java.net.Proxy;
 
@@ -12,6 +13,8 @@ import net.sf.jsignpdf.types.PDFEncryption;
 import net.sf.jsignpdf.types.PrintRight;
 import net.sf.jsignpdf.types.RenderMode;
 import net.sf.jsignpdf.types.ServerAuthentication;
+import net.sf.jsignpdf.utils.PropertyProvider;
+import net.sf.jsignpdf.utils.PropertyStoreFactory;
 import org.junit.Test;
 
 /**
@@ -172,6 +175,53 @@ public class BasicSignerOptionsTest {
         assertEquals(original.getProxyType(), copy.getProxyType());
         assertEquals(original.getProxyHost(), copy.getProxyHost());
         assertEquals(original.getProxyPort(), copy.getProxyPort());
+    }
+
+    /**
+     * Both field defaults must be true so the JavaFX UI shows Store passwords
+     * and Append signature as checked on a fresh install.
+     */
+    @Test
+    public void defaultFieldValues_appendAndStorePasswordsTrue() {
+        BasicSignerOptions opts = new BasicSignerOptions();
+        assertTrue("append field defaults to DEFVAL_APPEND", opts.isAppend());
+        assertTrue("storePasswords field defaults to DEFVAL_STOREPWD", opts.isStorePasswords());
+    }
+
+    /**
+     * When loadOptions() runs against an empty properties store (fresh install
+     * or after "Reset Settings"), the missing keys must fall back to the
+     * DEFVAL_* constants rather than silently becoming false.
+     */
+    @Test
+    public void loadOptions_noStoredProps_appendAndStorePasswordsDefaultTrue() {
+        PropertyProvider mainConfig = PropertyStoreFactory.getInstance().mainConfig();
+        mainConfig.clear();
+        BasicSignerOptions opts = new BasicSignerOptions();
+        opts.loadOptions();
+        assertTrue("append should default to true when no property is stored", opts.isAppend());
+        assertTrue("storePasswords should default to true when no property is stored",
+                opts.isStorePasswords());
+    }
+
+    /**
+     * Explicit false values persisted in the properties must still be honoured
+     * — the new defaults only apply when the key is absent.
+     */
+    @Test
+    public void loadOptions_storedFalseValuesArePreserved() {
+        PropertyProvider mainConfig = PropertyStoreFactory.getInstance().mainConfig();
+        mainConfig.clear();
+        mainConfig.setProperty(Constants.PROPERTY_APPEND, false);
+        mainConfig.setProperty(Constants.PROPERTY_STOREPWD, false);
+        try {
+            BasicSignerOptions opts = new BasicSignerOptions();
+            opts.loadOptions();
+            assertEquals("append must reflect stored false", false, opts.isAppend());
+            assertEquals("storePasswords must reflect stored false", false, opts.isStorePasswords());
+        } finally {
+            mainConfig.clear();
+        }
     }
 
     @Test

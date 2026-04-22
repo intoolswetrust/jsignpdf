@@ -240,6 +240,8 @@ public class Constants {
 
     public static final boolean DEFVAL_APPEND = toBoolean(true);
 
+    public static final boolean DEFVAL_STOREPWD = toBoolean(true);
+
     public static final int DEFVAL_KEY_INDEX = 0;
     public static final int DEFVAL_PAGE = 1;
     public static final float DEFVAL_LLX = 0f;
