@@ -82,10 +82,10 @@ public class PresetManagerTest {
     }
 
     @Test
-    public void load_populatesOptions_butLeavesPasswordsAlone() {
+    public void load_populatesOptions_includingPasswords() {
         PresetManager mgr = new PresetManager(factory);
         BasicSignerOptions source = sampleOptions();
-        source.setKsPasswd("should-not-persist");
+        source.setKsPasswd("should-persist");
         Preset p = mgr.saveAsNew(source, "With TSA");
 
         BasicSignerOptions target = new BasicSignerOptions();
@@ -95,8 +95,8 @@ public class PresetManagerTest {
         assertEquals("Signed for audit", target.getReason());
         assertEquals("Prague", target.getLocation());
         assertEquals("http://tsa.example.com/tsa", target.getTsaUrl());
-        // Password fields must not be overwritten by preset load
-        assertEquals("live-pwd", target.getKsPasswdStr());
+        // Password fields must be overwritten by preset load
+        assertEquals("should-persist", target.getKsPasswdStr());
     }
 
     @Test

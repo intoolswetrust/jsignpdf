@@ -155,13 +155,13 @@ public class BasicSignerOptions {
      * Common per-field load. When {@code includeMainConfigOnly} is {@code false} the method skips session state and password
      * fields, yielding the preset subset.
      */
-    private void loadFromStore(PropertyProvider store, boolean includeMainConfigOnly) {
+    private void loadFromStore(PropertyProvider store, boolean includeAllConfig) {
         setKsType(store.getProperty(Constants.PROPERTY_KSTYPE));
         setAdvanced(store.getAsBool(Constants.PROPERTY_ADVANCED));
         setKsFile(store.getProperty(Constants.PROPERTY_KEYSTORE));
         setKeyAlias(store.getProperty(Constants.PROPERTY_ALIAS));
         setKeyIndex(store.getAsInt(Constants.PROPERTY_KEY_INDEX, Constants.DEFVAL_KEY_INDEX));
-        if (includeMainConfigOnly) {
+        if (includeAllConfig) {
             setInFile(store.getProperty(Constants.PROPERTY_INPDF));
             setOutFile(store.getProperty(Constants.PROPERTY_OUTPDF));
         }
@@ -173,9 +173,6 @@ public class BasicSignerOptions {
         setPdfEncryption(store.getProperty(Constants.PROPERTY_PDF_ENCRYPTION));
         if (pdfEncryption == null && store.getAsBool(Constants.PROPERTY_ENCRYPTED_PDF)) {
             setPdfEncryption(PDFEncryption.PASSWORD);
-            if (includeMainConfigOnly) {
-                store.removeProperty(Constants.PROPERTY_ENCRYPTED_PDF);
-            }
         }
         setPdfEncryptionCertFile(store.getProperty(Constants.PROPERTY_PDF_ENCRYPTION_CERT_FILE));
         setCertLevel(store.getProperty(Constants.PROPERTY_CERT_LEVEL));
@@ -230,10 +227,6 @@ public class BasicSignerOptions {
         setProxyHost(store.getProperty(Constants.PROPERTY_PROXY_HOST));
         setProxyPort(store.getAsInt(Constants.PROPERTY_PROXY_PORT, Constants.DEFVAL_PROXY_PORT));
 
-        if (!includeMainConfigOnly) {
-            return;
-        }
-
         // passwords — main config only
         storePasswords = store.getAsBool(Constants.PROPERTY_STOREPWD, Constants.DEFVAL_STOREPWD);
         final String tmpHome = getDecrypted(store, Constants.EPROPERTY_USERHOME);
@@ -274,13 +267,13 @@ public class BasicSignerOptions {
      * Common per-field store. When {@code includeMainConfigOnly} is {@code false} the method skips session state and password
      * fields, yielding the preset subset.
      */
-    private void storeToStore(PropertyProvider store, boolean includeMainConfigOnly) {
+    private void storeToStore(PropertyProvider store, boolean includeAllConfig) {
         store.setProperty(Constants.PROPERTY_KSTYPE, getKsType());
         store.setProperty(Constants.PROPERTY_ADVANCED, isAdvanced());
         store.setProperty(Constants.PROPERTY_KEYSTORE, getKsFile());
         store.setProperty(Constants.PROPERTY_ALIAS, getKeyAlias());
         store.setProperty(Constants.PROPERTY_KEY_INDEX, getKeyIndex());
-        if (includeMainConfigOnly) {
+        if (includeAllConfig) {
             store.setProperty(Constants.PROPERTY_INPDF, getInFile());
             store.setProperty(Constants.PROPERTY_OUTPDF, getOutFile());
         }
@@ -332,10 +325,6 @@ public class BasicSignerOptions {
         store.setProperty(Constants.PROPERTY_PROXY_TYPE, getProxyType().name());
         store.setProperty(Constants.PROPERTY_PROXY_HOST, getProxyHost());
         store.setProperty(Constants.PROPERTY_PROXY_PORT, getProxyPort());
-
-        if (!includeMainConfigOnly) {
-            return;
-        }
 
         store.setProperty(Constants.PROPERTY_STOREPWD, isStorePasswords());
         setEncrypted(store, Constants.EPROPERTY_USERHOME, Constants.USER_HOME);
