@@ -35,6 +35,8 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Properties;
 import java.util.logging.Level;
 
@@ -43,6 +45,10 @@ import org.apache.commons.lang3.StringUtils;
 
 /**
  * This class provides basic functionality for work with property files. It encapsulates work with java.util.Properties class.
+ * <p>
+ * Instances are created with a target {@link Path}. Call {@link #load()} to populate the properties from the backing file (if
+ * any) and {@link #save()} to write them back. Use {@link PropertyStoreFactory} to obtain provider instances for the main
+ * config file or for individual preset files.
  *
  * @author Josef Cacek
  * @see java.util.Properties
@@ -54,35 +60,57 @@ public class PropertyProvider {
      */
     public static final String NS_NULL_VALUE = "$$NULL$$";
 
-    /**
-     * <code>PROPERTY_FILE</code> contains default filename for property file.
-     */
-    public static final String PROPERTY_FILE = System.getProperty("user.home") + "/.JSignPdf";
-
-    private static final File PROPERTY_FILE_FILE = new File(PROPERTY_FILE);
-
-    private Properties properties;
+    private final Path path;
+    private final Properties properties;
 
     /**
-     * Creates new instance of PropertyProvider and loads default properties - if exist.
+     * Creates a new instance backed by the given path. The path is not read here; call {@link #load()} to populate from
+     * disk. A {@code null} path turns the provider into an in-memory store — useful as a safe fallback when the config
+     * directory cannot be resolved.
      */
-    protected PropertyProvider() {
-        properties = new Properties();
+    public PropertyProvider(Path path) {
+        this.path = path;
+        this.properties = new Properties();
+    }
+
+    /**
+     * Loads properties from the backing path, if the file exists. Silently no-ops if the path is null or the file is missing.
+     */
+    public void load() {
+        if (path == null || !Files.isRegularFile(path)) {
+            return;
+        }
         try {
-            loadDefault();
+            loadProperties(path.toFile());
         } catch (ProperyProviderException e) {
             LOGGER.log(Level.WARNING, "", e);
         }
     }
 
     /**
-     * Returns singleton of this class (first call tries to load properties from default file, if it exists).
-     *
-     * @return instance of PropertyProvider
-     * @see PropertyProvider#PROPERTY_FILE
+     * Saves the current properties to the backing path. Creates parent directories if needed. Throws if the path is null
+     * (in-memory store) — callers should not reach for persistence in that case.
      */
-    public static PropertyProvider getInstance() {
-        return InstanceHolder.INSTANCE;
+    public void save() throws ProperyProviderException {
+        if (path == null) {
+            throw new ProperyProviderException("Property path is null — provider is in-memory only.");
+        }
+        try {
+            Path parent = path.getParent();
+            if (parent != null) {
+                Files.createDirectories(parent);
+            }
+        } catch (Exception e) {
+            throw new ProperyProviderException("Cannot create parent directory of " + path, e);
+        }
+        saveProperties(path.toFile());
+    }
+
+    /**
+     * Returns the path this provider is backed by, or {@code null} for an in-memory provider.
+     */
+    public Path getPath() {
+        return path;
     }
 
     /**
@@ -107,31 +135,13 @@ public class PropertyProvider {
      */
     public void loadProperties(File aFile) throws ProperyProviderException {
         if (aFile != null && aFile.canRead()) {
-            try {
-                properties.load(new FileInputStream(aFile));
+            try (var fis = new FileInputStream(aFile)) {
+                properties.load(fis);
             } catch (Exception e) {
                 throw new ProperyProviderException("Properties cannot be loaded", e);
             }
         } else {
-            throw new ProperyProviderException("Property file " + aFile.getPath() + " doesn't exist.");
-        }
-    }
-
-    /**
-     * Loads properties from given inputstream.
-     *
-     * @param anIS input stream to read properties from
-     * @throws ProperyProviderException
-     */
-    public void loadProperties(InputStream anIS) throws ProperyProviderException {
-        if (anIS != null) {
-            try {
-                properties.load(anIS);
-            } catch (Exception e) {
-                throw new ProperyProviderException("Properties cannot be loaded", e);
-            }
-        } else {
-            throw new ProperyProviderException("InputStream can't be null.");
+            throw new ProperyProviderException("Property file " + (aFile == null ? "null" : aFile.getPath()) + " doesn't exist.");
         }
     }
 
@@ -240,19 +250,6 @@ public class PropertyProvider {
     }
 
     /**
-     * Loads properties from default file.
-     *
-     * @throws ProperyProviderException
-     */
-    public void loadDefault() throws ProperyProviderException {
-        if (PROPERTY_FILE_FILE.isFile()) {
-            loadProperties(PROPERTY_FILE);
-        } else {
-            LOGGER.fine("Default property file " + PROPERTY_FILE_FILE + " doesn't exists.");
-        }
-    }
-
-    /**
      * Save current set of properties holded by PropertyProvider to a given file.
      *
      * @param aFile file to which will be properties saved
@@ -260,12 +257,12 @@ public class PropertyProvider {
      */
     public void saveProperties(File aFile) throws ProperyProviderException {
         if (aFile != null) {
-            try {
-                synchronized (properties) {
-                    properties.store(new FileOutputStream(aFile), "Properties saved by PropertyProvider");
+            synchronized (properties) {
+                try (var fos = new FileOutputStream(aFile)){
+                    properties.store(fos, "Properties saved by PropertyProvider");
+                } catch (Exception e) {
+                    throw new ProperyProviderException("Properties cannot be stored", e);
                 }
-            } catch (Exception e) {
-                throw new ProperyProviderException("Properties cannot be stored", e);
             }
         } else {
             throw new ProperyProviderException("Property-file is null!");
@@ -284,15 +281,6 @@ public class PropertyProvider {
         } else {
             throw new ProperyProviderException("Property filename is null!");
         }
-    }
-
-    /**
-     * Save current set of properties to default file.
-     *
-     * @throws ProperyProviderException
-     */
-    public void saveDefault() throws ProperyProviderException {
-        saveProperties(PROPERTY_FILE);
     }
 
     /**
@@ -435,10 +423,6 @@ public class PropertyProvider {
     public String getNotEmptyProperty(String aKey, String aDefault) {
         final String tmpVal = properties.getProperty(aKey);
         return StringUtils.isEmpty(tmpVal) ? aDefault : tmpVal;
-    }
-
-    private static class InstanceHolder {
-        static final PropertyProvider INSTANCE = new PropertyProvider();
     }
 
     /**

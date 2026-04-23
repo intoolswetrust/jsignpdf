@@ -6,6 +6,7 @@ import java.util.List;
 
 import net.sf.jsignpdf.Constants;
 import net.sf.jsignpdf.utils.PropertyProvider;
+import net.sf.jsignpdf.utils.PropertyStoreFactory;
 
 /**
  * Manages a list of recently opened PDF files, persisted via PropertyProvider.
@@ -13,7 +14,7 @@ import net.sf.jsignpdf.utils.PropertyProvider;
 public class RecentFilesManager {
 
     private static final int MAX_RECENT = 10;
-    private final PropertyProvider props = PropertyProvider.getInstance();
+    private final PropertyProvider props = PropertyStoreFactory.getInstance().mainConfig();
 
     public void addFile(File file) {
         List<String> files = getRecentFiles();

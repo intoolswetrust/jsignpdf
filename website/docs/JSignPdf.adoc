@@ -206,6 +206,32 @@ image:img/javafx/signing-result.png[Signing complete,width=562,height=400]
 
 The signed PDF is saved to the output path shown in the _Signature Properties_ panel. By default, it is the input file name with a `_signed` suffix (e.g. `document_signed.pdf`).
 
+=== Using presets
+
+A **preset** is a named bundle of signing settings that you can save once and reload with a single click. Presets are useful when you regularly switch between different configurations -- for example, one with a timestamp authority enabled and one without, or different visible-signature layouts for different document types.
+
+Presets capture everything in the <<Signing options>> reference (keystore, signature properties, visible-signature options, TSA, encryption and rights, OCSP/CRL, proxy). Passwords are included only if _Store passwords_ is enabled at the time you save the preset; in that case they are encrypted with a machine-local seed tied to the current user account and are silently ignored on load if the preset file is used under a different `user.home`. If you want a preset without stored passwords, disable _Store passwords_ before saving — no password keys are written to the file in that case. Loading a preset without passwords also clears any passwords already entered in the UI, so switching to a password-less preset never silently reuses credentials from an earlier selection. The currently loaded input and output file paths are not part of a preset.
+
+==== Loading a preset
+
+The _Preset_ drop-down in the toolbar shows every saved preset, sorted by name. Picking an entry immediately loads its settings into the UI -- no confirmation, no extra click. After the load, the drop-down returns to its _Load preset..._ placeholder. There is no "currently active preset" tracked anywhere: the drop-down is just a launcher, and whatever you do after loading (edits, saving as a new preset, signing) is independent of the preset you came from.
+
+If no presets exist yet, the drop-down is disabled and labelled _No presets saved_.
+
+==== Saving a new preset
+
+Choose _Presets > Save current as new preset..._ from the menu bar. Enter a name (up to 60 characters) and confirm. The preset appears in the toolbar drop-down immediately.
+
+==== Managing existing presets
+
+Choose _Presets > Manage presets..._ to open the management dialog. Each row offers three actions:
+
+* **Rename** -- change the display name. The underlying file is not renamed; the name is stored inside the file.
+* **Overwrite** -- replace the preset's stored settings with the current live settings. The preset's name and creation date are preserved. Asks for confirmation because the previous contents are lost.
+* **Delete** -- remove the preset file. Asks for confirmation.
+
+Presets are plain Java properties files under the <<Configuration directory,configuration directory>>.
+
 == Classic Swing UI
 
 The classic Swing GUI is the original graphical interface from earlier versions of JSignPdf. It remains available for backward compatibility. To start it, set the `jsignpdf.swing` system property:
@@ -277,7 +303,7 @@ usage: java -jar JSignPdf.jar [file1.pdf [file2.pdf ...]] [-a] [--bg-path
 | Loads properties from the default file (created by the GUI application).
 
 | `-lpf, --load-properties-file <file>`
-| Loads properties from the given file. The file can be created by copying the default property file `.JSignPdf` from the user's home directory.
+| Loads properties from the given file. The file can be created by copying the default `config.properties` from the <<Configuration directory>>.
 
 | `--enable-stdin-passwords`
 | Allow reading password values from standard input. When set, a password option value of `-` means "read one line from stdin" (or prompt, on an interactive console). See <<Reading passwords from standard input>>.
@@ -834,6 +860,48 @@ The property file _conf/conf.properties_ contain several option groups:
 * control the certificate checks
 * PKCS#11 support
 * enable more strict SSL handling
+
+=== Configuration directory
+
+Starting with JSignPdf 3.0.0, per-user state is stored in a platform-native configuration directory instead of a single file in your home folder. The directory holds two things: the main config file (`config.properties`, which persists the last-used signing settings) and a `presets/` subdirectory (see <<Using presets>>).
+
+The default location depends on your operating system:
+
+[cols="1,3"]
+|===
+|Platform |Default location
+
+|Linux / BSD
+|`$XDG_CONFIG_HOME/jsignpdf/`, falling back to `$HOME/.config/jsignpdf/`
+
+|Windows
+|`%APPDATA%\JSignPdf\` (typically `C:\Users\<you>\AppData\Roaming\JSignPdf\`)
+
+|macOS
+|`~/Library/Application Support/JSignPdf/`
+|===
+
+You can override the default by setting the `JSIGNPDF_CONFIG_DIR` environment variable to any directory path -- useful for portable installs, scripted tests, or keeping multiple profiles side-by-side.
+
+==== Layout
+
+[source]
+----
+<config-dir>/
+  config.properties          # main configuration (last-used signing settings)
+  presets/
+    preset-1745270400123.properties
+    preset-1745270500456.properties
+    ...
+----
+
+Preset filenames are opaque (`preset-<epoch-millis>.properties`); the user-visible name lives inside the file as `preset.displayName`. You can read, copy, or hand-edit any of these files -- they are plain Java properties.
+
+==== Migration from earlier versions
+
+Previous versions of JSignPdf stored everything in `~/.JSignPdf` (a single file in your home directory). On the first run of JSignPdf 3.0.0 or newer, if the new configuration directory does not yet exist but the legacy file does, JSignPdf copies `~/.JSignPdf` to `<config-dir>/config.properties` and creates an empty `presets/` subdirectory. **The legacy file is left in place**, so if you downgrade to an older JSignPdf release, it continues to work with its old settings.
+
+Once the new directory exists, the legacy file is no longer consulted or updated.
 
 === Java VM options for the Windows EXE launchers
 

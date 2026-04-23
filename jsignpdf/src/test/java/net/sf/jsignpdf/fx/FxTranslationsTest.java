@@ -88,8 +88,10 @@ public class FxTranslationsTest {
                     bundle.getString("jfx.gui.menu.view"), menuBar.getMenus().get(1).getText());
             assertEquals("Signing menu for " + locale,
                     bundle.getString("jfx.gui.menu.signing"), menuBar.getMenus().get(2).getText());
+            assertEquals("Presets menu for " + locale,
+                    bundle.getString("jfx.gui.menu.presets"), menuBar.getMenus().get(3).getText());
             assertEquals("Help menu for " + locale,
-                    bundle.getString("jfx.gui.menu.help"), menuBar.getMenus().get(3).getText());
+                    bundle.getString("jfx.gui.menu.help"), menuBar.getMenus().get(4).getText());
         }
     }
 
@@ -343,7 +345,8 @@ public class FxTranslationsTest {
         assertEquals("File", menuBar.getMenus().get(0).getText());
         assertEquals("View", menuBar.getMenus().get(1).getText());
         assertEquals("Signing", menuBar.getMenus().get(2).getText());
-        assertEquals("Help", menuBar.getMenus().get(3).getText());
+        assertEquals("Presets", menuBar.getMenus().get(3).getText());
+        assertEquals("Help", menuBar.getMenus().get(4).getText());
         assertEquals("Drop a PDF file here or use File > Open", getDropHintLabel(root).getText());
     }
 
@@ -356,7 +359,9 @@ public class FxTranslationsTest {
         assertEquals("Datei", menuBar.getMenus().get(0).getText());
         assertEquals("Ansicht", menuBar.getMenus().get(1).getText());
         assertEquals("Signierung", menuBar.getMenus().get(2).getText());
-        assertEquals("Hilfe", menuBar.getMenus().get(3).getText());
+        // "Presets" key has no German translation yet — falls back to English.
+        assertEquals("Presets", menuBar.getMenus().get(3).getText());
+        assertEquals("Hilfe", menuBar.getMenus().get(4).getText());
     }
 
     @Test

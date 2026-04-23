@@ -14,6 +14,7 @@ import net.sf.jsignpdf.types.PrintRight;
 import net.sf.jsignpdf.types.RenderMode;
 import net.sf.jsignpdf.types.ServerAuthentication;
 import net.sf.jsignpdf.utils.PropertyProvider;
+import net.sf.jsignpdf.utils.PropertyStoreFactory;
 import org.junit.Test;
 
 /**
@@ -194,7 +195,8 @@ public class BasicSignerOptionsTest {
      */
     @Test
     public void loadOptions_noStoredProps_appendAndStorePasswordsDefaultTrue() {
-        PropertyProvider.getInstance().clear();
+        PropertyProvider mainConfig = PropertyStoreFactory.getInstance().mainConfig();
+        mainConfig.clear();
         BasicSignerOptions opts = new BasicSignerOptions();
         opts.loadOptions();
         assertTrue("append should default to true when no property is stored", opts.isAppend());
@@ -208,16 +210,17 @@ public class BasicSignerOptionsTest {
      */
     @Test
     public void loadOptions_storedFalseValuesArePreserved() {
-        PropertyProvider.getInstance().clear();
-        PropertyProvider.getInstance().setProperty(Constants.PROPERTY_APPEND, false);
-        PropertyProvider.getInstance().setProperty(Constants.PROPERTY_STOREPWD, false);
+        PropertyProvider mainConfig = PropertyStoreFactory.getInstance().mainConfig();
+        mainConfig.clear();
+        mainConfig.setProperty(Constants.PROPERTY_APPEND, false);
+        mainConfig.setProperty(Constants.PROPERTY_STOREPWD, false);
         try {
             BasicSignerOptions opts = new BasicSignerOptions();
             opts.loadOptions();
             assertEquals("append must reflect stored false", false, opts.isAppend());
             assertEquals("storePasswords must reflect stored false", false, opts.isStorePasswords());
         } finally {
-            PropertyProvider.getInstance().clear();
+            mainConfig.clear();
         }
     }
 
