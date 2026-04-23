@@ -43,6 +43,7 @@ import static net.sf.jsignpdf.Constants.LOGGER;
 public class ConfigProvider extends PropertyProvider {
 
     protected ConfigProvider() {
+        super(null);
     }
 
     /**
@@ -54,12 +55,9 @@ public class ConfigProvider extends PropertyProvider {
         return InstanceHolder.INSTANCE;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see net.sf.jsignpdf.PropertyProvider#loadDefault()
+    /**
+     * Loads the bundled {@link Constants#CONF_FILE} config if it is found on disk.
      */
-    @Override
     public void loadDefault() throws ProperyProviderException {
         File file = IOUtils.findFile(Constants.CONF_FILE);
         if (file != null && file.isFile()) {
@@ -70,6 +68,15 @@ public class ConfigProvider extends PropertyProvider {
     }
 
     private static class InstanceHolder {
-        static final ConfigProvider INSTANCE = new ConfigProvider();
+        static final ConfigProvider INSTANCE;
+        static {
+            ConfigProvider cp = new ConfigProvider();
+            try {
+                cp.loadDefault();
+            } catch (ProperyProviderException e) {
+                LOGGER.fine("ConfigProvider default load skipped: " + e.getMessage());
+            }
+            INSTANCE = cp;
+        }
     }
 }
