@@ -39,53 +39,6 @@ Requires a **Java 21 (or newer) JRE** unless you use an installer that bundles i
 
 Maven-Central-published artifacts (for embedding the signing engine in your own project) live under `com.github.kwart.jsign`.
 
-## Reading passwords from standard input
-
-Passing a password on the command line exposes it to every local process that can read
-`/proc/<pid>/cmdline` (or to shell history). To avoid that, JSignPdf can read password values
-from standard input (or from an interactive console) instead.
-
-Opt in with `--enable-stdin-passwords` and use `-` as the value of any password option:
-
-```bash
-# Keystore password, piped in
-printf '%s\n' "$KS_PASSWORD" \
-  | java -jar JSignPdf.jar --enable-stdin-passwords \
-      -kst PKCS12 -ksf keystore.p12 -ksp - -ka mykey \
-      -d out/ input.pdf
-```
-
-You can combine several password options in one invocation. When multiple options use `-`, the
-values are consumed from stdin in a **fixed canonical order** regardless of the order in which
-they appear on the command line:
-
-1. `--keystore-password` (`-ksp`)
-2. `--key-password` (`-kp`)
-3. `--owner-password` (`-opwd`)
-4. `--user-password` (`-upwd`)
-5. `--tsa-cert-password` (`-tscp`)
-6. `--tsa-password` (`-tsp`)
-
-```bash
-# Keystore password first, TSA password second — even though the CLI lists them in the other order.
-{ printf '%s\n' "$KS_PASSWORD"; printf '%s\n' "$TSA_PASSWORD"; } \
-  | java -jar JSignPdf.jar --enable-stdin-passwords \
-      -kst PKCS12 -ksf keystore.p12 -ksp - -ka mykey \
-      -ts https://tsa.example/ -tsu tsauser -tsp - \
-      -d out/ input.pdf
-```
-
-Before blocking on each read, JSignPdf prints a progress line such as
-`[jsignpdf] Reading password for --keystore-password (1/2) from stdin...` to stderr so you can
-verify the order matches what your pipe is feeding. Use `-q` (`--quiet`) to suppress it.
-
-When a console is attached (an interactive terminal), `-` switches to a prompted,
-no-echo read via `java.io.Console.readPassword`.
-
-**Backwards compatibility:** without `--enable-stdin-passwords`, a literal `-` is still accepted
-as a password value exactly as before. JSignPdf will emit a one-time warning naming the flag, so
-a typo does not silently turn into a `-` password.
-
 ## Documentation
 
 - User guide: <https://intoolswetrust.github.io/jsignpdf/>
