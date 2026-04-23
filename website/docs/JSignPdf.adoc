@@ -220,7 +220,7 @@ If no presets exist yet, the drop-down is disabled and labelled _No presets save
 
 ==== Saving a new preset
 
-Choose _Presets > Save current as new preset..._ from the menu bar. Enter a name (up to 60 characters, any Unicode letters / digits / punctuation; no `/`, `\`, tabs, or other control characters) and confirm. The preset appears in the toolbar drop-down immediately.
+Choose _Presets > Save current as new preset..._ from the menu bar. Enter a name (up to 60 characters) and confirm. The preset appears in the toolbar drop-down immediately.
 
 ==== Managing existing presets
 
@@ -230,7 +230,7 @@ Choose _Presets > Manage presets..._ to open the management dialog. Each row off
 * **Overwrite** -- replace the preset's stored settings with the current live settings. The preset's name and creation date are preserved. Asks for confirmation because the previous contents are lost.
 * **Delete** -- remove the preset file. Asks for confirmation.
 
-There is no export/import; presets are plain Java properties files under the <<Configuration directory,configuration directory>>, so you can copy them manually between machines if you want. If _Store passwords_ was enabled when the preset was saved, the file contains the signing passwords encrypted with a machine-local seed — the encrypted values are only usable on the same user account and are silently ignored elsewhere, but the ciphertext itself is still present in the file. If you intend to share a preset (email, chat, cloud storage), turn _Store passwords_ off before saving it so the encrypted password keys are not written at all.
+Presets are plain Java properties files under the <<Configuration directory,configuration directory>>.
 
 == Classic Swing UI
 
