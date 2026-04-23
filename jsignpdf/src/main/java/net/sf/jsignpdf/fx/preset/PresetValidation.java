@@ -52,12 +52,12 @@ public final class PresetValidation {
     }
 
     /**
-     * Checks for control characters (below 0x20 or 0x7F) and path separators ({@code /} and {@code \}).
+     * Checks for control characters (below 0x20 or 0x7F).
      */
     private static boolean containsIllegalChars(String name) {
         for (int i = 0; i < name.length(); i++) {
             char c = name.charAt(i);
-            if (c < 0x20 || c == 0x7F || c == '/' || c == '\\') {
+            if (c < 0x20 || c == 0x7F) {
                 return true;
             }
         }

@@ -43,16 +43,6 @@ public class PresetValidationTest {
     }
 
     @Test
-    public void rejects_forwardSlash() {
-        assertEquals(PresetValidation.Result.ILLEGAL_CHAR, PresetValidation.validate("a/b", NOT_DUPLICATE));
-    }
-
-    @Test
-    public void rejects_backslash() {
-        assertEquals(PresetValidation.Result.ILLEGAL_CHAR, PresetValidation.validate("a\\b", NOT_DUPLICATE));
-    }
-
-    @Test
     public void rejects_controlChar_tab() {
         assertEquals(PresetValidation.Result.ILLEGAL_CHAR, PresetValidation.validate("a\tb", NOT_DUPLICATE));
     }
