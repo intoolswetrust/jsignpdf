@@ -4,6 +4,7 @@ import java.io.File;
 
 import static net.sf.jsignpdf.Constants.RES;
 
+import javafx.animation.PauseTransition;
 import javafx.beans.value.ChangeListener;
 import javafx.fxml.FXML;
 import javafx.scene.control.CheckBox;
@@ -12,9 +13,9 @@ import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
+import javafx.util.Duration;
 import net.sf.jsignpdf.fx.viewmodel.SigningOptionsViewModel;
 
 /**
@@ -29,11 +30,11 @@ public class SignatureSettingsController {
     @FXML private VBox visibleSigPane;
     @FXML private TextArea txtL2Text;
     @FXML private TextField txtBgImgPath;
-    @FXML private StackPane bgImgPreviewPane;
     @FXML private ImageView bgImgPreview;
     @FXML private Label bgImgPreviewPlaceholder;
 
     private SigningOptionsViewModel viewModel;
+    private final PauseTransition bgImgDebounce = new PauseTransition(Duration.millis(150));
 
     @FXML
     private void initialize() {
@@ -41,7 +42,8 @@ public class SignatureSettingsController {
         // so users can still see the current text/preview.
         visibleSigPane.disableProperty().bind(chkVisibleSig.selectedProperty().not());
 
-        txtBgImgPath.textProperty().addListener((obs, o, n) -> updateBgImgPreview(n));
+        bgImgDebounce.setOnFinished(e -> updateBgImgPreview(txtBgImgPath.getText()));
+        txtBgImgPath.textProperty().addListener((obs, o, n) -> bgImgDebounce.playFromStart());
         updateBgImgPreview(txtBgImgPath.getText());
     }
 
