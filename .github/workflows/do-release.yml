@@ -133,8 +133,66 @@ jobs:
         if-no-files-found: error
         retention-days: 1
 
+  linux-flatpak:
+    needs: do-release
+    runs-on: ubuntu-latest
+    env:
+      VERSION: ${{ needs.do-release.outputs.version }}
+    steps:
+    - name: Checkout release tag
+      uses: actions/checkout@v6
+      with:
+        ref: ${{ needs.do-release.outputs.tag }}
+
+    - name: Download Linux assets
+      uses: actions/download-artifact@v8
+      with:
+        name: jsignpdf-linux-assets
+        path: linux-assets
+
+    - name: Install Flatpak and build tools
+      run: |
+        sudo apt-get update -qq
+        sudo apt-get install -y flatpak flatpak-builder
+        sudo flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
+        sudo flatpak install -y --noninteractive flathub \
+          org.freedesktop.Platform//25.08 \
+          org.freedesktop.Sdk//25.08 \
+          org.freedesktop.Sdk.Extension.openjdk21//25.08
+
+    - name: Patch manifest to use local zip
+      run: |
+        ZIP_NAME=jsignpdf-${VERSION}.zip
+        SHA256=$(sha256sum "linux-assets/${ZIP_NAME}" | awk '{print $1}')
+        cp "linux-assets/${ZIP_NAME}" distribution/linux/flatpak/
+        sed -i \
+          "s|        url: https://downloads\.sourceforge\.net.*\.zip|        path: ${ZIP_NAME}|" \
+          distribution/linux/flatpak/io.github.intoolswetrust.JSignPdf.yaml
+        sed -i \
+          "s|sha256: [a-f0-9]\{64\}|sha256: ${SHA256}|" \
+          distribution/linux/flatpak/io.github.intoolswetrust.JSignPdf.yaml
+
+    - name: Build Flatpak bundle
+      run: |
+        BUNDLE_NAME=JSignPdf-${VERSION}-linux-x86_64.flatpak
+        cd distribution/linux/flatpak
+        flatpak-builder --repo=flatpak-repo --force-clean --disable-rofiles-fuse build-dir \
+          io.github.intoolswetrust.JSignPdf.yaml
+        flatpak build-bundle flatpak-repo "${BUNDLE_NAME}" \
+          io.github.intoolswetrust.JSignPdf
+        mkdir -p upload
+        mv "${BUNDLE_NAME}" upload/
+
+    - name: Stage Flatpak bundle for publish job
+      uses: actions/upload-artifact@v7
+      with:
+        name: jsignpdf-flatpak-assets
+        path: distribution/linux/flatpak/upload/*
+        if-no-files-found: error
+        retention-days: 1
+
   publish-release:
-    needs: [do-release, windows-installers]
+    needs: [do-release, windows-installers, linux-flatpak]
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -159,6 +217,12 @@ jobs:
       uses: actions/download-artifact@v8
       with:
         name: jsignpdf-windows-assets
+        path: release-assets/JSignPdf-${{ needs.do-release.outputs.version }}
+
+    - name: Download Flatpak bundle
+      uses: actions/download-artifact@v8
+      with:
+        name: jsignpdf-flatpak-assets
         path: release-assets/JSignPdf-${{ needs.do-release.outputs.version }}
 
     - name: List staged assets
