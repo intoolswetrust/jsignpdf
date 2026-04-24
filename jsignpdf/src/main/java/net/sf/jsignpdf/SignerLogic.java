@@ -304,7 +304,7 @@ public class SignerLogic implements Runnable {
                 }
                 final String certificate = PdfPKCS7.getSubjectFields((X509Certificate) chain[0]).toString();
                 final String timestamp = new SimpleDateFormat("yyyy.MM.dd HH:mm:ss z").format(sap.getSignDateNullSafe().getTime());
-                if (StringUtils.isEmpty(options.getL2Text())) {
+                if (options.getL2Text() == null) {
                     final StringBuilder buf = new StringBuilder();
                     buf.append(RES.get("default.l2text.signedBy")).append(" ").append(signer).append('\n');
                     buf.append(RES.get("default.l2text.date")).append(" ").append(timestamp);

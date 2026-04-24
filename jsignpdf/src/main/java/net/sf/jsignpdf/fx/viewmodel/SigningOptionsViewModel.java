@@ -135,7 +135,9 @@ public class SigningOptionsViewModel {
         opts.setPositionURX(positionURX.get());
         opts.setPositionURY(positionURY.get());
         opts.setBgImgScale(bgImgScale.get());
-        opts.setL2Text(l2Text.get());
+        // Normalize empty string to null so SignerLogic's null-check (blank rectangle intent) is preserved.
+        String l2TextValue = l2Text.get();
+        opts.setL2Text(l2TextValue != null && l2TextValue.isEmpty() ? null : l2TextValue);
         opts.setBgImgPath(bgImgPath.get());
         // The simplified JavaFX UI exposes only l2Text and bgImgPath for visible
         // signatures; every other appearance knob is reset to its canonical default
