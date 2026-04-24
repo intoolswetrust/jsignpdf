@@ -4,46 +4,45 @@ import java.io.File;
 
 import static net.sf.jsignpdf.Constants.RES;
 
-import javafx.collections.FXCollections;
+import javafx.beans.value.ChangeListener;
 import javafx.fxml.FXML;
 import javafx.scene.control.CheckBox;
-import javafx.scene.control.ComboBox;
+import javafx.scene.control.Label;
+import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
+import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
 import net.sf.jsignpdf.fx.viewmodel.SigningOptionsViewModel;
-import net.sf.jsignpdf.types.RenderMode;
 
 /**
  * Controller for the visible-signature appearance section.
- * Holds only the fields that affect how a visible signature rectangle is
- * rendered on the PDF. Non-appearance signature settings (hash algorithm,
- * certification level, signer metadata, output file, append) live in
- * {@link SignaturePropertiesController}.
+ * Exposes only the signature text (multiline) and a background image
+ * with a live preview. All other visible-signature knobs are normalized
+ * to canonical values by the view-model (see design-doc/3.0.0-simplify-visible.md).
  */
 public class SignatureSettingsController {
 
     @FXML private CheckBox chkVisibleSig;
     @FXML private VBox visibleSigPane;
-    @FXML private ComboBox<RenderMode> cmbRenderMode;
-    @FXML private TextField txtL2Text;
-    @FXML private TextField txtL4Text;
-    @FXML private TextField txtFontSize;
-    @FXML private TextField txtImgPath;
+    @FXML private TextArea txtL2Text;
     @FXML private TextField txtBgImgPath;
-    @FXML private CheckBox chkAcro6Layers;
+    @FXML private StackPane bgImgPreviewPane;
+    @FXML private ImageView bgImgPreview;
+    @FXML private Label bgImgPreviewPlaceholder;
 
     private SigningOptionsViewModel viewModel;
 
     @FXML
     private void initialize() {
-        cmbRenderMode.setItems(FXCollections.observableArrayList(RenderMode.values()));
+        // Keep the panel laid out even when visible-signature is off; just disable it
+        // so users can still see the current text/preview.
+        visibleSigPane.disableProperty().bind(chkVisibleSig.selectedProperty().not());
 
-        // Toggle visible signature details
-        visibleSigPane.managedProperty().bind(visibleSigPane.visibleProperty());
-        chkVisibleSig.selectedProperty().addListener((obs, o, n) ->
-                visibleSigPane.setVisible(n));
-        visibleSigPane.setVisible(false);
+        txtBgImgPath.textProperty().addListener((obs, o, n) -> updateBgImgPreview(n));
+        updateBgImgPreview(txtBgImgPath.getText());
     }
 
     public void setViewModel(SigningOptionsViewModel vm) {
@@ -62,45 +61,55 @@ public class SignatureSettingsController {
 
     private void bindToViewModel() {
         chkVisibleSig.selectedProperty().bindBidirectional(viewModel.visibleProperty());
-        cmbRenderMode.valueProperty().bindBidirectional(viewModel.renderModeProperty());
         txtL2Text.textProperty().bindBidirectional(viewModel.l2TextProperty());
-        txtL4Text.textProperty().bindBidirectional(viewModel.l4TextProperty());
-        txtImgPath.textProperty().bindBidirectional(viewModel.imgPathProperty());
         txtBgImgPath.textProperty().bindBidirectional(viewModel.bgImgPathProperty());
-        chkAcro6Layers.selectedProperty().bindBidirectional(viewModel.acro6LayersProperty());
-
-        // Font size needs manual sync (String <-> float)
-        viewModel.l2TextFontSizeProperty().addListener((obs, o, n) ->
-                txtFontSize.setText(String.valueOf(n.floatValue())));
-        txtFontSize.setOnAction(e -> {
-            try {
-                viewModel.l2TextFontSizeProperty().set(Float.parseFloat(txtFontSize.getText()));
-            } catch (NumberFormatException ignored) {
-            }
-        });
-
-        // Update visibility from initial value
-        visibleSigPane.setVisible(viewModel.visibleProperty().get());
-    }
-
-    @FXML
-    private void onBrowseImage() {
-        File file = browseImageFile(RES.get("jfx.gui.dialog.selectSignatureImage"));
-        if (file != null) txtImgPath.setText(file.getAbsolutePath());
     }
 
     @FXML
     private void onBrowseBgImage() {
-        File file = browseImageFile(RES.get("jfx.gui.dialog.selectBackgroundImage"));
-        if (file != null) txtBgImgPath.setText(file.getAbsolutePath());
-    }
-
-    private File browseImageFile(String title) {
         FileChooser fc = new FileChooser();
-        fc.setTitle(title);
+        fc.setTitle(RES.get("jfx.gui.dialog.selectBackgroundImage"));
         fc.getExtensionFilters().addAll(
                 new FileChooser.ExtensionFilter("Image Files", "*.png", "*.jpg", "*.jpeg", "*.gif"),
                 new FileChooser.ExtensionFilter("All Files", "*.*"));
-        return fc.showOpenDialog(txtImgPath.getScene().getWindow());
+        File file = fc.showOpenDialog(txtBgImgPath.getScene().getWindow());
+        if (file != null) txtBgImgPath.setText(file.getAbsolutePath());
+    }
+
+    @FXML
+    private void onClearBgImage() {
+        txtBgImgPath.setText("");
+    }
+
+    private void updateBgImgPreview(String path) {
+        if (path == null || path.trim().isEmpty()) {
+            showPreviewPlaceholder(RES.get("jfx.gui.sig.bgImage.none"));
+            return;
+        }
+        File f = new File(path);
+        if (!f.isFile()) {
+            showPreviewPlaceholder(RES.get("jfx.gui.sig.bgImage.error"));
+            return;
+        }
+        Image img = new Image(f.toURI().toString(), 260, 160, true, true, true);
+        img.errorProperty().addListener((ChangeListener<Boolean>) (obs, o, n) -> {
+            if (Boolean.TRUE.equals(n)) {
+                showPreviewPlaceholder(RES.get("jfx.gui.sig.bgImage.error"));
+            }
+        });
+        if (img.isError()) {
+            showPreviewPlaceholder(RES.get("jfx.gui.sig.bgImage.error"));
+            return;
+        }
+        bgImgPreview.setImage(img);
+        bgImgPreview.setVisible(true);
+        bgImgPreviewPlaceholder.setVisible(false);
+    }
+
+    private void showPreviewPlaceholder(String message) {
+        bgImgPreview.setImage(null);
+        bgImgPreview.setVisible(false);
+        bgImgPreviewPlaceholder.setText(message);
+        bgImgPreviewPlaceholder.setVisible(true);
     }
 }

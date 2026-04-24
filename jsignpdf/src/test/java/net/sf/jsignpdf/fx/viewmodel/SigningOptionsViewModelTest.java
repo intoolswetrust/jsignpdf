@@ -263,6 +263,43 @@ public class SigningOptionsViewModelTest {
         assertEquals(Constants.DEFVAL_HASH_ALGORITHM, opts.getHashAlgorithmX());
     }
 
+    /**
+     * The simplified JavaFX UI only exposes l2Text and bgImgPath for visible
+     * signatures. syncToOptions must normalize all other appearance knobs to
+     * their canonical defaults so that legacy values loaded from presets do
+     * not silently leak back into the saved options.
+     * See design-doc/3.0.0-simplify-visible.md.
+     */
+    @Test
+    public void testSyncToOptions_visibleSignatureNormalizedToCanonical() {
+        SigningOptionsViewModel vm = new SigningOptionsViewModel();
+        // Simulate a legacy preset with non-default values for hidden fields.
+        vm.renderModeProperty().set(RenderMode.GRAPHIC_AND_DESCRIPTION);
+        vm.l4TextProperty().set("some status text");
+        vm.l2TextFontSizeProperty().set(24f);
+        vm.imgPathProperty().set("/tmp/sig.png");
+        vm.acro6LayersProperty().set(!Constants.DEFVAL_ACRO6LAYERS);
+        // User-visible fields keep their values.
+        vm.l2TextProperty().set("multi\nline\nsignature");
+        vm.bgImgPathProperty().set("/tmp/bg.png");
+
+        BasicSignerOptions opts = new BasicSignerOptions();
+        vm.syncToOptions(opts);
+
+        assertEquals("renderMode must be normalized",
+                RenderMode.DESCRIPTION_ONLY, opts.getRenderMode());
+        assertNull("imgPath must be normalized", opts.getImgPath());
+        assertNull("l4Text must be normalized", opts.getL4Text());
+        assertEquals("fontSize must be normalized",
+                Constants.DEFVAL_L2_FONT_SIZE, opts.getL2TextFontSize(), 0.001f);
+        assertEquals("acro6Layers must be normalized",
+                Constants.DEFVAL_ACRO6LAYERS, opts.isAcro6Layers());
+        assertEquals("l2Text must be preserved verbatim",
+                "multi\nline\nsignature", opts.getL2Text());
+        assertEquals("bgImgPath must be preserved",
+                "/tmp/bg.png", opts.getBgImgPath());
+    }
+
     @Test
     public void testSyncRoundTrip() {
         SigningOptionsViewModel vm = new SigningOptionsViewModel();
