@@ -17,6 +17,7 @@ import javafx.scene.control.ButtonType;
 import javafx.scene.control.CheckMenuItem;
 import javafx.scene.control.TitledPane;
 import javafx.scene.control.ComboBox;
+import javafx.scene.control.ListCell;
 import javafx.scene.control.Dialog;
 import javafx.scene.control.TextInputDialog;
 import javafx.scene.control.Label;
@@ -374,6 +375,15 @@ public class MainWindowController {
 
     private void setupPresetCombo() {
         cmbPresets.setItems(presetManager.getPresets());
+        // JavaFX doesn't restore promptText in the button cell after clearSelection()+setValue(null);
+        // a custom button cell fixes that by reading the current promptText when item is null.
+        cmbPresets.setButtonCell(new ListCell<>() {
+            @Override
+            protected void updateItem(Preset item, boolean empty) {
+                super.updateItem(item, empty);
+                setText(item != null ? item.toString() : cmbPresets.getPromptText());
+            }
+        });
         updatePresetComboState();
         presetManager.getPresets().addListener((javafx.collections.ListChangeListener<Preset>) c -> updatePresetComboState());
         cmbPresets.getSelectionModel().selectedItemProperty().addListener((obs, oldP, newP) -> {
