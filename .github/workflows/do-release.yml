@@ -136,6 +136,7 @@ jobs:
   linux-flatpak:
     needs: do-release
     runs-on: ubuntu-latest
+    continue-on-error: true
     env:
       VERSION: ${{ needs.do-release.outputs.version }}
     steps:
@@ -150,33 +151,47 @@ jobs:
         name: jsignpdf-linux-assets
         path: linux-assets
 
+    - name: Cache Flatpak SDK
+      uses: actions/cache@v4
+      with:
+        path: ~/.local/share/flatpak
+        key: flatpak-sdk-25.08
+
     - name: Install Flatpak and build tools
       run: |
         sudo apt-get update -qq
         sudo apt-get install -y flatpak flatpak-builder
-        sudo flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
-        sudo flatpak install -y --noninteractive flathub \
+        flatpak remote-add --user --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
+        # SDK version must match runtime-version in distribution/linux/flatpak/io.github.intoolswetrust.JSignPdf.yaml
+        flatpak install --user -y --noninteractive flathub \
           org.freedesktop.Platform//25.08 \
           org.freedesktop.Sdk//25.08 \
           org.freedesktop.Sdk.Extension.openjdk21//25.08
 
     - name: Patch manifest to use local zip
       run: |
+        set -euo pipefail
+        MANIFEST=distribution/linux/flatpak/io.github.intoolswetrust.JSignPdf.yaml
         ZIP_NAME=jsignpdf-${VERSION}.zip
         SHA256=$(sha256sum "linux-assets/${ZIP_NAME}" | awk '{print $1}')
         cp "linux-assets/${ZIP_NAME}" distribution/linux/flatpak/
         sed -i \
           "s|        url: https://downloads\.sourceforge\.net.*\.zip|        path: ${ZIP_NAME}|" \
-          distribution/linux/flatpak/io.github.intoolswetrust.JSignPdf.yaml
+          "${MANIFEST}"
+        grep -q "path: ${ZIP_NAME}" "${MANIFEST}" \
+          || { echo "::error::URL sed patch did not match — check manifest indentation"; exit 1; }
         sed -i \
           "s|sha256: [a-f0-9]\{64\}|sha256: ${SHA256}|" \
-          distribution/linux/flatpak/io.github.intoolswetrust.JSignPdf.yaml
+          "${MANIFEST}"
+        grep -q "sha256: ${SHA256}" "${MANIFEST}" \
+          || { echo "::error::sha256 sed patch did not match"; exit 1; }
 
     - name: Build Flatpak bundle
       run: |
+        set -euo pipefail
         BUNDLE_NAME=JSignPdf-${VERSION}-linux-x86_64.flatpak
         cd distribution/linux/flatpak
-        flatpak-builder --repo=flatpak-repo --force-clean --disable-rofiles-fuse build-dir \
+        flatpak-builder --user --repo=flatpak-repo --force-clean --disable-rofiles-fuse build-dir \
           io.github.intoolswetrust.JSignPdf.yaml
         flatpak build-bundle flatpak-repo "${BUNDLE_NAME}" \
           io.github.intoolswetrust.JSignPdf
@@ -220,6 +235,7 @@ jobs:
         path: release-assets/JSignPdf-${{ needs.do-release.outputs.version }}
 
     - name: Download Flatpak bundle
+      if: needs.linux-flatpak.outcome == 'success'
       uses: actions/download-artifact@v8
       with:
         name: jsignpdf-flatpak-assets
