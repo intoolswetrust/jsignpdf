@@ -10,8 +10,9 @@ import javafx.scene.control.CheckBox;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
-import javafx.stage.FileChooser;
 import net.sf.jsignpdf.BasicSignerOptions;
+import net.sf.jsignpdf.fx.util.NativeFileChooser;
+import net.sf.jsignpdf.fx.util.NativeFileChooser.ExtensionFilter;
 import net.sf.jsignpdf.fx.service.KeyStoreService;
 import net.sf.jsignpdf.fx.viewmodel.SigningOptionsViewModel;
 import net.sf.jsignpdf.utils.KeyStoreUtils;
@@ -72,13 +73,13 @@ public class CertificateSettingsController {
 
     @FXML
     private void onBrowseKeystore() {
-        FileChooser fc = new FileChooser();
-        fc.setTitle(RES.get("jfx.gui.dialog.selectKeystoreFile"));
-        fc.getExtensionFilters().addAll(
-                new FileChooser.ExtensionFilter("All Files", "*.*"),
-                new FileChooser.ExtensionFilter("PKCS12", "*.p12", "*.pfx"),
-                new FileChooser.ExtensionFilter("JKS", "*.jks"));
-        File file = fc.showOpenDialog(txtKeystoreFile.getScene().getWindow());
+        // "All Files" must remain first — load-bearing ordering for this site.
+        File file = new NativeFileChooser()
+                .setTitle(RES.get("jfx.gui.dialog.selectKeystoreFile"))
+                .addFilter(ExtensionFilter.of("All Files", "*.*"))
+                .addFilter(ExtensionFilter.of("PKCS12", "*.p12", "*.pfx"))
+                .addFilter(ExtensionFilter.of("JKS", "*.jks"))
+                .showOpenDialog(txtKeystoreFile.getScene().getWindow());
         if (file != null) {
             txtKeystoreFile.setText(file.getAbsolutePath());
         }

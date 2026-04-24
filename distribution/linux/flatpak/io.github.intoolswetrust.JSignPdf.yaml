@@ -10,7 +10,6 @@ sdk-extensions:
 finish-args:
   - --env=PATH=/app/jre/bin:/app/bin:/usr/bin
   - --share=network
-  - --filesystem=home
   - --socket=x11
   - --socket=pulseaudio
 

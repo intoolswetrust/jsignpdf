@@ -12,7 +12,7 @@ import javafx.scene.control.ComboBox;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.VBox;
-import javafx.stage.FileChooser;
+import net.sf.jsignpdf.fx.util.NativeFileChooser;
 import net.sf.jsignpdf.fx.viewmodel.SigningOptionsViewModel;
 import net.sf.jsignpdf.types.PDFEncryption;
 import net.sf.jsignpdf.types.PrintRight;
@@ -162,9 +162,9 @@ public class EncryptionSettingsController {
 
     @FXML
     private void onBrowseEncCert() {
-        FileChooser fc = new FileChooser();
-        fc.setTitle(RES.get("jfx.gui.dialog.selectEncryptionCert"));
-        File file = fc.showOpenDialog(txtEncCertFile.getScene().getWindow());
+        File file = new NativeFileChooser()
+                .setTitle(RES.get("jfx.gui.dialog.selectEncryptionCert"))
+                .showOpenDialog(txtEncCertFile.getScene().getWindow());
         if (file != null) txtEncCertFile.setText(file.getAbsolutePath());
     }
 }

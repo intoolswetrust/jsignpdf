@@ -12,7 +12,7 @@ import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.VBox;
-import javafx.stage.FileChooser;
+import net.sf.jsignpdf.fx.util.NativeFileChooser;
 import net.sf.jsignpdf.fx.viewmodel.SigningOptionsViewModel;
 import net.sf.jsignpdf.types.HashAlgorithm;
 import net.sf.jsignpdf.types.ServerAuthentication;
@@ -196,9 +196,9 @@ public class TsaSettingsController {
 
     @FXML
     private void onBrowseTsaCertFile() {
-        FileChooser fc = new FileChooser();
-        fc.setTitle(RES.get("jfx.gui.dialog.selectTsaCertFile"));
-        File file = fc.showOpenDialog(txtTsaCertFile.getScene().getWindow());
+        File file = new NativeFileChooser()
+                .setTitle(RES.get("jfx.gui.dialog.selectTsaCertFile"))
+                .showOpenDialog(txtTsaCertFile.getScene().getWindow());
         if (file != null) txtTsaCertFile.setText(file.getAbsolutePath());
     }
 }

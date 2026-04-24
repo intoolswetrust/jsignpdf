@@ -37,8 +37,10 @@ import javafx.scene.input.KeyEvent;
 import javafx.scene.input.TransferMode;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.StackPane;
-import javafx.stage.FileChooser;
 import javafx.stage.Stage;
+
+import net.sf.jsignpdf.fx.util.NativeFileChooser;
+import net.sf.jsignpdf.fx.util.NativeFileChooser.ExtensionFilter;
 
 import org.openpdf.text.exceptions.BadPasswordException;
 
@@ -723,11 +725,10 @@ public class MainWindowController {
 
     @FXML
     private void onFileOpen() {
-        FileChooser fileChooser = new FileChooser();
-        fileChooser.setTitle(RES.get("jfx.gui.dialog.openPdf.title"));
-        fileChooser.getExtensionFilters().add(
-                new FileChooser.ExtensionFilter("PDF Files", "*.pdf"));
-        File file = fileChooser.showOpenDialog(stage);
+        File file = new NativeFileChooser()
+                .setTitle(RES.get("jfx.gui.dialog.openPdf.title"))
+                .addFilter(ExtensionFilter.of("PDF Files", "*.pdf"))
+                .showOpenDialog(stage);
         if (file != null) {
             openDocument(file);
         }
@@ -784,13 +785,13 @@ public class MainWindowController {
                     RES.get("jfx.gui.dialog.noDocument.text"));
             return;
         }
-        FileChooser fc = new FileChooser();
-        fc.setTitle(RES.get("jfx.gui.dialog.selectOutputPdf"));
-        fc.getExtensionFilters().add(new FileChooser.ExtensionFilter("PDF Files", "*.pdf"));
         String current = signingVM.outFileProperty().get();
         if (current == null || current.isEmpty()) {
             current = suggestedOutFileFor(documentVM.getDocumentFile());
         }
+        NativeFileChooser fc = new NativeFileChooser()
+                .setTitle(RES.get("jfx.gui.dialog.selectOutputPdf"))
+                .addFilter(ExtensionFilter.of("PDF Files", "*.pdf"));
         if (current != null && !current.isEmpty()) {
             File currentFile = new File(current);
             File parent = currentFile.getParentFile();
