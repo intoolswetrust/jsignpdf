@@ -73,7 +73,7 @@ NOTE: 32-bit Windows is no longer supported by the dedicated Windows installers.
 
 === Java
 
-If you use the platform-independent ZIP archive, you need Java Runtime Environment (JRE) version 11 or newer. You can download it freely from the web, for instance:
+If you use the platform-independent ZIP archive, you need Java Runtime Environment (JRE) version 21 or newer. You can download it freely from the web, for instance:
 
 * https://adoptium.net/[Eclipse Adoptium]
 * https://www.azul.com/downloads/?package=jre#download-openjdk[Azul Zulu]
