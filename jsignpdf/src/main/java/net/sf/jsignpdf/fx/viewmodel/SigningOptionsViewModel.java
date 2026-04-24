@@ -139,13 +139,13 @@ public class SigningOptionsViewModel {
         String l2TextValue = l2Text.get();
         opts.setL2Text(l2TextValue != null && l2TextValue.isEmpty() ? null : l2TextValue);
         opts.setBgImgPath(bgImgPath.get());
-        // The simplified JavaFX UI exposes only l2Text and bgImgPath for visible
+        // The simplified JavaFX UI exposes l2Text, l2TextFontSize, and bgImgPath for visible
         // signatures; every other appearance knob is reset to its canonical default
         // so saved settings stay deterministic. See design-doc/3.0.0-simplify-visible.md.
         opts.setRenderMode(RenderMode.DESCRIPTION_ONLY);
         opts.setImgPath(null);
         opts.setL4Text(null);
-        opts.setL2TextFontSize(Constants.DEFVAL_L2_FONT_SIZE);
+        opts.setL2TextFontSize(l2TextFontSize.get());
         opts.setAcro6Layers(Constants.DEFVAL_ACRO6LAYERS);
 
         // Encryption

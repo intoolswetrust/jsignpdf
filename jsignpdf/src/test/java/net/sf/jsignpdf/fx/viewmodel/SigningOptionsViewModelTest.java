@@ -290,8 +290,8 @@ public class SigningOptionsViewModelTest {
                 RenderMode.DESCRIPTION_ONLY, opts.getRenderMode());
         assertNull("imgPath must be normalized", opts.getImgPath());
         assertNull("l4Text must be normalized", opts.getL4Text());
-        assertEquals("fontSize must be normalized",
-                Constants.DEFVAL_L2_FONT_SIZE, opts.getL2TextFontSize(), 0.001f);
+        assertEquals("fontSize must be preserved",
+                24f, opts.getL2TextFontSize(), 0.001f);
         assertEquals("acro6Layers must be normalized",
                 Constants.DEFVAL_ACRO6LAYERS, opts.isAcro6Layers());
         assertEquals("l2Text must be preserved verbatim",

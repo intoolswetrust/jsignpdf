@@ -25,6 +25,9 @@
             <tooltip><Tooltip text="%jfx.gui.sig.l2Text.tooltip"/></tooltip>
         </TextArea>
 
+        <Label text="%jfx.gui.sig.fontSize"/>
+        <TextField fx:id="txtFontSize"/>
+
         <Label text="%jfx.gui.sig.backgroundImage"/>
         <HBox spacing="4">
             <TextField fx:id="txtBgImgPath" HBox.hgrow="ALWAYS"/>

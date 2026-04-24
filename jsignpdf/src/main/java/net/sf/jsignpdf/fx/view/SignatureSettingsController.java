@@ -29,6 +29,7 @@ public class SignatureSettingsController {
     @FXML private CheckBox chkVisibleSig;
     @FXML private VBox visibleSigPane;
     @FXML private TextArea txtL2Text;
+    @FXML private TextField txtFontSize;
     @FXML private TextField txtBgImgPath;
     @FXML private ImageView bgImgPreview;
     @FXML private Label bgImgPreviewPlaceholder;
@@ -65,6 +66,20 @@ public class SignatureSettingsController {
         chkVisibleSig.selectedProperty().bindBidirectional(viewModel.visibleProperty());
         txtL2Text.textProperty().bindBidirectional(viewModel.l2TextProperty());
         txtBgImgPath.textProperty().bindBidirectional(viewModel.bgImgPathProperty());
+
+        viewModel.l2TextFontSizeProperty().addListener((obs, o, n) ->
+                txtFontSize.setText(String.valueOf(n.floatValue())));
+        txtFontSize.setText(String.valueOf(viewModel.l2TextFontSizeProperty().get()));
+        txtFontSize.setOnAction(e -> commitFontSize());
+        txtFontSize.focusedProperty().addListener((obs, o, n) -> { if (!n) commitFontSize(); });
+    }
+
+    private void commitFontSize() {
+        try {
+            viewModel.l2TextFontSizeProperty().set(Float.parseFloat(txtFontSize.getText()));
+        } catch (NumberFormatException ignored) {
+            txtFontSize.setText(String.valueOf(viewModel.l2TextFontSizeProperty().get()));
+        }
     }
 
     @FXML
