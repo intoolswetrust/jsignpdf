@@ -304,7 +304,16 @@ public class SignerLogic implements Runnable {
                 }
                 final String certificate = PdfPKCS7.getSubjectFields((X509Certificate) chain[0]).toString();
                 final String timestamp = new SimpleDateFormat("yyyy.MM.dd HH:mm:ss z").format(sap.getSignDateNullSafe().getTime());
-                if (options.getL2Text() != null) {
+                if (options.getL2Text() == null) {
+                    final StringBuilder buf = new StringBuilder();
+                    buf.append(RES.get("default.l2text.signedBy")).append(" ").append(signer).append('\n');
+                    buf.append(RES.get("default.l2text.date")).append(" ").append(timestamp);
+                    if (StringUtils.isNotEmpty(reason))
+                        buf.append('\n').append(RES.get("default.l2text.reason")).append(" ").append(reason);
+                    if (StringUtils.isNotEmpty(location))
+                        buf.append('\n').append(RES.get("default.l2text.location")).append(" ").append(location);
+                    sap.setLayer2Text(buf.toString());
+                } else {
                     final Map<String, String> replacements = new HashMap<String, String>();
                     replacements.put(L2TEXT_PLACEHOLDER_SIGNER, StringUtils.defaultString(signer));
                     replacements.put(L2TEXT_PLACEHOLDER_CERTIFICATE, certificate);
@@ -314,15 +323,6 @@ public class SignerLogic implements Runnable {
                     replacements.put(L2TEXT_PLACEHOLDER_CONTACT, StringUtils.defaultString(contact));
                     final String l2text = StrSubstitutor.replace(options.getL2Text(), replacements);
                     sap.setLayer2Text(l2text);
-                } else {
-                    final StringBuilder buf = new StringBuilder();
-                    buf.append(RES.get("default.l2text.signedBy")).append(" ").append(signer).append('\n');
-                    buf.append(RES.get("default.l2text.date")).append(" ").append(timestamp);
-                    if (StringUtils.isNotEmpty(reason))
-                        buf.append('\n').append(RES.get("default.l2text.reason")).append(" ").append(reason);
-                    if (StringUtils.isNotEmpty(location))
-                        buf.append('\n').append(RES.get("default.l2text.location")).append(" ").append(location);
-                    sap.setLayer2Text(buf.toString());
                 }
                 if (FontUtils.getL2BaseFont() != null) {
                     sap.setLayer2Font(new Font(FontUtils.getL2BaseFont(), options.getL2TextFontSize()));

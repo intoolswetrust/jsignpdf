@@ -19,27 +19,14 @@
     <Separator/>
 
     <VBox fx:id="visibleSigPane" spacing="6">
-        <Label text="%jfx.gui.sig.renderMode"/>
-        <ComboBox fx:id="cmbRenderMode" maxWidth="Infinity"/>
-
         <Label text="%jfx.gui.sig.l2Text"/>
-        <TextField fx:id="txtL2Text"/>
-
-        <Label text="%jfx.gui.sig.l4Text"/>
-        <TextField fx:id="txtL4Text"/>
+        <TextArea fx:id="txtL2Text" wrapText="true" prefRowCount="4"
+                  promptText="%jfx.gui.sig.l2Text.prompt">
+            <tooltip><Tooltip text="%jfx.gui.sig.l2Text.tooltip"/></tooltip>
+        </TextArea>
 
         <Label text="%jfx.gui.sig.fontSize"/>
-        <TextField fx:id="txtFontSize" text="10.0"/>
-
-        <Label text="%jfx.gui.sig.signatureImage"/>
-        <HBox spacing="4">
-            <TextField fx:id="txtImgPath" HBox.hgrow="ALWAYS"/>
-            <Button onAction="#onBrowseImage" minWidth="30">
-                <graphic><ImageView fitWidth="16" fitHeight="16" preserveRatio="true">
-                    <Image url="@/net/sf/jsignpdf/fileopen16.png"/>
-                </ImageView></graphic>
-            </Button>
-        </HBox>
+        <TextField fx:id="txtFontSize"/>
 
         <Label text="%jfx.gui.sig.backgroundImage"/>
         <HBox spacing="4">
@@ -49,8 +36,15 @@
                     <Image url="@/net/sf/jsignpdf/fileopen16.png"/>
                 </ImageView></graphic>
             </Button>
+            <Button fx:id="btnClearBgImage" onAction="#onClearBgImage" text="✕" minWidth="30">
+                <tooltip><Tooltip text="%jfx.gui.sig.bgImage.clear"/></tooltip>
+            </Button>
         </HBox>
-
-        <CheckBox fx:id="chkAcro6Layers" text="%jfx.gui.sig.acro6Layers"/>
+        <StackPane fx:id="bgImgPreviewPane" minHeight="120" maxHeight="180"
+                   styleClass="preview-pane">
+            <ImageView fx:id="bgImgPreview" preserveRatio="true"
+                       fitWidth="260" fitHeight="160"/>
+            <Label fx:id="bgImgPreviewPlaceholder" text="%jfx.gui.sig.bgImage.none"/>
+        </StackPane>
     </VBox>
 </VBox>
