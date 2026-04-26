@@ -65,6 +65,7 @@ public final class PortalFileChooserBackend {
             String title,
             List<ExtensionFilter> filters,
             ExtensionFilter selectedFilter,
+            File initialDirectory,
             boolean multiple) throws Exception {
 
         DBusConnection c = conn();
@@ -75,6 +76,10 @@ public final class PortalFileChooserBackend {
         Map<String, Variant<?>> options = buildCommonOptions(token, filters, selectedFilter);
         if (multiple) {
             options.put("multiple", new Variant<>(Boolean.TRUE));
+        }
+        if (initialDirectory != null) {
+            options.put("current_folder",
+                    new Variant<>(nullTerminatedUtf8(initialDirectory.getAbsolutePath()), "ay"));
         }
 
         return callPortal(c, requestPath, () -> {
@@ -174,6 +179,12 @@ public final class PortalFileChooserBackend {
         } catch (Exception e) {
             settled.set(true);
             future.cancel(false);
+            try {
+                XdgRequest req = c.getRemoteObject(PORTAL_BUS, requestPath, XdgRequest.class);
+                req.Close();
+            } catch (Exception closeEx) {
+                LOGGER.fine("Failed to close abandoned portal request: " + closeEx.getMessage());
+            }
             throw e;
         } finally {
             try { handler.close(); } catch (Exception ignored) {}

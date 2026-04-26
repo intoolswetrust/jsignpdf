@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
 
 import javafx.application.Platform;
@@ -49,8 +50,11 @@ public final class NativeFileChooser {
     /** Cached portal reachability (null = not yet probed). */
     private static volatile Boolean portalReachable = null;
 
-    /** Set to true on first unrecoverable portal failure; causes session-wide FX fallback. */
+    /** Set to true after MAX_PORTAL_FAILURES consecutive failures; causes session-wide FX fallback. */
     private static volatile boolean portalDisabled = false;
+
+    private static final int MAX_PORTAL_FAILURES = 3;
+    private static final AtomicInteger portalFailureCount = new AtomicInteger(0);
 
     /** Set after the one-time fallback Alert has been shown. */
     private static volatile boolean portalAlertShown = false;
@@ -103,7 +107,8 @@ public final class NativeFileChooser {
         if (shouldUsePortal()) {
             try {
                 Optional<List<Path>> result =
-                        PortalFileChooserBackend.openFile(title, filters, selectedFilter, false);
+                        PortalFileChooserBackend.openFile(title, filters, selectedFilter, initialDirectory, false);
+                markPortalSuccess();
                 if (result.isEmpty()) return null;
                 List<Path> paths = result.get();
                 if (paths.isEmpty()) return null;
@@ -121,7 +126,8 @@ public final class NativeFileChooser {
         if (shouldUsePortal()) {
             try {
                 Optional<List<Path>> result =
-                        PortalFileChooserBackend.openFile(title, filters, selectedFilter, true);
+                        PortalFileChooserBackend.openFile(title, filters, selectedFilter, initialDirectory, true);
+                markPortalSuccess();
                 if (result.isEmpty()) return null;
                 List<Path> paths = result.get();
                 if (owner != null && !owner.isShowing()) return null;
@@ -142,6 +148,7 @@ public final class NativeFileChooser {
             try {
                 Optional<List<Path>> result = PortalFileChooserBackend.saveFile(
                         title, filters, selectedFilter, initialDirectory, initialFileName);
+                markPortalSuccess();
                 if (result.isEmpty()) return null;
                 List<Path> paths = result.get();
                 if (paths.isEmpty()) return null;
@@ -226,11 +233,17 @@ public final class NativeFileChooser {
         }
     }
 
+    private static void markPortalSuccess() {
+        portalFailureCount.set(0);
+    }
+
     private static void markPortalFailed(Exception e) {
         String uuid = UUID.randomUUID().toString();
         LOGGER.log(Level.WARNING,
                 "XDG portal file chooser failed [" + uuid + "]; falling back to JavaFX", e);
-        portalDisabled = true;
+        if (portalFailureCount.incrementAndGet() >= MAX_PORTAL_FAILURES) {
+            portalDisabled = true;
+        }
     }
 
     private static void showFallbackAlertOnce(Window owner) {
@@ -265,9 +278,6 @@ public final class NativeFileChooser {
 
     private File fxSaveDialog(Window owner) {
         FileChooser fc = buildFxChooser();
-        if (initialDirectory != null && initialDirectory.isDirectory()) {
-            fc.setInitialDirectory(initialDirectory);
-        }
         if (initialFileName != null) {
             fc.setInitialFileName(initialFileName);
         }
@@ -289,6 +299,9 @@ public final class NativeFileChooser {
                     break;
                 }
             }
+        }
+        if (initialDirectory != null && initialDirectory.isDirectory()) {
+            fc.setInitialDirectory(initialDirectory);
         }
         return fc;
     }
