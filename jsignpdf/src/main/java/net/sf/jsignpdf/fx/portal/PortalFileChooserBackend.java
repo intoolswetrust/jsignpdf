@@ -40,6 +40,12 @@ public final class PortalFileChooserBackend {
 
     private static volatile DBusConnection CONN;
 
+    private static final ExecutorService PORTAL_CALL_EXEC = Executors.newSingleThreadExecutor(r -> {
+        Thread t = new Thread(r, "jsignpdf-portal-call");
+        t.setDaemon(true);
+        return t;
+    });
+
     private PortalFileChooserBackend() {}
 
     // -----------------------------------------------------------------------
@@ -160,18 +166,9 @@ public final class PortalFileChooserBackend {
 
         try {
             // 10 s timeout for the initial method call — a flaky bus manifests here.
-            ExecutorService exec = Executors.newSingleThreadExecutor(r -> {
-                Thread t = new Thread(r, "jsignpdf-portal-call");
-                t.setDaemon(true);
-                return t;
-            });
-            try {
-                CompletableFuture.runAsync(() -> {
-                    try { call.invoke(); } catch (DBusException e) { throw new RuntimeException(e); }
-                }, exec).get(HANDLE_TIMEOUT_SEC, TimeUnit.SECONDS);
-            } finally {
-                exec.shutdownNow();
-            }
+            CompletableFuture.runAsync(() -> {
+                try { call.invoke(); } catch (DBusException e) { throw new RuntimeException(e); }
+            }, PORTAL_CALL_EXEC).get(HANDLE_TIMEOUT_SEC, TimeUnit.SECONDS);
 
             // Wait indefinitely for the Response signal — the user is browsing.
             return future.get();
@@ -198,7 +195,11 @@ public final class PortalFileChooserBackend {
                 List<String> uris = extractUris(signal.getResults());
                 List<Path> paths = new ArrayList<>(uris.size());
                 for (String uri : uris) {
-                    paths.add(Path.of(URI.create(uri)));
+                    URI u = URI.create(uri);
+                    if (!"file".equals(u.getScheme())) {
+                        throw new IllegalStateException("Portal returned non-file URI: " + uri);
+                    }
+                    paths.add(Path.of(u));
                 }
                 future.complete(Optional.of(paths));
             } catch (Exception e) {
@@ -212,16 +213,23 @@ public final class PortalFileChooserBackend {
         }
     }
 
-    @SuppressWarnings("unchecked")
     private static List<String> extractUris(Map<String, Variant<?>> results) {
         if (results == null) return List.of();
         Variant<?> v = results.get("uris");
         if (v == null) return List.of();
         Object val = v.getValue();
-        if (val instanceof List) {
-            return (List<String>) val;
+        if (!(val instanceof List)) return List.of();
+        List<?> raw = (List<?>) val;
+        List<String> uris = new ArrayList<>(raw.size());
+        for (Object element : raw) {
+            if (!(element instanceof String)) {
+                throw new IllegalStateException(
+                        "Portal returned malformed 'uris': expected String, got " +
+                        (element == null ? "null" : element.getClass().getName()));
+            }
+            uris.add((String) element);
         }
-        return List.of();
+        return uris;
     }
 
     private static String[] computeHandle(DBusConnection c) {

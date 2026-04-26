@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
 
@@ -57,7 +58,7 @@ public final class NativeFileChooser {
     private static final AtomicInteger portalFailureCount = new AtomicInteger(0);
 
     /** Set after the one-time fallback Alert has been shown. */
-    private static volatile boolean portalAlertShown = false;
+    private static final AtomicBoolean portalAlertShown = new AtomicBoolean(false);
 
     // -----------------------------------------------------------------------
     // Per-instance state (mirrors FileChooser API)
@@ -247,8 +248,7 @@ public final class NativeFileChooser {
     }
 
     private static void showFallbackAlertOnce(Window owner) {
-        if (portalAlertShown) return;
-        portalAlertShown = true;
+        if (!portalAlertShown.compareAndSet(false, true)) return;
         Platform.runLater(() -> {
             Alert alert = new Alert(Alert.AlertType.WARNING);
             alert.setTitle(RES.get("jfx.gui.dialog.portalFallback.title"));
