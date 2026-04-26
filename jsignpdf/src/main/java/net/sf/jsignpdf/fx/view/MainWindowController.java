@@ -313,6 +313,8 @@ public class MainWindowController {
             txtPageNumber.setText(String.valueOf(newVal.intValue()));
             renderCurrentPage();
             updateNavButtonState();
+            capturePlacementToSigningVM();
+            updateSigCoordsBadge();
         });
 
         // Zoom combo box changes
@@ -588,8 +590,7 @@ public class MainWindowController {
                     && placementVM.isPlaced();
         lblSigCoords.setVisible(show);
         if (show) {
-            lblSigCoords.setText(String.format("p.%d  (%d, %d) — (%d, %d)",
-                    signingVM.pageProperty().get(),
+            lblSigCoords.setText(String.format("(%d, %d) — (%d, %d)",
                     Math.round(signingVM.positionLLXProperty().get()),
                     Math.round(signingVM.positionLLYProperty().get()),
                     Math.round(signingVM.positionURXProperty().get()),
