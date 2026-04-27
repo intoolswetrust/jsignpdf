@@ -213,6 +213,8 @@
                    maxWidth="Infinity"/>
             <Label fx:id="lblSigStateBadge" text="%jfx.gui.status.invisibleSig"
                    styleClass="invisible-sig-badge" managed="false" visible="false"/>
+            <Label fx:id="lblSigCoords" styleClass="sig-coords-badge"
+                   managed="false" visible="false"/>
             <Label fx:id="lblOutputPath" styleClass="output-path-label"
                    managed="false" visible="false"/>
             <ProgressBar fx:id="progressBar" prefWidth="150"/>

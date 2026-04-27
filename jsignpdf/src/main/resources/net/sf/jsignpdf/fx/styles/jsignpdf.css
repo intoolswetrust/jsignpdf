@@ -101,6 +101,15 @@
     -fx-background-radius: 3;
 }
 
+.sig-coords-badge {
+    -fx-font-family: monospace;
+    -fx-font-size: 11px;
+    -fx-padding: 2 6 2 6;
+    -fx-background-color: #dceefb;
+    -fx-background-radius: 3;
+    -fx-text-fill: #2a6090;
+}
+
 .output-path-label {
     -fx-text-fill: #555555;
     -fx-font-style: italic;

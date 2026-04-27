@@ -145,6 +145,7 @@ public class MainWindowController {
     // Status bar
     @FXML private Label lblStatus;
     @FXML private Label lblSigStateBadge;
+    @FXML private Label lblSigCoords;
     @FXML private Label lblOutputPath;
     @FXML private ProgressBar progressBar;
 
@@ -231,7 +232,18 @@ public class MainWindowController {
                 signingVM.visibleProperty().set(true);
             }
             updateStatusWithHint();
+            updateSigCoordsBadge();
         });
+
+        // Keep coords badge in sync as the rectangle is moved or resized
+        Runnable syncCoordsFromPlacement = () -> {
+            capturePlacementToSigningVM();
+            updateSigCoordsBadge();
+        };
+        placementVM.relXProperty().addListener((obs, o, n) -> syncCoordsFromPlacement.run());
+        placementVM.relYProperty().addListener((obs, o, n) -> syncCoordsFromPlacement.run());
+        placementVM.relWidthProperty().addListener((obs, o, n) -> syncCoordsFromPlacement.run());
+        placementVM.relHeightProperty().addListener((obs, o, n) -> syncCoordsFromPlacement.run());
 
         // React to visible-signature state changes:
         //  - disabled: clear the placement rectangle
@@ -264,6 +276,9 @@ public class MainWindowController {
         // colour swap based on whether visible signature is on or off.
         lblSigStateBadge.managedProperty().bind(lblSigStateBadge.visibleProperty());
         lblSigStateBadge.visibleProperty().bind(documentVM.documentLoadedProperty());
+
+        // Coords badge: managed tracks visible so it takes no space when hidden
+        lblSigCoords.managedProperty().bind(lblSigCoords.visibleProperty());
 
         // Status-bar output path label: visible when a document is loaded
         lblOutputPath.managedProperty().bind(lblOutputPath.visibleProperty());
@@ -301,6 +316,8 @@ public class MainWindowController {
             txtPageNumber.setText(String.valueOf(newVal.intValue()));
             renderCurrentPage();
             updateNavButtonState();
+            capturePlacementToSigningVM();
+            updateSigCoordsBadge();
         });
 
         // Zoom combo box changes
@@ -566,6 +583,22 @@ public class MainWindowController {
                 : RES.get("jfx.gui.status.invisibleSig"));
         lblSigStateBadge.getStyleClass().removeAll("visible-sig-badge", "invisible-sig-badge");
         lblSigStateBadge.getStyleClass().add(on ? "visible-sig-badge" : "invisible-sig-badge");
+        updateSigCoordsBadge();
+    }
+
+    private void updateSigCoordsBadge() {
+        if (lblSigCoords == null) return;
+        boolean show = signingVM.visibleProperty().get()
+                    && documentVM.documentLoadedProperty().get()
+                    && placementVM.isPlaced();
+        lblSigCoords.setVisible(show);
+        if (show) {
+            lblSigCoords.setText(String.format("(%d, %d) — (%d, %d)",
+                    Math.round(signingVM.positionLLXProperty().get()),
+                    Math.round(signingVM.positionLLYProperty().get()),
+                    Math.round(signingVM.positionURXProperty().get()),
+                    Math.round(signingVM.positionURYProperty().get())));
+        }
     }
 
     /**
