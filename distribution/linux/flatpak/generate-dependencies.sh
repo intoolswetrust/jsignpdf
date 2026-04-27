@@ -18,7 +18,7 @@ if ! command -v flatpak >/dev/null 2>&1; then
 fi
 
 # Verify SDK is installed
-if ! flatpak info --user "$SDK_REF" &>/dev/null; then
+if ! flatpak info "$SDK_REF" &>/dev/null; then
   echo "Error: ${SDK_REF} is not installed" >&2
   echo "  flatpak install flathub ${SDK_REF}" >&2
   exit 1
@@ -26,7 +26,7 @@ fi
 
 # Verify OpenJDK extension is installed
 EXT_REF="org.freedesktop.Sdk.Extension.${SDK_EXT}//${SDK_REF##*/}"
-if ! flatpak info --user "$EXT_REF" &>/dev/null; then
+if ! flatpak info "$EXT_REF" &>/dev/null; then
   echo "Error: extension ${EXT_REF} is not installed" >&2
   echo "  flatpak install flathub ${EXT_REF}" >&2
   exit 1
@@ -37,7 +37,6 @@ echo "==> Generating dependencies in Flatpak SDK (${SDK_REF} + ${SDK_EXT})"
 # Run the dependency generation inside the Flatpak SDK
 # All the work is done in a single command pipeline
 cat << SCRIPT_EOF | env FLATPAK_ENABLE_SDK_EXT="${SDK_EXT}" SCRIPT_DIR="${SCRIPT_DIR}" flatpak run \
-  --user \
   --share=network \
   --filesystem="${SCRIPT_DIR}:rw" \
   --env=SCRIPT_DIR="${SCRIPT_DIR}" \
