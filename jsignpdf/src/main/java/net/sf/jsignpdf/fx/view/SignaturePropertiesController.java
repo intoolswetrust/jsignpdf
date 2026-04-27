@@ -9,7 +9,8 @@ import javafx.fxml.FXML;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.TextField;
-import javafx.stage.FileChooser;
+import net.sf.jsignpdf.fx.util.NativeFileChooser;
+import net.sf.jsignpdf.fx.util.NativeFileChooser.ExtensionFilter;
 import net.sf.jsignpdf.fx.viewmodel.SigningOptionsViewModel;
 import net.sf.jsignpdf.types.CertificationLevel;
 import net.sf.jsignpdf.types.HashAlgorithm;
@@ -57,10 +58,10 @@ public class SignaturePropertiesController {
 
     @FXML
     private void onBrowseOutFile() {
-        FileChooser fc = new FileChooser();
-        fc.setTitle(RES.get("jfx.gui.dialog.selectOutputPdf"));
-        fc.getExtensionFilters().add(new FileChooser.ExtensionFilter("PDF Files", "*.pdf"));
-        File file = fc.showSaveDialog(txtOutFile.getScene().getWindow());
+        File file = new NativeFileChooser()
+                .setTitle(RES.get("jfx.gui.dialog.selectOutputPdf"))
+                .addFilter(ExtensionFilter.of("PDF Files", "*.pdf"))
+                .showSaveDialog(txtOutFile.getScene().getWindow());
         if (file != null) txtOutFile.setText(file.getAbsolutePath());
     }
 }

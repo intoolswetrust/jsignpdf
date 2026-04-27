@@ -1,10 +1,8 @@
 package net.sf.jsignpdf.fx.control;
 
-import javafx.beans.binding.Bindings;
 import javafx.scene.Cursor;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.Pane;
-import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 import net.sf.jsignpdf.fx.viewmodel.SignaturePlacementViewModel;
 

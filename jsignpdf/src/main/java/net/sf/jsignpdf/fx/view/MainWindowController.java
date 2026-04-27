@@ -37,8 +37,11 @@ import javafx.scene.input.KeyEvent;
 import javafx.scene.input.TransferMode;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.StackPane;
-import javafx.stage.FileChooser;
 import javafx.stage.Stage;
+
+import net.sf.jsignpdf.fx.util.NativeFileChooser;
+import net.sf.jsignpdf.fx.util.NativeFileChooser.ExtensionFilter;
+import net.sf.jsignpdf.fx.util.Sandbox;
 
 import org.openpdf.text.exceptions.BadPasswordException;
 
@@ -723,11 +726,10 @@ public class MainWindowController {
 
     @FXML
     private void onFileOpen() {
-        FileChooser fileChooser = new FileChooser();
-        fileChooser.setTitle(RES.get("jfx.gui.dialog.openPdf.title"));
-        fileChooser.getExtensionFilters().add(
-                new FileChooser.ExtensionFilter("PDF Files", "*.pdf"));
-        File file = fileChooser.showOpenDialog(stage);
+        File file = new NativeFileChooser()
+                .setTitle(RES.get("jfx.gui.dialog.openPdf.title"))
+                .addFilter(ExtensionFilter.of("PDF Files", "*.pdf"))
+                .showOpenDialog(stage);
         if (file != null) {
             openDocument(file);
         }
@@ -784,25 +786,37 @@ public class MainWindowController {
                     RES.get("jfx.gui.dialog.noDocument.text"));
             return;
         }
-        FileChooser fc = new FileChooser();
-        fc.setTitle(RES.get("jfx.gui.dialog.selectOutputPdf"));
-        fc.getExtensionFilters().add(new FileChooser.ExtensionFilter("PDF Files", "*.pdf"));
+        promptForOutputFile();
+    }
+
+    /**
+     * Opens the Save dialog and stores the chosen path in the signing VM. Returns true
+     * if the user picked a file, false if they cancelled. Skips the doc-portal path as
+     * an initial directory — the portal silently ignores it and writes there don't
+     * persist on the host (see {@link Sandbox#isDocPortalPath}).
+     */
+    private boolean promptForOutputFile() {
         String current = signingVM.outFileProperty().get();
         if (current == null || current.isEmpty()) {
             current = suggestedOutFileFor(documentVM.getDocumentFile());
         }
+        NativeFileChooser fc = new NativeFileChooser()
+                .setTitle(RES.get("jfx.gui.dialog.selectOutputPdf"))
+                .addFilter(ExtensionFilter.of("PDF Files", "*.pdf"));
         if (current != null && !current.isEmpty()) {
             File currentFile = new File(current);
-            File parent = currentFile.getParentFile();
-            if (parent != null && parent.isDirectory()) {
-                fc.setInitialDirectory(parent);
+            if (!Sandbox.isDocPortalPath(current)) {
+                File parent = currentFile.getParentFile();
+                if (parent != null && parent.isDirectory()) {
+                    fc.setInitialDirectory(parent);
+                }
             }
             fc.setInitialFileName(currentFile.getName());
         }
         File file = fc.showSaveDialog(stage);
-        if (file != null) {
-            signingVM.outFileProperty().set(file.getAbsolutePath());
-        }
+        if (file == null) return false;
+        signingVM.outFileProperty().set(file.getAbsolutePath());
+        return true;
     }
 
     @FXML
@@ -831,6 +845,19 @@ public class MainWindowController {
                     RES.get("jfx.gui.dialog.missingTsaUrl.title"),
                     RES.get("jfx.gui.dialog.missingTsaUrl.text"));
             return;
+        }
+
+        // In a sandbox, the auto-derived "<input>_signed.pdf" lands inside the doc
+        // portal FUSE mount and is not exposed back to the host. Force a Save dialog
+        // (routed through the portal) so the user picks a real persistable location.
+        String effectiveOut = signingVM.outFileProperty().get();
+        if (effectiveOut == null || effectiveOut.isEmpty()) {
+            effectiveOut = suggestedOutFileFor(documentVM.getDocumentFile());
+        }
+        if (Sandbox.isDocPortalPath(effectiveOut)) {
+            if (!promptForOutputFile()) {
+                return;
+            }
         }
 
         // Capture live placement into the signing VM, then sync VM → options.

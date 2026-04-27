@@ -14,8 +14,9 @@ import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.VBox;
-import javafx.stage.FileChooser;
 import javafx.util.Duration;
+import net.sf.jsignpdf.fx.util.NativeFileChooser;
+import net.sf.jsignpdf.fx.util.NativeFileChooser.ExtensionFilter;
 import net.sf.jsignpdf.fx.viewmodel.SigningOptionsViewModel;
 
 /**
@@ -84,12 +85,11 @@ public class SignatureSettingsController {
 
     @FXML
     private void onBrowseBgImage() {
-        FileChooser fc = new FileChooser();
-        fc.setTitle(RES.get("jfx.gui.dialog.selectBackgroundImage"));
-        fc.getExtensionFilters().addAll(
-                new FileChooser.ExtensionFilter("Image Files", "*.png", "*.jpg", "*.jpeg", "*.gif"),
-                new FileChooser.ExtensionFilter("All Files", "*.*"));
-        File file = fc.showOpenDialog(txtBgImgPath.getScene().getWindow());
+        File file = new NativeFileChooser()
+                .setTitle(RES.get("jfx.gui.dialog.selectBackgroundImage"))
+                .addFilter(ExtensionFilter.of("Image Files", "*.png", "*.jpg", "*.jpeg", "*.gif"))
+                .addFilter(ExtensionFilter.of("All Files", "*.*"))
+                .showOpenDialog(txtBgImgPath.getScene().getWindow());
         if (file != null) txtBgImgPath.setText(file.getAbsolutePath());
     }
 
