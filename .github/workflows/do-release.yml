@@ -125,11 +125,32 @@ jobs:
       shell: pwsh
       run: ./distribution/windows/build-windows-installers.ps1 -Version ${{ needs.do-release.outputs.version }}
 
-    - name: Stage Windows installers for the publish job
+    - name: Upload unsigned Windows installers for SignPath
+      id: upload-unsigned-windows
+      uses: actions/upload-artifact@v7
+      with:
+        name: jsignpdf-windows-assets-unsigned
+        path: distribution/target/upload/*
+        if-no-files-found: error
+        retention-days: 1
+
+    - name: Submit signing request to SignPath
+      uses: signpath/github-action-submit-signing-request@v2
+      with:
+        api-token: '${{ secrets.SIGNPATH_API_TOKEN }}'
+        organization-id: '8d0ef437-1c25-49c6-9954-ed7fe51f9df8'
+        project-slug: 'jsignpdf'
+        signing-policy-slug: 'test-signing'
+        artifact-configuration-slug: 'zip'
+        github-artifact-id: '${{ steps.upload-unsigned-windows.outputs.artifact-id }}'
+        wait-for-completion: true
+        output-artifact-directory: 'distribution/target/signed'
+
+    - name: Stage signed Windows installers for the publish job
       uses: actions/upload-artifact@v7
       with:
         name: jsignpdf-windows-assets
-        path: distribution/target/upload/*
+        path: distribution/target/signed/*
         if-no-files-found: error
         retention-days: 1
 
