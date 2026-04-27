@@ -235,7 +235,7 @@ jobs:
         path: release-assets/JSignPdf-${{ needs.do-release.outputs.version }}
 
     - name: Download Flatpak bundle
-      if: needs.linux-flatpak.outcome == 'success'
+      if: needs.linux-flatpak.result == 'success'
       uses: actions/download-artifact@v8
       with:
         name: jsignpdf-flatpak-assets
