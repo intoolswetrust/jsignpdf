@@ -15,13 +15,11 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.ThreadLocalRandom;
-import java.util.logging.Level;
 
 import org.freedesktop.dbus.connections.impl.DBusConnection;
 import org.freedesktop.dbus.connections.impl.DBusConnectionBuilder;
 import org.freedesktop.dbus.exceptions.DBusException;
 import org.freedesktop.dbus.interfaces.DBus;
-import org.freedesktop.dbus.types.UInt32;
 import org.freedesktop.dbus.types.Variant;
 
 import net.sf.jsignpdf.fx.util.NativeFileChooser.ExtensionFilter;
@@ -158,7 +156,7 @@ public final class PortalFileChooserBackend {
         AtomicBoolean settled = new AtomicBoolean(false);
 
         // Subscribe BEFORE the method call to avoid the handle_token race (design §3).
-        AutoCloseable handler = c.addSigHandler(Response.class, signal -> {
+        AutoCloseable handler = c.addSigHandler(XdgRequest.Response.class, signal -> {
             if (!requestPath.equals(signal.getPath())) return;
             if (!settled.compareAndSet(false, true)) return;
             completeFromSignal(signal, future);
@@ -188,7 +186,7 @@ public final class PortalFileChooserBackend {
         }
     }
 
-    private static void completeFromSignal(Response signal, CompletableFuture<Optional<List<Path>>> future) {
+    private static void completeFromSignal(XdgRequest.Response signal, CompletableFuture<Optional<List<Path>>> future) {
         int code = signal.getResponse().intValue();
         if (code == 0) {
             try {
