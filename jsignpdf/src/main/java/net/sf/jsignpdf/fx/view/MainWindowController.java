@@ -41,6 +41,7 @@ import javafx.stage.Stage;
 
 import net.sf.jsignpdf.fx.util.NativeFileChooser;
 import net.sf.jsignpdf.fx.util.NativeFileChooser.ExtensionFilter;
+import net.sf.jsignpdf.fx.util.Sandbox;
 
 import org.openpdf.text.exceptions.BadPasswordException;
 
@@ -785,6 +786,16 @@ public class MainWindowController {
                     RES.get("jfx.gui.dialog.noDocument.text"));
             return;
         }
+        promptForOutputFile();
+    }
+
+    /**
+     * Opens the Save dialog and stores the chosen path in the signing VM. Returns true
+     * if the user picked a file, false if they cancelled. Skips the doc-portal path as
+     * an initial directory — the portal silently ignores it and writes there don't
+     * persist on the host (see {@link Sandbox#isDocPortalPath}).
+     */
+    private boolean promptForOutputFile() {
         String current = signingVM.outFileProperty().get();
         if (current == null || current.isEmpty()) {
             current = suggestedOutFileFor(documentVM.getDocumentFile());
@@ -794,16 +805,18 @@ public class MainWindowController {
                 .addFilter(ExtensionFilter.of("PDF Files", "*.pdf"));
         if (current != null && !current.isEmpty()) {
             File currentFile = new File(current);
-            File parent = currentFile.getParentFile();
-            if (parent != null && parent.isDirectory()) {
-                fc.setInitialDirectory(parent);
+            if (!Sandbox.isDocPortalPath(current)) {
+                File parent = currentFile.getParentFile();
+                if (parent != null && parent.isDirectory()) {
+                    fc.setInitialDirectory(parent);
+                }
             }
             fc.setInitialFileName(currentFile.getName());
         }
         File file = fc.showSaveDialog(stage);
-        if (file != null) {
-            signingVM.outFileProperty().set(file.getAbsolutePath());
-        }
+        if (file == null) return false;
+        signingVM.outFileProperty().set(file.getAbsolutePath());
+        return true;
     }
 
     @FXML
@@ -832,6 +845,19 @@ public class MainWindowController {
                     RES.get("jfx.gui.dialog.missingTsaUrl.title"),
                     RES.get("jfx.gui.dialog.missingTsaUrl.text"));
             return;
+        }
+
+        // In a sandbox, the auto-derived "<input>_signed.pdf" lands inside the doc
+        // portal FUSE mount and is not exposed back to the host. Force a Save dialog
+        // (routed through the portal) so the user picks a real persistable location.
+        String effectiveOut = signingVM.outFileProperty().get();
+        if (effectiveOut == null || effectiveOut.isEmpty()) {
+            effectiveOut = suggestedOutFileFor(documentVM.getDocumentFile());
+        }
+        if (Sandbox.isDocPortalPath(effectiveOut)) {
+            if (!promptForOutputFile()) {
+                return;
+            }
         }
 
         // Capture live placement into the signing VM, then sync VM → options.

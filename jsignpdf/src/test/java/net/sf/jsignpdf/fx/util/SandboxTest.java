@@ -50,4 +50,20 @@ public class SandboxTest {
     public void isSandboxed_falseWhenNoSignals() {
         assertFalse(Sandbox.isSandboxed(Path.of("/nonexistent"), Map.of()));
     }
+
+    @Test
+    public void isDocPortalPath_trueForFlatpakDocMount() {
+        assertTrue(Sandbox.isDocPortalPath("/run/user/1000/doc/37868ee9/foo.pdf"));
+        assertTrue(Sandbox.isDocPortalPath("/run/user/0/doc/abc/file with spaces.pdf"));
+    }
+
+    @Test
+    public void isDocPortalPath_falseForOtherPaths() {
+        assertFalse(Sandbox.isDocPortalPath(null));
+        assertFalse(Sandbox.isDocPortalPath(""));
+        assertFalse(Sandbox.isDocPortalPath("/home/user/foo.pdf"));
+        assertFalse(Sandbox.isDocPortalPath("/run/user/1000/doc/")); // no filename
+        assertFalse(Sandbox.isDocPortalPath("/run/user/abc/doc/file.pdf")); // non-numeric uid
+        assertFalse(Sandbox.isDocPortalPath("/tmp/run/user/1000/doc/file.pdf")); // not anchored
+    }
 }
