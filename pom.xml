@@ -31,7 +31,7 @@
         <openpdf.version>3.0.3</openpdf.version>
         <junit.version>4.13.2</junit.version>
         <openjfx.version>21.0.7</openjfx.version>
-        <dbus-java.version>5.1.0</dbus-java.version>
+        <dbus-java.version>5.2.0</dbus-java.version>
     </properties>
 
     <modules>
