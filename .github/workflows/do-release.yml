@@ -136,7 +136,6 @@ jobs:
   linux-flatpak:
     needs: do-release
     runs-on: ubuntu-latest
-    continue-on-error: true
     env:
       VERSION: ${{ needs.do-release.outputs.version }}
     steps:
@@ -208,6 +207,12 @@ jobs:
 
   publish-release:
     needs: [do-release, windows-installers, linux-flatpak]
+    # Flatpak is optional: publish even if its job failed, as long as the
+    # required jobs (do-release, windows-installers) succeeded.
+    if: |
+      always()
+      && needs.do-release.result == 'success'
+      && needs.windows-installers.result == 'success'
     runs-on: ubuntu-latest
     permissions:
       contents: write
