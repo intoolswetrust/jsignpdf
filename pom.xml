@@ -30,7 +30,7 @@
         <commons-lang3.version>3.20.0</commons-lang3.version>
         <openpdf.version>3.0.3</openpdf.version>
         <junit.version>4.13.2</junit.version>
-        <openjfx.version>21.0.7</openjfx.version>
+        <openjfx.version>24.0.2</openjfx.version>
         <dbus-java.version>5.1.0</dbus-java.version>
     </properties>
 
