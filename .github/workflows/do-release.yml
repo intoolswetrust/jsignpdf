@@ -285,7 +285,14 @@ jobs:
           echo "::error::No assets found under release-assets/$FULL_VERSION/"
           exit 1
         fi
+        prerelease_flag=()
+        shopt -s nocasematch
+        if [[ "$VERSION" == *ALPHA* || "$VERSION" == *BETA* || "$VERSION" == *RC* || "$VERSION" == *MILESTONE* ]]; then
+          prerelease_flag=(--prerelease)
+        fi
+        shopt -u nocasematch
         gh release create "$TAG" \
           --title "$TAG" \
           --notes-file "$NOTES_FILE" \
+          "${prerelease_flag[@]}" \
           "${assets[@]}"
