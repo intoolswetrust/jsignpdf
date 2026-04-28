@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.logging.Level;
 
+import javafx.animation.PauseTransition;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.geometry.Insets;
@@ -38,6 +39,7 @@ import javafx.scene.input.TransferMode;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.StackPane;
 import javafx.stage.Stage;
+import javafx.util.Duration;
 
 import net.sf.jsignpdf.fx.util.NativeFileChooser;
 import net.sf.jsignpdf.fx.util.NativeFileChooser.ExtensionFilter;
@@ -86,6 +88,7 @@ public class MainWindowController {
     private SignatureOverlay signatureOverlay;
     /** Holds the side panel node while it's detached from the SplitPane (hidden). */
     private Node detachedSidePanel;
+    private PauseTransition shiftHintTimer;
 
     // Included sub-controllers (fx:id + "Controller" naming convention)
     @FXML private VBox certificateSettings;
@@ -216,6 +219,7 @@ public class MainWindowController {
         signatureOverlay = new SignatureOverlay(placementVM);
         signatureOverlay.setVisible(false);
         signatureOverlay.setMouseTransparent(false);
+        signatureOverlay.setOnReplaceBlocked(this::showShiftHint);
         pdfArea.getChildren().add(0, pdfPageView);
         pdfArea.getChildren().add(1, signatureOverlay);
 
@@ -722,10 +726,34 @@ public class MainWindowController {
 
     private void updateStatusWithHint() {
         if (documentVM.isDocumentLoaded() && placementVM.isPlaced()) {
-            updateStatus(RES.get("jfx.gui.status.shiftToReplace"));
+            showShiftHint();
         } else if (documentVM.isDocumentLoaded()) {
+            cancelShiftHint();
             updateStatusForDocument();
         }
+    }
+
+    /** Briefly show the Shift-to-replace hint, then revert to filename/page. */
+    private void showShiftHint() {
+        if (!documentVM.isDocumentLoaded() || !placementVM.isPlaced()) return;
+        final String hintText = RES.get("jfx.gui.status.shiftToReplace");
+        updateStatus(hintText);
+        if (shiftHintTimer == null) {
+            shiftHintTimer = new PauseTransition(Duration.seconds(4));
+        } else {
+            shiftHintTimer.stop();
+        }
+        // Only revert if the hint is still the message being shown
+        shiftHintTimer.setOnFinished(ev -> {
+            if (hintText.equals(lblStatus.getText())) {
+                updateStatusForDocument();
+            }
+        });
+        shiftHintTimer.playFromStart();
+    }
+
+    private void cancelShiftHint() {
+        if (shiftHintTimer != null) shiftHintTimer.stop();
     }
 
     private void renderCurrentPage() {
