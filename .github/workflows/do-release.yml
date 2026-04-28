@@ -172,7 +172,7 @@ jobs:
         path: linux-assets
 
     - name: Cache Flatpak SDK
-      uses: actions/cache@v4
+      uses: actions/cache@v5
       with:
         path: ~/.local/share/flatpak
         key: flatpak-sdk-25.08
