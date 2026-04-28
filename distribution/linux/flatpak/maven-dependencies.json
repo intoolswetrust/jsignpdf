@@ -267,15 +267,15 @@
   },
   {
     "type": "file",
-    "url": "https://repo1.maven.org/maven2/com/github/kwart/jsign/jsignpdf/3.0.0-SNAPSHOT/jsignpdf-3.0.0-20260428.060936-66-sources.jar",
-    "sha256": "ebba30457473c601dabc76854bb0b066b8cb93ce64b0c784ace0b137a4ec1b1d",
+    "url": "https://repo1.maven.org/maven2/com/github/kwart/jsign/jsignpdf/3.0.0-SNAPSHOT/jsignpdf-3.0.0-20260428.061927-69-sources.jar",
+    "sha256": "3c6c8eb42eea6feca3839164269c16466cc47573ee8a903b73d1caccc5a0bb80",
     "dest": "m2local/com/github/kwart/jsign/jsignpdf/3.0.0-SNAPSHOT",
-    "dest-filename": "jsignpdf-3.0.0-20260428.060936-66-sources.jar"
+    "dest-filename": "jsignpdf-3.0.0-20260428.061927-69-sources.jar"
   },
   {
     "type": "file",
     "url": "https://repo1.maven.org/maven2/com/github/kwart/jsign/jsignpdf/3.0.0-SNAPSHOT/jsignpdf-3.0.0-SNAPSHOT-sources.jar",
-    "sha256": "ebba30457473c601dabc76854bb0b066b8cb93ce64b0c784ace0b137a4ec1b1d",
+    "sha256": "3c6c8eb42eea6feca3839164269c16466cc47573ee8a903b73d1caccc5a0bb80",
     "dest": "m2local/com/github/kwart/jsign/jsignpdf/3.0.0-SNAPSHOT",
     "dest-filename": "jsignpdf-3.0.0-SNAPSHOT-sources.jar"
   },
@@ -575,13 +575,6 @@
   },
   {
     "type": "file",
-    "url": "https://repo1.maven.org/maven2/commons-io/commons-io/2.21.0/commons-io-2.21.0-sources.jar",
-    "sha256": "5fd4d4493dd1eee5c6f314159dbac7fda1988a4ab037feacbeb2ecb3033c43b4",
-    "dest": "m2local/commons-io/commons-io/2.21.0",
-    "dest-filename": "commons-io-2.21.0-sources.jar"
-  },
-  {
-    "type": "file",
     "url": "https://repo1.maven.org/maven2/commons-io/commons-io/2.21.0/commons-io-2.21.0.jar",
     "sha256": "7d643a2afea8b058b762aa6fb90e5b256f6c729739f8b3784c3370ddc609e88d",
     "dest": "m2local/commons-io/commons-io/2.21.0",
@@ -593,6 +586,27 @@
     "sha256": "ae47795e721803ec8ff1deed74be28a811a02713bd5a3ab0ac67c2b58cb635ab",
     "dest": "m2local/commons-io/commons-io/2.21.0",
     "dest-filename": "commons-io-2.21.0.pom"
+  },
+  {
+    "type": "file",
+    "url": "https://repo1.maven.org/maven2/commons-io/commons-io/2.22.0/commons-io-2.22.0-sources.jar",
+    "sha256": "de5acfae5fa2735276df7facf46cdb0347374208ea47db246b554fae59277fb5",
+    "dest": "m2local/commons-io/commons-io/2.22.0",
+    "dest-filename": "commons-io-2.22.0-sources.jar"
+  },
+  {
+    "type": "file",
+    "url": "https://repo1.maven.org/maven2/commons-io/commons-io/2.22.0/commons-io-2.22.0.jar",
+    "sha256": "2b9a7b1f726fb86216dbd2c8321eabe0221dbd5b1be81c18e1cb53811b104758",
+    "dest": "m2local/commons-io/commons-io/2.22.0",
+    "dest-filename": "commons-io-2.22.0.jar"
+  },
+  {
+    "type": "file",
+    "url": "https://repo1.maven.org/maven2/commons-io/commons-io/2.22.0/commons-io-2.22.0.pom",
+    "sha256": "6425cec0ea760035efa77277de85f89fa6dbed147ab3dd95b8d2cbc55340accf",
+    "dest": "m2local/commons-io/commons-io/2.22.0",
+    "dest-filename": "commons-io-2.22.0.pom"
   },
   {
     "type": "file",
@@ -1286,6 +1300,13 @@
     "sha256": "94f6c027b15f6402995dd1b2c7ea35bfe1ebc88b6832b3134368b41998721953",
     "dest": "m2local/org/apache/commons/commons-parent/92",
     "dest-filename": "commons-parent-92.pom"
+  },
+  {
+    "type": "file",
+    "url": "https://repo1.maven.org/maven2/org/apache/commons/commons-parent/98/commons-parent-98.pom",
+    "sha256": "d40318527f56033e0ff0789971cc38c856aa99a685eea11270814e7f1eda9fba",
+    "dest": "m2local/org/apache/commons/commons-parent/98",
+    "dest-filename": "commons-parent-98.pom"
   },
   {
     "type": "file",
