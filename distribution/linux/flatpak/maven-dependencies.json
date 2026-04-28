@@ -15,52 +15,52 @@
   },
   {
     "type": "file",
-    "url": "https://repo1.maven.org/maven2/com/github/hypfvieh/dbus-java-core/5.1.0/dbus-java-core-5.1.0-sources.jar",
-    "sha256": "299a6bc8f036422a8ea05c116b019285a213ea6483272706c5c7fd92e7d27dae",
-    "dest": "m2local/com/github/hypfvieh/dbus-java-core/5.1.0",
-    "dest-filename": "dbus-java-core-5.1.0-sources.jar"
+    "url": "https://repo1.maven.org/maven2/com/github/hypfvieh/dbus-java-core/5.2.0/dbus-java-core-5.2.0-sources.jar",
+    "sha256": "0afc83708ec3fd6e9ce94693e12e2c51ae315a5e9d1a6b8405b5a7382110bcdc",
+    "dest": "m2local/com/github/hypfvieh/dbus-java-core/5.2.0",
+    "dest-filename": "dbus-java-core-5.2.0-sources.jar"
   },
   {
     "type": "file",
-    "url": "https://repo1.maven.org/maven2/com/github/hypfvieh/dbus-java-core/5.1.0/dbus-java-core-5.1.0.jar",
-    "sha256": "cf01cb7d335af6ae25fcd58bd2f1ac9a8465acd529670668a3a3902fd8c1c9cf",
-    "dest": "m2local/com/github/hypfvieh/dbus-java-core/5.1.0",
-    "dest-filename": "dbus-java-core-5.1.0.jar"
+    "url": "https://repo1.maven.org/maven2/com/github/hypfvieh/dbus-java-core/5.2.0/dbus-java-core-5.2.0.jar",
+    "sha256": "9dfadd65bdfec2154ccf23039f9ae6239dc625735b933653d9403e11c2c9cf10",
+    "dest": "m2local/com/github/hypfvieh/dbus-java-core/5.2.0",
+    "dest-filename": "dbus-java-core-5.2.0.jar"
   },
   {
     "type": "file",
-    "url": "https://repo1.maven.org/maven2/com/github/hypfvieh/dbus-java-core/5.1.0/dbus-java-core-5.1.0.pom",
-    "sha256": "c33835b9f25b1aa162958840f9b1c5b8ad6ca5ece2f6cd6d41a14dad79ffc36a",
-    "dest": "m2local/com/github/hypfvieh/dbus-java-core/5.1.0",
-    "dest-filename": "dbus-java-core-5.1.0.pom"
+    "url": "https://repo1.maven.org/maven2/com/github/hypfvieh/dbus-java-core/5.2.0/dbus-java-core-5.2.0.pom",
+    "sha256": "19305d6de9e0626d4412489d18458835c9dcfef6a9f28b5283c2d3e661ef865d",
+    "dest": "m2local/com/github/hypfvieh/dbus-java-core/5.2.0",
+    "dest-filename": "dbus-java-core-5.2.0.pom"
   },
   {
     "type": "file",
-    "url": "https://repo1.maven.org/maven2/com/github/hypfvieh/dbus-java-parent/5.1.0/dbus-java-parent-5.1.0.pom",
-    "sha256": "5b4efa31740706233e2a28dd89e8186a1dfdc5ba3f18cacd3f27e3bc0fe1a7ca",
-    "dest": "m2local/com/github/hypfvieh/dbus-java-parent/5.1.0",
-    "dest-filename": "dbus-java-parent-5.1.0.pom"
+    "url": "https://repo1.maven.org/maven2/com/github/hypfvieh/dbus-java-parent/5.2.0/dbus-java-parent-5.2.0.pom",
+    "sha256": "29b1d9a3880d07ebd1acb62b6083884ce10d3fb392be9055d7e32411f7f77d1c",
+    "dest": "m2local/com/github/hypfvieh/dbus-java-parent/5.2.0",
+    "dest-filename": "dbus-java-parent-5.2.0.pom"
   },
   {
     "type": "file",
-    "url": "https://repo1.maven.org/maven2/com/github/hypfvieh/dbus-java-transport-native-unixsocket/5.1.0/dbus-java-transport-native-unixsocket-5.1.0-sources.jar",
-    "sha256": "cc29d8ac6bb7b0dfaa28bf5cd67d73e3cc6aa098a86b4d375f081315c30d818c",
-    "dest": "m2local/com/github/hypfvieh/dbus-java-transport-native-unixsocket/5.1.0",
-    "dest-filename": "dbus-java-transport-native-unixsocket-5.1.0-sources.jar"
+    "url": "https://repo1.maven.org/maven2/com/github/hypfvieh/dbus-java-transport-native-unixsocket/5.2.0/dbus-java-transport-native-unixsocket-5.2.0-sources.jar",
+    "sha256": "6b293b0f86aeccad0a7c743298d3a50f24ab21842ce6acef69c7c08f8391e5f0",
+    "dest": "m2local/com/github/hypfvieh/dbus-java-transport-native-unixsocket/5.2.0",
+    "dest-filename": "dbus-java-transport-native-unixsocket-5.2.0-sources.jar"
   },
   {
     "type": "file",
-    "url": "https://repo1.maven.org/maven2/com/github/hypfvieh/dbus-java-transport-native-unixsocket/5.1.0/dbus-java-transport-native-unixsocket-5.1.0.jar",
-    "sha256": "276cb9cf2075b62a4a0e001756b8c6f8ab4125f1554128b758b1b80b849ca2ee",
-    "dest": "m2local/com/github/hypfvieh/dbus-java-transport-native-unixsocket/5.1.0",
-    "dest-filename": "dbus-java-transport-native-unixsocket-5.1.0.jar"
+    "url": "https://repo1.maven.org/maven2/com/github/hypfvieh/dbus-java-transport-native-unixsocket/5.2.0/dbus-java-transport-native-unixsocket-5.2.0.jar",
+    "sha256": "efeb82fecd6e176e5e9f63fb6d6775f19c194584bf001fd579a1a5b560bbf061",
+    "dest": "m2local/com/github/hypfvieh/dbus-java-transport-native-unixsocket/5.2.0",
+    "dest-filename": "dbus-java-transport-native-unixsocket-5.2.0.jar"
   },
   {
     "type": "file",
-    "url": "https://repo1.maven.org/maven2/com/github/hypfvieh/dbus-java-transport-native-unixsocket/5.1.0/dbus-java-transport-native-unixsocket-5.1.0.pom",
-    "sha256": "fcd36650b54f972dae56ba47cba0c219993448858bb803d11a29797aa0b60763",
-    "dest": "m2local/com/github/hypfvieh/dbus-java-transport-native-unixsocket/5.1.0",
-    "dest-filename": "dbus-java-transport-native-unixsocket-5.1.0.pom"
+    "url": "https://repo1.maven.org/maven2/com/github/hypfvieh/dbus-java-transport-native-unixsocket/5.2.0/dbus-java-transport-native-unixsocket-5.2.0.pom",
+    "sha256": "32c6a36896c29f93787ef1a9aa5ee5106de443fe433bb5acc0250f2aeb57b265",
+    "dest": "m2local/com/github/hypfvieh/dbus-java-transport-native-unixsocket/5.2.0",
+    "dest-filename": "dbus-java-transport-native-unixsocket-5.2.0.pom"
   },
   {
     "type": "file",
@@ -267,15 +267,15 @@
   },
   {
     "type": "file",
-    "url": "https://repo1.maven.org/maven2/com/github/kwart/jsign/jsignpdf/3.0.0-SNAPSHOT/jsignpdf-3.0.0-20260427.153616-57-sources.jar",
-    "sha256": "023c1e05e4fb8ef3b2ed4e22920fee6b18996cb1baad95b95b6ce9b4e8fbaf2d",
+    "url": "https://repo1.maven.org/maven2/com/github/kwart/jsign/jsignpdf/3.0.0-SNAPSHOT/jsignpdf-3.0.0-20260428.061738-68-sources.jar",
+    "sha256": "ee0c38192413d1b5ad4fc387d1a272feb5a34b6a9f323ae62d6d628829b0c5ce",
     "dest": "m2local/com/github/kwart/jsign/jsignpdf/3.0.0-SNAPSHOT",
-    "dest-filename": "jsignpdf-3.0.0-20260427.153616-57-sources.jar"
+    "dest-filename": "jsignpdf-3.0.0-20260428.061738-68-sources.jar"
   },
   {
     "type": "file",
     "url": "https://repo1.maven.org/maven2/com/github/kwart/jsign/jsignpdf/3.0.0-SNAPSHOT/jsignpdf-3.0.0-SNAPSHOT-sources.jar",
-    "sha256": "023c1e05e4fb8ef3b2ed4e22920fee6b18996cb1baad95b95b6ce9b4e8fbaf2d",
+    "sha256": "ee0c38192413d1b5ad4fc387d1a272feb5a34b6a9f323ae62d6d628829b0c5ce",
     "dest": "m2local/com/github/kwart/jsign/jsignpdf/3.0.0-SNAPSHOT",
     "dest-filename": "jsignpdf-3.0.0-SNAPSHOT-sources.jar"
   },
@@ -575,13 +575,6 @@
   },
   {
     "type": "file",
-    "url": "https://repo1.maven.org/maven2/commons-io/commons-io/2.21.0/commons-io-2.21.0-sources.jar",
-    "sha256": "5fd4d4493dd1eee5c6f314159dbac7fda1988a4ab037feacbeb2ecb3033c43b4",
-    "dest": "m2local/commons-io/commons-io/2.21.0",
-    "dest-filename": "commons-io-2.21.0-sources.jar"
-  },
-  {
-    "type": "file",
     "url": "https://repo1.maven.org/maven2/commons-io/commons-io/2.21.0/commons-io-2.21.0.jar",
     "sha256": "7d643a2afea8b058b762aa6fb90e5b256f6c729739f8b3784c3370ddc609e88d",
     "dest": "m2local/commons-io/commons-io/2.21.0",
@@ -593,6 +586,27 @@
     "sha256": "ae47795e721803ec8ff1deed74be28a811a02713bd5a3ab0ac67c2b58cb635ab",
     "dest": "m2local/commons-io/commons-io/2.21.0",
     "dest-filename": "commons-io-2.21.0.pom"
+  },
+  {
+    "type": "file",
+    "url": "https://repo1.maven.org/maven2/commons-io/commons-io/2.22.0/commons-io-2.22.0-sources.jar",
+    "sha256": "de5acfae5fa2735276df7facf46cdb0347374208ea47db246b554fae59277fb5",
+    "dest": "m2local/commons-io/commons-io/2.22.0",
+    "dest-filename": "commons-io-2.22.0-sources.jar"
+  },
+  {
+    "type": "file",
+    "url": "https://repo1.maven.org/maven2/commons-io/commons-io/2.22.0/commons-io-2.22.0.jar",
+    "sha256": "2b9a7b1f726fb86216dbd2c8321eabe0221dbd5b1be81c18e1cb53811b104758",
+    "dest": "m2local/commons-io/commons-io/2.22.0",
+    "dest-filename": "commons-io-2.22.0.jar"
+  },
+  {
+    "type": "file",
+    "url": "https://repo1.maven.org/maven2/commons-io/commons-io/2.22.0/commons-io-2.22.0.pom",
+    "sha256": "6425cec0ea760035efa77277de85f89fa6dbed147ab3dd95b8d2cbc55340accf",
+    "dest": "m2local/commons-io/commons-io/2.22.0",
+    "dest-filename": "commons-io-2.22.0.pom"
   },
   {
     "type": "file",
@@ -1286,6 +1300,13 @@
     "sha256": "94f6c027b15f6402995dd1b2c7ea35bfe1ebc88b6832b3134368b41998721953",
     "dest": "m2local/org/apache/commons/commons-parent/92",
     "dest-filename": "commons-parent-92.pom"
+  },
+  {
+    "type": "file",
+    "url": "https://repo1.maven.org/maven2/org/apache/commons/commons-parent/98/commons-parent-98.pom",
+    "sha256": "d40318527f56033e0ff0789971cc38c856aa99a685eea11270814e7f1eda9fba",
+    "dest": "m2local/org/apache/commons/commons-parent/98",
+    "dest-filename": "commons-parent-98.pom"
   },
   {
     "type": "file",
@@ -4005,31 +4026,31 @@
   },
   {
     "type": "file",
-    "url": "https://repo1.maven.org/maven2/org/slf4j/slf4j-api/2.0.13/slf4j-api-2.0.13-sources.jar",
-    "sha256": "84f366caa66ddaa9d204e5525580b562271663c05970f056815a1be8489e8b52",
-    "dest": "m2local/org/slf4j/slf4j-api/2.0.13",
-    "dest-filename": "slf4j-api-2.0.13-sources.jar"
+    "url": "https://repo1.maven.org/maven2/org/slf4j/slf4j-api/2.0.17/slf4j-api-2.0.17-sources.jar",
+    "sha256": "db0d08d8efa05ad19d174d747bd9d8e68dbb02b596812fe7b3a681656e346694",
+    "dest": "m2local/org/slf4j/slf4j-api/2.0.17",
+    "dest-filename": "slf4j-api-2.0.17-sources.jar"
   },
   {
     "type": "file",
-    "url": "https://repo1.maven.org/maven2/org/slf4j/slf4j-api/2.0.13/slf4j-api-2.0.13.jar",
-    "sha256": "e7c2a48e8515ba1f49fa637d57b4e2f590b3f5bd97407ac699c3aa5efb1204a9",
-    "dest": "m2local/org/slf4j/slf4j-api/2.0.13",
-    "dest-filename": "slf4j-api-2.0.13.jar"
+    "url": "https://repo1.maven.org/maven2/org/slf4j/slf4j-api/2.0.17/slf4j-api-2.0.17.jar",
+    "sha256": "7b751d952061954d5abfed7181c1f645d336091b679891591d63329c622eb832",
+    "dest": "m2local/org/slf4j/slf4j-api/2.0.17",
+    "dest-filename": "slf4j-api-2.0.17.jar"
   },
   {
     "type": "file",
-    "url": "https://repo1.maven.org/maven2/org/slf4j/slf4j-api/2.0.13/slf4j-api-2.0.13.pom",
-    "sha256": "51805cfda80ca2ac82041b906d9865d39e9823e358a0eeb62379dfed475c1571",
-    "dest": "m2local/org/slf4j/slf4j-api/2.0.13",
-    "dest-filename": "slf4j-api-2.0.13.pom"
+    "url": "https://repo1.maven.org/maven2/org/slf4j/slf4j-api/2.0.17/slf4j-api-2.0.17.pom",
+    "sha256": "150c40287f7cecdc21b9380caac98e928c4f33c023db6b348df1c5ac977026bf",
+    "dest": "m2local/org/slf4j/slf4j-api/2.0.17",
+    "dest-filename": "slf4j-api-2.0.17.pom"
   },
   {
     "type": "file",
-    "url": "https://repo1.maven.org/maven2/org/slf4j/slf4j-bom/2.0.13/slf4j-bom-2.0.13.pom",
-    "sha256": "7af272d7a738e2b98763791ffdd896040e8beb298a88fd606214407976cd310a",
-    "dest": "m2local/org/slf4j/slf4j-bom/2.0.13",
-    "dest-filename": "slf4j-bom-2.0.13.pom"
+    "url": "https://repo1.maven.org/maven2/org/slf4j/slf4j-bom/2.0.17/slf4j-bom-2.0.17.pom",
+    "sha256": "f78d27b642b4b886eb839fc102b5cd9fe7f30f37599ffe68185be4e1609031e9",
+    "dest": "m2local/org/slf4j/slf4j-bom/2.0.17",
+    "dest-filename": "slf4j-bom-2.0.17.pom"
   },
   {
     "type": "file",
@@ -4054,10 +4075,10 @@
   },
   {
     "type": "file",
-    "url": "https://repo1.maven.org/maven2/org/slf4j/slf4j-parent/2.0.13/slf4j-parent-2.0.13.pom",
-    "sha256": "67facfd51f06935cea85615a04775d70d80bfd03ad0f37670351f920ed0bb58a",
-    "dest": "m2local/org/slf4j/slf4j-parent/2.0.13",
-    "dest-filename": "slf4j-parent-2.0.13.pom"
+    "url": "https://repo1.maven.org/maven2/org/slf4j/slf4j-parent/2.0.17/slf4j-parent-2.0.17.pom",
+    "sha256": "95cd71e852dfdb29126e58b7b939d57ec2b2e6024391852e0b545dee082bbf3b",
+    "dest": "m2local/org/slf4j/slf4j-parent/2.0.17",
+    "dest-filename": "slf4j-parent-2.0.17.pom"
   },
   {
     "type": "file",
