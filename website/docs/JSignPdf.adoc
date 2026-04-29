@@ -232,6 +232,21 @@ Choose _Presets > Manage presets..._ to open the management dialog. Each row off
 
 Presets are plain Java properties files under the <<Configuration directory,configuration directory>>.
 
+=== Adjusting advanced preferences
+
+Open _Tools > Preferences..._ (shortcut `Ctrl+,` / `⌘,`) for application-wide tweaks that fall outside the per-document signing options. The dialog has six tabs:
+
+* **Visible Signature** -- font file, font name and encoding for the visible-signature L2 text
+* **Certificates** -- which certificate checks (validity, key usage, critical extensions) are applied when listing aliases
+* **Network** -- relax SSL security for TSA / OCSP / CRL traffic
+* **PDF Render** -- order and selection of preview backends (JPedal, Apache PDFBox, OpenPDF)
+* **TSA** -- default hash algorithm for timestamp requests
+* **PKCS#11** -- raw text of the SunPKCS11 provider configuration (see <<Using hardware tokens for signing>>)
+
+Most settings apply immediately on _OK_. The two tabs marked _Takes effect after restart_ -- Network and PKCS#11 -- only take effect on the next launch. _Reset section to defaults_ restores the bundled defaults for the active tab only; other tabs keep their current values.
+
+The values persist in `<config-dir>/advanced.properties` (see <<Advanced application configuration>>).
+
 == Classic Swing UI
 
 The classic Swing GUI is the original graphical interface from earlier versions of JSignPdf. It remains available for backward compatibility. To start it, set the `jsignpdf.swing` system property:
@@ -808,7 +823,7 @@ If some "online" feature (TSA, CRL, OCSP) is enabled and JSignPdf runs behind a 
 Steps to sign documents using hardware tokens:
 
 . Install PKCS#11 driver for your token. Check the vendor's documentation and install a proper driver for your system;
-. Create a configuration file pkcs11.cfg somewhere on your system. It will be used to configure a Java SunPKCS11 security provider. (see https://docs.oracle.com/en/java/javase/11/security/pkcs11-reference-guide1.html[PKCS#11 Reference Guide]) +
+. Place a configuration file at `<config-dir>/pkcs11.cfg` (see <<Configuration directory>>). It is used to configure a Java SunPKCS11 security provider (see https://docs.oracle.com/en/java/javase/11/security/pkcs11-reference-guide1.html[PKCS#11 Reference Guide]). The easiest way to create or edit it is via _Tools > Preferences > PKCS#11_ in the JavaFX UI. +
 The content depends on your driver, you can try to start with a simple 2 lines: +
 [source]
 ----
@@ -850,20 +865,22 @@ java -jar JSignPdf.jar -kst PKCS11 -ksp 123456 document.pdf
 
 == Advanced application configuration
 
-Some advanced options are not controlled from GUI or the command line. They can be only set directly in the appropriate configuration file.
+Application-wide tweaks beyond the per-document signing options live in `<config-dir>/advanced.properties` and -- for hardware tokens -- `<config-dir>/pkcs11.cfg`. Both are plain text files; the easiest way to edit them is the JavaFX <<Adjusting advanced preferences,Preferences dialog>>, which writes them on _OK_. Power users can also hand-edit the files directly while JSignPdf is closed; the next launch picks up the changes.
 
-=== conf.properties
+`advanced.properties` covers the same six topics as the Preferences dialog (visible-signature font, certificate-validation toggles, relaxed SSL, PDF preview backend order, default TSA hash algorithm, and one or two miscellaneous knobs). When a key is missing from `advanced.properties`, JSignPdf falls back to defaults bundled inside `JSignPdf.jar`, so a fresh install needs no config file at all.
 
-The property file _conf/conf.properties_ contain several option groups:
+=== Migration from earlier versions
 
-* visible signature font settings
-* control the certificate checks
-* PKCS#11 support
-* enable more strict SSL handling
+In JSignPdf 2.x the same options lived in `<install dir>/conf/conf.properties` and the PKCS#11 provider was pointed to by a `pkcs11config.path` key in that file. Starting with 3.0.0 those files move under your per-user <<Configuration directory,configuration directory>>:
+
+* `<install dir>/conf/conf.properties` -> `<config-dir>/advanced.properties`
+* `<install dir>/conf/pkcs11.cfg` -> `<config-dir>/pkcs11.cfg` (a fixed well-known location; the `pkcs11config.path` key has been removed)
+
+On the first launch of 3.0.0, JSignPdf checks the install-dir copies of both files and migrates them only if you actually edited them (i.e. their contents differ from the bundled samples). Unmodified files are skipped to avoid carrying over stale example values like `library=/usr/lib/libeToken.so` into a fresh install. The original install-dir files are left in place so a downgrade keeps working.
 
 === Configuration directory
 
-Starting with JSignPdf 3.0.0, per-user state is stored in a platform-native configuration directory instead of a single file in your home folder. The directory holds two things: the main config file (`config.properties`, which persists the last-used signing settings) and a `presets/` subdirectory (see <<Using presets>>).
+Starting with JSignPdf 3.0.0, per-user state is stored in a platform-native configuration directory instead of a single file in your home folder. The directory holds the main config file (`config.properties`, which persists the last-used signing settings), a `presets/` subdirectory (see <<Using presets>>), and -- once you visit the Preferences dialog or migrate from a 2.x install -- the advanced-config files `advanced.properties` and `pkcs11.cfg` (see <<Advanced application configuration>>).
 
 The default location depends on your operating system:
 
@@ -889,6 +906,8 @@ You can override the default by setting the `JSIGNPDF_CONFIG_DIR` environment va
 ----
 <config-dir>/
   config.properties          # main configuration (last-used signing settings)
+  advanced.properties        # advanced preferences (created on first save)
+  pkcs11.cfg                 # SunPKCS11 provider config (optional)
   presets/
     preset-1745270400123.properties
     preset-1745270500456.properties
@@ -899,9 +918,9 @@ Preset filenames are opaque (`preset-<epoch-millis>.properties`); the user-visib
 
 ==== Migration from earlier versions
 
-Previous versions of JSignPdf stored everything in `~/.JSignPdf` (a single file in your home directory). On the first run of JSignPdf 3.0.0 or newer, if the new configuration directory does not yet exist but the legacy file does, JSignPdf copies `~/.JSignPdf` to `<config-dir>/config.properties` and creates an empty `presets/` subdirectory. **The legacy file is left in place**, so if you downgrade to an older JSignPdf release, it continues to work with its old settings.
+Previous versions of JSignPdf stored everything in `~/.JSignPdf` (a single file in your home directory) plus the install-dir files `conf/conf.properties` and `conf/pkcs11.cfg`. On the first run of JSignPdf 3.0.0 or newer, if the new configuration directory does not yet exist, JSignPdf populates it from these locations: `~/.JSignPdf` is copied to `<config-dir>/config.properties`, and any edited install-dir files are copied to `<config-dir>/advanced.properties` and `<config-dir>/pkcs11.cfg` (see <<Advanced application configuration>>). An empty `presets/` subdirectory is created at the same time. **The legacy files are left in place**, so if you downgrade to an older JSignPdf release, it continues to work with its old settings.
 
-Once the new directory exists, the legacy file is no longer consulted or updated.
+Once the new directory exists, the legacy locations are no longer consulted or updated.
 
 === Java VM options for the Windows EXE launchers
 
