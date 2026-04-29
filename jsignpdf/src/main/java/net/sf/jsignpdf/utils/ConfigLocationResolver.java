@@ -61,6 +61,8 @@ public final class ConfigLocationResolver {
     static final String LEGACY_FILE_NAME = ".JSignPdf";
     static final String MAIN_CONFIG_FILE_NAME = "config.properties";
     static final String PRESETS_DIR_NAME = "presets";
+    static final String ADVANCED_CONFIG_FILE_NAME = "advanced.properties";
+    static final String PKCS11_CONFIG_FILE_NAME = "pkcs11.cfg";
 
     public enum OsType { LINUX, WINDOWS, MAC }
 
@@ -123,6 +125,22 @@ public final class ConfigLocationResolver {
         return dir == null ? null : dir.resolve(PRESETS_DIR_NAME);
     }
 
+    /**
+     * Path to the advanced-config file ({@code <cfg>/advanced.properties}). May be {@code null} if {@link #getConfigDir()} is.
+     */
+    public Path getAdvancedConfigFile() {
+        Path dir = getConfigDir();
+        return dir == null ? null : dir.resolve(ADVANCED_CONFIG_FILE_NAME);
+    }
+
+    /**
+     * Path to the PKCS#11 provider config file ({@code <cfg>/pkcs11.cfg}). May be {@code null} if {@link #getConfigDir()} is.
+     */
+    public Path getPkcs11ConfigFile() {
+        Path dir = getConfigDir();
+        return dir == null ? null : dir.resolve(PKCS11_CONFIG_FILE_NAME);
+    }
+
     // Visible for tests.
     Path resolveAndMigrate() {
         Path target = resolveTargetDir();
@@ -148,7 +166,42 @@ public final class ConfigLocationResolver {
             LOGGER.log(Level.WARNING, "Failed to create config directory " + target, e);
             return null;
         }
+
+        migrateInstallDirFile("conf/conf.properties", "/net/sf/jsignpdf/conf/advanced.default.properties",
+                target.resolve(ADVANCED_CONFIG_FILE_NAME));
+        migrateInstallDirFile("conf/pkcs11.cfg", "/net/sf/jsignpdf/conf/pkcs11.cfg.sample",
+                target.resolve(PKCS11_CONFIG_FILE_NAME));
+
         return target;
+    }
+
+    /**
+     * Copies an install-dir file to the new {@code <cfg>} location only when it differs from the bundled jar sample. Lets a
+     * fresh install (file byte-equal to bundled sample) skip migration.
+     */
+    private static void migrateInstallDirFile(String installRelativePath, String bundledResource, Path target) {
+        try {
+            java.io.File installFile = IOUtils.findFile(installRelativePath);
+            if (installFile == null || !installFile.isFile() || !installFile.canRead()) {
+                return;
+            }
+            byte[] userBytes = Files.readAllBytes(installFile.toPath());
+            byte[] sampleBytes;
+            try (java.io.InputStream is = ConfigLocationResolver.class.getResourceAsStream(bundledResource)) {
+                if (is == null) {
+                    LOGGER.warning("Bundled resource missing: " + bundledResource);
+                    return;
+                }
+                sampleBytes = is.readAllBytes();
+            }
+            if (java.util.Arrays.equals(userBytes, sampleBytes)) {
+                return;
+            }
+            Files.copy(installFile.toPath(), target, StandardCopyOption.COPY_ATTRIBUTES);
+            LOGGER.info("Migrated edited install-dir file " + installFile + " to " + target);
+        } catch (IOException e) {
+            LOGGER.log(Level.WARNING, "Failed to migrate " + installRelativePath, e);
+        }
     }
 
     private Path resolveTargetDir() {

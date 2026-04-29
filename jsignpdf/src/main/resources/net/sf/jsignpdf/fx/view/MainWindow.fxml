@@ -61,6 +61,10 @@
                     <MenuItem fx:id="menuManagePresets" text="%jfx.gui.menu.presets.manage"
                               onAction="#onManagePresets"/>
                 </Menu>
+                <Menu text="%jfx.gui.menu.tools">
+                    <MenuItem fx:id="menuPreferences" text="%jfx.gui.menu.tools.preferences"
+                              onAction="#onPreferences" accelerator="Shortcut+Comma"/>
+                </Menu>
                 <Menu text="%jfx.gui.menu.help">
                     <MenuItem fx:id="menuAbout" text="%jfx.gui.menu.help.about" onAction="#onAbout">
                         <graphic><ImageView fitWidth="16" fitHeight="16" preserveRatio="true">

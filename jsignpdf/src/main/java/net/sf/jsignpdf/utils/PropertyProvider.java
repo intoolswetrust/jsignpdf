@@ -391,6 +391,16 @@ public class PropertyProvider {
     }
 
     /**
+     * Snapshot of every property name currently held by this provider. The returned set is a copy; mutating it has no effect
+     * on the provider.
+     */
+    public java.util.Set<String> stringPropertyNames() {
+        synchronized (properties) {
+            return new java.util.HashSet<>(properties.stringPropertyNames());
+        }
+    }
+
+    /**
      * Throws PEException if given key doesn't exist.
      *
      * @param aKey property name which must be included in properties, if not exception is thrown

@@ -32,11 +32,13 @@ package net.sf.jsignpdf.utils;
 import static net.sf.jsignpdf.Constants.LOGGER;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
+import java.util.Properties;
 import java.util.logging.Level;
 
 /**
@@ -46,11 +48,14 @@ public final class PropertyStoreFactory {
 
     private static final String PRESET_FILENAME_PREFIX = "preset-";
     private static final String PRESET_FILENAME_SUFFIX = ".properties";
+    private static final String ADVANCED_DEFAULTS_RESOURCE = "/net/sf/jsignpdf/conf/advanced.default.properties";
 
     private static volatile PropertyStoreFactory instance;
 
     private final ConfigLocationResolver resolver;
     private volatile PropertyProvider mainConfig;
+    private volatile AdvancedConfig advancedConfig;
+    private volatile Properties advancedDefaultsCache;
 
     public PropertyStoreFactory(ConfigLocationResolver resolver) {
         this.resolver = resolver;
@@ -136,6 +141,43 @@ public final class PropertyStoreFactory {
     }
 
     /**
+     * Returns the cached {@link AdvancedConfig} backed by {@code <cfg>/advanced.properties}. Lazily loads on first call.
+     * Bundled defaults are read once from the jar resource and reused.
+     */
+    public AdvancedConfig advancedConfig() {
+        AdvancedConfig ref = advancedConfig;
+        if (ref == null) {
+            synchronized (this) {
+                ref = advancedConfig;
+                if (ref == null) {
+                    Path file = resolver.getAdvancedConfigFile();
+                    ref = new AdvancedConfig(file, loadAdvancedDefaults());
+                    advancedConfig = ref;
+                }
+            }
+        }
+        return ref;
+    }
+
+    private Properties loadAdvancedDefaults() {
+        Properties cached = advancedDefaultsCache;
+        if (cached == null) {
+            cached = new Properties();
+            try (InputStream is = PropertyStoreFactory.class.getResourceAsStream(ADVANCED_DEFAULTS_RESOURCE)) {
+                if (is != null) {
+                    cached.load(is);
+                } else {
+                    LOGGER.warning("Bundled defaults missing: " + ADVANCED_DEFAULTS_RESOURCE);
+                }
+            } catch (IOException e) {
+                LOGGER.log(Level.WARNING, "Failed to load bundled advanced.default.properties", e);
+            }
+            advancedDefaultsCache = cached;
+        }
+        return cached;
+    }
+
+    /**
      * Wipes every file under the resolved config directory (main config file, presets, anything else) and clears the in-memory
      * state of the cached main-config provider so every existing holder sees the reset. The config directory itself is kept
      * so subsequent writes don't race with directory creation.
@@ -148,6 +190,7 @@ public final class PropertyStoreFactory {
         if (mainConfig != null) {
             mainConfig.clear();
         }
+        advancedConfig = null;
     }
 
     private static void deleteDirectoryContents(Path dir) {

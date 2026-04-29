@@ -18,6 +18,7 @@ import net.sf.jsignpdf.types.PDFEncryption;
 import net.sf.jsignpdf.types.PrintRight;
 import net.sf.jsignpdf.types.RenderMode;
 import net.sf.jsignpdf.types.ServerAuthentication;
+import net.sf.jsignpdf.utils.AppConfig;
 
 import java.net.Proxy;
 import java.security.KeyStore;
@@ -352,7 +353,7 @@ public class SigningOptionsViewModel {
         if (ha != null) {
             return ha;
         }
-        HashAlgorithm fallback = HashAlgorithm.fromAlgorithmName(Constants.DEFVAL_TSA_HASH_ALG);
+        HashAlgorithm fallback = HashAlgorithm.fromAlgorithmName(AppConfig.defaultTsaHashAlg());
         return fallback != null ? fallback : HashAlgorithm.SHA256;
     }
 

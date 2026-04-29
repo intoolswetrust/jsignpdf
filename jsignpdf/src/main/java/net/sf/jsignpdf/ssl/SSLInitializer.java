@@ -50,6 +50,7 @@ import javax.net.ssl.TrustManager;
 import net.sf.jsignpdf.BasicSignerOptions;
 import net.sf.jsignpdf.Constants;
 import net.sf.jsignpdf.types.ServerAuthentication;
+import net.sf.jsignpdf.utils.AppConfig;
 import net.sf.jsignpdf.utils.KeyStoreUtils;
 
 import org.apache.commons.lang3.StringUtils;
@@ -65,7 +66,7 @@ public class SSLInitializer {
 
     public static final void init()
             throws NoSuchAlgorithmException, KeyManagementException, KeyStoreException, CertificateException, IOException {
-        if (Constants.RELAX_SSL_SECURITY) {
+        if (AppConfig.relaxSslSecurity()) {
             LOGGER.fine("Relaxing SSL security.");
 
             // Details for the properties -

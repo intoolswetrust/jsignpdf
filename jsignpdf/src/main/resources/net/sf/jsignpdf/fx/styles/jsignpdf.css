@@ -133,3 +133,28 @@
 .titled-pane > .title {
     -fx-font-weight: bold;
 }
+
+/* Preferences dialog */
+.pref-help {
+    -fx-text-fill: #666666;
+    -fx-font-size: 11px;
+}
+
+.pref-restart-hint {
+    -fx-text-fill: #b06000;
+    -fx-font-size: 11px;
+    -fx-padding: 2 6 2 6;
+    -fx-background-color: #fff3cd;
+    -fx-background-radius: 3;
+}
+
+.pref-monospace {
+    -fx-font-family: "Monospaced", "Menlo", "Consolas", monospace;
+    -fx-font-size: 12px;
+}
+
+.pref-path-label {
+    -fx-text-fill: #555555;
+    -fx-font-family: "Monospaced", "Menlo", "Consolas", monospace;
+    -fx-font-size: 11px;
+}

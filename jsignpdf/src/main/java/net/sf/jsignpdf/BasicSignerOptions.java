@@ -41,6 +41,7 @@ import net.sf.jsignpdf.types.PDFEncryption;
 import net.sf.jsignpdf.types.PrintRight;
 import net.sf.jsignpdf.types.RenderMode;
 import net.sf.jsignpdf.types.ServerAuthentication;
+import net.sf.jsignpdf.utils.AppConfig;
 import net.sf.jsignpdf.utils.PropertyProvider;
 import net.sf.jsignpdf.utils.PropertyStoreFactory;
 
@@ -1077,7 +1078,7 @@ public class BasicSignerOptions {
      * @return
      */
     public String getTsaHashAlgWithFallback() {
-        return StringUtils.defaultIfBlank(tsaHashAlg, Constants.DEFVAL_TSA_HASH_ALG);
+        return StringUtils.defaultIfBlank(tsaHashAlg, AppConfig.defaultTsaHashAlg());
     }
 
     /**

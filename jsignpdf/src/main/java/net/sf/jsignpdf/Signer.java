@@ -51,7 +51,6 @@ import javax.swing.WindowConstants;
 
 import net.sf.jsignpdf.fx.FxLauncher;
 import net.sf.jsignpdf.ssl.SSLInitializer;
-import net.sf.jsignpdf.utils.ConfigProvider;
 import net.sf.jsignpdf.utils.GuiUtils;
 import net.sf.jsignpdf.utils.KeyStoreUtils;
 import net.sf.jsignpdf.utils.PKCS11Utils;
@@ -102,7 +101,7 @@ public class Signer {
             LOGGER.log(Level.WARNING, "Unable to re-configure SSL layer", e);
         }
 
-        PKCS11Utils.registerProviders(ConfigProvider.getInstance().getProperty("pkcs11config.path"));
+        PKCS11Utils.registerProvidersFromDefaultLocation();
 
         traceInfo();
         boolean showGui = true;

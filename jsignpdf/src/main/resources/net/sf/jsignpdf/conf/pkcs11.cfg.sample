@@ -1,0 +1,10 @@
+# Sample file for registering PKCS#11 security provider in JSignPdf
+# Feel free to edit it and then set path to the file in the conf.properties configuration file.
+
+# Look for full list of possible attributes at
+# http://download.oracle.com/javase/8/docs/technotes/guides/security/p11guide.html#ATTRS
+
+name=JSignPdf
+
+library=/usr/lib/libeToken.so
+slot=1
