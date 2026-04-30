@@ -106,6 +106,8 @@ back `SunPKCS11` with a software NSS database.
 > does not support NSS keystores.
 
 ```bash
+sudo apt install -y libnss3-tools
+
 echo "pass123+" > /tmp/newpass.txt
 echo "dsadasdasdasdadasdasdasdasdsadfwerwerjfdksdjfksdlfhjsdk" > /tmp/noise.txt
 mkdir /tmp/nssdb
@@ -121,7 +123,9 @@ certutil -S -v 240 -k rsa -n "CN=localhost" -t "u,u,u" -x \
 # Workaround for https://bugzilla.redhat.com/show_bug.cgi?id=1760437
 touch /tmp/nssdb/secmod.db
 
-cat <<EOT > "$XDG_CONFIG_HOME/jsignpdf/pkcs11.cfg"
+mkdir -p ~/.config/jsignpdf
+
+cat <<EOT >~/.config/jsignpdf/pkcs11.cfg 
 name=testPkcs11
 nssLibraryDirectory=/usr/lib/x86_64-linux-gnu
 nssSecmodDirectory=/tmp/nssdb
