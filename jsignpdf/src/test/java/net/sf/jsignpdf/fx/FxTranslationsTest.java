@@ -90,10 +90,8 @@ public class FxTranslationsTest {
                     bundle.getString("jfx.gui.menu.signing"), menuBar.getMenus().get(2).getText());
             assertEquals("Presets menu for " + locale,
                     bundle.getString("jfx.gui.menu.presets"), menuBar.getMenus().get(3).getText());
-            assertEquals("Tools menu for " + locale,
-                    bundle.getString("jfx.gui.menu.tools"), menuBar.getMenus().get(4).getText());
             assertEquals("Help menu for " + locale,
-                    bundle.getString("jfx.gui.menu.help"), menuBar.getMenus().get(5).getText());
+                    bundle.getString("jfx.gui.menu.help"), menuBar.getMenus().get(4).getText());
         }
     }
 
@@ -110,6 +108,7 @@ public class FxTranslationsTest {
             assertMenuContains(fileMenu, bundle, "jfx.gui.menu.file.close", locale);
             assertMenuContains(fileMenu, bundle, "jfx.gui.menu.file.saveAs", locale);
             assertMenuContains(fileMenu, bundle, "jfx.gui.menu.file.resetSettings", locale);
+            assertMenuContains(fileMenu, bundle, "jfx.gui.menu.file.preferences", locale);
             assertMenuContains(fileMenu, bundle, "jfx.gui.menu.file.exit", locale);
         }
     }
@@ -348,8 +347,7 @@ public class FxTranslationsTest {
         assertEquals("View", menuBar.getMenus().get(1).getText());
         assertEquals("Signing", menuBar.getMenus().get(2).getText());
         assertEquals("Presets", menuBar.getMenus().get(3).getText());
-        assertEquals("Tools", menuBar.getMenus().get(4).getText());
-        assertEquals("Help", menuBar.getMenus().get(5).getText());
+        assertEquals("Help", menuBar.getMenus().get(4).getText());
         assertEquals("Drop a PDF file here or use File > Open", getDropHintLabel(root).getText());
     }
 
@@ -363,8 +361,7 @@ public class FxTranslationsTest {
         assertEquals("Ansicht", menuBar.getMenus().get(1).getText());
         assertEquals("Signierung", menuBar.getMenus().get(2).getText());
         assertEquals("Voreinstellungen", menuBar.getMenus().get(3).getText());
-        assertEquals("Werkzeuge", menuBar.getMenus().get(4).getText());
-        assertEquals("Hilfe", menuBar.getMenus().get(5).getText());
+        assertEquals("Hilfe", menuBar.getMenus().get(4).getText());
     }
 
     @Test
