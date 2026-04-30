@@ -94,7 +94,7 @@ Per-user state lives under a platform-native `<config-dir>` resolved by `ConfigL
 - **Presets** -- `<config-dir>/presets/preset-<epoch-millis>.properties` -- saved signing-option bundles. Display name lives inside as `preset.displayName`. Loaded/managed by `PresetManager`.
 - **Advanced config** -- `<config-dir>/advanced.properties` -- app-global tweaks (font, certificate checks, relax SSL, PDF preview backends, default TSA hash). Two-layer overlay: user file → bundled defaults from `/net/sf/jsignpdf/conf/advanced.default.properties`. Read via `AppConfig` static accessors; edited via the JavaFX _File > Preferences..._ dialog (`PreferencesController`).
 - **PKCS#11 config** -- `<config-dir>/pkcs11.cfg` -- raw SunPKCS11 provider config at a fixed well-known location (the legacy `pkcs11config.path` key was removed in 3.0.0). Loaded by `PKCS11Utils.registerProvidersFromDefaultLocation()` once at startup; restart required to re-register.
-- **Legacy migration** -- on first launch, `ConfigLocationResolver.resolveAndMigrate()` copies `~/.JSignPdf` to `config.properties` and migrates edited install-dir `conf/conf.properties` / `conf/pkcs11.cfg` files (byte-equality against bundled samples = skip). Originals are left in place for downgrade safety.
+- **Legacy migration** -- on first launch, `ConfigLocationResolver.resolveAndMigrate()` copies `~/.JSignPdf` to `config.properties`. The original is left in place for downgrade safety.
 
 ## Testing
 

@@ -35,10 +35,6 @@
             </includes>
         </fileSet>
         <fileSet>
-            <directory>conf</directory>
-            <outputDirectory>/conf/</outputDirectory>
-        </fileSet>
-        <fileSet>
             <directory>licenses</directory>
             <outputDirectory>/licenses/</outputDirectory>
         </fileSet>

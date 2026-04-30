@@ -17,12 +17,8 @@ import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 
 /**
- * Tests for the migration logic and accessor surface added in
- * {@link ConfigLocationResolver}: the new advanced.properties / pkcs11.cfg paths and the fresh-install no-op behaviour. The
- * byte-equality migration heuristic is exercised via a CI-friendly path: we point {@code IOUtils.findFile} at our temp
- * install dir by exploiting the fact that {@code IOUtils.findFile} resolves relative paths against the {@code jsignpdf.home}
- * system property only at lookup time (when no override is set, lookups against absent files return null and migration is a
- * no-op).
+ * Tests for the accessor surface added in {@link ConfigLocationResolver}: the new advanced.properties / pkcs11.cfg paths
+ * and the fresh-install no-op behaviour. Bundled jar resources are also exercised here.
  */
 public class AdvancedMigrationTest {
 

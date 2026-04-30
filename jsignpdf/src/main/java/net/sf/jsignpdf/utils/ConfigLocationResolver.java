@@ -41,8 +41,9 @@ import java.util.function.Function;
 import java.util.logging.Level;
 
 /**
- * Resolves the application's config directory, the main config file, and the presets directory, and handles the one-shot
- * migration from the legacy {@code ~/.JSignPdf} file layout.
+ * Resolves the application's config directory, the main config file, the presets directory, and the advanced/PKCS#11
+ * config files. On first launch, performs a one-shot migration of the legacy {@code ~/.JSignPdf} file into
+ * {@code <cfg>/config.properties}.
  * <p>
  * Resolution order:
  * <ol>
@@ -167,41 +168,7 @@ public final class ConfigLocationResolver {
             return null;
         }
 
-        migrateInstallDirFile("conf/conf.properties", "/net/sf/jsignpdf/conf/advanced.default.properties",
-                target.resolve(ADVANCED_CONFIG_FILE_NAME));
-        migrateInstallDirFile("conf/pkcs11.cfg", "/net/sf/jsignpdf/conf/pkcs11.cfg.sample",
-                target.resolve(PKCS11_CONFIG_FILE_NAME));
-
         return target;
-    }
-
-    /**
-     * Copies an install-dir file to the new {@code <cfg>} location only when it differs from the bundled jar sample. Lets a
-     * fresh install (file byte-equal to bundled sample) skip migration.
-     */
-    private static void migrateInstallDirFile(String installRelativePath, String bundledResource, Path target) {
-        try {
-            java.io.File installFile = IOUtils.findFile(installRelativePath);
-            if (installFile == null || !installFile.isFile() || !installFile.canRead()) {
-                return;
-            }
-            byte[] userBytes = Files.readAllBytes(installFile.toPath());
-            byte[] sampleBytes;
-            try (java.io.InputStream is = ConfigLocationResolver.class.getResourceAsStream(bundledResource)) {
-                if (is == null) {
-                    LOGGER.warning("Bundled resource missing: " + bundledResource);
-                    return;
-                }
-                sampleBytes = is.readAllBytes();
-            }
-            if (java.util.Arrays.equals(userBytes, sampleBytes)) {
-                return;
-            }
-            Files.copy(installFile.toPath(), target, StandardCopyOption.COPY_ATTRIBUTES);
-            LOGGER.info("Migrated edited install-dir file " + installFile + " to " + target);
-        } catch (IOException e) {
-            LOGGER.log(Level.WARNING, "Failed to migrate " + installRelativePath, e);
-        }
     }
 
     private Path resolveTargetDir() {
