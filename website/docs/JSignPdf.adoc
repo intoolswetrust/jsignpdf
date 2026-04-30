@@ -234,7 +234,7 @@ Presets are plain Java properties files under the <<Configuration directory,conf
 
 === Adjusting advanced preferences
 
-Open _Tools > Preferences..._ (shortcut `Ctrl+,` / `⌘,`) for application-wide tweaks that fall outside the per-document signing options. The dialog has six tabs:
+Open _File > Preferences..._ (shortcut `Ctrl+,` / `⌘,`) for application-wide tweaks that fall outside the per-document signing options. The dialog has six tabs:
 
 * **Visible Signature** -- font file, font name and encoding for the visible-signature L2 text
 * **Certificates** -- which certificate checks (validity, key usage, critical extensions) are applied when listing aliases
@@ -823,7 +823,7 @@ If some "online" feature (TSA, CRL, OCSP) is enabled and JSignPdf runs behind a 
 Steps to sign documents using hardware tokens:
 
 . Install PKCS#11 driver for your token. Check the vendor's documentation and install a proper driver for your system;
-. Place a configuration file at `<config-dir>/pkcs11.cfg` (see <<Configuration directory>>). It is used to configure a Java SunPKCS11 security provider (see https://docs.oracle.com/en/java/javase/11/security/pkcs11-reference-guide1.html[PKCS#11 Reference Guide]). The easiest way to create or edit it is via _Tools > Preferences > PKCS#11_ in the JavaFX UI. +
+. Place a configuration file at `<config-dir>/pkcs11.cfg` (see <<Configuration directory>>). It is used to configure a Java SunPKCS11 security provider (see https://docs.oracle.com/en/java/javase/11/security/pkcs11-reference-guide1.html[PKCS#11 Reference Guide]). The easiest way to create or edit it is via _File > Preferences > PKCS#11_ in the JavaFX UI. +
 The content depends on your driver, you can try to start with a simple 2 lines: +
 [source]
 ----
