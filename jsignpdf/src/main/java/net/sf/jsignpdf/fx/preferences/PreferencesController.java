@@ -337,12 +337,16 @@ public class PreferencesController {
                 FontUtils.reset();
             }
             if (pkcs11Path != null) {
-                Path parent = pkcs11Path.getParent();
-                if (parent != null) {
-                    Files.createDirectories(parent);
-                }
                 String body = vm.pkcs11BodyProperty().get();
-                Files.writeString(pkcs11Path, body == null ? "" : body, StandardCharsets.UTF_8);
+                if (body == null || body.isBlank()) {
+                    Files.deleteIfExists(pkcs11Path);
+                } else {
+                    Path parent = pkcs11Path.getParent();
+                    if (parent != null) {
+                        Files.createDirectories(parent);
+                    }
+                    Files.writeString(pkcs11Path, body, StandardCharsets.UTF_8);
+                }
             }
             return true;
         } catch (Exception e) {

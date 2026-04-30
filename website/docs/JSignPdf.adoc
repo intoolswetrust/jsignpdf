@@ -876,11 +876,11 @@ In JSignPdf 2.x the same options lived in `<install dir>/conf/conf.properties` a
 * `<install dir>/conf/conf.properties` -> `<config-dir>/advanced.properties`
 * `<install dir>/conf/pkcs11.cfg` -> `<config-dir>/pkcs11.cfg` (a fixed well-known location; the `pkcs11config.path` key has been removed)
 
-On the first launch of 3.0.0, JSignPdf checks the install-dir copies of both files and migrates them only if you actually edited them (i.e. their contents differ from the bundled samples). Unmodified files are skipped to avoid carrying over stale example values like `library=/usr/lib/libeToken.so` into a fresh install. The original install-dir files are left in place so a downgrade keeps working.
+The 3.0.0 distribution no longer ships an `<install dir>/conf/` directory and there is no automatic migration of pre-3.0.0 install-dir tweaks. If you previously customized `conf.properties` or maintained a `pkcs11.cfg`, re-enter the values via the Preferences dialog -- or copy your old files into `<config-dir>/advanced.properties` and `<config-dir>/pkcs11.cfg` by hand before launching 3.0.0.
 
 === Configuration directory
 
-Starting with JSignPdf 3.0.0, per-user state is stored in a platform-native configuration directory instead of a single file in your home folder. The directory holds the main config file (`config.properties`, which persists the last-used signing settings), a `presets/` subdirectory (see <<Using presets>>), and -- once you visit the Preferences dialog or migrate from a 2.x install -- the advanced-config files `advanced.properties` and `pkcs11.cfg` (see <<Advanced application configuration>>).
+Starting with JSignPdf 3.0.0, per-user state is stored in a platform-native configuration directory instead of a single file in your home folder. The directory holds the main config file (`config.properties`, which persists the last-used signing settings), a `presets/` subdirectory (see <<Using presets>>), and -- once you save changes from the Preferences dialog -- the advanced-config files `advanced.properties` and `pkcs11.cfg` (see <<Advanced application configuration>>).
 
 The default location depends on your operating system:
 
@@ -918,7 +918,7 @@ Preset filenames are opaque (`preset-<epoch-millis>.properties`); the user-visib
 
 ==== Migration from earlier versions
 
-Previous versions of JSignPdf stored everything in `~/.JSignPdf` (a single file in your home directory) plus the install-dir files `conf/conf.properties` and `conf/pkcs11.cfg`. On the first run of JSignPdf 3.0.0 or newer, if the new configuration directory does not yet exist, JSignPdf populates it from these locations: `~/.JSignPdf` is copied to `<config-dir>/config.properties`, and any edited install-dir files are copied to `<config-dir>/advanced.properties` and `<config-dir>/pkcs11.cfg` (see <<Advanced application configuration>>). An empty `presets/` subdirectory is created at the same time. **The legacy files are left in place**, so if you downgrade to an older JSignPdf release, it continues to work with its old settings.
+Previous versions of JSignPdf stored the main settings in `~/.JSignPdf` (a single file in your home directory). On the first run of JSignPdf 3.0.0 or newer, if the new configuration directory does not yet exist, JSignPdf copies `~/.JSignPdf` to `<config-dir>/config.properties` and creates an empty `presets/` subdirectory. **The legacy file is left in place**, so if you downgrade to an older JSignPdf release, it continues to work with its old settings. Pre-3.0.0 install-dir tweaks (`conf/conf.properties` and `conf/pkcs11.cfg`) are *not* migrated automatically -- see <<Advanced application configuration>> for what to do.
 
 Once the new directory exists, the legacy locations are no longer consulted or updated.
 
