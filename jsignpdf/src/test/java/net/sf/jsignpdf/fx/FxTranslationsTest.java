@@ -363,8 +363,7 @@ public class FxTranslationsTest {
         assertEquals("Ansicht", menuBar.getMenus().get(1).getText());
         assertEquals("Signierung", menuBar.getMenus().get(2).getText());
         assertEquals("Voreinstellungen", menuBar.getMenus().get(3).getText());
-        // Tools is untranslated (English fallback) until German translation is contributed.
-        assertEquals("Tools", menuBar.getMenus().get(4).getText());
+        assertEquals("Werkzeuge", menuBar.getMenus().get(4).getText());
         assertEquals("Hilfe", menuBar.getMenus().get(5).getText());
     }
 
