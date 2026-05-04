@@ -137,10 +137,9 @@ public class KeyStoreUtils {
         try {
             LOGGER.info(RES.get("console.getAliases"));
             final Enumeration<String> tmpAliases = aKs.aliases();
-            final boolean checkValidity = ConfigProvider.getInstance().getAsBool("certificate.checkValidity", true);
-            final boolean checkKeyUsage = ConfigProvider.getInstance().getAsBool("certificate.checkKeyUsage", true);
-            final boolean checkCriticalExtensions = ConfigProvider.getInstance()
-                    .getAsBool("certificate.checkCriticalExtensions", true);
+            final boolean checkValidity = AppConfig.checkValidity();
+            final boolean checkKeyUsage = AppConfig.checkKeyUsage();
+            final boolean checkCriticalExtensions = AppConfig.checkCriticalExtensions();
             while (tmpAliases.hasMoreElements()) {
                 String tmpAlias = tmpAliases.nextElement();
                 if (aKs.isKeyEntry(tmpAlias)) {

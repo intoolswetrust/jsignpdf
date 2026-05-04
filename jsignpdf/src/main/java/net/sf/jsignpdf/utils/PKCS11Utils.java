@@ -32,6 +32,10 @@ package net.sf.jsignpdf.utils;
 import static net.sf.jsignpdf.Constants.LOGGER;
 
 import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.security.KeyStore;
 import java.security.Provider;
 import java.security.Security;
@@ -46,8 +50,41 @@ import org.apache.commons.lang3.StringUtils;
  */
 public class PKCS11Utils {
 
+    private static final String SAMPLE_RESOURCE = "/net/sf/jsignpdf/conf/pkcs11.cfg.sample";
+
     public static volatile Provider SUN_PROVIDER;
     public static volatile Provider JSIGN_PROVIDER;
+
+    /**
+     * Registers PKCS#11 providers from {@code <cfg>/pkcs11.cfg} when that file exists. No-op if the config dir is unresolved
+     * or the file is missing — matching the empty-path early-return in {@link #registerProviders(String)}.
+     */
+    public static void registerProvidersFromDefaultLocation() {
+        Path cfgFile = ConfigLocationResolver.getInstance().getPkcs11ConfigFile();
+        if (cfgFile == null) {
+            return;
+        }
+        if (Files.isRegularFile(cfgFile)) {
+            registerProviders(cfgFile.toString());
+        }
+    }
+
+    /**
+     * Returns the bundled PKCS#11 sample as a String. Used by the Preferences PKCS#11 tab to populate the textarea on
+     * "Reset to bundled sample".
+     */
+    public static String getSampleConfig() {
+        try (InputStream is = PKCS11Utils.class.getResourceAsStream(SAMPLE_RESOURCE)) {
+            if (is == null) {
+                LOGGER.warning("Bundled PKCS#11 sample missing: " + SAMPLE_RESOURCE);
+                return "";
+            }
+            return new String(is.readAllBytes(), java.nio.charset.StandardCharsets.UTF_8);
+        } catch (IOException e) {
+            LOGGER.log(Level.WARNING, "Failed to read bundled PKCS#11 sample", e);
+            return "";
+        }
+    }
 
     /**
      * Tries to register the sun.security.pkcs11.SunPKCS11 provider with configuration provided in the given file.

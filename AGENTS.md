@@ -88,8 +88,13 @@ GUI (JavaFX / Swing)            ──┘         (model)              (signing 
 
 ### Configuration
 
-- **User settings**: `~/.JSignPdf` (properties file, passwords encrypted per-user)
-- **App config**: `conf/conf.properties`
+Per-user state lives under a platform-native `<config-dir>` resolved by `ConfigLocationResolver` (Linux: `$XDG_CONFIG_HOME/jsignpdf` or `~/.config/jsignpdf`; Windows: `%APPDATA%\JSignPdf`; macOS: `~/Library/Application Support/JSignPdf`). Override with `JSIGNPDF_CONFIG_DIR`. `PropertyStoreFactory` hands out `PropertyProvider` / `AdvancedConfig` instances backed by these files; tests construct them directly with a temp path instead of going through the singleton.
+
+- **Main config** -- `<config-dir>/config.properties` -- last-used signing settings; passwords encrypted per-user. Backed by `BasicSignerOptions` / `PropertyProvider`.
+- **Presets** -- `<config-dir>/presets/preset-<epoch-millis>.properties` -- saved signing-option bundles. Display name lives inside as `preset.displayName`. Loaded/managed by `PresetManager`.
+- **Advanced config** -- `<config-dir>/advanced.properties` -- app-global tweaks (font, certificate checks, relax SSL, PDF preview backends, default TSA hash). Two-layer overlay: user file → bundled defaults from `/net/sf/jsignpdf/conf/advanced.default.properties`. Read via `AppConfig` static accessors; edited via the JavaFX _File > Preferences..._ dialog (`PreferencesController`).
+- **PKCS#11 config** -- `<config-dir>/pkcs11.cfg` -- raw SunPKCS11 provider config at a fixed well-known location (the legacy `pkcs11config.path` key was removed in 3.0.0). Loaded by `PKCS11Utils.registerProvidersFromDefaultLocation()` once at startup; restart required to re-register.
+- **Legacy migration** -- on first launch, `ConfigLocationResolver.resolveAndMigrate()` copies `~/.JSignPdf` to `config.properties`. The original is left in place for downgrade safety.
 
 ## Testing
 

@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<TabPane xmlns="http://javafx.com/javafx"
+         xmlns:fx="http://javafx.com/fxml"
+         fx:controller="net.sf.jsignpdf.fx.preferences.PreferencesController"
+         fx:id="tabPane"
+         tabClosingPolicy="UNAVAILABLE"
+         prefWidth="720" prefHeight="520">
+
+    <!-- Visible signature font -->
+    <Tab fx:id="tabFont" text="%jfx.gui.preferences.section.font">
+        <ScrollPane fitToWidth="true">
+            <VBox spacing="8">
+                <padding><Insets top="12" right="12" bottom="12" left="12"/></padding>
+
+                <Label text="%jfx.gui.preferences.font.path"/>
+                <HBox spacing="6">
+                    <TextField fx:id="txtFontPath" HBox.hgrow="ALWAYS"/>
+                    <Button fx:id="btnFontPathBrowse" text="%jfx.gui.preferences.font.path.browse"
+                            onAction="#onBrowseFontPath"/>
+                </HBox>
+                <Label text="%jfx.gui.preferences.font.path.help" styleClass="pref-help" wrapText="true"/>
+
+                <Label text="%jfx.gui.preferences.font.name"/>
+                <TextField fx:id="txtFontName"/>
+                <Label text="%jfx.gui.preferences.font.name.help" styleClass="pref-help" wrapText="true"/>
+
+                <Label text="%jfx.gui.preferences.font.encoding"/>
+                <ComboBox fx:id="cmbFontEncoding" editable="true" prefWidth="220"/>
+                <Label text="%jfx.gui.preferences.font.encoding.help" styleClass="pref-help" wrapText="true"/>
+            </VBox>
+        </ScrollPane>
+    </Tab>
+
+    <!-- Certificate validation -->
+    <Tab fx:id="tabCertificate" text="%jfx.gui.preferences.section.certificate">
+        <VBox spacing="8">
+            <padding><Insets top="12" right="12" bottom="12" left="12"/></padding>
+            <CheckBox fx:id="chkCertCheckValidity" text="%jfx.gui.preferences.cert.checkValidity"/>
+            <Label text="%jfx.gui.preferences.cert.checkValidity.help" styleClass="pref-help" wrapText="true"/>
+            <CheckBox fx:id="chkCertCheckKeyUsage" text="%jfx.gui.preferences.cert.checkKeyUsage"/>
+            <Label text="%jfx.gui.preferences.cert.checkKeyUsage.help" styleClass="pref-help" wrapText="true"/>
+            <CheckBox fx:id="chkCertCheckCriticalExtensions" text="%jfx.gui.preferences.cert.checkCriticalExtensions"/>
+            <Label text="%jfx.gui.preferences.cert.checkCriticalExtensions.help"
+                   styleClass="pref-help" wrapText="true"/>
+        </VBox>
+    </Tab>
+
+    <!-- Network / SSL -->
+    <Tab fx:id="tabNetwork" text="%jfx.gui.preferences.section.network">
+        <VBox spacing="8">
+            <padding><Insets top="12" right="12" bottom="12" left="12"/></padding>
+            <HBox spacing="10" alignment="CENTER_LEFT">
+                <CheckBox fx:id="chkRelaxSslSecurity" text="%jfx.gui.preferences.network.relaxSsl"/>
+                <Label text="%jfx.gui.preferences.restartHint" styleClass="pref-restart-hint">
+                    <tooltip><Tooltip text="%jfx.gui.preferences.restartHint.tooltip"/></tooltip>
+                </Label>
+            </HBox>
+            <Label text="%jfx.gui.preferences.network.relaxSsl.help" styleClass="pref-help" wrapText="true"/>
+        </VBox>
+    </Tab>
+
+    <!-- PDF render -->
+    <Tab fx:id="tabPdfRender" text="%jfx.gui.preferences.section.pdfRender">
+        <VBox spacing="8">
+            <padding><Insets top="12" right="12" bottom="12" left="12"/></padding>
+            <Label text="%jfx.gui.preferences.pdfRender.libraries"/>
+            <Label text="%jfx.gui.preferences.pdfRender.libraries.help" styleClass="pref-help" wrapText="true"/>
+            <VBox fx:id="vboxPdfLibs" spacing="4"/>
+        </VBox>
+    </Tab>
+
+    <!-- TSA -->
+    <Tab fx:id="tabTsa" text="%jfx.gui.preferences.section.tsa">
+        <VBox spacing="8">
+            <padding><Insets top="12" right="12" bottom="12" left="12"/></padding>
+            <Label text="%jfx.gui.preferences.tsa.hashAlgorithm"/>
+            <ComboBox fx:id="cmbTsaHashAlgorithm" prefWidth="220"/>
+            <Label text="%jfx.gui.preferences.tsa.hashAlgorithm.help" styleClass="pref-help" wrapText="true"/>
+        </VBox>
+    </Tab>
+
+    <!-- PKCS#11 -->
+    <Tab fx:id="tabPkcs11" text="%jfx.gui.preferences.section.pkcs11">
+        <VBox spacing="8">
+            <padding><Insets top="12" right="12" bottom="12" left="12"/></padding>
+            <Label fx:id="lblPkcs11Path" styleClass="pref-path-label" wrapText="true"/>
+            <Label text="%jfx.gui.preferences.restartHint" styleClass="pref-restart-hint" maxWidth="-Infinity">
+                <tooltip><Tooltip text="%jfx.gui.preferences.restartHint.tooltip"/></tooltip>
+            </Label>
+            <TextArea fx:id="txtPkcs11Body" wrapText="false" prefRowCount="20" prefColumnCount="80"
+                      VBox.vgrow="ALWAYS" styleClass="pref-monospace"/>
+            <Label text="%jfx.gui.preferences.pkcs11.help" styleClass="pref-help" wrapText="true"/>
+            <Label fx:id="lblPkcs11EmptyHint" text="%jfx.gui.preferences.pkcs11.emptyHint"
+                   styleClass="pref-help" wrapText="true"/>
+            <HBox spacing="6">
+                <Button fx:id="btnPkcs11ResetSample" text="%jfx.gui.preferences.pkcs11.resetSample"
+                        onAction="#onPkcs11ResetSample"/>
+            </HBox>
+        </VBox>
+    </Tab>
+
+</TabPane>

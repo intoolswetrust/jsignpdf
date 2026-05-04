@@ -41,7 +41,6 @@ import java.util.logging.LogManager;
 import java.util.logging.Logger;
 
 import net.sf.jsignpdf.types.HashAlgorithm;
-import net.sf.jsignpdf.utils.ConfigProvider;
 import net.sf.jsignpdf.utils.ResourceProvider;
 
 /**
@@ -98,8 +97,6 @@ public class Constants {
      */
     public static final String PROPERTIES_FILE = ".JSignPdf";
 
-    public static final String CONF_FILE = "conf/conf.properties";
-
     /**
      * Name of X.509 certificate type.
      */
@@ -129,18 +126,11 @@ public class Constants {
 
     public static final ResourceProvider RES = new ResourceProvider(ResourceBundle.getBundle(RESOURCE_BUNDLE_BASE));
 
-    public static final boolean RELAX_SSL_SECURITY = ConfigProvider.getInstance().getAsBool("relax.ssl.security");
-
     public static final String PDF2IMAGE_JPEDAL = "jpedal";
     public static final String PDF2IMAGE_PDFBOX = "pdfbox";
     public static final String PDF2IMAGE_OPENPDF = "openpdf";
     public static final String PDF2IMAGE_LIBRARIES_DEFAULT = PDF2IMAGE_JPEDAL + "," + PDF2IMAGE_PDFBOX + ","
             + PDF2IMAGE_OPENPDF;
-    public static final String PDF2IMAGE_LIBRARIES = ConfigProvider.getInstance().getNotEmptyProperty("pdf2image.libraries",
-            PDF2IMAGE_LIBRARIES_DEFAULT);
-
-    public static final String DEFVAL_TSA_HASH_ALG = ConfigProvider.getInstance().getNotEmptyProperty("tsa.hashAlgorithm",
-            "SHA-256");
 
     /**
      * Property name.

@@ -41,13 +41,13 @@ import javax.net.ssl.TrustManager;
 import javax.net.ssl.TrustManagerFactory;
 import javax.net.ssl.X509TrustManager;
 
-import net.sf.jsignpdf.Constants;
+import net.sf.jsignpdf.utils.AppConfig;
 import net.sf.jsignpdf.utils.KeyStoreUtils;
 
 /**
- * TrustManager which works with in-memory copy of cacerts truststore. If {@link Constants#RELAX_SSL_SECURITY} is true then it
+ * TrustManager which works with in-memory copy of cacerts truststore. If {@link AppConfig#relaxSslSecurity()} is true then it
  * adds missing server certificates to the truststore.
- * 
+ *
  * @author Josef Cacek
  */
 public class DynamicX509TrustManager implements X509TrustManager {
@@ -85,13 +85,13 @@ public class DynamicX509TrustManager implements X509TrustManager {
     }
 
     /**
-     * Checks server's cert-chain. If check fails and {@link Constants#RELAX_SSL_SECURITY} is true then the first certificate
+     * Checks server's cert-chain. If check fails and {@link AppConfig#relaxSslSecurity()} is true then the first certificate
      * from the chain is added to the truststore and the check is repeated.
-     * 
+     *
      * @see javax.net.ssl.X509TrustManager#checkServerTrusted(java.security.cert.X509Certificate[], java.lang.String)
      */
     public void checkServerTrusted(X509Certificate[] chain, String authType) throws CertificateException {
-        if (Constants.RELAX_SSL_SECURITY) {
+        if (AppConfig.relaxSslSecurity()) {
             try {
                 trustManager.checkServerTrusted(chain, authType);
             } catch (CertificateException cx) {

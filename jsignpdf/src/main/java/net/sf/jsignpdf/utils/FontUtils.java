@@ -56,19 +56,18 @@ public class FontUtils {
      */
     public static synchronized BaseFont getL2BaseFont() {
         if (l2baseFont == null) {
-            final ConfigProvider conf = ConfigProvider.getInstance();
             try {
                 final ByteArrayOutputStream tmpBaos = new ByteArrayOutputStream();
-                String fontPath = conf.getNotEmptyProperty("font.path", null);
+                String fontPath = AppConfig.fontPath();
                 String fontName;
                 String fontEncoding;
                 InputStream tmpIs;
                 if (fontPath != null) {
-                    fontName = conf.getNotEmptyProperty("font.name", null);
+                    fontName = AppConfig.fontName();
                     if (fontName == null) {
                         fontName = new File(fontPath).getName();
                     }
-                    fontEncoding = conf.getNotEmptyProperty("font.encoding", null);
+                    fontEncoding = AppConfig.fontEncoding();
                     if (fontEncoding == null) {
                         fontEncoding = BaseFont.WINANSI;
                     }
@@ -93,6 +92,15 @@ public class FontUtils {
             }
         }
         return l2baseFont;
+    }
+
+    /**
+     * Drops the cached BaseFont so the next {@link #getL2BaseFont()} rebuilds from the current {@link AppConfig#fontPath()},
+     * {@link AppConfig#fontName()} and {@link AppConfig#fontEncoding()}. Called by the Preferences dialog when a font key
+     * changes so the new font shows up on the next sign / preview without restarting.
+     */
+    public static synchronized void reset() {
+        l2baseFont = null;
     }
 
 }

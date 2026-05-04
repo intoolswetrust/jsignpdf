@@ -41,6 +41,7 @@ import java.nio.channels.FileChannel;
 
 import net.sf.jsignpdf.BasicSignerOptions;
 import net.sf.jsignpdf.Constants;
+import net.sf.jsignpdf.utils.AppConfig;
 import net.sf.jsignpdf.utils.PdfUtils;
 
 import org.apache.pdfbox.Loader;
@@ -86,12 +87,15 @@ public class Pdf2Image {
      */
     public BufferedImage getImageForPage(final int aPage) {
         BufferedImage tmpResult = null;
-        for (String libname : Constants.PDF2IMAGE_LIBRARIES.split("\\s*,\\s*")) {
+        for (String libname : AppConfig.pdf2imageLibraries().split("\\s*,\\s*")) {
             tmpResult = switch (libname) {
                 case Constants.PDF2IMAGE_JPEDAL -> getImageUsingJPedal(aPage);
                 case Constants.PDF2IMAGE_PDFBOX -> getImageUsingPdfBox(aPage);
                 case Constants.PDF2IMAGE_OPENPDF -> getImageUsingOpenPdfRenderer(aPage);
-                default -> null;
+                default -> {
+                    Constants.LOGGER.fine("Unknown pdf2image library: " + libname);
+                    yield null;
+                }
             };
             if (tmpResult != null)
                 break;

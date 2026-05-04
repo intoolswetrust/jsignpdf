@@ -55,6 +55,7 @@ import net.sf.jsignpdf.fx.control.PdfPageView;
 import net.sf.jsignpdf.fx.control.SignatureOverlay;
 import net.sf.jsignpdf.fx.service.PdfRenderService;
 import net.sf.jsignpdf.fx.service.SigningService;
+import net.sf.jsignpdf.fx.preferences.PreferencesController;
 import net.sf.jsignpdf.fx.preset.ManagePresetsDialog;
 import net.sf.jsignpdf.fx.preset.Preset;
 import net.sf.jsignpdf.fx.preset.PresetManager;
@@ -119,6 +120,7 @@ public class MainWindowController {
     @FXML private MenuItem menuResetSettings;
     @FXML private MenuItem menuSavePresetAsNew;
     @FXML private MenuItem menuManagePresets;
+    @FXML private MenuItem menuPreferences;
     @FXML private MenuItem menuAbout;
 
     // Toolbar
@@ -523,6 +525,11 @@ public class MainWindowController {
         signingVM.syncToOptions(options);
         ManagePresetsDialog dialog = new ManagePresetsDialog(presetManager, options, stage);
         dialog.showAndWait();
+    }
+
+    @FXML
+    private void onPreferences() {
+        PreferencesController.show(stage);
     }
 
     private String validationMessage(PresetValidation.Result result) {

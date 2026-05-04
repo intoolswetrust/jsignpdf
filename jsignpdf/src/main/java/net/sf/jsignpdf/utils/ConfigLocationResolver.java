@@ -41,8 +41,9 @@ import java.util.function.Function;
 import java.util.logging.Level;
 
 /**
- * Resolves the application's config directory, the main config file, and the presets directory, and handles the one-shot
- * migration from the legacy {@code ~/.JSignPdf} file layout.
+ * Resolves the application's config directory, the main config file, the presets directory, and the advanced/PKCS#11
+ * config files. On first launch, performs a one-shot migration of the legacy {@code ~/.JSignPdf} file into
+ * {@code <cfg>/config.properties}.
  * <p>
  * Resolution order:
  * <ol>
@@ -61,6 +62,8 @@ public final class ConfigLocationResolver {
     static final String LEGACY_FILE_NAME = ".JSignPdf";
     static final String MAIN_CONFIG_FILE_NAME = "config.properties";
     static final String PRESETS_DIR_NAME = "presets";
+    static final String ADVANCED_CONFIG_FILE_NAME = "advanced.properties";
+    static final String PKCS11_CONFIG_FILE_NAME = "pkcs11.cfg";
 
     public enum OsType { LINUX, WINDOWS, MAC }
 
@@ -123,6 +126,22 @@ public final class ConfigLocationResolver {
         return dir == null ? null : dir.resolve(PRESETS_DIR_NAME);
     }
 
+    /**
+     * Path to the advanced-config file ({@code <cfg>/advanced.properties}). May be {@code null} if {@link #getConfigDir()} is.
+     */
+    public Path getAdvancedConfigFile() {
+        Path dir = getConfigDir();
+        return dir == null ? null : dir.resolve(ADVANCED_CONFIG_FILE_NAME);
+    }
+
+    /**
+     * Path to the PKCS#11 provider config file ({@code <cfg>/pkcs11.cfg}). May be {@code null} if {@link #getConfigDir()} is.
+     */
+    public Path getPkcs11ConfigFile() {
+        Path dir = getConfigDir();
+        return dir == null ? null : dir.resolve(PKCS11_CONFIG_FILE_NAME);
+    }
+
     // Visible for tests.
     Path resolveAndMigrate() {
         Path target = resolveTargetDir();
@@ -148,6 +167,7 @@ public final class ConfigLocationResolver {
             LOGGER.log(Level.WARNING, "Failed to create config directory " + target, e);
             return null;
         }
+
         return target;
     }
 

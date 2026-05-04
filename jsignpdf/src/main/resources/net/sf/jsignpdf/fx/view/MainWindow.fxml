@@ -32,6 +32,8 @@
                     <SeparatorMenuItem/>
                     <MenuItem fx:id="menuResetSettings" text="%jfx.gui.menu.file.resetSettings"
                               onAction="#onResetSettings"/>
+                    <MenuItem fx:id="menuPreferences" text="%jfx.gui.menu.file.preferences"
+                              onAction="#onPreferences" accelerator="Shortcut+Comma"/>
                     <SeparatorMenuItem/>
                     <MenuItem fx:id="menuExit" text="%jfx.gui.menu.file.exit" onAction="#onFileExit"
                               accelerator="Shortcut+Q"/>
