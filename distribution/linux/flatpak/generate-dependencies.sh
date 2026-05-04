@@ -80,12 +80,16 @@ find "\$M2_DIR" -type f \( -name "*.jar" -o -name "*.pom" -o -name "*.aar" \) | 
   filename=\$(basename "\$file")
   dir=\$(dirname "\$file")
 
-  # Skip artifacts installed locally by 'mvn install' — the project's own
-  # modules have no remote URL, so flatpak-builder would 404 trying to fetch
-  # them. Maven records the source repo per file in _remote.repositories;
-  # a line "<filename>>=" (empty source) means locally installed.
-  if [[ -f "\$dir/_remote.repositories" ]] && \\
-     grep -qE "^\${filename}>=\$" "\$dir/_remote.repositories"; then
+  # Only include artifacts that came from Maven Central.
+  # _remote.repositories records the source repo per file:
+  #   "filename>central="           → downloaded from Maven Central  ✓ keep
+  #   "filename>="                  → locally installed by mvn install  ✗ skip
+  #   "filename>s01-...="           → downloaded from the snapshot repo  ✗ skip
+  # Using a whitelist avoids both locally-built modules and project snapshot
+  # artifacts (sources JARs etc.) that Maven fetches from the snapshot repo
+  # but whose Maven Central URL would 404 in flatpak-builder.
+  if [[ ! -f "\$dir/_remote.repositories" ]] || \
+     ! grep -qE "^\${filename}>central=" "\$dir/_remote.repositories"; then
     continue
   fi
 
