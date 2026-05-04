@@ -127,7 +127,7 @@
                     </configuration>
                     <executions>
                         <execution>
-                            <id>check-no-license-header</id>
+                            <id>checkstyle</id>
                             <phase>validate</phase>
                             <goals>
                                 <goal>check</goal>
