@@ -43,6 +43,7 @@ import javafx.stage.Stage;
 import net.sf.jsignpdf.Constants;
 import net.sf.jsignpdf.fx.util.NativeFileChooser;
 import net.sf.jsignpdf.fx.util.NativeFileChooser.ExtensionFilter;
+import net.sf.jsignpdf.ssl.SSLInitializer;
 import net.sf.jsignpdf.utils.AdvancedConfig;
 import net.sf.jsignpdf.utils.ConfigLocationResolver;
 import net.sf.jsignpdf.utils.FontUtils;
@@ -281,19 +282,15 @@ public class PreferencesController {
         Tab active = tabPane.getSelectionModel().getSelectedItem();
         AdvancedConfig defaults = bundledDefaultsHolder();
         if (active == tabFont) {
-            vm.fontPathProperty().set("");
-            vm.fontNameProperty().set("");
-            vm.fontEncodingProperty().set("");
+            vm.applyFontDefaults(defaults);
         } else if (active == tabCertificate) {
-            vm.checkValidityProperty().set(defaults.getAsBool("certificate.checkValidity", true));
-            vm.checkKeyUsageProperty().set(defaults.getAsBool("certificate.checkKeyUsage", true));
-            vm.checkCriticalExtensionsProperty().set(defaults.getAsBool("certificate.checkCriticalExtensions", false));
+            vm.applyCertificateDefaults(defaults);
         } else if (active == tabNetwork) {
-            vm.relaxSslSecurityProperty().set(defaults.getAsBool("relax.ssl.security", false));
+            vm.applyNetworkDefaults(defaults);
         } else if (active == tabPdfRender) {
-            vm.decodePdfLibraries(defaults.getNotEmptyProperty("pdf2image.libraries", "jpedal,pdfbox,openpdf"));
+            vm.applyPdfRenderDefaults(defaults);
         } else if (active == tabTsa) {
-            vm.tsaHashAlgorithmProperty().set(defaults.getNotEmptyProperty("tsa.hashAlgorithm", "SHA-256"));
+            vm.applyTsaDefaults(defaults);
         } else if (active == tabPkcs11) {
             vm.pkcs11BodyProperty().set(PKCS11Utils.getSampleConfig());
         }
@@ -335,6 +332,15 @@ public class PreferencesController {
             Set<String> changed = cfg.save();
             if (changed.stream().anyMatch(k -> k.startsWith("font."))) {
                 FontUtils.reset();
+            }
+            if (changed.contains("relax.ssl.security")) {
+                // Re-apply the trust-manager / hostname-verifier so a false→true toggle takes effect for the next request.
+                // The JVM-wide system properties (jsse.enableSNIExtension, etc.) still need a restart — covered by the hint label.
+                try {
+                    SSLInitializer.init();
+                } catch (Exception sslEx) {
+                    Constants.LOGGER.log(Level.WARNING, "Failed to re-init SSL after relax.ssl.security change", sslEx);
+                }
             }
             if (pkcs11Path != null) {
                 String body = vm.pkcs11BodyProperty().get();

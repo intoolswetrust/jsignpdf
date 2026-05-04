@@ -80,14 +80,34 @@ public class PreferencesViewModel {
 
     /** Resets every VM property to the bundled-default value (read from the given snapshot of bundled defaults). */
     public void applyDefaults(AdvancedConfig defaults) {
+        applyFontDefaults(defaults);
+        applyCertificateDefaults(defaults);
+        applyNetworkDefaults(defaults);
+        applyPdfRenderDefaults(defaults);
+        applyTsaDefaults(defaults);
+    }
+
+    public void applyFontDefaults(AdvancedConfig defaults) {
         fontPath.set(orEmpty(defaults.getBundledDefault("font.path")));
         fontName.set(orEmpty(defaults.getBundledDefault("font.name")));
         fontEncoding.set(orEmpty(defaults.getBundledDefault("font.encoding")));
+    }
+
+    public void applyCertificateDefaults(AdvancedConfig defaults) {
         checkValidity.set(parseBool(defaults.getBundledDefault("certificate.checkValidity"), true));
         checkKeyUsage.set(parseBool(defaults.getBundledDefault("certificate.checkKeyUsage"), true));
         checkCriticalExtensions.set(parseBool(defaults.getBundledDefault("certificate.checkCriticalExtensions"), false));
+    }
+
+    public void applyNetworkDefaults(AdvancedConfig defaults) {
         relaxSslSecurity.set(parseBool(defaults.getBundledDefault("relax.ssl.security"), false));
+    }
+
+    public void applyPdfRenderDefaults(AdvancedConfig defaults) {
         decodePdfLibraries(orFallback(defaults.getBundledDefault("pdf2image.libraries"), "jpedal,pdfbox,openpdf"));
+    }
+
+    public void applyTsaDefaults(AdvancedConfig defaults) {
         tsaHashAlgorithm.set(orFallback(defaults.getBundledDefault("tsa.hashAlgorithm"), "SHA-256"));
     }
 

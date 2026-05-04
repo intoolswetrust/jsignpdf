@@ -92,7 +92,10 @@ public class Pdf2Image {
                 case Constants.PDF2IMAGE_JPEDAL -> getImageUsingJPedal(aPage);
                 case Constants.PDF2IMAGE_PDFBOX -> getImageUsingPdfBox(aPage);
                 case Constants.PDF2IMAGE_OPENPDF -> getImageUsingOpenPdfRenderer(aPage);
-                default -> null;
+                default -> {
+                    Constants.LOGGER.fine("Unknown pdf2image library: " + libname);
+                    yield null;
+                }
             };
             if (tmpResult != null)
                 break;
