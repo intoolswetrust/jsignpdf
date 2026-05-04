@@ -234,7 +234,7 @@ Presets are plain Java properties files under the <<Configuration directory,conf
 
 === Adjusting advanced preferences
 
-Open _File > Preferences..._ (shortcut `Ctrl+,` / `⌘,`) for application-wide tweaks that fall outside the per-document signing options. The dialog has six tabs:
+Open _File > Preferences..._ (shortcut `Ctrl+,` / `⌘,`) for application-wide tweaks that fall outside the per-document signing options. The dialog has the following tabs:
 
 * **Visible Signature** -- font file, font name and encoding for the visible-signature L2 text
 * **Certificates** -- which certificate checks (validity, key usage, critical extensions) are applied when listing aliases
