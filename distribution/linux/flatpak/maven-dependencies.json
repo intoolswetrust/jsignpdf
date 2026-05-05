@@ -1912,17 +1912,17 @@
   },
   {
     "type": "file",
-    "url": "https://repo1.maven.org/maven2/org/apache/maven/plugins/maven-clean-plugin/3.4.0/maven-clean-plugin-3.4.0.jar",
-    "sha256": "1e00437fc88814a0790dbc45fe8c482a92b077ad12c3890614f9aee9fb194660",
-    "dest": "m2local/org/apache/maven/plugins/maven-clean-plugin/3.4.0",
-    "dest-filename": "maven-clean-plugin-3.4.0.jar"
+    "url": "https://repo1.maven.org/maven2/org/apache/maven/plugins/maven-clean-plugin/3.5.0/maven-clean-plugin-3.5.0.jar",
+    "sha256": "a15977e3457ff8cd803c1a37e1e53aad76e4609cd23bbca8e8f783e5c78e5fa8",
+    "dest": "m2local/org/apache/maven/plugins/maven-clean-plugin/3.5.0",
+    "dest-filename": "maven-clean-plugin-3.5.0.jar"
   },
   {
     "type": "file",
-    "url": "https://repo1.maven.org/maven2/org/apache/maven/plugins/maven-clean-plugin/3.4.0/maven-clean-plugin-3.4.0.pom",
-    "sha256": "1bd962799cdd06e02686015e42f5a5fe025076b06ad0f5624f506e7e936b473e",
-    "dest": "m2local/org/apache/maven/plugins/maven-clean-plugin/3.4.0",
-    "dest-filename": "maven-clean-plugin-3.4.0.pom"
+    "url": "https://repo1.maven.org/maven2/org/apache/maven/plugins/maven-clean-plugin/3.5.0/maven-clean-plugin-3.5.0.pom",
+    "sha256": "9dc0a3f49b582aa36d2617c69034a66cdf5b1ec789f7e6ff506df962551fde89",
+    "dest": "m2local/org/apache/maven/plugins/maven-clean-plugin/3.5.0",
+    "dest-filename": "maven-clean-plugin-3.5.0.pom"
   },
   {
     "type": "file",
@@ -1996,17 +1996,17 @@
   },
   {
     "type": "file",
-    "url": "https://repo1.maven.org/maven2/org/apache/maven/plugins/maven-plugins/42/maven-plugins-42.pom",
-    "sha256": "5b31681ea67e838a8ed1f08af891d1ae50f16dfadd3fc2b787900ed69d5f2503",
-    "dest": "m2local/org/apache/maven/plugins/maven-plugins/42",
-    "dest-filename": "maven-plugins-42.pom"
-  },
-  {
-    "type": "file",
     "url": "https://repo1.maven.org/maven2/org/apache/maven/plugins/maven-plugins/43/maven-plugins-43.pom",
     "sha256": "a177f84e01c3829a357b8f135686ae7dd8c35d1c2089a390ef089340aa47cd21",
     "dest": "m2local/org/apache/maven/plugins/maven-plugins/43",
     "dest-filename": "maven-plugins-43.pom"
+  },
+  {
+    "type": "file",
+    "url": "https://repo1.maven.org/maven2/org/apache/maven/plugins/maven-plugins/44/maven-plugins-44.pom",
+    "sha256": "d7801d725de2abb706efb931e22eac5df4d0c7fc8c9ea9a4d9986782407aaff7",
+    "dest": "m2local/org/apache/maven/plugins/maven-plugins/44",
+    "dest-filename": "maven-plugins-44.pom"
   },
   {
     "type": "file",
