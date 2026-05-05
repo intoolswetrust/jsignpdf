@@ -267,52 +267,52 @@
   },
   {
     "type": "file",
-    "url": "https://repo1.maven.org/maven2/com/github/librepdf/openpdf-parent/3.0.3/openpdf-parent-3.0.3.pom",
-    "sha256": "956576bc12f7da86e306c091c79849739a606460236e8a89ae0ffe8b8af5ba78",
-    "dest": "m2local/com/github/librepdf/openpdf-parent/3.0.3",
-    "dest-filename": "openpdf-parent-3.0.3.pom"
+    "url": "https://repo1.maven.org/maven2/com/github/librepdf/openpdf-parent/3.0.4/openpdf-parent-3.0.4.pom",
+    "sha256": "7614d6c0b60c8beb147f10902dc1d95050f1dc68ba3e83354516b5bdf2ab6a79",
+    "dest": "m2local/com/github/librepdf/openpdf-parent/3.0.4",
+    "dest-filename": "openpdf-parent-3.0.4.pom"
   },
   {
     "type": "file",
-    "url": "https://repo1.maven.org/maven2/com/github/librepdf/openpdf-renderer/3.0.3/openpdf-renderer-3.0.3-sources.jar",
-    "sha256": "8f0487245a6d5cebdfb4b5400df716e764d85f693a37d9b2b8e7fa7a626f0bcf",
-    "dest": "m2local/com/github/librepdf/openpdf-renderer/3.0.3",
-    "dest-filename": "openpdf-renderer-3.0.3-sources.jar"
+    "url": "https://repo1.maven.org/maven2/com/github/librepdf/openpdf-renderer/3.0.4/openpdf-renderer-3.0.4-sources.jar",
+    "sha256": "50ac7a577b979b18b956919a84e8b04080231e8d23dc2dca185198804c77e3ac",
+    "dest": "m2local/com/github/librepdf/openpdf-renderer/3.0.4",
+    "dest-filename": "openpdf-renderer-3.0.4-sources.jar"
   },
   {
     "type": "file",
-    "url": "https://repo1.maven.org/maven2/com/github/librepdf/openpdf-renderer/3.0.3/openpdf-renderer-3.0.3.jar",
-    "sha256": "5f3c7d9e6a314a61a1ec26add41c28158e158d4aedcb61fd38a24f36e1e7aeab",
-    "dest": "m2local/com/github/librepdf/openpdf-renderer/3.0.3",
-    "dest-filename": "openpdf-renderer-3.0.3.jar"
+    "url": "https://repo1.maven.org/maven2/com/github/librepdf/openpdf-renderer/3.0.4/openpdf-renderer-3.0.4.jar",
+    "sha256": "90a9dc355f7548ec1cfbb46520c35b6b973873b4479f449bdb0c3b761bc33fd0",
+    "dest": "m2local/com/github/librepdf/openpdf-renderer/3.0.4",
+    "dest-filename": "openpdf-renderer-3.0.4.jar"
   },
   {
     "type": "file",
-    "url": "https://repo1.maven.org/maven2/com/github/librepdf/openpdf-renderer/3.0.3/openpdf-renderer-3.0.3.pom",
-    "sha256": "8d9c60e2ff2219efb88a31e366b88abe121df40e1b98ae84f07187b9cad111ba",
-    "dest": "m2local/com/github/librepdf/openpdf-renderer/3.0.3",
-    "dest-filename": "openpdf-renderer-3.0.3.pom"
+    "url": "https://repo1.maven.org/maven2/com/github/librepdf/openpdf-renderer/3.0.4/openpdf-renderer-3.0.4.pom",
+    "sha256": "a11878aabd716df546ad6ba2663ffac946296856dcf823af60529ea4fb560eb0",
+    "dest": "m2local/com/github/librepdf/openpdf-renderer/3.0.4",
+    "dest-filename": "openpdf-renderer-3.0.4.pom"
   },
   {
     "type": "file",
-    "url": "https://repo1.maven.org/maven2/com/github/librepdf/openpdf/3.0.3/openpdf-3.0.3-sources.jar",
-    "sha256": "addd362a4ee54cfd5afe84e11cd2d7e51b0bd90aa57fd57ad55e3c306216780b",
-    "dest": "m2local/com/github/librepdf/openpdf/3.0.3",
-    "dest-filename": "openpdf-3.0.3-sources.jar"
+    "url": "https://repo1.maven.org/maven2/com/github/librepdf/openpdf/3.0.4/openpdf-3.0.4-sources.jar",
+    "sha256": "282c90e603a377710ce32441c929c9521e6f3e7e4c85d23176250c260b3ee161",
+    "dest": "m2local/com/github/librepdf/openpdf/3.0.4",
+    "dest-filename": "openpdf-3.0.4-sources.jar"
   },
   {
     "type": "file",
-    "url": "https://repo1.maven.org/maven2/com/github/librepdf/openpdf/3.0.3/openpdf-3.0.3.jar",
-    "sha256": "59002ad85de1066cbc58ffdf216294698390f65902c2543e98b33d160ad3d3dd",
-    "dest": "m2local/com/github/librepdf/openpdf/3.0.3",
-    "dest-filename": "openpdf-3.0.3.jar"
+    "url": "https://repo1.maven.org/maven2/com/github/librepdf/openpdf/3.0.4/openpdf-3.0.4.jar",
+    "sha256": "838993e2be202e31ac9ba72305fb8c1f51165df51e4ca4f02e68d491436772ec",
+    "dest": "m2local/com/github/librepdf/openpdf/3.0.4",
+    "dest-filename": "openpdf-3.0.4.jar"
   },
   {
     "type": "file",
-    "url": "https://repo1.maven.org/maven2/com/github/librepdf/openpdf/3.0.3/openpdf-3.0.3.pom",
-    "sha256": "450e9413dca09607c0eb387b5da134e6ede9c5eaa8682a5d25972e634ee1c4ff",
-    "dest": "m2local/com/github/librepdf/openpdf/3.0.3",
-    "dest-filename": "openpdf-3.0.3.pom"
+    "url": "https://repo1.maven.org/maven2/com/github/librepdf/openpdf/3.0.4/openpdf-3.0.4.pom",
+    "sha256": "e60bd42c46916c5ae4153858bc1225aba71dbff24d3a8b88efad23ff8b4edded",
+    "dest": "m2local/com/github/librepdf/openpdf/3.0.4",
+    "dest-filename": "openpdf-3.0.4.pom"
   },
   {
     "type": "file",
