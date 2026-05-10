@@ -1,7 +1,6 @@
 package net.sf.jsignpdf;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.Proxy;
 import java.util.Collections;
 import java.util.HashSet;
@@ -24,7 +23,11 @@ public class Constants {
     static {
         try (var is = Constants.class.getClassLoader().
                 getResourceAsStream("logging.properties")) {
-            LogManager.getLogManager().readConfiguration(is);
+            if (is != null) {
+                LogManager.getLogManager().readConfiguration(is);
+            } else {
+                System.err.println("[ERROR] The logging.properties file was not found.");
+            }
         } catch (IOException e) {
             e.printStackTrace();
         }
