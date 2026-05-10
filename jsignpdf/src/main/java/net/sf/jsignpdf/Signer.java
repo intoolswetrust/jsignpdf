@@ -15,8 +15,10 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+import java.util.function.Consumer;
 import java.util.logging.Level;
 
+import javax.swing.JOptionPane;
 import javax.swing.UIManager;
 import javax.swing.WindowConstants;
 
@@ -41,6 +43,14 @@ import org.apache.commons.lang3.StringUtils;
  * @author Josef Cacek
  */
 public class Signer {
+
+    /** GitHub issues URL shown in the JavaFX fallback warning dialog. */
+    static final String GITHUB_ISSUES_URL = "https://github.com/intoolswetrust/jsignpdf/issues";
+
+    // Package-private launch hooks. Tests replace these to drive launchGui without opening real windows.
+    static Consumer<BasicSignerOptions> fxLauncher = FxLauncher::launch;
+    static Consumer<BasicSignerOptions> swingLauncher = Signer::doLaunchSwing;
+    static Consumer<Throwable> fxFallbackNotifier = Signer::showFxFallbackWarning;
 
     /**
      * Prints formatted help message (command line arguments).
@@ -122,22 +132,66 @@ public class Signer {
         }
 
         if (showGui) {
-            if (Boolean.getBoolean("jsignpdf.swing")) {
-                // Legacy Swing GUI (preserved for fallback)
-                try {
-                    UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-                } catch (Exception e) {
-                    System.err.println("Can't set Look&Feel.");
-                }
-                SignPdfForm tmpForm = new SignPdfForm(WindowConstants.EXIT_ON_CLOSE, tmpOpts);
-                tmpForm.pack();
-                GuiUtils.center(tmpForm);
-                tmpForm.setVisible(true);
-            } else {
-                // New JavaFX GUI (default)
-                FxLauncher.launch(tmpOpts);
-            }
+            launchGui(tmpOpts);
         }
+    }
+
+    /**
+     * Starts the GUI. The JavaFX UI is the default; if its initialization fails (e.g. because of missing/incompatible
+     * native libraries) a warning dialog is shown and the legacy Swing UI is started as a fallback.
+     *
+     * <p>The {@code -Djsignpdf.swing=true} system property forces the legacy Swing UI without attempting JavaFX.
+     */
+    static void launchGui(BasicSignerOptions opts) {
+        if (Boolean.getBoolean("jsignpdf.swing")) {
+            swingLauncher.accept(opts);
+            return;
+        }
+        try {
+            fxLauncher.accept(opts);
+        } catch (Throwable t) {
+            LOGGER.log(Level.WARNING, "JavaFX UI failed to initialize, falling back to Swing UI", t);
+            try {
+                fxFallbackNotifier.accept(t);
+            } catch (Throwable ignored) {
+                // Don't block the Swing fallback if the warning dialog itself can't be shown (e.g. headless).
+            }
+            swingLauncher.accept(opts);
+        }
+    }
+
+    static String buildFxFallbackMessage(Throwable cause) {
+        String reason;
+        if (cause == null) {
+            reason = "";
+        } else if (cause.getMessage() != null && !cause.getMessage().isEmpty()) {
+            reason = cause.getClass().getSimpleName() + ": " + cause.getMessage();
+        } else {
+            reason = cause.getClass().getName();
+        }
+        return RES.get("gui.fxFallback.message", new String[] { reason, GITHUB_ISSUES_URL });
+    }
+
+    private static void showFxFallbackWarning(Throwable cause) {
+        try {
+            UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+        } catch (Exception ignored) {
+            // Fall back to default L&F if system L&F can't be set.
+        }
+        JOptionPane.showMessageDialog(null, buildFxFallbackMessage(cause),
+                RES.get("gui.fxFallback.title"), JOptionPane.WARNING_MESSAGE);
+    }
+
+    private static void doLaunchSwing(BasicSignerOptions opts) {
+        try {
+            UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+        } catch (Exception e) {
+            System.err.println("Can't set Look&Feel.");
+        }
+        SignPdfForm tmpForm = new SignPdfForm(WindowConstants.EXIT_ON_CLOSE, opts);
+        tmpForm.pack();
+        GuiUtils.center(tmpForm);
+        tmpForm.setVisible(true);
     }
 
     /**
