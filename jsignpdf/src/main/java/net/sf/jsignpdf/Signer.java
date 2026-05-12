@@ -22,7 +22,6 @@ import javax.swing.JOptionPane;
 import javax.swing.UIManager;
 import javax.swing.WindowConstants;
 
-import net.sf.jsignpdf.fx.FxLauncher;
 import net.sf.jsignpdf.ssl.SSLInitializer;
 import net.sf.jsignpdf.utils.GuiUtils;
 import net.sf.jsignpdf.utils.KeyStoreUtils;
@@ -48,9 +47,29 @@ public class Signer {
     static final String GITHUB_ISSUES_URL = "https://github.com/intoolswetrust/jsignpdf/issues";
 
     // Package-private launch hooks. Tests replace these to drive launchGui without opening real windows.
-    static Consumer<BasicSignerOptions> fxLauncher = FxLauncher::launch;
+    // The FxLauncher class is loaded reflectively so this Signer class stays loadable when JavaFX
+    // is not on the classpath (minimal cross-platform ZIP / CLI-only deployments).
+    static Consumer<BasicSignerOptions> fxLauncher = Signer::invokeFxLauncher;
     static Consumer<BasicSignerOptions> swingLauncher = Signer::doLaunchSwing;
     static Consumer<Throwable> fxFallbackNotifier = Signer::showFxFallbackWarning;
+
+    private static void invokeFxLauncher(BasicSignerOptions opts) {
+        try {
+            Class<?> fxLauncherClass = Class.forName("net.sf.jsignpdf.fx.FxLauncher");
+            fxLauncherClass.getMethod("launch", BasicSignerOptions.class).invoke(null, opts);
+        } catch (java.lang.reflect.InvocationTargetException e) {
+            Throwable cause = e.getCause();
+            if (cause instanceof RuntimeException) {
+                throw (RuntimeException) cause;
+            }
+            if (cause instanceof Error) {
+                throw (Error) cause;
+            }
+            throw new RuntimeException(cause != null ? cause : e);
+        } catch (ReflectiveOperationException e) {
+            throw new RuntimeException(e);
+        }
+    }
 
     /**
      * Prints formatted help message (command line arguments).
