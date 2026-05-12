@@ -131,27 +131,22 @@ jobs:
         include:
           - os: windows-2022
             label: windows-x64
-            shell: pwsh
             script: ./distribution/windows/build-windows-installers.ps1
             signpath: true
           - os: ubuntu-24.04
             label: linux-x64
-            shell: bash
             script: ./distribution/linux/build-linux-installers.sh
             signpath: false
           - os: ubuntu-24.04-arm
             label: linux-aarch64
-            shell: bash
             script: ./distribution/linux/build-linux-installers.sh
             signpath: false
           - os: macos-13
             label: macos-x64
-            shell: bash
             script: ./distribution/macos/build-macos-installers.sh
             signpath: false
           - os: macos-14
             label: macos-aarch64
-            shell: bash
             script: ./distribution/macos/build-macos-installers.sh
             signpath: false
     runs-on: ${{ matrix.os }}
@@ -190,8 +185,18 @@ jobs:
         path: distribution/target/pdf-guide
 
     - name: Build native installers
-      shell: ${{ matrix.shell }}
-      run: ${{ matrix.script }} "${{ env.VERSION }}"
+      # `shell:` cannot reference matrix.* at step level, and the PS1 needs
+      # PowerShell while the .sh scripts want bash. Bash is preinstalled on
+      # the Windows runner, so we dispatch from bash and shell out to pwsh
+      # for the PowerShell entry point.
+      shell: bash
+      run: |
+        set -euo pipefail
+        if [[ "${{ runner.os }}" == "Windows" ]]; then
+          pwsh -File ${{ matrix.script }} -Version "$VERSION"
+        else
+          ${{ matrix.script }} "$VERSION"
+        fi
 
     # Windows artifacts go through SignPath before they're handed to the
     # publish job. Other platforms upload directly.
