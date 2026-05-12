@@ -10,7 +10,7 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
 
     steps:
       - uses: actions/checkout@v6
@@ -19,5 +19,6 @@ jobs:
         with:
           java-version: 21
           distribution: 'temurin'
+          cache: 'maven'
       - name: Build with Maven
         run: mvn --batch-mode --update-snapshots verify

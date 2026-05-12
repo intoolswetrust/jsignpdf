@@ -10,10 +10,14 @@ sidebar:
 
 ### 1. Install
 
-- Download the latest release from the [GitHub releases page](https://github.com/intoolswetrust/jsignpdf/releases/latest).
-- On Windows 64-bit, pick one of the `win-x64` artifacts — the **EXE** or **MSI** installer, or the **portable ZIP**. All three bundle their own Java runtime.
-- On Linux, macOS or 32-bit Windows, download `jsignpdf-*.zip` (the platform-independent archive) and install Java 21 or newer, e.g. from [Eclipse Adoptium](https://adoptium.net/).
-- Extract the archive if you chose a ZIP.
+Download the latest release from the [GitHub releases page](https://github.com/intoolswetrust/jsignpdf/releases/latest). Native installers bundle their own Java 21 runtime; cross-platform ZIPs need Java 21+ from e.g. [Eclipse Adoptium](https://adoptium.net/).
+
+- **Windows x64** — `jsignpdf-<version>-windows-x64.msi` (signed) or `jsignpdf-<version>-windows-x64.zip` (portable).
+- **Linux x64 / aarch64** — `jsignpdf-<version>-linux-<arch>.deb`, `jsignpdf-<version>-linux-<arch>.rpm`, or the matching `.zip`. Flatpak bundles are also published per arch.
+- **macOS Intel / Apple Silicon** — `jsignpdf-<version>-macos-x64.dmg` or `jsignpdf-<version>-macos-aarch64.dmg` (unsigned in 3.1 — expect a Gatekeeper prompt), or the matching `.zip`.
+- **Any OS with Java 21** — `jsignpdf-<version>-full.zip` (JavaFX bundled) or `jsignpdf-<version>-minimal.zip` (CLI / Swing fallback only).
+
+If you grabbed a ZIP, extract it and run `bin/jsignpdf.sh` (POSIX) or `bin\jsignpdf.cmd` (Windows).
 
 ### 2. Get a keystore
 
@@ -28,10 +32,13 @@ A demo keystore (`jsmith.p12`, password `123456`) and a sample PDF are included 
 
 ### 3. Launch the GUI
 
-From the folder where `JSignPdf.jar` lives:
+If you installed via DEB / RPM / MSI / DMG / Flatpak, launch JSignPdf from the application menu.
+
+If you extracted a cross-platform ZIP, run the launcher from the extracted folder:
 
 ```shell
-java -jar JSignPdf.jar
+bin/jsignpdf.sh       # POSIX
+bin\jsignpdf.cmd      # Windows
 ```
 
 Then:
@@ -44,7 +51,7 @@ Then:
 ### 4. Or sign from the command line
 
 ```shell
-java -jar JSignPdf.jar \
+bin/jsignpdf.sh \
     -kst PKCS12 -ksf keystore.p12 -ksp mypassword \
     mydocument.pdf
 ```
