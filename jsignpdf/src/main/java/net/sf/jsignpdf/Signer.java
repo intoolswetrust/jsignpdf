@@ -76,7 +76,7 @@ public class Signer {
      */
     private static void printHelp() {
         final HelpFormatter formatter = new HelpFormatter();
-        formatter.printHelp(80, "java -jar JSignPdf.jar [file1.pdf [file2.pdf ...]]", RES.get("hlp.header"),
+        formatter.printHelp(80, "jsignpdf [file1.pdf [file2.pdf ...]]", RES.get("hlp.header"),
                 SignerOptionsFromCmdLine.OPTS, NEW_LINE + RES.get("hlp.footer.exitCodes") + NEW_LINE
                         + StringUtils.repeat("-", 80) + NEW_LINE + RES.get("hlp.footer.examples"),
                 true);
