@@ -43,6 +43,10 @@
                             <repositoryName>lib</repositoryName>
                             <useWildcardClassPath>true</useWildcardClassPath>
                             <binFolder>bin</binFolder>
+                            <binFileExtensions>
+                                <unix>.sh</unix>
+                                <windows>.cmd</windows>
+                            </binFileExtensions>
                             <platforms>
                                 <platform>unix</platform>
                                 <platform>windows</platform>

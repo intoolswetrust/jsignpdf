@@ -44,22 +44,24 @@
             <directory>demo</directory>
             <outputDirectory>demo</outputDirectory>
         </fileSet>
-    </fileSets>
 
-    <files>
-        <file>
-            <source>${staging.dir}/bin/jsignpdf</source>
+        <fileSet>
+            <directory>${staging.dir}/bin</directory>
             <outputDirectory>bin</outputDirectory>
-            <destName>jsignpdf.sh</destName>
+            <includes>
+                <include>*.sh</include>
+            </includes>
             <fileMode>0755</fileMode>
             <lineEnding>unix</lineEnding>
-        </file>
-        <file>
-            <source>${staging.dir}/bin/jsignpdf.bat</source>
+        </fileSet>
+        <fileSet>
+            <directory>${staging.dir}/bin</directory>
             <outputDirectory>bin</outputDirectory>
-            <destName>jsignpdf.cmd</destName>
+            <includes>
+                <include>*.cmd</include>
+            </includes>
             <fileMode>0644</fileMode>
             <lineEnding>dos</lineEnding>
-        </file>
-    </files>
+        </fileSet>
+    </fileSets>
 </assembly>
