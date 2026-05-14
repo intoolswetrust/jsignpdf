@@ -236,8 +236,8 @@ public class SigningOptionsViewModel {
         rightModifyAnnotations.set(opts.isRightModifyAnnotations());
         rightModifyContents.set(opts.isRightModifyContents());
 
-        tsaEnabled.set(opts.isTimestamp());
         tsaUrl.set(opts.getTsaUrl());
+        tsaEnabled.set(opts.isTimestamp());
         tsaServerAuthn.set(opts.getTsaServerAuthn());
         tsaUser.set(opts.getTsaUser());
         tsaPassword.set(opts.getTsaPasswd());

@@ -4,9 +4,11 @@ import java.util.ResourceBundle;
 
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
+import javafx.geometry.Rectangle2D;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.image.Image;
+import javafx.stage.Screen;
 import javafx.stage.Stage;
 import net.sf.jsignpdf.BasicSignerOptions;
 import net.sf.jsignpdf.Constants;
@@ -51,5 +53,10 @@ public class JSignPdfApp extends Application {
         primaryStage.setOnCloseRequest(event -> controller.storeAndCleanup());
 
         primaryStage.show();
+
+        Rectangle2D visualBounds = Screen.getPrimary().getVisualBounds();
+        if (primaryStage.getWidth() > visualBounds.getWidth() || primaryStage.getHeight() > visualBounds.getHeight()) {
+            primaryStage.setMaximized(true);
+        }
     }
 }
