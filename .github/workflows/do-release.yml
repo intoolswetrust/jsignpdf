@@ -141,6 +141,10 @@ jobs:
             label: linux-aarch64
             script: ./distribution/linux/build-linux-installers.sh
             signpath: false
+            # OpenJFX 21 does not publish linux-aarch64 classifier jars on Maven Central.
+            # Force the linux (x86_64) classifier for compilation; the actual arm64 JFX
+            # runtime comes from the bundled Zulu+FX JDK via jpackage.
+            maven-extra-args: -Djavafx.platform=linux
           - os: macos-13
             label: macos-x64
             script: ./distribution/macos/build-macos-installers.sh
@@ -176,7 +180,7 @@ jobs:
 
     - name: Build the distribution staging (appassembler/lib + ZIPs)
       shell: bash
-      run: mvn -B -DskipTests -pl distribution -am package
+      run: mvn -B -DskipTests -pl distribution -am package ${{ matrix.maven-extra-args }}
 
     - name: Download PDF guide
       uses: actions/download-artifact@v8
