@@ -124,6 +124,14 @@ jobs:
     #
     # fail-fast: false so a single broken platform doesn't abort the others
     # mid-release. macOS DMGs are unsigned in 3.1 — see design-doc/3.1-no-fat-jar.md.
+    #
+    # macos-13 is GitHub's last Intel macOS image and its hosted pool is being
+    # retired: jobs can sit queued for hours or never get a runner. The Intel
+    # mac build is therefore BEST-EFFORT — `continue-on-error` on that matrix
+    # entry keeps its failure/timeout from blocking the release, and the
+    # `timeout-minutes` below caps how long a stuck/queued runner can hang the
+    # workflow. jpackage only builds for the host arch, so an x64 DMG needs an
+    # Intel host — there is no newer Intel runner to migrate to.
     needs: do-release
     strategy:
       fail-fast: false
@@ -149,11 +157,16 @@ jobs:
             label: macos-x64
             script: ./distribution/macos/build-macos-installers.sh
             signpath: false
+            # Intel macOS: best-effort (see job comment above).
+            best-effort: true
           - os: macos-14
             label: macos-aarch64
             script: ./distribution/macos/build-macos-installers.sh
             signpath: false
     runs-on: ${{ matrix.os }}
+    # Best-effort entries (Intel macOS) must not fail or hang the release.
+    continue-on-error: ${{ matrix.best-effort || false }}
+    timeout-minutes: 60
     env:
       VERSION: ${{ needs.do-release.outputs.version }}
     steps:
@@ -332,7 +345,10 @@ jobs:
   publish-release:
     # Collects every per-platform asset, computes SHA-256 checksums, mirrors to
     # SourceForge, and creates the GitHub Release. Flatpak is optional: if its
-    # job failed (e.g. SDK extension outage) we still publish the rest.
+    # job failed (e.g. SDK extension outage) we still publish the rest. The
+    # Intel-macOS (macos-x64) build is best-effort: its matrix entry sets
+    # continue-on-error, so a failed/timed-out Intel job still reports success
+    # to `needs.package.result` and the release publishes without that asset.
     needs: [do-release, package, flatpak]
     if: |
       always()

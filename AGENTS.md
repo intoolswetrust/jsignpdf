@@ -113,4 +113,4 @@ Per-user state lives under a platform-native `<config-dir>` resolved by `ConfigL
 |---|---|---|
 | `pr-builder.yaml` | PR/push to master | `mvn verify` with Java 21 |
 | `push-snapshots.yaml` | Push to master | Deploy SNAPSHOTs to Maven Central |
-| `do-release.yml` | Manual dispatch | Full release: Maven Central deploy → per-platform jpackage matrix (windows-2022 / ubuntu-24.04 x2 / macos-13 / macos-14) → Flatpak matrix (x86_64 + aarch64) → publish (SHA-256 + SourceForge mirror + GitHub Release). Native installers use Azul Zulu+FX 21 (`java-package: jdk+fx`) so JavaFX modules are available to `jlink`. |
+| `do-release.yml` | Manual dispatch | Full release: Maven Central deploy → per-platform jpackage matrix (windows-2022 / ubuntu-24.04 x2 / macos-13 _(Intel, best-effort: `continue-on-error`, retiring runner pool)_ / macos-14) → Flatpak matrix (x86_64 + aarch64) → publish (SHA-256 + SourceForge mirror + GitHub Release). Native installers use Azul Zulu+FX 21 (`java-package: jdk+fx`) so JavaFX modules are available to `jlink`. |
