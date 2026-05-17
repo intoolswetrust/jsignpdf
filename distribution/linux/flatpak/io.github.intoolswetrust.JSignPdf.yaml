@@ -36,7 +36,7 @@ modules:
       - type: file
         path: jsignpdf.png
     build-commands:
-      # The 3.1 full ZIP unpacks (with the default strip-components: 1) into a
+      # The full ZIP unpacks (with the default strip-components: 1) into a
       # tree containing lib/, lib/javafx/, licenses/, docs/, demo/, bin/.
       # We only need lib/ (the runtime classpath, including JavaFX linux
       # classifier jars) and licenses/ for the bundled app.
