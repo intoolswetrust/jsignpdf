@@ -4,10 +4,10 @@ on:
   workflow_dispatch:
     inputs:
       release-version:
-        description: 'Version to be released (e.g. 2.3.0).'
+        description: 'Version to be released (e.g. 3.1.0).'
         required: true
       next-snapshot-version:
-        description: 'Version to be set after the release - without the -SNAPSHOT suffix (e.g. 2.4.0).'
+        description: 'Version to be set after the release - without the -SNAPSHOT suffix (e.g. 3.2.0).'
         required: true
 
 env:
@@ -16,9 +16,20 @@ env:
   GIT_COMMITTER_NAME: Terminator the Kitty
   GIT_COMMITTER_EMAIL: <>
 
+# Cancel a previous workflow on the same ref (e.g. when re-running a release
+# manually). We do NOT cancel in-progress runs — a half-finished release would
+# leave Maven Central and SourceForge in an inconsistent state.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
+
 jobs:
   do-release:
-    runs-on: ubuntu-latest
+    # Tags the repo, deploys the library jar to Maven Central, and assembles
+    # the cross-platform full + minimal ZIPs from the unshaded build. The ZIPs
+    # are the inputs the per-platform matrix builds on (jpackage scripts read
+    # distribution/target/appassembler), and the full ZIP is the Flatpak input.
+    runs-on: ubuntu-24.04
     outputs:
       tag: ${{ steps.maven_release.outputs.TAG }}
       version: ${{ steps.maven_release.outputs.VERSION }}
@@ -26,6 +37,7 @@ jobs:
     steps:
     - name: Checkout
       uses: actions/checkout@v6
+
     - name: Verify release notes file exists
       run: |
         VERSION=${{ github.event.inputs.release-version }}
@@ -37,6 +49,7 @@ jobs:
           exit 1
         fi
         echo "Found release notes: $NOTES_FILE"
+
     - name: Set up Java and credentials
       uses: actions/setup-java@v5
       with:
@@ -49,7 +62,7 @@ jobs:
         gpg-passphrase: MAVEN_GPG_PASSPHRASE
         cache: 'maven'
 
-    - name: Do the Maven release and prepare Linux assets
+    - name: Do the Maven release and assemble cross-platform ZIPs
       id: maven_release
       run: |
         VERSION=${{ github.event.inputs.release-version }}
@@ -67,8 +80,9 @@ jobs:
             -Dmaven.wagon.httpconnectionManager.maxPerRoute=60 -Dmaven.wagon.httpconnectionManager.maxTotal=100
         cd distribution/target
         ls -R
-        mkdir upload
-        mv *.zip upload/
+        mkdir -p upload
+        cp "jsignpdf-${VERSION}-full.zip"    "upload/jsignpdf-${VERSION}-full.zip"
+        cp "jsignpdf-${VERSION}-minimal.zip" "upload/jsignpdf-${VERSION}-minimal.zip"
         cp generated-docs/JSignPdf.pdf "upload/$FULL_VERSION.pdf"
         cp "../doc/release-notes/${BASE_VERSION}.md" upload/README.md
         echo "TAG=$TAG" >> $GITHUB_OUTPUT
@@ -79,10 +93,10 @@ jobs:
         MAVEN_PASSWORD: ${{ secrets.OSSRH_PASSWORD }}
         MAVEN_GPG_PASSPHRASE: ${{ secrets.MAVEN_GPG_PASSPHRASE }}
 
-    - name: Stage Linux release assets for the publish job
+    - name: Stage cross-platform ZIPs + PDF + README for the publish job
       uses: actions/upload-artifact@v7
       with:
-        name: jsignpdf-linux-assets
+        name: jsignpdf-crossplatform-assets
         path: distribution/target/upload/*
         if-no-files-found: error
         retention-days: 1
@@ -95,37 +109,99 @@ jobs:
         if-no-files-found: error
         retention-days: 1
 
-  windows-installers:
+    - name: Publish full ZIP for the Flatpak builder
+      uses: actions/upload-artifact@v7
+      with:
+        name: jsignpdf-full-zip
+        path: distribution/target/jsignpdf-${{ github.event.inputs.release-version }}-full.zip
+        if-no-files-found: error
+        retention-days: 1
+
+  package:
+    # Per-platform native installers via jpackage. Each runner rebuilds the
+    # distribution module locally (cheap thanks to the Maven cache) and then
+    # runs the platform script from distribution/{windows,linux,macos}/.
+    #
+    # fail-fast: false so a single broken platform doesn't abort the others
+    # mid-release. macOS DMGs are unsigned in 3.1 — see design-doc/3.1-no-fat-jar.md.
     needs: do-release
-    runs-on: windows-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: windows-2022
+            label: windows-x64
+            script: ./distribution/windows/build-windows-installers.ps1
+            signpath: true
+          - os: ubuntu-24.04
+            label: linux-x64
+            script: ./distribution/linux/build-linux-installers.sh
+            signpath: false
+          - os: ubuntu-24.04-arm
+            label: linux-aarch64
+            script: ./distribution/linux/build-linux-installers.sh
+            signpath: false
+          - os: macos-13
+            label: macos-x64
+            script: ./distribution/macos/build-macos-installers.sh
+            signpath: false
+          - os: macos-14
+            label: macos-aarch64
+            script: ./distribution/macos/build-macos-installers.sh
+            signpath: false
+    runs-on: ${{ matrix.os }}
+    env:
+      VERSION: ${{ needs.do-release.outputs.version }}
     steps:
     - name: Checkout release tag
       uses: actions/checkout@v6
       with:
         ref: ${{ needs.do-release.outputs.tag }}
 
-    - name: Set up JDK 21
+    # jpackage runs need JavaFX modules in the bundled runtime image, so we
+    # consume Azul Zulu+FX (java-package: jdk+fx). Temurin does not ship JFX.
+    - name: Set up Zulu+FX 21
       uses: actions/setup-java@v5
       with:
         java-version: 21
-        distribution: 'temurin'
+        distribution: 'zulu'
+        java-package: 'jdk+fx'
         cache: 'maven'
 
-    - name: Build jsignpdf and installcert jars
-      shell: bash
-      run: mvn -B -DskipTests -pl jsignpdf,installcert -am package
+    - name: Install Linux packaging tools
+      if: startsWith(matrix.os, 'ubuntu-')
+      run: |
+        sudo apt-get update -qq
+        sudo apt-get install -y fakeroot rpm
 
-    - name: Download PDF guide from the release job
+    - name: Build the distribution staging (appassembler/lib + ZIPs)
+      shell: bash
+      run: mvn -B -DskipTests -pl distribution -am package
+
+    - name: Download PDF guide
       uses: actions/download-artifact@v8
       with:
         name: jsignpdf-pdf-guide
         path: distribution/target/pdf-guide
 
-    - name: Build Windows installers (EXE / MSI / ZIP)
-      shell: pwsh
-      run: ./distribution/windows/build-windows-installers.ps1 -Version ${{ needs.do-release.outputs.version }}
+    - name: Build native installers
+      # `shell:` cannot reference matrix.* at step level, and the PS1 needs
+      # PowerShell while the .sh scripts want bash. Bash is preinstalled on
+      # the Windows runner, so we dispatch from bash and shell out to pwsh
+      # for the PowerShell entry point.
+      shell: bash
+      run: |
+        set -euo pipefail
+        if [[ "${{ runner.os }}" == "Windows" ]]; then
+          pwsh -File ${{ matrix.script }} -Version "$VERSION"
+        else
+          ${{ matrix.script }} "$VERSION"
+        fi
 
+    # Windows artifacts go through SignPath before they're handed to the
+    # publish job. Other platforms upload directly.
     - name: Upload unsigned Windows installers for SignPath
+      if: matrix.signpath
       id: upload-unsigned-windows
       uses: actions/upload-artifact@v7
       with:
@@ -135,6 +211,7 @@ jobs:
         retention-days: 1
 
     - name: Submit signing request to SignPath
+      if: matrix.signpath
       uses: signpath/github-action-submit-signing-request@v2
       with:
         api-token: '${{ secrets.SIGNPATH_API_TOKEN }}'
@@ -146,17 +223,39 @@ jobs:
         wait-for-completion: true
         output-artifact-directory: 'distribution/target/signed'
 
-    - name: Stage signed Windows installers for the publish job
+    - name: Stage signed Windows installers for publish
+      if: matrix.signpath
       uses: actions/upload-artifact@v7
       with:
-        name: jsignpdf-windows-assets
+        name: jsignpdf-platform-assets-${{ matrix.label }}
         path: distribution/target/signed/*
         if-no-files-found: error
         retention-days: 1
 
-  linux-flatpak:
+    - name: Stage platform installers for publish
+      if: ${{ !matrix.signpath }}
+      uses: actions/upload-artifact@v7
+      with:
+        name: jsignpdf-platform-assets-${{ matrix.label }}
+        path: distribution/target/upload/*
+        if-no-files-found: error
+        retention-days: 1
+
+  flatpak:
+    # Builds Flatpak bundles for both x86_64 and aarch64 from the cross-platform
+    # full ZIP. JavaFX lives inside the ZIP for the x86_64 case; aarch64 falls
+    # through to Swing because OpenJFX 21 does not publish linux-aarch64
+    # classifier jars on Maven Central.
     needs: do-release
-    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-24.04
+            arch: x86_64
+          - os: ubuntu-24.04-arm
+            arch: aarch64
+    runs-on: ${{ matrix.os }}
     env:
       VERSION: ${{ needs.do-release.outputs.version }}
     steps:
@@ -165,17 +264,17 @@ jobs:
       with:
         ref: ${{ needs.do-release.outputs.tag }}
 
-    - name: Download Linux assets
+    - name: Download full ZIP
       uses: actions/download-artifact@v8
       with:
-        name: jsignpdf-linux-assets
-        path: linux-assets
+        name: jsignpdf-full-zip
+        path: flatpak-input
 
     - name: Cache Flatpak SDK
       uses: actions/cache@v5
       with:
         path: ~/.local/share/flatpak
-        key: flatpak-sdk-25.08
+        key: flatpak-sdk-25.08-${{ matrix.arch }}
 
     - name: Install Flatpak and build tools
       run: |
@@ -192,11 +291,11 @@ jobs:
       run: |
         set -euo pipefail
         MANIFEST=distribution/linux/flatpak/io.github.intoolswetrust.JSignPdf.yaml
-        ZIP_NAME=jsignpdf-${VERSION}.zip
-        SHA256=$(sha256sum "linux-assets/${ZIP_NAME}" | awk '{print $1}')
-        cp "linux-assets/${ZIP_NAME}" distribution/linux/flatpak/
+        ZIP_NAME=jsignpdf-${VERSION}-full.zip
+        SHA256=$(sha256sum "flatpak-input/${ZIP_NAME}" | awk '{print $1}')
+        cp "flatpak-input/${ZIP_NAME}" distribution/linux/flatpak/
         sed -i \
-          "s|        url: https://downloads\.sourceforge\.net.*\.zip|        path: ${ZIP_NAME}|" \
+          "s|^        url:.*\.zip|        path: ${ZIP_NAME}|" \
           "${MANIFEST}"
         grep -q "path: ${ZIP_NAME}" "${MANIFEST}" \
           || { echo "::error::URL sed patch did not match — check manifest indentation"; exit 1; }
@@ -209,7 +308,7 @@ jobs:
     - name: Build Flatpak bundle
       run: |
         set -euo pipefail
-        BUNDLE_NAME=JSignPdf-${VERSION}-linux-x86_64.flatpak
+        BUNDLE_NAME=jsignpdf-${VERSION}-linux-${{ matrix.arch }}.flatpak
         cd distribution/linux/flatpak
         flatpak-builder --user --repo=flatpak-repo --force-clean --disable-rofiles-fuse build-dir \
           io.github.intoolswetrust.JSignPdf.yaml
@@ -221,20 +320,21 @@ jobs:
     - name: Stage Flatpak bundle for publish job
       uses: actions/upload-artifact@v7
       with:
-        name: jsignpdf-flatpak-assets
+        name: jsignpdf-flatpak-assets-${{ matrix.arch }}
         path: distribution/linux/flatpak/upload/*
         if-no-files-found: error
         retention-days: 1
 
   publish-release:
-    needs: [do-release, windows-installers, linux-flatpak]
-    # Flatpak is optional: publish even if its job failed, as long as the
-    # required jobs (do-release, windows-installers) succeeded.
+    # Collects every per-platform asset, computes SHA-256 checksums, mirrors to
+    # SourceForge, and creates the GitHub Release. Flatpak is optional: if its
+    # job failed (e.g. SDK extension outage) we still publish the rest.
+    needs: [do-release, package, flatpak]
     if: |
       always()
       && needs.do-release.result == 'success'
-      && needs.windows-installers.result == 'success'
-    runs-on: ubuntu-latest
+      && needs.package.result == 'success'
+    runs-on: ubuntu-24.04
     permissions:
       contents: write
     env:
@@ -248,24 +348,37 @@ jobs:
       with:
         ref: ${{ needs.do-release.outputs.tag }}
 
-    - name: Download Linux assets
+    - name: Download cross-platform assets (ZIPs + PDF guide + README)
       uses: actions/download-artifact@v8
       with:
-        name: jsignpdf-linux-assets
+        name: jsignpdf-crossplatform-assets
         path: release-assets/JSignPdf-${{ needs.do-release.outputs.version }}
 
-    - name: Download Windows assets
+    - name: Download per-platform installers
       uses: actions/download-artifact@v8
       with:
-        name: jsignpdf-windows-assets
+        pattern: jsignpdf-platform-assets-*
+        merge-multiple: true
         path: release-assets/JSignPdf-${{ needs.do-release.outputs.version }}
 
-    - name: Download Flatpak bundle
-      if: needs.linux-flatpak.result == 'success'
+    - name: Download Flatpak bundles
+      if: needs.flatpak.result == 'success'
       uses: actions/download-artifact@v8
       with:
-        name: jsignpdf-flatpak-assets
+        pattern: jsignpdf-flatpak-assets-*
+        merge-multiple: true
         path: release-assets/JSignPdf-${{ needs.do-release.outputs.version }}
+
+    - name: Compute SHA-256 checksums
+      run: |
+        set -euo pipefail
+        cd "release-assets/$FULL_VERSION"
+        # Hash every shipped asset except the checksums file itself.
+        find . -maxdepth 1 -type f \
+          ! -name '*-SHA256SUMS.txt' \
+          -printf '%f\n' | sort | xargs sha256sum > "jsignpdf-${VERSION}-SHA256SUMS.txt"
+        echo "Generated jsignpdf-${VERSION}-SHA256SUMS.txt:"
+        cat "jsignpdf-${VERSION}-SHA256SUMS.txt"
 
     - name: List staged assets
       run: ls -R release-assets

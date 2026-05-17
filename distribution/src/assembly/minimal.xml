@@ -1,0 +1,67 @@
+<assembly xmlns="http://maven.apache.org/ASSEMBLY/2.1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:schemaLocation="http://maven.apache.org/ASSEMBLY/2.1.0 http://maven.apache.org/xsd/assembly-2.1.0.xsd">
+
+    <id>minimal</id>
+    <formats>
+        <format>zip</format>
+    </formats>
+    <includeBaseDirectory>true</includeBaseDirectory>
+    <baseDirectory>jsignpdf-${project.version}</baseDirectory>
+
+    <fileSets>
+        <!--
+          No JavaFX at all: neither the cross-platform api jars (controls/fxml/swing/graphics/base)
+          nor the platform-classified native jars. Signer is loadable without JavaFX on the
+          classpath; if a GUI is requested, it catches the ClassNotFoundException from the
+          reflective FxLauncher load and falls back to Swing.
+        -->
+        <fileSet>
+            <directory>${staging.dir}/lib</directory>
+            <outputDirectory>lib</outputDirectory>
+            <includes>
+                <include>*.jar</include>
+            </includes>
+            <excludes>
+                <exclude>javafx-*.jar</exclude>
+            </excludes>
+        </fileSet>
+
+        <fileSet>
+            <directory>licenses</directory>
+            <outputDirectory>licenses</outputDirectory>
+        </fileSet>
+
+        <fileSet>
+            <directory>target/generated-docs</directory>
+            <outputDirectory>docs</outputDirectory>
+            <includes>
+                <include>*.txt</include>
+                <include>*.pdf</include>
+            </includes>
+        </fileSet>
+
+        <fileSet>
+            <directory>demo</directory>
+            <outputDirectory>demo</outputDirectory>
+        </fileSet>
+
+        <fileSet>
+            <directory>${staging.dir}/bin</directory>
+            <outputDirectory>bin</outputDirectory>
+            <includes>
+                <include>*.sh</include>
+            </includes>
+            <fileMode>0755</fileMode>
+            <lineEnding>unix</lineEnding>
+        </fileSet>
+        <fileSet>
+            <directory>${staging.dir}/bin</directory>
+            <outputDirectory>bin</outputDirectory>
+            <includes>
+                <include>*.cmd</include>
+            </includes>
+            <fileMode>0644</fileMode>
+            <lineEnding>dos</lineEnding>
+        </fileSet>
+    </fileSets>
+</assembly>

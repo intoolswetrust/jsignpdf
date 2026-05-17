@@ -27,15 +27,22 @@ Project home page: [jsignpdf.eu](https://jsignpdf.eu/)
 
 ## Install
 
-Requires a **Java 21 (or newer) JRE** unless you use an installer that bundles its own runtime.
+Native installers bundle their own Java 21 runtime. Cross-platform ZIPs need a **Java 21 (or newer) JRE** on `PATH` or pointed at by `JAVA_HOME`.
 
-| Platform | Artifact | Notes |
+All artifacts are published on [GitHub Releases](https://github.com/intoolswetrust/jsignpdf/releases) and mirrored on [SourceForge](https://sourceforge.net/projects/jsignpdf/files/latest/download).
+
+| Platform | Recommended | Portable fallback |
 |---|---|---|
-| **Windows** | EXE / MSI / portable ZIP from [GitHub Releases](https://github.com/intoolswetrust/jsignpdf/releases) | Built with `jpackage`, ships a bundled Java 21 runtime. 64-bit only. |
-| **Linux** | Flatpak (Flathub submission in progress — tracked in [#307](https://github.com/intoolswetrust/jsignpdf/issues/307)) or cross-platform ZIP | Flatpak bundles its own Java runtime. |
-| **macOS** | Cross-platform ZIP | Requires Java 21 on `PATH`. |
-| **Any OS with Java 21** | `jsignpdf-<version>.zip` | Run `JSignPdf.sh` / `JSignPdf.bat` from the extracted folder. |
-| **Mirror** | [SourceForge](https://sourceforge.net/projects/jsignpdf/files/latest/download) | Same artifacts as GitHub Releases. |
+| **Windows x64** | `jsignpdf-<version>-windows-x64.msi` (SignPath-signed) | `jsignpdf-<version>-windows-x64.zip` |
+| **Linux x64 (Debian / Ubuntu)** | `jsignpdf-<version>-linux-x64.deb` | `jsignpdf-<version>-linux-x64.zip` |
+| **Linux x64 (Fedora / RHEL / openSUSE)** | `jsignpdf-<version>-linux-x64.rpm` | `jsignpdf-<version>-linux-x64.zip` |
+| **Linux aarch64 (ARM servers / SBCs)** | `jsignpdf-<version>-linux-aarch64.{deb,rpm}` | `jsignpdf-<version>-linux-aarch64.zip` |
+| **Linux (any distro)** | `jsignpdf-<version>-linux-<arch>.flatpak` (Flathub submission tracked in [#307](https://github.com/intoolswetrust/jsignpdf/issues/307)) | — |
+| **macOS Intel** | `jsignpdf-<version>-macos-x64.dmg` (unsigned in 3.1 — Gatekeeper warning) | `jsignpdf-<version>-macos-x64.zip` |
+| **macOS Apple Silicon** | `jsignpdf-<version>-macos-aarch64.dmg` (unsigned in 3.1) | `jsignpdf-<version>-macos-aarch64.zip` |
+| **Any OS with Java 21** | `jsignpdf-<version>-full.zip` (JFX bundled for every supported OS/arch) | `jsignpdf-<version>-minimal.zip` (no JFX, Swing fallback only — for CLI users and packagers) |
+
+`jsignpdf-<version>-SHA256SUMS.txt` covers every artifact above.
 
 Maven-Central-published artifacts (for embedding the signing engine in your own project) live under `com.github.kwart.jsign`.
 
@@ -61,17 +68,22 @@ mvn clean install
 
 The resulting artifacts are produced under `distribution/target/`. See [AGENTS.md](AGENTS.md) for module layout, source-tree overview, and test commands.
 
-### Windows installers
+### Native installers
 
-Windows installers are built with `jpackage` as part of the release workflow
-(`.github/workflows/do-release.yml`) and produce three artifacts:
+Native installers for every supported platform are built with `jpackage` as
+part of the release workflow (`.github/workflows/do-release.yml`):
 
-- `JSignPdf-<version>.exe` — EXE installer with bundled Java 21 runtime
-- `JSignPdf-<version>.msi` — MSI installer with bundled Java 21 runtime
-- `JSignPdf-<version>-win-x64.zip` — portable ZIP with bundled Java 21 runtime
+- Windows: `distribution/windows/build-windows-installers.ps1` → MSI + ZIP
+- Linux  : `distribution/linux/build-linux-installers.sh` → DEB + RPM + ZIP (auto-detects x64 / aarch64)
+- macOS  : `distribution/macos/build-macos-installers.sh` → DMG + ZIP (auto-detects x64 / aarch64)
 
-For a local experiment on Linux, cross-building requires a Windows JDK + WiX;
-the supported path is to let the release workflow build the installers.
+Each script consumes the staging tree assembled by the `distribution` module
+(`mvn -B -DskipTests -pl distribution -am package`) and assumes Azul Zulu+FX 21
+is on `PATH` / `JAVA_HOME` so the JavaFX modules are available to `jlink`.
+
+For a local experiment on a different platform, cross-building is not
+supported by `jpackage` — the GitHub Actions release workflow runs each script
+on a matching runner.
 
 ### Flatpak
 

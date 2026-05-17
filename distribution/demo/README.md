@@ -11,12 +11,12 @@ Sample material for trying out JSignPdf from the command line.
 
 ## Command-line examples
 
-The commands below assume you run them from this `demo` directory with `JSignPdf.jar` available on the path shown. Adjust the path to match your installation.
+The commands below assume you run them from this `demo` directory inside an extracted cross-platform ZIP (`bin/` and `lib/` sit at the parent level). On Windows substitute `..\bin\jsignpdf.cmd` for `../bin/jsignpdf.sh`. If you installed via the native installer (MSI / DEB / RPM / DMG / Flatpak), replace the launcher path with `jsignpdf` (which lives on `PATH`).
 
 ### Basic signature
 
 ```shell
-java -jar ../JSignPdf.jar \
+../bin/jsignpdf.sh \
     -kst PKCS12 \
     -ksf jsmith.p12 \
     -ksp 123456 \
@@ -28,7 +28,7 @@ The signed file is written next to the input as `service-agreeement_signed.pdf`.
 ### Signature with reason, location and contact
 
 ```shell
-java -jar ../JSignPdf.jar \
+../bin/jsignpdf.sh \
     -kst PKCS12 -ksf jsmith.p12 -ksp 123456 \
     -r "I agree with the content" \
     -l "Prague, CZ" \
@@ -39,7 +39,7 @@ java -jar ../JSignPdf.jar \
 ### Visible signature on page 1
 
 ```shell
-java -jar ../JSignPdf.jar \
+../bin/jsignpdf.sh \
     -kst PKCS12 -ksf jsmith.p12 -ksp 123456 \
     -V -pg 1 \
     -llx 50 -lly 50 -urx 250 -ury 120 \
@@ -52,7 +52,7 @@ java -jar ../JSignPdf.jar \
 [FreeTSA](https://freetsa.org/) provides a free, public RFC 3161 timestamping authority. No authentication is required.
 
 ```shell
-java -jar ../JSignPdf.jar \
+../bin/jsignpdf.sh \
     -kst PKCS12 -ksf jsmith.p12 -ksp 123456 \
     -ha SHA256 \
     -ts https://freetsa.org/tsr \
@@ -65,7 +65,7 @@ If FreeTSA's root certificate is not trusted by your Java runtime, import it int
 ### Append a signature to an already-signed document
 
 ```shell
-java -jar ../JSignPdf.jar \
+../bin/jsignpdf.sh \
     -kst PKCS12 -ksf jsmith.p12 -ksp 123456 \
     -a \
     service-agreeement_signed.pdf
@@ -74,7 +74,7 @@ java -jar ../JSignPdf.jar \
 ### List keys in the demo keystore
 
 ```shell
-java -jar ../JSignPdf.jar \
+../bin/jsignpdf.sh \
     -kst PKCS12 -ksf jsmith.p12 -ksp 123456 \
     -lk
 ```

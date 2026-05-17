@@ -21,7 +21,7 @@
         <maven.enforcer.plugin.version>3.6.2</maven.enforcer.plugin.version>
         <maven.jar.plugin.version>3.5.0</maven.jar.plugin.version>
         <maven.dependency.plugin.version>3.10.0</maven.dependency.plugin.version>
-        <maven.shade.plugin.version>3.6.2</maven.shade.plugin.version>
+        <maven.appassembler.plugin.version>2.1.0</maven.appassembler.plugin.version>
 
         <bouncycastle.version>1.84</bouncycastle.version>
         <jsign.pkcs11.version>1.1.0</jsign.pkcs11.version>
@@ -37,6 +37,7 @@
     </properties>
 
     <modules>
+        <module>jsignpdf-bootstrap</module>
         <module>jsignpdf</module>
         <module>installcert</module>
         <module>distribution</module>
@@ -190,22 +191,9 @@
                     <version>${maven.enforcer.plugin.version}</version>
                 </plugin>
                 <plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-shade-plugin</artifactId>
-                    <version>${maven.shade.plugin.version}</version>
-                    <configuration>
-                        <filters>
-                            <filter>
-                                <artifact>*:*</artifact>
-                                <excludes>
-                                    <exclude>META-INF/*.SF</exclude>
-                                    <exclude>META-INF/*.DSA</exclude>
-                                    <exclude>META-INF/*.RSA</exclude>
-                                    <exclude>**/module-info.class</exclude>
-                                </excludes>
-                            </filter>
-                        </filters>
-                    </configuration>
+                    <groupId>org.codehaus.mojo</groupId>
+                    <artifactId>appassembler-maven-plugin</artifactId>
+                    <version>${maven.appassembler.plugin.version}</version>
                 </plugin>
                 <plugin>
                     <groupId>org.codehaus.mojo</groupId>

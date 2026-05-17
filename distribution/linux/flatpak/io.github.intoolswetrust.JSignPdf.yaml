@@ -36,8 +36,12 @@ modules:
       - type: file
         path: jsignpdf.png
     build-commands:
+      # The full ZIP unpacks (with the default strip-components: 1) into a
+      # tree containing lib/, lib/javafx/, licenses/, docs/, demo/, bin/.
+      # We only need lib/ (the runtime classpath, including JavaFX linux
+      # classifier jars) and licenses/ for the bundled app.
       - mkdir -p ${FLATPAK_DEST}/share/jsignpdf
-      - cp -r JSignPdf.jar InstallCert.jar licenses ${FLATPAK_DEST}/share/jsignpdf/
+      - cp -r lib licenses ${FLATPAK_DEST}/share/jsignpdf/
       - install -Dm755 jsignpdf-flatpak.in ${FLATPAK_DEST}/bin/jsignpdf
       - install -Dm644 jsignpdf.desktop ${FLATPAK_DEST}/share/applications/io.github.intoolswetrust.JSignPdf.desktop
       - install -Dm644 io.github.intoolswetrust.JSignPdf.metainfo.xml ${FLATPAK_DEST}/share/metainfo/io.github.intoolswetrust.JSignPdf.metainfo.xml

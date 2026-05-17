@@ -1,0 +1,49 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <artifactId>jsignpdf-bootstrap</artifactId>
+    <packaging>jar</packaging>
+    <name>${project.artifactId}</name>
+    <description>
+        Tiny Java-8 launcher that picks the right JavaFX platform jars at
+        runtime and reflectively invokes the real JSignPdf main. Lives in its
+        own module so it can stay at bytecode level 52 while the rest of the
+        project targets Java 21.
+    </description>
+
+    <parent>
+        <groupId>com.github.kwart.jsign</groupId>
+        <artifactId>jsignpdf-root</artifactId>
+        <version>3.1.0-SNAPSHOT</version>
+        <relativePath>../pom.xml</relativePath>
+    </parent>
+
+    <properties>
+        <maven.compiler.release>8</maven.compiler.release>
+    </properties>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <configuration>
+                    <archive>
+                        <manifest>
+                            <mainClass>com.intoolswetrust.jsignpdf.Bootstrap</mainClass>
+                        </manifest>
+                    </archive>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+
+    <dependencies>
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+</project>

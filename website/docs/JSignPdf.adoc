@@ -50,35 +50,68 @@ JSignPdf releases are available on the GitHub releases page:
 
 {url-repo}/releases
 
-Each release provides the following artifacts:
+Each release provides per-platform installers (each bundles its own Java 21 runtime) plus two cross-platform ZIPs for users who already have Java.
 
+.Native installers (bundled Java runtime)
 [cols="1,3"]
 |===
 |Artifact |Description
 
-|`jsignpdf-${VERSION}.zip`
-|Platform-independent ZIP archive containing the JAR files (`JSignPdf.jar`, `InstallCert.jar`), a shell launcher for Linux/macOS, the documentation and the demo material. Works on any OS with Java 21 or newer installed.
+|`jsignpdf-${VERSION}-windows-x64.msi`
+|Windows 64-bit MSI installer (SignPath-signed). Installs to _Program Files_ by default, creates Start Menu shortcuts and registers an Add/Remove Programs entry. Preferred for enterprise deployment via group policy or software-distribution tools.
 
-|`JSignPdf-${VERSION}-win-x64.exe`
-|Windows 64-bit EXE installer. Bundles its own Java runtime, installs to _Program Files_ by default, creates Start Menu shortcuts and registers an Add/Remove Programs entry.
+|`jsignpdf-${VERSION}-windows-x64.zip`
+|Windows 64-bit portable ZIP. Same content as the MSI but unzip-and-run -- no installation required.
 
-|`JSignPdf-${VERSION}-win-x64.msi`
-|Windows 64-bit MSI installer. Functionally equivalent to the EXE installer; preferred for deployment via group policy or enterprise software-distribution tools.
+|`jsignpdf-${VERSION}-linux-x64.deb` +
+`jsignpdf-${VERSION}-linux-aarch64.deb`
+|Debian / Ubuntu packages for x86_64 and ARM64.
 
-|`JSignPdf-${VERSION}-win-x64.zip`
-|Windows 64-bit portable ZIP. Contains the fully packaged application (including a bundled JRE); just unzip and run `JSignPdf.exe`.
+|`jsignpdf-${VERSION}-linux-x64.rpm` +
+`jsignpdf-${VERSION}-linux-aarch64.rpm`
+|RPM packages for Fedora / RHEL / openSUSE on x86_64 and ARM64.
+
+|`jsignpdf-${VERSION}-linux-x64.zip` +
+`jsignpdf-${VERSION}-linux-aarch64.zip`
+|Portable Linux app-images. Untar and run; no system install.
+
+|`jsignpdf-${VERSION}-linux-x86_64.flatpak` +
+`jsignpdf-${VERSION}-linux-aarch64.flatpak`
+|Sandboxed Flatpak bundles. Installed with `flatpak install <file>`.
+
+|`jsignpdf-${VERSION}-macos-x64.dmg` +
+`jsignpdf-${VERSION}-macos-aarch64.dmg`
+|macOS disk images for Intel and Apple Silicon. Currently unsigned -- expect a Gatekeeper warning on first launch.
+
+|`jsignpdf-${VERSION}-macos-x64.zip` +
+`jsignpdf-${VERSION}-macos-aarch64.zip`
+|Portable macOS `.app` bundles for Intel and Apple Silicon.
 |===
 
-NOTE: 32-bit Windows is no longer supported by the dedicated Windows installers. Users on 32-bit Windows can still run JSignPdf from the platform-independent ZIP with their own 32-bit JRE.
+.Cross-platform ZIPs (bring your own Java 21)
+[cols="1,3"]
+|===
+|Artifact |Description
+
+|`jsignpdf-${VERSION}-full.zip`
+|Cross-platform ZIP with all dependencies plus JavaFX natives for Windows x64, Linux x64, macOS x64 and macOS Apple Silicon. The `bin/jsignpdf.sh` / `bin\jsignpdf.cmd` launchers pick the matching JavaFX classifier at startup. Use this when you carry the same JSignPdf install across multiple machines / OSes.
+
+|`jsignpdf-${VERSION}-minimal.zip`
+|Cross-platform ZIP without JavaFX. Suitable for headless / CLI signing, Linux aarch64 (where OpenJFX has no native classifier), or as the basis for downstream packagers (Debian, Homebrew). The GUI falls back to the legacy Swing UI automatically when invoked.
+|===
+
+`jsignpdf-${VERSION}-SHA256SUMS.txt` covers every artifact above. Releases are also mirrored on https://sourceforge.net/projects/jsignpdf/files/[SourceForge].
+
+NOTE: 32-bit Windows is no longer supported. Users on 32-bit Windows can still run JSignPdf from the cross-platform ZIPs with their own 32-bit JRE.
 
 === Java
 
-If you use the platform-independent ZIP archive, you need Java Runtime Environment (JRE) version 21 or newer. You can download it freely from the web, for instance:
+The cross-platform ZIPs require Java Runtime Environment (JRE) version 21 or newer. You can download it freely from the web, for instance:
 
 * https://adoptium.net/[Eclipse Adoptium]
 * https://www.azul.com/downloads/?package=jre#download-openjdk[Azul Zulu]
 
-NOTE: The Windows EXE / MSI / portable ZIP variants all bundle their own JRE, so a separate Java installation is not required on Windows.
+NOTE: All native installers (MSI / DEB / RPM / DMG / Flatpak) bundle their own JRE, so a separate Java installation is not required when you go that route.
 
 === Obtaining a keystore
 
@@ -117,50 +150,60 @@ Every release bundles a small `demo/` folder so you can try JSignPdf immediately
 
 You can find the folder:
 
-* at the top level of the platform-independent ZIP (`jsignpdf-${VERSION}.zip`)
-* under `<install dir>\app\demo\` after installing with the Windows EXE / MSI installer
-* under `JSignPdf\app\demo\` in the Windows portable ZIP (`JSignPdf-${VERSION}-win-x64.zip`)
+* at the top level of either cross-platform ZIP (`jsignpdf-${VERSION}-full.zip` / `jsignpdf-${VERSION}-minimal.zip`), inside `jsignpdf-${VERSION}/demo/`
+* under `<install dir>\app\demo\` after installing with the Windows MSI
+* under `/opt/jsignpdf/lib/app/demo/` after installing the Linux DEB or RPM
+* under `JSignPdf.app/Contents/Resources/demo/` inside the macOS DMG
 
 WARNING: The bundled keystore is meant purely for experimentation. Do not use it to sign real documents.
 
 == Launching JSignPdf
 
-=== From the Windows installer or portable ZIP
+=== From a native installer (MSI / DEB / RPM / DMG / Flatpak)
 
-When JSignPdf is installed via the Windows EXE / MSI installer (or extracted from the `win-x64.zip` portable archive), four launchers are available:
+When JSignPdf is installed via one of the native installers, four launchers are registered with the desktop environment and (on Linux and Windows) added to `PATH`:
 
 [cols="1,3"]
 |===
 |Launcher |Purpose
 
-|`JSignPdf.exe`
-|Starts the JavaFX graphical interface (the default). Also available as a Start Menu shortcut after installation.
+|`JSignPdf` (Windows: `JSignPdf.exe`, Linux: `JSignPdf` in `/opt/jsignpdf/bin/` + a `jsignpdf` symlink on `PATH`)
+|Starts the JavaFX graphical interface (the default). Also exposed as a Start Menu / application-menu entry.
 
-|`JSignPdf-swing.exe`
+|`JSignPdf-swing`
 |Starts the classic Swing graphical interface (equivalent to passing `-Djsignpdf.swing=true` on the command line).
 
-|`JSignPdfC.exe`
+|`JSignPdfC`
 |Console-mode launcher for the signer. Use this in batch scripts, CI pipelines or whenever you want the output to appear in the current terminal window.
 
-|`InstallCert.exe`
+|`InstallCert`
 |Command-line tool for importing a server certificate into the bundled JRE's `cacerts` truststore (see <<InstallCert Tool>>).
 |===
 
-All four launchers share the bundled JRE -- you do **not** need to have Java installed separately. For installer-based deployments the launchers live in `<install dir>\` (with Start Menu shortcuts to the GUI launchers); in the portable ZIP they are directly in the extracted folder.
+All four launchers share the bundled JRE -- you do **not** need to have Java installed separately.
 
-=== From the platform-independent ZIP
+=== From a cross-platform ZIP
 
-All platforms (with Java 21 or newer installed) can run the JAR file _JSignPdf.jar_ directly. Use the following command in the directory where the application is located:
+After extracting `jsignpdf-${VERSION}-full.zip` (or `-minimal.zip`), launch JSignPdf from inside the extracted folder:
 
- $ java -jar JSignPdf.jar
+[source]
+----
+$ bin/jsignpdf.sh        # Linux / macOS
+> bin\jsignpdf.cmd       # Windows
+----
 
-On Linux and macOS a convenience shell script is bundled in `bin/jsignpdf.sh` which adds the JVM options required on Java 21+ and then launches the JAR.
+The launcher scripts find your JRE via `JAVA_HOME`, falling back to `java` on `PATH`. They invoke a small bootstrap class (`com.intoolswetrust.jsignpdf.Bootstrap`) which checks the Java version, picks the matching JavaFX platform jars from `lib/javafx/` and then starts the application.
 
-By default, JSignPdf opens the JavaFX graphical interface (see <<Using the JavaFX UI>>). To start the classic Swing GUI instead, set the `jsignpdf.swing` system property:
+By default, JSignPdf opens the JavaFX graphical interface (see <<Using the JavaFX UI>>). To start the classic Swing GUI instead, set the `jsignpdf.swing` system property via `JAVA_OPTS`:
 
- $ java -Djsignpdf.swing=true -jar JSignPdf.jar
+[source]
+----
+$ JAVA_OPTS=-Djsignpdf.swing=true bin/jsignpdf.sh
+----
 
 If command line arguments for signing are provided, JSignPdf runs in batch mode without opening any GUI (see <<Command line (batch mode)>>).
+
+NOTE: On Linux aarch64 the cross-platform ZIPs always start the Swing GUI -- OpenJFX 21 does not publish a `linux-aarch64` native classifier on Maven Central. The Linux aarch64 DEB / RPM / Flatpak builds are unaffected because their bundled Azul Zulu+FX runtime supplies JavaFX as JDK modules.
 
 == Using the JavaFX UI
 
@@ -249,9 +292,9 @@ The values persist in `<config-dir>/advanced.properties` (see <<Advanced applica
 
 == Classic Swing UI
 
-The classic Swing GUI is the original graphical interface from earlier versions of JSignPdf. It remains available for backward compatibility. To start it, set the `jsignpdf.swing` system property:
+The classic Swing GUI is the original graphical interface from earlier versions of JSignPdf. It remains available for backward compatibility. From a native installer use the `JSignPdf-swing` launcher; from a cross-platform ZIP set the `jsignpdf.swing` system property:
 
- $ java -Djsignpdf.swing=true -jar JSignPdf.jar
+ $ JAVA_OPTS=-Djsignpdf.swing=true bin/jsignpdf.sh
 
 The Swing GUI opens in a simplified view. Fill in the keystore type, keystore file and password, the input PDF file, and press _Sign It_.
 
@@ -271,7 +314,7 @@ The options are grouped by category below. For detailed descriptions of each opt
 
 [source,shell]
 ----
-usage: java -jar JSignPdf.jar [file1.pdf [file2.pdf ...]] [-a] [--bg-path
+usage: jsignpdf [file1.pdf [file2.pdf ...]] [-a] [--bg-path
        <file>] [--bg-scale <scale>] [-c <contact>] [-cl <level>] [--crl] [-d
        <path>] [--disable-acrobat6-layer-mode] [--disable-assembly]
        [--disable-copy] [--disable-fill] [--disable-modify-annotations]
@@ -590,14 +633,14 @@ Sign a PDF using the Windows certificate store:
 
 [source,shell]
 ----
-$ java -jar JSignPdf.jar -kst WINDOWS-MY mydocument.pdf
+$ jsignpdf -kst WINDOWS-MY mydocument.pdf
 ----
 
 Sign and encrypt a PDF, disabling printing:
 
 [source,shell]
 ----
-$ java -jar JSignPdf.jar -kst PKCS12 -ksf my_certificate.pfx \
+$ jsignpdf -kst PKCS12 -ksf my_certificate.pfx \
   -ksp myPrivateKeystorePassword -ka cert23 \
   -pe PASSWORD -opwd xxx123 -upwd 123xxx \
   -pr DISALLOW_PRINTING mydocument.pdf
@@ -607,14 +650,14 @@ List available keystore types:
 
 [source,shell]
 ----
-$ java -jar JSignPdf.jar -lkt
+$ jsignpdf -lkt
 ----
 
 List key aliases in a keystore (quiet mode):
 
 [source,shell]
 ----
-$ java -jar JSignPdf.jar -kst PKCS12 -ksf my_certificate.pfx \
+$ jsignpdf -kst PKCS12 -ksf my_certificate.pfx \
   -ksp myVeryPrivatePassword -lk -q
 ----
 
@@ -628,7 +671,7 @@ Opt in with `--enable-stdin-passwords` and use `-` as the value of any password 
 [source,shell]
 ----
 $ printf '%s\n' "$KS_PASSWORD" \
-  | java -jar JSignPdf.jar --enable-stdin-passwords \
+  | jsignpdf --enable-stdin-passwords \
       -kst PKCS12 -ksf keystore.p12 -ksp - -ka mykey \
       -d out/ input.pdf
 ----
@@ -646,7 +689,7 @@ When more than one option uses `-`, the values are consumed from stdin in a *fix
 [source,shell]
 ----
 $ { printf '%s\n' "$KS_PASSWORD"; printf '%s\n' "$TSA_PASSWORD"; } \
-  | java -jar JSignPdf.jar --enable-stdin-passwords \
+  | jsignpdf --enable-stdin-passwords \
       -kst PKCS12 -ksf keystore.p12 -ksp - -ka mykey \
       -ts https://tsa.example/ -tsu tsauser -tsp - \
       -d out/ input.pdf
@@ -658,7 +701,7 @@ When a console is attached (an interactive terminal), `-` switches to a prompted
 
 [source,shell]
 ----
-$ java -jar JSignPdf.jar --enable-stdin-passwords \
+$ jsignpdf --enable-stdin-passwords \
       -kst PKCS12 -ksf keystore.p12 -ksp - -ka mykey input.pdf
 Enter password for --keystore-password: ****
 ----
@@ -834,9 +877,8 @@ library=/path/to/your/PKCSDriver.so
 
 [source]
 ----
-java -Djava.security.debug=pkcs11keystore \
-     -Djava.security.debug=sunpkcs11 \
-     -jar JSignPdf.jar
+JAVA_OPTS="-Djava.security.debug=pkcs11keystore -Djava.security.debug=sunpkcs11" \
+    bin/jsignpdf.sh
 ----
 
 
@@ -860,14 +902,14 @@ If the PKCS11 keystore type works properly in the GUI and you can use the certif
 
 [source]
 ----
-java -jar JSignPdf.jar -kst PKCS11 -ksp 123456 document.pdf
+jsignpdf -kst PKCS11 -ksp 123456 document.pdf
 ----
 
 == Advanced application configuration
 
 Application-wide tweaks beyond the per-document signing options live in `<config-dir>/advanced.properties` and -- for hardware tokens -- `<config-dir>/pkcs11.cfg`. Both are plain text files; the easiest way to edit them is the JavaFX <<Adjusting advanced preferences,Preferences dialog>>, which writes them on _OK_. Power users can also hand-edit the files directly while JSignPdf is closed; the next launch picks up the changes.
 
-`advanced.properties` covers the same six topics as the Preferences dialog (visible-signature font, certificate-validation toggles, relaxed SSL, PDF preview backend order, default TSA hash algorithm, and one or two miscellaneous knobs). When a key is missing from `advanced.properties`, JSignPdf falls back to defaults bundled inside `JSignPdf.jar`, so a fresh install needs no config file at all.
+`advanced.properties` covers the same six topics as the Preferences dialog (visible-signature font, certificate-validation toggles, relaxed SSL, PDF preview backend order, default TSA hash algorithm, and one or two miscellaneous knobs). When a key is missing from `advanced.properties`, JSignPdf falls back to defaults bundled inside the application jar, so a fresh install needs no config file at all.
 
 === Migration from earlier versions
 
@@ -922,26 +964,28 @@ Previous versions of JSignPdf stored the main settings in `~/.JSignPdf` (a singl
 
 Once the new directory exists, the legacy locations are no longer consulted or updated.
 
-=== Java VM options for the Windows EXE launchers
+=== Java VM options for the native installer launchers
 
-If you need to change JVM properties for the Windows launchers (for example to increase the maximum heap), edit the corresponding `.cfg` file under the `app` subfolder of the installation. jpackage creates one `.cfg` per launcher:
+If you need to change JVM properties for the four bundled launchers (for example to increase the maximum heap), edit the corresponding `.cfg` file under the `app` subfolder of the installation. jpackage creates one `.cfg` per launcher:
 
 [cols="1,3"]
 |===
 |Launcher |Configuration file
 
-|`JSignPdf.exe`
-|`app\JSignPdf.cfg`
+|`JSignPdf`
+|`app/JSignPdf.cfg`
 
-|`JSignPdf-swing.exe`
-|`app\JSignPdf-swing.cfg`
+|`JSignPdf-swing`
+|`app/JSignPdf-swing.cfg`
 
-|`JSignPdfC.exe`
-|`app\JSignPdfC.cfg`
+|`JSignPdfC`
+|`app/JSignPdfC.cfg`
 
-|`InstallCert.exe`
-|`app\InstallCert.cfg`
+|`InstallCert`
+|`app/InstallCert.cfg`
 |===
+
+The `app/` folder lives under the install root: `%ProgramFiles%\JSignPdf\app\` on Windows, `/opt/jsignpdf/lib/app/` on Linux, `JSignPdf.app/Contents/app/` on macOS.
 
 Each `.cfg` file contains a `[JavaOptions]` section with one `java-options=` entry per option. Add additional options as further `java-options=` lines, for example:
 
@@ -953,7 +997,7 @@ java-options=-Xmx1g
 java-options=-Dswing.aatext=true
 ----
 
-NOTE: The configuration files are shared between the installed build (`%ProgramFiles%\JSignPdf\app\`) and the portable ZIP (`JSignPdf\app\` inside the extracted archive).
+The same `.cfg` files are present inside the per-platform portable ZIPs (`jsignpdf-${VERSION}-windows-x64.zip`, `jsignpdf-${VERSION}-linux-x64.zip`, ...) under `JSignPdf/app/` (Windows / Linux) or `JSignPdf.app/Contents/app/` (macOS).
 
 == Troubleshooting
 
@@ -961,14 +1005,14 @@ NOTE: The configuration files are shared between the installed build (`%ProgramF
 
 If you see an OutOfMemoryError in the program console, you need to allow Java to use more memory.
 
-When running from the platform-independent ZIP, add `-Xmx<size>` to your Java command. The following example allows Java to use 512 MB of heap:
+When running from a cross-platform ZIP, set the `-Xmx<size>` flag via `JAVA_OPTS` before invoking the launcher. The following example allows Java to use 512 MB of heap:
 
 [source]
 ----
-$ java -Xmx512m -jar JSignPdf.jar
+$ JAVA_OPTS=-Xmx512m bin/jsignpdf.sh
 ----
 
-When running from the Windows EXE / MSI / portable ZIP, add a new `java-options=-Xmx512m` line to the `.cfg` file of the affected launcher (see <<Java VM options for the Windows EXE launchers>>).
+When running from a native installer (MSI / DEB / RPM / DMG / Flatpak) or the per-platform portable ZIP, add a `java-options=-Xmx512m` line to the `.cfg` file of the affected launcher (see <<Java VM options for the native installer launchers>>).
 
 === SSL/TLS certificate errors
 
@@ -999,13 +1043,22 @@ If timestamping fails:
 
 JSignPdf comes with a command line utility for adding server certificates to the Java `cacerts` keystore. This is useful when connecting to HTTPS servers whose certificates are not signed by a well-known CA (see <<SSL/TLS certificate errors>>).
 
+When installed via a native installer (MSI / DEB / RPM / DMG / Flatpak) it is exposed as the `InstallCert` launcher:
+
 [source]
 ----
-$ java -jar InstallCert.jar
+$ InstallCert
 
 or
 
-$ java -jar InstallCert.jar hostname[:port] [cacertPwd]
+$ InstallCert hostname[:port] [cacertPwd]
+----
+
+From a cross-platform ZIP the tool is reachable via `java -cp` against the bundled jars:
+
+[source]
+----
+$ java -cp "lib/*" net.sf.jsignpdf.InstallCert hostname[:port] [cacertPwd]
 ----
 
 If you don't provide a hostname argument, you will be asked for it.

@@ -1,0 +1,82 @@
+<assembly xmlns="http://maven.apache.org/ASSEMBLY/2.1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:schemaLocation="http://maven.apache.org/ASSEMBLY/2.1.0 http://maven.apache.org/xsd/assembly-2.1.0.xsd">
+
+    <id>full</id>
+    <formats>
+        <format>zip</format>
+    </formats>
+    <includeBaseDirectory>true</includeBaseDirectory>
+    <baseDirectory>jsignpdf-${project.version}</baseDirectory>
+
+    <fileSets>
+        <!-- jars: everything from staging/lib, minus the platform-classified JavaFX jars. -->
+        <fileSet>
+            <directory>${staging.dir}/lib</directory>
+            <outputDirectory>lib</outputDirectory>
+            <includes>
+                <include>*.jar</include>
+            </includes>
+            <excludes>
+                <exclude>javafx-*-win.jar</exclude>
+                <exclude>javafx-*-linux.jar</exclude>
+                <exclude>javafx-*-linux-aarch64.jar</exclude>
+                <exclude>javafx-*-mac.jar</exclude>
+                <exclude>javafx-*-mac-aarch64.jar</exclude>
+            </excludes>
+        </fileSet>
+
+        <!-- Platform-classified JavaFX jars land in lib/javafx/; Bootstrap picks the right ones at runtime. -->
+        <fileSet>
+            <directory>${staging.dir}/lib</directory>
+            <outputDirectory>lib/javafx</outputDirectory>
+            <includes>
+                <include>javafx-*-win.jar</include>
+                <include>javafx-*-linux.jar</include>
+                <include>javafx-*-linux-aarch64.jar</include>
+                <include>javafx-*-mac.jar</include>
+                <include>javafx-*-mac-aarch64.jar</include>
+            </includes>
+        </fileSet>
+
+        <!-- License files distributed with every variant. -->
+        <fileSet>
+            <directory>licenses</directory>
+            <outputDirectory>licenses</outputDirectory>
+        </fileSet>
+
+        <!-- Generated PDF / text documentation, if present. -->
+        <fileSet>
+            <directory>target/generated-docs</directory>
+            <outputDirectory>docs</outputDirectory>
+            <includes>
+                <include>*.txt</include>
+                <include>*.pdf</include>
+            </includes>
+        </fileSet>
+
+        <!-- Demo PDF + sample keystore for the user guide. -->
+        <fileSet>
+            <directory>demo</directory>
+            <outputDirectory>demo</outputDirectory>
+        </fileSet>
+
+        <fileSet>
+            <directory>${staging.dir}/bin</directory>
+            <outputDirectory>bin</outputDirectory>
+            <includes>
+                <include>*.sh</include>
+            </includes>
+            <fileMode>0755</fileMode>
+            <lineEnding>unix</lineEnding>
+        </fileSet>
+        <fileSet>
+            <directory>${staging.dir}/bin</directory>
+            <outputDirectory>bin</outputDirectory>
+            <includes>
+                <include>*.cmd</include>
+            </includes>
+            <fileMode>0644</fileMode>
+            <lineEnding>dos</lineEnding>
+        </fileSet>
+    </fileSets>
+</assembly>
