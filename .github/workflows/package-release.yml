@@ -104,6 +104,44 @@ jobs:
         if-no-files-found: error
         retention-days: 1
 
+  pick-intel-runner:
+    # Decides where the Intel-macOS (macos-x64) build runs: a self-hosted
+    # Intel mac if one is online and idle, otherwise GitHub's retiring
+    # hosted macos-13 pool. Output is a JSON value consumed by the `package`
+    # job's runs-on (a JSON string "macos-13", or a label array for
+    # self-hosted). It is a point-in-time check — if the self-hosted box
+    # drops out between here and job pickup, macos-x64 is best-effort
+    # (continue-on-error + timeout-minutes) so the release is unaffected.
+    #
+    # Listing self-hosted runners needs a token with repo "Administration:
+    # read"; the default GITHUB_TOKEN lacks it. Provide it as the optional
+    # RUNNER_QUERY_TOKEN secret. Missing/insufficient token or any API error
+    # falls back to the hosted pool, so the workflow degrades safely.
+    runs-on: ubuntu-24.04
+    outputs:
+      runs-on: ${{ steps.pick.outputs.runs_on }}
+    steps:
+    - name: Probe for a self-hosted Intel mac
+      id: pick
+      env:
+        GH_TOKEN: ${{ secrets.RUNNER_QUERY_TOKEN || github.token }}
+        SELF_HOSTED_LABEL: macos-x64-selfhosted
+      run: |
+        set -uo pipefail
+        online=$(gh api --paginate \
+          "repos/${{ github.repository }}/actions/runners" \
+          --jq "[.runners[] | select(.status==\"online\" and .busy==false
+                 and ([.labels[].name] | index(\"${SELF_HOSTED_LABEL}\")))] | length" \
+          2>/dev/null) || online=0
+        online=${online:-0}
+        if [ "$online" -gt 0 ]; then
+          echo "Self-hosted Intel runner available ($online idle) — using it."
+          echo "runs_on=[\"self-hosted\",\"macOS\",\"X64\",\"${SELF_HOSTED_LABEL}\"]" >> "$GITHUB_OUTPUT"
+        else
+          echo "No idle self-hosted Intel runner — falling back to hosted macos-13."
+          echo 'runs_on="macos-13"' >> "$GITHUB_OUTPUT"
+        fi
+
   package:
     # Per-platform native installers via jpackage. Each runner downloads the
     # full ZIP from the fetch-zips job, unpacks it, and points the platform
@@ -113,13 +151,14 @@ jobs:
     # fail-fast: false so a single broken platform doesn't abort the others.
     # macOS DMGs are unsigned in 3.1 — see design-doc/3.1-no-fat-jar.md.
     #
-    # macos-13 is GitHub's last Intel macOS image and its hosted pool is being
-    # retired: jobs can sit queued for hours or never get a runner. The Intel
-    # mac build is therefore BEST-EFFORT — continue-on-error on that matrix
-    # entry keeps its failure/timeout from blocking the release, and
-    # timeout-minutes caps how long a stuck/queued runner can hang the
+    # The Intel-macOS (macos-x64) entry's runner is chosen by
+    # pick-intel-runner: a self-hosted Intel mac if one is online, else
+    # GitHub's retiring hosted macos-13 pool (which can sit queued for hours
+    # or never get a runner). Either way the entry is BEST-EFFORT —
+    # continue-on-error keeps its failure/timeout from blocking the release,
+    # and timeout-minutes caps how long a stuck/queued runner can hang the
     # workflow.
-    needs: fetch-zips
+    needs: [fetch-zips, pick-intel-runner]
     strategy:
       fail-fast: false
       matrix:
@@ -146,7 +185,9 @@ jobs:
             label: macos-aarch64
             script: ./distribution/macos/build-macos-installers.sh
             signpath: false
-    runs-on: ${{ matrix.os }}
+    # macos-x64 resolves to pick-intel-runner's choice (self-hosted label
+    # array or "macos-13"); every other entry uses its static matrix.os.
+    runs-on: ${{ matrix.label == 'macos-x64' && fromJSON(needs.pick-intel-runner.outputs.runs-on) || matrix.os }}
     # Best-effort entries (Intel macOS) must not fail or hang the release.
     continue-on-error: ${{ matrix.best-effort || false }}
     timeout-minutes: 60
