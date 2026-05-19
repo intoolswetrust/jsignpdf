@@ -31,7 +31,10 @@ VERSION="$1"
 SCRIPT_DIR="$(cd -P "$(dirname "$0")" >/dev/null 2>&1 && pwd -P)"
 ROOT="$(cd -P "$SCRIPT_DIR/../.." >/dev/null 2>&1 && pwd -P)"
 TARGET="$ROOT/distribution/target"
-APPASSEMBLY="$TARGET/appassembler/lib"
+# Runtime jar dir. Defaults to the locally-built appassembler staging; the
+# package-release workflow overrides it with JSIGNPDF_LIB_DIR pointing at the
+# lib/ unpacked from the full ZIP downloaded from Maven Central.
+APPASSEMBLY="${JSIGNPDF_LIB_DIR:-$TARGET/appassembler/lib}"
 STAGING="$TARGET/jpackage-staging"
 OUT="$TARGET/jpackage-out"
 UPLOAD="$TARGET/upload"

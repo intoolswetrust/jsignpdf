@@ -28,7 +28,10 @@ Set-StrictMode -Version Latest
 
 $root        = (Resolve-Path "$PSScriptRoot/../..").Path
 $target      = Join-Path $root 'distribution/target'
-$appassembly = Join-Path $target 'appassembler/lib'
+# Runtime jar dir. Defaults to the locally-built appassembler staging; the
+# package-release workflow overrides it with JSIGNPDF_LIB_DIR pointing at the
+# lib/ unpacked from the full ZIP downloaded from Maven Central.
+$appassembly = if ($env:JSIGNPDF_LIB_DIR) { $env:JSIGNPDF_LIB_DIR } else { Join-Path $target 'appassembler/lib' }
 $staging     = Join-Path $target 'jpackage-staging'
 $out         = Join-Path $target 'jpackage-out'
 $upload      = Join-Path $target 'upload'
