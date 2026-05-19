@@ -109,6 +109,44 @@
                 </executions>
             </plugin>
 
+            <!--
+              Step 3: attach both zips as classified artifacts so the Maven
+              release deploys them to Central (signed by maven-gpg-plugin at
+              the later 'verify' phase), the same way the pre-3.0
+              jsignpdf-distribution module published its single zip. The
+              package-release workflow downloads these exact bits to drive the
+              per-platform jpackage builds. The assembly executions keep
+              <attach>false</attach>; build-helper does the attaching so the
+              classifiers (full / minimal) are explicit.
+            -->
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>build-helper-maven-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>attach-distribution-zips</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>attach-artifact</goal>
+                        </goals>
+                        <configuration>
+                            <artifacts>
+                                <artifact>
+                                    <file>${project.build.directory}/jsignpdf-${project.version}-full.zip</file>
+                                    <type>zip</type>
+                                    <classifier>full</classifier>
+                                </artifact>
+                                <artifact>
+                                    <file>${project.build.directory}/jsignpdf-${project.version}-minimal.zip</file>
+                                    <type>zip</type>
+                                    <classifier>minimal</classifier>
+                                </artifact>
+                            </artifacts>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-enforcer-plugin</artifactId>
