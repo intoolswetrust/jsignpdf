@@ -799,6 +799,20 @@
   },
   {
     "type": "file",
+    "url": "https://repo1.maven.org/maven2/commons-codec/commons-codec/1.22.0/commons-codec-1.22.0.jar",
+    "sha256": "d164fe79f262c32d9b18a0b5b2d317d1c27653d5e98fd2b998c24bf901c72ce4",
+    "dest": "m2local/commons-codec/commons-codec/1.22.0",
+    "dest-filename": "commons-codec-1.22.0.jar"
+  },
+  {
+    "type": "file",
+    "url": "https://repo1.maven.org/maven2/commons-codec/commons-codec/1.22.0/commons-codec-1.22.0.pom",
+    "sha256": "d9a565d978faa69d2b1195fb1ec27e60f29e7feb09afb85adac78f280068f8fe",
+    "dest": "m2local/commons-codec/commons-codec/1.22.0",
+    "dest-filename": "commons-codec-1.22.0.pom"
+  },
+  {
+    "type": "file",
     "url": "https://repo1.maven.org/maven2/commons-collections/commons-collections/3.2.2/commons-collections-3.2.2.jar",
     "sha256": "eeeae917917144a68a741d4c0dff66aa5c5c5fd85593ff217bced3fc8ca783b8",
     "dest": "m2local/commons-collections/commons-collections/3.2.2",
@@ -908,13 +922,6 @@
     "sha256": "542b7a502ed61950d1b83112b51b1617d3407e3a4df5ab56a98d760e0f8c5950",
     "dest": "m2local/commons-io/commons-io/2.19.0",
     "dest-filename": "commons-io-2.19.0.pom"
-  },
-  {
-    "type": "file",
-    "url": "https://repo1.maven.org/maven2/commons-io/commons-io/2.20.0/commons-io-2.20.0.jar",
-    "sha256": "df90bba0fe3cb586b7f164e78fe8f8f4da3f2dd5c27fa645f888100ccc25dd72",
-    "dest": "m2local/commons-io/commons-io/2.20.0",
-    "dest-filename": "commons-io-2.20.0.jar"
   },
   {
     "type": "file",
@@ -1513,6 +1520,13 @@
   },
   {
     "type": "file",
+    "url": "https://repo1.maven.org/maven2/org/apache/apache/38/apache-38.pom",
+    "sha256": "9b0a5f28ddfb4b7500a37022bee8245efdd044fb9a3d79fb827550923eccc4b5",
+    "dest": "m2local/org/apache/apache/38",
+    "dest-filename": "apache-38.pom"
+  },
+  {
+    "type": "file",
     "url": "https://repo1.maven.org/maven2/org/apache/apache/4/apache-4.pom",
     "sha256": "9e9323a26ba8eb2394efef0c96d31b70df570808630dc147cab1e73541cc5194",
     "dest": "m2local/org/apache/apache/4",
@@ -1713,20 +1727,6 @@
     "sha256": "aa254b373b6f6d46bc9dca86331b072a8ab86eb25ea9921fd439618392e98a16",
     "dest": "m2local/org/apache/commons/commons-lang3/3.18.0",
     "dest-filename": "commons-lang3-3.18.0.pom"
-  },
-  {
-    "type": "file",
-    "url": "https://repo1.maven.org/maven2/org/apache/commons/commons-lang3/3.19.0/commons-lang3-3.19.0.jar",
-    "sha256": "32733ab4bc90b45b63eb72677d886961003fd4ed113e07b1028f9877cb2ac735",
-    "dest": "m2local/org/apache/commons/commons-lang3/3.19.0",
-    "dest-filename": "commons-lang3-3.19.0.jar"
-  },
-  {
-    "type": "file",
-    "url": "https://repo1.maven.org/maven2/org/apache/commons/commons-lang3/3.19.0/commons-lang3-3.19.0.pom",
-    "sha256": "d7463906ab3081ff42cf3531eb793b240fb0ca3f1c26fd58fc84fb23032a72b7",
-    "dest": "m2local/org/apache/commons/commons-lang3/3.19.0",
-    "dest-filename": "commons-lang3-3.19.0.pom"
   },
   {
     "type": "file",
@@ -1958,13 +1958,6 @@
     "sha256": "d189ff2c0027e96bb65d31e6f227ed2af966169b36af1e973dd5ba08926dc7b5",
     "dest": "m2local/org/apache/commons/commons-parent/85",
     "dest-filename": "commons-parent-85.pom"
-  },
-  {
-    "type": "file",
-    "url": "https://repo1.maven.org/maven2/org/apache/commons/commons-parent/88/commons-parent-88.pom",
-    "sha256": "8bf726150d1d6a43ba0aa92060e552933caf2873aa193952d9d496470fa9fbd8",
-    "dest": "m2local/org/apache/commons/commons-parent/88",
-    "dest-filename": "commons-parent-88.pom"
   },
   {
     "type": "file",
@@ -2437,38 +2430,38 @@
   },
   {
     "type": "file",
-    "url": "https://repo1.maven.org/maven2/org/apache/maven/enforcer/enforcer-api/3.6.2/enforcer-api-3.6.2.jar",
-    "sha256": "96205145b1eb4957903590ddd0d87f084ec95c1a56a5326cb7c6dec4678ea27a",
-    "dest": "m2local/org/apache/maven/enforcer/enforcer-api/3.6.2",
-    "dest-filename": "enforcer-api-3.6.2.jar"
+    "url": "https://repo1.maven.org/maven2/org/apache/maven/enforcer/enforcer-api/3.6.3/enforcer-api-3.6.3.jar",
+    "sha256": "cca55222e1de7cb3beb082eca5a18f43c80e4e748313a318b18b2b404d1bd340",
+    "dest": "m2local/org/apache/maven/enforcer/enforcer-api/3.6.3",
+    "dest-filename": "enforcer-api-3.6.3.jar"
   },
   {
     "type": "file",
-    "url": "https://repo1.maven.org/maven2/org/apache/maven/enforcer/enforcer-api/3.6.2/enforcer-api-3.6.2.pom",
-    "sha256": "7dfe2d5575f8934776ed08c32c2d750e41ecb49f36d81dc8934005c26de146c8",
-    "dest": "m2local/org/apache/maven/enforcer/enforcer-api/3.6.2",
-    "dest-filename": "enforcer-api-3.6.2.pom"
+    "url": "https://repo1.maven.org/maven2/org/apache/maven/enforcer/enforcer-api/3.6.3/enforcer-api-3.6.3.pom",
+    "sha256": "562c3998fa5382f907b6ba6e1c97f987fdf72e8dc7c04e5b586bdb53de7c0eb3",
+    "dest": "m2local/org/apache/maven/enforcer/enforcer-api/3.6.3",
+    "dest-filename": "enforcer-api-3.6.3.pom"
   },
   {
     "type": "file",
-    "url": "https://repo1.maven.org/maven2/org/apache/maven/enforcer/enforcer-rules/3.6.2/enforcer-rules-3.6.2.jar",
-    "sha256": "32df6061b38212d347d1306fa254f0bd216025259763dd4affb22965521bc750",
-    "dest": "m2local/org/apache/maven/enforcer/enforcer-rules/3.6.2",
-    "dest-filename": "enforcer-rules-3.6.2.jar"
+    "url": "https://repo1.maven.org/maven2/org/apache/maven/enforcer/enforcer-rules/3.6.3/enforcer-rules-3.6.3.jar",
+    "sha256": "24bad9159ed9af932488bad1be042471a170a5bc822bfc8f7b29f3c297c1e138",
+    "dest": "m2local/org/apache/maven/enforcer/enforcer-rules/3.6.3",
+    "dest-filename": "enforcer-rules-3.6.3.jar"
   },
   {
     "type": "file",
-    "url": "https://repo1.maven.org/maven2/org/apache/maven/enforcer/enforcer-rules/3.6.2/enforcer-rules-3.6.2.pom",
-    "sha256": "dc8b3b277701081e8e025aa1539e29863c9e85f2e5630ea01784b35ed5639527",
-    "dest": "m2local/org/apache/maven/enforcer/enforcer-rules/3.6.2",
-    "dest-filename": "enforcer-rules-3.6.2.pom"
+    "url": "https://repo1.maven.org/maven2/org/apache/maven/enforcer/enforcer-rules/3.6.3/enforcer-rules-3.6.3.pom",
+    "sha256": "610eec18af07156d273d5ca2acc36d78a015a12b38ce806d47d74b98e911b2ea",
+    "dest": "m2local/org/apache/maven/enforcer/enforcer-rules/3.6.3",
+    "dest-filename": "enforcer-rules-3.6.3.pom"
   },
   {
     "type": "file",
-    "url": "https://repo1.maven.org/maven2/org/apache/maven/enforcer/enforcer/3.6.2/enforcer-3.6.2.pom",
-    "sha256": "9c99512c5ebd887a256ea6457dadce455eee27cb6544176c830bc5ad8540035c",
-    "dest": "m2local/org/apache/maven/enforcer/enforcer/3.6.2",
-    "dest-filename": "enforcer-3.6.2.pom"
+    "url": "https://repo1.maven.org/maven2/org/apache/maven/enforcer/enforcer/3.6.3/enforcer-3.6.3.pom",
+    "sha256": "63ea934ece526118aab7963da5078f976e29355e1a472e24c54e2c0efecdfb47",
+    "dest": "m2local/org/apache/maven/enforcer/enforcer/3.6.3",
+    "dest-filename": "enforcer-3.6.3.pom"
   },
   {
     "type": "file",
@@ -2724,6 +2717,13 @@
   },
   {
     "type": "file",
+    "url": "https://repo1.maven.org/maven2/org/apache/maven/maven-parent/48/maven-parent-48.pom",
+    "sha256": "cc9eed84b90a96cbc33aefecc93facb9a49f960ad678909162c579356cfe12c9",
+    "dest": "m2local/org/apache/maven/maven-parent/48",
+    "dest-filename": "maven-parent-48.pom"
+  },
+  {
+    "type": "file",
     "url": "https://repo1.maven.org/maven2/org/apache/maven/maven-parent/5/maven-parent-5.pom",
     "sha256": "5d7c2a229173155823c45380332f221bf0d27e52c9db76e9217940306765bd50",
     "dest": "m2local/org/apache/maven/maven-parent/5",
@@ -2941,17 +2941,17 @@
   },
   {
     "type": "file",
-    "url": "https://repo1.maven.org/maven2/org/apache/maven/plugins/maven-enforcer-plugin/3.6.2/maven-enforcer-plugin-3.6.2.jar",
-    "sha256": "88189ac3d0d2049ce9efabaf9895aee074f4eddb0f224defeb48c34ffe9d6fd8",
-    "dest": "m2local/org/apache/maven/plugins/maven-enforcer-plugin/3.6.2",
-    "dest-filename": "maven-enforcer-plugin-3.6.2.jar"
+    "url": "https://repo1.maven.org/maven2/org/apache/maven/plugins/maven-enforcer-plugin/3.6.3/maven-enforcer-plugin-3.6.3.jar",
+    "sha256": "32347686c513894a2fae96eeb11527883f47b8957850d793ea833646ad954dca",
+    "dest": "m2local/org/apache/maven/plugins/maven-enforcer-plugin/3.6.3",
+    "dest-filename": "maven-enforcer-plugin-3.6.3.jar"
   },
   {
     "type": "file",
-    "url": "https://repo1.maven.org/maven2/org/apache/maven/plugins/maven-enforcer-plugin/3.6.2/maven-enforcer-plugin-3.6.2.pom",
-    "sha256": "d8fd2a11c0339478e164a3036abba40a2ce5bf35f198f0e26041441398e1a7fe",
-    "dest": "m2local/org/apache/maven/plugins/maven-enforcer-plugin/3.6.2",
-    "dest-filename": "maven-enforcer-plugin-3.6.2.pom"
+    "url": "https://repo1.maven.org/maven2/org/apache/maven/plugins/maven-enforcer-plugin/3.6.3/maven-enforcer-plugin-3.6.3.pom",
+    "sha256": "9f32329a568596122363a78043d7ca2c485118cc3f86c6d5c92a2ecc94f645ad",
+    "dest": "m2local/org/apache/maven/plugins/maven-enforcer-plugin/3.6.3",
+    "dest-filename": "maven-enforcer-plugin-3.6.3.pom"
   },
   {
     "type": "file",
@@ -3130,17 +3130,17 @@
   },
   {
     "type": "file",
-    "url": "https://repo1.maven.org/maven2/org/apache/maven/resolver/maven-resolver-api/1.9.23/maven-resolver-api-1.9.23.pom",
-    "sha256": "c3174c617715faf583d55bdbcf7928e4ee71a8a78eedbfca775e23de28304086",
-    "dest": "m2local/org/apache/maven/resolver/maven-resolver-api/1.9.23",
-    "dest-filename": "maven-resolver-api-1.9.23.pom"
-  },
-  {
-    "type": "file",
     "url": "https://repo1.maven.org/maven2/org/apache/maven/resolver/maven-resolver-api/1.9.25/maven-resolver-api-1.9.25.pom",
     "sha256": "d2a68bc43e04adaf767970122de0c44430458fee25dd967d0039401dc260171a",
     "dest": "m2local/org/apache/maven/resolver/maven-resolver-api/1.9.25",
     "dest-filename": "maven-resolver-api-1.9.25.pom"
+  },
+  {
+    "type": "file",
+    "url": "https://repo1.maven.org/maven2/org/apache/maven/resolver/maven-resolver-api/1.9.27/maven-resolver-api-1.9.27.pom",
+    "sha256": "98dc031f75f2c9b7efeef344e1c74bb3d009c584e36e82a0ec3d263d2bfef373",
+    "dest": "m2local/org/apache/maven/resolver/maven-resolver-api/1.9.27",
+    "dest-filename": "maven-resolver-api-1.9.27.pom"
   },
   {
     "type": "file",
@@ -3172,20 +3172,6 @@
   },
   {
     "type": "file",
-    "url": "https://repo1.maven.org/maven2/org/apache/maven/resolver/maven-resolver-util/1.9.23/maven-resolver-util-1.9.23.jar",
-    "sha256": "a6b81ce281313cc2adf19e697d59d53a83793d83e33707fc44836c4934f4030f",
-    "dest": "m2local/org/apache/maven/resolver/maven-resolver-util/1.9.23",
-    "dest-filename": "maven-resolver-util-1.9.23.jar"
-  },
-  {
-    "type": "file",
-    "url": "https://repo1.maven.org/maven2/org/apache/maven/resolver/maven-resolver-util/1.9.23/maven-resolver-util-1.9.23.pom",
-    "sha256": "ecc014d22b31def225b5ae4e1e715d2350cfe959b05f98d4df0c39a741918c2f",
-    "dest": "m2local/org/apache/maven/resolver/maven-resolver-util/1.9.23",
-    "dest-filename": "maven-resolver-util-1.9.23.pom"
-  },
-  {
-    "type": "file",
     "url": "https://repo1.maven.org/maven2/org/apache/maven/resolver/maven-resolver-util/1.9.25/maven-resolver-util-1.9.25.jar",
     "sha256": "e31330fdb29045f3087b4985cb488a5b5ebbcbd7d879fda14e6ed4dd61b1fdf7",
     "dest": "m2local/org/apache/maven/resolver/maven-resolver-util/1.9.25",
@@ -3197,6 +3183,20 @@
     "sha256": "2283fb0bb5cec9f7524cba93498c6e89739aac5edd25d3a418f0fc4f6ce30007",
     "dest": "m2local/org/apache/maven/resolver/maven-resolver-util/1.9.25",
     "dest-filename": "maven-resolver-util-1.9.25.pom"
+  },
+  {
+    "type": "file",
+    "url": "https://repo1.maven.org/maven2/org/apache/maven/resolver/maven-resolver-util/1.9.27/maven-resolver-util-1.9.27.jar",
+    "sha256": "74a12548f0d6aad13c728666288c1e81201c24bd05bb4e4ec8c1558517b379a7",
+    "dest": "m2local/org/apache/maven/resolver/maven-resolver-util/1.9.27",
+    "dest-filename": "maven-resolver-util-1.9.27.jar"
+  },
+  {
+    "type": "file",
+    "url": "https://repo1.maven.org/maven2/org/apache/maven/resolver/maven-resolver-util/1.9.27/maven-resolver-util-1.9.27.pom",
+    "sha256": "b2b3c7774cdc61887da814b42338c9421babbab9b1e87c3e6493885ffda53231",
+    "dest": "m2local/org/apache/maven/resolver/maven-resolver-util/1.9.27",
+    "dest-filename": "maven-resolver-util-1.9.27.pom"
   },
   {
     "type": "file",
@@ -3214,17 +3214,17 @@
   },
   {
     "type": "file",
-    "url": "https://repo1.maven.org/maven2/org/apache/maven/resolver/maven-resolver/1.9.23/maven-resolver-1.9.23.pom",
-    "sha256": "65da85f16b9a31cb3db26d1b3f0aa8f6fde0b9b2170ed725a9bf2f8267690508",
-    "dest": "m2local/org/apache/maven/resolver/maven-resolver/1.9.23",
-    "dest-filename": "maven-resolver-1.9.23.pom"
-  },
-  {
-    "type": "file",
     "url": "https://repo1.maven.org/maven2/org/apache/maven/resolver/maven-resolver/1.9.25/maven-resolver-1.9.25.pom",
     "sha256": "c0870a6e68e160851cc7c1108ffc77198edf90715520d1a87c50484e7281c06e",
     "dest": "m2local/org/apache/maven/resolver/maven-resolver/1.9.25",
     "dest-filename": "maven-resolver-1.9.25.pom"
+  },
+  {
+    "type": "file",
+    "url": "https://repo1.maven.org/maven2/org/apache/maven/resolver/maven-resolver/1.9.27/maven-resolver-1.9.27.pom",
+    "sha256": "8924b41711cce058f83c46d79ad83d6e04edcf13ed5631ec11135656e0b87f56",
+    "dest": "m2local/org/apache/maven/resolver/maven-resolver/1.9.27",
+    "dest-filename": "maven-resolver-1.9.27.pom"
   },
   {
     "type": "file",
@@ -4537,6 +4537,20 @@
   },
   {
     "type": "file",
+    "url": "https://repo1.maven.org/maven2/org/codehaus/plexus/plexus-utils/4.0.3/plexus-utils-4.0.3.jar",
+    "sha256": "421ff6ed146c53a9d4eaade8f629b52b12af7187101f1bd06c2c64e904019f3c",
+    "dest": "m2local/org/codehaus/plexus/plexus-utils/4.0.3",
+    "dest-filename": "plexus-utils-4.0.3.jar"
+  },
+  {
+    "type": "file",
+    "url": "https://repo1.maven.org/maven2/org/codehaus/plexus/plexus-utils/4.0.3/plexus-utils-4.0.3.pom",
+    "sha256": "35736658f3fe1efa395086c91df2592664fafa24c3f2608fdaba1136d17fd360",
+    "dest": "m2local/org/codehaus/plexus/plexus-utils/4.0.3",
+    "dest-filename": "plexus-utils-4.0.3.pom"
+  },
+  {
+    "type": "file",
     "url": "https://repo1.maven.org/maven2/org/codehaus/plexus/plexus-velocity/2.2.0/plexus-velocity-2.2.0.jar",
     "sha256": "3e7e902f492c973cf210ddb8267843a3b65e83f5067467e2f4d9af0051f6b8b9",
     "dest": "m2local/org/codehaus/plexus/plexus-velocity/2.2.0",
@@ -5216,6 +5230,13 @@
   },
   {
     "type": "file",
+    "url": "https://repo1.maven.org/maven2/org/junit/junit-bom/5.14.4/junit-bom-5.14.4.pom",
+    "sha256": "5706e8f29a0a07f56efbbea4a0670793414194bb8d24d8143ba1e787a2f32856",
+    "dest": "m2local/org/junit/junit-bom/5.14.4",
+    "dest-filename": "junit-bom-5.14.4.pom"
+  },
+  {
+    "type": "file",
     "url": "https://repo1.maven.org/maven2/org/junit/junit-bom/5.7.2/junit-bom-5.7.2.pom",
     "sha256": "cd14aaa869991f82021c585d570d31ff342bcba58bb44233b70193771b96487b",
     "dest": "m2local/org/junit/junit-bom/5.7.2",
@@ -5314,178 +5335,178 @@
   },
   {
     "type": "file",
-    "url": "https://repo1.maven.org/maven2/org/openjfx/javafx-base/21.0.7/javafx-base-21.0.7-linux.jar",
-    "sha256": "4cb5a46623138bc80ca61647f8705eea16a0ccb6efaf7dbffc994d1cc83da596",
-    "dest": "m2local/org/openjfx/javafx-base/21.0.7",
-    "dest-filename": "javafx-base-21.0.7-linux.jar"
+    "url": "https://repo1.maven.org/maven2/org/openjfx/javafx-base/21.0.11/javafx-base-21.0.11-linux.jar",
+    "sha256": "80fec582d54d09d4580af9430230e9b8e24eef385c967c3019cc207e08e05c34",
+    "dest": "m2local/org/openjfx/javafx-base/21.0.11",
+    "dest-filename": "javafx-base-21.0.11-linux.jar"
   },
   {
     "type": "file",
-    "url": "https://repo1.maven.org/maven2/org/openjfx/javafx-base/21.0.7/javafx-base-21.0.7-mac-aarch64.jar",
-    "sha256": "5a58dc2169489f5f5d865ca7f84a3e744681932c8396b965bf3e74824ff0514a",
-    "dest": "m2local/org/openjfx/javafx-base/21.0.7",
-    "dest-filename": "javafx-base-21.0.7-mac-aarch64.jar"
+    "url": "https://repo1.maven.org/maven2/org/openjfx/javafx-base/21.0.11/javafx-base-21.0.11-mac-aarch64.jar",
+    "sha256": "3b3ca2989063c5277257fa4619ff2a4ee70a374a386624d32bcde4076b8fd849",
+    "dest": "m2local/org/openjfx/javafx-base/21.0.11",
+    "dest-filename": "javafx-base-21.0.11-mac-aarch64.jar"
   },
   {
     "type": "file",
-    "url": "https://repo1.maven.org/maven2/org/openjfx/javafx-base/21.0.7/javafx-base-21.0.7-mac.jar",
-    "sha256": "5b9182e1f6549d02518448d8919f39964860aac80c53651a3beaa2702173209d",
-    "dest": "m2local/org/openjfx/javafx-base/21.0.7",
-    "dest-filename": "javafx-base-21.0.7-mac.jar"
+    "url": "https://repo1.maven.org/maven2/org/openjfx/javafx-base/21.0.11/javafx-base-21.0.11-mac.jar",
+    "sha256": "0f1bae8522f8db2323452f19c8c60a48c13254cfa8380949abec04709c5b4000",
+    "dest": "m2local/org/openjfx/javafx-base/21.0.11",
+    "dest-filename": "javafx-base-21.0.11-mac.jar"
   },
   {
     "type": "file",
-    "url": "https://repo1.maven.org/maven2/org/openjfx/javafx-base/21.0.7/javafx-base-21.0.7-win.jar",
-    "sha256": "3b3fcd57062e59d6e382b22fe82bb358a90958852d166cc3dd4056c6ba551b65",
-    "dest": "m2local/org/openjfx/javafx-base/21.0.7",
-    "dest-filename": "javafx-base-21.0.7-win.jar"
+    "url": "https://repo1.maven.org/maven2/org/openjfx/javafx-base/21.0.11/javafx-base-21.0.11-win.jar",
+    "sha256": "ecd5a4c1d49f77df3518ccf697702176c99a0dbbcf2bec78793073da90789157",
+    "dest": "m2local/org/openjfx/javafx-base/21.0.11",
+    "dest-filename": "javafx-base-21.0.11-win.jar"
   },
   {
     "type": "file",
-    "url": "https://repo1.maven.org/maven2/org/openjfx/javafx-base/21.0.7/javafx-base-21.0.7.jar",
-    "sha256": "5cc5052a3db7caed9961a616b067e75e2f428f65d3213d533143207e70724bb7",
-    "dest": "m2local/org/openjfx/javafx-base/21.0.7",
-    "dest-filename": "javafx-base-21.0.7.jar"
+    "url": "https://repo1.maven.org/maven2/org/openjfx/javafx-base/21.0.11/javafx-base-21.0.11.jar",
+    "sha256": "6e9ceedaca2ac1c505003902a6d5c8e6480e3c31deb66cf8a619a9fc8e32832f",
+    "dest": "m2local/org/openjfx/javafx-base/21.0.11",
+    "dest-filename": "javafx-base-21.0.11.jar"
   },
   {
     "type": "file",
-    "url": "https://repo1.maven.org/maven2/org/openjfx/javafx-base/21.0.7/javafx-base-21.0.7.pom",
-    "sha256": "4d538399c3aa36b5acbedd8e1c103ad3d644e8107c7244daeb455805bfc362c9",
-    "dest": "m2local/org/openjfx/javafx-base/21.0.7",
-    "dest-filename": "javafx-base-21.0.7.pom"
+    "url": "https://repo1.maven.org/maven2/org/openjfx/javafx-base/21.0.11/javafx-base-21.0.11.pom",
+    "sha256": "bc08f40f6bc40b1aa7b7a0bef62fac51617e9ceff0ba2815779653d1c728722c",
+    "dest": "m2local/org/openjfx/javafx-base/21.0.11",
+    "dest-filename": "javafx-base-21.0.11.pom"
   },
   {
     "type": "file",
-    "url": "https://repo1.maven.org/maven2/org/openjfx/javafx-controls/21.0.7/javafx-controls-21.0.7-linux.jar",
-    "sha256": "af92f44c41f494da3358fc1572c115413a72d9824243086851c1cba87167dd86",
-    "dest": "m2local/org/openjfx/javafx-controls/21.0.7",
-    "dest-filename": "javafx-controls-21.0.7-linux.jar"
+    "url": "https://repo1.maven.org/maven2/org/openjfx/javafx-controls/21.0.11/javafx-controls-21.0.11-linux.jar",
+    "sha256": "0afdb772f0fa94da3a32b4712f863a0b33f9711898b3624e19b0d54818682015",
+    "dest": "m2local/org/openjfx/javafx-controls/21.0.11",
+    "dest-filename": "javafx-controls-21.0.11-linux.jar"
   },
   {
     "type": "file",
-    "url": "https://repo1.maven.org/maven2/org/openjfx/javafx-controls/21.0.7/javafx-controls-21.0.7.jar",
-    "sha256": "907c7a78dee823be00d09ea05387c01cde2d1ea42b9d698dfe961546b26ce60a",
-    "dest": "m2local/org/openjfx/javafx-controls/21.0.7",
-    "dest-filename": "javafx-controls-21.0.7.jar"
+    "url": "https://repo1.maven.org/maven2/org/openjfx/javafx-controls/21.0.11/javafx-controls-21.0.11.jar",
+    "sha256": "da942005621630c85d8d271303c97bde17c94082e68b4e4539c71ca273ab6e36",
+    "dest": "m2local/org/openjfx/javafx-controls/21.0.11",
+    "dest-filename": "javafx-controls-21.0.11.jar"
   },
   {
     "type": "file",
-    "url": "https://repo1.maven.org/maven2/org/openjfx/javafx-controls/21.0.7/javafx-controls-21.0.7.pom",
-    "sha256": "565a7db60700eb4768969ec32871dadaa205a8f5215bc71bfe564d7d6d19d7d2",
-    "dest": "m2local/org/openjfx/javafx-controls/21.0.7",
-    "dest-filename": "javafx-controls-21.0.7.pom"
+    "url": "https://repo1.maven.org/maven2/org/openjfx/javafx-controls/21.0.11/javafx-controls-21.0.11.pom",
+    "sha256": "842fab0182c4265793d7b99c57dab6446be129cbfa315680acb4052de8b03f1a",
+    "dest": "m2local/org/openjfx/javafx-controls/21.0.11",
+    "dest-filename": "javafx-controls-21.0.11.pom"
   },
   {
     "type": "file",
-    "url": "https://repo1.maven.org/maven2/org/openjfx/javafx-fxml/21.0.7/javafx-fxml-21.0.7-linux.jar",
-    "sha256": "70817918d687353880319e49b0cb0dfbd671c33f4111fbd27ea09298c6720b08",
-    "dest": "m2local/org/openjfx/javafx-fxml/21.0.7",
-    "dest-filename": "javafx-fxml-21.0.7-linux.jar"
+    "url": "https://repo1.maven.org/maven2/org/openjfx/javafx-fxml/21.0.11/javafx-fxml-21.0.11-linux.jar",
+    "sha256": "ede7f0563b3afcd608f0531e03c96e5726a382498a4b9bf5c7baaa81af6212e5",
+    "dest": "m2local/org/openjfx/javafx-fxml/21.0.11",
+    "dest-filename": "javafx-fxml-21.0.11-linux.jar"
   },
   {
     "type": "file",
-    "url": "https://repo1.maven.org/maven2/org/openjfx/javafx-fxml/21.0.7/javafx-fxml-21.0.7.jar",
-    "sha256": "5bd355c18a357413662a1926a66d79544b338ec0d3c7d5607ad4e88ce782f189",
-    "dest": "m2local/org/openjfx/javafx-fxml/21.0.7",
-    "dest-filename": "javafx-fxml-21.0.7.jar"
+    "url": "https://repo1.maven.org/maven2/org/openjfx/javafx-fxml/21.0.11/javafx-fxml-21.0.11.jar",
+    "sha256": "f38cfb75e7ed6525861f89dc681153ac0a7b48f35e1b6ffddcd9524c40549862",
+    "dest": "m2local/org/openjfx/javafx-fxml/21.0.11",
+    "dest-filename": "javafx-fxml-21.0.11.jar"
   },
   {
     "type": "file",
-    "url": "https://repo1.maven.org/maven2/org/openjfx/javafx-fxml/21.0.7/javafx-fxml-21.0.7.pom",
-    "sha256": "407f4d58f7a01a9dc60444939b4a32375e0da8a98dfe002e80ec2fd54702b54e",
-    "dest": "m2local/org/openjfx/javafx-fxml/21.0.7",
-    "dest-filename": "javafx-fxml-21.0.7.pom"
+    "url": "https://repo1.maven.org/maven2/org/openjfx/javafx-fxml/21.0.11/javafx-fxml-21.0.11.pom",
+    "sha256": "2da90acad256f8272b6f796402c1c0bb5d6fd960db050ca27b67ac769fcd1f64",
+    "dest": "m2local/org/openjfx/javafx-fxml/21.0.11",
+    "dest-filename": "javafx-fxml-21.0.11.pom"
   },
   {
     "type": "file",
-    "url": "https://repo1.maven.org/maven2/org/openjfx/javafx-graphics/21.0.7/javafx-graphics-21.0.7-linux.jar",
-    "sha256": "623ee7182486b30d6d4b2977685f5689157fa3307e7ce127ffe0bdc2a58832fe",
-    "dest": "m2local/org/openjfx/javafx-graphics/21.0.7",
-    "dest-filename": "javafx-graphics-21.0.7-linux.jar"
+    "url": "https://repo1.maven.org/maven2/org/openjfx/javafx-graphics/21.0.11/javafx-graphics-21.0.11-linux.jar",
+    "sha256": "a8d10c8f587c5d1248f36050a3df0626b440f8295c5ca2e2820606af213ee7c4",
+    "dest": "m2local/org/openjfx/javafx-graphics/21.0.11",
+    "dest-filename": "javafx-graphics-21.0.11-linux.jar"
   },
   {
     "type": "file",
-    "url": "https://repo1.maven.org/maven2/org/openjfx/javafx-graphics/21.0.7/javafx-graphics-21.0.7-mac-aarch64.jar",
-    "sha256": "6758ce2327a603d70b15f0286e131185002ec479c06c3efe3dca678965ebbc98",
-    "dest": "m2local/org/openjfx/javafx-graphics/21.0.7",
-    "dest-filename": "javafx-graphics-21.0.7-mac-aarch64.jar"
+    "url": "https://repo1.maven.org/maven2/org/openjfx/javafx-graphics/21.0.11/javafx-graphics-21.0.11-mac-aarch64.jar",
+    "sha256": "7b8c25508074849b129c5b028d92636a65264c59d610a843182ab90ac931b022",
+    "dest": "m2local/org/openjfx/javafx-graphics/21.0.11",
+    "dest-filename": "javafx-graphics-21.0.11-mac-aarch64.jar"
   },
   {
     "type": "file",
-    "url": "https://repo1.maven.org/maven2/org/openjfx/javafx-graphics/21.0.7/javafx-graphics-21.0.7-mac.jar",
-    "sha256": "369fe123c896784cebb167bc41ecfb0d293416870a232f7852ff05456c4f17fd",
-    "dest": "m2local/org/openjfx/javafx-graphics/21.0.7",
-    "dest-filename": "javafx-graphics-21.0.7-mac.jar"
+    "url": "https://repo1.maven.org/maven2/org/openjfx/javafx-graphics/21.0.11/javafx-graphics-21.0.11-mac.jar",
+    "sha256": "d73aa370c57feb58aae051a8db8b434dbbb209b91aff2c67c13c6bdf9ca55cf8",
+    "dest": "m2local/org/openjfx/javafx-graphics/21.0.11",
+    "dest-filename": "javafx-graphics-21.0.11-mac.jar"
   },
   {
     "type": "file",
-    "url": "https://repo1.maven.org/maven2/org/openjfx/javafx-graphics/21.0.7/javafx-graphics-21.0.7-win.jar",
-    "sha256": "b256fff6bc846a618263d8ff731ab2c19bbb05df789db0828a2dc3a3d8686991",
-    "dest": "m2local/org/openjfx/javafx-graphics/21.0.7",
-    "dest-filename": "javafx-graphics-21.0.7-win.jar"
+    "url": "https://repo1.maven.org/maven2/org/openjfx/javafx-graphics/21.0.11/javafx-graphics-21.0.11-win.jar",
+    "sha256": "5b385a10d1a92feecad731c633ce2a4941aa347544474f0d667a37157fcb8d55",
+    "dest": "m2local/org/openjfx/javafx-graphics/21.0.11",
+    "dest-filename": "javafx-graphics-21.0.11-win.jar"
   },
   {
     "type": "file",
-    "url": "https://repo1.maven.org/maven2/org/openjfx/javafx-graphics/21.0.7/javafx-graphics-21.0.7.jar",
-    "sha256": "0422e0390a14cb3193e66b8c3c492fa507932bcbeb2b3800cc4ddb7811c7e68b",
-    "dest": "m2local/org/openjfx/javafx-graphics/21.0.7",
-    "dest-filename": "javafx-graphics-21.0.7.jar"
+    "url": "https://repo1.maven.org/maven2/org/openjfx/javafx-graphics/21.0.11/javafx-graphics-21.0.11.jar",
+    "sha256": "4862f9d455839de88eeb3be4ca6d7c7287f5abb9204d50dda2904bdfa520edc6",
+    "dest": "m2local/org/openjfx/javafx-graphics/21.0.11",
+    "dest-filename": "javafx-graphics-21.0.11.jar"
   },
   {
     "type": "file",
-    "url": "https://repo1.maven.org/maven2/org/openjfx/javafx-graphics/21.0.7/javafx-graphics-21.0.7.pom",
-    "sha256": "1abdc0d66d9d893cf76f348f14402d925185d3337d23f1d0b3c25af552428ae9",
-    "dest": "m2local/org/openjfx/javafx-graphics/21.0.7",
-    "dest-filename": "javafx-graphics-21.0.7.pom"
+    "url": "https://repo1.maven.org/maven2/org/openjfx/javafx-graphics/21.0.11/javafx-graphics-21.0.11.pom",
+    "sha256": "6595dacbea9cdb84512bf482ddf7ad02203270128a41d129d76c4cec42edbb17",
+    "dest": "m2local/org/openjfx/javafx-graphics/21.0.11",
+    "dest-filename": "javafx-graphics-21.0.11.pom"
   },
   {
     "type": "file",
-    "url": "https://repo1.maven.org/maven2/org/openjfx/javafx-swing/21.0.7/javafx-swing-21.0.7-linux.jar",
-    "sha256": "09005bd82f9647367c1a0b06b2806fc9b0f53e009a72f4eaa92570f714b50b59",
-    "dest": "m2local/org/openjfx/javafx-swing/21.0.7",
-    "dest-filename": "javafx-swing-21.0.7-linux.jar"
+    "url": "https://repo1.maven.org/maven2/org/openjfx/javafx-swing/21.0.11/javafx-swing-21.0.11-linux.jar",
+    "sha256": "f41725b83db80df222374f65415ae8567c061eab94073d5fc0540fc00ad67494",
+    "dest": "m2local/org/openjfx/javafx-swing/21.0.11",
+    "dest-filename": "javafx-swing-21.0.11-linux.jar"
   },
   {
     "type": "file",
-    "url": "https://repo1.maven.org/maven2/org/openjfx/javafx-swing/21.0.7/javafx-swing-21.0.7-mac-aarch64.jar",
-    "sha256": "30cac0b27dff717521ad3b0511478a73e7e384a16af7c2fcd4bf806633bf7515",
-    "dest": "m2local/org/openjfx/javafx-swing/21.0.7",
-    "dest-filename": "javafx-swing-21.0.7-mac-aarch64.jar"
+    "url": "https://repo1.maven.org/maven2/org/openjfx/javafx-swing/21.0.11/javafx-swing-21.0.11-mac-aarch64.jar",
+    "sha256": "c12082ee24c423d113bd0e413cce390985a34cf51ddd48f75d177df400335e1e",
+    "dest": "m2local/org/openjfx/javafx-swing/21.0.11",
+    "dest-filename": "javafx-swing-21.0.11-mac-aarch64.jar"
   },
   {
     "type": "file",
-    "url": "https://repo1.maven.org/maven2/org/openjfx/javafx-swing/21.0.7/javafx-swing-21.0.7-mac.jar",
-    "sha256": "73207d6a0e1b2711ac81705676f69e1fa6d82cb93e70039093d7af3bbaa83818",
-    "dest": "m2local/org/openjfx/javafx-swing/21.0.7",
-    "dest-filename": "javafx-swing-21.0.7-mac.jar"
+    "url": "https://repo1.maven.org/maven2/org/openjfx/javafx-swing/21.0.11/javafx-swing-21.0.11-mac.jar",
+    "sha256": "fd2472152b11853b6ce9ad829d256c60808bbcf019c2006ffdb35a58c1d363c0",
+    "dest": "m2local/org/openjfx/javafx-swing/21.0.11",
+    "dest-filename": "javafx-swing-21.0.11-mac.jar"
   },
   {
     "type": "file",
-    "url": "https://repo1.maven.org/maven2/org/openjfx/javafx-swing/21.0.7/javafx-swing-21.0.7-win.jar",
-    "sha256": "95782392503f03a0aa81d7f23c0e47889928af74c51991327863d479428a1170",
-    "dest": "m2local/org/openjfx/javafx-swing/21.0.7",
-    "dest-filename": "javafx-swing-21.0.7-win.jar"
+    "url": "https://repo1.maven.org/maven2/org/openjfx/javafx-swing/21.0.11/javafx-swing-21.0.11-win.jar",
+    "sha256": "fd295f088e983a247b20fb7f500e39da0490387bd86726d5e6c2bd5caf58cbf2",
+    "dest": "m2local/org/openjfx/javafx-swing/21.0.11",
+    "dest-filename": "javafx-swing-21.0.11-win.jar"
   },
   {
     "type": "file",
-    "url": "https://repo1.maven.org/maven2/org/openjfx/javafx-swing/21.0.7/javafx-swing-21.0.7.jar",
-    "sha256": "e1d925d8877d23f758c7fb6e584a692a2267e865d26a87bc5cad9b96a1422189",
-    "dest": "m2local/org/openjfx/javafx-swing/21.0.7",
-    "dest-filename": "javafx-swing-21.0.7.jar"
+    "url": "https://repo1.maven.org/maven2/org/openjfx/javafx-swing/21.0.11/javafx-swing-21.0.11.jar",
+    "sha256": "37daa61e311fd417842e20601e00c7c8b251ddda60029cd971f48fd3e346fd32",
+    "dest": "m2local/org/openjfx/javafx-swing/21.0.11",
+    "dest-filename": "javafx-swing-21.0.11.jar"
   },
   {
     "type": "file",
-    "url": "https://repo1.maven.org/maven2/org/openjfx/javafx-swing/21.0.7/javafx-swing-21.0.7.pom",
-    "sha256": "210aaa28bc33088305de066a0edc3cd7a8590f9ff95d64aed70a9fdcb1039e36",
-    "dest": "m2local/org/openjfx/javafx-swing/21.0.7",
-    "dest-filename": "javafx-swing-21.0.7.pom"
+    "url": "https://repo1.maven.org/maven2/org/openjfx/javafx-swing/21.0.11/javafx-swing-21.0.11.pom",
+    "sha256": "96191d70f2f22f2928ca052688efd09ce940880582d02cb158a9ffc07ac7d91d",
+    "dest": "m2local/org/openjfx/javafx-swing/21.0.11",
+    "dest-filename": "javafx-swing-21.0.11.pom"
   },
   {
     "type": "file",
-    "url": "https://repo1.maven.org/maven2/org/openjfx/javafx/21.0.7/javafx-21.0.7.pom",
-    "sha256": "3c67def7ba1c5d2c74f428b6f345c99173171f0a2c35e83d8ae31bd8cc5babf3",
-    "dest": "m2local/org/openjfx/javafx/21.0.7",
-    "dest-filename": "javafx-21.0.7.pom"
+    "url": "https://repo1.maven.org/maven2/org/openjfx/javafx/21.0.11/javafx-21.0.11.pom",
+    "sha256": "492ecdca08e9869607379c5ce8418bf9a90dd177171539309da41333a446acd9",
+    "dest": "m2local/org/openjfx/javafx/21.0.11",
+    "dest-filename": "javafx-21.0.11.pom"
   },
   {
     "type": "file",
