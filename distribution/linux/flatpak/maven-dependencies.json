@@ -3977,6 +3977,20 @@
   },
   {
     "type": "file",
+    "url": "https://repo1.maven.org/maven2/org/codehaus/mojo/build-helper-maven-plugin/3.6.1/build-helper-maven-plugin-3.6.1.jar",
+    "sha256": "772765fc101dfd292a85541037096bd12daf9d5f657d6808bb85cf16ff9f4427",
+    "dest": "m2local/org/codehaus/mojo/build-helper-maven-plugin/3.6.1",
+    "dest-filename": "build-helper-maven-plugin-3.6.1.jar"
+  },
+  {
+    "type": "file",
+    "url": "https://repo1.maven.org/maven2/org/codehaus/mojo/build-helper-maven-plugin/3.6.1/build-helper-maven-plugin-3.6.1.pom",
+    "sha256": "dbdfd37ddb8f976a4f8f35327f12b033863feca8c55381ca94f6dce965b6a657",
+    "dest": "m2local/org/codehaus/mojo/build-helper-maven-plugin/3.6.1",
+    "dest-filename": "build-helper-maven-plugin-3.6.1.pom"
+  },
+  {
+    "type": "file",
     "url": "https://repo1.maven.org/maven2/org/codehaus/mojo/license-maven-plugin/2.7.1/license-maven-plugin-2.7.1.jar",
     "sha256": "ce1430955c570d3d742e917f4bc2f89ec19752d92887f02aef6d360b3883fbb7",
     "dest": "m2local/org/codehaus/mojo/license-maven-plugin/2.7.1",
@@ -3995,6 +4009,13 @@
     "sha256": "4e0e213dafe8ff6b6b331778b54014272d04be7ce619d12176ecf333af2a9112",
     "dest": "m2local/org/codehaus/mojo/mojo-parent/39",
     "dest-filename": "mojo-parent-39.pom"
+  },
+  {
+    "type": "file",
+    "url": "https://repo1.maven.org/maven2/org/codehaus/mojo/mojo-parent/91/mojo-parent-91.pom",
+    "sha256": "6c75af0e0cfae6a7e3fb4db3478771d6c5d65a9a238c35dc6410f153d81877b1",
+    "dest": "m2local/org/codehaus/mojo/mojo-parent/91",
+    "dest-filename": "mojo-parent-91.pom"
   },
   {
     "type": "file",
@@ -5192,6 +5213,13 @@
     "sha256": "cef80fec86454f6806bfb0df24669b5c6f32e2cb728539ea859f47dfdc9bbc17",
     "dest": "m2local/org/junit/junit-bom/5.12.2",
     "dest-filename": "junit-bom-5.12.2.pom"
+  },
+  {
+    "type": "file",
+    "url": "https://repo1.maven.org/maven2/org/junit/junit-bom/5.13.0/junit-bom-5.13.0.pom",
+    "sha256": "d48f54bc0598dab0e91a0d975c7d7c954666eac4fee63941876e3f92ea1e59c6",
+    "dest": "m2local/org/junit/junit-bom/5.13.0",
+    "dest-filename": "junit-bom-5.13.0.pom"
   },
   {
     "type": "file",
