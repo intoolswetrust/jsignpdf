@@ -38,17 +38,16 @@ All artifacts are published on [GitHub Releases](https://github.com/intoolswetru
 | **Linux x64 (Fedora / RHEL / openSUSE)** | `jsignpdf-<version>-linux-x64.rpm` | `jsignpdf-<version>-linux-x64.zip` |
 | **Linux aarch64 (ARM servers / SBCs)** | `jsignpdf-<version>-linux-aarch64.{deb,rpm}` | `jsignpdf-<version>-linux-aarch64.zip` |
 | **Linux (any distro)** | `jsignpdf-<version>-linux-<arch>.flatpak` (Flathub submission tracked in [#307](https://github.com/intoolswetrust/jsignpdf/issues/307)) | — |
-| **macOS Intel** | `jsignpdf-<version>-macos-x64.dmg` (unsigned in 3.1 — Gatekeeper warning; built best-effort, may be absent from some releases — see note) | `jsignpdf-<version>-macos-x64.zip` |
 | **macOS Apple Silicon** | `jsignpdf-<version>-macos-aarch64.dmg` (unsigned in 3.1) | `jsignpdf-<version>-macos-aarch64.zip` |
 | **Any OS with Java 21** | `jsignpdf-<version>-full.zip` (JFX bundled for every supported OS/arch) | `jsignpdf-<version>-minimal.zip` (no JFX, Swing fallback only — for CLI users and packagers) |
 
 `jsignpdf-<version>-SHA256SUMS.txt` covers every artifact above.
 
-> **macOS Intel is built on a best-effort basis.** GitHub's last Intel macOS
-> CI runner is being retired and its job queue is heavily constrained, so the
-> `macos-x64` DMG/ZIP may be missing from a given release. Intel Mac users can
-> fall back to the cross-platform `jsignpdf-<version>-full.zip` (requires a
-> locally installed Java 21), or run the Apple Silicon build under Rosetta 2.
+> **No native build is shipped for Intel macOS.** Apple has discontinued Intel
+> Macs and GitHub's last Intel macOS CI runner is being retired. Intel Mac
+> users should run the Apple Silicon build under Rosetta 2, or fall back to
+> the cross-platform `jsignpdf-<version>-full.zip` (requires a locally
+> installed Java 21).
 
 Maven-Central-published artifacts (for embedding the signing engine in your own project) live under `com.github.kwart.jsign`.
 
