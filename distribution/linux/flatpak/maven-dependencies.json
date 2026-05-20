@@ -5412,6 +5412,27 @@
   },
   {
     "type": "file",
+    "url": "https://repo1.maven.org/maven2/org/openjfx/javafx-controls/21.0.11/javafx-controls-21.0.11-mac-aarch64.jar",
+    "sha256": "143b60eefdbd8d0f370467c89248a60a48e4b35428d16c5f9b59c9e543121c85",
+    "dest": "m2local/org/openjfx/javafx-controls/21.0.11",
+    "dest-filename": "javafx-controls-21.0.11-mac-aarch64.jar"
+  },
+  {
+    "type": "file",
+    "url": "https://repo1.maven.org/maven2/org/openjfx/javafx-controls/21.0.11/javafx-controls-21.0.11-mac.jar",
+    "sha256": "c2d93e96624291c00f3878497a827dcd7c6cd8e55b50da19c6488766ce334fda",
+    "dest": "m2local/org/openjfx/javafx-controls/21.0.11",
+    "dest-filename": "javafx-controls-21.0.11-mac.jar"
+  },
+  {
+    "type": "file",
+    "url": "https://repo1.maven.org/maven2/org/openjfx/javafx-controls/21.0.11/javafx-controls-21.0.11-win.jar",
+    "sha256": "9ecd53bc4faff6895812373952dc0fda2dd54f77046cd04fccd10d49fe3b3799",
+    "dest": "m2local/org/openjfx/javafx-controls/21.0.11",
+    "dest-filename": "javafx-controls-21.0.11-win.jar"
+  },
+  {
+    "type": "file",
     "url": "https://repo1.maven.org/maven2/org/openjfx/javafx-controls/21.0.11/javafx-controls-21.0.11.jar",
     "sha256": "da942005621630c85d8d271303c97bde17c94082e68b4e4539c71ca273ab6e36",
     "dest": "m2local/org/openjfx/javafx-controls/21.0.11",
@@ -5430,6 +5451,27 @@
     "sha256": "ede7f0563b3afcd608f0531e03c96e5726a382498a4b9bf5c7baaa81af6212e5",
     "dest": "m2local/org/openjfx/javafx-fxml/21.0.11",
     "dest-filename": "javafx-fxml-21.0.11-linux.jar"
+  },
+  {
+    "type": "file",
+    "url": "https://repo1.maven.org/maven2/org/openjfx/javafx-fxml/21.0.11/javafx-fxml-21.0.11-mac-aarch64.jar",
+    "sha256": "1e85d243cec8d78fb5d7e2e9ea42bf1e9bec9e37706e55878bee936a69bd2ad8",
+    "dest": "m2local/org/openjfx/javafx-fxml/21.0.11",
+    "dest-filename": "javafx-fxml-21.0.11-mac-aarch64.jar"
+  },
+  {
+    "type": "file",
+    "url": "https://repo1.maven.org/maven2/org/openjfx/javafx-fxml/21.0.11/javafx-fxml-21.0.11-mac.jar",
+    "sha256": "e533cfd2586ac585f34b022b5fb1fd0d91990eece5b24af3df5260da51ab3743",
+    "dest": "m2local/org/openjfx/javafx-fxml/21.0.11",
+    "dest-filename": "javafx-fxml-21.0.11-mac.jar"
+  },
+  {
+    "type": "file",
+    "url": "https://repo1.maven.org/maven2/org/openjfx/javafx-fxml/21.0.11/javafx-fxml-21.0.11-win.jar",
+    "sha256": "d60b84eec6fda4717c38b8d2b8e8edf1265d1536bc7be483a094716da6586272",
+    "dest": "m2local/org/openjfx/javafx-fxml/21.0.11",
+    "dest-filename": "javafx-fxml-21.0.11-win.jar"
   },
   {
     "type": "file",
