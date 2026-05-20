@@ -14,7 +14,7 @@ Download the latest release from the [GitHub releases page](https://github.com/i
 
 - **Windows x64** — `jsignpdf-<version>-windows-x64.msi` (signed) or `jsignpdf-<version>-windows-x64.zip` (portable).
 - **Linux x64 / aarch64** — `jsignpdf-<version>-linux-<arch>.deb`, `jsignpdf-<version>-linux-<arch>.rpm`, or the matching `.zip`. Flatpak bundles are also published per arch.
-- **macOS Intel / Apple Silicon** — `jsignpdf-<version>-macos-x64.dmg` or `jsignpdf-<version>-macos-aarch64.dmg` (unsigned in 3.1 — expect a Gatekeeper prompt), or the matching `.zip`.
+- **macOS Apple Silicon** — `jsignpdf-<version>-macos-aarch64.dmg` (unsigned in 3.1 — expect a Gatekeeper prompt), or the matching `.zip`. Intel Macs: run the Apple Silicon build under Rosetta 2, or use `jsignpdf-<version>-full.zip` with a locally installed Java 21.
 - **Any OS with Java 21** — `jsignpdf-<version>-full.zip` (JavaFX bundled) or `jsignpdf-<version>-minimal.zip` (CLI / Swing fallback only).
 
 If you grabbed a ZIP, extract it and run `bin/jsignpdf.sh` (POSIX) or `bin\jsignpdf.cmd` (Windows).

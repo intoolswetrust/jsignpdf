@@ -106,64 +106,6 @@ jobs:
         if-no-files-found: error
         retention-days: 1
 
-  pick-intel-runner:
-    # Decides where the Intel-macOS (macos-x64) build runs: a self-hosted
-    # Intel mac if one is online and idle, otherwise GitHub's retiring
-    # hosted macos-13 pool. Output is a JSON value consumed by the `package`
-    # job's runs-on (a JSON string "macos-13", or a label array for
-    # self-hosted). It is a point-in-time check — if the self-hosted box
-    # drops out between here and job pickup, macos-x64 is best-effort
-    # (continue-on-error + timeout-minutes) so the release is unaffected.
-    #
-    # Listing self-hosted runners needs a token with repo "Administration:
-    # read"; the default GITHUB_TOKEN lacks it. Provide it as the optional
-    # RUNNER_QUERY_TOKEN secret. Missing/insufficient token or any API error
-    # falls back to the hosted pool, so the workflow degrades safely.
-    runs-on: ubuntu-24.04
-    outputs:
-      runs-on: ${{ steps.pick.outputs.runs_on }}
-    steps:
-    - name: Probe for a self-hosted Intel mac
-      id: pick
-      env:
-        # The runners API needs repo "Administration: read", which the
-        # default GITHUB_TOKEN cannot be granted. Set the RUNNER_QUERY_TOKEN
-        # secret to a (fine-grained) PAT with that permission, otherwise this
-        # always falls back to the hosted pool (see the warning below).
-        GH_TOKEN: ${{ secrets.RUNNER_QUERY_TOKEN || github.token }}
-        USING_QUERY_TOKEN: ${{ secrets.RUNNER_QUERY_TOKEN != '' }}
-        SELF_HOSTED_LABEL: macos-x64-selfhosted
-      run: |
-        set -uo pipefail
-        fallback() {
-          echo "==> Falling back to hosted macos-13. Reason: $1"
-          echo 'runs_on="macos-13"' >> "$GITHUB_OUTPUT"
-          exit 0
-        }
-        if [ "$USING_QUERY_TOKEN" != "true" ]; then
-          echo "::warning::RUNNER_QUERY_TOKEN secret is not set; the default GITHUB_TOKEN cannot list self-hosted runners (needs repo Administration:read)."
-          fallback "no RUNNER_QUERY_TOKEN secret"
-        fi
-        # Capture stderr so an auth/permission failure is visible rather than
-        # silently treated as 'no runner'.
-        if ! resp=$(gh api --paginate "repos/${{ github.repository }}/actions/runners" \
-                      --jq '.runners[]' 2> api_err.txt); then
-          echo "::warning::runners API call failed (token likely lacks Administration:read):"
-          sed 's/^/    /' api_err.txt || true
-          fallback "runners API error"
-        fi
-        echo "Runners visible to the token:"
-        echo "$resp" | jq -r '"  - \(.name)  status=\(.status) busy=\(.busy) labels=[\([.labels[].name]|join(","))]"'
-        online=$(echo "$resp" \
-          | jq -s "[.[] | select(.status==\"online\" and .busy==false
-                   and ([.labels[].name] | index(\"${SELF_HOSTED_LABEL}\")))] | length")
-        if [ "${online:-0}" -gt 0 ]; then
-          echo "==> Self-hosted Intel runner available ($online idle) — using it."
-          echo "runs_on=[\"self-hosted\",\"macOS\",\"X64\",\"${SELF_HOSTED_LABEL}\"]" >> "$GITHUB_OUTPUT"
-        else
-          fallback "no online/idle runner with label '${SELF_HOSTED_LABEL}'"
-        fi
-
   package:
     # Per-platform native installers via jpackage. Each runner downloads the
     # full ZIP from the fetch-zips job, unpacks it, and points the platform
@@ -173,14 +115,11 @@ jobs:
     # fail-fast: false so a single broken platform doesn't abort the others.
     # macOS DMGs are unsigned in 3.1 — see design-doc/3.1-no-fat-jar.md.
     #
-    # The Intel-macOS (macos-x64) entry's runner is chosen by
-    # pick-intel-runner: a self-hosted Intel mac if one is online, else
-    # GitHub's retiring hosted macos-13 pool (which can sit queued for hours
-    # or never get a runner). Either way the entry is BEST-EFFORT —
-    # continue-on-error keeps its failure/timeout from blocking the release,
-    # and timeout-minutes caps how long a stuck/queued runner can hang the
-    # workflow.
-    needs: [fetch-zips, pick-intel-runner]
+    # No Intel-macOS (macos-x64) entry: Apple discontinued Intel Macs and
+    # GitHub's last hosted Intel image is being retired. Intel Mac users run
+    # the Apple Silicon DMG under Rosetta 2 or use the cross-platform full
+    # ZIP. See design-doc/3.1-separate-release-steps.md.
+    needs: fetch-zips
     strategy:
       fail-fast: false
       matrix:
@@ -197,21 +136,11 @@ jobs:
             label: linux-aarch64
             script: ./distribution/linux/build-linux-installers.sh
             signpath: false
-          - os: macos-13
-            label: macos-x64
-            script: ./distribution/macos/build-macos-installers.sh
-            signpath: false
-            # Intel macOS: best-effort (see job comment above).
-            best-effort: true
           - os: macos-14
             label: macos-aarch64
             script: ./distribution/macos/build-macos-installers.sh
             signpath: false
-    # macos-x64 resolves to pick-intel-runner's choice (self-hosted label
-    # array or "macos-13"); every other entry uses its static matrix.os.
-    runs-on: ${{ matrix.label == 'macos-x64' && fromJSON(needs.pick-intel-runner.outputs.runs-on) || matrix.os }}
-    # Best-effort entries (Intel macOS) must not fail or hang the release.
-    continue-on-error: ${{ matrix.best-effort || false }}
+    runs-on: ${{ matrix.os }}
     timeout-minutes: 60
     env:
       VERSION: ${{ inputs.release-version }}
@@ -414,10 +343,7 @@ jobs:
   publish-release:
     # Collects every asset, computes SHA-256 checksums, mirrors to SourceForge,
     # and creates the GitHub Release. Flatpak is optional: if its job failed
-    # (e.g. SDK extension outage) we still publish the rest. The Intel-macOS
-    # (macos-x64) build is best-effort: its matrix entry sets
-    # continue-on-error, so a failed/timed-out Intel job still reports success
-    # to needs.package.result and the release publishes without that asset.
+    # (e.g. SDK extension outage) we still publish the rest.
     needs: [fetch-zips, package, flatpak]
     if: |
       always()

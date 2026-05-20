@@ -79,13 +79,11 @@ Each release provides per-platform installers (each bundles its own Java 21 runt
 `jsignpdf-${VERSION}-linux-aarch64.flatpak`
 |Sandboxed Flatpak bundles. Installed with `flatpak install <file>`.
 
-|`jsignpdf-${VERSION}-macos-x64.dmg` +
-`jsignpdf-${VERSION}-macos-aarch64.dmg`
-|macOS disk images for Intel and Apple Silicon. Currently unsigned -- expect a Gatekeeper warning on first launch.
+|`jsignpdf-${VERSION}-macos-aarch64.dmg`
+|macOS disk image for Apple Silicon. Currently unsigned -- expect a Gatekeeper warning on first launch. Intel Macs: run the Apple Silicon build under Rosetta 2, or use the cross-platform full ZIP with a locally installed Java 21.
 
-|`jsignpdf-${VERSION}-macos-x64.zip` +
-`jsignpdf-${VERSION}-macos-aarch64.zip`
-|Portable macOS `.app` bundles for Intel and Apple Silicon.
+|`jsignpdf-${VERSION}-macos-aarch64.zip`
+|Portable macOS `.app` bundle for Apple Silicon.
 |===
 
 .Cross-platform ZIPs (bring your own Java 21)

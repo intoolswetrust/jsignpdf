@@ -6,9 +6,10 @@
 #   jsignpdf-<version>-macos-<arch>.dmg  - disk image (UNSIGNED in 3.1 — see design doc)
 #   jsignpdf-<version>-macos-<arch>.zip  - portable zip of the jpackage app-image
 #
-# <arch> is auto-detected: x86_64 -> x64, arm64/aarch64 -> aarch64. Run this
-# script on the matching host (the macos-13 and macos-14 GitHub runners),
-# since jpackage always cross-builds for the host.
+# <arch> is auto-detected: x86_64 -> x64, arm64/aarch64 -> aarch64. The
+# release pipeline only invokes this on the macos-14 (Apple Silicon) runner;
+# Intel macOS is no longer built (see design-doc/3.1-separate-release-steps.md).
+# The arch auto-detection is kept for local Intel-mac developer builds.
 #
 # Prerequisites on the build machine:
 #   * Azul Zulu+FX 21 (or another JDK 21 bundle that ships the JavaFX modules)
