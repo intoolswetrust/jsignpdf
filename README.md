@@ -43,11 +43,6 @@ All artifacts are published on [GitHub Releases](https://github.com/intoolswetru
 
 `jsignpdf-<version>-SHA256SUMS.txt` covers every artifact above.
 
-> **No native build is shipped for Intel macOS.** Apple has discontinued Intel
-> Macs and GitHub's last Intel macOS CI runner is being retired. Intel Mac
-> users should run the Apple Silicon build under Rosetta 2, or fall back to
-> the cross-platform `jsignpdf-<version>-full.zip` (requires a locally
-> installed Java 21).
 
 Maven-Central-published artifacts (for embedding the signing engine in your own project) live under `com.github.kwart.jsign`.
 
