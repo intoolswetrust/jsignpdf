@@ -50,7 +50,9 @@ jobs:
       with:
         java-version: 21
         distribution: 'temurin'
-        cache: 'maven'
+        # No `cache: maven` here: this job does not check out the repo (it
+        # only resolves the published ZIPs from Central via dependency:copy),
+        # and the maven cache key globs for **/pom.xml, which would fail.
 
     - name: Download full + minimal ZIPs from Maven Central (with retry)
       run: |
@@ -124,22 +126,42 @@ jobs:
     - name: Probe for a self-hosted Intel mac
       id: pick
       env:
+        # The runners API needs repo "Administration: read", which the
+        # default GITHUB_TOKEN cannot be granted. Set the RUNNER_QUERY_TOKEN
+        # secret to a (fine-grained) PAT with that permission, otherwise this
+        # always falls back to the hosted pool (see the warning below).
         GH_TOKEN: ${{ secrets.RUNNER_QUERY_TOKEN || github.token }}
+        USING_QUERY_TOKEN: ${{ secrets.RUNNER_QUERY_TOKEN != '' }}
         SELF_HOSTED_LABEL: macos-x64-selfhosted
       run: |
         set -uo pipefail
-        online=$(gh api --paginate \
-          "repos/${{ github.repository }}/actions/runners" \
-          --jq "[.runners[] | select(.status==\"online\" and .busy==false
-                 and ([.labels[].name] | index(\"${SELF_HOSTED_LABEL}\")))] | length" \
-          2>/dev/null) || online=0
-        online=${online:-0}
-        if [ "$online" -gt 0 ]; then
-          echo "Self-hosted Intel runner available ($online idle) — using it."
+        fallback() {
+          echo "==> Falling back to hosted macos-13. Reason: $1"
+          echo 'runs_on="macos-13"' >> "$GITHUB_OUTPUT"
+          exit 0
+        }
+        if [ "$USING_QUERY_TOKEN" != "true" ]; then
+          echo "::warning::RUNNER_QUERY_TOKEN secret is not set; the default GITHUB_TOKEN cannot list self-hosted runners (needs repo Administration:read)."
+          fallback "no RUNNER_QUERY_TOKEN secret"
+        fi
+        # Capture stderr so an auth/permission failure is visible rather than
+        # silently treated as 'no runner'.
+        if ! resp=$(gh api --paginate "repos/${{ github.repository }}/actions/runners" \
+                      --jq '.runners[]' 2> api_err.txt); then
+          echo "::warning::runners API call failed (token likely lacks Administration:read):"
+          sed 's/^/    /' api_err.txt || true
+          fallback "runners API error"
+        fi
+        echo "Runners visible to the token:"
+        echo "$resp" | jq -r '"  - \(.name)  status=\(.status) busy=\(.busy) labels=[\([.labels[].name]|join(","))]"'
+        online=$(echo "$resp" \
+          | jq -s "[.[] | select(.status==\"online\" and .busy==false
+                   and ([.labels[].name] | index(\"${SELF_HOSTED_LABEL}\")))] | length")
+        if [ "${online:-0}" -gt 0 ]; then
+          echo "==> Self-hosted Intel runner available ($online idle) — using it."
           echo "runs_on=[\"self-hosted\",\"macOS\",\"X64\",\"${SELF_HOSTED_LABEL}\"]" >> "$GITHUB_OUTPUT"
         else
-          echo "No idle self-hosted Intel runner — falling back to hosted macos-13."
-          echo 'runs_on="macos-13"' >> "$GITHUB_OUTPUT"
+          fallback "no online/idle runner with label '${SELF_HOSTED_LABEL}'"
         fi
 
   package:
