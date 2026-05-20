@@ -44,11 +44,25 @@ public final class Bootstrap {
     public static void main(String[] args) throws Exception {
         ensureJavaVersion();
         URL[] classpath = buildClasspath();
-        URLClassLoader loader = new URLClassLoader(classpath, Bootstrap.class.getClassLoader());
+        URLClassLoader loader = new URLClassLoader(classpath, platformClassLoader());
         Thread.currentThread().setContextClassLoader(loader);
         Class<?> signer = Class.forName(MAIN_CLASS, true, loader);
         Method main = signer.getMethod("main", String[].class);
         main.invoke(null, (Object) args);
+    }
+
+    /**
+     * Returns the JDK platform class loader so the URLClassLoader we build sits directly above the
+     * JDK and below nothing — in particular, not below the system classloader. The launcher scripts
+     * put every sibling jar (including the real {@code jsignpdf.jar}) on the {@code -cp lib/*}
+     * system classpath; if we kept the system classloader as parent, parent-first delegation would
+     * load {@code Signer} from there, and {@code Signer}'s defining loader would have no visibility
+     * into the {@code lib/javafx/} jars added only to our URLClassLoader. Reflective because this
+     * class is compiled at bytecode level 52 ({@link #MIN_JAVA} guarantees the method exists).
+     */
+    private static ClassLoader platformClassLoader() throws Exception {
+        Method m = ClassLoader.class.getMethod("getPlatformClassLoader");
+        return (ClassLoader) m.invoke(null);
     }
 
     private static void ensureJavaVersion() {
