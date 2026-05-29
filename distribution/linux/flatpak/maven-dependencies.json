@@ -36,6 +36,62 @@
   },
   {
     "type": "file",
+    "url": "https://repo1.maven.org/maven2/com/aayushatharva/brotli4j/brotli4j-parent/1.23.0/brotli4j-parent-1.23.0.pom",
+    "sha256": "e5396c28d74a0c27262aeafce391c35a1e420fa15d6eba6a2ab4269f4033cf29",
+    "dest": "m2local/com/aayushatharva/brotli4j/brotli4j-parent/1.23.0",
+    "dest-filename": "brotli4j-parent-1.23.0.pom"
+  },
+  {
+    "type": "file",
+    "url": "https://repo1.maven.org/maven2/com/aayushatharva/brotli4j/brotli4j/1.23.0/brotli4j-1.23.0.jar",
+    "sha256": "5fcf13ad78d07319cc507465dcf61cbc3efee9f45c9ae1c42a9902414696bc0b",
+    "dest": "m2local/com/aayushatharva/brotli4j/brotli4j/1.23.0",
+    "dest-filename": "brotli4j-1.23.0.jar"
+  },
+  {
+    "type": "file",
+    "url": "https://repo1.maven.org/maven2/com/aayushatharva/brotli4j/brotli4j/1.23.0/brotli4j-1.23.0.pom",
+    "sha256": "fd8f51d637cb34bed81b8958f26e5c41dcbe4c89f072d91debc2ec0daca095bf",
+    "dest": "m2local/com/aayushatharva/brotli4j/brotli4j/1.23.0",
+    "dest-filename": "brotli4j-1.23.0.pom"
+  },
+  {
+    "type": "file",
+    "url": "https://repo1.maven.org/maven2/com/aayushatharva/brotli4j/native-linux-x86_64/1.23.0/native-linux-x86_64-1.23.0.jar",
+    "sha256": "c504e243961c4229d8e486ca8f87b757ad9a033dda471061c0134c050ddcaa7c",
+    "dest": "m2local/com/aayushatharva/brotli4j/native-linux-x86_64/1.23.0",
+    "dest-filename": "native-linux-x86_64-1.23.0.jar"
+  },
+  {
+    "type": "file",
+    "url": "https://repo1.maven.org/maven2/com/aayushatharva/brotli4j/native-linux-x86_64/1.23.0/native-linux-x86_64-1.23.0.pom",
+    "sha256": "7d49c72349f876b3f995b7878fdeba22b6fbc30491908f6bae7d7d8a0491b4a8",
+    "dest": "m2local/com/aayushatharva/brotli4j/native-linux-x86_64/1.23.0",
+    "dest-filename": "native-linux-x86_64-1.23.0.pom"
+  },
+  {
+    "type": "file",
+    "url": "https://repo1.maven.org/maven2/com/aayushatharva/brotli4j/natives/1.23.0/natives-1.23.0.pom",
+    "sha256": "23898979556d84dcf92a497911c985c8e6f8756c6b33b7a46be9ab00e8ce13d1",
+    "dest": "m2local/com/aayushatharva/brotli4j/natives/1.23.0",
+    "dest-filename": "natives-1.23.0.pom"
+  },
+  {
+    "type": "file",
+    "url": "https://repo1.maven.org/maven2/com/aayushatharva/brotli4j/service/1.23.0/service-1.23.0.jar",
+    "sha256": "7f298d44dbb7688419f0179ee1dfa0e4436633272b05d38a5faf3a2b8d08697b",
+    "dest": "m2local/com/aayushatharva/brotli4j/service/1.23.0",
+    "dest-filename": "service-1.23.0.jar"
+  },
+  {
+    "type": "file",
+    "url": "https://repo1.maven.org/maven2/com/aayushatharva/brotli4j/service/1.23.0/service-1.23.0.pom",
+    "sha256": "6b28b242770cb508103a855615bb1f96a0fc63988c26a16b96156096a5d90a2e",
+    "dest": "m2local/com/aayushatharva/brotli4j/service/1.23.0",
+    "dest-filename": "service-1.23.0.pom"
+  },
+  {
+    "type": "file",
     "url": "https://repo1.maven.org/maven2/com/fasterxml/jackson/jackson-bom/2.15.3/jackson-bom-2.15.3.pom",
     "sha256": "66fc9945c16716bc202f4b9d7e6d969df3f509feffbe1acf1a31511b753d5c9d",
     "dest": "m2local/com/fasterxml/jackson/jackson-bom/2.15.3",
@@ -365,38 +421,38 @@
   },
   {
     "type": "file",
-    "url": "https://repo1.maven.org/maven2/com/github/librepdf/openpdf-parent/3.0.4/openpdf-parent-3.0.4.pom",
-    "sha256": "7614d6c0b60c8beb147f10902dc1d95050f1dc68ba3e83354516b5bdf2ab6a79",
-    "dest": "m2local/com/github/librepdf/openpdf-parent/3.0.4",
-    "dest-filename": "openpdf-parent-3.0.4.pom"
+    "url": "https://repo1.maven.org/maven2/com/github/librepdf/openpdf-parent/3.0.5/openpdf-parent-3.0.5.pom",
+    "sha256": "4a9b29280dc670ec4891f54faf747a295514e6727a9eb5ec803129f699d25eef",
+    "dest": "m2local/com/github/librepdf/openpdf-parent/3.0.5",
+    "dest-filename": "openpdf-parent-3.0.5.pom"
   },
   {
     "type": "file",
-    "url": "https://repo1.maven.org/maven2/com/github/librepdf/openpdf-renderer/3.0.4/openpdf-renderer-3.0.4.jar",
-    "sha256": "90a9dc355f7548ec1cfbb46520c35b6b973873b4479f449bdb0c3b761bc33fd0",
-    "dest": "m2local/com/github/librepdf/openpdf-renderer/3.0.4",
-    "dest-filename": "openpdf-renderer-3.0.4.jar"
+    "url": "https://repo1.maven.org/maven2/com/github/librepdf/openpdf-renderer/3.0.5/openpdf-renderer-3.0.5.jar",
+    "sha256": "7b2c3976cd2db7f11c3047902fa35454f65e3cecc18b436a7635fe503da74c31",
+    "dest": "m2local/com/github/librepdf/openpdf-renderer/3.0.5",
+    "dest-filename": "openpdf-renderer-3.0.5.jar"
   },
   {
     "type": "file",
-    "url": "https://repo1.maven.org/maven2/com/github/librepdf/openpdf-renderer/3.0.4/openpdf-renderer-3.0.4.pom",
-    "sha256": "a11878aabd716df546ad6ba2663ffac946296856dcf823af60529ea4fb560eb0",
-    "dest": "m2local/com/github/librepdf/openpdf-renderer/3.0.4",
-    "dest-filename": "openpdf-renderer-3.0.4.pom"
+    "url": "https://repo1.maven.org/maven2/com/github/librepdf/openpdf-renderer/3.0.5/openpdf-renderer-3.0.5.pom",
+    "sha256": "ce69e923384e7586364bf51d938666f2903819719b7d8432ddcbf441b0fab0a0",
+    "dest": "m2local/com/github/librepdf/openpdf-renderer/3.0.5",
+    "dest-filename": "openpdf-renderer-3.0.5.pom"
   },
   {
     "type": "file",
-    "url": "https://repo1.maven.org/maven2/com/github/librepdf/openpdf/3.0.4/openpdf-3.0.4.jar",
-    "sha256": "838993e2be202e31ac9ba72305fb8c1f51165df51e4ca4f02e68d491436772ec",
-    "dest": "m2local/com/github/librepdf/openpdf/3.0.4",
-    "dest-filename": "openpdf-3.0.4.jar"
+    "url": "https://repo1.maven.org/maven2/com/github/librepdf/openpdf/3.0.5/openpdf-3.0.5.jar",
+    "sha256": "2a70c6024bb10b6192b4b91d8bb581de24b776a799a30ef5b87748e54aca2144",
+    "dest": "m2local/com/github/librepdf/openpdf/3.0.5",
+    "dest-filename": "openpdf-3.0.5.jar"
   },
   {
     "type": "file",
-    "url": "https://repo1.maven.org/maven2/com/github/librepdf/openpdf/3.0.4/openpdf-3.0.4.pom",
-    "sha256": "e60bd42c46916c5ae4153858bc1225aba71dbff24d3a8b88efad23ff8b4edded",
-    "dest": "m2local/com/github/librepdf/openpdf/3.0.4",
-    "dest-filename": "openpdf-3.0.4.pom"
+    "url": "https://repo1.maven.org/maven2/com/github/librepdf/openpdf/3.0.5/openpdf-3.0.5.pom",
+    "sha256": "b5a4fe64481e4d10fb9a99ee2d0f5749bd0fd9640ce7e8c54ef8debae93b47a4",
+    "dest": "m2local/com/github/librepdf/openpdf/3.0.5",
+    "dest-filename": "openpdf-3.0.5.pom"
   },
   {
     "type": "file",
