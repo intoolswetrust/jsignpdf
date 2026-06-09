@@ -1093,6 +1093,48 @@
   },
   {
     "type": "file",
+    "url": "https://repo1.maven.org/maven2/eu/maveniverse/maven/domtrip/domtrip-core/1.5.1/domtrip-core-1.5.1.jar",
+    "sha256": "7f70f7c35068a99a9e0c527bdd6392a6e07678bd9933ca4429116b8275629f74",
+    "dest": "m2local/eu/maveniverse/maven/domtrip/domtrip-core/1.5.1",
+    "dest-filename": "domtrip-core-1.5.1.jar"
+  },
+  {
+    "type": "file",
+    "url": "https://repo1.maven.org/maven2/eu/maveniverse/maven/domtrip/domtrip-core/1.5.1/domtrip-core-1.5.1.pom",
+    "sha256": "7d8ecbd2a7b860ef85b359134b5371c6ed23124cef2a45954a9773bf50c7ac3b",
+    "dest": "m2local/eu/maveniverse/maven/domtrip/domtrip-core/1.5.1",
+    "dest-filename": "domtrip-core-1.5.1.pom"
+  },
+  {
+    "type": "file",
+    "url": "https://repo1.maven.org/maven2/eu/maveniverse/maven/domtrip/domtrip-maven/1.5.1/domtrip-maven-1.5.1.jar",
+    "sha256": "d8ddc436506a6d2288bcb0cc12c0257793005af1ae67c53d7d7c6c1fd59d82af",
+    "dest": "m2local/eu/maveniverse/maven/domtrip/domtrip-maven/1.5.1",
+    "dest-filename": "domtrip-maven-1.5.1.jar"
+  },
+  {
+    "type": "file",
+    "url": "https://repo1.maven.org/maven2/eu/maveniverse/maven/domtrip/domtrip-maven/1.5.1/domtrip-maven-1.5.1.pom",
+    "sha256": "415b72e29795d7f86711497150fff7fe12e809f2c481f8d591d07b7cedebb5ef",
+    "dest": "m2local/eu/maveniverse/maven/domtrip/domtrip-maven/1.5.1",
+    "dest-filename": "domtrip-maven-1.5.1.pom"
+  },
+  {
+    "type": "file",
+    "url": "https://repo1.maven.org/maven2/eu/maveniverse/maven/domtrip/domtrip/1.5.1/domtrip-1.5.1.pom",
+    "sha256": "f109fb70888e5ec9b42ffd42d2324004a35f9b0eb64ec89092134f0dee3128cc",
+    "dest": "m2local/eu/maveniverse/maven/domtrip/domtrip/1.5.1",
+    "dest-filename": "domtrip-1.5.1.pom"
+  },
+  {
+    "type": "file",
+    "url": "https://repo1.maven.org/maven2/eu/maveniverse/maven/parent/parent/52/parent-52.pom",
+    "sha256": "ec0c2694d9958218506861f70a4c202efa746d7675b3a61ddcd95be43715f6ab",
+    "dest": "m2local/eu/maveniverse/maven/parent/parent/52",
+    "dest-filename": "parent-52.pom"
+  },
+  {
+    "type": "file",
     "url": "https://repo1.maven.org/maven2/info/picocli/picocli/4.6.2/picocli-4.6.2.jar",
     "sha256": "4754d96eaf5314f35a287da5c67848b285067868fca6d1f5121a74f67f065b61",
     "dest": "m2local/info/picocli/picocli/4.6.2",
@@ -2416,6 +2458,20 @@
   },
   {
     "type": "file",
+    "url": "https://repo1.maven.org/maven2/org/apache/maven/doxia/doxia-sink-api/2.1.0/doxia-sink-api-2.1.0.jar",
+    "sha256": "b465db838dd482a994d32a088bea4bcbaa62cfb8b2853511a9f8c3e769402c74",
+    "dest": "m2local/org/apache/maven/doxia/doxia-sink-api/2.1.0",
+    "dest-filename": "doxia-sink-api-2.1.0.jar"
+  },
+  {
+    "type": "file",
+    "url": "https://repo1.maven.org/maven2/org/apache/maven/doxia/doxia-sink-api/2.1.0/doxia-sink-api-2.1.0.pom",
+    "sha256": "618112f616b84b9cd87165a81c998563c7f114e2b9f39eaeaa09260a1135570c",
+    "dest": "m2local/org/apache/maven/doxia/doxia-sink-api/2.1.0",
+    "dest-filename": "doxia-sink-api-2.1.0.pom"
+  },
+  {
+    "type": "file",
     "url": "https://repo1.maven.org/maven2/org/apache/maven/doxia/doxia-site-model/2.0.0/doxia-site-model-2.0.0.jar",
     "sha256": "f6ec9ef75a41d1b826e5ecf02d92c5de90a6bc70ea93d5340988703223bf2205",
     "dest": "m2local/org/apache/maven/doxia/doxia-site-model/2.0.0",
@@ -2483,6 +2539,13 @@
     "sha256": "59f40c92b9f525bb6ca6f8845ec63b13dab18c3c1da93d17620cb8d2ea4c61b8",
     "dest": "m2local/org/apache/maven/doxia/doxia/2.0.0",
     "dest-filename": "doxia-2.0.0.pom"
+  },
+  {
+    "type": "file",
+    "url": "https://repo1.maven.org/maven2/org/apache/maven/doxia/doxia/2.1.0/doxia-2.1.0.pom",
+    "sha256": "60d320f3a7b36047cc2969397aa8f0ce673afcd88a60ef04e2b032b7c0011969",
+    "dest": "m2local/org/apache/maven/doxia/doxia/2.1.0",
+    "dest-filename": "doxia-2.1.0.pom"
   },
   {
     "type": "file",
@@ -2983,17 +3046,17 @@
   },
   {
     "type": "file",
-    "url": "https://repo1.maven.org/maven2/org/apache/maven/plugins/maven-dependency-plugin/3.10.0/maven-dependency-plugin-3.10.0.jar",
-    "sha256": "f5c804d7cdecb3591e04e1dd423600c2f0d13605ee6d4a5d1393a5bc5a3b9070",
-    "dest": "m2local/org/apache/maven/plugins/maven-dependency-plugin/3.10.0",
-    "dest-filename": "maven-dependency-plugin-3.10.0.jar"
+    "url": "https://repo1.maven.org/maven2/org/apache/maven/plugins/maven-dependency-plugin/3.11.0/maven-dependency-plugin-3.11.0.jar",
+    "sha256": "e37a8fc9ff47435cc6bda257a4501cf79626c8115610ba33c77775ce23b4c3b7",
+    "dest": "m2local/org/apache/maven/plugins/maven-dependency-plugin/3.11.0",
+    "dest-filename": "maven-dependency-plugin-3.11.0.jar"
   },
   {
     "type": "file",
-    "url": "https://repo1.maven.org/maven2/org/apache/maven/plugins/maven-dependency-plugin/3.10.0/maven-dependency-plugin-3.10.0.pom",
-    "sha256": "d53783d7849e34bd389ec69763200be42c5c7e0ad25ed108e744c34e9d3e60cc",
-    "dest": "m2local/org/apache/maven/plugins/maven-dependency-plugin/3.10.0",
-    "dest-filename": "maven-dependency-plugin-3.10.0.pom"
+    "url": "https://repo1.maven.org/maven2/org/apache/maven/plugins/maven-dependency-plugin/3.11.0/maven-dependency-plugin-3.11.0.pom",
+    "sha256": "570b5e43230f7a13f9ec8ae0b0993208a5f4c763b6593a87af4123112ce47220",
+    "dest": "m2local/org/apache/maven/plugins/maven-dependency-plugin/3.11.0",
+    "dest-filename": "maven-dependency-plugin-3.11.0.pom"
   },
   {
     "type": "file",
@@ -3067,6 +3130,13 @@
   },
   {
     "type": "file",
+    "url": "https://repo1.maven.org/maven2/org/apache/maven/plugins/maven-plugins/48/maven-plugins-48.pom",
+    "sha256": "57014e98ba621d9d254cf79ad4dfcdcf690290fd97a935bab9ebe72bd5be40d3",
+    "dest": "m2local/org/apache/maven/plugins/maven-plugins/48",
+    "dest-filename": "maven-plugins-48.pom"
+  },
+  {
+    "type": "file",
     "url": "https://repo1.maven.org/maven2/org/apache/maven/plugins/maven-resources-plugin/3.4.0/maven-resources-plugin-3.4.0.jar",
     "sha256": "72c7d66ea49256ea64a82b28a15df69177d13066d12afeb4a1ee0616da4648f1",
     "dest": "m2local/org/apache/maven/plugins/maven-resources-plugin/3.4.0",
@@ -3081,17 +3151,17 @@
   },
   {
     "type": "file",
-    "url": "https://repo1.maven.org/maven2/org/apache/maven/plugins/maven-surefire-plugin/3.5.5/maven-surefire-plugin-3.5.5.jar",
-    "sha256": "1ae06fc7dbb22140610327e6e94e6285176c993cf8d1a850adb6f87f535f8cb4",
-    "dest": "m2local/org/apache/maven/plugins/maven-surefire-plugin/3.5.5",
-    "dest-filename": "maven-surefire-plugin-3.5.5.jar"
+    "url": "https://repo1.maven.org/maven2/org/apache/maven/plugins/maven-surefire-plugin/3.5.6/maven-surefire-plugin-3.5.6.jar",
+    "sha256": "5fea3d2f0ad1d790717d66aa31d995c22ca528612316f8380d67c40367af3464",
+    "dest": "m2local/org/apache/maven/plugins/maven-surefire-plugin/3.5.6",
+    "dest-filename": "maven-surefire-plugin-3.5.6.jar"
   },
   {
     "type": "file",
-    "url": "https://repo1.maven.org/maven2/org/apache/maven/plugins/maven-surefire-plugin/3.5.5/maven-surefire-plugin-3.5.5.pom",
-    "sha256": "04dd9d39989cb719f5e583058f2a4a296190ee6a18f7b2f83842aad7bbf70b1b",
-    "dest": "m2local/org/apache/maven/plugins/maven-surefire-plugin/3.5.5",
-    "dest-filename": "maven-surefire-plugin-3.5.5.pom"
+    "url": "https://repo1.maven.org/maven2/org/apache/maven/plugins/maven-surefire-plugin/3.5.6/maven-surefire-plugin-3.5.6.pom",
+    "sha256": "a9fe60995e2bf4146e3bdd4e4a12737bdafd23cffa52626af57e2162cb077ee1",
+    "dest": "m2local/org/apache/maven/plugins/maven-surefire-plugin/3.5.6",
+    "dest-filename": "maven-surefire-plugin-3.5.6.pom"
   },
   {
     "type": "file",
@@ -3333,17 +3403,17 @@
   },
   {
     "type": "file",
-    "url": "https://repo1.maven.org/maven2/org/apache/maven/shared/maven-dependency-analyzer/1.17.0/maven-dependency-analyzer-1.17.0.jar",
-    "sha256": "2710707f61af4556ccd9fb21ceb8f59119afcb8637b100ddabb3225bd948b9be",
-    "dest": "m2local/org/apache/maven/shared/maven-dependency-analyzer/1.17.0",
-    "dest-filename": "maven-dependency-analyzer-1.17.0.jar"
+    "url": "https://repo1.maven.org/maven2/org/apache/maven/shared/maven-dependency-analyzer/1.17.1/maven-dependency-analyzer-1.17.1.jar",
+    "sha256": "1c01883172b50855ceaa68f3688b21a4b8d8bc77435d162db08818680b7fed87",
+    "dest": "m2local/org/apache/maven/shared/maven-dependency-analyzer/1.17.1",
+    "dest-filename": "maven-dependency-analyzer-1.17.1.jar"
   },
   {
     "type": "file",
-    "url": "https://repo1.maven.org/maven2/org/apache/maven/shared/maven-dependency-analyzer/1.17.0/maven-dependency-analyzer-1.17.0.pom",
-    "sha256": "691d70cd2fbf7ce0f33a1c258d9c188bdde0816dbe94ded670eda8c2eab472f3",
-    "dest": "m2local/org/apache/maven/shared/maven-dependency-analyzer/1.17.0",
-    "dest-filename": "maven-dependency-analyzer-1.17.0.pom"
+    "url": "https://repo1.maven.org/maven2/org/apache/maven/shared/maven-dependency-analyzer/1.17.1/maven-dependency-analyzer-1.17.1.pom",
+    "sha256": "2c390dbed1b9d253084f47ce769040003bdc604f185e3162bc9c41208deb4b6a",
+    "dest": "m2local/org/apache/maven/shared/maven-dependency-analyzer/1.17.1",
+    "dest-filename": "maven-dependency-analyzer-1.17.1.pom"
   },
   {
     "type": "file",
@@ -3487,10 +3557,10 @@
   },
   {
     "type": "file",
-    "url": "https://repo1.maven.org/maven2/org/apache/maven/shared/maven-shared-components/47/maven-shared-components-47.pom",
-    "sha256": "3bd3d07c910477091bb9602f931f696c4aa115c86a322bff6a604ec7543afc07",
-    "dest": "m2local/org/apache/maven/shared/maven-shared-components/47",
-    "dest-filename": "maven-shared-components-47.pom"
+    "url": "https://repo1.maven.org/maven2/org/apache/maven/shared/maven-shared-components/48/maven-shared-components-48.pom",
+    "sha256": "4a8f3bc226f6f1b7f7362fa2a6e1da451561f86783ec512176e1c467a03708eb",
+    "dest": "m2local/org/apache/maven/shared/maven-shared-components/48",
+    "dest-filename": "maven-shared-components-48.pom"
   },
   {
     "type": "file",
@@ -3543,108 +3613,108 @@
   },
   {
     "type": "file",
-    "url": "https://repo1.maven.org/maven2/org/apache/maven/surefire/maven-surefire-common/3.5.5/maven-surefire-common-3.5.5.jar",
-    "sha256": "ee2fd8f0f86150940b54866ea77b0361a1efe7ae0f0b62f2e3834c2ea11ec9cc",
-    "dest": "m2local/org/apache/maven/surefire/maven-surefire-common/3.5.5",
-    "dest-filename": "maven-surefire-common-3.5.5.jar"
+    "url": "https://repo1.maven.org/maven2/org/apache/maven/surefire/maven-surefire-common/3.5.6/maven-surefire-common-3.5.6.jar",
+    "sha256": "30c9e2bb7f1bb800482e42c208c144124132ec3c3b4b87ab5abda8b60c9f29b9",
+    "dest": "m2local/org/apache/maven/surefire/maven-surefire-common/3.5.6",
+    "dest-filename": "maven-surefire-common-3.5.6.jar"
   },
   {
     "type": "file",
-    "url": "https://repo1.maven.org/maven2/org/apache/maven/surefire/maven-surefire-common/3.5.5/maven-surefire-common-3.5.5.pom",
-    "sha256": "47577ce85e4726ba689470359d009ab3dd54a2a66a54604c376c5ea3d36657fc",
-    "dest": "m2local/org/apache/maven/surefire/maven-surefire-common/3.5.5",
-    "dest-filename": "maven-surefire-common-3.5.5.pom"
+    "url": "https://repo1.maven.org/maven2/org/apache/maven/surefire/maven-surefire-common/3.5.6/maven-surefire-common-3.5.6.pom",
+    "sha256": "cf9b4bb72eeb22554fc9afb463d5ee04f1f2786da4101c70ab9985a482858622",
+    "dest": "m2local/org/apache/maven/surefire/maven-surefire-common/3.5.6",
+    "dest-filename": "maven-surefire-common-3.5.6.pom"
   },
   {
     "type": "file",
-    "url": "https://repo1.maven.org/maven2/org/apache/maven/surefire/surefire-api/3.5.5/surefire-api-3.5.5.jar",
-    "sha256": "b5694cc7b6016acb45af77500fa465755030b14c15985b2c90213b46287ec2d4",
-    "dest": "m2local/org/apache/maven/surefire/surefire-api/3.5.5",
-    "dest-filename": "surefire-api-3.5.5.jar"
+    "url": "https://repo1.maven.org/maven2/org/apache/maven/surefire/surefire-api/3.5.6/surefire-api-3.5.6.jar",
+    "sha256": "331defab7586a785e541a476f08112881b07068981ece3239676e1b3aa58ca14",
+    "dest": "m2local/org/apache/maven/surefire/surefire-api/3.5.6",
+    "dest-filename": "surefire-api-3.5.6.jar"
   },
   {
     "type": "file",
-    "url": "https://repo1.maven.org/maven2/org/apache/maven/surefire/surefire-api/3.5.5/surefire-api-3.5.5.pom",
-    "sha256": "ad893f1333c98f47353734bdc2c3024df175748848e5da96e0739829597678c3",
-    "dest": "m2local/org/apache/maven/surefire/surefire-api/3.5.5",
-    "dest-filename": "surefire-api-3.5.5.pom"
+    "url": "https://repo1.maven.org/maven2/org/apache/maven/surefire/surefire-api/3.5.6/surefire-api-3.5.6.pom",
+    "sha256": "bccac2ece4fe005abc8cb50f696187aa70be27536dc39cb72abea2009acbecfa",
+    "dest": "m2local/org/apache/maven/surefire/surefire-api/3.5.6",
+    "dest-filename": "surefire-api-3.5.6.pom"
   },
   {
     "type": "file",
-    "url": "https://repo1.maven.org/maven2/org/apache/maven/surefire/surefire-booter/3.5.5/surefire-booter-3.5.5.jar",
-    "sha256": "c4f2be4d00eb7b79f797c7d9719c0b3e9cec43ba1cae4880ebabc60961e42e30",
-    "dest": "m2local/org/apache/maven/surefire/surefire-booter/3.5.5",
-    "dest-filename": "surefire-booter-3.5.5.jar"
+    "url": "https://repo1.maven.org/maven2/org/apache/maven/surefire/surefire-booter/3.5.6/surefire-booter-3.5.6.jar",
+    "sha256": "5b1c75591b42467926b22ba0e80e2e68cb4779024097694f34a53321ba5acf9d",
+    "dest": "m2local/org/apache/maven/surefire/surefire-booter/3.5.6",
+    "dest-filename": "surefire-booter-3.5.6.jar"
   },
   {
     "type": "file",
-    "url": "https://repo1.maven.org/maven2/org/apache/maven/surefire/surefire-booter/3.5.5/surefire-booter-3.5.5.pom",
-    "sha256": "3329accc720aa884d87631978010e14ce0598452ad39433a8ca993619dcea3f3",
-    "dest": "m2local/org/apache/maven/surefire/surefire-booter/3.5.5",
-    "dest-filename": "surefire-booter-3.5.5.pom"
+    "url": "https://repo1.maven.org/maven2/org/apache/maven/surefire/surefire-booter/3.5.6/surefire-booter-3.5.6.pom",
+    "sha256": "4dbe8cf4d6d563cb9bca0fc23ffde92fe4055efe29c37f2590633b62efbef6f9",
+    "dest": "m2local/org/apache/maven/surefire/surefire-booter/3.5.6",
+    "dest-filename": "surefire-booter-3.5.6.pom"
   },
   {
     "type": "file",
-    "url": "https://repo1.maven.org/maven2/org/apache/maven/surefire/surefire-extensions-api/3.5.5/surefire-extensions-api-3.5.5.jar",
-    "sha256": "eb992fe8b019a336c03aa558779f5792f58bb72050cd4c4d33fc1da5a24cb1b6",
-    "dest": "m2local/org/apache/maven/surefire/surefire-extensions-api/3.5.5",
-    "dest-filename": "surefire-extensions-api-3.5.5.jar"
+    "url": "https://repo1.maven.org/maven2/org/apache/maven/surefire/surefire-extensions-api/3.5.6/surefire-extensions-api-3.5.6.jar",
+    "sha256": "57ce1a7a9eb87f8ba2eda7f7449877d8c03da8e541e9036cd9c5cdfb1b7a1c08",
+    "dest": "m2local/org/apache/maven/surefire/surefire-extensions-api/3.5.6",
+    "dest-filename": "surefire-extensions-api-3.5.6.jar"
   },
   {
     "type": "file",
-    "url": "https://repo1.maven.org/maven2/org/apache/maven/surefire/surefire-extensions-api/3.5.5/surefire-extensions-api-3.5.5.pom",
-    "sha256": "93d972aea168469673ddb86330f64dc9967f50e003e42b285c8cef7d58be1be1",
-    "dest": "m2local/org/apache/maven/surefire/surefire-extensions-api/3.5.5",
-    "dest-filename": "surefire-extensions-api-3.5.5.pom"
+    "url": "https://repo1.maven.org/maven2/org/apache/maven/surefire/surefire-extensions-api/3.5.6/surefire-extensions-api-3.5.6.pom",
+    "sha256": "658c4269c47f464de7a7d7dd07031661a4b008ef87592de05c85719ef3bfc3b1",
+    "dest": "m2local/org/apache/maven/surefire/surefire-extensions-api/3.5.6",
+    "dest-filename": "surefire-extensions-api-3.5.6.pom"
   },
   {
     "type": "file",
-    "url": "https://repo1.maven.org/maven2/org/apache/maven/surefire/surefire-extensions-spi/3.5.5/surefire-extensions-spi-3.5.5.jar",
-    "sha256": "e3bff2e5e9641db26d2e4a9579d8dc4d6ab3d6b9065c6e132f5596be86b875f0",
-    "dest": "m2local/org/apache/maven/surefire/surefire-extensions-spi/3.5.5",
-    "dest-filename": "surefire-extensions-spi-3.5.5.jar"
+    "url": "https://repo1.maven.org/maven2/org/apache/maven/surefire/surefire-extensions-spi/3.5.6/surefire-extensions-spi-3.5.6.jar",
+    "sha256": "ae22348985e0acdf223f11615846290704899f12aeec8ad82b4d1db38a0767db",
+    "dest": "m2local/org/apache/maven/surefire/surefire-extensions-spi/3.5.6",
+    "dest-filename": "surefire-extensions-spi-3.5.6.jar"
   },
   {
     "type": "file",
-    "url": "https://repo1.maven.org/maven2/org/apache/maven/surefire/surefire-extensions-spi/3.5.5/surefire-extensions-spi-3.5.5.pom",
-    "sha256": "e1e0db5d9e9a61e1fd816d09c41bb2717d8846bbfb33281e5d30aade69c181ec",
-    "dest": "m2local/org/apache/maven/surefire/surefire-extensions-spi/3.5.5",
-    "dest-filename": "surefire-extensions-spi-3.5.5.pom"
+    "url": "https://repo1.maven.org/maven2/org/apache/maven/surefire/surefire-extensions-spi/3.5.6/surefire-extensions-spi-3.5.6.pom",
+    "sha256": "800dbbb51f836d77f58696614377052b4551cfe8349ce097a24505742e78eff8",
+    "dest": "m2local/org/apache/maven/surefire/surefire-extensions-spi/3.5.6",
+    "dest-filename": "surefire-extensions-spi-3.5.6.pom"
   },
   {
     "type": "file",
-    "url": "https://repo1.maven.org/maven2/org/apache/maven/surefire/surefire-logger-api/3.5.5/surefire-logger-api-3.5.5.jar",
-    "sha256": "5ff01941b8cef7c530e62099ba2a793467b68098a2bceb2f031d6530916e3cd9",
-    "dest": "m2local/org/apache/maven/surefire/surefire-logger-api/3.5.5",
-    "dest-filename": "surefire-logger-api-3.5.5.jar"
+    "url": "https://repo1.maven.org/maven2/org/apache/maven/surefire/surefire-logger-api/3.5.6/surefire-logger-api-3.5.6.jar",
+    "sha256": "ac67f08b58d5e490272f3f41ed511ea0ee8ef177d515b93d392e144251ad856c",
+    "dest": "m2local/org/apache/maven/surefire/surefire-logger-api/3.5.6",
+    "dest-filename": "surefire-logger-api-3.5.6.jar"
   },
   {
     "type": "file",
-    "url": "https://repo1.maven.org/maven2/org/apache/maven/surefire/surefire-logger-api/3.5.5/surefire-logger-api-3.5.5.pom",
-    "sha256": "05499020753ee74b93b9cb91cbc05885af900a368ec7cc8510277e68a6a5b9da",
-    "dest": "m2local/org/apache/maven/surefire/surefire-logger-api/3.5.5",
-    "dest-filename": "surefire-logger-api-3.5.5.pom"
+    "url": "https://repo1.maven.org/maven2/org/apache/maven/surefire/surefire-logger-api/3.5.6/surefire-logger-api-3.5.6.pom",
+    "sha256": "a50b35f10aa31e69ba52755c31aaaef98be0b630ff6570d7cb081c34fadaefe8",
+    "dest": "m2local/org/apache/maven/surefire/surefire-logger-api/3.5.6",
+    "dest-filename": "surefire-logger-api-3.5.6.pom"
   },
   {
     "type": "file",
-    "url": "https://repo1.maven.org/maven2/org/apache/maven/surefire/surefire-shared-utils/3.5.5/surefire-shared-utils-3.5.5.jar",
-    "sha256": "50b880ae1a95c6e5301c055ef46bfd1281c2a6c3e26e25e6465d1c22a7eabc2d",
-    "dest": "m2local/org/apache/maven/surefire/surefire-shared-utils/3.5.5",
-    "dest-filename": "surefire-shared-utils-3.5.5.jar"
+    "url": "https://repo1.maven.org/maven2/org/apache/maven/surefire/surefire-shared-utils/3.5.6/surefire-shared-utils-3.5.6.jar",
+    "sha256": "b21563bce49411d872bd48a402af06dfc07670464bfdaa2ef7918f216c42758a",
+    "dest": "m2local/org/apache/maven/surefire/surefire-shared-utils/3.5.6",
+    "dest-filename": "surefire-shared-utils-3.5.6.jar"
   },
   {
     "type": "file",
-    "url": "https://repo1.maven.org/maven2/org/apache/maven/surefire/surefire-shared-utils/3.5.5/surefire-shared-utils-3.5.5.pom",
-    "sha256": "61df0ff0b033305b956d3e4d614b368d53775e72fb89cc4fbb5f6764f5e893fd",
-    "dest": "m2local/org/apache/maven/surefire/surefire-shared-utils/3.5.5",
-    "dest-filename": "surefire-shared-utils-3.5.5.pom"
+    "url": "https://repo1.maven.org/maven2/org/apache/maven/surefire/surefire-shared-utils/3.5.6/surefire-shared-utils-3.5.6.pom",
+    "sha256": "0f5d83342185ba129aa9137bcd776fa9d859caa29ae199241effbbe515341335",
+    "dest": "m2local/org/apache/maven/surefire/surefire-shared-utils/3.5.6",
+    "dest-filename": "surefire-shared-utils-3.5.6.pom"
   },
   {
     "type": "file",
-    "url": "https://repo1.maven.org/maven2/org/apache/maven/surefire/surefire/3.5.5/surefire-3.5.5.pom",
-    "sha256": "05658c71ed1ac0100adb3b5eea1d0facd0010867144ed046882d157ef674b3be",
-    "dest": "m2local/org/apache/maven/surefire/surefire/3.5.5",
-    "dest-filename": "surefire-3.5.5.pom"
+    "url": "https://repo1.maven.org/maven2/org/apache/maven/surefire/surefire/3.5.6/surefire-3.5.6.pom",
+    "sha256": "419678335ab6c41d3eee332ade9bf1274c284b226c3b4d8ac1aa407961561ce7",
+    "dest": "m2local/org/apache/maven/surefire/surefire/3.5.6",
+    "dest-filename": "surefire-3.5.6.pom"
   },
   {
     "type": "file",
@@ -4170,6 +4240,20 @@
     "sha256": "469a6c59f92effa62c0797ce7d52d2c03cf8ee1034b923c360dd78a9f505a7ba",
     "dest": "m2local/org/codehaus/plexus/plexus-classworlds/2.6.0",
     "dest-filename": "plexus-classworlds-2.6.0.pom"
+  },
+  {
+    "type": "file",
+    "url": "https://repo1.maven.org/maven2/org/codehaus/plexus/plexus-classworlds/2.9.0/plexus-classworlds-2.9.0.jar",
+    "sha256": "1ad3292cd563381e3fd632f3fded1988f9e9b2be7a9f3db63ff4c4cedba13fa5",
+    "dest": "m2local/org/codehaus/plexus/plexus-classworlds/2.9.0",
+    "dest-filename": "plexus-classworlds-2.9.0.jar"
+  },
+  {
+    "type": "file",
+    "url": "https://repo1.maven.org/maven2/org/codehaus/plexus/plexus-classworlds/2.9.0/plexus-classworlds-2.9.0.pom",
+    "sha256": "d9a3fe6374558b88948a96382b6b8a7ad75c23bed754994ea6f002586bb35f27",
+    "dest": "m2local/org/codehaus/plexus/plexus-classworlds/2.9.0",
+    "dest-filename": "plexus-classworlds-2.9.0.pom"
   },
   {
     "type": "file",
@@ -4838,17 +4922,17 @@
   },
   {
     "type": "file",
-    "url": "https://repo1.maven.org/maven2/org/eclipse/sisu/org.eclipse.sisu.inject/0.9.0.M4/org.eclipse.sisu.inject-0.9.0.M4.jar",
-    "sha256": "1cbd7a965a5e2a9ea823bab311962a4e5aa5c240705bdbad5a52b40ffdfa1004",
-    "dest": "m2local/org/eclipse/sisu/org.eclipse.sisu.inject/0.9.0.M4",
-    "dest-filename": "org.eclipse.sisu.inject-0.9.0.M4.jar"
+    "url": "https://repo1.maven.org/maven2/org/eclipse/sisu/org.eclipse.sisu.inject/1.0.0/org.eclipse.sisu.inject-1.0.0.jar",
+    "sha256": "3ab8d7bfe68f3b6ec95c1a0a47e628edbc9d76e90634cb0a0ba121fbb11b8e42",
+    "dest": "m2local/org/eclipse/sisu/org.eclipse.sisu.inject/1.0.0",
+    "dest-filename": "org.eclipse.sisu.inject-1.0.0.jar"
   },
   {
     "type": "file",
-    "url": "https://repo1.maven.org/maven2/org/eclipse/sisu/org.eclipse.sisu.inject/0.9.0.M4/org.eclipse.sisu.inject-0.9.0.M4.pom",
-    "sha256": "33966b3abd12908001b707688dfb7c09908b1e86556dc3fac1e85122a686f059",
-    "dest": "m2local/org/eclipse/sisu/org.eclipse.sisu.inject/0.9.0.M4",
-    "dest-filename": "org.eclipse.sisu.inject-0.9.0.M4.pom"
+    "url": "https://repo1.maven.org/maven2/org/eclipse/sisu/org.eclipse.sisu.inject/1.0.0/org.eclipse.sisu.inject-1.0.0.pom",
+    "sha256": "ea0fb93dafec8adde218ce2a11f0f84ebec2b822c1d9be8b2ed9cd61ed654cf3",
+    "dest": "m2local/org/eclipse/sisu/org.eclipse.sisu.inject/1.0.0",
+    "dest-filename": "org.eclipse.sisu.inject-1.0.0.pom"
   },
   {
     "type": "file",
@@ -4866,17 +4950,17 @@
   },
   {
     "type": "file",
-    "url": "https://repo1.maven.org/maven2/org/eclipse/sisu/org.eclipse.sisu.plexus/0.9.0.M4/org.eclipse.sisu.plexus-0.9.0.M4.jar",
-    "sha256": "b90579bc652eac7331436e0a25533fce14130b9c6e015f2dd3a3d4bb07e942b7",
-    "dest": "m2local/org/eclipse/sisu/org.eclipse.sisu.plexus/0.9.0.M4",
-    "dest-filename": "org.eclipse.sisu.plexus-0.9.0.M4.jar"
+    "url": "https://repo1.maven.org/maven2/org/eclipse/sisu/org.eclipse.sisu.plexus/1.0.0/org.eclipse.sisu.plexus-1.0.0.jar",
+    "sha256": "865b5300034fc08c790215d7d97f141914c932191bef9338a7dcef589f7536e9",
+    "dest": "m2local/org/eclipse/sisu/org.eclipse.sisu.plexus/1.0.0",
+    "dest-filename": "org.eclipse.sisu.plexus-1.0.0.jar"
   },
   {
     "type": "file",
-    "url": "https://repo1.maven.org/maven2/org/eclipse/sisu/org.eclipse.sisu.plexus/0.9.0.M4/org.eclipse.sisu.plexus-0.9.0.M4.pom",
-    "sha256": "90b4be7a71c979d0c4dea20c20a28eb9e76a29df68ab9018cf011019a3e4f562",
-    "dest": "m2local/org/eclipse/sisu/org.eclipse.sisu.plexus/0.9.0.M4",
-    "dest-filename": "org.eclipse.sisu.plexus-0.9.0.M4.pom"
+    "url": "https://repo1.maven.org/maven2/org/eclipse/sisu/org.eclipse.sisu.plexus/1.0.0/org.eclipse.sisu.plexus-1.0.0.pom",
+    "sha256": "f9bd338be70d4bc4d8f3f10cdfab7baec089fd3b3ef1013d4ca64c4e7f2163d5",
+    "dest": "m2local/org/eclipse/sisu/org.eclipse.sisu.plexus/1.0.0",
+    "dest-filename": "org.eclipse.sisu.plexus-1.0.0.pom"
   },
   {
     "type": "file",
@@ -4887,10 +4971,10 @@
   },
   {
     "type": "file",
-    "url": "https://repo1.maven.org/maven2/org/eclipse/sisu/sisu-inject/0.9.0.M4/sisu-inject-0.9.0.M4.pom",
-    "sha256": "0c829c9641ccac870d7d7ff012cbbad8447e912eb9a26d0d7283f09cba44c0d9",
-    "dest": "m2local/org/eclipse/sisu/sisu-inject/0.9.0.M4",
-    "dest-filename": "sisu-inject-0.9.0.M4.pom"
+    "url": "https://repo1.maven.org/maven2/org/eclipse/sisu/sisu-inject/1.0.0/sisu-inject-1.0.0.pom",
+    "sha256": "98656aa9a4841078ac7efde2ae7fdaa87724c1f504afea7a4151acd3ed066fc2",
+    "dest": "m2local/org/eclipse/sisu/sisu-inject/1.0.0",
+    "dest-filename": "sisu-inject-1.0.0.pom"
   },
   {
     "type": "file",
@@ -4943,66 +5027,66 @@
   },
   {
     "type": "file",
-    "url": "https://repo1.maven.org/maven2/org/jacoco/jacoco-maven-plugin/0.8.14/jacoco-maven-plugin-0.8.14.jar",
-    "sha256": "82effa8e421bf6ce516997f6b297bee8342f91d28f481b59bf2850f1576b4a34",
-    "dest": "m2local/org/jacoco/jacoco-maven-plugin/0.8.14",
-    "dest-filename": "jacoco-maven-plugin-0.8.14.jar"
+    "url": "https://repo1.maven.org/maven2/org/jacoco/jacoco-maven-plugin/0.8.15/jacoco-maven-plugin-0.8.15.jar",
+    "sha256": "f1b5a734742f99573f99c0af214f63c28156ef47f7467e434a7a1b723cdba9b2",
+    "dest": "m2local/org/jacoco/jacoco-maven-plugin/0.8.15",
+    "dest-filename": "jacoco-maven-plugin-0.8.15.jar"
   },
   {
     "type": "file",
-    "url": "https://repo1.maven.org/maven2/org/jacoco/jacoco-maven-plugin/0.8.14/jacoco-maven-plugin-0.8.14.pom",
-    "sha256": "ba3a08fe93fef4d73b76dce547076510691f61aaf79c42ce9b7fb459b259a821",
-    "dest": "m2local/org/jacoco/jacoco-maven-plugin/0.8.14",
-    "dest-filename": "jacoco-maven-plugin-0.8.14.pom"
+    "url": "https://repo1.maven.org/maven2/org/jacoco/jacoco-maven-plugin/0.8.15/jacoco-maven-plugin-0.8.15.pom",
+    "sha256": "46d7904122433f5479b175ee27b343b5e1a4ccea28489ea14147326b613896e3",
+    "dest": "m2local/org/jacoco/jacoco-maven-plugin/0.8.15",
+    "dest-filename": "jacoco-maven-plugin-0.8.15.pom"
   },
   {
     "type": "file",
-    "url": "https://repo1.maven.org/maven2/org/jacoco/org.jacoco.agent/0.8.14/org.jacoco.agent-0.8.14-runtime.jar",
-    "sha256": "3fb76eea65f81bd9415202bab34b6571728841dff1ab8e6bbe81adc2e299face",
-    "dest": "m2local/org/jacoco/org.jacoco.agent/0.8.14",
-    "dest-filename": "org.jacoco.agent-0.8.14-runtime.jar"
+    "url": "https://repo1.maven.org/maven2/org/jacoco/org.jacoco.agent/0.8.15/org.jacoco.agent-0.8.15-runtime.jar",
+    "sha256": "fb5b0036a0899ea97edfa0fc2c7985b55f3f7c5695028163e5e60d4f3cf6075d",
+    "dest": "m2local/org/jacoco/org.jacoco.agent/0.8.15",
+    "dest-filename": "org.jacoco.agent-0.8.15-runtime.jar"
   },
   {
     "type": "file",
-    "url": "https://repo1.maven.org/maven2/org/jacoco/org.jacoco.agent/0.8.14/org.jacoco.agent-0.8.14.pom",
-    "sha256": "943e77ed5ccb99aeeb3fe5643fea5a636f6f828e3958f8605f426ddc9afab8c9",
-    "dest": "m2local/org/jacoco/org.jacoco.agent/0.8.14",
-    "dest-filename": "org.jacoco.agent-0.8.14.pom"
+    "url": "https://repo1.maven.org/maven2/org/jacoco/org.jacoco.agent/0.8.15/org.jacoco.agent-0.8.15.pom",
+    "sha256": "47eb24b1577e473cbba634399bc56fe7b366b18401bf911d0d8771f56f228966",
+    "dest": "m2local/org/jacoco/org.jacoco.agent/0.8.15",
+    "dest-filename": "org.jacoco.agent-0.8.15.pom"
   },
   {
     "type": "file",
-    "url": "https://repo1.maven.org/maven2/org/jacoco/org.jacoco.build/0.8.14/org.jacoco.build-0.8.14.pom",
-    "sha256": "87d059b35849df97779148fd7e52f63f1fcd03a4e7e64c2a61a6c9cce61a8de7",
-    "dest": "m2local/org/jacoco/org.jacoco.build/0.8.14",
-    "dest-filename": "org.jacoco.build-0.8.14.pom"
+    "url": "https://repo1.maven.org/maven2/org/jacoco/org.jacoco.build/0.8.15/org.jacoco.build-0.8.15.pom",
+    "sha256": "3a2c89f80c2ab9caf1b403a62da4bcbd909ee52ea53747391267a5cdc968c123",
+    "dest": "m2local/org/jacoco/org.jacoco.build/0.8.15",
+    "dest-filename": "org.jacoco.build-0.8.15.pom"
   },
   {
     "type": "file",
-    "url": "https://repo1.maven.org/maven2/org/jacoco/org.jacoco.core/0.8.14/org.jacoco.core-0.8.14.jar",
-    "sha256": "28abbf0eea5a08e4f24097f2fbac663ca17c341c25c3a04d90d6cd325943c995",
-    "dest": "m2local/org/jacoco/org.jacoco.core/0.8.14",
-    "dest-filename": "org.jacoco.core-0.8.14.jar"
+    "url": "https://repo1.maven.org/maven2/org/jacoco/org.jacoco.core/0.8.15/org.jacoco.core-0.8.15.jar",
+    "sha256": "ade1e0fdb4cd80d8537b57c6edb70a1360c47fdc518c20c65314517479bc4d0d",
+    "dest": "m2local/org/jacoco/org.jacoco.core/0.8.15",
+    "dest-filename": "org.jacoco.core-0.8.15.jar"
   },
   {
     "type": "file",
-    "url": "https://repo1.maven.org/maven2/org/jacoco/org.jacoco.core/0.8.14/org.jacoco.core-0.8.14.pom",
-    "sha256": "7b75bae2c1779af544369833afe1d68f5a3955e91d166cb19dff886534b1ad6c",
-    "dest": "m2local/org/jacoco/org.jacoco.core/0.8.14",
-    "dest-filename": "org.jacoco.core-0.8.14.pom"
+    "url": "https://repo1.maven.org/maven2/org/jacoco/org.jacoco.core/0.8.15/org.jacoco.core-0.8.15.pom",
+    "sha256": "7b283b35bb2bda3b827b4da89ce968d257d1d98dd8594d7c8cb5b2f6d8cd9b15",
+    "dest": "m2local/org/jacoco/org.jacoco.core/0.8.15",
+    "dest-filename": "org.jacoco.core-0.8.15.pom"
   },
   {
     "type": "file",
-    "url": "https://repo1.maven.org/maven2/org/jacoco/org.jacoco.report/0.8.14/org.jacoco.report-0.8.14.jar",
-    "sha256": "a3e2026060ab8b8d5c650706406234bb4c033dfd5376afeb8b1666e8ed27c453",
-    "dest": "m2local/org/jacoco/org.jacoco.report/0.8.14",
-    "dest-filename": "org.jacoco.report-0.8.14.jar"
+    "url": "https://repo1.maven.org/maven2/org/jacoco/org.jacoco.report/0.8.15/org.jacoco.report-0.8.15.jar",
+    "sha256": "66a79e36edc77a1ebf6689e76a976e12ab4f1af515cbd09555840fba775714f4",
+    "dest": "m2local/org/jacoco/org.jacoco.report/0.8.15",
+    "dest-filename": "org.jacoco.report-0.8.15.jar"
   },
   {
     "type": "file",
-    "url": "https://repo1.maven.org/maven2/org/jacoco/org.jacoco.report/0.8.14/org.jacoco.report-0.8.14.pom",
-    "sha256": "e2ebf2c580f86afa7f75f43a28109dd894c42463928bc9911777e35275108e58",
-    "dest": "m2local/org/jacoco/org.jacoco.report/0.8.14",
-    "dest-filename": "org.jacoco.report-0.8.14.pom"
+    "url": "https://repo1.maven.org/maven2/org/jacoco/org.jacoco.report/0.8.15/org.jacoco.report-0.8.15.pom",
+    "sha256": "a1ea901ca04547f1dc24e75dde104b3a7171ff9d0c2b8f43b3153be09ac3c08a",
+    "dest": "m2local/org/jacoco/org.jacoco.report/0.8.15",
+    "dest-filename": "org.jacoco.report-0.8.15.pom"
   },
   {
     "type": "file",
@@ -5671,10 +5755,24 @@
   },
   {
     "type": "file",
-    "url": "https://repo1.maven.org/maven2/org/ow2/asm/asm-bom/9.9/asm-bom-9.9.pom",
-    "sha256": "0fa27336fa7b62923ca9bdc69526ebe712a3bfb1f7ee8bf76c4a0b3f85f19d62",
-    "dest": "m2local/org/ow2/asm/asm-bom/9.9",
-    "dest-filename": "asm-bom-9.9.pom"
+    "url": "https://repo1.maven.org/maven2/org/ow2/asm/asm-bom/9.10.1/asm-bom-9.10.1.pom",
+    "sha256": "709472d69cf785d4b679eee0e6e0575d4b104476ddf35265ef1117e73c129cd4",
+    "dest": "m2local/org/ow2/asm/asm-bom/9.10.1",
+    "dest-filename": "asm-bom-9.10.1.pom"
+  },
+  {
+    "type": "file",
+    "url": "https://repo1.maven.org/maven2/org/ow2/asm/asm-commons/9.10.1/asm-commons-9.10.1.jar",
+    "sha256": "6d0abefb7cbf972ea16edb37ec14835372505063a45f976ab7ea889ed9497895",
+    "dest": "m2local/org/ow2/asm/asm-commons/9.10.1",
+    "dest-filename": "asm-commons-9.10.1.jar"
+  },
+  {
+    "type": "file",
+    "url": "https://repo1.maven.org/maven2/org/ow2/asm/asm-commons/9.10.1/asm-commons-9.10.1.pom",
+    "sha256": "ceb2c43f3a273db88af8652d89ed6312f3e91a1a1e0ffc6f7823169278cf795c",
+    "dest": "m2local/org/ow2/asm/asm-commons/9.10.1",
+    "dest-filename": "asm-commons-9.10.1.pom"
   },
   {
     "type": "file",
@@ -5699,17 +5797,17 @@
   },
   {
     "type": "file",
-    "url": "https://repo1.maven.org/maven2/org/ow2/asm/asm-commons/9.9/asm-commons-9.9.jar",
-    "sha256": "db2f6f26150bbe7c126606b4a1151836bcc22a1e05a423b3585698bece995ff8",
-    "dest": "m2local/org/ow2/asm/asm-commons/9.9",
-    "dest-filename": "asm-commons-9.9.jar"
+    "url": "https://repo1.maven.org/maven2/org/ow2/asm/asm-tree/9.10.1/asm-tree-9.10.1.jar",
+    "sha256": "3dfb0d5b6a106cd40b5b250e39935fbf2f927f4477546a5369a3ac609cf0506b",
+    "dest": "m2local/org/ow2/asm/asm-tree/9.10.1",
+    "dest-filename": "asm-tree-9.10.1.jar"
   },
   {
     "type": "file",
-    "url": "https://repo1.maven.org/maven2/org/ow2/asm/asm-commons/9.9/asm-commons-9.9.pom",
-    "sha256": "18a5d3ef1377e7544b3ca3210f261396b987f6010ef591d3872adae63119ee43",
-    "dest": "m2local/org/ow2/asm/asm-commons/9.9",
-    "dest-filename": "asm-commons-9.9.pom"
+    "url": "https://repo1.maven.org/maven2/org/ow2/asm/asm-tree/9.10.1/asm-tree-9.10.1.pom",
+    "sha256": "963eebdea6e2e1ff25c9068b64a238e1585c99f8acd455595ac159a7f52b6c41",
+    "dest": "m2local/org/ow2/asm/asm-tree/9.10.1",
+    "dest-filename": "asm-tree-9.10.1.pom"
   },
   {
     "type": "file",
@@ -5734,20 +5832,6 @@
   },
   {
     "type": "file",
-    "url": "https://repo1.maven.org/maven2/org/ow2/asm/asm-tree/9.9/asm-tree-9.9.jar",
-    "sha256": "42178f3775c9c63f9e5e1446747d29b4eca4d91bd6e75e5c43cfa372a47d38c6",
-    "dest": "m2local/org/ow2/asm/asm-tree/9.9",
-    "dest-filename": "asm-tree-9.9.jar"
-  },
-  {
-    "type": "file",
-    "url": "https://repo1.maven.org/maven2/org/ow2/asm/asm-tree/9.9/asm-tree-9.9.pom",
-    "sha256": "d01788ed8e6e8e24acaf6cb4a7bdcc2733416252faa00232959e3e2e9df1bf44",
-    "dest": "m2local/org/ow2/asm/asm-tree/9.9",
-    "dest-filename": "asm-tree-9.9.pom"
-  },
-  {
-    "type": "file",
     "url": "https://repo1.maven.org/maven2/org/ow2/asm/asm-util/9.2/asm-util-9.2.pom",
     "sha256": "ddd06913f147d70ae68e7a6e4356a55b33f14dde6162dbff2bd0e289581f1ad2",
     "dest": "m2local/org/ow2/asm/asm-util/9.2",
@@ -5766,6 +5850,34 @@
     "sha256": "7fb5e63362b2d52d77dca3b754aebad635751d3fc520191e9500ece9e2345b71",
     "dest": "m2local/org/ow2/asm/asm-util/9.7.1",
     "dest-filename": "asm-util-9.7.1.pom"
+  },
+  {
+    "type": "file",
+    "url": "https://repo1.maven.org/maven2/org/ow2/asm/asm/9.10.1/asm-9.10.1.jar",
+    "sha256": "ed825d10ab1399c8c0cb669e688cf0c8c82629b4c8399b58352b68e92ca10fcb",
+    "dest": "m2local/org/ow2/asm/asm/9.10.1",
+    "dest-filename": "asm-9.10.1.jar"
+  },
+  {
+    "type": "file",
+    "url": "https://repo1.maven.org/maven2/org/ow2/asm/asm/9.10.1/asm-9.10.1.pom",
+    "sha256": "e1b1c3832ca3ac0a9e563c405f4c760118b5556a4920daee14058886197e094d",
+    "dest": "m2local/org/ow2/asm/asm/9.10.1",
+    "dest-filename": "asm-9.10.1.pom"
+  },
+  {
+    "type": "file",
+    "url": "https://repo1.maven.org/maven2/org/ow2/asm/asm/9.10/asm-9.10.jar",
+    "sha256": "34f38c5d5e8bcb32cbd2d11e44bc12725be1ccdb87c3c96000af57fd81df6e64",
+    "dest": "m2local/org/ow2/asm/asm/9.10",
+    "dest-filename": "asm-9.10.jar"
+  },
+  {
+    "type": "file",
+    "url": "https://repo1.maven.org/maven2/org/ow2/asm/asm/9.10/asm-9.10.pom",
+    "sha256": "bc038dcf0d45d16b71270eddeef39119672147306b661705fe4b568aa5d487e7",
+    "dest": "m2local/org/ow2/asm/asm/9.10",
+    "dest-filename": "asm-9.10.pom"
   },
   {
     "type": "file",
@@ -5790,13 +5902,6 @@
   },
   {
     "type": "file",
-    "url": "https://repo1.maven.org/maven2/org/ow2/asm/asm/9.8/asm-9.8.pom",
-    "sha256": "c1367c3bb383d7619e7f797e38df7513885f2eef04ae7b5908f68222657b5baa",
-    "dest": "m2local/org/ow2/asm/asm/9.8",
-    "dest-filename": "asm-9.8.pom"
-  },
-  {
-    "type": "file",
     "url": "https://repo1.maven.org/maven2/org/ow2/asm/asm/9.9.1/asm-9.9.1.jar",
     "sha256": "6f3828a215c920059a5efa2fb55c233d6c54ec5cadca99ce1b1bdd10077c7ddd",
     "dest": "m2local/org/ow2/asm/asm/9.9.1",
@@ -5808,20 +5913,6 @@
     "sha256": "aca68dee9ba2f6cd90ffde728efdc7e3ebfcf59f3f41fbfe248d2d01d5b866af",
     "dest": "m2local/org/ow2/asm/asm/9.9.1",
     "dest-filename": "asm-9.9.1.pom"
-  },
-  {
-    "type": "file",
-    "url": "https://repo1.maven.org/maven2/org/ow2/asm/asm/9.9/asm-9.9.jar",
-    "sha256": "03d99a74ad1ee5c71334ef67437f4ef4fe3488caa7c96d8645abc73c8e2017d4",
-    "dest": "m2local/org/ow2/asm/asm/9.9",
-    "dest-filename": "asm-9.9.jar"
-  },
-  {
-    "type": "file",
-    "url": "https://repo1.maven.org/maven2/org/ow2/asm/asm/9.9/asm-9.9.pom",
-    "sha256": "cf861ef1e745d57154af79ae14df340ed5341e5dcd0157cefcd2eb7f1aa05c57",
-    "dest": "m2local/org/ow2/asm/asm/9.9",
-    "dest-filename": "asm-9.9.pom"
   },
   {
     "type": "file",
