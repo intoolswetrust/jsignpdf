@@ -39,6 +39,7 @@
 
     <modules>
         <module>jsignpdf-bootstrap</module>
+        <module>engines</module>
         <module>jsignpdf</module>
         <module>installcert</module>
         <module>distribution</module>
@@ -46,6 +47,16 @@
 
     <dependencyManagement>
         <dependencies>
+            <dependency>
+                <groupId>com.github.kwart.jsign</groupId>
+                <artifactId>jsignpdf-engine-api</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.github.kwart.jsign</groupId>
+                <artifactId>jsignpdf-engine-openpdf</artifactId>
+                <version>${project.version}</version>
+            </dependency>
             <dependency>
                 <groupId>com.github.librepdf</groupId>
                 <artifactId>openpdf</artifactId>
@@ -138,6 +149,8 @@
                                 <includedLicense>GPL-2.0-with-classpath-exception</includedLicense>
                                 <includedLicense>MIT</includedLicense>
                                 <includedLicense>LGPL-2.1</includedLicense>
+                                <!-- JSignPdf's own modules are dual MPL-2.0 / LGPL-2.1 -->
+                                <includedLicense>MPL-2.0</includedLicense>
                             </includedLicenses>
                         </configuration>
                     </execution>
@@ -226,7 +239,12 @@
                                 LGPL-2.1 |
                                 GNU Lesser General Public License (LGPL), Version 2.1 |
                                 Lesser General Public License (LGPL) |
-                                GNU Lesser General Public License, version 2.1
+                                GNU Lesser General Public License, version 2.1 |
+                                GNU LESSER GENERAL PUBLIC LICENSE, Version 2.1
+                            </licenseMerge>
+                            <licenseMerge>
+                                MPL-2.0 |
+                                Mozilla Public License Version 2.0
                             </licenseMerge>
                         </licenseMerges>
                         <excludedScopes>test,provided</excludedScopes>

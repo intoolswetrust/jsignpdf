@@ -218,6 +218,17 @@
             <artifactId>jsignpdf</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <!--
+          Bundled signing engines. The main jsignpdf jar compile-depends only on the engine API;
+          the concrete engine implementations are pulled in here (runtime) so their jars land in
+          lib/ and are discovered via ServiceLoader. Additional engines (PDFBox, DSS) are added
+          here in phase 2.
+        -->
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>jsignpdf-engine-openpdf</artifactId>
+            <version>${project.version}</version>
+        </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>installcert</artifactId>

@@ -1,0 +1,26 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <artifactId>jsignpdf-engine-openpdf</artifactId>
+    <packaging>jar</packaging>
+    <name>${project.artifactId}</name>
+    <description>JSignPdf OpenPDF-based signing engine (default)</description>
+
+    <parent>
+        <groupId>com.github.kwart.jsign</groupId>
+        <artifactId>jsignpdf-root</artifactId>
+        <version>3.1.0-SNAPSHOT</version>
+        <relativePath>../../pom.xml</relativePath>
+    </parent>
+
+    <dependencies>
+        <dependency>
+            <groupId>com.github.kwart.jsign</groupId>
+            <artifactId>jsignpdf-engine-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.github.librepdf</groupId>
+            <artifactId>openpdf</artifactId>
+        </dependency>
+    </dependencies>
+</project>

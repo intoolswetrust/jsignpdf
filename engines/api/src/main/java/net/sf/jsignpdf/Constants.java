@@ -246,6 +246,12 @@ public class Constants {
     public static final String ARG_LIST_KEYS = "lk";
     public static final String ARG_LIST_KEYS_LONG = "list-keys";
 
+    public static final String ARG_ENGINE = "eng";
+    public static final String ARG_ENGINE_LONG = "engine";
+
+    public static final String ARG_LIST_ENGINES = "le";
+    public static final String ARG_LIST_ENGINES_LONG = "list-engines";
+
     public static final String ARG_KS_TYPE_LONG = "keystore-type";
     public static final String ARG_KS_TYPE = "kst";
 

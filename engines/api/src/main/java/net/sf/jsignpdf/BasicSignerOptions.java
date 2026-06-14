@@ -16,7 +16,6 @@ import net.sf.jsignpdf.utils.AppConfig;
 import net.sf.jsignpdf.utils.PropertyProvider;
 import net.sf.jsignpdf.utils.PropertyStoreFactory;
 
-import org.apache.commons.cli.ParseException;
 import org.apache.commons.lang3.StringUtils;
 import org.bouncycastle.crypto.CryptoException;
 
@@ -102,6 +101,11 @@ public class BasicSignerOptions {
     private int proxyPort;
 
     private String[] cmdLine;
+
+    // Signing engine id. Transient per-invocation override (set by the CLI --engine flag); not
+    // persisted in config.properties. When null, the dispatcher falls back to the engine selected in
+    // advanced.properties (see AppConfig#defaultEngineId()).
+    private String engine;
 
     /**
      * Loads options from PropertyProvider
@@ -1221,6 +1225,20 @@ public class BasicSignerOptions {
         return tmpResult;
     }
 
+    /**
+     * @return the signing-engine id override (CLI {@code --engine}), or {@code null} when unset
+     */
+    public String getEngine() {
+        return engine;
+    }
+
+    /**
+     * @param engine the signing-engine id override to set (CLI {@code --engine})
+     */
+    public void setEngine(final String engine) {
+        this.engine = engine;
+    }
+
     protected String[] getCmdLine() {
         return cmdLine;
     }
@@ -1297,6 +1315,7 @@ public class BasicSignerOptions {
         copy.setProxyType(getProxyType());
         copy.setProxyHost(getProxyHost());
         copy.setProxyPort(getProxyPort());
+        copy.setEngine(getEngine());
         return copy;
     }
 

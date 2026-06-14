@@ -22,6 +22,8 @@ import javax.swing.JOptionPane;
 import javax.swing.UIManager;
 import javax.swing.WindowConstants;
 
+import net.sf.jsignpdf.engine.EngineRegistry;
+import net.sf.jsignpdf.engine.SigningEngine;
 import net.sf.jsignpdf.ssl.SSLInitializer;
 import net.sf.jsignpdf.utils.GuiUtils;
 import net.sf.jsignpdf.utils.KeyStoreUtils;
@@ -83,6 +85,23 @@ public class Signer {
     }
 
     /**
+     * Prints the registered signing engines, one per line as {@code <id> - <displayName>}, with the
+     * default engine annotated. Used by the {@code --list-engines} command.
+     */
+    private static void listEngines() {
+        final EngineRegistry registry = EngineRegistry.getInstance();
+        final SigningEngine defaultEngine = registry.getDefault().orElse(null);
+        LOGGER.info(RES.get("console.engines"));
+        for (SigningEngine engine : registry.listAll()) {
+            String line = RES.get("console.listEngines.line", new String[] { engine.id(), engine.displayName() });
+            if (defaultEngine != null && engine.id().equals(defaultEngine.id())) {
+                line = line + " " + RES.get("console.listEngines.default");
+            }
+            System.out.println(line);
+        }
+    }
+
+    /**
      * Main.
      *
      * @param args
@@ -132,6 +151,10 @@ public class Signer {
                 }
                 return;
             }
+            if (tmpOpts.isListEngines()) {
+                listEngines();
+                return;
+            }
             if (tmpOpts.isGui()) {
                 showGui = true;
             } else if (ArrayUtils.isNotEmpty(tmpOpts.getFiles())
@@ -140,7 +163,7 @@ public class Signer {
                 exit(0);
             } else {
                 final boolean tmpCommand = tmpOpts.isPrintVersion() || tmpOpts.isPrintHelp() || tmpOpts.isListKeyStores()
-                        || tmpOpts.isListKeys();
+                        || tmpOpts.isListKeys() || tmpOpts.isListEngines();
                 if (!tmpCommand) {
                     // no valid command provided - print help and exit
                     printHelp();
