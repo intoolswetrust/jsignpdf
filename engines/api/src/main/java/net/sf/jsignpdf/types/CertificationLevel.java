@@ -2,20 +2,24 @@ package net.sf.jsignpdf.types;
 
 import static net.sf.jsignpdf.Constants.RES;
 
-import org.openpdf.text.pdf.PdfSignatureAppearance;
-
 /**
  * Enum of possible certification levels used to Sign PDF.
- * 
+ *
+ * <p>
+ * The integer codes are the DocMDP certification-level values defined by the PDF specification and
+ * historically exposed by iText / OpenPDF as {@code PdfSignatureAppearance.NOT_CERTIFIED == -1},
+ * {@code CERTIFIED_NO_CHANGES_ALLOWED == 1}, {@code CERTIFIED_FORM_FILLING == 2} and
+ * {@code CERTIFIED_FORM_FILLING_AND_ANNOTATIONS == 3}. They are inlined here so this shared model
+ * type carries no signing-backend dependency; the active engine maps the code onto its own library.
+ * </p>
+ *
  * @author Josef Cacek
  */
 public enum CertificationLevel {
 
-    NOT_CERTIFIED("certificationLevel.notCertified", PdfSignatureAppearance.NOT_CERTIFIED), CERTIFIED_NO_CHANGES_ALLOWED(
-            "certificationLevel.noChanges",
-            PdfSignatureAppearance.CERTIFIED_NO_CHANGES_ALLOWED), CERTIFIED_FORM_FILLING("certificationLevel.formFill",
-                    PdfSignatureAppearance.CERTIFIED_FORM_FILLING), CERTIFIED_FORM_FILLING_AND_ANNOTATIONS(
-                            "certificationLevel.formFillAnnot", PdfSignatureAppearance.CERTIFIED_FORM_FILLING_AND_ANNOTATIONS);
+    NOT_CERTIFIED("certificationLevel.notCertified", -1), CERTIFIED_NO_CHANGES_ALLOWED("certificationLevel.noChanges",
+            1), CERTIFIED_FORM_FILLING("certificationLevel.formFill", 2), CERTIFIED_FORM_FILLING_AND_ANNOTATIONS(
+                    "certificationLevel.formFillAnnot", 3);
 
     private String msgKey;
     private int level;
@@ -33,10 +37,9 @@ public enum CertificationLevel {
     }
 
     /**
-     * Returns Level as defined in iText.
-     * 
-     * @return
-     * @see PdfSignatureAppearance#setCertificationLevel(int)
+     * Returns the DocMDP certification-level code (PDF-spec value, as historically used by iText).
+     *
+     * @return the certification-level code
      */
     public int getLevel() {
         return level;

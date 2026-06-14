@@ -80,6 +80,19 @@
     </build>
 
     <dependencies>
+        <!-- Signing-engine SPI + shared model/core (compile). Engine implementations are discovered at
+             runtime via ServiceLoader; the default OpenPDF engine is bundled by the distribution module
+             and pulled in here at test scope so the in-module signing tests have an engine to run. -->
+        <dependency>
+            <groupId>com.github.kwart.jsign</groupId>
+            <artifactId>jsignpdf-engine-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.github.kwart.jsign</groupId>
+            <artifactId>jsignpdf-engine-openpdf</artifactId>
+            <scope>test</scope>
+        </dependency>
+
         <!-- JavaFX -->
         <dependency>
             <groupId>org.openjfx</groupId>

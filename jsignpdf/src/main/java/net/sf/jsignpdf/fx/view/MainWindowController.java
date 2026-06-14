@@ -17,6 +17,7 @@ import javafx.scene.control.ButtonBar;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.CheckMenuItem;
 import javafx.scene.control.TitledPane;
+import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.Dialog;
@@ -50,7 +51,14 @@ import org.openpdf.text.exceptions.BadPasswordException;
 import net.sf.jsignpdf.BasicSignerOptions;
 import net.sf.jsignpdf.Constants;
 import net.sf.jsignpdf.PdfExtraInfo;
+import net.sf.jsignpdf.engine.Capability;
+import net.sf.jsignpdf.engine.EngineRegistry;
+import net.sf.jsignpdf.engine.SigningEngine;
+import net.sf.jsignpdf.fx.EngineCapabilities;
+import net.sf.jsignpdf.utils.AdvancedConfig;
+import net.sf.jsignpdf.utils.AppConfig;
 import javafx.scene.layout.VBox;
+import javafx.util.StringConverter;
 import net.sf.jsignpdf.fx.control.PdfPageView;
 import net.sf.jsignpdf.fx.control.SignatureOverlay;
 import net.sf.jsignpdf.fx.service.PdfRenderService;
@@ -85,6 +93,7 @@ public class MainWindowController {
     private final SigningService signingService = new SigningService();
     private final RecentFilesManager recentFilesManager = new RecentFilesManager();
     private final PresetManager presetManager = new PresetManager();
+    private final EngineCapabilities engineCapabilities = new EngineCapabilities();
     private PdfPageView pdfPageView;
     private SignatureOverlay signatureOverlay;
     /** Holds the side panel node while it's detached from the SplitPane (hidden). */
@@ -135,6 +144,7 @@ public class MainWindowController {
     @FXML private Button btnNextPage;
     @FXML private ToggleButton btnVisibleSig;
     @FXML private ToggleButton btnTsa;
+    @FXML private ChoiceBox<SigningEngine> cmbEngine;
     @FXML private ComboBox<Preset> cmbPresets;
     @FXML private Button btnSign;
 
@@ -397,6 +407,65 @@ public class MainWindowController {
 
         refreshRecentFilesMenu();
         setupPresetCombo();
+        setupEngineSelector();
+    }
+
+    /**
+     * Populates the toolbar engine selector from the {@link EngineRegistry}, binds it to the
+     * {@code engine=} key in {@code advanced.properties}, and drives the capability-based control gating
+     * off the selected engine. Switching the engine is immediate (no restart): the
+     * {@link EngineCapabilities} bindings re-evaluate so unsupported controls disable themselves.
+     */
+    private void setupEngineSelector() {
+        if (cmbEngine == null) {
+            return;
+        }
+        final EngineRegistry registry = EngineRegistry.getInstance();
+        cmbEngine.getItems().setAll(registry.listAll());
+        cmbEngine.setConverter(new StringConverter<SigningEngine>() {
+            @Override
+            public String toString(SigningEngine engine) {
+                return engine == null ? "" : engine.displayName();
+            }
+
+            @Override
+            public SigningEngine fromString(String s) {
+                return null;
+            }
+        });
+        SigningEngine current = registry.findById(AppConfig.defaultEngineId())
+                .or(registry::getDefault).orElse(null);
+        if (current != null) {
+            cmbEngine.getSelectionModel().select(current);
+        }
+        engineCapabilities.activeEngineProperty().set(current);
+
+        cmbEngine.getSelectionModel().selectedItemProperty().addListener((obs, oldEngine, sel) -> {
+            if (sel == null) {
+                return;
+            }
+            engineCapabilities.activeEngineProperty().set(sel);
+            try {
+                AdvancedConfig cfg = PropertyStoreFactory.getInstance().advancedConfig();
+                cfg.setProperty("engine", sel.id());
+                cfg.save();
+            } catch (Exception e) {
+                LOGGER.log(Level.WARNING, "Failed to persist engine selection", e);
+            }
+        });
+
+        // Capability-driven section gating. These controls are not governed by the document-loaded
+        // disable logic, so binding their disableProperty here is safe. (With OpenPDF — the only
+        // engine in phase 1 — every capability is present, so nothing is disabled; the wiring exists
+        // for reduced-capability engines added in phase 2.)
+        engineCapabilities.gate(btnTsa, Capability.TSA);
+        if (tsaAccordionPane != null) {
+            engineCapabilities.gate(tsaAccordionPane, Capability.TSA);
+        }
+        if (encryptionAccordionPane != null) {
+            engineCapabilities.gate(encryptionAccordionPane, Capability.ENCRYPTION_PASSWORD,
+                    Capability.ENCRYPTION_CERTIFICATE);
+        }
     }
 
     private void setupPresetCombo() {

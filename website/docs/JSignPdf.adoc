@@ -317,10 +317,10 @@ usage: jsignpdf [file1.pdf [file2.pdf ...]] [-a] [--bg-path
        <path>] [--disable-acrobat6-layer-mode] [--disable-assembly]
        [--disable-copy] [--disable-fill] [--disable-modify-annotations]
        [--disable-modify-content] [--disable-screen-readers] [-e] [-ec <file>]
-       [--enable-stdin-passwords] [-fs <size>] [--gui] [-h] [-ha <algorithm>]
-       [--img-path <file>] [-ka <alias>]
+       [--enable-stdin-passwords] [-eng <engine>] [-fs <size>] [--gui] [-h]
+       [-ha <algorithm>] [--img-path <file>] [-ka <alias>]
        [-ki <index>] [-kp <password>] [-ksf <file>] [-ksp <password>] [-kst
-       <type>] [-l <location>] [--l2-text <text>] [--l4-text <text>] [-lk]
+       <type>] [-l <location>] [--l2-text <text>] [--l4-text <text>] [-le] [-lk]
        [-lkt] [-llx <position>] [-lly <position>] [-lp] [-lpf <file>] [--ocsp]
        [--ocsp-server-url <responderUrl>] [-op <prefix>] [-opwd <password>] [-os
        <suffix>] [-pe <mode>] [-pg <pageNumber>] [-pr <right>] [--proxy-host
@@ -354,6 +354,12 @@ usage: jsignpdf [file1.pdf [file2.pdf ...]] [-a] [--bg-path
 
 | `-lk, --list-keys`
 | Lists keys in the chosen keystore.
+
+| `-le, --list-engines`
+| Lists the available signing engines (use as values for `-eng`). See <<Signing engines>>.
+
+| `-eng, --engine <engine>`
+| Selects the signing engine for this invocation, overriding the `engine` key in `advanced.properties`. Use `-le` to list available engines. See <<Signing engines>>.
 
 | `-lp, --load-properties`
 | Loads properties from the default file (created by the GUI application).
@@ -902,6 +908,30 @@ If the PKCS11 keystore type works properly in the GUI and you can use the certif
 ----
 jsignpdf -kst PKCS11 -ksp 123456 document.pdf
 ----
+
+== Signing engines
+
+Starting with JSignPdf 3.1, the signing backend is pluggable. The work of producing the signature is performed by a *signing engine*, selected at runtime. JSignPdf ships with the *OpenPDF* engine (id `openpdf`), which is the default and produces exactly the same signatures as previous releases -- so unless you choose otherwise, nothing changes.
+
+To see the engines available in your installation:
+
+[source,shell]
+----
+jsignpdf --list-engines
+----
+
+Each line is printed as `<id> - <name>`, with the default engine annotated `(default)`.
+
+The default engine is taken from the `engine` key in `<config-dir>/advanced.properties` (bundled default: `openpdf`). To override it for a single command-line run without changing the configuration, use `-eng` / `--engine`:
+
+[source,shell]
+----
+jsignpdf --engine openpdf -ksf cert.p12 -ksp secret document.pdf
+----
+
+In the JavaFX UI, the active engine is chosen from the *Engine* selector in the toolbar; the choice is saved to `advanced.properties` immediately. When an engine does not support a particular option, the corresponding control is disabled (with an explanatory tooltip); on the command line, signing fails fast with a message listing the unsupported options.
+
+Engines are discovered automatically: dropping a third-party engine jar (with its dependencies and a `META-INF/services/net.sf.jsignpdf.engine.SigningEngine` registration) into the `lib/` directory of an installed JSignPdf makes it appear in `--list-engines` and the toolbar selector.
 
 == Advanced application configuration
 

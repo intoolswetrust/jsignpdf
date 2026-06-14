@@ -1,6 +1,8 @@
 package net.sf.jsignpdf.utils;
 
 import net.sf.jsignpdf.Constants;
+import net.sf.jsignpdf.engine.AdvancedEngineConfig;
+import net.sf.jsignpdf.engine.EngineConfig;
 
 /**
  * Static facade over {@link AdvancedConfig}. Call sites read app-global toggles through these typed accessors so they stay
@@ -8,7 +10,29 @@ import net.sf.jsignpdf.Constants;
  */
 public final class AppConfig {
 
+    /** Bundled-default signing engine id (used when {@code advanced.properties} has no {@code engine} key). */
+    public static final String DEFAULT_ENGINE_ID = "openpdf";
+
     private AppConfig() {
+    }
+
+    /**
+     * Identifier of the signing engine selected in {@code advanced.properties} (the GUI default and the
+     * fallback for the CLI), or {@value #DEFAULT_ENGINE_ID} when unset.
+     */
+    public static String defaultEngineId() {
+        return cfg().getNotEmptyProperty("engine", DEFAULT_ENGINE_ID);
+    }
+
+    /**
+     * Returns a read-only view of the advanced configuration scoped to the {@code engine.<id>.*} namespace
+     * of the given engine.
+     *
+     * @param engineId the engine identifier
+     * @return the engine-scoped configuration view
+     */
+    public static EngineConfig engineConfigFor(String engineId) {
+        return new AdvancedEngineConfig(cfg(), "engine." + engineId + ".");
     }
 
     public static boolean relaxSslSecurity() {
