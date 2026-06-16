@@ -207,7 +207,7 @@ $appImageArgs = @(
     '--copyright','Josef Cacek',
     '--description','JSignPdf adds digital signatures to PDF documents',
     '--icon',(Join-Path $iconsDir 'icons.ico'),
-    '--add-modules','javafx.controls,javafx.fxml,javafx.swing',
+    '--add-modules','ALL-MODULE-PATH',
     '--dest',$out
 ) + $mainJvmOptions + @(
     '--add-launcher',"JSignPdf-swing=$swingLauncherProps",

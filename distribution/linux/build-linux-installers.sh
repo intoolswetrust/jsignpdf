@@ -222,7 +222,7 @@ APP_IMAGE_ARGS=(
   --copyright 'Josef Cacek'
   --description 'JSignPdf adds digital signatures to PDF documents'
   --icon "$ICONS_DIR/logojsignpdf.png"
-  --add-modules javafx.controls,javafx.fxml,javafx.swing
+  --add-modules ALL-MODULE-PATH
   --dest "$OUT"
   "${MAIN_JVM_OPTS[@]}"
   --add-launcher "JSignPdf-swing=$SWING_PROPS"
