@@ -62,10 +62,12 @@ jobs:
         DEP_PLUGIN="org.apache.maven.plugins:maven-dependency-plugin:3.10.0"
         attempt=0
         max_attempts=40
-        until mvn -B "${DEP_PLUGIN}:copy" \
+        # -U is required: without it Maven negative-caches the first miss and the
+        # retry loop never re-contacts Central, so it always fails.
+        until mvn -B -U "${DEP_PLUGIN}:copy" \
                  -Dartifact="${GAV_PREFIX}:full" \
                  -DoutputDirectory=zips \
-              && mvn -B "${DEP_PLUGIN}:copy" \
+              && mvn -B -U "${DEP_PLUGIN}:copy" \
                  -Dartifact="${GAV_PREFIX}:minimal" \
                  -DoutputDirectory=zips; do
           attempt=$((attempt + 1))
