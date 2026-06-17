@@ -172,7 +172,8 @@
                                                 source="SignatureProperties.fxml"/>
                                 </ScrollPane>
                             </TitledPane>
-                            <TitledPane text="%jfx.gui.panel.signatureAppearance">
+                            <TitledPane fx:id="signatureAppearanceAccordionPane"
+                                        text="%jfx.gui.panel.signatureAppearance">
                                 <ScrollPane fitToWidth="true">
                                     <fx:include fx:id="signatureSettings"
                                                 source="SignatureSettings.fxml"/>

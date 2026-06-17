@@ -151,6 +151,7 @@ public class MainWindowController {
     // Content area
     @FXML private SplitPane splitPane;
     @FXML private Accordion sidePanelAccordion;
+    @FXML private TitledPane signatureAppearanceAccordionPane;
     @FXML private TitledPane tsaAccordionPane;
     @FXML private TitledPane encryptionAccordionPane;
     @FXML private ScrollPane scrollPane;
@@ -454,11 +455,14 @@ public class MainWindowController {
             }
         });
 
-        // Capability-driven section gating. These controls are not governed by the document-loaded
-        // disable logic, so binding their disableProperty here is safe. (With OpenPDF — the only
-        // engine in phase 1 — every capability is present, so nothing is disabled; the wiring exists
-        // for reduced-capability engines added in phase 2.)
+        // Capability-driven section gating at the umbrella (accordion-pane) granularity. These panes
+        // are not governed by the document-loaded disable logic, so binding their disableProperty here
+        // is safe. (With OpenPDF — the only engine in phase 1 — every capability is present, so nothing
+        // is disabled; the wiring exists for reduced-capability engines added in phase 2.)
         engineCapabilities.gate(btnTsa, Capability.TSA);
+        if (signatureAppearanceAccordionPane != null) {
+            engineCapabilities.gate(signatureAppearanceAccordionPane, Capability.VISIBLE_SIGNATURE);
+        }
         if (tsaAccordionPane != null) {
             engineCapabilities.gate(tsaAccordionPane, Capability.TSA);
         }
@@ -466,6 +470,16 @@ public class MainWindowController {
             engineCapabilities.gate(encryptionAccordionPane, Capability.ENCRYPTION_PASSWORD,
                     Capability.ENCRYPTION_CERTIFICATE);
         }
+
+        // TODO(phase-2): field-level capability gating is still missing for controls that live inside
+        // the side-panel sub-controllers and already carry their own disable logic — hash algorithm,
+        // certification level, append mode, render-mode items, permission checkboxes, proxy fields, and
+        // the PKCS#11/CloudFoxy keystore-type items (see the control->capability table in
+        // design-doc/3.1-signing-engines.md). The CLI path is already comprehensive via
+        // EngineMismatchValidator, which is the authoritative table to mirror here. This asymmetry is
+        // invisible while OpenPDF (all capabilities) is the only engine; it must be closed when the
+        // first reduced-capability engine (DSS, see design-doc/3.1-engine-dss.md) lands so the GUI does
+        // not leave enabled options the engine will reject at sign time.
     }
 
     private void setupPresetCombo() {
