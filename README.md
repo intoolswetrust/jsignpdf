@@ -103,6 +103,12 @@ Releases are workflow-driven via [`.github/workflows/do-release.yml`](.github/wo
 3. SNAPSHOT builds are published to Maven Central on every push to `master`
    via [`push-snapshots.yaml`](.github/workflows/push-snapshots.yaml).
 
+## Sponsors
+
+<img src="https://avatars.githubusercontent.com/u/34448643?s=64" alt="SignPath" width="48" align="left" hspace="12"/>
+
+Free code signing on Windows provided by [SignPath.io](https://signpath.io/), certificate by [SignPath Foundation](https://signpath.org/).
+
 ## License
 
 Dual-licensed under **MPL 2.0** and **LGPL 2.1** — see [License.md](License.md).
