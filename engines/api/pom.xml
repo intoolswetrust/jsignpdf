@@ -1,0 +1,44 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <artifactId>jsignpdf-engine-api</artifactId>
+    <packaging>jar</packaging>
+    <name>${project.artifactId}</name>
+    <description>JSignPdf signing-engine SPI and shared signing model</description>
+
+    <parent>
+        <groupId>com.github.kwart.jsign</groupId>
+        <artifactId>jsignpdf-root</artifactId>
+        <version>3.1.0-SNAPSHOT</version>
+        <relativePath>../../pom.xml</relativePath>
+    </parent>
+
+    <!--
+      The engine API is the backend-neutral core: the SPI (SigningEngine / Capability / EngineConfig),
+      the shared signing model (BasicSignerOptions, types, listeners) and the configuration / keystore
+      utilities every engine relies on. It deliberately depends ONLY on BouncyCastle + commons (and
+      the PKCS#11 helper); it must never depend on a signing backend (OpenPDF / PDFBox / DSS).
+    -->
+    <dependencies>
+        <dependency>
+            <groupId>org.bouncycastle</groupId>
+            <artifactId>bcprov-jdk18on</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.bouncycastle</groupId>
+            <artifactId>bcpkix-jdk18on</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-lang3</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>commons-io</groupId>
+            <artifactId>commons-io</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.github.kwart.jsign</groupId>
+            <artifactId>jsign-pkcs11</artifactId>
+        </dependency>
+    </dependencies>
+</project>

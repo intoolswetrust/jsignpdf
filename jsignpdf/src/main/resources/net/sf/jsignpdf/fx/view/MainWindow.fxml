@@ -127,6 +127,13 @@
                     </tooltip>
                 </ToggleButton>
                 <Separator orientation="VERTICAL"/>
+                <Label text="%jfx.gui.engine.label"/>
+                <ChoiceBox fx:id="cmbEngine" prefWidth="130">
+                    <tooltip>
+                        <Tooltip text="%jfx.gui.engine.tooltip"/>
+                    </tooltip>
+                </ChoiceBox>
+                <Separator orientation="VERTICAL"/>
                 <Label text="%jfx.gui.preset.label"/>
                 <ComboBox fx:id="cmbPresets" prefWidth="180">
                     <tooltip>

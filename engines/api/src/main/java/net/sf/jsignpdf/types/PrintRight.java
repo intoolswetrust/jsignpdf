@@ -2,17 +2,21 @@ package net.sf.jsignpdf.types;
 
 import static net.sf.jsignpdf.Constants.RES;
 
-import org.openpdf.text.pdf.PdfWriter;
-
 /**
- * Enum of possible printing rights
- * 
+ * Enum of possible printing rights.
+ *
+ * <p>
+ * The integer codes are the PDF permission bit values historically exposed by iText / OpenPDF as
+ * {@code PdfWriter.ALLOW_DEGRADED_PRINTING == 4} and {@code PdfWriter.ALLOW_PRINTING == 2052}. They
+ * are inlined here so this shared model type carries no signing-backend dependency.
+ * </p>
+ *
  * @author Josef Cacek
  */
 public enum PrintRight {
 
     DISALLOW_PRINTING("rights.disallowPrinting", 0), ALLOW_DEGRADED_PRINTING("rights.allowDegradedPrinting",
-            PdfWriter.ALLOW_DEGRADED_PRINTING), ALLOW_PRINTING("rights.allowPrinting", PdfWriter.ALLOW_PRINTING);
+            4), ALLOW_PRINTING("rights.allowPrinting", 2052);
 
     private String msgKey;
     private int right;
@@ -30,10 +34,9 @@ public enum PrintRight {
     }
 
     /**
-     * Returns right (bit mask) as defined in iText.
-     * 
-     * @return
-     * @see PdfWriter#ALLOW_PRINTING
+     * Returns the PDF permission bit value (as historically used by iText).
+     *
+     * @return the permission bit mask
      */
     public int getRight() {
         return right;

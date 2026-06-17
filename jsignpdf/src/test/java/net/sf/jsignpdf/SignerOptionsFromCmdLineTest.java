@@ -240,6 +240,47 @@ public class SignerOptionsFromCmdLineTest {
         assertFalse(f.warnings().contains("[jsignpdf]"));
     }
 
+    @Test
+    public void engineOption_setsEngineId() throws Exception {
+        Fixture f = new Fixture("");
+        f.opts.setCmdLine(new String[] { "--engine", "openpdf" });
+        f.opts.loadCmdLine();
+        assertEquals("openpdf", f.opts.getEngine());
+        assertFalse(f.opts.isListEngines());
+    }
+
+    @Test
+    public void engineOption_shortForm() throws Exception {
+        Fixture f = new Fixture("");
+        f.opts.setCmdLine(new String[] { "-eng", "pdfbox" });
+        f.opts.loadCmdLine();
+        assertEquals("pdfbox", f.opts.getEngine());
+    }
+
+    @Test
+    public void engineOption_absentLeavesNull() throws Exception {
+        Fixture f = new Fixture("");
+        f.opts.setCmdLine(new String[] { "-ksf", "/tmp/x.p12" });
+        f.opts.loadCmdLine();
+        assertNull(f.opts.getEngine());
+    }
+
+    @Test
+    public void listEnginesOption_setsFlag() throws Exception {
+        Fixture f = new Fixture("");
+        f.opts.setCmdLine(new String[] { "--list-engines" });
+        f.opts.loadCmdLine();
+        assertTrue(f.opts.isListEngines());
+    }
+
+    @Test
+    public void listEnginesOption_shortForm() throws Exception {
+        Fixture f = new Fixture("");
+        f.opts.setCmdLine(new String[] { "-le" });
+        f.opts.loadCmdLine();
+        assertTrue(f.opts.isListEngines());
+    }
+
     /** Convenience wiring: captures warnings and feeds a canned stdin reader with no Console. */
     private static final class Fixture {
         final SignerOptionsFromCmdLine opts = new SignerOptionsFromCmdLine();

@@ -50,6 +50,7 @@ public class SignerOptionsFromCmdLine extends BasicSignerOptions {
     private boolean printVersion;
     private boolean listKeyStores;
     private boolean listKeys;
+    private boolean listEngines;
 
     private boolean gui;
 
@@ -110,6 +111,11 @@ public class SignerOptionsFromCmdLine extends BasicSignerOptions {
         setPrintVersion(line.hasOption(ARG_VERSION));
         setListKeyStores(line.hasOption(ARG_LIST_KS_TYPES));
         setListKeys(line.hasOption(ARG_LIST_KEYS));
+        setListEngines(line.hasOption(ARG_LIST_ENGINES));
+
+        // signing engine selection (CLI override of advanced.properties)
+        if (line.hasOption(ARG_ENGINE))
+            setEngine(line.getOptionValue(ARG_ENGINE));
 
         // basic options
         if (line.hasOption(ARG_KS_TYPE))
@@ -327,6 +333,12 @@ public class SignerOptionsFromCmdLine extends BasicSignerOptions {
                 .create(ARG_LIST_KS_TYPES));
         OPTS.addOption(
                 OptionBuilder.withLongOpt(ARG_LIST_KEYS_LONG).withDescription(RES.get("hlp.listKeys")).create(ARG_LIST_KEYS));
+        OPTS.addOption(OptionBuilder.withLongOpt(ARG_LIST_ENGINES_LONG).withDescription(RES.get("hlp.listEngines"))
+                .create(ARG_LIST_ENGINES));
+
+        // signing engine selection
+        OPTS.addOption(OptionBuilder.withLongOpt(ARG_ENGINE_LONG).withDescription(RES.get("hlp.engine")).hasArg()
+                .withArgName("engine").create(ARG_ENGINE));
 
         // keystore and key configuration options
         OPTS.addOption(OptionBuilder.withLongOpt(ARG_KS_TYPE_LONG).withDescription(RES.get("hlp.ksType")).hasArg()
@@ -594,6 +606,20 @@ public class SignerOptionsFromCmdLine extends BasicSignerOptions {
      */
     public void setListKeys(boolean listKeys) {
         this.listKeys = listKeys;
+    }
+
+    /**
+     * @return the listEngines
+     */
+    public boolean isListEngines() {
+        return listEngines;
+    }
+
+    /**
+     * @param listEngines the listEngines to set
+     */
+    public void setListEngines(boolean listEngines) {
+        this.listEngines = listEngines;
     }
 
     /**

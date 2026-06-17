@@ -1,0 +1,102 @@
+package net.sf.jsignpdf.engine;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+
+import java.util.EnumSet;
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+import org.junit.Test;
+
+import net.sf.jsignpdf.BasicSignerOptions;
+import net.sf.jsignpdf.engine.EngineMismatchValidator.Mismatch;
+
+/**
+ * Exercises {@link EngineMismatchValidator} with a deliberately reduced-capability {@link StubSigningEngine},
+ * plus a no-mismatch baseline against the all-capable OpenPDF engine.
+ */
+public class EngineMismatchValidatorTest {
+
+    private static Set<Capability> caps(List<Mismatch> mismatches) {
+        return mismatches.stream().map(Mismatch::capability).collect(Collectors.toSet());
+    }
+
+    @Test
+    public void emptyCapabilityEngineFlagsDefaultHashAndAppend() {
+        // A fresh options object signs with the default SHA-1 hash and append mode on, so an engine
+        // that supports neither must report both.
+        BasicSignerOptions opts = new BasicSignerOptions();
+        StubSigningEngine engine = new StubSigningEngine("empty");
+        Set<Capability> reported = caps(EngineMismatchValidator.findMismatches(opts, engine));
+        assertTrue(reported.contains(Capability.HASH_SHA1));
+        assertTrue(reported.contains(Capability.APPEND_MODE));
+    }
+
+    @Test
+    public void allCapableEngineReportsNoMismatchForDefaults() {
+        BasicSignerOptions opts = new BasicSignerOptions();
+        opts.setAdvanced(true);
+        SigningEngine openpdf = EngineRegistry.getInstance().findById("openpdf").orElseThrow();
+        assertTrue(EngineMismatchValidator.findMismatches(opts, openpdf).isEmpty());
+    }
+
+    @Test
+    public void missingVisibleUmbrellaSuppressesSubFields() {
+        BasicSignerOptions opts = new BasicSignerOptions();
+        opts.setVisible(true);
+        opts.setL2Text("custom text");
+        StubSigningEngine engine = new StubSigningEngine("noVisible", Capability.HASH_SHA1, Capability.APPEND_MODE);
+        Set<Capability> reported = caps(EngineMismatchValidator.findMismatches(opts, engine));
+        assertTrue("umbrella must be reported", reported.contains(Capability.VISIBLE_SIGNATURE));
+        assertFalse("sub-field must NOT be reported when umbrella is missing",
+                reported.contains(Capability.VISIBLE_LAYER2_TEXT));
+    }
+
+    @Test
+    public void supportedVisibleUmbrellaStillFlagsSubField() {
+        BasicSignerOptions opts = new BasicSignerOptions();
+        opts.setVisible(true);
+        opts.setL2Text("custom text");
+        StubSigningEngine engine = new StubSigningEngine("visibleNoL2",
+                Capability.HASH_SHA1, Capability.APPEND_MODE, Capability.VISIBLE_SIGNATURE);
+        Set<Capability> reported = caps(EngineMismatchValidator.findMismatches(opts, engine));
+        assertFalse(reported.contains(Capability.VISIBLE_SIGNATURE));
+        assertTrue(reported.contains(Capability.VISIBLE_LAYER2_TEXT));
+    }
+
+    @Test
+    public void tsaUmbrellaFlaggedWhenEnabledAndUnsupported() {
+        BasicSignerOptions opts = new BasicSignerOptions();
+        opts.setAdvanced(true);
+        opts.setTimestamp(true);
+        opts.setTsaUrl("http://tsa.example.com");
+        StubSigningEngine engine = new StubSigningEngine("noTsa", Capability.HASH_SHA1, Capability.APPEND_MODE);
+        Set<Capability> reported = caps(EngineMismatchValidator.findMismatches(opts, engine));
+        assertTrue(reported.contains(Capability.TSA));
+    }
+
+    @Test
+    public void noTimestampMeansNoTsaMismatch() {
+        BasicSignerOptions opts = new BasicSignerOptions();
+        opts.setAdvanced(true);
+        // timestamp disabled -> TSA not evaluated even though the engine lacks it
+        StubSigningEngine engine = new StubSigningEngine("noTsa",
+                Capability.HASH_SHA1, Capability.APPEND_MODE);
+        assertFalse(caps(EngineMismatchValidator.findMismatches(opts, engine)).contains(Capability.TSA));
+    }
+
+    @Test
+    public void mismatchCarriesOptionLabel() {
+        BasicSignerOptions opts = new BasicSignerOptions();
+        opts.setVisible(true);
+        StubSigningEngine engine = new StubSigningEngine("empty2",
+                Capability.HASH_SHA1, Capability.APPEND_MODE);
+        List<Mismatch> mismatches = EngineMismatchValidator.findMismatches(opts, engine);
+        Mismatch visible = mismatches.stream()
+                .filter(m -> m.capability() == Capability.VISIBLE_SIGNATURE).findFirst().orElseThrow();
+        assertEquals("--visible-signature", visible.option());
+    }
+}
