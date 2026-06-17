@@ -89,6 +89,51 @@ public class EngineMismatchValidatorTest {
     }
 
     @Test
+    public void padesLevelFlaggedWhenEngineLacksCapability() {
+        // OpenPDF declares no PADES_BASELINE_* capability, so requesting a PAdES level must be flagged.
+        BasicSignerOptions opts = new BasicSignerOptions();
+        opts.setAdvanced(true);
+        opts.setPadesLevel(net.sf.jsignpdf.types.PadesLevel.BASELINE_LTA);
+        StubSigningEngine engine = new StubSigningEngine("noPades", Capability.HASH_SHA1, Capability.APPEND_MODE);
+        List<Mismatch> mismatches = EngineMismatchValidator.findMismatches(opts, engine);
+        Set<Capability> reported = caps(mismatches);
+        assertTrue(reported.contains(Capability.PADES_BASELINE_LTA));
+        Mismatch m = mismatches.stream().filter(x -> x.capability() == Capability.PADES_BASELINE_LTA)
+                .findFirst().orElseThrow();
+        assertEquals("--pades-level", m.option());
+    }
+
+    @Test
+    public void padesLevelNotFlaggedWhenEngineSupportsIt() {
+        BasicSignerOptions opts = new BasicSignerOptions();
+        opts.setAdvanced(true);
+        opts.setPadesLevel(net.sf.jsignpdf.types.PadesLevel.BASELINE_T);
+        StubSigningEngine engine = new StubSigningEngine("pades",
+                Capability.HASH_SHA1, Capability.APPEND_MODE, Capability.PADES_BASELINE_T);
+        assertFalse(caps(EngineMismatchValidator.findMismatches(opts, engine)).contains(Capability.PADES_BASELINE_T));
+    }
+
+    @Test
+    public void noPadesLevelMeansNoPadesMismatch() {
+        // Default (null) pades level must never produce a mismatch, even against an engine without PAdES.
+        BasicSignerOptions opts = new BasicSignerOptions();
+        opts.setAdvanced(true);
+        StubSigningEngine engine = new StubSigningEngine("noPades", Capability.HASH_SHA1, Capability.APPEND_MODE);
+        Set<Capability> reported = caps(EngineMismatchValidator.findMismatches(opts, engine));
+        assertFalse(reported.contains(Capability.PADES_BASELINE_B));
+    }
+
+    @Test
+    public void dssEngineAcceptsPadesLevelsWithoutMismatch() {
+        BasicSignerOptions opts = new BasicSignerOptions();
+        opts.setAdvanced(true);
+        opts.setHashAlgorithm(net.sf.jsignpdf.types.HashAlgorithm.SHA256);
+        opts.setPadesLevel(net.sf.jsignpdf.types.PadesLevel.BASELINE_T);
+        SigningEngine dss = EngineRegistry.getInstance().findById("dss").orElseThrow();
+        assertTrue(EngineMismatchValidator.findMismatches(opts, dss).isEmpty());
+    }
+
+    @Test
     public void mismatchCarriesOptionLabel() {
         BasicSignerOptions opts = new BasicSignerOptions();
         opts.setVisible(true);

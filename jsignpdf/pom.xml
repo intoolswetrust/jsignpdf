@@ -92,6 +92,11 @@
             <artifactId>jsignpdf-engine-openpdf</artifactId>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>com.github.kwart.jsign</groupId>
+            <artifactId>jsignpdf-engine-dss</artifactId>
+            <scope>test</scope>
+        </dependency>
 
         <!-- JavaFX -->
         <dependency>

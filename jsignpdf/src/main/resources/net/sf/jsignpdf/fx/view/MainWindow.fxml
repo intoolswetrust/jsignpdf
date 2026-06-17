@@ -133,6 +133,12 @@
                         <Tooltip text="%jfx.gui.engine.tooltip"/>
                     </tooltip>
                 </ChoiceBox>
+                <Label fx:id="lblPadesLevel" text="%jfx.gui.padesLevel.label"/>
+                <ChoiceBox fx:id="cmbPadesLevel" prefWidth="90">
+                    <tooltip>
+                        <Tooltip text="%jfx.gui.padesLevel.tooltip"/>
+                    </tooltip>
+                </ChoiceBox>
                 <Separator orientation="VERTICAL"/>
                 <Label text="%jfx.gui.preset.label"/>
                 <ComboBox fx:id="cmbPresets" prefWidth="180">

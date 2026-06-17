@@ -145,6 +145,8 @@ public class SignerOptionsFromCmdLine extends BasicSignerOptions {
             setCertLevel(line.getOptionValue(ARG_CERT_LEVEL));
         if (line.hasOption(ARG_HASH_ALGORITHM))
             setHashAlgorithm(line.getOptionValue(ARG_HASH_ALGORITHM));
+        if (line.hasOption(ARG_PADES_LEVEL))
+            setPadesLevel(line.getOptionValue(ARG_PADES_LEVEL));
 
         // encryption
         if (line.hasOption(ARG_ENCRYPTED))
@@ -377,6 +379,8 @@ public class SignerOptionsFromCmdLine extends BasicSignerOptions {
         OPTS.addOption(OptionBuilder.withLongOpt(ARG_HASH_ALGORITHM_LONG)
                 .withDescription(RES.get("hlp.hashAlgorithm", getEnumValues(HashAlgorithm.values()))).hasArg()
                 .withArgName("algorithm").create(ARG_HASH_ALGORITHM));
+        OPTS.addOption(OptionBuilder.withLongOpt(ARG_PADES_LEVEL_LONG).withDescription(RES.get("hlp.padesLevel")).hasArg()
+                .withArgName("level").create(ARG_PADES_LEVEL));
 
         OPTS.addOption(OptionBuilder.withLongOpt(ARG_QUIET_LONG).withDescription(RES.get("hlp.quiet")).create(ARG_QUIET));
 

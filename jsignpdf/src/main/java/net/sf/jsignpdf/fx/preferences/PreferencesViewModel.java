@@ -44,6 +44,16 @@ public class PreferencesViewModel {
 
     private final StringProperty tsaHashAlgorithm = new SimpleStringProperty("SHA-256");
 
+    // DSS engine (engine.dss.*) — trust material for PAdES LT/LTA
+    private final BooleanProperty dssOnlineEnabled = new SimpleBooleanProperty(false);
+    private final BooleanProperty dssUseDefaultLotl = new SimpleBooleanProperty(false);
+    private final StringProperty dssLotlUrls = new SimpleStringProperty("");
+    private final StringProperty dssCertFiles = new SimpleStringProperty("");
+    private final StringProperty dssCertUrls = new SimpleStringProperty("");
+    private final StringProperty dssTruststoreFile = new SimpleStringProperty("");
+    private final StringProperty dssTruststoreType = new SimpleStringProperty("");
+    private final StringProperty dssTruststorePassword = new SimpleStringProperty("");
+
     private final StringProperty pkcs11Body = new SimpleStringProperty("");
 
     /** Loads the VM from the given snapshot of {@link AdvancedConfig} and a pkcs11 file body. */
@@ -62,6 +72,15 @@ public class PreferencesViewModel {
 
         tsaHashAlgorithm.set(cfg.getNotEmptyProperty("tsa.hashAlgorithm", "SHA-256"));
 
+        dssOnlineEnabled.set(cfg.getAsBool("engine.dss.online.enabled", false));
+        dssUseDefaultLotl.set(cfg.getAsBool("engine.dss.trust.useDefaultLotl", false));
+        dssLotlUrls.set(orEmpty(cfg.getProperty("engine.dss.trust.lotlUrls")));
+        dssCertFiles.set(orEmpty(cfg.getProperty("engine.dss.trust.certFiles")));
+        dssCertUrls.set(orEmpty(cfg.getProperty("engine.dss.trust.certUrls")));
+        dssTruststoreFile.set(orEmpty(cfg.getProperty("engine.dss.trust.truststoreFile")));
+        dssTruststoreType.set(orEmpty(cfg.getProperty("engine.dss.trust.truststoreType")));
+        dssTruststorePassword.set(orEmpty(cfg.getProperty("engine.dss.trust.truststorePassword")));
+
         pkcs11Body.set(pkcs11FileBody == null ? "" : pkcs11FileBody);
     }
 
@@ -76,6 +95,15 @@ public class PreferencesViewModel {
         cfg.setProperty("relax.ssl.security", relaxSslSecurity.get());
         cfg.setProperty("pdf2image.libraries", encodePdfLibraries());
         cfg.setProperty("tsa.hashAlgorithm", tsaHashAlgorithm.get());
+
+        cfg.setProperty("engine.dss.online.enabled", dssOnlineEnabled.get());
+        cfg.setProperty("engine.dss.trust.useDefaultLotl", dssUseDefaultLotl.get());
+        writeStringOrRemove(cfg, "engine.dss.trust.lotlUrls", dssLotlUrls.get());
+        writeStringOrRemove(cfg, "engine.dss.trust.certFiles", dssCertFiles.get());
+        writeStringOrRemove(cfg, "engine.dss.trust.certUrls", dssCertUrls.get());
+        writeStringOrRemove(cfg, "engine.dss.trust.truststoreFile", dssTruststoreFile.get());
+        writeStringOrRemove(cfg, "engine.dss.trust.truststoreType", dssTruststoreType.get());
+        writeStringOrRemove(cfg, "engine.dss.trust.truststorePassword", dssTruststorePassword.get());
     }
 
     /** Resets every VM property to the bundled-default value (read from the given snapshot of bundled defaults). */
@@ -85,6 +113,7 @@ public class PreferencesViewModel {
         applyNetworkDefaults(defaults);
         applyPdfRenderDefaults(defaults);
         applyTsaDefaults(defaults);
+        applyDssDefaults(defaults);
     }
 
     public void applyFontDefaults(AdvancedConfig defaults) {
@@ -109,6 +138,17 @@ public class PreferencesViewModel {
 
     public void applyTsaDefaults(AdvancedConfig defaults) {
         tsaHashAlgorithm.set(orFallback(defaults.getBundledDefault("tsa.hashAlgorithm"), "SHA-256"));
+    }
+
+    public void applyDssDefaults(AdvancedConfig defaults) {
+        dssOnlineEnabled.set(parseBool(defaults.getBundledDefault("engine.dss.online.enabled"), false));
+        dssUseDefaultLotl.set(parseBool(defaults.getBundledDefault("engine.dss.trust.useDefaultLotl"), false));
+        dssLotlUrls.set(orEmpty(defaults.getBundledDefault("engine.dss.trust.lotlUrls")));
+        dssCertFiles.set(orEmpty(defaults.getBundledDefault("engine.dss.trust.certFiles")));
+        dssCertUrls.set(orEmpty(defaults.getBundledDefault("engine.dss.trust.certUrls")));
+        dssTruststoreFile.set(orEmpty(defaults.getBundledDefault("engine.dss.trust.truststoreFile")));
+        dssTruststoreType.set(orEmpty(defaults.getBundledDefault("engine.dss.trust.truststoreType")));
+        dssTruststorePassword.set(orEmpty(defaults.getBundledDefault("engine.dss.trust.truststorePassword")));
     }
 
     public String encodePdfLibraries() {
@@ -206,6 +246,14 @@ public class PreferencesViewModel {
     public IntegerProperty pdfLibPdfboxOrderProperty() { return pdfLibPdfboxOrder; }
     public IntegerProperty pdfLibOpenpdfOrderProperty() { return pdfLibOpenpdfOrder; }
     public StringProperty tsaHashAlgorithmProperty() { return tsaHashAlgorithm; }
+    public BooleanProperty dssOnlineEnabledProperty() { return dssOnlineEnabled; }
+    public BooleanProperty dssUseDefaultLotlProperty() { return dssUseDefaultLotl; }
+    public StringProperty dssLotlUrlsProperty() { return dssLotlUrls; }
+    public StringProperty dssCertFilesProperty() { return dssCertFiles; }
+    public StringProperty dssCertUrlsProperty() { return dssCertUrls; }
+    public StringProperty dssTruststoreFileProperty() { return dssTruststoreFile; }
+    public StringProperty dssTruststoreTypeProperty() { return dssTruststoreType; }
+    public StringProperty dssTruststorePasswordProperty() { return dssTruststorePassword; }
     public StringProperty pkcs11BodyProperty() { return pkcs11Body; }
 
     /** Move the given library one slot up (order--), swapping with the lib currently at that order. */

@@ -324,7 +324,7 @@ usage: jsignpdf [file1.pdf [file2.pdf ...]] [-a] [--bg-path
        [-lkt] [-llx <position>] [-lly <position>] [-lp] [-lpf <file>] [--ocsp]
        [--ocsp-server-url <responderUrl>] [-op <prefix>] [-opwd <password>] [-os
        <suffix>] [-pe <mode>] [-pg <pageNumber>] [-pr <right>] [--proxy-host
-       <hostname>] [--proxy-port <port>] [--proxy-type <type>] [-q] [-r
+       <hostname>] [--proxy-port <port>] [-pl <level>] [--proxy-type <type>] [-q] [-r
        <reason>] [--render-mode <mode>] [-sn <signer>] [-ta <method>] [-ts <URL>]
        [--tsa-policy-oid <policyOID>] [-tscf <file>] [-tscp <password>] [-tsct
        <ks-type>] [-tsh <algorithm>] [-tsp <password>] [-tsu <username>] [-upwd
@@ -414,6 +414,9 @@ See <<Signing properties>> for details.
 
 | `-cl, --certification-level <level>`
 | Certification level. Default: `NOT_CERTIFIED`. Values: `NOT_CERTIFIED`, `CERTIFIED_NO_CHANGES_ALLOWED`, `CERTIFIED_FORM_FILLING`, `CERTIFIED_FORM_FILLING_AND_ANNOTATIONS`.
+
+| `-pl, --pades-level <level>`
+| PAdES baseline level for the PAdES (`dss`) signing engine. Values (case-insensitive): `B`, `T`, `LT`, `LTA`. Honoured only by engines that support PAdES; the default OpenPDF engine rejects it (use `-eng dss`). `LT`/`LTA` require revocation data — see <<PAdES & the DSS engine>>. See <<Signing engines>>.
 
 | `-sn, --signer-name <signer>`
 | Signer name. Defaults to the common name (CN) of the chosen certificate.
@@ -932,6 +935,65 @@ jsignpdf --engine openpdf -ksf cert.p12 -ksp secret document.pdf
 In the JavaFX UI, the active engine is chosen from the *Engine* selector in the toolbar; the choice is saved to `advanced.properties` immediately. When an engine does not support a particular option, the corresponding control is disabled (with an explanatory tooltip); on the command line, signing fails fast with a message listing the unsupported options.
 
 Engines are discovered automatically: dropping a third-party engine jar (with its dependencies and a `META-INF/services/net.sf.jsignpdf.engine.SigningEngine` registration) into the `lib/` directory of an installed JSignPdf makes it appear in `--list-engines` and the toolbar selector.
+
+=== PAdES & the DSS engine
+
+JSignPdf 3.1 bundles a second engine, *EU DSS (PAdES)* (id `dss`), built on the European Commission's https://github.com/esig/dss[Digital Signature Service] library. It produces *PAdES* signatures (`ETSI.CAdES.detached`) at the four ETSI baseline levels, which the OpenPDF engine cannot create:
+
+[cols="1,3"]
+|===
+|Level |What it adds
+
+|`B`
+|Basic signature (the default when `dss` is selected without a level).
+
+|`T`
+|`B` + a signature timestamp from the configured <<TSA and certificate validation options,TSA>>. Setting a TSA while requesting `B` automatically upgrades to `T`.
+
+|`LT`
+|`T` + embedded validation material (certificates and OCSP/CRL responses) for long-term validation.
+
+|`LTA`
+|`LT` + an archive timestamp.
+|===
+
+Select it with `-eng dss` on the command line (or the *Engine* toolbar selector in the GUI) and pick the level with `-pl` / `--pades-level`:
+
+[source,shell]
+----
+jsignpdf -eng dss -pl LT -ksf cert.p12 -ksp secret -ha SHA256 document.pdf
+----
+
+DSS requires a PAdES digest, so the hash algorithm must be `SHA256`, `SHA384` or `SHA512` (`SHA1`/`RIPEMD160` are rejected). Certificate-based PDF encryption and CloudFoxy external signing are not available with `dss`; use the OpenPDF engine for those.
+
+*Trust material for LT/LTA.* The `B` and `T` levels work fully offline (only `T` needs network access to the TSA). The `LT` and `LTA` levels embed revocation data, so they need reachable OCSP/CRL endpoints and a trust anchor set. These are configured with `engine.dss.*` keys in `advanced.properties` (also editable from the *DSS engine* tab of the Preferences dialog):
+
+[cols="2,3"]
+|===
+|Key |Meaning
+
+|`engine.dss.online.enabled`
+|Fetch revocation data (OCSP/CRL) and intermediate certificates (AIA) online. Must be `true` to produce `LT`/`LTA`. Default `false` (keeps `B`/`T` offline).
+
+|`engine.dss.trust.useDefaultLotl`
+|Build trust anchors from the default EU List of Trusted Lists (LOTL).
+
+|`engine.dss.trust.lotlUrls`
+|Comma-separated custom LOTL URLs.
+
+|`engine.dss.trust.certFiles`
+|Comma-separated trusted X.509 certificate files.
+
+|`engine.dss.trust.certUrls`
+|Comma-separated trusted X.509 certificate URLs.
+
+|`engine.dss.trust.truststoreFile` +
+`engine.dss.trust.truststoreType` +
+`engine.dss.trust.truststorePassword`
+|A truststore holding trust anchors (type defaults to the JVM default).
+|===
+
+If `LT`/`LTA` is requested but revocation data cannot be reached (for example, with online fetching disabled), the signing fails with a logged error rather than silently emitting a weaker level.
 
 == Advanced application configuration
 

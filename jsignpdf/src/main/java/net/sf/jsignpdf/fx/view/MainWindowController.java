@@ -74,6 +74,7 @@ import net.sf.jsignpdf.utils.PropertyStoreFactory;
 import net.sf.jsignpdf.fx.viewmodel.SignaturePlacementViewModel;
 import net.sf.jsignpdf.fx.viewmodel.SigningOptionsViewModel;
 import net.sf.jsignpdf.fx.viewmodel.VisibleSignatureCoordinator;
+import net.sf.jsignpdf.types.PadesLevel;
 import net.sf.jsignpdf.types.PageInfo;
 
 import static net.sf.jsignpdf.Constants.LOGGER;
@@ -145,6 +146,8 @@ public class MainWindowController {
     @FXML private ToggleButton btnVisibleSig;
     @FXML private ToggleButton btnTsa;
     @FXML private ChoiceBox<SigningEngine> cmbEngine;
+    @FXML private Label lblPadesLevel;
+    @FXML private ChoiceBox<PadesLevel> cmbPadesLevel;
     @FXML private ComboBox<Preset> cmbPresets;
     @FXML private Button btnSign;
 
@@ -460,6 +463,7 @@ public class MainWindowController {
         // is safe. (With OpenPDF — the only engine in phase 1 — every capability is present, so nothing
         // is disabled; the wiring exists for reduced-capability engines added in phase 2.)
         engineCapabilities.gate(btnTsa, Capability.TSA);
+        setupPadesLevelSelector();
         if (signatureAppearanceAccordionPane != null) {
             engineCapabilities.gate(signatureAppearanceAccordionPane, Capability.VISIBLE_SIGNATURE);
         }
@@ -480,6 +484,35 @@ public class MainWindowController {
         // invisible while OpenPDF (all capabilities) is the only engine; it must be closed when the
         // first reduced-capability engine (DSS, see design-doc/3.1-engine-dss.md) lands so the GUI does
         // not leave enabled options the engine will reject at sign time.
+    }
+
+    /**
+     * Populates and gates the PAdES-level dropdown. The control is bound to the signing ViewModel's
+     * {@code padesLevel} property and gated as a unit on {@link Capability#PADES_BASELINE_B}: an engine
+     * that cannot produce even B is not a PAdES engine, so the dropdown disables/greys for OpenPDF and
+     * enables for DSS. An empty selection means "engine default".
+     */
+    private void setupPadesLevelSelector() {
+        if (cmbPadesLevel == null) {
+            return;
+        }
+        cmbPadesLevel.getItems().setAll(PadesLevel.values());
+        cmbPadesLevel.setConverter(new StringConverter<PadesLevel>() {
+            @Override
+            public String toString(PadesLevel level) {
+                return level == null ? "" : level.shortName();
+            }
+
+            @Override
+            public PadesLevel fromString(String s) {
+                return PadesLevel.fromString(s);
+            }
+        });
+        cmbPadesLevel.valueProperty().bindBidirectional(signingVM.padesLevelProperty());
+        engineCapabilities.gate(cmbPadesLevel, Capability.PADES_BASELINE_B);
+        if (lblPadesLevel != null) {
+            engineCapabilities.gate(lblPadesLevel, Capability.PADES_BASELINE_B);
+        }
     }
 
     private void setupPresetCombo() {

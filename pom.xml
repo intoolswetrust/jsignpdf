@@ -32,6 +32,7 @@
         <commons-cli.version>1.11.0</commons-cli.version>
         <commons-lang3.version>3.20.0</commons-lang3.version>
         <openpdf.version>3.0.5</openpdf.version>
+        <dss.version>6.4</dss.version>
         <junit.version>4.13.2</junit.version>
         <openjfx.version>21.0.11</openjfx.version>
         <dbus-java.version>5.2.0</dbus-java.version>
@@ -56,6 +57,19 @@
                 <groupId>com.github.kwart.jsign</groupId>
                 <artifactId>jsignpdf-engine-openpdf</artifactId>
                 <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.github.kwart.jsign</groupId>
+                <artifactId>jsignpdf-engine-dss</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <!-- DSS BOM: manages all eu.europa.ec.joinup.sd-dss artifact versions used by the dss engine -->
+            <dependency>
+                <groupId>eu.europa.ec.joinup.sd-dss</groupId>
+                <artifactId>dss-bom</artifactId>
+                <version>${dss.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
             </dependency>
             <dependency>
                 <groupId>com.github.librepdf</groupId>
@@ -151,6 +165,8 @@
                                 <includedLicense>LGPL-2.1</includedLicense>
                                 <!-- JSignPdf's own modules are dual MPL-2.0 / LGPL-2.1 -->
                                 <includedLicense>MPL-2.0</includedLicense>
+                                <!-- DSS transitive deps: EDL 1.0 / BSD (JAXB, Jakarta Activation, Stax2) -->
+                                <includedLicense>BSD-3-Clause</includedLicense>
                             </includedLicenses>
                         </configuration>
                     </execution>
@@ -233,18 +249,27 @@
                             </licenseMerge>
                             <licenseMerge>
                                 Apache-2.0 |
-                                Apache License 2.0
+                                Apache License 2.0 |
+                                Apache License, Version 2.0 |
+                                The Apache License, Version 2.0
                             </licenseMerge>
                             <licenseMerge>
                                 LGPL-2.1 |
                                 GNU Lesser General Public License (LGPL), Version 2.1 |
                                 Lesser General Public License (LGPL) |
                                 GNU Lesser General Public License, version 2.1 |
-                                GNU LESSER GENERAL PUBLIC LICENSE, Version 2.1
+                                GNU LESSER GENERAL PUBLIC LICENSE, Version 2.1 |
+                                GNU Lesser General Public License
                             </licenseMerge>
                             <licenseMerge>
                                 MPL-2.0 |
                                 Mozilla Public License Version 2.0
+                            </licenseMerge>
+                            <licenseMerge>
+                                BSD-3-Clause |
+                                EDL 1.0 |
+                                Eclipse Distribution License - v 1.0 |
+                                The BSD License
                             </licenseMerge>
                         </licenseMerges>
                         <excludedScopes>test,provided</excludedScopes>

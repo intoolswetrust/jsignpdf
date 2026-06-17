@@ -8,6 +8,7 @@ import java.util.Objects;
 
 import net.sf.jsignpdf.types.CertificationLevel;
 import net.sf.jsignpdf.types.HashAlgorithm;
+import net.sf.jsignpdf.types.PadesLevel;
 import net.sf.jsignpdf.types.PDFEncryption;
 import net.sf.jsignpdf.types.PrintRight;
 import net.sf.jsignpdf.types.RenderMode;
@@ -50,6 +51,8 @@ public class BasicSignerOptions {
     private String pdfEncryptionCertFile;
     private CertificationLevel certLevel;
     private HashAlgorithm hashAlgorithm;
+    // PAdES baseline level (DSS engine). null = engine default (OpenPDF ignores it; DSS treats null as BASELINE_B).
+    private PadesLevel padesLevel;
 
     protected boolean storePasswords = Constants.DEFVAL_STOREPWD;
 
@@ -156,6 +159,7 @@ public class BasicSignerOptions {
         setPdfEncryptionCertFile(store.getProperty(Constants.PROPERTY_PDF_ENCRYPTION_CERT_FILE));
         setCertLevel(store.getProperty(Constants.PROPERTY_CERT_LEVEL));
         setHashAlgorithm(store.getProperty(Constants.PROPERTY_HASH_ALGORITHM));
+        setPadesLevel(store.getProperty(Constants.PROPERTY_PADES_LEVEL));
 
         setRightPrinting(store.getProperty(Constants.PROPERTY_RIGHT_PRINT));
         setRightCopy(store.getAsBool(Constants.PROPERTY_RIGHT_COPY));
@@ -278,6 +282,7 @@ public class BasicSignerOptions {
         store.setProperty(Constants.PROPERTY_PDF_ENCRYPTION_CERT_FILE, getPdfEncryptionCertFile());
         store.setProperty(Constants.PROPERTY_CERT_LEVEL, getCertLevel().name());
         store.setProperty(Constants.PROPERTY_HASH_ALGORITHM, getHashAlgorithm().name());
+        store.setProperty(Constants.PROPERTY_PADES_LEVEL, getPadesLevel() == null ? null : getPadesLevel().name());
 
         store.setProperty(Constants.PROPERTY_RIGHT_PRINT, getRightPrinting().name());
         store.setProperty(Constants.PROPERTY_RIGHT_COPY, isRightCopy());
@@ -1173,6 +1178,30 @@ public class BasicSignerOptions {
         setHashAlgorithm(hashAlg);
     }
 
+    /**
+     * @return the selected PAdES baseline level, or {@code null} for the engine default
+     */
+    public PadesLevel getPadesLevel() {
+        return padesLevel;
+    }
+
+    /**
+     * @param padesLevel the PAdES baseline level to set ({@code null} = engine default)
+     */
+    public void setPadesLevel(final PadesLevel padesLevel) {
+        this.padesLevel = padesLevel;
+    }
+
+    /**
+     * Sets the PAdES baseline level from a (short or full) string token. Unrecognised or empty values
+     * reset the level to {@code null} (engine default).
+     *
+     * @param aValue the level token ({@code B} / {@code T} / {@code LT} / {@code LTA} or full enum name)
+     */
+    public void setPadesLevel(final String aValue) {
+        setPadesLevel(PadesLevel.fromString(aValue));
+    }
+
     public Proxy.Type getProxyType() {
         if (proxyType == null) {
             proxyType = Constants.DEFVAL_PROXY_TYPE;
@@ -1277,6 +1306,7 @@ public class BasicSignerOptions {
         copy.setPdfEncryptionCertFile(getPdfEncryptionCertFile());
         copy.setCertLevel(getCertLevel());
         copy.setHashAlgorithm(getHashAlgorithm());
+        copy.setPadesLevel(getPadesLevel());
         copy.setStorePasswords(isStorePasswords());
         copy.setRightPrinting(getRightPrinting());
         copy.setRightCopy(isRightCopy());
@@ -1331,7 +1361,8 @@ public class BasicSignerOptions {
         result = prime * result + Objects.hash(acro6Layers, advanced, append, bgImgPath, bgImgScale, certLevel, contact,
                 crlEnabled, encryptor, hashAlgorithm, imgPath, inFile, keyAlias, keyIndex, ksFile, ksType, l2Text,
                 l2TextFontSize, l4Text, listener, location, ocspEnabled, ocspServerUrl, outFile, page, pdfEncryption,
-                pdfEncryptionCertFile, positionLLX, positionLLY, positionURX, positionURY, propertiesFilePath, props, proxyHost,
+                padesLevel, pdfEncryptionCertFile, positionLLX, positionLLY, positionURX, positionURY, propertiesFilePath,
+                props, proxyHost,
                 proxyPort, proxyType, reason, renderMode, rightAssembly, rightCopy, rightFillIn, rightModifyAnnotations,
                 rightModifyContents, rightPrinting, rightScreanReaders, signerName, storePasswords, timestamp, tsaCertFile,
                 tsaCertFilePwd, tsaCertFileType, tsaHashAlg, tsaPasswd, tsaPolicy, tsaServerAuthn, tsaUrl, tsaUser, visible);
@@ -1361,7 +1392,7 @@ public class BasicSignerOptions {
                 && Objects.equals(l4Text, other.l4Text) && Objects.equals(listener, other.listener)
                 && Objects.equals(location, other.location) && ocspEnabled == other.ocspEnabled
                 && Objects.equals(ocspServerUrl, other.ocspServerUrl) && Objects.equals(outFile, other.outFile)
-                && page == other.page && pdfEncryption == other.pdfEncryption
+                && page == other.page && padesLevel == other.padesLevel && pdfEncryption == other.pdfEncryption
                 && Objects.equals(pdfEncryptionCertFile, other.pdfEncryptionCertFile)
                 && Arrays.equals(pdfOwnerPwd, other.pdfOwnerPwd) && Arrays.equals(pdfUserPwd, other.pdfUserPwd)
                 && Float.floatToIntBits(positionLLX) == Float.floatToIntBits(other.positionLLX)

@@ -69,6 +69,7 @@ public class PreferencesController {
     @FXML private Tab tabNetwork;
     @FXML private Tab tabPdfRender;
     @FXML private Tab tabTsa;
+    @FXML private Tab tabDss;
     @FXML private Tab tabPkcs11;
 
     @FXML private TextField txtFontPath;
@@ -85,6 +86,15 @@ public class PreferencesController {
     @FXML private VBox vboxPdfLibs;
 
     @FXML private ComboBox<String> cmbTsaHashAlgorithm;
+
+    @FXML private CheckBox chkDssOnlineEnabled;
+    @FXML private CheckBox chkDssUseDefaultLotl;
+    @FXML private TextField txtDssLotlUrls;
+    @FXML private TextField txtDssCertFiles;
+    @FXML private TextField txtDssCertUrls;
+    @FXML private TextField txtDssTruststoreFile;
+    @FXML private TextField txtDssTruststoreType;
+    @FXML private TextField txtDssTruststorePassword;
 
     @FXML private Label lblPkcs11Path;
     @FXML private TextArea txtPkcs11Body;
@@ -184,6 +194,15 @@ public class PreferencesController {
         chkRelaxSslSecurity.selectedProperty().bindBidirectional(vm.relaxSslSecurityProperty());
 
         cmbTsaHashAlgorithm.valueProperty().bindBidirectional(vm.tsaHashAlgorithmProperty());
+
+        chkDssOnlineEnabled.selectedProperty().bindBidirectional(vm.dssOnlineEnabledProperty());
+        chkDssUseDefaultLotl.selectedProperty().bindBidirectional(vm.dssUseDefaultLotlProperty());
+        txtDssLotlUrls.textProperty().bindBidirectional(vm.dssLotlUrlsProperty());
+        txtDssCertFiles.textProperty().bindBidirectional(vm.dssCertFilesProperty());
+        txtDssCertUrls.textProperty().bindBidirectional(vm.dssCertUrlsProperty());
+        txtDssTruststoreFile.textProperty().bindBidirectional(vm.dssTruststoreFileProperty());
+        txtDssTruststoreType.textProperty().bindBidirectional(vm.dssTruststoreTypeProperty());
+        txtDssTruststorePassword.textProperty().bindBidirectional(vm.dssTruststorePasswordProperty());
 
         txtPkcs11Body.textProperty().bindBidirectional(vm.pkcs11BodyProperty());
         lblPkcs11EmptyHint.visibleProperty().bind(
@@ -291,6 +310,8 @@ public class PreferencesController {
             vm.applyPdfRenderDefaults(defaults);
         } else if (active == tabTsa) {
             vm.applyTsaDefaults(defaults);
+        } else if (active == tabDss) {
+            vm.applyDssDefaults(defaults);
         } else if (active == tabPkcs11) {
             vm.pkcs11BodyProperty().set(PKCS11Utils.getSampleConfig());
         }

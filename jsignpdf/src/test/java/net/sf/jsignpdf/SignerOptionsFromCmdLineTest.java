@@ -281,6 +281,30 @@ public class SignerOptionsFromCmdLineTest {
         assertTrue(f.opts.isListEngines());
     }
 
+    @Test
+    public void padesLevelOption_longForm() throws Exception {
+        Fixture f = new Fixture("");
+        f.opts.setCmdLine(new String[] { "--pades-level", "LTA" });
+        f.opts.loadCmdLine();
+        assertEquals(net.sf.jsignpdf.types.PadesLevel.BASELINE_LTA, f.opts.getPadesLevel());
+    }
+
+    @Test
+    public void padesLevelOption_shortFormCaseInsensitive() throws Exception {
+        Fixture f = new Fixture("");
+        f.opts.setCmdLine(new String[] { "-pl", "lt" });
+        f.opts.loadCmdLine();
+        assertEquals(net.sf.jsignpdf.types.PadesLevel.BASELINE_LT, f.opts.getPadesLevel());
+    }
+
+    @Test
+    public void padesLevelOption_absentLeavesNull() throws Exception {
+        Fixture f = new Fixture("");
+        f.opts.setCmdLine(new String[] { "-ksf", "/tmp/x.p12" });
+        f.opts.loadCmdLine();
+        assertNull(f.opts.getPadesLevel());
+    }
+
     /** Convenience wiring: captures warnings and feeds a canned stdin reader with no Console. */
     private static final class Fixture {
         final SignerOptionsFromCmdLine opts = new SignerOptionsFromCmdLine();
