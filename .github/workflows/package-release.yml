@@ -230,7 +230,7 @@ jobs:
         api-token: '${{ secrets.SIGNPATH_API_TOKEN }}'
         organization-id: '8d0ef437-1c25-49c6-9954-ed7fe51f9df8'
         project-slug: 'jsignpdf'
-        signing-policy-slug: 'test-signing'
+        signing-policy-slug: 'release-signing'
         artifact-configuration-slug: 'zip'
         github-artifact-id: '${{ steps.upload-unsigned-windows.outputs.artifact-id }}'
         wait-for-completion: true
