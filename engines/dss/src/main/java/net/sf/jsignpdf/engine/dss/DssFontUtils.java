@@ -9,6 +9,7 @@ import net.sf.jsignpdf.utils.AppConfig;
 
 import org.apache.commons.lang3.StringUtils;
 
+import eu.europa.esig.dss.model.InMemoryDocument;
 import eu.europa.esig.dss.pades.DSSFileFont;
 import eu.europa.esig.dss.pades.DSSFont;
 
@@ -37,7 +38,11 @@ final class DssFontUtils {
         try (InputStream is = fontPath != null ? new FileInputStream(fontPath)
                 : DssFontUtils.class.getResourceAsStream(DEFAULT_EMBEDDED_FONT_PATH)) {
             if (is != null) {
-                return new DSSFileFont(is);
+                // Materialise the font bytes here, while the stream is open. DSSFileFont later re-reads
+                // the font lazily (getJavaFont()/getInputStream()), so it must own a self-contained,
+                // in-memory copy rather than the stream this method closes on return. (DSSFileFont(stream)
+                // happens to buffer eagerly today, but we don't want to depend on that internal detail.)
+                return new DSSFileFont(new InMemoryDocument(is.readAllBytes()));
             }
         } catch (Exception e) {
             Constants.LOGGER.log(Level.SEVERE, "Font loading failed" + (StringUtils.isNotEmpty(fontPath) ? ": " + fontPath : ""),

@@ -59,5 +59,18 @@
             <artifactId>junit</artifactId>
             <scope>test</scope>
         </dependency>
+
+        <!-- DSS validation (test only): read back the achieved PAdES level to assert it in tests.
+             dss-policy-jaxb supplies the default validation policy (policy/constraint.xml). -->
+        <dependency>
+            <groupId>eu.europa.ec.joinup.sd-dss</groupId>
+            <artifactId>dss-validation</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>eu.europa.ec.joinup.sd-dss</groupId>
+            <artifactId>dss-policy-jaxb</artifactId>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 </project>

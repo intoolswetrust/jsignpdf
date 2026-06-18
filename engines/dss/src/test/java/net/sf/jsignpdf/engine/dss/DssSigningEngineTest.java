@@ -7,6 +7,7 @@ import static org.junit.Assert.assertTrue;
 import java.io.File;
 import java.security.Security;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import net.sf.jsignpdf.BasicSignerOptions;
@@ -18,15 +19,25 @@ import org.apache.pdfbox.Loader;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDPage;
 import org.apache.pdfbox.pdmodel.PDPageContentStream;
+import org.apache.pdfbox.pdmodel.common.PDRectangle;
 import org.apache.pdfbox.pdmodel.font.PDType1Font;
 import org.apache.pdfbox.pdmodel.font.Standard14Fonts;
+import org.apache.pdfbox.pdmodel.interactive.annotation.PDAnnotationWidget;
 import org.apache.pdfbox.pdmodel.interactive.digitalsignature.PDSignature;
+import org.apache.pdfbox.pdmodel.interactive.form.PDSignatureField;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
+
+import eu.europa.esig.dss.enumerations.SignatureLevel;
+import eu.europa.esig.dss.model.FileDocument;
+import eu.europa.esig.dss.simplereport.SimpleReport;
+import eu.europa.esig.dss.spi.validation.CommonCertificateVerifier;
+import eu.europa.esig.dss.validation.SignedDocumentValidator;
+import eu.europa.esig.dss.validation.reports.Reports;
 
 /**
  * Signing tests for {@link DssSigningEngine}, adapted from the {@code jsignpdf-pades} signing suite to
@@ -89,31 +100,47 @@ public class DssSigningEngineTest {
     }
 
     @Test
-    public void defaultLevelProducesPadesSignature() throws Exception {
+    public void defaultLevelProducesBaselineB() throws Exception {
         BasicSignerOptions o = baseOptions(); // padesLevel == null -> BASELINE_B
         boolean ok = new DssSigningEngine().sign(o, EMPTY_CONFIG);
         assertTrue("signing should succeed", ok);
         assertTrue("output should exist", outputFile.exists());
-        assertPadesSignature(outputFile);
+        assertSignatureLevel(outputFile, SignatureLevel.PAdES_BASELINE_B);
     }
 
     @Test
-    public void explicitBaselineBProducesPadesSignature() throws Exception {
+    public void explicitBaselineBProducesBaselineB() throws Exception {
         BasicSignerOptions o = baseOptions();
         o.setPadesLevel(PadesLevel.BASELINE_B);
         assertTrue(new DssSigningEngine().sign(o, EMPTY_CONFIG));
-        assertPadesSignature(outputFile);
+        assertSignatureLevel(outputFile, SignatureLevel.PAdES_BASELINE_B);
     }
 
     @Test
-    public void visibleSignatureIsPlacedAndSigned() throws Exception {
+    public void visibleSignatureIsPlacedOnRequestedPage() throws Exception {
         BasicSignerOptions o = baseOptions();
         o.setVisible(true);
         o.setPage(1);
+        o.setPositionLLX(100f);
+        o.setPositionLLY(100f);
+        o.setPositionURX(300f);
+        o.setPositionURY(250f);
         o.setReason("testing");
         o.setLocation("here");
         assertTrue(new DssSigningEngine().sign(o, EMPTY_CONFIG));
-        assertPadesSignature(outputFile);
+        assertSignatureLevel(outputFile, SignatureLevel.PAdES_BASELINE_B);
+
+        try (PDDocument doc = Loader.loadPDF(outputFile)) {
+            List<PDSignatureField> fields = doc.getSignatureFields();
+            assertEquals("exactly one signature field expected", 1, fields.size());
+            PDAnnotationWidget widget = fields.get(0).getWidgets().get(0);
+            assertTrue("signature widget must sit on the requested (first) page",
+                    doc.getPage(0).getAnnotations().contains(widget));
+            PDRectangle rect = widget.getRectangle();
+            // The visible signature spans the requested box (URX-LLX x URY-LLY = 200 x 150).
+            assertEquals("visible signature width", 200f, rect.getWidth(), 1f);
+            assertEquals("visible signature height", 150f, rect.getHeight(), 1f);
+        }
     }
 
     @Test
@@ -149,12 +176,24 @@ public class DssSigningEngineTest {
         assertFalse("PAdES disallows SHA-1", engine.capabilities().contains(Capability.HASH_SHA1));
     }
 
-    private static void assertPadesSignature(File pdf) throws Exception {
+    /**
+     * Asserts both the PAdES subfilter (structural) and the <em>achieved</em> baseline level. The level is
+     * read back through DSS's own validator, since the subfilter alone ({@code ETSI.CAdES.detached}) is
+     * identical for B / T / LT / LTA and so cannot distinguish them.
+     */
+    private static void assertSignatureLevel(File pdf, SignatureLevel expected) throws Exception {
         try (PDDocument doc = Loader.loadPDF(pdf)) {
             assertFalse("a signature must be present", doc.getSignatureDictionaries().isEmpty());
             PDSignature sig = doc.getSignatureDictionaries().get(0);
             assertEquals("ETSI.CAdES.detached", sig.getSubFilter());
         }
+        SignedDocumentValidator validator = SignedDocumentValidator.fromDocument(new FileDocument(pdf));
+        validator.setCertificateVerifier(new CommonCertificateVerifier());
+        Reports reports = validator.validateDocument();
+        SimpleReport simpleReport = reports.getSimpleReport();
+        assertEquals("exactly one signature expected", 1, simpleReport.getSignaturesCount());
+        assertEquals("achieved PAdES baseline level", expected,
+                simpleReport.getSignatureFormat(simpleReport.getFirstSignatureId()));
     }
 
     /** Minimal in-memory {@link EngineConfig} backed by a map (keys already engine-relative). */
