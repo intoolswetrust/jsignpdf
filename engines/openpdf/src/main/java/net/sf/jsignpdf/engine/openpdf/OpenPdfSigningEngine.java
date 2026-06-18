@@ -79,7 +79,7 @@ public class OpenPdfSigningEngine implements SigningEngine {
             Capability.SUBFILTER_ADBE_PKCS7_DETACHED,
             Capability.HASH_SHA1, Capability.HASH_SHA256, Capability.HASH_SHA384, Capability.HASH_SHA512,
             Capability.HASH_RIPEMD160,
-            Capability.APPEND_MODE, Capability.CERTIFICATION_LEVEL,
+            Capability.OVERWRITE_MODE, Capability.CERTIFICATION_LEVEL,
             Capability.ENCRYPTION_PASSWORD, Capability.ENCRYPTION_CERTIFICATE, Capability.PERMISSIONS_BITMASK,
             Capability.VISIBLE_SIGNATURE, Capability.VISIBLE_LAYER2_TEXT, Capability.VISIBLE_LAYER4_TEXT,
             Capability.VISIBLE_RENDER_MODE_DESCRIPTION_ONLY, Capability.VISIBLE_RENDER_MODE_GRAPHIC_AND_DESCRIPTION,

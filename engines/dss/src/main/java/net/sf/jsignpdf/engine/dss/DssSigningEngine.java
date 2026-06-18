@@ -91,7 +91,7 @@ public class DssSigningEngine implements SigningEngine {
 
             Capability.HASH_SHA256, Capability.HASH_SHA384, Capability.HASH_SHA512,
 
-            Capability.APPEND_MODE, // DSS signs incrementally by default
+            // No OVERWRITE_MODE: DSS always signs incrementally (PAdES requires it). Append is universal.
             Capability.CERTIFICATION_LEVEL,
             Capability.ENCRYPTION_PASSWORD, Capability.PERMISSIONS_BITMASK,
 

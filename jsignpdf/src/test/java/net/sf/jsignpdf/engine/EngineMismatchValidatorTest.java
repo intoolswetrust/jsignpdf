@@ -25,14 +25,39 @@ public class EngineMismatchValidatorTest {
     }
 
     @Test
-    public void emptyCapabilityEngineFlagsDefaultHashAndAppend() {
-        // A fresh options object signs with the default SHA-1 hash and append mode on, so an engine
-        // that supports neither must report both.
+    public void emptyCapabilityEngineFlagsDefaultHashButNotAppend() {
+        // A fresh options object signs with the default SHA-1 hash and append (incremental) mode on.
+        // Append is universal, so only the hash is flagged against a capability-less engine.
         BasicSignerOptions opts = new BasicSignerOptions();
         StubSigningEngine engine = new StubSigningEngine("empty");
         Set<Capability> reported = caps(EngineMismatchValidator.findMismatches(opts, engine));
         assertTrue(reported.contains(Capability.HASH_SHA1));
-        assertTrue(reported.contains(Capability.APPEND_MODE));
+        assertFalse(reported.contains(Capability.OVERWRITE_MODE));
+    }
+
+    @Test
+    public void overwriteFlaggedWhenEngineLacksCapability() {
+        // append=false (in advanced mode) requests a non-incremental rewrite, which needs OVERWRITE_MODE.
+        BasicSignerOptions opts = new BasicSignerOptions();
+        opts.setAdvanced(true);
+        opts.setAppend(false);
+        StubSigningEngine engine = new StubSigningEngine("noOverwrite", Capability.HASH_SHA1);
+        List<Mismatch> mismatches = EngineMismatchValidator.findMismatches(opts, engine);
+        Set<Capability> reported = caps(mismatches);
+        assertTrue(reported.contains(Capability.OVERWRITE_MODE));
+        Mismatch m = mismatches.stream().filter(x -> x.capability() == Capability.OVERWRITE_MODE)
+                .findFirst().orElseThrow();
+        assertEquals("--append", m.option());
+    }
+
+    @Test
+    public void overwriteNotFlaggedWhenEngineSupportsIt() {
+        BasicSignerOptions opts = new BasicSignerOptions();
+        opts.setAdvanced(true);
+        opts.setAppend(false);
+        StubSigningEngine engine = new StubSigningEngine("overwrite",
+                Capability.HASH_SHA1, Capability.OVERWRITE_MODE);
+        assertFalse(caps(EngineMismatchValidator.findMismatches(opts, engine)).contains(Capability.OVERWRITE_MODE));
     }
 
     @Test
@@ -48,7 +73,7 @@ public class EngineMismatchValidatorTest {
         BasicSignerOptions opts = new BasicSignerOptions();
         opts.setVisible(true);
         opts.setL2Text("custom text");
-        StubSigningEngine engine = new StubSigningEngine("noVisible", Capability.HASH_SHA1, Capability.APPEND_MODE);
+        StubSigningEngine engine = new StubSigningEngine("noVisible", Capability.HASH_SHA1);
         Set<Capability> reported = caps(EngineMismatchValidator.findMismatches(opts, engine));
         assertTrue("umbrella must be reported", reported.contains(Capability.VISIBLE_SIGNATURE));
         assertFalse("sub-field must NOT be reported when umbrella is missing",
@@ -61,7 +86,7 @@ public class EngineMismatchValidatorTest {
         opts.setVisible(true);
         opts.setL2Text("custom text");
         StubSigningEngine engine = new StubSigningEngine("visibleNoL2",
-                Capability.HASH_SHA1, Capability.APPEND_MODE, Capability.VISIBLE_SIGNATURE);
+                Capability.HASH_SHA1, Capability.VISIBLE_SIGNATURE);
         Set<Capability> reported = caps(EngineMismatchValidator.findMismatches(opts, engine));
         assertFalse(reported.contains(Capability.VISIBLE_SIGNATURE));
         assertTrue(reported.contains(Capability.VISIBLE_LAYER2_TEXT));
@@ -73,7 +98,7 @@ public class EngineMismatchValidatorTest {
         opts.setAdvanced(true);
         opts.setTimestamp(true);
         opts.setTsaUrl("http://tsa.example.com");
-        StubSigningEngine engine = new StubSigningEngine("noTsa", Capability.HASH_SHA1, Capability.APPEND_MODE);
+        StubSigningEngine engine = new StubSigningEngine("noTsa", Capability.HASH_SHA1);
         Set<Capability> reported = caps(EngineMismatchValidator.findMismatches(opts, engine));
         assertTrue(reported.contains(Capability.TSA));
     }
@@ -84,7 +109,7 @@ public class EngineMismatchValidatorTest {
         opts.setAdvanced(true);
         // timestamp disabled -> TSA not evaluated even though the engine lacks it
         StubSigningEngine engine = new StubSigningEngine("noTsa",
-                Capability.HASH_SHA1, Capability.APPEND_MODE);
+                Capability.HASH_SHA1);
         assertFalse(caps(EngineMismatchValidator.findMismatches(opts, engine)).contains(Capability.TSA));
     }
 
@@ -94,7 +119,7 @@ public class EngineMismatchValidatorTest {
         BasicSignerOptions opts = new BasicSignerOptions();
         opts.setAdvanced(true);
         opts.setPadesLevel(net.sf.jsignpdf.types.PadesLevel.BASELINE_LTA);
-        StubSigningEngine engine = new StubSigningEngine("noPades", Capability.HASH_SHA1, Capability.APPEND_MODE);
+        StubSigningEngine engine = new StubSigningEngine("noPades", Capability.HASH_SHA1);
         List<Mismatch> mismatches = EngineMismatchValidator.findMismatches(opts, engine);
         Set<Capability> reported = caps(mismatches);
         assertTrue(reported.contains(Capability.PADES_BASELINE_LTA));
@@ -109,7 +134,7 @@ public class EngineMismatchValidatorTest {
         opts.setAdvanced(true);
         opts.setPadesLevel(net.sf.jsignpdf.types.PadesLevel.BASELINE_T);
         StubSigningEngine engine = new StubSigningEngine("pades",
-                Capability.HASH_SHA1, Capability.APPEND_MODE, Capability.PADES_BASELINE_T);
+                Capability.HASH_SHA1, Capability.PADES_BASELINE_T);
         assertFalse(caps(EngineMismatchValidator.findMismatches(opts, engine)).contains(Capability.PADES_BASELINE_T));
     }
 
@@ -118,7 +143,7 @@ public class EngineMismatchValidatorTest {
         // Default (null) pades level must never produce a mismatch, even against an engine without PAdES.
         BasicSignerOptions opts = new BasicSignerOptions();
         opts.setAdvanced(true);
-        StubSigningEngine engine = new StubSigningEngine("noPades", Capability.HASH_SHA1, Capability.APPEND_MODE);
+        StubSigningEngine engine = new StubSigningEngine("noPades", Capability.HASH_SHA1);
         Set<Capability> reported = caps(EngineMismatchValidator.findMismatches(opts, engine));
         assertFalse(reported.contains(Capability.PADES_BASELINE_B));
     }
@@ -138,7 +163,7 @@ public class EngineMismatchValidatorTest {
         BasicSignerOptions opts = new BasicSignerOptions();
         opts.setVisible(true);
         StubSigningEngine engine = new StubSigningEngine("empty2",
-                Capability.HASH_SHA1, Capability.APPEND_MODE);
+                Capability.HASH_SHA1);
         List<Mismatch> mismatches = EngineMismatchValidator.findMismatches(opts, engine);
         Mismatch visible = mismatches.stream()
                 .filter(m -> m.capability() == Capability.VISIBLE_SIGNATURE).findFirst().orElseThrow();

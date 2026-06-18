@@ -55,7 +55,6 @@ import net.sf.jsignpdf.engine.Capability;
 import net.sf.jsignpdf.engine.EngineRegistry;
 import net.sf.jsignpdf.engine.SigningEngine;
 import net.sf.jsignpdf.fx.EngineCapabilities;
-import net.sf.jsignpdf.utils.AdvancedConfig;
 import net.sf.jsignpdf.utils.AppConfig;
 import javafx.scene.layout.VBox;
 import javafx.util.StringConverter;
@@ -145,7 +144,6 @@ public class MainWindowController {
     @FXML private Button btnNextPage;
     @FXML private ToggleButton btnVisibleSig;
     @FXML private ToggleButton btnTsa;
-    @FXML private ChoiceBox<SigningEngine> cmbEngine;
     @FXML private Label lblPadesLevel;
     @FXML private ChoiceBox<PadesLevel> cmbPadesLevel;
     @FXML private ComboBox<Preset> cmbPresets;
@@ -154,6 +152,7 @@ public class MainWindowController {
     // Content area
     @FXML private SplitPane splitPane;
     @FXML private Accordion sidePanelAccordion;
+    @FXML private TitledPane padesLevelAccordionPane;
     @FXML private TitledPane signatureAppearanceAccordionPane;
     @FXML private TitledPane tsaAccordionPane;
     @FXML private TitledPane encryptionAccordionPane;
@@ -411,52 +410,21 @@ public class MainWindowController {
 
         refreshRecentFilesMenu();
         setupPresetCombo();
-        setupEngineSelector();
+        setupEngineCapabilityGating();
     }
 
     /**
-     * Populates the toolbar engine selector from the {@link EngineRegistry}, binds it to the
-     * {@code engine=} key in {@code advanced.properties}, and drives the capability-based control gating
-     * off the selected engine. Switching the engine is immediate (no restart): the
-     * {@link EngineCapabilities} bindings re-evaluate so unsupported controls disable themselves.
+     * Drives the capability-based control gating off the active signing engine. The engine itself is now
+     * selected in File &gt; Preferences (persisted to the {@code engine=} key in {@code advanced.properties});
+     * this method seeds {@link EngineCapabilities} from that persisted value at startup and wires the
+     * capability-driven disabling of toolbar buttons and accordion sections. {@link #onPreferences()}
+     * refreshes the active engine after the dialog closes so switching it takes effect without a restart.
      */
-    private void setupEngineSelector() {
-        if (cmbEngine == null) {
-            return;
-        }
+    private void setupEngineCapabilityGating() {
         final EngineRegistry registry = EngineRegistry.getInstance();
-        cmbEngine.getItems().setAll(registry.listAll());
-        cmbEngine.setConverter(new StringConverter<SigningEngine>() {
-            @Override
-            public String toString(SigningEngine engine) {
-                return engine == null ? "" : engine.displayName();
-            }
-
-            @Override
-            public SigningEngine fromString(String s) {
-                return null;
-            }
-        });
         SigningEngine current = registry.findById(AppConfig.defaultEngineId())
                 .or(registry::getDefault).orElse(null);
-        if (current != null) {
-            cmbEngine.getSelectionModel().select(current);
-        }
         engineCapabilities.activeEngineProperty().set(current);
-
-        cmbEngine.getSelectionModel().selectedItemProperty().addListener((obs, oldEngine, sel) -> {
-            if (sel == null) {
-                return;
-            }
-            engineCapabilities.activeEngineProperty().set(sel);
-            try {
-                AdvancedConfig cfg = PropertyStoreFactory.getInstance().advancedConfig();
-                cfg.setProperty("engine", sel.id());
-                cfg.save();
-            } catch (Exception e) {
-                LOGGER.log(Level.WARNING, "Failed to persist engine selection", e);
-            }
-        });
 
         // Capability-driven section gating at the umbrella (accordion-pane) granularity. These panes
         // are not governed by the document-loaded disable logic, so binding their disableProperty here
@@ -464,6 +432,9 @@ public class MainWindowController {
         // is disabled; the wiring exists for reduced-capability engines added in phase 2.)
         engineCapabilities.gate(btnTsa, Capability.TSA);
         setupPadesLevelSelector();
+        if (padesLevelAccordionPane != null) {
+            engineCapabilities.gate(padesLevelAccordionPane, Capability.PADES_BASELINE_B);
+        }
         if (signatureAppearanceAccordionPane != null) {
             engineCapabilities.gate(signatureAppearanceAccordionPane, Capability.VISIBLE_SIGNATURE);
         }
@@ -490,7 +461,9 @@ public class MainWindowController {
      * Populates and gates the PAdES-level dropdown. The control is bound to the signing ViewModel's
      * {@code padesLevel} property and gated as a unit on {@link Capability#PADES_BASELINE_B}: an engine
      * that cannot produce even B is not a PAdES engine, so the dropdown disables/greys for OpenPDF and
-     * enables for DSS. An empty selection means "engine default".
+     * enables for DSS. The level defaults to {@link PadesLevel#BASELINE_B} for PAdES engines (so the
+     * dropdown isn't empty) and is cleared for non-PAdES engines (a stale level would otherwise trip the
+     * {@link EngineMismatchValidator}).
      */
     private void setupPadesLevelSelector() {
         if (cmbPadesLevel == null) {
@@ -512,6 +485,35 @@ public class MainWindowController {
         engineCapabilities.gate(cmbPadesLevel, Capability.PADES_BASELINE_B);
         if (lblPadesLevel != null) {
             engineCapabilities.gate(lblPadesLevel, Capability.PADES_BASELINE_B);
+        }
+
+        // Seed a sensible default for the current engine and keep it in step when the engine changes.
+        applyPadesLevelDefaultForEngine(engineCapabilities.activeEngineProperty().get());
+        engineCapabilities.activeEngineProperty().addListener(
+                (obs, oldEngine, newEngine) -> applyPadesLevelDefaultForEngine(newEngine));
+        // Re-apply the engine-appropriate value whenever the level is changed by an options/preset load or
+        // a reset (those call syncFromOptions/resetToDefaults). This keeps the dropdown from going empty
+        // while a PAdES engine is active, and clears a stale level loaded under a non-PAdES engine (which
+        // would otherwise trip the EngineMismatchValidator at sign time).
+        signingVM.padesLevelProperty().addListener((obs, oldLevel, newLevel) ->
+                applyPadesLevelDefaultForEngine(engineCapabilities.activeEngineProperty().get()));
+    }
+
+    /**
+     * Picks the PAdES level appropriate for the given engine: {@link PadesLevel#BASELINE_B} as a non-empty
+     * default when the engine is PAdES-capable and no level is set yet, or {@code null} when the engine is
+     * not PAdES-capable (OpenPDF) so the level can't reach the engine mismatch validator. An explicit
+     * user choice (e.g. LT/LTA) is preserved while a PAdES engine stays active.
+     */
+    private void applyPadesLevelDefaultForEngine(SigningEngine engine) {
+        boolean padesCapable = engine != null
+                && engine.capabilities().contains(Capability.PADES_BASELINE_B);
+        if (padesCapable) {
+            if (signingVM.padesLevelProperty().get() == null) {
+                signingVM.padesLevelProperty().set(PadesLevel.BASELINE_B);
+            }
+        } else if (signingVM.padesLevelProperty().get() != null) {
+            signingVM.padesLevelProperty().set(null);
         }
     }
 
@@ -645,7 +647,23 @@ public class MainWindowController {
 
     @FXML
     private void onPreferences() {
-        PreferencesController.show(stage);
+        boolean saved = PreferencesController.show(stage);
+        if (saved) {
+            // The engine may have been changed in Preferences. Re-seed the capability bindings from the
+            // persisted value so toolbar buttons and accordion sections re-gate immediately (no restart).
+            refreshActiveEngineFromConfig();
+        }
+    }
+
+    /**
+     * Re-seeds {@link EngineCapabilities#activeEngineProperty()} from the engine persisted in
+     * {@code advanced.properties}, so capability gating (and the PAdES-level default) re-evaluates after
+     * the engine changes via Preferences or a settings reset.
+     */
+    private void refreshActiveEngineFromConfig() {
+        EngineRegistry registry = EngineRegistry.getInstance();
+        registry.findById(AppConfig.defaultEngineId()).or(registry::getDefault)
+                .ifPresent(e -> engineCapabilities.activeEngineProperty().set(e));
     }
 
     private String validationMessage(PresetValidation.Result result) {
@@ -948,6 +966,10 @@ public class MainWindowController {
 
             // Reset the ViewModel (which updates all bound UI controls)
             signingVM.resetToDefaults();
+
+            // The wiped config reverts the engine to the bundled default; re-seed capability gating and
+            // the PAdES-level default to match.
+            refreshActiveEngineFromConfig();
 
             // Clear placement and close any open document
             if (documentVM.isDocumentLoaded()) {

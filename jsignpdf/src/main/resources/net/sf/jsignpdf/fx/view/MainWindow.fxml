@@ -127,19 +127,6 @@
                     </tooltip>
                 </ToggleButton>
                 <Separator orientation="VERTICAL"/>
-                <Label text="%jfx.gui.engine.label"/>
-                <ChoiceBox fx:id="cmbEngine" prefWidth="130">
-                    <tooltip>
-                        <Tooltip text="%jfx.gui.engine.tooltip"/>
-                    </tooltip>
-                </ChoiceBox>
-                <Label fx:id="lblPadesLevel" text="%jfx.gui.padesLevel.label"/>
-                <ChoiceBox fx:id="cmbPadesLevel" prefWidth="90">
-                    <tooltip>
-                        <Tooltip text="%jfx.gui.padesLevel.tooltip"/>
-                    </tooltip>
-                </ChoiceBox>
-                <Separator orientation="VERTICAL"/>
                 <Label text="%jfx.gui.preset.label"/>
                 <ComboBox fx:id="cmbPresets" prefWidth="180">
                     <tooltip>
@@ -177,6 +164,22 @@
                                     <fx:include fx:id="signatureProperties"
                                                 source="SignatureProperties.fxml"/>
                                 </ScrollPane>
+                            </TitledPane>
+                            <TitledPane fx:id="padesLevelAccordionPane"
+                                        text="%jfx.gui.panel.padesLevel">
+                                <VBox spacing="6">
+                                    <padding>
+                                        <Insets top="8" right="8" bottom="8" left="8"/>
+                                    </padding>
+                                    <Label fx:id="lblPadesLevel" text="%jfx.gui.padesLevel.label"/>
+                                    <ChoiceBox fx:id="cmbPadesLevel" prefWidth="120">
+                                        <tooltip>
+                                            <Tooltip text="%jfx.gui.padesLevel.tooltip"/>
+                                        </tooltip>
+                                    </ChoiceBox>
+                                    <Label text="%jfx.gui.padesLevel.help"
+                                           styleClass="pref-help" wrapText="true"/>
+                                </VBox>
                             </TitledPane>
                             <TitledPane fx:id="signatureAppearanceAccordionPane"
                                         text="%jfx.gui.panel.signatureAppearance">

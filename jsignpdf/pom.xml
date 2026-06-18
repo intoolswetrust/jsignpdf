@@ -27,6 +27,12 @@
                         -Dglass.platform=Monocle -Dmonocle.platform=Headless
                         -Dprism.order=sw
                     </argLine>
+                    <!-- Isolate tests from the developer's real config (~/.config/jsignpdf). Otherwise a
+                         persisted advanced.properties (e.g. engine=dss) leaks into tests that resolve the
+                         default engine and sign with it. -->
+                    <environmentVariables>
+                        <JSIGNPDF_CONFIG_DIR>${project.build.directory}/test-config</JSIGNPDF_CONFIG_DIR>
+                    </environmentVariables>
                 </configuration>
             </plugin>
             <plugin>

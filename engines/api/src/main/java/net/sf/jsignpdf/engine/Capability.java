@@ -26,7 +26,7 @@ public enum Capability {
     HASH_RIPEMD160,
 
     // document-level
-    APPEND_MODE,
+    OVERWRITE_MODE, // rewrite the document non-incrementally; incremental append is universal and needs no capability
     CERTIFICATION_LEVEL, // DocMDP: all four levels
     ENCRYPTION_PASSWORD,
     ENCRYPTION_CERTIFICATE,

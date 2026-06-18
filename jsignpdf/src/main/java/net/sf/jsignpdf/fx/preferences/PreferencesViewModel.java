@@ -13,6 +13,7 @@ import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import net.sf.jsignpdf.utils.AdvancedConfig;
+import net.sf.jsignpdf.utils.AppConfig;
 
 /**
  * Backing model for the Preferences dialog. Loaded from {@link AdvancedConfig} on dialog open and written back on OK.
@@ -24,6 +25,8 @@ public class PreferencesViewModel {
     public static final String LIB_JPEDAL = "jpedal";
     public static final String LIB_PDFBOX = "pdfbox";
     public static final String LIB_OPENPDF = "openpdf";
+
+    private final StringProperty engineId = new SimpleStringProperty(AppConfig.DEFAULT_ENGINE_ID);
 
     private final StringProperty fontPath = new SimpleStringProperty("");
     private final StringProperty fontName = new SimpleStringProperty("");
@@ -58,6 +61,7 @@ public class PreferencesViewModel {
 
     /** Loads the VM from the given snapshot of {@link AdvancedConfig} and a pkcs11 file body. */
     public void loadFrom(AdvancedConfig cfg, String pkcs11FileBody) {
+        engineId.set(cfg.getNotEmptyProperty("engine", AppConfig.DEFAULT_ENGINE_ID));
         fontPath.set(orEmpty(cfg.getProperty("font.path")));
         fontName.set(orEmpty(cfg.getProperty("font.name")));
         fontEncoding.set(orEmpty(cfg.getProperty("font.encoding")));
@@ -86,6 +90,7 @@ public class PreferencesViewModel {
 
     /** Writes the VM back into the given {@link AdvancedConfig} (does not persist; caller should call {@code save()}). */
     public void writeTo(AdvancedConfig cfg) {
+        cfg.setProperty("engine", orFallback(engineId.get(), AppConfig.DEFAULT_ENGINE_ID));
         writeStringOrRemove(cfg, "font.path", fontPath.get());
         writeStringOrRemove(cfg, "font.name", fontName.get());
         writeStringOrRemove(cfg, "font.encoding", fontEncoding.get());
@@ -108,12 +113,17 @@ public class PreferencesViewModel {
 
     /** Resets every VM property to the bundled-default value (read from the given snapshot of bundled defaults). */
     public void applyDefaults(AdvancedConfig defaults) {
+        applyEngineDefaults(defaults);
         applyFontDefaults(defaults);
         applyCertificateDefaults(defaults);
         applyNetworkDefaults(defaults);
         applyPdfRenderDefaults(defaults);
         applyTsaDefaults(defaults);
         applyDssDefaults(defaults);
+    }
+
+    public void applyEngineDefaults(AdvancedConfig defaults) {
+        engineId.set(orFallback(defaults.getBundledDefault("engine"), AppConfig.DEFAULT_ENGINE_ID));
     }
 
     public void applyFontDefaults(AdvancedConfig defaults) {
@@ -232,6 +242,7 @@ public class PreferencesViewModel {
         }
     }
 
+    public StringProperty engineIdProperty() { return engineId; }
     public StringProperty fontPathProperty() { return fontPath; }
     public StringProperty fontNameProperty() { return fontName; }
     public StringProperty fontEncodingProperty() { return fontEncoding; }

@@ -11,6 +11,18 @@
          tabClosingPolicy="UNAVAILABLE"
          prefWidth="720" prefHeight="520">
 
+    <!-- Signing engine -->
+    <Tab fx:id="tabEngine" text="%jfx.gui.preferences.section.engine">
+        <VBox spacing="8">
+            <padding><Insets top="12" right="12" bottom="12" left="12"/></padding>
+            <Label text="%jfx.gui.engine.label"/>
+            <ChoiceBox fx:id="cmbEngine" prefWidth="220">
+                <tooltip><Tooltip text="%jfx.gui.engine.tooltip"/></tooltip>
+            </ChoiceBox>
+            <Label text="%jfx.gui.preferences.engine.help" styleClass="pref-help" wrapText="true"/>
+        </VBox>
+    </Tab>
+
     <!-- Visible signature font -->
     <Tab fx:id="tabFont" text="%jfx.gui.preferences.section.font">
         <ScrollPane fitToWidth="true">

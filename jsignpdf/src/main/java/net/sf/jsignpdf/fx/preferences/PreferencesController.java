@@ -27,6 +27,7 @@ import javafx.scene.control.Button;
 import javafx.scene.control.ButtonBar.ButtonData;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.CheckBox;
+import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Dialog;
 import javafx.scene.control.DialogPane;
@@ -40,7 +41,10 @@ import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
+import javafx.util.StringConverter;
 import net.sf.jsignpdf.Constants;
+import net.sf.jsignpdf.engine.EngineRegistry;
+import net.sf.jsignpdf.engine.SigningEngine;
 import net.sf.jsignpdf.fx.util.NativeFileChooser;
 import net.sf.jsignpdf.fx.util.NativeFileChooser.ExtensionFilter;
 import net.sf.jsignpdf.ssl.SSLInitializer;
@@ -64,6 +68,7 @@ public class PreferencesController {
     private static final String DEFAULTS_RESOURCE = "/net/sf/jsignpdf/conf/advanced.default.properties";
 
     @FXML private TabPane tabPane;
+    @FXML private Tab tabEngine;
     @FXML private Tab tabFont;
     @FXML private Tab tabCertificate;
     @FXML private Tab tabNetwork;
@@ -71,6 +76,8 @@ public class PreferencesController {
     @FXML private Tab tabTsa;
     @FXML private Tab tabDss;
     @FXML private Tab tabPkcs11;
+
+    @FXML private ChoiceBox<SigningEngine> cmbEngine;
 
     @FXML private TextField txtFontPath;
     @FXML private Button btnFontPathBrowse;
@@ -108,6 +115,18 @@ public class PreferencesController {
 
     @FXML
     private void initialize() {
+        cmbEngine.getItems().setAll(EngineRegistry.getInstance().listAll());
+        cmbEngine.setConverter(new StringConverter<SigningEngine>() {
+            @Override
+            public String toString(SigningEngine engine) {
+                return engine == null ? "" : engine.displayName();
+            }
+
+            @Override
+            public SigningEngine fromString(String s) {
+                return null;
+            }
+        });
         cmbFontEncoding.getItems().addAll(ENCODINGS);
         cmbTsaHashAlgorithm.getItems().addAll(HASH_ALGORITHMS);
         // Empty-hint visibility is bound when bind() runs.
@@ -183,6 +202,22 @@ public class PreferencesController {
 
     void bind(PreferencesViewModel viewModel) {
         this.vm = viewModel;
+
+        // The engine ChoiceBox holds SigningEngine objects; the VM stores the engine id string. Keep the two
+        // in sync manually (both directions, so "Reset section" reselecting the default reflects in the combo).
+        selectEngineById(vm.engineIdProperty().get());
+        cmbEngine.getSelectionModel().selectedItemProperty().addListener((obs, oldEngine, sel) -> {
+            if (sel != null) {
+                vm.engineIdProperty().set(sel.id());
+            }
+        });
+        vm.engineIdProperty().addListener((obs, oldId, newId) -> {
+            SigningEngine sel = cmbEngine.getSelectionModel().getSelectedItem();
+            if (sel == null || !sel.id().equals(newId)) {
+                selectEngineById(newId);
+            }
+        });
+
         txtFontPath.textProperty().bindBidirectional(vm.fontPathProperty());
         txtFontName.textProperty().bindBidirectional(vm.fontNameProperty());
         cmbFontEncoding.valueProperty().bindBidirectional(vm.fontEncodingProperty());
@@ -216,6 +251,14 @@ public class PreferencesController {
         vm.pdfLibJpedalOrderProperty().addListener((o, a, b) -> rerender.run());
         vm.pdfLibPdfboxOrderProperty().addListener((o, a, b) -> rerender.run());
         vm.pdfLibOpenpdfOrderProperty().addListener((o, a, b) -> rerender.run());
+    }
+
+    private void selectEngineById(String id) {
+        EngineRegistry registry = EngineRegistry.getInstance();
+        SigningEngine target = registry.findById(id).or(registry::getDefault).orElse(null);
+        if (target != null) {
+            cmbEngine.getSelectionModel().select(target);
+        }
     }
 
     private void rebuildPdfLibsPanel() {
@@ -300,7 +343,9 @@ public class PreferencesController {
     private void resetActiveTabToDefaults() {
         Tab active = tabPane.getSelectionModel().getSelectedItem();
         AdvancedConfig defaults = bundledDefaultsHolder();
-        if (active == tabFont) {
+        if (active == tabEngine) {
+            vm.applyEngineDefaults(defaults);
+        } else if (active == tabFont) {
             vm.applyFontDefaults(defaults);
         } else if (active == tabCertificate) {
             vm.applyCertificateDefaults(defaults);

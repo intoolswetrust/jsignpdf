@@ -97,9 +97,10 @@ public final class EngineMismatchValidator {
             }
         }
 
-        // append mode
-        if (o.isAppendX() && !caps.contains(Capability.APPEND_MODE)) {
-            out.add(new Mismatch("--append", Capability.APPEND_MODE));
+        // overwrite (non-incremental) mode — incremental append is universal, so only a request to
+        // overwrite the document (append disabled) against an engine that can't do it is a mismatch.
+        if (!o.isAppendX() && !caps.contains(Capability.OVERWRITE_MODE)) {
+            out.add(new Mismatch("--append", Capability.OVERWRITE_MODE));
         }
 
         // certification level
