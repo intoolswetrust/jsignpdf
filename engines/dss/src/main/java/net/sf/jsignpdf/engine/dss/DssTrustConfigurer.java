@@ -1,14 +1,11 @@
 package net.sf.jsignpdf.engine.dss;
 
-import static net.sf.jsignpdf.Constants.LOGGER;
-
 import java.io.File;
 import java.io.InputStream;
 import java.net.URL;
 import java.security.KeyStore;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.Level;
 
 import net.sf.jsignpdf.engine.EngineConfig;
 
@@ -79,16 +76,14 @@ final class DssTrustConfigurer {
      * @param proxyConfig the HTTP proxy configuration to route AIA / OCSP / CRL traffic through, or
      *                    {@code null} for a direct connection
      * @return the configured certificate verifier
+     * @throws Exception if a configured trust source (truststore / cert file / cert URL / LOTL) cannot be
+     *                   loaded; the caller fails fast rather than signing without the intended trust anchors
      */
-    CommonCertificateVerifier buildVerifier(ProxyConfig proxyConfig) {
+    CommonCertificateVerifier buildVerifier(ProxyConfig proxyConfig) throws Exception {
         CommonCertificateVerifier verifier = new CommonCertificateVerifier();
-        try {
-            CertificateSource[] trustedSources = createTrustedCertSources();
-            if (trustedSources.length > 0) {
-                verifier.setTrustedCertSources(trustedSources);
-            }
-        } catch (Exception e) {
-            LOGGER.log(Level.WARNING, "Failed to configure DSS trusted certificate sources", e);
+        CertificateSource[] trustedSources = createTrustedCertSources();
+        if (trustedSources.length > 0) {
+            verifier.setTrustedCertSources(trustedSources);
         }
         if (isOnlineEnabled()) {
             OCSPDataLoader ocspDataLoader = new OCSPDataLoader();

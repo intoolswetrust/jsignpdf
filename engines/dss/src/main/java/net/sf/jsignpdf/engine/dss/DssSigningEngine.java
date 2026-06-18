@@ -231,7 +231,16 @@ public class DssSigningEngine implements SigningEngine {
                     }
                 }
                 final ProxyConfig proxyConfig = buildProxyConfig(options);
-                final CommonCertificateVerifier verifier = trustConfigurer.buildVerifier(proxyConfig);
+                final CommonCertificateVerifier verifier;
+                try {
+                    verifier = trustConfigurer.buildVerifier(proxyConfig);
+                } catch (Exception e) {
+                    // A configured trust source could not be loaded (bad truststore path/password, unreadable
+                    // cert file/URL, ...). Fail fast with a clear message rather than signing without the
+                    // intended trust anchors and surfacing an opaque DSS error later.
+                    LOGGER.log(Level.SEVERE, RES.get("console.dss.trustConfigFailed"), e);
+                    return false;
+                }
                 final PAdESService service = new PAdESService(verifier);
 
                 if (useTsa) {
@@ -414,11 +423,11 @@ public class DssSigningEngine implements SigningEngine {
         final RenderMode renderMode = options.getRenderMode();
         final boolean withGraphic = renderMode == RenderMode.GRAPHIC_AND_DESCRIPTION;
 
-        // Image: the signature graphic (render mode GRAPHIC_AND_DESCRIPTION) takes priority; otherwise a
-        // background image, if configured.
-        final String graphicPath = options.getImgPath();
-        final String bgImgPath = options.getBgImgPath();
-        final String imagePath = (withGraphic && graphicPath != null) ? graphicPath : bgImgPath;
+        // DSS renders a single signature image. In GRAPHIC_AND_DESCRIPTION mode that image is the signature
+        // graphic (options.imgPath); in the other render modes it is the background image (options.bgImgPath).
+        // The two are mutually exclusive here (unlike OpenPDF, which layers them), and we never silently
+        // substitute one for the other: a graphic render mode with no graphic configured yields text only.
+        final String imagePath = withGraphic ? options.getImgPath() : options.getBgImgPath();
         if (imagePath != null) {
             LOGGER.info(RES.get("console.createImage", imagePath));
             imageParams.setImage(new FileDocument(imagePath));
