@@ -117,10 +117,23 @@ public class DssSigningEngineTest {
     }
 
     @Test
-    public void ltWithoutOnlineFetchingFails() throws Exception {
+    public void ltWithoutTsaFails() throws Exception {
         BasicSignerOptions o = baseOptions();
         o.setPadesLevel(PadesLevel.BASELINE_LT);
-        // online fetching disabled -> the engine must refuse rather than emit a weaker level
+        // LT/LTA build on a signature timestamp; with no TSA the engine must fail fast rather than
+        // dropping to a weaker level or blowing up deep inside DSS.
+        boolean ok = new DssSigningEngine().sign(o, EMPTY_CONFIG);
+        assertFalse("LT without a TSA must fail", ok);
+    }
+
+    @Test
+    public void ltWithTsaButOfflineFails() throws Exception {
+        BasicSignerOptions o = baseOptions();
+        o.setPadesLevel(PadesLevel.BASELINE_LT);
+        o.setTimestamp(true);
+        o.setTsaUrl("http://tsa.example.com/tsr");
+        // A TSA is configured but online revocation fetching is disabled (empty config) -> the engine
+        // must refuse rather than emit a weaker level. The guard fires before any network access.
         boolean ok = new DssSigningEngine().sign(o, EMPTY_CONFIG);
         assertFalse("LT without revocation data must fail", ok);
     }

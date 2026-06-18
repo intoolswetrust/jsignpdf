@@ -11,6 +11,7 @@ import static net.sf.jsignpdf.Constants.RES;
 
 import java.io.File;
 import java.io.FileOutputStream;
+import java.net.Proxy;
 import java.net.URI;
 import java.security.PrivateKey;
 import java.security.cert.Certificate;
@@ -63,6 +64,8 @@ import eu.europa.esig.dss.pades.SignatureImageParameters;
 import eu.europa.esig.dss.pades.SignatureImageTextParameters;
 import eu.europa.esig.dss.pades.signature.PAdESService;
 import eu.europa.esig.dss.service.http.commons.TimestampDataLoader;
+import eu.europa.esig.dss.service.http.proxy.ProxyConfig;
+import eu.europa.esig.dss.service.http.proxy.ProxyProperties;
 import eu.europa.esig.dss.service.tsp.OnlineTSPSource;
 import eu.europa.esig.dss.spi.validation.CommonCertificateVerifier;
 
@@ -215,16 +218,25 @@ public class DssSigningEngine implements SigningEngine {
                 final DssTrustConfigurer trustConfigurer = new DssTrustConfigurer(engineConfig);
                 final boolean ltOrLta = parameters.getSignatureLevel() == SignatureLevel.PAdES_BASELINE_LT
                         || parameters.getSignatureLevel() == SignatureLevel.PAdES_BASELINE_LTA;
-                if (ltOrLta && !trustConfigurer.isOnlineEnabled()) {
-                    LOGGER.severe(RES.get("console.dss.ltNoRevocation"));
-                    return false;
+                if (ltOrLta) {
+                    // LT/LTA build on a signature timestamp (level T); without a TSA, DSS would fail deep in
+                    // signDocument(). Fail fast here with a clear message instead.
+                    if (!useTsa) {
+                        LOGGER.severe(RES.get("console.dss.ltNoTsa"));
+                        return false;
+                    }
+                    if (!trustConfigurer.isOnlineEnabled()) {
+                        LOGGER.severe(RES.get("console.dss.ltNoRevocation"));
+                        return false;
+                    }
                 }
-                final CommonCertificateVerifier verifier = trustConfigurer.buildVerifier();
+                final ProxyConfig proxyConfig = buildProxyConfig(options);
+                final CommonCertificateVerifier verifier = trustConfigurer.buildVerifier(proxyConfig);
                 final PAdESService service = new PAdESService(verifier);
 
                 if (useTsa) {
                     LOGGER.info(RES.get("console.creatingTsaClient"));
-                    service.setTspSource(buildTspSource(options, parameters, digestAlgorithm));
+                    service.setTspSource(buildTspSource(options, parameters, digestAlgorithm, proxyConfig));
                 }
 
                 LOGGER.info(RES.get("console.processing"));
@@ -253,12 +265,13 @@ public class DssSigningEngine implements SigningEngine {
     }
 
     private OnlineTSPSource buildTspSource(BasicSignerOptions options, PAdESSignatureParameters parameters,
-            DigestAlgorithm digestAlgorithm) {
+            DigestAlgorithm digestAlgorithm, ProxyConfig proxyConfig) {
         final String tsaUrl = options.getTsaUrl();
         final TimestampDataLoader tsDataLoader = new TimestampDataLoader();
+        tsDataLoader.setProxyConfig(proxyConfig);
         if (options.getTsaServerAuthn() == ServerAuthentication.PASSWORD) {
             final URI tsaUri = URI.create(tsaUrl);
-            tsDataLoader.addAuthentication(tsaUri.getHost(), tsaUri.getPort(), null,
+            tsDataLoader.addAuthentication(tsaUri.getHost(), resolvePort(tsaUri), null,
                     StringUtils.defaultString(options.getTsaUser()),
                     StringUtils.defaultString(options.getTsaPasswd()).toCharArray());
         }
@@ -276,6 +289,51 @@ public class DssSigningEngine implements SigningEngine {
         return tspSource;
     }
 
+    /** Resolves the port for basic-auth registration, defaulting from the scheme when none is given. */
+    private static int resolvePort(URI uri) {
+        final int port = uri.getPort();
+        if (port >= 0) {
+            return port;
+        }
+        return "https".equalsIgnoreCase(uri.getScheme()) ? 443 : 80;
+    }
+
+    /**
+     * Translates JSignPdf's proxy settings into a DSS {@link ProxyConfig} so OCSP / CRL / AIA / TSA
+     * traffic honours the configured proxy (mirroring the OpenPDF engine's {@code createProxy()} use).
+     * DSS routes only HTTP-style proxies; SOCKS is unsupported, so it is reported rather than silently
+     * ignored.
+     *
+     * @return the proxy configuration, or {@code null} for a direct connection
+     */
+    private static ProxyConfig buildProxyConfig(BasicSignerOptions options) {
+        if (!options.isAdvanced() || options.getProxyType() == Proxy.Type.DIRECT) {
+            return null;
+        }
+        if (options.getProxyType() == Proxy.Type.SOCKS) {
+            LOGGER.warning(RES.get("console.dss.socksProxyUnsupported"));
+            return null;
+        }
+        final String host = options.getProxyHost();
+        if (StringUtils.isBlank(host)) {
+            return null;
+        }
+        final int port = options.getProxyPort();
+        final ProxyConfig proxyConfig = new ProxyConfig();
+        proxyConfig.setHttpProperties(proxyProperties("http", host, port));
+        // An HTTP proxy is reached over http even for https targets (CONNECT tunnelling), hence "http".
+        proxyConfig.setHttpsProperties(proxyProperties("http", host, port));
+        return proxyConfig;
+    }
+
+    private static ProxyProperties proxyProperties(String scheme, String host, int port) {
+        final ProxyProperties props = new ProxyProperties();
+        props.setScheme(scheme);
+        props.setHost(host);
+        props.setPort(port);
+        return props;
+    }
+
     private File encryptPdf(File inFile, BasicSignerOptions options) throws Exception {
         try (PDDocument doc = Loader.loadPDF(inFile)) {
             if (!doc.getSignatureDictionaries().isEmpty()) {
@@ -286,6 +344,8 @@ public class DssSigningEngine implements SigningEngine {
             final String encOwnerPwd = StringUtils.defaultString(options.getPdfOwnerPwdStrX());
             final String encUserPwd = StringUtils.defaultString(options.getPdfUserPwdStr());
             final StandardProtectionPolicy policy = new StandardProtectionPolicy(encOwnerPwd, encUserPwd, ap);
+            // 128-bit matches the OpenPDF engine's password encryption (PdfStamper.setEncryption(true, ...)
+            // i.e. STANDARD_ENCRYPTION_128), so switching engines is not an encryption-strength downgrade.
             policy.setEncryptionKeyLength(128);
             doc.protect(policy);
 

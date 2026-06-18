@@ -17,6 +17,8 @@ import org.apache.commons.lang3.StringUtils;
 import eu.europa.esig.dss.service.crl.OnlineCRLSource;
 import eu.europa.esig.dss.service.http.commons.CommonsDataLoader;
 import eu.europa.esig.dss.service.http.commons.FileCacheDataLoader;
+import eu.europa.esig.dss.service.http.commons.OCSPDataLoader;
+import eu.europa.esig.dss.service.http.proxy.ProxyConfig;
 import eu.europa.esig.dss.service.ocsp.OnlineOCSPSource;
 import eu.europa.esig.dss.spi.DSSUtils;
 import eu.europa.esig.dss.spi.tsl.TrustedListsCertificateSource;
@@ -74,9 +76,11 @@ final class DssTrustConfigurer {
      * Builds a verifier configured with the trusted certificate sources and (when online is enabled) the
      * AIA / OCSP / CRL online sources required to embed validation material for LT/LTA.
      *
+     * @param proxyConfig the HTTP proxy configuration to route AIA / OCSP / CRL traffic through, or
+     *                    {@code null} for a direct connection
      * @return the configured certificate verifier
      */
-    CommonCertificateVerifier buildVerifier() {
+    CommonCertificateVerifier buildVerifier(ProxyConfig proxyConfig) {
         CommonCertificateVerifier verifier = new CommonCertificateVerifier();
         try {
             CertificateSource[] trustedSources = createTrustedCertSources();
@@ -87,9 +91,13 @@ final class DssTrustConfigurer {
             LOGGER.log(Level.WARNING, "Failed to configure DSS trusted certificate sources", e);
         }
         if (isOnlineEnabled()) {
-            verifier.setAIASource(new DefaultAIASource());
-            verifier.setOcspSource(new OnlineOCSPSource());
-            verifier.setCrlSource(new OnlineCRLSource());
+            OCSPDataLoader ocspDataLoader = new OCSPDataLoader();
+            ocspDataLoader.setProxyConfig(proxyConfig);
+            CommonsDataLoader dataLoader = new CommonsDataLoader();
+            dataLoader.setProxyConfig(proxyConfig);
+            verifier.setAIASource(new DefaultAIASource(dataLoader));
+            verifier.setOcspSource(new OnlineOCSPSource(ocspDataLoader));
+            verifier.setCrlSource(new OnlineCRLSource(dataLoader));
         }
         return verifier;
     }
