@@ -26,6 +26,7 @@ import org.apache.pdfbox.pdmodel.interactive.annotation.PDAnnotationWidget;
 import org.apache.pdfbox.pdmodel.interactive.digitalsignature.PDSignature;
 import org.apache.pdfbox.pdmodel.interactive.form.PDSignatureField;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
+import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Rule;
@@ -53,6 +54,9 @@ public class DssSigningEngineTest {
 
     private static final EngineConfig EMPTY_CONFIG = new MapEngineConfig(new HashMap<>());
 
+    /** In-JVM RFC 3161 TSA on a loopback port, so level-T signatures can be produced offline. */
+    private static EmbeddedTsaServer tsaServer;
+
     @Rule
     public TemporaryFolder tmp = new TemporaryFolder();
 
@@ -60,8 +64,18 @@ public class DssSigningEngineTest {
     private File outputFile;
 
     @BeforeClass
-    public static void registerBc() {
+    public static void setUpClass() throws Exception {
+        // BC must be registered before the embedded TSA generates its signing material.
         Security.addProvider(new BouncyCastleProvider());
+        tsaServer = new EmbeddedTsaServer();
+        tsaServer.start();
+    }
+
+    @AfterClass
+    public static void stopTsa() {
+        if (tsaServer != null) {
+            tsaServer.stop();
+        }
     }
 
     @Before
@@ -99,6 +113,13 @@ public class DssSigningEngineTest {
         return o;
     }
 
+    /** Points the options at the embedded loopback TSA (no auth), so signing reaches baseline level T. */
+    private void useEmbeddedTsa(BasicSignerOptions o) {
+        o.setTimestamp(true);
+        o.setTsaUrl(tsaServer.getUrl());
+        o.setTsaHashAlg("SHA-256");
+    }
+
     @Test
     public void defaultLevelProducesBaselineB() throws Exception {
         BasicSignerOptions o = baseOptions(); // padesLevel == null -> BASELINE_B
@@ -114,6 +135,23 @@ public class DssSigningEngineTest {
         o.setPadesLevel(PadesLevel.BASELINE_B);
         assertTrue(new DssSigningEngine().sign(o, EMPTY_CONFIG));
         assertSignatureLevel(outputFile, SignatureLevel.PAdES_BASELINE_B);
+    }
+
+    @Test
+    public void baselineBWithTsaUpgradesToT() throws Exception {
+        BasicSignerOptions o = baseOptions(); // padesLevel == null -> BASELINE_B, auto-upgraded to T by the TSA
+        useEmbeddedTsa(o);
+        assertTrue(new DssSigningEngine().sign(o, EMPTY_CONFIG));
+        assertSignatureLevel(outputFile, SignatureLevel.PAdES_BASELINE_T);
+    }
+
+    @Test
+    public void explicitBaselineTWithTsaProducesT() throws Exception {
+        BasicSignerOptions o = baseOptions();
+        o.setPadesLevel(PadesLevel.BASELINE_T);
+        useEmbeddedTsa(o);
+        assertTrue(new DssSigningEngine().sign(o, EMPTY_CONFIG));
+        assertSignatureLevel(outputFile, SignatureLevel.PAdES_BASELINE_T);
     }
 
     @Test
