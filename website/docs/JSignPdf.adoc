@@ -932,7 +932,7 @@ The default engine is taken from the `engine` key in `<config-dir>/advanced.prop
 jsignpdf --engine openpdf -ksf cert.p12 -ksp secret document.pdf
 ----
 
-In the JavaFX UI, the active engine is chosen from the *Engine* selector in the toolbar; the choice is saved to `advanced.properties` immediately. When an engine does not support a particular option, the corresponding control is disabled (with an explanatory tooltip); on the command line, signing fails fast with a message listing the unsupported options.
+In the JavaFX UI, the active engine is chosen from the *Engine* selector in the Preferences; the choice is saved to `advanced.properties` immediately. When an engine does not support a particular option, the corresponding control is disabled (with an explanatory tooltip); on the command line, signing fails fast with a message listing the unsupported options.
 
 Engines are discovered automatically: dropping a third-party engine jar (with its dependencies and a `META-INF/services/net.sf.jsignpdf.engine.SigningEngine` registration) into the `lib/` directory of an installed JSignPdf makes it appear in `--list-engines` and the toolbar selector.
 
@@ -957,7 +957,7 @@ JSignPdf 3.1 bundles a second engine, *EU DSS (PAdES)* (id `dss`), built on the 
 |`LT` + an archive timestamp.
 |===
 
-Select it with `-eng dss` on the command line (or the *Engine* toolbar selector in the GUI) and pick the level with `-pl` / `--pades-level`:
+Select it with `-eng dss` on the command line (or the *PAdES Level* sidebar section in the GUI) and pick the level with `-pl` / `--pades-level`:
 
 [source,shell]
 ----
