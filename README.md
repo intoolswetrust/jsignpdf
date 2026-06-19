@@ -23,7 +23,7 @@ Project home page: [jsignpdf.eu](https://jsignpdf.eu/)
 - **Timestamping**: RFC 3161 TSA with optional user/password authentication.
 - **Revocation info**: CRL and OCSP embedding for LTV workflows.
 - **Visible signatures**: customizable layout with `${signer}`, `${timestamp}`, and other placeholders.
-- **Signing engines (OpenPDF / PAdES via DSS)**: pluggable signing backend, selectable per run (`-eng` / toolbar). The default **OpenPDF** engine is unchanged; the bundled **EU DSS** engine produces PAdES signatures at baseline levels B / T / LT / LTA (`--pades-level`).
+- **Signing engines (OpenPDF / PAdES via DSS)**: pluggable signing backend, selectable per run (`-eng` / Preferences). The default **OpenPDF** engine is unchanged; the bundled **EU DSS** engine produces PAdES signatures at baseline levels B / T / LT / LTA (`--pades-level`).
 - **Internationalization**: maintained via [Weblate](https://hosted.weblate.org/projects/jsignpdf/messages/) (15+ languages).
 
 ## Install
