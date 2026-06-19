@@ -141,17 +141,14 @@ public class DssSigningEngine implements SigningEngine {
             }
 
             final HashAlgorithm hashAlgorithm = options.getHashAlgorithmX();
-            DigestAlgorithm digestAlgorithm = DssMappings.toDigestAlgorithm(hashAlgorithm);
+            final DigestAlgorithm digestAlgorithm = DssMappings.toDigestAlgorithm(hashAlgorithm);
             if (digestAlgorithm == null) {
-                // A deliberate selection of a non-PAdES digest is rejected by EngineMismatchValidator
-                // before we get here; reaching this branch means the legacy default (SHA-1) leaked
-                // through, so upgrade it transparently rather than failing on bare defaults.
-                if (options.isAdvanced() && options.isHashAlgorithmSet()) {
-                    LOGGER.severe(RES.get("console.dss.unsupportedHash", hashAlgorithm.getAlgorithmName()));
-                    return false;
-                }
-                LOGGER.info(RES.get("console.dss.hashUpgrade", hashAlgorithm.getAlgorithmName()));
-                digestAlgorithm = DigestAlgorithm.SHA256;
+                // SHA-1 / RIPEMD-160 are not valid PAdES digests. The default (SHA-256) maps fine, so
+                // reaching here means a non-PAdES digest was explicitly selected in advanced mode.
+                // EngineMismatchValidator normally rejects this earlier; fail fast here too rather than
+                // silently substituting a digest.
+                LOGGER.severe(RES.get("console.dss.unsupportedHash", hashAlgorithm.getAlgorithmName()));
+                return false;
             }
 
             try (PrivateKeySignatureToken token = new PrivateKeySignatureToken(key, chain)) {
@@ -212,6 +209,15 @@ public class DssSigningEngine implements SigningEngine {
                         return false;
                     }
                     effectiveInFile = encryptedTempFile;
+                    // DSS must open the temp with the password encryptPdf just used (not necessarily the
+                    // input-decrypt password set above). PDFBox treats an empty owner password as "owner =
+                    // user password", so when the owner password is empty fall back to the user password;
+                    // otherwise DSS cannot decrypt the temp at all (the owner-empty / user-password-only case).
+                    final String encOwnerPwd = options.getPdfOwnerPwdStrX();
+                    final String openPwd = StringUtils.isNotEmpty(encOwnerPwd) ? encOwnerPwd : options.getPdfUserPwdStr();
+                    if (StringUtils.isNotEmpty(openPwd)) {
+                        parameters.setPasswordProtection(openPwd.toCharArray());
+                    }
                 }
 
                 final DSSDocument document = new FileDocument(effectiveInFile);

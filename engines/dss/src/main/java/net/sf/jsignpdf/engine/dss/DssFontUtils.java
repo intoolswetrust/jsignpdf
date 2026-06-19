@@ -45,8 +45,8 @@ final class DssFontUtils {
                 return new DSSFileFont(new InMemoryDocument(is.readAllBytes()));
             }
         } catch (Exception e) {
-            Constants.LOGGER.log(Level.SEVERE, "Font loading failed" + (StringUtils.isNotEmpty(fontPath) ? ": " + fontPath : ""),
-                    e);
+            final String fontSource = StringUtils.isNotEmpty(fontPath) ? fontPath : DEFAULT_EMBEDDED_FONT_PATH;
+            Constants.LOGGER.log(Level.SEVERE, Constants.RES.get("console.dss.fontLoadFailed", fontSource), e);
         }
         return null;
     }

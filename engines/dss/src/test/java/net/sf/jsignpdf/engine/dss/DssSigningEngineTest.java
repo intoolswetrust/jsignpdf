@@ -13,6 +13,7 @@ import java.util.Map;
 import net.sf.jsignpdf.BasicSignerOptions;
 import net.sf.jsignpdf.engine.Capability;
 import net.sf.jsignpdf.engine.EngineConfig;
+import net.sf.jsignpdf.types.PDFEncryption;
 import net.sf.jsignpdf.types.PadesLevel;
 
 import org.apache.pdfbox.Loader;
@@ -133,7 +134,6 @@ public class DssSigningEngineTest {
     public void defaultHashSignsSuccessfully() throws Exception {
         BasicSignerOptions o = baseOptions();
         // no explicit hash -> the global default (SHA-256) is a valid PAdES digest, so signing just works.
-        // The engine still carries a defensive upgrade for any non-PAdES default that might leak through.
         o.setHashAlgorithm((net.sf.jsignpdf.types.HashAlgorithm) null);
         assertFalse("precondition: hash is the unset default", o.isHashAlgorithmSet());
         assertTrue("signing with the default hash must succeed", new DssSigningEngine().sign(o, EMPTY_CONFIG));
@@ -163,6 +163,37 @@ public class DssSigningEngineTest {
         useEmbeddedTsa(o);
         assertTrue(new DssSigningEngine().sign(o, EMPTY_CONFIG));
         assertSignatureLevel(outputFile, SignatureLevel.PAdES_BASELINE_T);
+    }
+
+    @Test
+    public void inPlaceSigningProducesValidFile() throws Exception {
+        BasicSignerOptions o = baseOptions();
+        // -o == input: DSS reads the source lazily and writes to a FileOutputStream on the same path.
+        // Confirm signing in place still yields a valid, single-signature PAdES file.
+        o.setOutFile(inputFile.getAbsolutePath());
+        assertTrue("in-place signing must succeed", new DssSigningEngine().sign(o, EMPTY_CONFIG));
+        assertSignatureLevel(inputFile, SignatureLevel.PAdES_BASELINE_B);
+    }
+
+    @Test
+    public void userOnlyEncryptionSignsAndStaysEncrypted() throws Exception {
+        BasicSignerOptions o = baseOptions();
+        // Encrypt-before-sign with a user password only (owner left empty). The engine must open the
+        // encrypted temp with the exact owner password it used (here the empty owner password) rather
+        // than relying on PDFBox's implicit empty-password fallback, then still produce a signed,
+        // still-encrypted output.
+        o.setPdfEncryption(PDFEncryption.PASSWORD);
+        o.setPdfUserPwd("userpass");
+        assertTrue("signing a user-only-encrypted PDF must succeed", new DssSigningEngine().sign(o, EMPTY_CONFIG));
+
+        // The output is still encrypted (PDFBox maps an empty owner password to "owner = user password"),
+        // so it opens with the user password and carries a PAdES signature. A password-less load / the DSS
+        // validator cannot open it, hence the structural check here rather than assertSignatureLevel().
+        try (PDDocument doc = Loader.loadPDF(outputFile, "userpass")) {
+            assertTrue("output must be encrypted", doc.isEncrypted());
+            assertFalse("a signature must be present", doc.getSignatureDictionaries().isEmpty());
+            assertEquals("ETSI.CAdES.detached", doc.getSignatureDictionaries().get(0).getSubFilter());
+        }
     }
 
     @Test

@@ -1,5 +1,7 @@
 package net.sf.jsignpdf.types;
 
+import java.util.Locale;
+
 /**
  * PAdES baseline signature levels (ETSI EN 319 142). This is the single new per-document field the
  * DSS engine needs; it is selected by the user through {@code --pades-level} / the FX dropdown and
@@ -36,7 +38,7 @@ public enum PadesLevel {
         if (value == null) {
             return null;
         }
-        String v = value.trim().toUpperCase(java.util.Locale.ENGLISH);
+        String v = value.trim().toUpperCase(Locale.ENGLISH);
         switch (v) {
             case "B":
                 return BASELINE_B;

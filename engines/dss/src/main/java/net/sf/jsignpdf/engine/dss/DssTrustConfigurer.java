@@ -3,11 +3,16 @@ package net.sf.jsignpdf.engine.dss;
 import java.io.File;
 import java.io.InputStream;
 import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.security.KeyStore;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
 
+import net.sf.jsignpdf.Constants;
 import net.sf.jsignpdf.engine.EngineConfig;
+import net.sf.jsignpdf.utils.ConfigLocationResolver;
 
 import org.apache.commons.lang3.StringUtils;
 
@@ -56,6 +61,16 @@ final class DssTrustConfigurer {
     /** Separator for the list-valued keys (lotlUrls / certFiles / certUrls). */
     private static final String LIST_SEPARATOR = "[,;]+";
 
+    /** Subdirectory (under the JSignPdf config dir, else the system temp dir) holding the cached trusted lists. */
+    private static final String TL_CACHE_DIR_NAME = "dss-tl-cache";
+
+    /**
+     * How long a cached trusted-list / LOTL download stays fresh before DSS re-fetches it (24h). Trusted lists
+     * change infrequently, so this lets repeat / batch LT/LTA signing reuse the on-disk cache instead of
+     * re-downloading the LOTL on every {@code sign()} call.
+     */
+    private static final long TL_CACHE_EXPIRATION_MS = 24L * 60 * 60 * 1000;
+
     private final EngineConfig config;
 
     DssTrustConfigurer(EngineConfig config) {
@@ -103,7 +118,10 @@ final class DssTrustConfigurer {
         LOTLSource[] lotlSources = getLotlSources();
         if (lotlSources.length > 0) {
             TLValidationJob tlValidationJob = new TLValidationJob();
-            tlValidationJob.setOnlineDataLoader(new FileCacheDataLoader(new CommonsDataLoader()));
+            FileCacheDataLoader onlineDataLoader = new FileCacheDataLoader(new CommonsDataLoader());
+            onlineDataLoader.setFileCacheDirectory(tlCacheDirectory());
+            onlineDataLoader.setCacheExpirationTime(TL_CACHE_EXPIRATION_MS);
+            tlValidationJob.setOnlineDataLoader(onlineDataLoader);
             tlValidationJob.setListOfTrustedListSources(lotlSources);
             TrustedListsCertificateSource trustedListsCertificateSource = new TrustedListsCertificateSource();
             tlValidationJob.setTrustedListCertificateSource(trustedListsCertificateSource);
@@ -133,6 +151,26 @@ final class DssTrustConfigurer {
             trustedSources.add(source);
         }
         return trustedSources.toArray(new CertificateSource[0]);
+    }
+
+    /**
+     * Resolves the directory DSS caches the downloaded trusted lists in: {@code <configDir>/dss-tl-cache} when a
+     * JSignPdf config directory is available, otherwise a stable folder under the system temp dir. A persistent
+     * location (rather than {@link FileCacheDataLoader}'s default temp behaviour) lets the cache survive across
+     * runs so batch LT/LTA signing reuses it.
+     */
+    private static File tlCacheDirectory() {
+        Path base = ConfigLocationResolver.getInstance().getConfigDir();
+        File cacheDir = base != null
+                ? base.resolve(TL_CACHE_DIR_NAME).toFile()
+                : new File(System.getProperty("java.io.tmpdir"), "jsignpdf-" + TL_CACHE_DIR_NAME);
+        try {
+            Files.createDirectories(cacheDir.toPath());
+        } catch (Exception e) {
+            // Non-fatal: DSS recreates the directory on demand; log and let signing proceed.
+            Constants.LOGGER.log(Level.WARNING, "Could not create DSS trusted-list cache directory " + cacheDir, e);
+        }
+        return cacheDir;
     }
 
     private LOTLSource[] getLotlSources() {
