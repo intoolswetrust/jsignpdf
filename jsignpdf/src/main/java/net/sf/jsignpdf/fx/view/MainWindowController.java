@@ -446,15 +446,18 @@ public class MainWindowController {
                     Capability.ENCRYPTION_CERTIFICATE);
         }
 
-        // TODO(phase-2): field-level capability gating is still missing for controls that live inside
-        // the side-panel sub-controllers and already carry their own disable logic — hash algorithm,
-        // certification level, append mode, render-mode items, permission checkboxes, proxy fields, and
-        // the PKCS#11/CloudFoxy keystore-type items (see the control->capability table in
-        // design-doc/3.1-signing-engines.md). The CLI path is already comprehensive via
-        // EngineMismatchValidator, which is the authoritative table to mirror here. This asymmetry is
-        // invisible while OpenPDF (all capabilities) is the only engine; it must be closed when the
-        // first reduced-capability engine (DSS, see design-doc/3.1-engine-dss.md) lands so the GUI does
-        // not leave enabled options the engine will reject at sign time.
+        // Field-level gating for controls that live inside side-panel sub-controllers. The append toggle
+        // is the first of these: an engine without OVERWRITE_MODE (DSS) always appends, so the checkbox is
+        // forced on and disabled there.
+        if (signaturePropertiesController != null) {
+            signaturePropertiesController.gateCapabilities(engineCapabilities);
+        }
+
+        // TODO(phase-2): field-level capability gating is still missing for the remaining sub-controller
+        // controls that carry their own disable logic — hash algorithm, certification level, render-mode
+        // items, permission checkboxes, proxy fields, and the PKCS#11/CloudFoxy keystore-type items (see
+        // the control->capability table in design-doc/3.1-signing-engines.md). The CLI path is already
+        // comprehensive via EngineMismatchValidator, which is the authoritative table to mirror here.
     }
 
     /**

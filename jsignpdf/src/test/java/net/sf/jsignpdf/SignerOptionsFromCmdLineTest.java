@@ -305,6 +305,33 @@ public class SignerOptionsFromCmdLineTest {
         assertNull(f.opts.getPadesLevel());
     }
 
+    @Test
+    public void append_isDefaultWhenNeitherFlagGiven() throws Exception {
+        // Incremental append is the safe default and matches the GUI; omitting both flags must not request
+        // an overwrite (which a PAdES engine like DSS cannot honour).
+        Fixture f = new Fixture("");
+        f.opts.setCmdLine(new String[] { "-ksf", "/tmp/x.p12" });
+        f.opts.loadCmdLine();
+        assertTrue(f.opts.isAppend());
+    }
+
+    @Test
+    public void overwriteFlag_disablesAppend() throws Exception {
+        Fixture f = new Fixture("");
+        f.opts.setCmdLine(new String[] { "-ksf", "/tmp/x.p12", "--overwrite" });
+        f.opts.loadCmdLine();
+        assertFalse(f.opts.isAppend());
+    }
+
+    @Test
+    public void legacyAppendFlag_stillKeepsAppendOn() throws Exception {
+        // --append is now redundant (append is the default) but must remain a harmless no-op for scripts.
+        Fixture f = new Fixture("");
+        f.opts.setCmdLine(new String[] { "-ksf", "/tmp/x.p12", "--append" });
+        f.opts.loadCmdLine();
+        assertTrue(f.opts.isAppend());
+    }
+
     /** Convenience wiring: captures warnings and feeds a canned stdin reader with no Console. */
     private static final class Fixture {
         final SignerOptionsFromCmdLine opts = new SignerOptionsFromCmdLine();

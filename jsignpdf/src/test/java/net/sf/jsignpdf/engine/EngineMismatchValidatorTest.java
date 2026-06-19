@@ -61,7 +61,7 @@ public class EngineMismatchValidatorTest {
         assertTrue(reported.contains(Capability.OVERWRITE_MODE));
         Mismatch m = mismatches.stream().filter(x -> x.capability() == Capability.OVERWRITE_MODE)
                 .findFirst().orElseThrow();
-        assertEquals("--append", m.option());
+        assertEquals("--overwrite", m.option());
     }
 
     @Test

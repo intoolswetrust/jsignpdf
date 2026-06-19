@@ -298,6 +298,8 @@ public class Constants {
     public static final String ARG_APPEND = "a";
     public static final String ARG_APPEND_LONG = "append";
 
+    public static final String ARG_OVERWRITE_LONG = "overwrite";
+
     public static final String ARG_QUIET_LONG = "quiet";
     public static final String ARG_QUIET = "q";
 

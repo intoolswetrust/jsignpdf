@@ -101,10 +101,11 @@ public final class EngineMismatchValidator {
             }
         }
 
-        // overwrite (non-incremental) mode — incremental append is universal, so only a request to
-        // overwrite the document (append disabled) against an engine that can't do it is a mismatch.
+        // overwrite (non-incremental) mode — incremental append is the default and universal, so only an
+        // explicit --overwrite request against an engine that can't do it (e.g. DSS, which PAdES forces to
+        // be incremental) is a mismatch. The request is deliberate, so fail fast rather than silently append.
         if (!o.isAppendX() && !caps.contains(Capability.OVERWRITE_MODE)) {
-            out.add(new Mismatch("--append", Capability.OVERWRITE_MODE));
+            out.add(new Mismatch("--overwrite", Capability.OVERWRITE_MODE));
         }
 
         // certification level
