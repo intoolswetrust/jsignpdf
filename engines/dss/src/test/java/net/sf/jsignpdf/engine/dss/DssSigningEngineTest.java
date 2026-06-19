@@ -130,6 +130,17 @@ public class DssSigningEngineTest {
     }
 
     @Test
+    public void defaultHashSignsSuccessfully() throws Exception {
+        BasicSignerOptions o = baseOptions();
+        // no explicit hash -> the global default (SHA-256) is a valid PAdES digest, so signing just works.
+        // The engine still carries a defensive upgrade for any non-PAdES default that might leak through.
+        o.setHashAlgorithm((net.sf.jsignpdf.types.HashAlgorithm) null);
+        assertFalse("precondition: hash is the unset default", o.isHashAlgorithmSet());
+        assertTrue("signing with the default hash must succeed", new DssSigningEngine().sign(o, EMPTY_CONFIG));
+        assertSignatureLevel(outputFile, SignatureLevel.PAdES_BASELINE_B);
+    }
+
+    @Test
     public void explicitBaselineBProducesBaselineB() throws Exception {
         BasicSignerOptions o = baseOptions();
         o.setPadesLevel(PadesLevel.BASELINE_B);

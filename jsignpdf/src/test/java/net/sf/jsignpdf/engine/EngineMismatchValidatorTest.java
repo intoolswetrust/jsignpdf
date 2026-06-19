@@ -25,10 +25,24 @@ public class EngineMismatchValidatorTest {
     }
 
     @Test
-    public void emptyCapabilityEngineFlagsDefaultHashButNotAppend() {
-        // A fresh options object signs with the default SHA-1 hash and append (incremental) mode on.
-        // Append is universal, so only the hash is flagged against a capability-less engine.
+    public void defaultsProduceNoHashOrOverwriteMismatch() {
+        // A fresh options object carries the global default hash (never explicitly chosen) and append
+        // (incremental) mode on. An unchosen default is the engine's problem to honour/upgrade, and
+        // incremental append is universal — so a capability-less engine flags neither.
         BasicSignerOptions opts = new BasicSignerOptions();
+        opts.setAdvanced(true);
+        StubSigningEngine engine = new StubSigningEngine("empty");
+        Set<Capability> reported = caps(EngineMismatchValidator.findMismatches(opts, engine));
+        assertFalse("default hash must not be treated as a user choice", reported.contains(Capability.HASH_SHA1));
+        assertFalse("incremental append is universal", reported.contains(Capability.OVERWRITE_MODE));
+    }
+
+    @Test
+    public void explicitlyChosenUnsupportedHashIsFlagged() {
+        // When the user deliberately selects SHA-1 in advanced mode, an engine that lacks it must fail fast.
+        BasicSignerOptions opts = new BasicSignerOptions();
+        opts.setAdvanced(true);
+        opts.setHashAlgorithm(net.sf.jsignpdf.types.HashAlgorithm.SHA1);
         StubSigningEngine engine = new StubSigningEngine("empty");
         Set<Capability> reported = caps(EngineMismatchValidator.findMismatches(opts, engine));
         assertTrue(reported.contains(Capability.HASH_SHA1));

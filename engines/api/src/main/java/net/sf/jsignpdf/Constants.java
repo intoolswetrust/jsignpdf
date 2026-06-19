@@ -201,7 +201,7 @@ public class Constants {
     public static final long DEFVAL_SIG_SIZE = 15000L;
     public static final String DEFVAL_CACERTS_PASSWD = "changeit";
 
-    public static final HashAlgorithm DEFVAL_HASH_ALGORITHM = HashAlgorithm.SHA1;
+    public static final HashAlgorithm DEFVAL_HASH_ALGORITHM = HashAlgorithm.SHA256;
 
     public static final boolean DEFVAL_APPEND = toBoolean(true);
 

@@ -204,6 +204,17 @@
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-surefire-plugin</artifactId>
                     <version>${maven.surefire.plugin.version}</version>
+                    <configuration>
+                        <!-- Isolate tests from the developer's real config. ConfigLocationResolver
+                             honours JSIGNPDF_CONFIG_DIR verbatim and ahead of the platform location,
+                             so the AppConfig/PropertyStoreFactory singletons resolve a clean, build-local
+                             directory instead of ~/.config/jsignpdf (or %APPDATA%, ~/Library/...). Without
+                             this, tests that assert defaults (engine, advanced.properties) flake on a
+                             machine that has a saved config. The dir lives under target/ so `clean` wipes it. -->
+                        <environmentVariables>
+                            <JSIGNPDF_CONFIG_DIR>${project.build.directory}/test-config</JSIGNPDF_CONFIG_DIR>
+                        </environmentVariables>
+                    </configuration>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>

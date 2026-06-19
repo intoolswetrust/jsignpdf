@@ -82,11 +82,15 @@ public final class EngineMismatchValidator {
         final List<Mismatch> out = new ArrayList<>();
         final var caps = engine.capabilities();
 
-        // hash algorithm
-        final HashAlgorithm hash = o.getHashAlgorithmX();
-        final Capability hashCap = HASH_CAPS.get(hash);
-        if (hashCap != null && !caps.contains(hashCap)) {
-            out.add(new Mismatch("--hash-algorithm", hashCap));
+        // hash algorithm: only a deliberate (advanced-mode) selection is a user choice the engine must
+        // honour. The global default (SHA-1) is not — an engine that lacks it transparently upgrades to a
+        // supported digest, so signing with bare defaults must not fail fast here.
+        if (o.isAdvanced() && o.isHashAlgorithmSet()) {
+            final HashAlgorithm hash = o.getHashAlgorithmX();
+            final Capability hashCap = HASH_CAPS.get(hash);
+            if (hashCap != null && !caps.contains(hashCap)) {
+                out.add(new Mismatch("--hash-algorithm", hashCap));
+            }
         }
 
         // PAdES baseline level

@@ -141,10 +141,17 @@ public class DssSigningEngine implements SigningEngine {
             }
 
             final HashAlgorithm hashAlgorithm = options.getHashAlgorithmX();
-            final DigestAlgorithm digestAlgorithm = DssMappings.toDigestAlgorithm(hashAlgorithm);
+            DigestAlgorithm digestAlgorithm = DssMappings.toDigestAlgorithm(hashAlgorithm);
             if (digestAlgorithm == null) {
-                LOGGER.severe(RES.get("console.dss.unsupportedHash", hashAlgorithm.getAlgorithmName()));
-                return false;
+                // A deliberate selection of a non-PAdES digest is rejected by EngineMismatchValidator
+                // before we get here; reaching this branch means the legacy default (SHA-1) leaked
+                // through, so upgrade it transparently rather than failing on bare defaults.
+                if (options.isAdvanced() && options.isHashAlgorithmSet()) {
+                    LOGGER.severe(RES.get("console.dss.unsupportedHash", hashAlgorithm.getAlgorithmName()));
+                    return false;
+                }
+                LOGGER.info(RES.get("console.dss.hashUpgrade", hashAlgorithm.getAlgorithmName()));
+                digestAlgorithm = DigestAlgorithm.SHA256;
             }
 
             try (PrivateKeySignatureToken token = new PrivateKeySignatureToken(key, chain)) {

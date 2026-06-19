@@ -1149,10 +1149,19 @@ public class BasicSignerOptions {
     }
 
     public HashAlgorithm getHashAlgorithm() {
-        if (hashAlgorithm == null) {
-            hashAlgorithm = Constants.DEFVAL_HASH_ALGORITHM;
-        }
-        return hashAlgorithm;
+        return hashAlgorithm == null ? Constants.DEFVAL_HASH_ALGORITHM : hashAlgorithm;
+    }
+
+    /**
+     * Whether a hash algorithm was explicitly selected (CLI {@code --hash-algorithm}, stored config, or
+     * GUI selection), as opposed to falling back to {@link Constants#DEFVAL_HASH_ALGORITHM}. Used to tell
+     * a deliberate user choice from the legacy default, so capability validation only fails fast on the
+     * former and engines may transparently upgrade the latter to a supported digest.
+     *
+     * @return true when a hash algorithm has been set
+     */
+    public boolean isHashAlgorithmSet() {
+        return hashAlgorithm != null;
     }
 
     public HashAlgorithm getHashAlgorithmX() {
