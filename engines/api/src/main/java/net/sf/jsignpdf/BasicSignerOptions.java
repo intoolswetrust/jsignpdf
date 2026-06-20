@@ -1055,10 +1055,35 @@ public class BasicSignerOptions {
     }
 
     /**
-     * @return
+     * Returns the effective TSA hash algorithm name, falling back to the configured default when none
+     * is set, normalised to its canonical form. The TSA hash is a free-text value on the CLI
+     * ({@code --tsa-hash-alg}), the Swing dialog and the properties file, so a lowercase entry such as
+     * {@code sha256} would otherwise reach iText's {@code setDigestName} (NPE) or DSS's
+     * {@code DigestAlgorithm.forJavaName} (exception). Canonicalising here gives both engines a value
+     * they accept.
+     *
+     * @return the canonical TSA hash algorithm name (e.g. {@code SHA-256})
      */
     public String getTsaHashAlgWithFallback() {
-        return StringUtils.defaultIfBlank(tsaHashAlg, AppConfig.defaultTsaHashAlg());
+        return normalizeTsaHashAlg(StringUtils.defaultIfBlank(tsaHashAlg, AppConfig.defaultTsaHashAlg()));
+    }
+
+    /**
+     * Normalises a free-text TSA hash algorithm name to its canonical form. Recognised algorithms are
+     * mapped to their canonical spelling (e.g. {@code sha256} / {@code sha-256} &rarr; {@code SHA-256});
+     * an unrecognised value is uppercased so it still survives the digest-name lookup in the signing
+     * engines instead of triggering a {@link NullPointerException}.
+     *
+     * @param value the raw hash name (may be {@code null} or blank)
+     * @return the canonical name, or {@code null} when the input is blank
+     */
+    static String normalizeTsaHashAlg(String value) {
+        if (StringUtils.isBlank(value)) {
+            return null;
+        }
+        final String trimmed = value.trim();
+        final HashAlgorithm known = HashAlgorithm.fromAlgorithmName(trimmed);
+        return known != null ? known.getAlgorithmName() : trimmed.toUpperCase(Locale.ROOT);
     }
 
     /**
