@@ -323,8 +323,8 @@ usage: jsignpdf [file1.pdf [file2.pdf ...]] [-a] [--bg-path
        <type>] [-l <location>] [--l2-text <text>] [--l4-text <text>] [-le] [-lk]
        [-lkt] [-llx <position>] [-lly <position>] [-lp] [-lpf <file>] [--ocsp]
        [--ocsp-server-url <responderUrl>] [-op <prefix>] [-opwd <password>] [-os
-       <suffix>] [-pe <mode>] [-pg <pageNumber>] [-pr <right>] [--proxy-host
-       <hostname>] [--proxy-port <port>] [--proxy-type <type>] [-q] [-r
+       <suffix>] [--overwrite] [-pe <mode>] [-pg <pageNumber>] [-pr <right>] [--proxy-host
+       <hostname>] [--proxy-port <port>] [-pl <level>] [--proxy-type <type>] [-q] [-r
        <reason>] [--render-mode <mode>] [-sn <signer>] [-ta <method>] [-ts <URL>]
        [--tsa-policy-oid <policyOID>] [-tscf <file>] [-tscp <password>] [-tsct
        <ks-type>] [-tsh <algorithm>] [-tsp <password>] [-tsu <username>] [-upwd
@@ -407,13 +407,19 @@ See <<Signing properties>> for details.
 |Option |Description
 
 | `-a, --append`
-| Append signature to existing ones instead of replacing them.
+| Append the signature to existing ones (incremental update). This is the default since JSignPdf 3.1, so the flag is kept only for backward compatibility and is now a no-op.
+
+| `--overwrite`
+| Replace existing signatures by rewriting the document (non-incremental). Opt-out of the default append behaviour. Rejected by the DSS (PAdES) engine, which always signs incrementally -- see <<Signing engines>>.
 
 | `-ha, --hash-algorithm <algorithm>`
-| Hash algorithm for the signature. Default: `SHA1`. Values: `SHA1`, `SHA256`, `SHA384`, `SHA512`, `RIPEMD160`.
+| Hash algorithm for the signature. Default: `SHA256`. Values: `SHA1`, `SHA256`, `SHA384`, `SHA512`, `RIPEMD160`. (SHA-1 remains selectable for the OpenPDF engine; the DSS engine accepts only `SHA256`/`SHA384`/`SHA512`.)
 
 | `-cl, --certification-level <level>`
 | Certification level. Default: `NOT_CERTIFIED`. Values: `NOT_CERTIFIED`, `CERTIFIED_NO_CHANGES_ALLOWED`, `CERTIFIED_FORM_FILLING`, `CERTIFIED_FORM_FILLING_AND_ANNOTATIONS`.
+
+| `-pl, --pades-level <level>`
+| PAdES baseline level for the PAdES (`dss`) signing engine. Values (case-insensitive): `B`, `T`, `LT`, `LTA`. Honoured only by engines that support PAdES; the default OpenPDF engine rejects it (use `-eng dss`). `LT`/`LTA` require revocation data — see <<PAdES & the DSS engine>>. See <<Signing engines>>.
 
 | `-sn, --signer-name <signer>`
 | Signer name. Defaults to the common name (CN) of the chosen certificate.
@@ -764,7 +770,7 @@ The reason, location, and contact fields provide additional information about th
 
 ==== Append signature
 
-JSignPdf can work in two signing modes. When _Append signature_ is enabled, the new signature is appended and any previously-existing signatures stay unchanged; when it is disabled, existing signatures are replaced. The GUI enables _Append signature_ by default; on the CLI the default is replace (pass `-a` to append). _*This option is disabled for encrypted documents.*_
+JSignPdf can work in two signing modes. When _Append signature_ is enabled, the new signature is appended and any previously-existing signatures stay unchanged; when it is disabled, the existing signatures are replaced by rewriting the document. Append is the default in both the GUI and -- since JSignPdf 3.1 -- the CLI; on the command line, pass `--overwrite` to replace instead (the legacy `-a` / `--append` flag is now a no-op, kept for backward compatibility). The DSS (PAdES) engine always signs incrementally and rejects `--overwrite`. _*This option is disabled for encrypted documents.*_
 
 ==== Certification level
 
@@ -834,6 +840,22 @@ The _Acrobat 6 layer mode_ option (enabled by default) allows you to control whi
 ==== Texts and Images
 
 _Signature Text_, _Status Text_, _Image_, and _Background Image_ inputs define the content of fields in a visible signature. _Font Size_ is used for setting the size of _Signature Text_, it should contain a positive decimal number.
+
+The _Signature Text_ supports placeholders that are expanded when the document is signed:
+
+[cols="1,3"]
+|===
+|Placeholder |Expands to
+
+|`${signer}`      |Common name (CN) of the signing certificate.
+|`${timestamp}`   |Signing date and time -- use this to **show the date/time on the visible signature**.
+|`${certificate}` |Description of the signing certificate.
+|`${location}`    |The _Location_ field value.
+|`${reason}`      |The _Reason_ field value.
+|`${contact}`     |The _Contact_ field value.
+|===
+
+For example, a _Signature Text_ of `Signed by ${signer}` + `on ${timestamp}` renders the signer name and the signing date/time. When _Signature Text_ is left empty, JSignPdf uses a default layout that already includes the signer and the date.
 
 _Background image scale_ defines the size of a background image. Any negative number means the best-fit algorithm will be used. Zero value means to stretch, which fills the whole field -- it doesn't keep the image ratio. A positive value means the multiplicator of the original size.
 
@@ -929,9 +951,68 @@ The default engine is taken from the `engine` key in `<config-dir>/advanced.prop
 jsignpdf --engine openpdf -ksf cert.p12 -ksp secret document.pdf
 ----
 
-In the JavaFX UI, the active engine is chosen from the *Engine* selector in the toolbar; the choice is saved to `advanced.properties` immediately. When an engine does not support a particular option, the corresponding control is disabled (with an explanatory tooltip); on the command line, signing fails fast with a message listing the unsupported options.
+In the JavaFX UI, the active engine is chosen from the *Engine* selector in the Preferences; the choice is saved to `advanced.properties` immediately. When an engine does not support a particular option, the corresponding control is disabled (with an explanatory tooltip); on the command line, signing fails fast with a message listing the unsupported options.
 
-Engines are discovered automatically: dropping a third-party engine jar (with its dependencies and a `META-INF/services/net.sf.jsignpdf.engine.SigningEngine` registration) into the `lib/` directory of an installed JSignPdf makes it appear in `--list-engines` and the toolbar selector.
+Engines are discovered automatically: dropping a third-party engine jar (with its dependencies and a `META-INF/services/net.sf.jsignpdf.engine.SigningEngine` registration) into the `lib/` directory of an installed JSignPdf makes it appear in `--list-engines` and the Preferences engine selector.
+
+=== PAdES & the DSS engine
+
+JSignPdf 3.1 bundles a second engine, *EU DSS (PAdES)* (id `dss`), built on the European Commission's https://github.com/esig/dss[Digital Signature Service] library. It produces *PAdES* signatures (`ETSI.CAdES.detached`) at the four ETSI baseline levels, which the OpenPDF engine cannot create:
+
+[cols="1,3"]
+|===
+|Level |What it adds
+
+|`B`
+|Basic signature (the default when `dss` is selected without a level).
+
+|`T`
+|`B` + a signature timestamp from the configured <<TSA and certificate validation options,TSA>>. Setting a TSA while requesting `B` automatically upgrades to `T`.
+
+|`LT`
+|`T` + embedded validation material (certificates and OCSP/CRL responses) for long-term validation.
+
+|`LTA`
+|`LT` + an archive timestamp.
+|===
+
+Select it with `-eng dss` on the command line (or the *PAdES Level* sidebar section in the GUI) and pick the level with `-pl` / `--pades-level`:
+
+[source,shell]
+----
+jsignpdf -eng dss -pl LT -ksf cert.p12 -ksp secret -ha SHA256 document.pdf
+----
+
+DSS requires a PAdES digest, so the hash algorithm must be `SHA256`, `SHA384` or `SHA512` (`SHA1`/`RIPEMD160` are rejected). Certificate-based PDF encryption and CloudFoxy external signing are not available with `dss`; use the OpenPDF engine for those.
+
+*Trust material for LT/LTA.* The `B` and `T` levels work fully offline (only `T` needs network access to the TSA). The `LT` and `LTA` levels embed revocation data, so they need reachable OCSP/CRL endpoints and a trust anchor set. These are configured with `engine.dss.*` keys in `advanced.properties` (also editable from the *DSS engine* tab of the Preferences dialog):
+
+[cols="2,3"]
+|===
+|Key |Meaning
+
+|`engine.dss.online.enabled`
+|Fetch revocation data (OCSP/CRL) and intermediate certificates (AIA) online. Must be `true` to produce `LT`/`LTA`. Default `false` (keeps `B`/`T` offline).
+
+|`engine.dss.trust.useDefaultLotl`
+|Build trust anchors from the default EU List of Trusted Lists (LOTL).
+
+|`engine.dss.trust.lotlUrls`
+|Comma-separated custom LOTL URLs.
+
+|`engine.dss.trust.certFiles`
+|Comma-separated trusted X.509 certificate files.
+
+|`engine.dss.trust.certUrls`
+|Comma-separated trusted X.509 certificate URLs.
+
+|`engine.dss.trust.truststoreFile` +
+`engine.dss.trust.truststoreType` +
+`engine.dss.trust.truststorePassword`
+|A truststore holding trust anchors (type defaults to the JVM default).
+|===
+
+If `LT`/`LTA` is requested but revocation data cannot be reached (for example, with online fetching disabled), the signing fails with a logged error rather than silently emitting a weaker level.
 
 == Advanced application configuration
 

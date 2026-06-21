@@ -8,6 +8,7 @@ import java.util.Objects;
 
 import net.sf.jsignpdf.types.CertificationLevel;
 import net.sf.jsignpdf.types.HashAlgorithm;
+import net.sf.jsignpdf.types.PadesLevel;
 import net.sf.jsignpdf.types.PDFEncryption;
 import net.sf.jsignpdf.types.PrintRight;
 import net.sf.jsignpdf.types.RenderMode;
@@ -50,6 +51,8 @@ public class BasicSignerOptions {
     private String pdfEncryptionCertFile;
     private CertificationLevel certLevel;
     private HashAlgorithm hashAlgorithm;
+    // PAdES baseline level (DSS engine). null = engine default (OpenPDF ignores it; DSS treats null as BASELINE_B).
+    private PadesLevel padesLevel;
 
     protected boolean storePasswords = Constants.DEFVAL_STOREPWD;
 
@@ -156,6 +159,7 @@ public class BasicSignerOptions {
         setPdfEncryptionCertFile(store.getProperty(Constants.PROPERTY_PDF_ENCRYPTION_CERT_FILE));
         setCertLevel(store.getProperty(Constants.PROPERTY_CERT_LEVEL));
         setHashAlgorithm(store.getProperty(Constants.PROPERTY_HASH_ALGORITHM));
+        setPadesLevel(store.getProperty(Constants.PROPERTY_PADES_LEVEL));
 
         setRightPrinting(store.getProperty(Constants.PROPERTY_RIGHT_PRINT));
         setRightCopy(store.getAsBool(Constants.PROPERTY_RIGHT_COPY));
@@ -278,6 +282,7 @@ public class BasicSignerOptions {
         store.setProperty(Constants.PROPERTY_PDF_ENCRYPTION_CERT_FILE, getPdfEncryptionCertFile());
         store.setProperty(Constants.PROPERTY_CERT_LEVEL, getCertLevel().name());
         store.setProperty(Constants.PROPERTY_HASH_ALGORITHM, getHashAlgorithm().name());
+        store.setProperty(Constants.PROPERTY_PADES_LEVEL, getPadesLevel() == null ? null : getPadesLevel().name());
 
         store.setProperty(Constants.PROPERTY_RIGHT_PRINT, getRightPrinting().name());
         store.setProperty(Constants.PROPERTY_RIGHT_COPY, isRightCopy());
@@ -1050,10 +1055,35 @@ public class BasicSignerOptions {
     }
 
     /**
-     * @return
+     * Returns the effective TSA hash algorithm name, falling back to the configured default when none
+     * is set, normalised to its canonical form. The TSA hash is a free-text value on the CLI
+     * ({@code --tsa-hash-alg}), the Swing dialog and the properties file, so a lowercase entry such as
+     * {@code sha256} would otherwise reach iText's {@code setDigestName} (NPE) or DSS's
+     * {@code DigestAlgorithm.forJavaName} (exception). Canonicalising here gives both engines a value
+     * they accept.
+     *
+     * @return the canonical TSA hash algorithm name (e.g. {@code SHA-256})
      */
     public String getTsaHashAlgWithFallback() {
-        return StringUtils.defaultIfBlank(tsaHashAlg, AppConfig.defaultTsaHashAlg());
+        return normalizeTsaHashAlg(StringUtils.defaultIfBlank(tsaHashAlg, AppConfig.defaultTsaHashAlg()));
+    }
+
+    /**
+     * Normalises a free-text TSA hash algorithm name to its canonical form. Recognised algorithms are
+     * mapped to their canonical spelling (e.g. {@code sha256} / {@code sha-256} &rarr; {@code SHA-256});
+     * an unrecognised value is uppercased so it still survives the digest-name lookup in the signing
+     * engines instead of triggering a {@link NullPointerException}.
+     *
+     * @param value the raw hash name (may be {@code null} or blank)
+     * @return the canonical name, or {@code null} when the input is blank
+     */
+    static String normalizeTsaHashAlg(String value) {
+        if (StringUtils.isBlank(value)) {
+            return null;
+        }
+        final String trimmed = value.trim();
+        final HashAlgorithm known = HashAlgorithm.fromAlgorithmName(trimmed);
+        return known != null ? known.getAlgorithmName() : trimmed.toUpperCase(Locale.ROOT);
     }
 
     /**
@@ -1144,10 +1174,19 @@ public class BasicSignerOptions {
     }
 
     public HashAlgorithm getHashAlgorithm() {
-        if (hashAlgorithm == null) {
-            hashAlgorithm = Constants.DEFVAL_HASH_ALGORITHM;
-        }
-        return hashAlgorithm;
+        return hashAlgorithm == null ? Constants.DEFVAL_HASH_ALGORITHM : hashAlgorithm;
+    }
+
+    /**
+     * Whether a hash algorithm was explicitly selected (CLI {@code --hash-algorithm}, stored config, or
+     * GUI selection), as opposed to falling back to {@link Constants#DEFVAL_HASH_ALGORITHM}. Used to tell
+     * a deliberate user choice from the legacy default, so capability validation only fails fast on the
+     * former and engines may transparently upgrade the latter to a supported digest.
+     *
+     * @return true when a hash algorithm has been set
+     */
+    public boolean isHashAlgorithmSet() {
+        return hashAlgorithm != null;
     }
 
     public HashAlgorithm getHashAlgorithmX() {
@@ -1171,6 +1210,30 @@ public class BasicSignerOptions {
             }
         }
         setHashAlgorithm(hashAlg);
+    }
+
+    /**
+     * @return the selected PAdES baseline level, or {@code null} for the engine default
+     */
+    public PadesLevel getPadesLevel() {
+        return padesLevel;
+    }
+
+    /**
+     * @param padesLevel the PAdES baseline level to set ({@code null} = engine default)
+     */
+    public void setPadesLevel(final PadesLevel padesLevel) {
+        this.padesLevel = padesLevel;
+    }
+
+    /**
+     * Sets the PAdES baseline level from a (short or full) string token. Unrecognised or empty values
+     * reset the level to {@code null} (engine default).
+     *
+     * @param aValue the level token ({@code B} / {@code T} / {@code LT} / {@code LTA} or full enum name)
+     */
+    public void setPadesLevel(final String aValue) {
+        setPadesLevel(PadesLevel.fromString(aValue));
     }
 
     public Proxy.Type getProxyType() {
@@ -1277,6 +1340,7 @@ public class BasicSignerOptions {
         copy.setPdfEncryptionCertFile(getPdfEncryptionCertFile());
         copy.setCertLevel(getCertLevel());
         copy.setHashAlgorithm(getHashAlgorithm());
+        copy.setPadesLevel(getPadesLevel());
         copy.setStorePasswords(isStorePasswords());
         copy.setRightPrinting(getRightPrinting());
         copy.setRightCopy(isRightCopy());
@@ -1331,7 +1395,8 @@ public class BasicSignerOptions {
         result = prime * result + Objects.hash(acro6Layers, advanced, append, bgImgPath, bgImgScale, certLevel, contact,
                 crlEnabled, encryptor, hashAlgorithm, imgPath, inFile, keyAlias, keyIndex, ksFile, ksType, l2Text,
                 l2TextFontSize, l4Text, listener, location, ocspEnabled, ocspServerUrl, outFile, page, pdfEncryption,
-                pdfEncryptionCertFile, positionLLX, positionLLY, positionURX, positionURY, propertiesFilePath, props, proxyHost,
+                padesLevel, pdfEncryptionCertFile, positionLLX, positionLLY, positionURX, positionURY, propertiesFilePath,
+                props, proxyHost,
                 proxyPort, proxyType, reason, renderMode, rightAssembly, rightCopy, rightFillIn, rightModifyAnnotations,
                 rightModifyContents, rightPrinting, rightScreanReaders, signerName, storePasswords, timestamp, tsaCertFile,
                 tsaCertFilePwd, tsaCertFileType, tsaHashAlg, tsaPasswd, tsaPolicy, tsaServerAuthn, tsaUrl, tsaUser, visible);
@@ -1361,7 +1426,7 @@ public class BasicSignerOptions {
                 && Objects.equals(l4Text, other.l4Text) && Objects.equals(listener, other.listener)
                 && Objects.equals(location, other.location) && ocspEnabled == other.ocspEnabled
                 && Objects.equals(ocspServerUrl, other.ocspServerUrl) && Objects.equals(outFile, other.outFile)
-                && page == other.page && pdfEncryption == other.pdfEncryption
+                && page == other.page && padesLevel == other.padesLevel && pdfEncryption == other.pdfEncryption
                 && Objects.equals(pdfEncryptionCertFile, other.pdfEncryptionCertFile)
                 && Arrays.equals(pdfOwnerPwd, other.pdfOwnerPwd) && Arrays.equals(pdfUserPwd, other.pdfUserPwd)
                 && Float.floatToIntBits(positionLLX) == Float.floatToIntBits(other.positionLLX)

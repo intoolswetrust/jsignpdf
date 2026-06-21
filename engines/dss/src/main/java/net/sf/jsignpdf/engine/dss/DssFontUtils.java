@@ -1,0 +1,53 @@
+package net.sf.jsignpdf.engine.dss;
+
+import java.io.FileInputStream;
+import java.io.InputStream;
+import java.util.logging.Level;
+
+import net.sf.jsignpdf.Constants;
+import net.sf.jsignpdf.utils.AppConfig;
+
+import org.apache.commons.lang3.StringUtils;
+
+import eu.europa.esig.dss.model.InMemoryDocument;
+import eu.europa.esig.dss.pades.DSSFileFont;
+import eu.europa.esig.dss.pades.DSSFont;
+
+/**
+ * Resolves the {@link DSSFont} used for the visible-signature text. It honours the same
+ * {@code font.path} advanced-config knob the OpenPDF engine uses (capability
+ * {@code VISIBLE_CUSTOM_FONT}) and otherwise falls back to the DejaVuSans font bundled in
+ * {@code jsignpdf-engine-api} (so non-Latin text renders correctly).
+ *
+ * @author Josef Cacek
+ */
+final class DssFontUtils {
+
+    /** DejaVuSans bundled as a resource in jsignpdf-engine-api. */
+    private static final String DEFAULT_EMBEDDED_FONT_PATH = "/net/sf/jsignpdf/fonts/DejaVuSans.ttf";
+
+    private DssFontUtils() {
+    }
+
+    /**
+     * @return a {@link DSSFont} for the visible-signature text, or {@code null} if no font could be
+     *         loaded
+     */
+    static DSSFont getVisibleSignatureFont() {
+        final String fontPath = AppConfig.fontPath();
+        try (InputStream is = fontPath != null ? new FileInputStream(fontPath)
+                : DssFontUtils.class.getResourceAsStream(DEFAULT_EMBEDDED_FONT_PATH)) {
+            if (is != null) {
+                // Materialise the font bytes here, while the stream is open. DSSFileFont later re-reads
+                // the font lazily (getJavaFont()/getInputStream()), so it must own a self-contained,
+                // in-memory copy rather than the stream this method closes on return. (DSSFileFont(stream)
+                // happens to buffer eagerly today, but we don't want to depend on that internal detail.)
+                return new DSSFileFont(new InMemoryDocument(is.readAllBytes()));
+            }
+        } catch (Exception e) {
+            final String fontSource = StringUtils.isNotEmpty(fontPath) ? fontPath : DEFAULT_EMBEDDED_FONT_PATH;
+            Constants.LOGGER.log(Level.SEVERE, Constants.RES.get("console.dss.fontLoadFailed", fontSource), e);
+        }
+        return null;
+    }
+}

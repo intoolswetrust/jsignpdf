@@ -224,6 +224,34 @@ public class BasicSignerOptionsTest {
         }
     }
 
+    /**
+     * A free-text TSA hash algorithm (CLI {@code --tsa-hash-alg}, Swing dialog, properties file) must be
+     * canonicalised before it reaches the signing engines, otherwise a lowercase entry such as
+     * {@code sha256} triggers an NPE in iText ({@code setDigestName}) or an exception in DSS
+     * ({@code DigestAlgorithm.forJavaName}). Regression guard for issues #126 / #181.
+     */
+    @Test
+    public void getTsaHashAlgWithFallback_canonicalisesFreeTextValue() {
+        BasicSignerOptions opts = new BasicSignerOptions();
+
+        opts.setTsaHashAlg("sha256");
+        assertEquals("SHA-256", opts.getTsaHashAlgWithFallback());
+
+        opts.setTsaHashAlg(" sha-512 ");
+        assertEquals("SHA-512", opts.getTsaHashAlgWithFallback());
+
+        opts.setTsaHashAlg("ripemd160");
+        assertEquals("RIPEMD160", opts.getTsaHashAlgWithFallback());
+
+        // Unrecognised value is at least uppercased so the digest-name lookup does not NPE.
+        opts.setTsaHashAlg("sha3-256");
+        assertEquals("SHA3-256", opts.getTsaHashAlgWithFallback());
+
+        // Blank falls back to the configured default (canonicalised).
+        opts.setTsaHashAlg("   ");
+        assertEquals("SHA-256", opts.getTsaHashAlgWithFallback());
+    }
+
     @Test
     public void createCopyShouldDefensivelyCopyCharArrays() {
         BasicSignerOptions original = new BasicSignerOptions();

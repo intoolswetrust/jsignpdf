@@ -23,7 +23,13 @@ jsignpdf-root/
 ├── jsignpdf-bootstrap/  # Java-8 launcher (Bootstrap.java): JRE-version check + JFX
 │                          classifier picker + reflective Signer.main. Used by the
 │                          cross-platform ZIPs (bin/jsignpdf.sh|.cmd → Bootstrap → Signer).
-├── jsignpdf/            # Main application (signing logic + GUI + CLI)
+├── engines/            # Signing-engine SPI + bundled engines (Maven parent module)
+│   ├── api/            #   Engine SPI (SigningEngine, Capability) + the shared core model
+│   │                       (BasicSignerOptions, Constants, types/) and the canonical
+│   │                       messages*.properties resource bundle.
+│   ├── openpdf/        #   Default OpenPDF engine (id `openpdf`) — unchanged signatures.
+│   └── dss/            #   EU DSS PAdES engine (id `dss`) — PAdES B/T/LT/LTA.
+├── jsignpdf/            # Main application (GUI + CLI + engine discovery/gating)
 ├── installcert/         # Certificate installer utility
 ├── distribution/        # Per-platform packaging — assembles full + minimal ZIPs and
 │                          drives jpackage for MSI / DEB / RPM / DMG (windows/, linux/,
@@ -41,21 +47,43 @@ Keep these in sync with the code; user-facing features are not "done" until they
 | `website/docs/JSignPdf.adoc` | **Authoritative user guide.** Single source of truth consumed by both the Hugo site (`website/content/docs/guide/index.adoc` is regenerated from it by `website/prepare.sh`) and the Maven PDF build in `distribution/`. | Any new or changed user-visible feature: new CLI flags, new GUI panels, changed defaults, new keystore types, new exit codes, etc. Update the synopsis block, the relevant option table, and add a dedicated subsection if the feature has non-obvious usage. |
 | `distribution/doc/release-notes/<version>.md` | Release notes bundled with the artifact and used as the GitHub Release body. | Every release-worthy change. |
 | `README.md` | Top-level project landing page. Concise feature overview + pointers to the guide. | Only for high-signal changes (new feature categories, platform support, install paths). |
-| `jsignpdf/src/main/resources/net/sf/jsignpdf/translations/messages.properties` | Canonical English resource bundle (all others are Weblate-synced). CLI `--help` text comes from here. | Any new CLI option or GUI string. Do not hand-edit non-English `messages_*.properties` files. |
+| `engines/api/src/main/resources/net/sf/jsignpdf/translations/messages.properties` | Canonical English resource bundle (all others are Weblate-synced). CLI `--help` text comes from here. Lives in the `engines/api` module so both the engines and the app can read it. | Any new CLI option or GUI string. Do not hand-edit non-English `messages_*.properties` files. |
 | `design-doc/<version>-<topic>.md` | Design notes for larger changes. | Before implementing a non-trivial feature. |
 
 When a PR touches a user-visible feature without updating `JSignPdf.adoc`, flag it as incomplete.
 
 ## Source Code Layout
 
-All source is under `jsignpdf/src/main/java/net/sf/jsignpdf/`:
+Java code lives in two places under the `net.sf.jsignpdf` package root: the shared core +
+engine SPI in `engines/api/` (and the bundled engines in `engines/openpdf/` and `engines/dss/`),
+and the application (GUI + CLI) in `jsignpdf/`.
+
+**`engines/api/src/main/java/net/sf/jsignpdf/`** — shared core model + engine SPI (no UI deps):
+
+```
+net.sf.jsignpdf
+├── BasicSignerOptions.java      # Central model for all signing configuration
+├── Constants.java               # CLI arg names, default values, config keys
+├── JSignEncryptor.java          # PDF encryption helper
+├── engine/                      # Engine SPI: SigningEngine, Capability, EngineConfig
+├── extcsp/                      # External crypto providers (CloudFoxy)
+├── ssl/                         # SSL/TLS initialization
+├── types/                       # Enums and value types (HashAlgorithm, ...)
+└── utils/                       # KeyStoreUtils, ResourceProvider, PropertyProvider, etc.
+```
+
+The bundled engines register via `META-INF/services/net.sf.jsignpdf.engine.SigningEngine`:
+`engines/openpdf/` (id `openpdf`, default) and `engines/dss/` (id `dss`, PAdES).
+
+**`jsignpdf/src/main/java/net/sf/jsignpdf/`** — application (GUI + CLI + engine wiring):
 
 ```
 net.sf.jsignpdf
 ├── Signer.java                 # Entry point - launches CLI or GUI
-├── SignerLogic.java             # Core signing engine (no UI dependencies)
-├── BasicSignerOptions.java      # Central model for all signing configuration
+├── SignerLogic.java             # Drives a SigningEngine (no UI dependencies)
+├── SignerOptionsFromCmdLine.java # CLI parsing into BasicSignerOptions
 ├── SignPdfForm.java             # Swing GUI (legacy, .form files are IDE-generated)
+├── engine/                      # EngineRegistry (discovery), EngineMismatchValidator (CLI gating)
 ├── fx/                          # JavaFX GUI (default)
 │   ├── JSignPdfApp.java         #   Application entry point
 │   ├── FxLauncher.java          #   Static launcher called from Signer.main()
@@ -64,24 +92,22 @@ net.sf.jsignpdf
 │   ├── service/                 #   PdfRenderService, SigningService, KeyStoreService
 │   ├── control/                 #   PdfPageView, SignatureOverlay
 │   └── util/                    #   FxResourceProvider, SwingFxImageConverter, RecentFilesManager
-├── crl/                         # Certificate Revocation List handling
-├── extcsp/                      # External crypto providers (CloudFoxy)
 ├── preview/                     # PDF page rendering (Pdf2Image)
-├── ssl/                         # SSL/TLS initialization
-├── types/                       # Enums and value types
-└── utils/                       # KeyStoreUtils, ResourceProvider, PropertyProvider, etc.
+├── types/                       # App-only enums and value types
+└── utils/                       # App-only helpers
 ```
 
 ## Architecture
 
 ```
 CLI (SignerOptionsFromCmdLine)  ──┐
-                                  ├──> BasicSignerOptions ──> SignerLogic.signFile()
-GUI (JavaFX / Swing)            ──┘         (model)              (signing engine)
+                                  ├──> BasicSignerOptions ──> SignerLogic.signFile() ──> SigningEngine
+GUI (JavaFX / Swing)            ──┘         (model)              (orchestration)         (openpdf | dss)
 ```
 
 - **`BasicSignerOptions`** is the central model. Both CLI and GUI populate it, then pass it to `SignerLogic`.
-- **`SignerLogic`** is the signing engine. It has no UI dependencies.
+- **`SignerLogic`** has no UI dependencies. It resolves a `SigningEngine` (via `EngineRegistry`) and delegates the actual signing to it.
+- **Signing engines** are discovered with `ServiceLoader`. Each declares a set of `Capability` values; the CLI fails fast on unsupported options via `EngineMismatchValidator`, and the GUI disables the matching controls.
 - **JavaFX GUI** uses MVVM: ViewModels with JavaFX properties, FXML views with `%key` i18n, background services wrapping `SignerLogic` and `Pdf2Image`.
 
 ### i18n

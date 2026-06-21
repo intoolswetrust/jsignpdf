@@ -67,6 +67,10 @@ toc: false
       title="Hardware tokens"
       subtitle="Sign with PKCS#11 smart cards, HSMs and USB tokens — not just soft keys." >}}
   {{< hextra/feature-card
+      icon="cube"
+      title="Signing engines & PAdES"
+      subtitle="Pluggable backend: the default OpenPDF engine, plus an EU DSS engine for PAdES baseline signatures (B / T / LT / LTA)." >}}
+  {{< hextra/feature-card
       icon="sparkles"
       title="Free and open source"
       subtitle="LGPL / MPL licensed. Free for personal and commercial use, no strings attached." >}}

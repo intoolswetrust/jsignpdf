@@ -8,6 +8,7 @@ import java.util.Map;
 import net.sf.jsignpdf.BasicSignerOptions;
 import net.sf.jsignpdf.Constants;
 import net.sf.jsignpdf.types.HashAlgorithm;
+import net.sf.jsignpdf.types.PadesLevel;
 import net.sf.jsignpdf.types.PDFEncryption;
 import net.sf.jsignpdf.types.PrintRight;
 import net.sf.jsignpdf.types.RenderMode;
@@ -58,6 +59,14 @@ public final class EngineMismatchValidator {
         RENDER_CAPS.put(RenderMode.SIGNAME_AND_DESCRIPTION, Capability.VISIBLE_RENDER_MODE_NAME_AND_DESCRIPTION);
     }
 
+    private static final Map<PadesLevel, Capability> PADES_CAPS = new EnumMap<>(PadesLevel.class);
+    static {
+        PADES_CAPS.put(PadesLevel.BASELINE_B, Capability.PADES_BASELINE_B);
+        PADES_CAPS.put(PadesLevel.BASELINE_T, Capability.PADES_BASELINE_T);
+        PADES_CAPS.put(PadesLevel.BASELINE_LT, Capability.PADES_BASELINE_LT);
+        PADES_CAPS.put(PadesLevel.BASELINE_LTA, Capability.PADES_BASELINE_LTA);
+    }
+
     private EngineMismatchValidator() {
     }
 
@@ -73,16 +82,27 @@ public final class EngineMismatchValidator {
         final List<Mismatch> out = new ArrayList<>();
         final var caps = engine.capabilities();
 
-        // hash algorithm
-        final HashAlgorithm hash = o.getHashAlgorithmX();
-        final Capability hashCap = HASH_CAPS.get(hash);
-        if (hashCap != null && !caps.contains(hashCap)) {
-            out.add(new Mismatch("--hash-algorithm", hashCap));
+        if (o.isAdvanced() && o.isHashAlgorithmSet()) {
+            final HashAlgorithm hash = o.getHashAlgorithmX();
+            final Capability hashCap = HASH_CAPS.get(hash);
+            if (hashCap != null && !caps.contains(hashCap)) {
+                out.add(new Mismatch("--hash-algorithm", hashCap));
+            }
         }
 
-        // append mode
-        if (o.isAppendX() && !caps.contains(Capability.APPEND_MODE)) {
-            out.add(new Mismatch("--append", Capability.APPEND_MODE));
+        // PAdES baseline level
+        if (o.getPadesLevel() != null) {
+            final Capability padesCap = PADES_CAPS.get(o.getPadesLevel());
+            if (padesCap != null && !caps.contains(padesCap)) {
+                out.add(new Mismatch("--pades-level", padesCap));
+            }
+        }
+
+        // overwrite (non-incremental) mode — incremental append is the default and universal, so only an
+        // explicit --overwrite request against an engine that can't do it (e.g. DSS, which PAdES forces to
+        // be incremental) is a mismatch. The request is deliberate, so fail fast rather than silently append.
+        if (!o.isAppendX() && !caps.contains(Capability.OVERWRITE_MODE)) {
+            out.add(new Mismatch("--overwrite", Capability.OVERWRITE_MODE));
         }
 
         // certification level

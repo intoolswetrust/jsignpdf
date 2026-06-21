@@ -9,6 +9,9 @@ import javafx.fxml.FXML;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.TextField;
+import net.sf.jsignpdf.engine.Capability;
+import net.sf.jsignpdf.engine.SigningEngine;
+import net.sf.jsignpdf.fx.EngineCapabilities;
 import net.sf.jsignpdf.fx.util.NativeFileChooser;
 import net.sf.jsignpdf.fx.util.NativeFileChooser.ExtensionFilter;
 import net.sf.jsignpdf.fx.viewmodel.SigningOptionsViewModel;
@@ -54,6 +57,27 @@ public class SignaturePropertiesController {
         txtContact.textProperty().bindBidirectional(viewModel.contactProperty());
         chkAppend.selectedProperty().bindBidirectional(viewModel.appendProperty());
         txtOutFile.textProperty().bindBidirectional(viewModel.outFileProperty());
+    }
+
+    /**
+     * Gates the "append signature" checkbox against the active engine's capabilities. Unchecking the box
+     * requests an overwrite (non-incremental rewrite), which needs {@link Capability#OVERWRITE_MODE}.
+     * Engines that lack it (e.g. the DSS/PAdES engine) always append, so the box is forced on and disabled
+     * with the shared "not supported" tooltip while such an engine is active. This mirrors the CLI
+     * fail-soft handled by {@link net.sf.jsignpdf.engine.EngineMismatchValidator}.
+     *
+     * @param caps the capability source driving the gating; must be wired after {@link #setViewModel}
+     */
+    public void gateCapabilities(EngineCapabilities caps) {
+        caps.gate(chkAppend, Capability.OVERWRITE_MODE);
+        enforceAppendForEngine(caps.activeEngineProperty().get());
+        caps.activeEngineProperty().addListener((obs, oldEngine, newEngine) -> enforceAppendForEngine(newEngine));
+    }
+
+    private void enforceAppendForEngine(SigningEngine engine) {
+        if (engine != null && !engine.capabilities().contains(Capability.OVERWRITE_MODE)) {
+            viewModel.appendProperty().set(true);
+        }
     }
 
     @FXML

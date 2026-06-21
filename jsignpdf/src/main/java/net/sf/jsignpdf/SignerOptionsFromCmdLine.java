@@ -140,11 +140,16 @@ public class SignerOptionsFromCmdLine extends BasicSignerOptions {
             setLocation(line.getOptionValue(ARG_LOCATION));
         if (line.hasOption(ARG_CONTACT))
             setContact(line.getOptionValue(ARG_CONTACT));
-        setAppend(line.hasOption(ARG_APPEND));
+        // Append (incremental) is the safe default and matches the GUI; --overwrite opts into a
+        // non-incremental rewrite (only honoured by engines with the OVERWRITE_MODE capability). The
+        // legacy --append flag is kept for backward compatibility and is now a no-op (append is implied).
+        setAppend(!line.hasOption(ARG_OVERWRITE_LONG));
         if (line.hasOption(ARG_CERT_LEVEL))
             setCertLevel(line.getOptionValue(ARG_CERT_LEVEL));
         if (line.hasOption(ARG_HASH_ALGORITHM))
             setHashAlgorithm(line.getOptionValue(ARG_HASH_ALGORITHM));
+        if (line.hasOption(ARG_PADES_LEVEL))
+            setPadesLevel(line.getOptionValue(ARG_PADES_LEVEL));
 
         // encryption
         if (line.hasOption(ARG_ENCRYPTED))
@@ -371,12 +376,15 @@ public class SignerOptionsFromCmdLine extends BasicSignerOptions {
         OPTS.addOption(OptionBuilder.withLongOpt(ARG_CONTACT_LONG).withDescription(RES.get("hlp.contact")).hasArg()
                 .withArgName("contact").create(ARG_CONTACT));
         OPTS.addOption(OptionBuilder.withLongOpt(ARG_APPEND_LONG).withDescription(RES.get("hlp.append")).create(ARG_APPEND));
+        OPTS.addOption(OptionBuilder.withLongOpt(ARG_OVERWRITE_LONG).withDescription(RES.get("hlp.overwrite")).create());
         OPTS.addOption(OptionBuilder.withLongOpt(ARG_CERT_LEVEL_LONG)
                 .withDescription(RES.get("hlp.certLevel", getEnumValues(CertificationLevel.values()))).hasArg()
                 .withArgName("level").create(ARG_CERT_LEVEL));
         OPTS.addOption(OptionBuilder.withLongOpt(ARG_HASH_ALGORITHM_LONG)
                 .withDescription(RES.get("hlp.hashAlgorithm", getEnumValues(HashAlgorithm.values()))).hasArg()
                 .withArgName("algorithm").create(ARG_HASH_ALGORITHM));
+        OPTS.addOption(OptionBuilder.withLongOpt(ARG_PADES_LEVEL_LONG).withDescription(RES.get("hlp.padesLevel")).hasArg()
+                .withArgName("level").create(ARG_PADES_LEVEL));
 
         OPTS.addOption(OptionBuilder.withLongOpt(ARG_QUIET_LONG).withDescription(RES.get("hlp.quiet")).create(ARG_QUIET));
 

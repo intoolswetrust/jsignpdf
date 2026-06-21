@@ -27,6 +27,23 @@ public class EngineRegistryTest {
     }
 
     @Test
+    public void serviceLoaderDiscoversDssEngine() {
+        SigningEngine dss = EngineRegistry.getInstance().findById("dss").orElseThrow();
+        assertEquals("dss", dss.id());
+        assertEquals("EU DSS (PAdES)", dss.displayName());
+        assertTrue(dss.capabilities().contains(Capability.PADES_BASELINE_LTA));
+        assertTrue(dss.capabilities().contains(Capability.SUBFILTER_ETSI_CADES_DETACHED));
+    }
+
+    @Test
+    public void dssIsListedButNotDefault() {
+        List<SigningEngine> all = EngineRegistry.getInstance().listAll();
+        assertTrue(all.stream().anyMatch(e -> e.id().equals("dss")));
+        // default stays openpdf
+        assertEquals("openpdf", EngineRegistry.getInstance().getDefault().orElseThrow().id());
+    }
+
+    @Test
     public void findByIdIsCaseInsensitive() {
         assertTrue(EngineRegistry.getInstance().findById("OpenPDF").isPresent());
         assertTrue(EngineRegistry.getInstance().findById("OPENPDF").isPresent());

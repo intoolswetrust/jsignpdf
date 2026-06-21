@@ -231,6 +231,11 @@
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
+            <artifactId>jsignpdf-engine-dss</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
             <artifactId>installcert</artifactId>
             <version>${project.version}</version>
         </dependency>

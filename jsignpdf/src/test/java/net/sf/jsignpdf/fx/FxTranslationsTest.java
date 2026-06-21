@@ -238,15 +238,18 @@ public class FxTranslationsTest {
             assertEquals("Signature properties panel for " + locale,
                     bundle.getString("jfx.gui.panel.signatureProperties"),
                     accordion.getPanes().get(1).getText());
+            assertEquals("PAdES level panel for " + locale,
+                    bundle.getString("jfx.gui.panel.padesLevel"),
+                    accordion.getPanes().get(2).getText());
             assertEquals("Signature appearance panel for " + locale,
                     bundle.getString("jfx.gui.panel.signatureAppearance"),
-                    accordion.getPanes().get(2).getText());
+                    accordion.getPanes().get(3).getText());
             assertEquals("TSA panel for " + locale,
                     bundle.getString("jfx.gui.panel.timestampValidation"),
-                    accordion.getPanes().get(3).getText());
+                    accordion.getPanes().get(4).getText());
             assertEquals("Encryption panel for " + locale,
                     bundle.getString("jfx.gui.panel.encryptionRights"),
-                    accordion.getPanes().get(4).getText());
+                    accordion.getPanes().get(5).getText());
         }
     }
 

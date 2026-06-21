@@ -16,5 +16,6 @@
     <modules>
         <module>api</module>
         <module>openpdf</module>
+        <module>dss</module>
     </modules>
 </project>

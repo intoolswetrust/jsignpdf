@@ -14,6 +14,7 @@ import net.sf.jsignpdf.BasicSignerOptions;
 import net.sf.jsignpdf.Constants;
 import net.sf.jsignpdf.types.CertificationLevel;
 import net.sf.jsignpdf.types.HashAlgorithm;
+import net.sf.jsignpdf.types.PadesLevel;
 import net.sf.jsignpdf.types.PDFEncryption;
 import net.sf.jsignpdf.types.PrintRight;
 import net.sf.jsignpdf.types.RenderMode;
@@ -51,6 +52,8 @@ public class SigningOptionsViewModel {
     // Certification & hash
     private final ObjectProperty<CertificationLevel> certLevel = new SimpleObjectProperty<>();
     private final ObjectProperty<HashAlgorithm> hashAlgorithm = new SimpleObjectProperty<>();
+    // PAdES baseline level (DSS engine); null = engine default
+    private final ObjectProperty<PadesLevel> padesLevel = new SimpleObjectProperty<>();
 
     // Visible signature
     private final BooleanProperty visible = new SimpleBooleanProperty(false);
@@ -127,6 +130,7 @@ public class SigningOptionsViewModel {
         opts.setContact(contact.get());
         opts.setCertLevel(certLevel.get());
         opts.setHashAlgorithm(hashAlgorithm.get());
+        opts.setPadesLevel(padesLevel.get());
 
         // Visible signature
         opts.setVisible(visible.get());
@@ -207,6 +211,7 @@ public class SigningOptionsViewModel {
         contact.set(opts.getContact());
         certLevel.set(opts.getCertLevelX());
         hashAlgorithm.set(opts.getHashAlgorithmX());
+        padesLevel.set(opts.getPadesLevel());
 
         visible.set(opts.isVisible());
         page.set(opts.getPage());
@@ -278,6 +283,7 @@ public class SigningOptionsViewModel {
         contact.set(null);
         certLevel.set(CertificationLevel.NOT_CERTIFIED);
         hashAlgorithm.set(Constants.DEFVAL_HASH_ALGORITHM);
+        padesLevel.set(null);
 
         // Visible signature
         visible.set(false);
@@ -381,6 +387,7 @@ public class SigningOptionsViewModel {
     public StringProperty contactProperty() { return contact; }
     public ObjectProperty<CertificationLevel> certLevelProperty() { return certLevel; }
     public ObjectProperty<HashAlgorithm> hashAlgorithmProperty() { return hashAlgorithm; }
+    public ObjectProperty<PadesLevel> padesLevelProperty() { return padesLevel; }
     public BooleanProperty visibleProperty() { return visible; }
     public IntegerProperty pageProperty() { return page; }
     public FloatProperty positionLLXProperty() { return positionLLX; }

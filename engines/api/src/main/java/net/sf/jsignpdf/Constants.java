@@ -129,6 +129,7 @@ public class Constants {
 
     public static final String PROPERTY_CERT_LEVEL = "certification.level";
     public static final String PROPERTY_HASH_ALGORITHM = "hash.algorithm";
+    public static final String PROPERTY_PADES_LEVEL = "pades.level";
 
     public static final String PROPERTY_RIGHT_PRINT = "right.printing";
     public static final String PROPERTY_RIGHT_COPY = "right.copy";
@@ -200,7 +201,7 @@ public class Constants {
     public static final long DEFVAL_SIG_SIZE = 15000L;
     public static final String DEFVAL_CACERTS_PASSWD = "changeit";
 
-    public static final HashAlgorithm DEFVAL_HASH_ALGORITHM = HashAlgorithm.SHA1;
+    public static final HashAlgorithm DEFVAL_HASH_ALGORITHM = HashAlgorithm.SHA256;
 
     public static final boolean DEFVAL_APPEND = toBoolean(true);
 
@@ -297,6 +298,8 @@ public class Constants {
     public static final String ARG_APPEND = "a";
     public static final String ARG_APPEND_LONG = "append";
 
+    public static final String ARG_OVERWRITE_LONG = "overwrite";
+
     public static final String ARG_QUIET_LONG = "quiet";
     public static final String ARG_QUIET = "q";
 
@@ -305,6 +308,9 @@ public class Constants {
 
     public static final String ARG_HASH_ALGORITHM = "ha";
     public static final String ARG_HASH_ALGORITHM_LONG = "hash-algorithm";
+
+    public static final String ARG_PADES_LEVEL = "pl";
+    public static final String ARG_PADES_LEVEL_LONG = "pades-level";
 
     public static final String ARG_ENCRYPTED = "e";
     public static final String ARG_ENCRYPTED_LONG = "encrypted";
