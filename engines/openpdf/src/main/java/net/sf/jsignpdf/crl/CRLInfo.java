@@ -4,8 +4,12 @@ import static net.sf.jsignpdf.Constants.RES;
 import static net.sf.jsignpdf.Constants.LOGGER;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
+import java.net.Proxy;
 import java.net.URL;
+import java.net.URLConnection;
 import java.security.cert.CRL;
 import java.security.cert.CRLException;
 import java.security.cert.Certificate;
@@ -36,6 +40,9 @@ import net.sf.jsignpdf.Constants;
  *
  */
 public class CRLInfo {
+
+    /** Maximum number of redirects to follow when downloading a CRL. */
+    private static final int MAX_CRL_REDIRECTS = 5;
 
     private CRL[] crls;
     private long byteCount = 0L;
@@ -96,7 +103,7 @@ public class CRLInfo {
                 LOGGER.info(RES.get("console.crlinfo.loadCrl", urlStr));
                 final URL tmpUrl = new URL(urlStr);
                 final CountingInputStream inStream = new CountingInputStream(
-                        tmpUrl.openConnection(options.createProxy()).getInputStream());
+                        openCrlStream(tmpUrl, options.createProxy()));
                 final CertificateFactory cf = CertificateFactory.getInstance(Constants.CERT_TYPE_X509);
                 final CRL crl = cf.generateCRL(inStream);
                 final long tmpBytesRead = inStream.getByteCount();
@@ -119,6 +126,46 @@ public class CRLInfo {
             }
         }
         crls = crlSet.toArray(new CRL[crlSet.size()]);
+    }
+
+    /**
+     * Opens an input stream for the given CRL URL, following redirects manually.
+     * <p>
+     * {@link HttpURLConnection} only follows redirects that stay on the same protocol; a CRL
+     * distribution point that redirects HTTP&nbsp;&rarr;&nbsp;HTTPS (or back) is therefore not
+     * followed automatically and the caller sees an empty response. We follow the {@code Location}
+     * header ourselves so cross-scheme redirects work too (#254). The configured proxy is reused
+     * for every hop.
+     *
+     * @param url   the CRL distribution-point URL
+     * @param proxy the proxy to use (never {@code null}; may be {@link Proxy#NO_PROXY})
+     * @return the response input stream of the final, non-redirecting hop
+     * @throws IOException on connection errors, a redirect without a {@code Location} header, or too
+     *         many redirects
+     */
+    private InputStream openCrlStream(final URL url, final Proxy proxy) throws IOException {
+        URL currentUrl = url;
+        for (int hop = 0; hop <= MAX_CRL_REDIRECTS; hop++) {
+            final URLConnection conn = currentUrl.openConnection(proxy);
+            if (!(conn instanceof HttpURLConnection httpConn)) {
+                return conn.getInputStream();
+            }
+            // Follow redirects ourselves so that cross-scheme hops are honoured.
+            httpConn.setInstanceFollowRedirects(false);
+            final int status = httpConn.getResponseCode();
+            if (status < 300 || status >= 400) {
+                return httpConn.getInputStream();
+            }
+            final String location = httpConn.getHeaderField("Location");
+            httpConn.disconnect();
+            if (location == null) {
+                throw new IOException("CRL redirect (HTTP " + status + ") without Location header: " + currentUrl);
+            }
+            // Resolve against the current URL to support relative redirects.
+            currentUrl = new URL(currentUrl, location);
+            LOGGER.info(RES.get("console.crlinfo.loadCrl", currentUrl.toString()));
+        }
+        throw new IOException("Too many CRL redirects for: " + url);
     }
 
     /**
