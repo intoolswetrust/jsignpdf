@@ -57,13 +57,13 @@ jobs:
     - name: Classify release version
       id: check
       shell: bash
+      env:
+        VERSION: ${{ inputs.release-version }}
       run: |
         set -euo pipefail
         shopt -s nocasematch
-        if [[ "${{ inputs.release-version }}" == *ALPHA* \
-           || "${{ inputs.release-version }}" == *BETA* \
-           || "${{ inputs.release-version }}" == *RC* \
-           || "${{ inputs.release-version }}" == *MILESTONE* ]]; then
+        if [[ "$VERSION" == *ALPHA* || "$VERSION" == *BETA* \
+           || "$VERSION" == *RC* || "$VERSION" == *MILESTONE* ]]; then
           echo "is-prerelease=true" >> "$GITHUB_OUTPUT"
         else
           echo "is-prerelease=false" >> "$GITHUB_OUTPUT"
@@ -320,9 +320,10 @@ jobs:
     # The resumable second half of Windows code signing. The package job has
     # already submitted the request to SignPath; here we poll the SignPath REST
     # API for completion and download the signed artifact. If the wait times
-    # out or the download fails, re-run *only this job* from the GitHub UI:
-    # package stays green, so its signing-request-id artifact is reused and the
-    # request is never re-submitted.
+    # out (e.g. the request is still awaiting manual approval in the SignPath
+    # UI) or the download fails, re-run *only this job* from the GitHub UI once
+    # approval is done: package stays green, so its signing-request-id artifact
+    # is reused and the request is never re-submitted.
     #
     # Skipped entirely for pre-releases (they are not signed).
     needs: [setup, package]
@@ -384,6 +385,10 @@ jobs:
         path: staged/*
         if-no-files-found: error
         retention-days: 1
+        # Make a sign-windows re-run idempotent: if a previous attempt already
+        # staged the signed bits, replace them instead of failing on a
+        # name collision.
+        overwrite: true
 
   flatpak:
     # Builds Flatpak bundles for both x86_64 and aarch64 from the Central full
