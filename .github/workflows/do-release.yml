@@ -71,6 +71,34 @@ jobs:
         gpg-passphrase: MAVEN_GPG_PASSPHRASE
         cache: 'maven'
 
+    # Bake the new version into the AppStream metainfo BEFORE the tag is cut,
+    # so Flathub and distros (which build from the tagged source) show it. The
+    # commit lands on the branch ahead of release:prepare, so it rides into the
+    # tagged tree. Validation runs here, before the irreversible Maven release,
+    # so a malformed entry fails the release early instead of downstream at
+    # Flathub. Pre-release versions are skipped by the script (no commit).
+    - name: Update AppStream metainfo with the release entry
+      run: |
+        set -euo pipefail
+        VERSION=${{ github.event.inputs.release-version }}
+        BASE_VERSION="${VERSION%%-*}"
+        NOTES_FILE="distribution/doc/release-notes/${BASE_VERSION}.md"
+        METAINFO="distribution/linux/io.github.intoolswetrust.JSignPdf.metainfo.xml"
+        sudo apt-get update
+        sudo apt-get install -y appstream
+        python3 distribution/linux/update-metainfo-release.py \
+          --version "$VERSION" \
+          --notes "$NOTES_FILE" \
+          --metainfo "$METAINFO"
+        appstreamcli validate --no-net "$METAINFO"
+        if git diff --quiet -- "$METAINFO"; then
+          echo "No metainfo change to commit (pre-release or entry already present)."
+        else
+          git add "$METAINFO"
+          git commit -m "Add ${VERSION} release entry to AppStream metainfo"
+          echo "Committed metainfo update for ${VERSION}."
+        fi
+
     - name: Do the Maven release (deploys jars + full/minimal ZIPs to Central)
       id: maven_release
       run: |
