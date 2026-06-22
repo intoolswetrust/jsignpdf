@@ -14,6 +14,12 @@ name: Package Release
 # re-downloads from Central and recreates the GitHub Release. Use this to
 # recover a failed/timed-out packaging run WITHOUT re-running do-release.yml.
 # See design-doc/3.1-separate-release-steps.md.
+#
+# Windows code signing (SignPath) only runs for FINAL releases; pre-releases
+# (ALPHA/BETA/RC/MILESTONE) ship unsigned Windows installers. Signing is split
+# into submit (package job) and poll+download (sign-windows job) so that if the
+# wait/download fails you can re-run ONLY the sign-windows job — the request is
+# never re-submitted.
 
 on:
   workflow_call:
@@ -33,7 +39,36 @@ concurrency:
   group: ${{ github.workflow }}-${{ inputs.release-version }}
   cancel-in-progress: false
 
+# SignPath coordinates. Kept here as the single source of truth: the submit
+# step (package job) and the REST poll/download (sign-windows job) both derive
+# their URLs from these, so they can never drift apart.
+env:
+  SIGNPATH_ORG_ID: 8d0ef437-1c25-49c6-9954-ed7fe51f9df8
+  SIGNPATH_API_BASE: https://app.signpath.io/API/v1
+
 jobs:
+  setup:
+    # Classify the version once. Pre-releases (ALPHA/BETA/RC/MILESTONE) skip
+    # Windows code signing entirely and are flagged --prerelease on GitHub.
+    runs-on: ubuntu-24.04
+    outputs:
+      is-prerelease: ${{ steps.check.outputs.is-prerelease }}
+    steps:
+    - name: Classify release version
+      id: check
+      shell: bash
+      run: |
+        set -euo pipefail
+        shopt -s nocasematch
+        if [[ "${{ inputs.release-version }}" == *ALPHA* \
+           || "${{ inputs.release-version }}" == *BETA* \
+           || "${{ inputs.release-version }}" == *RC* \
+           || "${{ inputs.release-version }}" == *MILESTONE* ]]; then
+          echo "is-prerelease=true" >> "$GITHUB_OUTPUT"
+        else
+          echo "is-prerelease=false" >> "$GITHUB_OUTPUT"
+        fi
+
   fetch-zips:
     # Pull the published full/minimal ZIPs from Maven Central. release:perform
     # closes+releases the staging repo (autoReleaseAfterClose=true), but the
@@ -117,11 +152,17 @@ jobs:
     # fail-fast: false so a single broken platform doesn't abort the others.
     # macOS DMGs are unsigned in 3.1 — see design-doc/3.1-no-fat-jar.md.
     #
+    # Windows code signing (SignPath) is split across two jobs so the download
+    # is resumable: this job only *submits* the signing request (no waiting)
+    # and the separate sign-windows job polls + downloads the signed bits. Only
+    # final releases are signed; for pre-releases the unsigned Windows
+    # installers are staged directly here.
+    #
     # No Intel-macOS (macos-x64) entry: Apple discontinued Intel Macs and
     # GitHub's last hosted Intel image is being retired. Intel Mac users run
     # the Apple Silicon DMG under Rosetta 2 or use the cross-platform full
     # ZIP. See design-doc/3.1-separate-release-steps.md.
-    needs: fetch-zips
+    needs: [setup, fetch-zips]
     strategy:
       fail-fast: false
       matrix:
@@ -211,10 +252,13 @@ jobs:
           ${{ matrix.script }} "$VERSION"
         fi
 
-    # Windows artifacts go through SignPath before they're handed to the
-    # publish job. Other platforms upload directly.
+    # Windows release builds go through SignPath. To keep the signed-bits
+    # download resumable (re-run the sign-windows job without re-submitting),
+    # this job only submits the request and hands the request id off to
+    # sign-windows via an artifact. wait-for-completion is false: we do NOT
+    # wait or download here.
     - name: Upload unsigned Windows installers for SignPath
-      if: matrix.signpath
+      if: matrix.signpath && needs.setup.outputs.is-prerelease == 'false'
       id: upload-unsigned-windows
       uses: actions/upload-artifact@v7
       with:
@@ -223,34 +267,121 @@ jobs:
         if-no-files-found: error
         retention-days: 1
 
-    - name: Submit signing request to SignPath
-      if: matrix.signpath
+    - name: Submit signing request to SignPath (no wait)
+      if: matrix.signpath && needs.setup.outputs.is-prerelease == 'false'
+      id: submit-signing
       uses: signpath/github-action-submit-signing-request@v2
       with:
         api-token: '${{ secrets.SIGNPATH_API_TOKEN }}'
-        organization-id: '8d0ef437-1c25-49c6-9954-ed7fe51f9df8'
+        organization-id: '${{ env.SIGNPATH_ORG_ID }}'
         project-slug: 'jsignpdf'
         signing-policy-slug: 'release-signing'
         artifact-configuration-slug: 'zip'
         github-artifact-id: '${{ steps.upload-unsigned-windows.outputs.artifact-id }}'
-        wait-for-completion: true
-        output-artifact-directory: 'distribution/target/signed'
+        wait-for-completion: false
 
-    - name: Stage signed Windows installers for publish
-      if: matrix.signpath
+    - name: Record signing request id for the download job
+      if: matrix.signpath && needs.setup.outputs.is-prerelease == 'false'
+      shell: bash
+      run: |
+        set -euo pipefail
+        mkdir -p signing-metadata
+        id='${{ steps.submit-signing.outputs.signing-request-id }}'
+        if [ -z "$id" ]; then
+          echo "::error::SignPath did not return a signing-request-id"
+          exit 1
+        fi
+        printf '%s\n' "$id" > signing-metadata/signing-request-id.txt
+        echo "Submitted signing request: $id"
+
+    - name: Stage signing request id for sign-windows
+      if: matrix.signpath && needs.setup.outputs.is-prerelease == 'false'
       uses: actions/upload-artifact@v7
       with:
-        name: jsignpdf-platform-assets-${{ matrix.label }}
-        path: distribution/target/signed/*
+        name: jsignpdf-windows-signing-metadata
+        path: signing-metadata/signing-request-id.txt
         if-no-files-found: error
-        retention-days: 1
+        # Longer retention so the signed-bits download can be re-run later
+        # (after a wait timeout) without re-submitting.
+        retention-days: 5
 
+    # Everything that isn't a signed Windows build is staged directly here:
+    # all non-Windows platforms, plus pre-release Windows (skips signing).
     - name: Stage platform installers for publish
-      if: ${{ !matrix.signpath }}
+      if: ${{ !matrix.signpath || needs.setup.outputs.is-prerelease == 'true' }}
       uses: actions/upload-artifact@v7
       with:
         name: jsignpdf-platform-assets-${{ matrix.label }}
         path: distribution/target/upload/*
+        if-no-files-found: error
+        retention-days: 1
+
+  sign-windows:
+    # The resumable second half of Windows code signing. The package job has
+    # already submitted the request to SignPath; here we poll the SignPath REST
+    # API for completion and download the signed artifact. If the wait times
+    # out or the download fails, re-run *only this job* from the GitHub UI:
+    # package stays green, so its signing-request-id artifact is reused and the
+    # request is never re-submitted.
+    #
+    # Skipped entirely for pre-releases (they are not signed).
+    needs: [setup, package]
+    if: needs.setup.outputs.is-prerelease == 'false'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 90
+    steps:
+    - name: Download signing request id
+      uses: actions/download-artifact@v8
+      with:
+        name: jsignpdf-windows-signing-metadata
+        path: signing-metadata
+
+    - name: Poll SignPath and download the signed artifact
+      env:
+        SIGNPATH_API_TOKEN: ${{ secrets.SIGNPATH_API_TOKEN }}
+      run: |
+        set -euo pipefail
+        REQ_ID="$(tr -d '[:space:]' < signing-metadata/signing-request-id.txt)"
+        if [ -z "$REQ_ID" ]; then
+          echo "::error::No signing request id found"
+          exit 1
+        fi
+        STATUS_URL="${SIGNPATH_API_BASE}/${SIGNPATH_ORG_ID}/SigningRequests/${REQ_ID}"
+        echo "Polling signing request ${REQ_ID}"
+
+        status=""
+        # 120 x 30s = up to 60 min waiting for the signing workflow to finish.
+        for attempt in $(seq 1 120); do
+          resp="$(curl -fsSL -H "Authorization: Bearer ${SIGNPATH_API_TOKEN}" "${STATUS_URL}")"
+          status="$(echo "$resp" | jq -r '.status')"
+          final="$(echo "$resp" | jq -r '.isFinalStatus')"
+          echo "attempt ${attempt}: status=${status} isFinalStatus=${final}"
+          if [ "$final" = "true" ]; then
+            break
+          fi
+          sleep 30
+        done
+
+        if [ "$status" != "Completed" ]; then
+          echo "::error::Signing request ${REQ_ID} did not complete (status=${status}). Re-run this job to retry the download without re-submitting."
+          exit 1
+        fi
+
+        mkdir -p signed-download distribution/target/signed
+        curl -fsSL -H "Authorization: Bearer ${SIGNPATH_API_TOKEN}" \
+          -o signed-download/signed.zip "${STATUS_URL}/SignedArtifact"
+        unzip -q signed-download/signed.zip -d distribution/target/signed
+        # Flatten any nesting so the staged asset set matches the other
+        # platforms (individual installer files at the top level).
+        mkdir -p staged
+        find distribution/target/signed -type f -exec cp {} staged/ \;
+        ls -l staged
+
+    - name: Stage signed Windows installers for publish
+      uses: actions/upload-artifact@v7
+      with:
+        name: jsignpdf-platform-assets-windows-x64
+        path: staged/*
         if-no-files-found: error
         retention-days: 1
 
@@ -346,11 +477,14 @@ jobs:
     # Collects every asset, computes SHA-256 checksums, mirrors to SourceForge,
     # and creates the GitHub Release. Flatpak is optional: if its job failed
     # (e.g. SDK extension outage) we still publish the rest.
-    needs: [fetch-zips, package, flatpak]
+    needs: [setup, fetch-zips, package, sign-windows, flatpak]
+    # sign-windows is 'skipped' for pre-releases (unsigned Windows bits come
+    # straight from the package job) and must be 'success' for final releases.
     if: |
       always()
       && needs.fetch-zips.result == 'success'
       && needs.package.result == 'success'
+      && (needs.sign-windows.result == 'success' || needs.sign-windows.result == 'skipped')
     runs-on: ubuntu-24.04
     permissions:
       contents: write
@@ -461,11 +595,9 @@ jobs:
           exit 1
         fi
         prerelease_flag=()
-        shopt -s nocasematch
-        if [[ "$VERSION" == *ALPHA* || "$VERSION" == *BETA* || "$VERSION" == *RC* || "$VERSION" == *MILESTONE* ]]; then
+        if [ "${{ needs.setup.outputs.is-prerelease }}" = "true" ]; then
           prerelease_flag=(--prerelease)
         fi
-        shopt -u nocasematch
         gh release create "$TAG" \
           --title "$TAG" \
           --notes-file "$NOTES_FILE" \
