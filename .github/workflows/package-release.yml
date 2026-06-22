@@ -153,7 +153,7 @@ jobs:
       run: echo "tag=JSignPdf_${VERSION//./_}" >> "$GITHUB_OUTPUT"
 
     - name: Checkout release tag
-      uses: actions/checkout@v6
+      uses: actions/checkout@v7
       with:
         ref: ${{ steps.tag.outputs.tag }}
 
@@ -277,7 +277,7 @@ jobs:
       run: echo "tag=JSignPdf_${VERSION//./_}" >> "$GITHUB_OUTPUT"
 
     - name: Checkout release tag
-      uses: actions/checkout@v6
+      uses: actions/checkout@v7
       with:
         ref: ${{ steps.tag.outputs.tag }}
 
@@ -365,7 +365,7 @@ jobs:
         echo "full=JSignPdf-${VERSION}" >> "$GITHUB_OUTPUT"
 
     - name: Checkout release tag
-      uses: actions/checkout@v6
+      uses: actions/checkout@v7
       with:
         ref: ${{ steps.vars.outputs.tag }}
 
