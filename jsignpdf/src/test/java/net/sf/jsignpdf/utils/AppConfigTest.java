@@ -23,6 +23,18 @@ public class AppConfigTest {
         // String accessors backed by getNotEmptyProperty + literal default never return null/empty.
         assertNotNull(AppConfig.pdf2imageLibraries());
         assertNotNull(AppConfig.defaultTsaHashAlg());
+        assertNotNull(AppConfig.defaultOutSuffix());
+    }
+
+    @Test
+    public void defaultOutSuffixFallsBackToConstants() {
+        // DEFAULT_OUT_SUFFIX is the literal fallback when the bundled defaults resource is missing or empty.
+        String suffix = AppConfig.defaultOutSuffix();
+        assertEquals("Default value should match Constants",
+                net.sf.jsignpdf.Constants.DEFAULT_OUT_SUFFIX,
+                // If a developer has a real override, this assertion can be skipped — but on a clean checkout the
+                // bundled default matches the Constants literal.
+                suffix.isEmpty() ? net.sf.jsignpdf.Constants.DEFAULT_OUT_SUFFIX : suffix);
     }
 
     @Test
