@@ -386,18 +386,37 @@ public class DssSigningEngine implements SigningEngine {
                 return service.signDocument(document, parameters, signatureValue);
             } catch (IllegalArgumentException e) {
                 final Integer required = parseRequiredContentSize(e.getMessage());
-                if (!retryOnUndersize || attempt >= MAX_CONTENT_SIZE_RETRIES) {
-                    throw e;
-                }
+                // Doubling is the fallback when the required size cannot be parsed; the guard below stops a
+                // non-growing loop in that case.
                 final int grown = required != null ? required + RETRY_MARGIN : contentSize * 2;
-                if (grown <= contentSize) {
-                    // No forward progress (unparseable message and overflow guard); stop rather than loop.
+                if (!retryOnUndersize || attempt >= MAX_CONTENT_SIZE_RETRIES || grown <= contentSize) {
+                    logUndersizeGuidance(contentSize, required, retryOnUndersize);
                     throw e;
                 }
                 LOGGER.info(RES.get("console.dss.contentSizeRetry", String.valueOf(contentSize),
                         String.valueOf(grown)));
                 contentSize = grown;
             }
+        }
+    }
+
+    /**
+     * Logs an actionable message when an undersized {@code /Contents} cannot be recovered, pointing the user at
+     * the two knobs that control it: the automatic {@code engine.dss.retryOnUndersize} growth (when it is
+     * switched off) and the explicit {@code engine.dss.contentSize} reservation. Without this the only feedback
+     * is the raw DSS {@link IllegalArgumentException}, which names {@code setContentSize(...)} (a DSS API call)
+     * rather than the JSignPdf setting.
+     *
+     * @param contentSize the reservation that proved too small
+     * @param required    the size DSS reported as needed, or {@code null} if it could not be parsed
+     */
+    private static void logUndersizeGuidance(int contentSize, Integer required, boolean retryOnUndersize) {
+        final String suggested = String.valueOf((required != null ? required : contentSize * 2) + RETRY_MARGIN);
+        if (retryOnUndersize) {
+            // Retry was enabled but exhausted/non-progressing: only the explicit override is left.
+            LOGGER.severe(RES.get("console.dss.contentSizeExhausted", String.valueOf(contentSize), suggested));
+        } else {
+            LOGGER.severe(RES.get("console.dss.contentSizeTooSmall", String.valueOf(contentSize), suggested));
         }
     }
 
