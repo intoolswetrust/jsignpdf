@@ -149,6 +149,39 @@ public class DssSigningEngineTest {
     }
 
     @Test
+    public void undersizedContentSizeRecoversViaRetry() throws Exception {
+        BasicSignerOptions o = baseOptions();
+        // A deliberately tiny reservation forces DSS's "signature size too small" error. With the retry
+        // enabled by default, the engine must grow the reservation and still produce a valid signature.
+        Map<String, String> cfg = new HashMap<>();
+        cfg.put(DssSigningEngine.KEY_CONTENT_SIZE, "100");
+        assertTrue("undersize must be recovered by the retry",
+                new DssSigningEngine().sign(o, new MapEngineConfig(cfg)));
+        assertSignatureLevel(outputFile, SignatureLevel.PAdES_BASELINE_B);
+    }
+
+    @Test
+    public void undersizedContentSizeFailsWhenRetryDisabled() throws Exception {
+        BasicSignerOptions o = baseOptions();
+        Map<String, String> cfg = new HashMap<>();
+        cfg.put(DssSigningEngine.KEY_CONTENT_SIZE, "100");
+        cfg.put(DssSigningEngine.KEY_RETRY_ON_UNDERSIZE, "false");
+        // With the retry switched off, a too-small reservation must fail rather than silently grow.
+        assertFalse("undersize must fail when the retry is disabled",
+                new DssSigningEngine().sign(o, new MapEngineConfig(cfg)));
+    }
+
+    @Test
+    public void explicitContentSizeSignsSuccessfully() throws Exception {
+        BasicSignerOptions o = baseOptions();
+        Map<String, String> cfg = new HashMap<>();
+        cfg.put(DssSigningEngine.KEY_CONTENT_SIZE, "32768");
+        assertTrue("a generous explicit content size must sign in one pass",
+                new DssSigningEngine().sign(o, new MapEngineConfig(cfg)));
+        assertSignatureLevel(outputFile, SignatureLevel.PAdES_BASELINE_B);
+    }
+
+    @Test
     public void baselineBWithTsaUpgradesToT() throws Exception {
         BasicSignerOptions o = baseOptions(); // padesLevel == null -> BASELINE_B, auto-upgraded to T by the TSA
         useEmbeddedTsa(o);
