@@ -15,6 +15,7 @@ import java.net.Proxy;
 import java.net.URI;
 import java.security.PrivateKey;
 import java.security.cert.Certificate;
+import java.security.cert.CertificateEncodingException;
 import java.security.cert.X509Certificate;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -23,6 +24,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.logging.Level;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.naming.ldap.LdapName;
 import javax.naming.ldap.Rdn;
@@ -82,6 +85,47 @@ public class DssSigningEngine implements SigningEngine {
 
     /** Stable identifier used in config files and CLI args. */
     public static final String ID = "dss";
+
+    /**
+     * Config key ({@code engine.dss.contentSize}): explicit number of bytes to reserve in the PDF
+     * {@code /Contents} for the CMS signature. A positive value overrides the automatic estimate; {@code 0}
+     * (the default / absent) means the size is estimated from the certificate chain and signing options.
+     */
+    static final String KEY_CONTENT_SIZE = "contentSize";
+
+    /**
+     * Config key ({@code engine.dss.retryOnUndersize}): when {@code true} (the default), the signature is
+     * re-created with a larger reserved {@code /Contents} if DSS reports the reserved size was too small.
+     * The retry repeats the signing operation (and, for timestamped levels, fetches a fresh TSA token).
+     */
+    static final String KEY_RETRY_ON_UNDERSIZE = "retryOnUndersize";
+
+    /** Lower bound for the reserved {@code /Contents} size, matching DSS's own default; never estimate below it. */
+    private static final int MIN_CONTENT_SIZE = 9472;
+
+    /** Per-certificate fallback used only when a chain certificate cannot be DER-encoded for measurement. */
+    private static final int CERT_SIZE_FALLBACK = 2048;
+
+    /**
+     * Headroom added on top of the certificate-chain bytes for the signer info, signed attributes, the
+     * signature value (comfortably covers RSA-4096) and the ASN.1 framing of the CMS SignedData.
+     */
+    private static final int CMS_OVERHEAD = 4096;
+
+    /**
+     * Extra space reserved when a signature timestamp is embedded (PAdES level T and above). The timestamp
+     * token carries its own TSA certificate chain and is by far the largest single variable in {@code /Contents}.
+     */
+    private static final int TSA_ALLOWANCE = 16384;
+
+    /** Slack added on top of the exact size DSS reports when growing after an undersize failure. */
+    private static final int RETRY_MARGIN = 2048;
+
+    /** Cap on undersize retries; DSS reports the exact required size, so a single retry normally suffices. */
+    private static final int MAX_CONTENT_SIZE_RETRIES = 3;
+
+    /** Extracts the actual CMS length from the DSS "signature size too small" message; see {@code assertContentSizeSufficient}. */
+    private static final Pattern UNDERSIZE_LENGTH_PATTERN = Pattern.compile("with a length \\[(\\d+)\\]");
 
     private static final Set<Capability> CAPABILITIES = Set.copyOf(EnumSet.of(
             Capability.SUBFILTER_ETSI_CADES_DETACHED,
@@ -263,9 +307,13 @@ public class DssSigningEngine implements SigningEngine {
 
                 LOGGER.info(RES.get("console.processing"));
                 LOGGER.info(RES.get("console.createSignature"));
-                final ToBeSigned dataToSign = service.getDataToSign(document, parameters);
-                final SignatureValue signatureValue = token.sign(dataToSign, digestAlgorithm, null);
-                final DSSDocument signedDocument = service.signDocument(document, parameters, signatureValue);
+                final int configuredContentSize = engineConfig.getInt(KEY_CONTENT_SIZE, 0);
+                final int initialContentSize = configuredContentSize > 0
+                        ? configuredContentSize
+                        : estimateContentSize(chain, useTsa);
+                final boolean retryOnUndersize = engineConfig.getBoolean(KEY_RETRY_ON_UNDERSIZE, true);
+                final DSSDocument signedDocument = signWithContentSize(service, document, parameters, token,
+                        digestAlgorithm, initialContentSize, retryOnUndersize);
 
                 LOGGER.info(RES.get("console.createOutPdf", outFile));
                 try (FileOutputStream fos = new FileOutputStream(outFile)) {
@@ -284,6 +332,93 @@ public class DssSigningEngine implements SigningEngine {
             }
         }
         return finished;
+    }
+
+    /**
+     * Estimates how many bytes to reserve in the PDF {@code /Contents} for the CMS signature. DSS uses a
+     * fixed reservation (default {@value #MIN_CONTENT_SIZE}) that is too small for large certificate chains
+     * (e.g. eID / qualified certificates) combined with an embedded signature timestamp, which is exactly the
+     * case reported in issue #430. Sizing from the actual chain (plus a fixed timestamp allowance) covers
+     * those in a single pass; {@link #signWithContentSize} is the safety net when even this is too small.
+     *
+     * <p>
+     * The estimate cannot be exact for timestamped signatures: the TSA token (with its own certificate chain)
+     * is only known after the TSA responds inside {@code signDocument()}, so a fixed {@link #TSA_ALLOWANCE} is
+     * reserved instead.
+     * </p>
+     *
+     * @param chain         the signer's certificate chain (all of it is encapsulated in the CMS)
+     * @param withTimestamp whether a signature timestamp will be embedded (PAdES level T and above)
+     * @return the number of bytes to reserve, never below {@link #MIN_CONTENT_SIZE}
+     */
+    private static int estimateContentSize(Certificate[] chain, boolean withTimestamp) {
+        int chainBytes = 0;
+        for (Certificate cert : chain) {
+            try {
+                chainBytes += cert.getEncoded().length;
+            } catch (CertificateEncodingException e) {
+                chainBytes += CERT_SIZE_FALLBACK;
+            }
+        }
+        int estimate = chainBytes + CMS_OVERHEAD;
+        if (withTimestamp) {
+            estimate += TSA_ALLOWANCE;
+        }
+        return Math.max(estimate, MIN_CONTENT_SIZE);
+    }
+
+    /**
+     * Signs the document, reserving {@code initialContentSize} bytes for the CMS {@code /Contents}. The
+     * reserved size is fixed before the byte ranges are digested, so it cannot be derived from the produced
+     * signature; when {@code retryOnUndersize} is enabled and DSS reports the reservation was too small, this
+     * re-runs the whole signing operation with the exact size DSS reported (plus {@link #RETRY_MARGIN}). For
+     * timestamped levels each retry fetches a fresh TSA token, hence the {@link #MAX_CONTENT_SIZE_RETRIES} cap.
+     */
+    private DSSDocument signWithContentSize(PAdESService service, DSSDocument document,
+            PAdESSignatureParameters parameters, PrivateKeySignatureToken token, DigestAlgorithm digestAlgorithm,
+            int initialContentSize, boolean retryOnUndersize) {
+        int contentSize = initialContentSize;
+        for (int attempt = 0;; attempt++) {
+            parameters.setContentSize(contentSize);
+            final ToBeSigned dataToSign = service.getDataToSign(document, parameters);
+            final SignatureValue signatureValue = token.sign(dataToSign, digestAlgorithm, null);
+            try {
+                return service.signDocument(document, parameters, signatureValue);
+            } catch (IllegalArgumentException e) {
+                final Integer required = parseRequiredContentSize(e.getMessage());
+                if (!retryOnUndersize || attempt >= MAX_CONTENT_SIZE_RETRIES) {
+                    throw e;
+                }
+                final int grown = required != null ? required + RETRY_MARGIN : contentSize * 2;
+                if (grown <= contentSize) {
+                    // No forward progress (unparseable message and overflow guard); stop rather than loop.
+                    throw e;
+                }
+                LOGGER.info(RES.get("console.dss.contentSizeRetry", String.valueOf(contentSize),
+                        String.valueOf(grown)));
+                contentSize = grown;
+            }
+        }
+    }
+
+    /**
+     * Parses the required CMS length out of the DSS "signature size is too small" message, so the retry can
+     * reserve exactly that (plus a margin). Returns {@code null} when the message does not match, in which case
+     * the caller falls back to doubling.
+     */
+    private static Integer parseRequiredContentSize(String message) {
+        if (message == null) {
+            return null;
+        }
+        final Matcher matcher = UNDERSIZE_LENGTH_PATTERN.matcher(message);
+        if (matcher.find()) {
+            try {
+                return Integer.valueOf(matcher.group(1));
+            } catch (NumberFormatException e) {
+                return null;
+            }
+        }
+        return null;
     }
 
     private OnlineTSPSource buildTspSource(BasicSignerOptions options, PAdESSignatureParameters parameters,
