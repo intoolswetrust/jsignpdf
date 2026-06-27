@@ -67,9 +67,10 @@ import net.sf.jsignpdf.fx.preset.ManagePresetsDialog;
 import net.sf.jsignpdf.fx.preset.Preset;
 import net.sf.jsignpdf.fx.preset.PresetManager;
 import net.sf.jsignpdf.fx.preset.PresetValidation;
+import net.sf.jsignpdf.utils.PropertyProvider;
+import net.sf.jsignpdf.utils.PropertyStoreFactory;
 import net.sf.jsignpdf.fx.util.RecentFilesManager;
 import net.sf.jsignpdf.fx.viewmodel.DocumentViewModel;
-import net.sf.jsignpdf.utils.PropertyStoreFactory;
 import net.sf.jsignpdf.fx.viewmodel.SignaturePlacementViewModel;
 import net.sf.jsignpdf.fx.viewmodel.SigningOptionsViewModel;
 import net.sf.jsignpdf.fx.viewmodel.VisibleSignatureCoordinator;
@@ -85,6 +86,8 @@ import static net.sf.jsignpdf.Constants.RES;
 public class MainWindowController {
 
     private Stage stage;
+    private File lastOpenDir;
+    private double lastZoomLevel = 1.0;
     private BasicSignerOptions options;
     private final DocumentViewModel documentVM = new DocumentViewModel();
     private final SigningOptionsViewModel signingVM = new SigningOptionsViewModel();
@@ -319,6 +322,7 @@ public class MainWindowController {
 
         progressBar.setVisible(false);
         updateStatus(RES.get("jfx.gui.status.ready"));
+        loadPersistedViewState();
 
         cmbZoom.getItems().addAll("50%", "75%", "100%", "125%", "150%", "200%");
         cmbZoom.setValue("100%");
@@ -351,12 +355,14 @@ public class MainWindowController {
             }
         });
 
-        // Zoom level changes update combo
+        // Zoom level changes update combo, remember the last zoom, and persist
         documentVM.zoomLevelProperty().addListener((obs, oldVal, newVal) -> {
+            lastZoomLevel = newVal.doubleValue();
             String formatted = Math.round(newVal.doubleValue() * 100) + "%";
             if (!formatted.equals(cmbZoom.getValue())) {
                 cmbZoom.setValue(formatted);
             }
+            saveViewStateToConfig();
         });
 
         // Page number text field commit
@@ -931,11 +937,16 @@ public class MainWindowController {
 
     @FXML
     private void onFileOpen() {
-        File file = new NativeFileChooser()
+        NativeFileChooser fc = new NativeFileChooser()
                 .setTitle(RES.get("jfx.gui.dialog.openPdf.title"))
-                .addFilter(ExtensionFilter.of("PDF Files", "*.pdf"))
-                .showOpenDialog(stage);
+                .addFilter(ExtensionFilter.of("PDF Files", "*.pdf"));
+        if (lastOpenDir != null) {
+            fc.setInitialDirectory(lastOpenDir);
+        }
+        File file = fc.showOpenDialog(stage);
         if (file != null) {
+            lastOpenDir = file.getParentFile();
+            saveLastOpenDir();
             openDocument(file);
         }
     }
@@ -947,6 +958,7 @@ public class MainWindowController {
 
     @FXML
     private void onFileExit() {
+        saveViewStateToConfig();
         stage.close();
     }
 
@@ -1184,6 +1196,7 @@ public class MainWindowController {
     // --- Document handling ---
 
     private void openDocument(File file) {
+        lastOpenDir = file.getParentFile();
         try {
             if (options == null) {
                 options = new BasicSignerOptions();
@@ -1218,13 +1231,13 @@ public class MainWindowController {
 
             documentVM.setDocumentFile(file);
             documentVM.setPageCount(pages);
-            documentVM.setZoomLevel(1.0);
+            documentVM.setZoomLevel(lastZoomLevel);
 
             lblDropHint.setVisible(false);
             setDocumentControlsDisabled(false);
             lblPageCount.setText("/ " + pages);
             txtPageNumber.setText("1");
-            cmbZoom.setValue("100%");
+            cmbZoom.setValue(Math.round(lastZoomLevel * 100) + "%");
 
             stage.setTitle("JSignPdf " + Constants.VERSION + " - " + file.getName());
             LOGGER.info("Opened document: " + file.getAbsolutePath());
@@ -1340,6 +1353,45 @@ public class MainWindowController {
         updateOutputPathLabel();
         updateSigStateBadge();
         stage.setTitle("JSignPdf " + Constants.VERSION);
+    }
+
+    private static final String KEY_LAST_OPEN_DIR = "last.open.dir";
+    private static final String KEY_LAST_ZOOM = "last.zoom";
+
+    private void saveLastOpenDir() {
+        try {
+            PropertyProvider cfg = PropertyStoreFactory.getInstance().mainConfig();
+            cfg.setProperty(KEY_LAST_OPEN_DIR, lastOpenDir.getAbsolutePath());
+            cfg.save();
+        } catch (Exception ignored) {
+        }
+    }
+
+    private void loadPersistedViewState() {
+        try {
+            PropertyProvider cfg = PropertyStoreFactory.getInstance().mainConfig();
+            String dir = cfg.getProperty(KEY_LAST_OPEN_DIR);
+            if (dir != null && !dir.isEmpty()) {
+                File f = new File(dir);
+                if (f.isDirectory()) {
+                    lastOpenDir = f;
+                }
+            }
+            String zoom = cfg.getProperty(KEY_LAST_ZOOM);
+            if (zoom != null) {
+                lastZoomLevel = Double.parseDouble(zoom);
+            }
+        } catch (Exception ignored) {
+        }
+    }
+
+    private void saveViewStateToConfig() {
+        try {
+            PropertyProvider cfg = PropertyStoreFactory.getInstance().mainConfig();
+            cfg.setProperty(KEY_LAST_ZOOM, String.valueOf(lastZoomLevel));
+            cfg.save();
+        } catch (Exception ignored) {
+        }
     }
 
     /**
