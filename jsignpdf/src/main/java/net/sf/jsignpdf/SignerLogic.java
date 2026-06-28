@@ -7,6 +7,7 @@ import java.io.File;
 import java.util.List;
 import java.util.logging.Level;
 
+import net.sf.jsignpdf.engine.DssLtTrustPreflight;
 import net.sf.jsignpdf.engine.EngineConfig;
 import net.sf.jsignpdf.engine.EngineMismatchValidator;
 import net.sf.jsignpdf.engine.EngineMismatchValidator.Mismatch;
@@ -83,6 +84,22 @@ public class SignerLogic implements Runnable {
             }
 
             final EngineConfig engineConfig = AppConfig.engineConfigFor(engine.id());
+
+            // Fail fast on an LT/LTA request the engine isn't configured to satisfy (issue #432), before any
+            // key/PIN access or network round-trip, with the exact keys to set.
+            final DssLtTrustPreflight.Result preflight =
+                    DssLtTrustPreflight.check(options, engine, engineConfig);
+            if (preflight.hasIssues()) {
+                LOGGER.severe(RES.get("console.dss.ltPreflightFailed"));
+                if (preflight.onlineMissing()) {
+                    LOGGER.severe(RES.get("console.dss.ltPreflight.online"));
+                }
+                if (preflight.trustSourceMissing()) {
+                    LOGGER.severe(RES.get("console.dss.ltPreflight.trust"));
+                }
+                return false;
+            }
+
             finished = engine.sign(options, engineConfig);
         } catch (Exception e) {
             LOGGER.log(Level.SEVERE, RES.get("console.exception"), e);

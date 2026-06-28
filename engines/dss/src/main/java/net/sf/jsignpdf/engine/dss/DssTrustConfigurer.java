@@ -26,10 +26,10 @@ import eu.europa.esig.dss.spi.DSSUtils;
 import eu.europa.esig.dss.spi.tsl.TrustedListsCertificateSource;
 import eu.europa.esig.dss.spi.validation.CommonCertificateVerifier;
 import eu.europa.esig.dss.spi.x509.CertificateSource;
-import eu.europa.esig.dss.spi.x509.CommonCertificateSource;
 import eu.europa.esig.dss.spi.x509.CommonTrustedCertificateSource;
 import eu.europa.esig.dss.spi.x509.KeyStoreCertificateSource;
 import eu.europa.esig.dss.spi.x509.aia.DefaultAIASource;
+import eu.europa.esig.dss.tsl.function.OfficialJournalSchemeInformationURI;
 import eu.europa.esig.dss.tsl.job.TLValidationJob;
 import eu.europa.esig.dss.tsl.source.LOTLSource;
 
@@ -50,13 +50,44 @@ import eu.europa.esig.dss.tsl.source.LOTLSource;
 final class DssTrustConfigurer {
 
     static final String KEY_ONLINE_ENABLED = "online.enabled";
-    static final String KEY_USE_DEFAULT_LOTL = "trust.useDefaultLotl";
+
+    // --- EU LOTL machinery (trust.eu.* sub-namespace) ---
+    /** Enable the bundled European LOTL (with the bundled OJ keystore). */
+    static final String KEY_EU_ENABLED = "trust.eu.enabled";
+    /** Override the default EU LOTL URL (only effective when {@link #KEY_EU_ENABLED} is set). */
+    static final String KEY_EU_LOTL_URL = "trust.eu.lotlUrl";
+    /** Override the Official Journal scheme-information URL used by the announcement predicate. */
+    static final String KEY_EU_OJ_URL = "trust.eu.ojUrl";
+    /** Override the bundled OJ keystore with an external file. */
+    static final String KEY_EU_OJ_KEYSTORE_FILE = "trust.eu.ojKeystoreFile";
+    /** Password for the OJ keystore override file. */
+    static final String KEY_EU_OJ_KEYSTORE_PASSWORD = "trust.eu.ojKeystorePassword";
+
+    // --- generic / advanced trust material ---
     static final String KEY_LOTL_URLS = "trust.lotlUrls";
     static final String KEY_CERT_FILES = "trust.certFiles";
     static final String KEY_CERT_URLS = "trust.certUrls";
     static final String KEY_TRUSTSTORE_FILE = "trust.truststoreFile";
     static final String KEY_TRUSTSTORE_TYPE = "trust.truststoreType";
     static final String KEY_TRUSTSTORE_PASSWORD = "trust.truststorePassword";
+
+    /** Canonical EU List of Trusted Lists location. */
+    static final String DEFAULT_EU_LOTL_URL = "https://ec.europa.eu/tools/lotl/eu-lotl.xml";
+
+    /**
+     * Default Official Journal scheme-information URL announcing the certificates allowed to sign the EU LOTL.
+     * Must stay in sync with the bundled OJ keystore ({@link #OJ_KEYSTORE_RESOURCE}); both were rotated by
+     * OJ C/2026/1944 (April 2026). Override via {@link #KEY_EU_OJ_URL} when pointing at a newer OJ notice.
+     */
+    static final String DEFAULT_OJ_URL =
+            "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=OJ:C_202601944";
+
+    /** Classpath location of the bundled OJ keystore (validates the EU LOTL's own signature). */
+    static final String OJ_KEYSTORE_RESOURCE = "/net/sf/jsignpdf/engine/dss/eu-oj-keystore.p12";
+
+    /** Keystore type / password of the bundled OJ keystore (matches the DSS demonstrations keystore). */
+    private static final String OJ_KEYSTORE_TYPE = "PKCS12";
+    private static final String OJ_KEYSTORE_PASSWORD = "dss-password";
 
     /** Separator for the list-valued keys (lotlUrls / certFiles / certUrls). */
     private static final String LIST_SEPARATOR = "[,;]+";
@@ -125,7 +156,15 @@ final class DssTrustConfigurer {
             tlValidationJob.setListOfTrustedListSources(lotlSources);
             TrustedListsCertificateSource trustedListsCertificateSource = new TrustedListsCertificateSource();
             tlValidationJob.setTrustedListCertificateSource(trustedListsCertificateSource);
-            tlValidationJob.onlineRefresh();
+            try {
+                tlValidationJob.onlineRefresh();
+            } catch (Exception e) {
+                // Surface an actionable cause instead of an opaque DSS stack trace; the caller logs this via
+                // console.dss.trustConfigFailed and aborts signing. Common causes: offline / proxy not
+                // configured, or a stale OJ keystore that can no longer validate the LOTL signature.
+                throw new IllegalStateException("Failed to refresh the EU LOTL / trusted lists (check network /"
+                        + " proxy, or update the OJ keystore via " + KEY_EU_OJ_KEYSTORE_FILE + ")", e);
+            }
             trustedSources.add(trustedListsCertificateSource);
         }
 
@@ -173,18 +212,66 @@ final class DssTrustConfigurer {
         return cacheDir;
     }
 
-    private LOTLSource[] getLotlSources() {
+    LOTLSource[] getLotlSources() throws Exception {
         List<LOTLSource> lotlSources = new ArrayList<>();
-        if (config.getBoolean(KEY_USE_DEFAULT_LOTL, false)) {
-            lotlSources.add(new LOTLSource());
+        CertificateSource ojCertificateSource = null;
+
+        if (config.getBoolean(KEY_EU_ENABLED, false)) {
+            ojCertificateSource = ojKeystoreCertificateSource();
+            lotlSources.add(europeanLotlSource(ojCertificateSource));
         }
-        for (String url : splitList(config.getString(KEY_LOTL_URLS))) {
+
+        List<String> customLotlUrls = splitList(config.getString(KEY_LOTL_URLS));
+        if (!customLotlUrls.isEmpty() && ojCertificateSource == null) {
+            ojCertificateSource = ojKeystoreCertificateSource();
+        }
+        for (String url : customLotlUrls) {
+            // Advanced / "bring your own trust": signed by the (bundled or overridden) OJ certs, pivot
+            // support on, but no OJ announcement predicate (a custom LOTL may not announce the EU OJ URL).
             LOTLSource lotlSource = new LOTLSource();
             lotlSource.setUrl(url);
-            lotlSource.setCertificateSource(new CommonCertificateSource());
+            lotlSource.setCertificateSource(ojCertificateSource);
+            lotlSource.setPivotSupport(true);
             lotlSources.add(lotlSource);
         }
         return lotlSources.toArray(new LOTLSource[0]);
+    }
+
+    /**
+     * Builds the European LOTL source wired so DSS can validate the LOTL's own signature against the OJ
+     * keystore and follow the pivot chain to the current trust anchors. The URL and OJ scheme-information URL
+     * default to the canonical EU values and are overridable via {@link #KEY_EU_LOTL_URL} / {@link #KEY_EU_OJ_URL}.
+     */
+    private LOTLSource europeanLotlSource(CertificateSource ojCertificateSource) {
+        LOTLSource lotl = new LOTLSource();
+        lotl.setUrl(config.getString(KEY_EU_LOTL_URL, DEFAULT_EU_LOTL_URL));
+        lotl.setCertificateSource(ojCertificateSource);
+        lotl.setSigningCertificatesAnnouncementPredicate(
+                new OfficialJournalSchemeInformationURI(config.getString(KEY_EU_OJ_URL, DEFAULT_OJ_URL)));
+        lotl.setPivotSupport(true);
+        return lotl;
+    }
+
+    /**
+     * Loads the certificate source that validates the LOTL signature: an external keystore when
+     * {@link #KEY_EU_OJ_KEYSTORE_FILE} is set, otherwise the keystore bundled on the classpath. Unlike
+     * {@link #KEY_TRUSTSTORE_FILE} (trust anchors for the document signer), these certs are consumed only by
+     * the {@link TLValidationJob} to decide whether to accept the LOTL.
+     */
+    private CertificateSource ojKeystoreCertificateSource() throws Exception {
+        final String overrideFile = config.getString(KEY_EU_OJ_KEYSTORE_FILE);
+        if (StringUtils.isNotEmpty(overrideFile)) {
+            final String pwd = config.getString(KEY_EU_OJ_KEYSTORE_PASSWORD, "");
+            return new KeyStoreCertificateSource(new File(overrideFile), KeyStore.getDefaultType(),
+                    pwd != null ? pwd.toCharArray() : null);
+        }
+        try (InputStream is = DssTrustConfigurer.class.getResourceAsStream(OJ_KEYSTORE_RESOURCE)) {
+            if (is == null) {
+                throw new IllegalStateException("Bundled OJ keystore resource not found on the classpath: "
+                        + OJ_KEYSTORE_RESOURCE);
+            }
+            return new KeyStoreCertificateSource(is, OJ_KEYSTORE_TYPE, OJ_KEYSTORE_PASSWORD.toCharArray());
+        }
     }
 
     private static List<String> splitList(String value) {

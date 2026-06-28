@@ -52,9 +52,12 @@ import net.sf.jsignpdf.BasicSignerOptions;
 import net.sf.jsignpdf.Constants;
 import net.sf.jsignpdf.PdfExtraInfo;
 import net.sf.jsignpdf.engine.Capability;
+import net.sf.jsignpdf.engine.DssLtTrustPreflight;
+import net.sf.jsignpdf.engine.EngineConfig;
 import net.sf.jsignpdf.engine.EngineRegistry;
 import net.sf.jsignpdf.engine.SigningEngine;
 import net.sf.jsignpdf.fx.EngineCapabilities;
+import net.sf.jsignpdf.utils.AdvancedConfig;
 import net.sf.jsignpdf.utils.AppConfig;
 import javafx.scene.layout.VBox;
 import javafx.util.StringConverter;
@@ -1085,6 +1088,12 @@ public class MainWindowController {
             options.setOutFile(nameBase + Constants.DEFAULT_OUT_SUFFIX + suffix);
         }
 
+        // LT/LTA preflight (issue #432): warn before signing if the DSS engine isn't configured for the
+        // online fetching + trust anchor that LT/LTA require, and offer to enable them.
+        if (!confirmLtPreflight()) {
+            return;
+        }
+
         // Start signing
         signingService.cancel();
         signingService.reset();
@@ -1093,6 +1102,55 @@ public class MainWindowController {
         progressBar.setProgress(-1); // indeterminate
         updateStatus(RES.get("jfx.gui.status.signingInProgress"));
         signingService.start();
+    }
+
+    /**
+     * Runs the LT/LTA trust preflight ({@link DssLtTrustPreflight}) against the active engine and its config.
+     * When the configuration would make LT/LTA signing fail (issue #432), shows a confirmation offering to
+     * enable the missing prerequisites ({@code engine.dss.online.enabled} and, if no trust source is set,
+     * {@code engine.dss.trust.eu.enabled}) and persist them, with a "sign anyway" escape.
+     *
+     * @return {@code true} to proceed with signing, {@code false} to abort
+     */
+    private boolean confirmLtPreflight() {
+        final SigningEngine engine = engineCapabilities.activeEngineProperty().get();
+        if (engine == null) {
+            return true;
+        }
+        final EngineConfig engineConfig = AppConfig.engineConfigFor(engine.id());
+        final DssLtTrustPreflight.Result preflight = DssLtTrustPreflight.check(options, engine, engineConfig);
+        if (!preflight.hasIssues()) {
+            return true;
+        }
+
+        final Alert confirm = new Alert(Alert.AlertType.CONFIRMATION);
+        confirm.setTitle(RES.get("jfx.gui.dialog.ltPreflight.title"));
+        confirm.setHeaderText(null);
+        confirm.setContentText(RES.get("jfx.gui.dialog.ltPreflight.text"));
+        confirm.initOwner(stage);
+        final ButtonType enableAndSign = new ButtonType(RES.get("jfx.gui.dialog.ltPreflight.enable"),
+                ButtonBar.ButtonData.YES);
+        final ButtonType signAnyway = new ButtonType(RES.get("jfx.gui.dialog.ltPreflight.anyway"),
+                ButtonBar.ButtonData.NO);
+        confirm.getButtonTypes().setAll(enableAndSign, signAnyway, ButtonType.CANCEL);
+
+        final Optional<ButtonType> result = confirm.showAndWait();
+        if (result.isEmpty() || result.get() == ButtonType.CANCEL) {
+            return false;
+        }
+        if (result.get() == enableAndSign) {
+            final AdvancedConfig cfg = PropertyStoreFactory.getInstance().advancedConfig();
+            cfg.setProperty("engine.dss.online.enabled", true);
+            if (preflight.trustSourceMissing()) {
+                cfg.setProperty("engine.dss.trust.eu.enabled", true);
+            }
+            try {
+                cfg.save();
+            } catch (Exception e) {
+                LOGGER.log(Level.WARNING, "Could not persist DSS LT/LTA prerequisites", e);
+            }
+        }
+        return true;
     }
 
     @FXML
