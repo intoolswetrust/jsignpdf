@@ -5,6 +5,9 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import java.io.File;
+import java.io.FileOutputStream;
+import java.nio.file.Files;
+import java.security.KeyStore;
 import java.security.Security;
 import java.util.HashMap;
 import java.util.List;
@@ -55,8 +58,16 @@ public class DssSigningEngineTest {
 
     private static final EngineConfig EMPTY_CONFIG = new MapEngineConfig(new HashMap<>());
 
+    /** Alias / passwords for the leaf signing keystore the embedded CA issues for the LT/LTA happy-path tests. */
+    private static final String CA_KEY_ALIAS = "signer";
+    private static final char[] CA_KS_PASSWD = "storepass".toCharArray();
+    private static final char[] CA_KEY_PASSWD = "keypass".toCharArray();
+
     /** In-JVM RFC 3161 TSA on a loopback port, so level-T signatures can be produced offline. */
     private static EmbeddedTsaServer tsaServer;
+
+    /** In-JVM CA + loopback CRL endpoint, so LT/LTA revocation data can be fetched offline. */
+    private static EmbeddedCa embeddedCa;
 
     @Rule
     public TemporaryFolder tmp = new TemporaryFolder();
@@ -66,16 +77,21 @@ public class DssSigningEngineTest {
 
     @BeforeClass
     public static void setUpClass() throws Exception {
-        // BC must be registered before the embedded TSA generates its signing material.
+        // BC must be registered before the embedded TSA / CA generate their signing material.
         Security.addProvider(new BouncyCastleProvider());
         tsaServer = new EmbeddedTsaServer();
         tsaServer.start();
+        embeddedCa = new EmbeddedCa();
+        embeddedCa.start();
     }
 
     @AfterClass
-    public static void stopTsa() {
+    public static void stopServers() {
         if (tsaServer != null) {
             tsaServer.stop();
+        }
+        if (embeddedCa != null) {
+            embeddedCa.stop();
         }
     }
 
@@ -276,6 +292,69 @@ public class DssSigningEngineTest {
         // must refuse rather than emit a weaker level. The guard fires before any network access.
         boolean ok = new DssSigningEngine().sign(o, EMPTY_CONFIG);
         assertFalse("LT without revocation data must fail", ok);
+    }
+
+    @Test
+    public void ltSucceedsWithTrustedChainAndRevocation() throws Exception {
+        BasicSignerOptions o = caSignerOptions(PadesLevel.BASELINE_LT);
+        // Happy path: the signer's issuer is trusted and its CRL is reachable, so DSS embeds the
+        // revocation data and reaches LT. This is the regression guard for issue #432, where an untrusted
+        // chain made DSS skip revocation fetching and fail with "Revocation data is missing".
+        assertTrue("LT must succeed with a trusted issuer and reachable CRL",
+                new DssSigningEngine().sign(o, caTrustConfig()));
+        assertSignatureLevel(outputFile, SignatureLevel.PAdES_BASELINE_LT);
+    }
+
+    @Test
+    public void ltaSucceedsWithTrustedChainAndRevocation() throws Exception {
+        BasicSignerOptions o = caSignerOptions(PadesLevel.BASELINE_LTA);
+        // LTA adds an archive timestamp on top of LT; the embedded TSA certificate is pinned as a trust
+        // anchor (see caTrustConfig) so the archive timestamp's own chain validates without revocation.
+        assertTrue("LTA must succeed with a trusted issuer and reachable CRL",
+                new DssSigningEngine().sign(o, caTrustConfig()));
+        assertSignatureLevel(outputFile, SignatureLevel.PAdES_BASELINE_LTA);
+    }
+
+    /**
+     * Builds options signing with a fresh leaf keystore issued by the embedded CA (its CRL distribution point
+     * targets the loopback CRL endpoint), at the requested baseline level and through the embedded TSA.
+     */
+    private BasicSignerOptions caSignerOptions(PadesLevel level) throws Exception {
+        KeyStore ks = embeddedCa.issueSigningKeyStore(CA_KEY_ALIAS, CA_KEY_PASSWD);
+        File ksFile = tmp.newFile(level + "-signer.jks");
+        try (FileOutputStream fos = new FileOutputStream(ksFile)) {
+            ks.store(fos, CA_KS_PASSWD);
+        }
+        BasicSignerOptions o = new BasicSignerOptions();
+        o.setAdvanced(true);
+        o.setHashAlgorithm(net.sf.jsignpdf.types.HashAlgorithm.SHA256);
+        o.setKsType("JKS");
+        o.setKsFile(ksFile.getAbsolutePath());
+        o.setKsPasswd(CA_KS_PASSWD);
+        o.setKeyAlias(CA_KEY_ALIAS);
+        o.setKeyPasswd(CA_KEY_PASSWD);
+        o.setInFile(inputFile.getAbsolutePath());
+        o.setOutFile(outputFile.getAbsolutePath());
+        o.setPadesLevel(level);
+        useEmbeddedTsa(o);
+        return o;
+    }
+
+    /**
+     * Trust configuration for the LT/LTA happy path: online revocation fetching enabled, with the embedded
+     * CA root (the signer's issuer) and the embedded TSA certificate pinned as trust anchors. Trusting the
+     * issuer is what makes DSS fetch revocation data at all (see issue #432); trusting the self-signed TSA
+     * certificate spares its chain from needing revocation for the LTA archive timestamp.
+     */
+    private EngineConfig caTrustConfig() throws Exception {
+        File caFile = tmp.newFile("ca.crt");
+        Files.write(caFile.toPath(), embeddedCa.getCaCertificate().getEncoded());
+        File tsaFile = tmp.newFile("tsa.crt");
+        Files.write(tsaFile.toPath(), tsaServer.getCertificate().getEncoded());
+        Map<String, String> cfg = new HashMap<>();
+        cfg.put(DssTrustConfigurer.KEY_ONLINE_ENABLED, "true");
+        cfg.put(DssTrustConfigurer.KEY_CERT_FILES, caFile.getAbsolutePath() + "," + tsaFile.getAbsolutePath());
+        return new MapEngineConfig(cfg);
     }
 
     @Test
