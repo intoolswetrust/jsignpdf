@@ -332,6 +332,52 @@ public class SignerOptionsFromCmdLineTest {
         assertTrue(f.opts.isAppend());
     }
 
+    @Test
+    public void optionOverride_multiplePairsFlowToAdvancedConfig() throws Exception {
+        Fixture f = new Fixture("");
+        f.opts.setCmdLine(new String[] {
+                "-o", "engine.cliovr.online.enabled=true",
+                "-o", "engine.cliovr.trust.certFiles=/path/ca.pem",
+        });
+        f.opts.loadCmdLine();
+        net.sf.jsignpdf.engine.EngineConfig cfg = net.sf.jsignpdf.utils.AppConfig.engineConfigFor("cliovr");
+        assertTrue(cfg.getBoolean("online.enabled", false));
+        assertEquals("/path/ca.pem", cfg.getString("trust.certFiles"));
+    }
+
+    @Test
+    public void optionOverride_valueMayContainEquals() throws Exception {
+        Fixture f = new Fixture("");
+        f.opts.setCmdLine(new String[] { "-o", "engine.cliovr.eq.value=a=b=c" });
+        f.opts.loadCmdLine();
+        assertEquals("a=b=c", net.sf.jsignpdf.utils.AppConfig.engineConfigFor("cliovr").getString("eq.value"));
+    }
+
+    @Test
+    public void optionOverride_missingEqualsIsRejected() {
+        Fixture f = new Fixture("");
+        f.opts.setCmdLine(new String[] { "-o", "engine.cliovr.no-separator" });
+        try {
+            f.opts.loadCmdLine();
+            fail("expected ParseException for a value without '='");
+        } catch (ParseException e) {
+            assertTrue("message should echo the bad value, was: " + e.getMessage(),
+                    e.getMessage().contains("engine.cliovr.no-separator"));
+        }
+    }
+
+    @Test
+    public void optionOverride_emptyKeyIsRejected() {
+        Fixture f = new Fixture("");
+        f.opts.setCmdLine(new String[] { "-o", "=orphan" });
+        try {
+            f.opts.loadCmdLine();
+            fail("expected ParseException for an empty key");
+        } catch (ParseException expected) {
+            // ok
+        }
+    }
+
     /** Convenience wiring: captures warnings and feeds a canned stdin reader with no Console. */
     private static final class Fixture {
         final SignerOptionsFromCmdLine opts = new SignerOptionsFromCmdLine();

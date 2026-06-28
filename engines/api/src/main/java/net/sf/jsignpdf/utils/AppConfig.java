@@ -1,5 +1,8 @@
 package net.sf.jsignpdf.utils;
 
+import java.util.Locale;
+import java.util.Map;
+
 import net.sf.jsignpdf.Constants;
 import net.sf.jsignpdf.engine.AdvancedEngineConfig;
 import net.sf.jsignpdf.engine.EngineConfig;
@@ -78,6 +81,24 @@ public final class AppConfig {
 
     public static String fontEncoding() {
         return cfg().getNotEmptyProperty("font.encoding", null);
+    }
+
+    /**
+     * Installs CLI-supplied {@code advanced.properties} overrides into the shared advanced configuration as a transient,
+     * highest-priority layer. Applied entries are logged at INFO with secret values masked. No-op for a {@code null} or
+     * empty map.
+     */
+    public static void applyAdvancedOverrides(Map<String, String> overrides) {
+        if (overrides == null || overrides.isEmpty()) {
+            return;
+        }
+        overrides.forEach((k, v) -> Constants.LOGGER.info("Applied advanced override: " + k + "=" + mask(k, v)));
+        cfg().applyOverrides(overrides);
+    }
+
+    private static String mask(String key, String value) {
+        String lower = key == null ? "" : key.toLowerCase(Locale.ENGLISH);
+        return lower.contains("password") || lower.contains("pwd") ? "***" : value;
     }
 
     private static AdvancedConfig cfg() {

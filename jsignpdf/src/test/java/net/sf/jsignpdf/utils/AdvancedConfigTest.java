@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 
@@ -137,5 +138,47 @@ public class AdvancedConfigTest {
         Path file = tmp.newFolder().toPath().resolve("advanced.properties");
         AdvancedConfig cfg = new AdvancedConfig(file, bundledDefaults);
         assertNull(cfg.getProperty("does.not.exist"));
+    }
+
+    @Test
+    public void applyOverrides_winsOverUserLayerAndBundledDefaults() throws Exception {
+        Path file = tmp.newFolder().toPath().resolve("advanced.properties");
+        Files.writeString(file, "relax.ssl.security=false\ntsa.hashAlgorithm=SHA-256\n");
+        AdvancedConfig cfg = new AdvancedConfig(file, bundledDefaults);
+        cfg.applyOverrides(Map.of(
+                "relax.ssl.security", "true",
+                "tsa.hashAlgorithm", "SHA-512",
+                "pdf2image.libraries", "pdfbox"));
+        assertTrue("override beats user layer", cfg.getAsBool("relax.ssl.security", false));
+        assertEquals("override beats user layer", "SHA-512", cfg.getNotEmptyProperty("tsa.hashAlgorithm", null));
+        assertEquals("override beats bundled default", "pdfbox", cfg.getNotEmptyProperty("pdf2image.libraries", null));
+    }
+
+    @Test
+    public void applyOverrides_emptyValueSetsEmptyString() throws Exception {
+        Path file = tmp.newFolder().toPath().resolve("advanced.properties");
+        AdvancedConfig cfg = new AdvancedConfig(file, bundledDefaults);
+        cfg.applyOverrides(Map.of("tsa.hashAlgorithm", ""));
+        assertEquals("", cfg.getProperty("tsa.hashAlgorithm"));
+    }
+
+    @Test
+    public void applyOverrides_isNotPersistedNorReportedAsUserOverride() throws Exception {
+        Path file = tmp.newFolder().toPath().resolve("advanced.properties");
+        AdvancedConfig cfg = new AdvancedConfig(file, bundledDefaults);
+        cfg.applyOverrides(Map.of("relax.ssl.security", "true"));
+        assertFalse("transient override is not a user override", cfg.hasUserOverride("relax.ssl.security"));
+        Set<String> changed = cfg.save();
+        assertTrue("overrides never reach the change set", changed.isEmpty());
+        assertFalse("overrides are never written to disk",
+                Files.exists(file) && Files.readString(file).contains("relax.ssl.security"));
+    }
+
+    @Test
+    public void applyOverrides_nullMapIsNoOp() throws Exception {
+        Path file = tmp.newFolder().toPath().resolve("advanced.properties");
+        AdvancedConfig cfg = new AdvancedConfig(file, bundledDefaults);
+        cfg.applyOverrides(null);
+        assertFalse("falls through to the bundled default", cfg.getAsBool("relax.ssl.security", true));
     }
 }
