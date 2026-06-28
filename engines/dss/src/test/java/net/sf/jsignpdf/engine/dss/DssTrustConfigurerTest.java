@@ -67,6 +67,20 @@ public class DssTrustConfigurerTest {
     }
 
     @Test
+    public void mraSupportIsOffByDefaultAndOptInForCustomLotlUrls() throws Exception {
+        LOTLSource[] defaultSources = lotlSources(Map.of(
+                DssTrustConfigurer.KEY_LOTL_URLS, "https://mra.test/mra_lotl.xml"));
+        assertEquals(1, defaultSources.length);
+        assertFalse("MRA support must be off by default", defaultSources[0].isMraSupport());
+
+        LOTLSource[] mraSources = lotlSources(Map.of(
+                DssTrustConfigurer.KEY_LOTL_URLS, "https://mra.test/mra_lotl.xml",
+                DssTrustConfigurer.KEY_LOTL_MRA_SUPPORT, "true"));
+        assertEquals(1, mraSources.length);
+        assertTrue("MRA support must be enabled when opted in", mraSources[0].isMraSupport());
+    }
+
+    @Test
     public void blankAndGarbageLotlUrlEntriesAreSkipped() throws Exception {
         // Empty / whitespace-only entries between separators must never become a LOTLSource with a null URL.
         LOTLSource[] sources = lotlSources(Map.of(

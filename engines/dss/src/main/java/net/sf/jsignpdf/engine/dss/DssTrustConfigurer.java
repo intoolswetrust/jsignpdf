@@ -65,6 +65,12 @@ final class DssTrustConfigurer {
 
     // --- generic / advanced trust material ---
     static final String KEY_LOTL_URLS = "trust.lotlUrls";
+    /**
+     * Enable Mutual Recognition Agreement processing for the {@link #KEY_LOTL_URLS} sources, so DSS grants
+     * trust to third-country trust services recognised via an MRA LOTL (e.g. the eIDAS international pilot's
+     * {@code mra_lotl.xml}). Off by default; only MRA LOTLs need it.
+     */
+    static final String KEY_LOTL_MRA_SUPPORT = "trust.lotlMraSupport";
     static final String KEY_CERT_FILES = "trust.certFiles";
     static final String KEY_CERT_URLS = "trust.certUrls";
     static final String KEY_TRUSTSTORE_FILE = "trust.truststoreFile";
@@ -225,13 +231,16 @@ final class DssTrustConfigurer {
         if (!customLotlUrls.isEmpty() && ojCertificateSource == null) {
             ojCertificateSource = ojKeystoreCertificateSource();
         }
+        boolean mraSupport = config.getBoolean(KEY_LOTL_MRA_SUPPORT, false);
         for (String url : customLotlUrls) {
             // Advanced / "bring your own trust": signed by the (bundled or overridden) OJ certs, pivot
             // support on, but no OJ announcement predicate (a custom LOTL may not announce the EU OJ URL).
+            // MRA support is opt-in for third-country mutual-recognition LOTLs.
             LOTLSource lotlSource = new LOTLSource();
             lotlSource.setUrl(url);
             lotlSource.setCertificateSource(ojCertificateSource);
             lotlSource.setPivotSupport(true);
+            lotlSource.setMraSupport(mraSupport);
             lotlSources.add(lotlSource);
         }
         return lotlSources.toArray(new LOTLSource[0]);
