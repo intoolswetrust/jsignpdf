@@ -321,7 +321,8 @@ usage: jsignpdf [file1.pdf [file2.pdf ...]] [-a] [--bg-path
        [-ha <algorithm>] [--img-path <file>] [-ka <alias>]
        [-ki <index>] [-kp <password>] [-ksf <file>] [-ksp <password>] [-kst
        <type>] [-l <location>] [--l2-text <text>] [--l4-text <text>] [-le] [-lk]
-       [-lkt] [-llx <position>] [-lly <position>] [-lp] [-lpf <file>] [--ocsp]
+       [-lkt] [-llx <position>] [-lly <position>] [-lp] [-lpf <file>] [-o
+       <key=value>] [--ocsp]
        [--ocsp-server-url <responderUrl>] [-op <prefix>] [-opwd <password>] [-os
        <suffix>] [--overwrite] [-pe <mode>] [-pg <pageNumber>] [-pr <right>] [--proxy-host
        <hostname>] [--proxy-port <port>] [-pl <level>] [--proxy-type <type>] [-q] [-r
@@ -366,6 +367,9 @@ usage: jsignpdf [file1.pdf [file2.pdf ...]] [-a] [--bg-path
 
 | `-lpf, --load-properties-file <file>`
 | Loads properties from the given file. The file can be created by copying the default `config.properties` from the <<Configuration directory>>.
+
+| `-o, --option <key=value>`
+| Sets a single <<Advanced application configuration,`advanced.properties`>> key for this invocation, overriding the value from the configuration file (and the bundled default). Repeatable. The value may contain `=` (only the first one is the separator). Useful for the `engine.dss.*` trust knobs -- see <<PAdES & the DSS engine>>. Note: values are visible in the process list and shell history, so prefer the configuration file for secrets such as truststore passwords.
 
 | `--enable-stdin-passwords`
 | Allow reading password values from standard input. When set, a password option value of `-` means "read one line from stdin" (or prompt, on an interactive console). See <<Reading passwords from standard input>>.
@@ -1014,11 +1018,22 @@ DSS requires a PAdES digest, so the hash algorithm must be `SHA256`, `SHA384` or
 
 If `LT`/`LTA` is requested but revocation data cannot be reached (for example, with online fetching disabled), the signing fails with a logged error rather than silently emitting a weaker level.
 
+On the command line these keys can be set for a single run with `-o` (see <<General options>>), without editing `advanced.properties`:
+
+[source,shell]
+----
+jsignpdf doc.pdf -eng dss -pl LT -ts <tsa-url> \
+    -o engine.dss.online.enabled=true \
+    -o engine.dss.trust.certFiles=/path/to/ca.pem
+----
+
 == Advanced application configuration
 
 Application-wide tweaks beyond the per-document signing options live in `<config-dir>/advanced.properties` and -- for hardware tokens -- `<config-dir>/pkcs11.cfg`. Both are plain text files; the easiest way to edit them is the JavaFX <<Adjusting advanced preferences,Preferences dialog>>, which writes them on _OK_. Power users can also hand-edit the files directly while JSignPdf is closed; the next launch picks up the changes.
 
 `advanced.properties` covers the same six topics as the Preferences dialog (visible-signature font, certificate-validation toggles, relaxed SSL, PDF preview backend order, default TSA hash algorithm, and one or two miscellaneous knobs). When a key is missing from `advanced.properties`, JSignPdf falls back to defaults bundled inside the application jar, so a fresh install needs no config file at all.
+
+In batch mode, any of these keys can be overridden for a single run with the `-o key=value` command-line option (see <<General options>>), without changing the file. CLI overrides take precedence over `advanced.properties` and the bundled defaults, and are not persisted.
 
 === Migration from earlier versions
 

@@ -5,7 +5,9 @@ import static net.sf.jsignpdf.Constants.*;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.net.Proxy;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.function.Consumer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -112,6 +114,8 @@ public class SignerOptionsFromCmdLine extends BasicSignerOptions {
         setListKeyStores(line.hasOption(ARG_LIST_KS_TYPES));
         setListKeys(line.hasOption(ARG_LIST_KEYS));
         setListEngines(line.hasOption(ARG_LIST_ENGINES));
+
+        AppConfig.applyAdvancedOverrides(parseAdvancedOverrides(line));
 
         // signing engine selection (CLI override of advanced.properties)
         if (line.hasOption(ARG_ENGINE))
@@ -324,6 +328,22 @@ public class SignerOptionsFromCmdLine extends BasicSignerOptions {
         return aDefVal;
     }
 
+    private Map<String, String> parseAdvancedOverrides(CommandLine line) throws ParseException {
+        Map<String, String> result = new LinkedHashMap<>();
+        String[] values = line.getOptionValues(ARG_OPTION);
+        if (values == null) {
+            return result;
+        }
+        for (String raw : values) {
+            int eq = raw.indexOf('=');
+            if (eq < 1) {
+                throw new ParseException("Invalid -" + ARG_OPTION + " value '" + raw + "', expected key=value");
+            }
+            result.put(raw.substring(0, eq), raw.substring(eq + 1));
+        }
+        return result;
+    }
+
     static {
         // reset option builder
         OptionBuilder.withLongOpt(ARG_HELP_LONG).create();
@@ -334,6 +354,8 @@ public class SignerOptionsFromCmdLine extends BasicSignerOptions {
                 .create(ARG_LOADPROPS));
         OPTS.addOption(OptionBuilder.withLongOpt(ARG_LOADPROPS_FILE_LONG).withDescription(RES.get("hlp.loadPropertiesFile"))
                 .hasArg().withArgName("file").create(ARG_LOADPROPS_FILE));
+        OPTS.addOption(OptionBuilder.withLongOpt(ARG_OPTION_LONG).withDescription(RES.get("hlp.option"))
+                .hasArg().withArgName("key=value").create(ARG_OPTION));
         OPTS.addOption(OptionBuilder.withLongOpt(ARG_LIST_KS_TYPES_LONG).withDescription(RES.get("hlp.listKsTypes"))
                 .create(ARG_LIST_KS_TYPES));
         OPTS.addOption(

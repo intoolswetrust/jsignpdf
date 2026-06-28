@@ -5,6 +5,7 @@ import static net.sf.jsignpdf.Constants.LOGGER;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Properties;
 import java.util.Set;
@@ -23,6 +24,7 @@ public final class AdvancedConfig {
 
     private final PropertyProvider userLayer;
     private final Properties bundledDefaults;
+    private final Properties overrides = new Properties();
     private Properties baseline;
 
     /**
@@ -75,8 +77,28 @@ public final class AdvancedConfig {
     }
 
     public synchronized String getProperty(String key) {
-        String v = userLayer.getProperty(key);
+        String v = overrides.getProperty(key);
+        if (v != null) {
+            return v;
+        }
+        v = userLayer.getProperty(key);
         return v != null ? v : bundledDefaults.getProperty(key);
+    }
+
+    /**
+     * Installs the given key/value pairs as the highest-priority, in-memory-only layer. Overrides win over the user file
+     * and the bundled defaults, and are never persisted by {@link #save()} nor reported as user overrides. Intended for
+     * transient CLI-supplied configuration. Entries with a {@code null} key or value are ignored.
+     */
+    public synchronized void applyOverrides(Map<String, String> kv) {
+        if (kv == null) {
+            return;
+        }
+        kv.forEach((k, v) -> {
+            if (k != null && v != null) {
+                overrides.setProperty(k, v);
+            }
+        });
     }
 
     public synchronized String getProperty(String key, String def) {
