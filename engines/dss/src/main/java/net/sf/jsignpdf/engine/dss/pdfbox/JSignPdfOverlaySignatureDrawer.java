@@ -49,6 +49,10 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.List;
 
+/*
+ * Custom DSS PDFBox drawer for JSignPdf.
+ * Draws background, then image, then overlays text on top.
+ */
 public class JSignPdfOverlaySignatureDrawer extends AbstractPdfBoxSignatureDrawer {
 
     private static final Logger LOG = LoggerFactory.getLogger(JSignPdfOverlaySignatureDrawer.class);
