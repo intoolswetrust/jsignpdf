@@ -1,7 +1,3 @@
-/*
- * Custom DSS PDFBox drawer for JSignPdf.
- * Draws background, then image, then overlays text on top.
- */
 package net.sf.jsignpdf.engine.dss.pdfbox;
 
 import eu.europa.esig.dss.model.DSSDocument;
