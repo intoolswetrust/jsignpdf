@@ -27,14 +27,26 @@ public class AppConfigTest {
     }
 
     @Test
-    public void defaultOutSuffixFallsBackToConstants() {
-        // DEFAULT_OUT_SUFFIX is the literal fallback when the bundled defaults resource is missing or empty.
-        String suffix = AppConfig.defaultOutSuffix();
-        assertEquals("Default value should match Constants",
-                net.sf.jsignpdf.Constants.DEFAULT_OUT_SUFFIX,
-                // If a developer has a real override, this assertion can be skipped — but on a clean checkout the
-                // bundled default matches the Constants literal.
-                suffix.isEmpty() ? net.sf.jsignpdf.Constants.DEFAULT_OUT_SUFFIX : suffix);
+    public void defaultOutSuffixReadsOutputSuffixKey() {
+        // Verifies both that the accessor reads the output.suffix key and that, with no user override, it falls back
+        // to the bundled default (which ships as Constants.DEFAULT_OUT_SUFFIX). Restores the original state afterwards
+        // so the shared singleton isn't polluted for other tests.
+        AdvancedConfig cfg = PropertyStoreFactory.getInstance().advancedConfig();
+        String original = cfg.hasUserOverride("output.suffix") ? cfg.getProperty("output.suffix") : null;
+        try {
+            cfg.setProperty("output.suffix", "_firmado");
+            assertEquals("Accessor must read the output.suffix key", "_firmado", AppConfig.defaultOutSuffix());
+
+            cfg.removeProperty("output.suffix");
+            assertEquals("Without an override it falls back to the bundled default",
+                    net.sf.jsignpdf.Constants.DEFAULT_OUT_SUFFIX, AppConfig.defaultOutSuffix());
+        } finally {
+            if (original != null) {
+                cfg.setProperty("output.suffix", original);
+            } else {
+                cfg.removeProperty("output.suffix");
+            }
+        }
     }
 
     @Test
