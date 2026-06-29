@@ -424,7 +424,7 @@ jobs:
         path: flatpak-input
 
     - name: Cache Flatpak SDK
-      uses: actions/cache@v5
+      uses: actions/cache@v6
       with:
         path: ~/.local/share/flatpak
         key: flatpak-sdk-25.08-${{ matrix.arch }}
