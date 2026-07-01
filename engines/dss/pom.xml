@@ -44,6 +44,13 @@
             <groupId>eu.europa.ec.joinup.sd-dss</groupId>
             <artifactId>dss-tsl-validation</artifactId>
         </dependency>
+        <!-- TS 119612 v2.1.1 trusted-list model: DSS only declares this optionally, but
+             dss-tsl-validation needs TrustedList211Utils at runtime when parsing trusted lists
+             (verifyTLVersionConformity). Without it the whole LOTL path fails to parse. -->
+        <dependency>
+            <groupId>eu.europa.ec.joinup.sd-dss</groupId>
+            <artifactId>specs-trusted-list-v211</artifactId>
+        </dependency>
         <dependency>
             <groupId>eu.europa.ec.joinup.sd-dss</groupId>
             <artifactId>dss-crl-parser-x509crl</artifactId>
@@ -79,17 +86,16 @@
             <scope>test</scope>
         </dependency>
 
-        <!-- DSS validation (test only): read back the achieved PAdES level to assert it in tests.
-             dss-policy-jaxb supplies the default validation policy (policy/constraint.xml). -->
+        <!-- DSS validation: required at runtime by the trusted-list validation job (TLValidatorTask uses
+             SignedDocumentValidator to verify LOTL/TL signatures); also used by the tests to read back the
+             achieved PAdES level. dss-policy-jaxb supplies the default validation policy (policy/constraint.xml). -->
         <dependency>
             <groupId>eu.europa.ec.joinup.sd-dss</groupId>
             <artifactId>dss-validation</artifactId>
-            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>eu.europa.ec.joinup.sd-dss</groupId>
             <artifactId>dss-policy-jaxb</artifactId>
-            <scope>test</scope>
         </dependency>
     </dependencies>
 </project>
