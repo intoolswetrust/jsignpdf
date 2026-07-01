@@ -28,6 +28,8 @@
         <jsign.pkcs11.version>1.1.0</jsign.pkcs11.version>
         <jsign.jpedal.version>4.92.13</jsign.jpedal.version>
         <pdfbox.version>3.0.7</pdfbox.version>
+        <jbig2-imageio.version>3.0.2</jbig2-imageio.version>
+        <jai-imageio-jpeg2000.version>1.4.0</jai-imageio-jpeg2000.version>
         <commons-io.version>2.22.0</commons-io.version>
         <commons-cli.version>1.11.0</commons-cli.version>
         <commons-lang3.version>3.20.0</commons-lang3.version>
@@ -112,6 +114,11 @@
                 <version>${pdfbox.version}</version>
             </dependency>
             <dependency>
+                <groupId>org.apache.pdfbox</groupId>
+                <artifactId>jbig2-imageio</artifactId>
+                <version>${jbig2-imageio.version}</version>
+            </dependency>
+            <dependency>
                 <groupId>com.github.kwart.jsign</groupId>
                 <artifactId>jsign-jpedal</artifactId>
                 <version>${jsign.jpedal.version}</version>
@@ -126,11 +133,15 @@
                 <artifactId>junit</artifactId>
                 <version>${junit.version}</version>
             </dependency>
-            <!-- We don't use the following jai-imageio dependency. We unify the version to make the enforcer's DependencyConvergence rule happy. -->
             <dependency>
                 <groupId>com.github.jai-imageio</groupId>
                 <artifactId>jai-imageio-core</artifactId>
                 <version>1.4.0</version>
+            </dependency>
+            <dependency>
+                <groupId>com.github.jai-imageio</groupId>
+                <artifactId>jai-imageio-jpeg2000</artifactId>
+                <version>${jai-imageio-jpeg2000.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
