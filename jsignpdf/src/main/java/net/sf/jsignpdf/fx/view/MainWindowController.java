@@ -831,7 +831,7 @@ public class MainWindowController {
             nameBase = inFile.substring(0, inFile.length() - 4);
             suffix = inFile.substring(inFile.length() - 4);
         }
-        return nameBase + Constants.DEFAULT_OUT_SUFFIX + suffix;
+        return nameBase + AppConfig.defaultOutSuffix() + suffix;
     }
 
 
@@ -1082,7 +1082,7 @@ public class MainWindowController {
                 nameBase = inFile.substring(0, inFile.length() - 4);
                 suffix = inFile.substring(inFile.length() - 4);
             }
-            options.setOutFile(nameBase + Constants.DEFAULT_OUT_SUFFIX + suffix);
+            options.setOutFile(nameBase + AppConfig.defaultOutSuffix() + suffix);
         }
 
         // Start signing

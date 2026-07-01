@@ -427,7 +427,8 @@ public class BasicSignerOptions {
     }
 
     /**
-     * Returns output file name if filled or input file name with default output suffix ("_signed")
+     * Returns output file name if filled or input file name with the configured default output suffix
+     * (the {@code output.suffix} advanced-config key; bundled default {@code "_signed"}).
      *
      * @return
      */
@@ -444,7 +445,7 @@ public class BasicSignerOptions {
                     tmpExtension = tmpNameBase.substring(tmpBaseLen);
                     tmpNameBase = tmpNameBase.substring(0, tmpBaseLen);
                 }
-                tmpOut = tmpNameBase + Constants.DEFAULT_OUT_SUFFIX + tmpExtension;
+                tmpOut = tmpNameBase + AppConfig.defaultOutSuffix() + tmpExtension;
             }
         }
         return tmpOut;

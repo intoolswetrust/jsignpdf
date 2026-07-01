@@ -43,7 +43,7 @@ public class SignerOptionsFromCmdLine extends BasicSignerOptions {
     static final Options OPTS = new Options();
 
     private String outPrefix;
-    private String outSuffix = Constants.DEFAULT_OUT_SUFFIX;
+    private String outSuffix = AppConfig.defaultOutSuffix();
     private String outPath;
 
     private String[] files;
@@ -136,6 +136,10 @@ public class SignerOptionsFromCmdLine extends BasicSignerOptions {
             setOutPrefix(line.getOptionValue(ARG_OPREFIX));
         if (line.hasOption(ARG_OSUFFIX))
             setOutSuffix(line.getOptionValue(ARG_OSUFFIX));
+        else
+            // Re-resolve here so the configured output.suffix is honored even though the field initializer captured
+            // its value at construction time (i.e. before any advanced-config override was applied).
+            setOutSuffix(AppConfig.defaultOutSuffix());
         if (line.hasOption(ARG_SIGNER_NAME))
             setSignerName(line.getOptionValue(ARG_SIGNER_NAME));
         if (line.hasOption(ARG_REASON))
@@ -387,7 +391,8 @@ public class SignerOptionsFromCmdLine extends BasicSignerOptions {
                 .withArgName("path").create(ARG_OUTPATH));
         OPTS.addOption(OptionBuilder.withLongOpt(ARG_OPREFIX_LONG).withDescription(RES.get("hlp.outPrefix")).hasArg()
                 .withArgName("prefix").create(ARG_OPREFIX));
-        OPTS.addOption(OptionBuilder.withLongOpt(ARG_OSUFFIX_LONG).withDescription(RES.get("hlp.outSuffix")).hasArg()
+        OPTS.addOption(OptionBuilder.withLongOpt(ARG_OSUFFIX_LONG)
+                .withDescription(RES.get("hlp.outSuffix", AppConfig.defaultOutSuffix())).hasArg()
                 .withArgName("suffix").create(ARG_OSUFFIX));
         OPTS.addOption(OptionBuilder.withLongOpt(ARG_SIGNER_NAME_LONG).withDescription(RES.get("hlp.signerName")).hasArg()
                 .withArgName("signer").create(ARG_SIGNER_NAME));
