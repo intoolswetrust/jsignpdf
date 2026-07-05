@@ -23,6 +23,30 @@ public class AppConfigTest {
         // String accessors backed by getNotEmptyProperty + literal default never return null/empty.
         assertNotNull(AppConfig.pdf2imageLibraries());
         assertNotNull(AppConfig.defaultTsaHashAlg());
+        assertNotNull(AppConfig.defaultOutSuffix());
+    }
+
+    @Test
+    public void defaultOutSuffixReadsOutputSuffixKey() {
+        // Verifies both that the accessor reads the output.suffix key and that, with no user override, it falls back
+        // to the bundled default (which ships as Constants.DEFAULT_OUT_SUFFIX). Restores the original state afterwards
+        // so the shared singleton isn't polluted for other tests.
+        AdvancedConfig cfg = PropertyStoreFactory.getInstance().advancedConfig();
+        String original = cfg.hasUserOverride("output.suffix") ? cfg.getProperty("output.suffix") : null;
+        try {
+            cfg.setProperty("output.suffix", "_firmado");
+            assertEquals("Accessor must read the output.suffix key", "_firmado", AppConfig.defaultOutSuffix());
+
+            cfg.removeProperty("output.suffix");
+            assertEquals("Without an override it falls back to the bundled default",
+                    net.sf.jsignpdf.Constants.DEFAULT_OUT_SUFFIX, AppConfig.defaultOutSuffix());
+        } finally {
+            if (original != null) {
+                cfg.setProperty("output.suffix", original);
+            } else {
+                cfg.removeProperty("output.suffix");
+            }
+        }
     }
 
     @Test

@@ -245,7 +245,7 @@ When you are ready, click the _Sign_ button in the toolbar. JSignPdf signs the d
 
 image:img/javafx/signing-result.png[Signing complete,width=562,height=400]
 
-The signed PDF is saved to the output path shown in the _Signature Properties_ panel. By default, it is the input file name with a `_signed` suffix (e.g. `document_signed.pdf`).
+The signed PDF is saved to the output path shown in the _Signature Properties_ panel. By default, it is the input file name with a `_signed` suffix (e.g. `document_signed.pdf`). The suffix can be changed with the `output.suffix` key in `advanced.properties` (see <<Advanced application configuration>>) -- handy for localizing the marker (e.g. `_signe`, `_firmado`).
 
 === Using presets
 
@@ -451,7 +451,7 @@ See <<Signing properties>> for details.
 | Prefix for the signed filename. Default: empty.
 
 | `-os, --out-suffix <suffix>`
-| Suffix for the signed filename. Default: `_signed` (e.g. `mydocument.pdf` becomes `mydocument_signed.pdf`).
+| Suffix for the signed filename. Default: the `output.suffix` key in `advanced.properties` (bundled default `_signed`), so `mydocument.pdf` becomes `mydocument_signed.pdf`.
 |===
 
 === Visible signature options
@@ -764,7 +764,7 @@ _JavaFX panel: Signature Properties_
 
 _Input PDF file_ is the existing PDF file to which a digital signature will be added.
 
-_Output PDF file_ is the name of the resulting PDF file. If not specified, the _Input PDF file_ name with the suffix `_signed` is used automatically (e.g. input _test.pdf_ will produce _test_signed.pdf_)
+_Output PDF file_ is the name of the resulting PDF file. If not specified, the _Input PDF file_ name with the suffix `_signed` is used automatically (e.g. input _test.pdf_ will produce _test_signed.pdf_). The suffix is taken from the `output.suffix` key in `advanced.properties`, so it can be localized (see <<Advanced application configuration>>).
 
 _*The Input and Output files have to be different!*_
 
@@ -1031,7 +1031,7 @@ jsignpdf doc.pdf -eng dss -pl LT -ts <tsa-url> \
 
 Application-wide tweaks beyond the per-document signing options live in `<config-dir>/advanced.properties` and -- for hardware tokens -- `<config-dir>/pkcs11.cfg`. Both are plain text files; the easiest way to edit them is the JavaFX <<Adjusting advanced preferences,Preferences dialog>>, which writes them on _OK_. Power users can also hand-edit the files directly while JSignPdf is closed; the next launch picks up the changes.
 
-`advanced.properties` covers the same six topics as the Preferences dialog (visible-signature font, certificate-validation toggles, relaxed SSL, PDF preview backend order, default TSA hash algorithm, and one or two miscellaneous knobs). When a key is missing from `advanced.properties`, JSignPdf falls back to defaults bundled inside the application jar, so a fresh install needs no config file at all.
+`advanced.properties` covers the same topics as the Preferences dialog (visible-signature font, certificate-validation toggles, relaxed SSL, PDF preview backend order, default TSA hash algorithm) plus a few file-editable knobs such as `output.suffix` -- the suffix appended to the input file name to derive the default output file name (bundled default `_signed`; e.g. set `output.suffix=_firmado` to produce `mydocument_firmado.pdf`). When a key is missing from `advanced.properties`, JSignPdf falls back to defaults bundled inside the application jar, so a fresh install needs no config file at all.
 
 In batch mode, any of these keys can be overridden for a single run with the `-o key=value` command-line option (see <<General options>>), without changing the file. CLI overrides take precedence over `advanced.properties` and the bundled defaults, and are not persisted.
 

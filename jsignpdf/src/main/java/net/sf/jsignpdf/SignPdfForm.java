@@ -27,6 +27,7 @@ import net.sf.jsignpdf.types.CertificationLevel;
 import net.sf.jsignpdf.types.HashAlgorithm;
 import net.sf.jsignpdf.types.PDFEncryption;
 import net.sf.jsignpdf.types.PrintRight;
+import net.sf.jsignpdf.utils.AppConfig;
 import net.sf.jsignpdf.utils.GuiUtils;
 import net.sf.jsignpdf.utils.KeyStoreUtils;
 import net.sf.jsignpdf.utils.PKCS11Utils;
@@ -410,7 +411,7 @@ public class SignPdfForm extends javax.swing.JFrame implements SignResultListene
                     justName = justName.substring(0, dotPosition);
                 }
 
-                File signedPDF = new File(f.getParentFile(), justName + "_signed.pdf");
+                File signedPDF = new File(f.getParentFile(), justName + AppConfig.defaultOutSuffix() + ".pdf");
 
                 tfOutPdfFile.setText(signedPDF.getPath());
             }
