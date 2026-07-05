@@ -46,6 +46,12 @@
                                 <unix>.sh</unix>
                                 <windows>.cmd</windows>
                             </binFileExtensions>
+                            <!--
+                              PKCS#11 access needs the same JDK-internal exports the jpackage
+                              native launchers get from distribution/jpackage/common-jvm-options.txt.
+                              Keep this list in sync with that file.
+                            -->
+                            <extraJvmArguments>--add-exports=jdk.crypto.cryptoki/sun.security.pkcs11=ALL-UNNAMED --add-exports=jdk.crypto.cryptoki/sun.security.pkcs11.wrapper=ALL-UNNAMED --add-exports=java.base/sun.security.action=ALL-UNNAMED --add-exports=java.base/sun.security.rsa=ALL-UNNAMED --add-opens=java.base/sun.security.util=ALL-UNNAMED</extraJvmArguments>
                             <platforms>
                                 <platform>unix</platform>
                                 <platform>windows</platform>
