@@ -164,14 +164,6 @@
             <artifactId>jbig2-imageio</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.github.jai-imageio</groupId>
-            <artifactId>jai-imageio-core</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.github.jai-imageio</groupId>
-            <artifactId>jai-imageio-jpeg2000</artifactId>
-        </dependency>
-        <dependency>
             <groupId>com.github.kwart.jsign</groupId>
             <artifactId>jsign-jpedal</artifactId>
         </dependency>

@@ -67,8 +67,6 @@ import net.sf.jsignpdf.fx.preset.ManagePresetsDialog;
 import net.sf.jsignpdf.fx.preset.Preset;
 import net.sf.jsignpdf.fx.preset.PresetManager;
 import net.sf.jsignpdf.fx.preset.PresetValidation;
-import net.sf.jsignpdf.utils.PropertyProvider;
-import net.sf.jsignpdf.utils.PropertyStoreFactory;
 import net.sf.jsignpdf.fx.util.RecentFilesManager;
 import net.sf.jsignpdf.fx.viewmodel.DocumentViewModel;
 import net.sf.jsignpdf.fx.viewmodel.SignaturePlacementViewModel;
@@ -76,6 +74,8 @@ import net.sf.jsignpdf.fx.viewmodel.SigningOptionsViewModel;
 import net.sf.jsignpdf.fx.viewmodel.VisibleSignatureCoordinator;
 import net.sf.jsignpdf.types.PadesLevel;
 import net.sf.jsignpdf.types.PageInfo;
+import net.sf.jsignpdf.utils.PropertyProvider;
+import net.sf.jsignpdf.utils.PropertyStoreFactory;
 
 import static net.sf.jsignpdf.Constants.LOGGER;
 import static net.sf.jsignpdf.Constants.RES;
@@ -84,6 +84,9 @@ import static net.sf.jsignpdf.Constants.RES;
  * Controller for the main application window.
  */
 public class MainWindowController {
+
+    private static final String KEY_LAST_OPEN_DIR = "last.open.dir";
+    private static final String KEY_LAST_ZOOM = "last.zoom";
 
     private Stage stage;
     private File lastOpenDir;
@@ -355,14 +358,13 @@ public class MainWindowController {
             }
         });
 
-        // Zoom level changes update combo, remember the last zoom, and persist
+        // Zoom level changes update combo and remember the last zoom (persisted on document open / exit)
         documentVM.zoomLevelProperty().addListener((obs, oldVal, newVal) -> {
             lastZoomLevel = newVal.doubleValue();
             String formatted = Math.round(newVal.doubleValue() * 100) + "%";
             if (!formatted.equals(cmbZoom.getValue())) {
                 cmbZoom.setValue(formatted);
             }
-            saveViewStateToConfig();
         });
 
         // Page number text field commit
@@ -945,8 +947,6 @@ public class MainWindowController {
         }
         File file = fc.showOpenDialog(stage);
         if (file != null) {
-            lastOpenDir = file.getParentFile();
-            saveLastOpenDir();
             openDocument(file);
         }
     }
@@ -1197,6 +1197,7 @@ public class MainWindowController {
 
     private void openDocument(File file) {
         lastOpenDir = file.getParentFile();
+        saveViewStateToConfig();
         try {
             if (options == null) {
                 options = new BasicSignerOptions();
@@ -1355,18 +1356,6 @@ public class MainWindowController {
         stage.setTitle("JSignPdf " + Constants.VERSION);
     }
 
-    private static final String KEY_LAST_OPEN_DIR = "last.open.dir";
-    private static final String KEY_LAST_ZOOM = "last.zoom";
-
-    private void saveLastOpenDir() {
-        try {
-            PropertyProvider cfg = PropertyStoreFactory.getInstance().mainConfig();
-            cfg.setProperty(KEY_LAST_OPEN_DIR, lastOpenDir.getAbsolutePath());
-            cfg.save();
-        } catch (Exception ignored) {
-        }
-    }
-
     private void loadPersistedViewState() {
         try {
             PropertyProvider cfg = PropertyStoreFactory.getInstance().mainConfig();
@@ -1381,16 +1370,21 @@ public class MainWindowController {
             if (zoom != null) {
                 lastZoomLevel = Double.parseDouble(zoom);
             }
-        } catch (Exception ignored) {
+        } catch (Exception e) {
+            LOGGER.log(Level.FINE, "Could not load persisted view state", e);
         }
     }
 
     private void saveViewStateToConfig() {
         try {
             PropertyProvider cfg = PropertyStoreFactory.getInstance().mainConfig();
+            if (lastOpenDir != null) {
+                cfg.setProperty(KEY_LAST_OPEN_DIR, lastOpenDir.getAbsolutePath());
+            }
             cfg.setProperty(KEY_LAST_ZOOM, String.valueOf(lastZoomLevel));
             cfg.save();
-        } catch (Exception ignored) {
+        } catch (Exception e) {
+            LOGGER.log(Level.FINE, "Could not persist view state", e);
         }
     }
 
