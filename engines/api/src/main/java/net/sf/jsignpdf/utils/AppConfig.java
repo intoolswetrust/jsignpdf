@@ -50,6 +50,15 @@ public final class AppConfig {
         return cfg().getNotEmptyProperty("tsa.hashAlgorithm", "SHA-256");
     }
 
+    /**
+     * Suffix appended to the input file name to build the default output file name (the GUI suggestion and the
+     * fallback for the CLI {@code -osuffix} option), or {@value Constants#DEFAULT_OUT_SUFFIX} when unset. Lets users
+     * localize the {@code _signed} marker (e.g. {@code _signe}, {@code _firmado}, {@code _unterschrieben}).
+     */
+    public static String defaultOutSuffix() {
+        return cfg().getNotEmptyProperty("output.suffix", Constants.DEFAULT_OUT_SUFFIX);
+    }
+
     public static boolean checkValidity() {
         return cfg().getAsBool("certificate.checkValidity", true);
     }

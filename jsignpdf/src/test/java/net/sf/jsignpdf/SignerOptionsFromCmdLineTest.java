@@ -378,6 +378,39 @@ public class SignerOptionsFromCmdLineTest {
         }
     }
 
+    @Test
+    public void outSuffix_defaultIsResolvedAtParseTimeNotConstruction() throws Exception {
+        // Regression for the construction-time capture: the outSuffix field initializer reads the default before
+        // loadCmdLine runs (and before advanced overrides are applied). When -os is absent, loadCmdLine must
+        // re-resolve the configured output.suffix so a value set after construction (e.g. a -o override) is honored.
+        net.sf.jsignpdf.utils.AdvancedConfig cfg = net.sf.jsignpdf.utils.PropertyStoreFactory.getInstance()
+                .advancedConfig();
+        Fixture f = new Fixture(""); // constructs the opts -> field initializer captures the current default
+        cfg.setProperty("output.suffix", "_resolvedlate"); // change the config AFTER construction
+        try {
+            f.opts.setCmdLine(new String[] { "-ksf", "/tmp/x.p12" }); // no -os
+            f.opts.loadCmdLine();
+            assertEquals("_resolvedlate", f.opts.getOutSuffix());
+        } finally {
+            cfg.removeProperty("output.suffix");
+        }
+    }
+
+    @Test
+    public void outSuffix_explicitFlagWinsOverConfiguredDefault() throws Exception {
+        net.sf.jsignpdf.utils.AdvancedConfig cfg = net.sf.jsignpdf.utils.PropertyStoreFactory.getInstance()
+                .advancedConfig();
+        cfg.setProperty("output.suffix", "_fromcfg");
+        try {
+            Fixture f = new Fixture("");
+            f.opts.setCmdLine(new String[] { "--out-suffix", "_explicit" });
+            f.opts.loadCmdLine();
+            assertEquals("_explicit", f.opts.getOutSuffix());
+        } finally {
+            cfg.removeProperty("output.suffix");
+        }
+    }
+
     /** Convenience wiring: captures warnings and feeds a canned stdin reader with no Console. */
     private static final class Fixture {
         final SignerOptionsFromCmdLine opts = new SignerOptionsFromCmdLine();
