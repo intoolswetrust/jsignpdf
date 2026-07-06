@@ -128,7 +128,7 @@ public final class JpxPluginManager {
             }
             try {
                 registry.registerServiceProvider(spi, ImageReaderSpi.class);
-                LOGGER.info("Registered image reader plugin: " + spi.getClass().getName());
+                LOGGER.fine("Registered image reader plugin: " + spi.getClass().getName());
             } catch (Throwable t) {
                 LOGGER.log(Level.FINE, "Failed to register image reader provider " + spi.getClass().getName(), t);
             }

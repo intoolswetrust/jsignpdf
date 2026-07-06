@@ -135,7 +135,7 @@ public final class JpxCodecInstaller {
                         + " (expected " + artifact.sha256() + ", got " + actual + ")");
             }
             Files.move(part, target, StandardCopyOption.REPLACE_EXISTING);
-            LOGGER.info("Installed codec jar " + target);
+            LOGGER.fine("Installed codec jar " + target);
             return done;
         } catch (IOException | InterruptedException | RuntimeException e) {
             try {
