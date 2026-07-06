@@ -33,6 +33,7 @@ public final class ConfigLocationResolver {
     static final String LEGACY_FILE_NAME = ".JSignPdf";
     static final String MAIN_CONFIG_FILE_NAME = "config.properties";
     static final String PRESETS_DIR_NAME = "presets";
+    static final String PLUGINS_DIR_NAME = "plugins";
     static final String ADVANCED_CONFIG_FILE_NAME = "advanced.properties";
     static final String PKCS11_CONFIG_FILE_NAME = "pkcs11.cfg";
 
@@ -95,6 +96,16 @@ public final class ConfigLocationResolver {
     public Path getPresetsDir() {
         Path dir = getConfigDir();
         return dir == null ? null : dir.resolve(PRESETS_DIR_NAME);
+    }
+
+    /**
+     * Path to the optional plugins directory ({@code <cfg>/plugins/}). Holds user-fetched, non-bundled codec jars that are
+     * loaded into ImageIO at startup. Created lazily by the code that writes into it. May be {@code null} if
+     * {@link #getConfigDir()} is.
+     */
+    public Path getPluginsDir() {
+        Path dir = getConfigDir();
+        return dir == null ? null : dir.resolve(PLUGINS_DIR_NAME);
     }
 
     /**
