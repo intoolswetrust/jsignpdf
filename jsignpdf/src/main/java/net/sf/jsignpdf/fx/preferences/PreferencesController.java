@@ -95,7 +95,7 @@ public class PreferencesController {
     @FXML private ComboBox<String> cmbTsaHashAlgorithm;
 
     @FXML private CheckBox chkDssOnlineEnabled;
-    @FXML private CheckBox chkDssUseDefaultLotl;
+    @FXML private CheckBox chkDssEuEnabled;
     @FXML private TextField txtDssLotlUrls;
     @FXML private TextField txtDssCertFiles;
     @FXML private TextField txtDssCertUrls;
@@ -231,7 +231,7 @@ public class PreferencesController {
         cmbTsaHashAlgorithm.valueProperty().bindBidirectional(vm.tsaHashAlgorithmProperty());
 
         chkDssOnlineEnabled.selectedProperty().bindBidirectional(vm.dssOnlineEnabledProperty());
-        chkDssUseDefaultLotl.selectedProperty().bindBidirectional(vm.dssUseDefaultLotlProperty());
+        chkDssEuEnabled.selectedProperty().bindBidirectional(vm.dssEuEnabledProperty());
         txtDssLotlUrls.textProperty().bindBidirectional(vm.dssLotlUrlsProperty());
         txtDssCertFiles.textProperty().bindBidirectional(vm.dssCertFilesProperty());
         txtDssCertUrls.textProperty().bindBidirectional(vm.dssCertUrlsProperty());

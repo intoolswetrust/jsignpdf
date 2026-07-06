@@ -322,6 +322,12 @@ public class DssSigningEngine implements SigningEngine {
                 LOGGER.info(RES.get("console.closeStream"));
             }
             finished = true;
+        } catch (eu.europa.esig.dss.alert.exception.AlertException e) {
+            // LT/LTA: DSS refused because revocation data could not be collected for the signer chain — it is
+            // not anchored by the configured trust material (its CA is not in the truststore / cert files /
+            // LOTL, or an MRA LOTL needs engine.dss.trust.lotlMraSupport=true). Surface that instead of an
+            // opaque stack trace.
+            LOGGER.log(Level.SEVERE, RES.get("console.dss.untrustedChain"), e);
         } catch (Exception e) {
             LOGGER.log(Level.SEVERE, RES.get("console.exception"), e);
         } catch (OutOfMemoryError e) {

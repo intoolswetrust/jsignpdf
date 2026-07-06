@@ -103,7 +103,7 @@
                 <padding><Insets top="12" right="12" bottom="12" left="12"/></padding>
                 <CheckBox fx:id="chkDssOnlineEnabled" text="%jfx.gui.dss.online.enabled"/>
                 <Label text="%jfx.gui.dss.online.enabled.tooltip" styleClass="pref-help" wrapText="true"/>
-                <CheckBox fx:id="chkDssUseDefaultLotl" text="%jfx.gui.dss.trust.useDefaultLotl"/>
+                <CheckBox fx:id="chkDssEuEnabled" text="%jfx.gui.dss.trust.eu.enabled"/>
                 <Label text="%jfx.gui.dss.trust.lotlUrls"/>
                 <TextField fx:id="txtDssLotlUrls"/>
                 <Label text="%jfx.gui.dss.trust.certFiles"/>

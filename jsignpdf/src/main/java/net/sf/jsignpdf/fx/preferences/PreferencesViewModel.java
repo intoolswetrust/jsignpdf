@@ -49,7 +49,7 @@ public class PreferencesViewModel {
 
     // DSS engine (engine.dss.*) — trust material for PAdES LT/LTA
     private final BooleanProperty dssOnlineEnabled = new SimpleBooleanProperty(false);
-    private final BooleanProperty dssUseDefaultLotl = new SimpleBooleanProperty(false);
+    private final BooleanProperty dssEuEnabled = new SimpleBooleanProperty(false);
     private final StringProperty dssLotlUrls = new SimpleStringProperty("");
     private final StringProperty dssCertFiles = new SimpleStringProperty("");
     private final StringProperty dssCertUrls = new SimpleStringProperty("");
@@ -77,7 +77,7 @@ public class PreferencesViewModel {
         tsaHashAlgorithm.set(cfg.getNotEmptyProperty("tsa.hashAlgorithm", "SHA-256"));
 
         dssOnlineEnabled.set(cfg.getAsBool("engine.dss.online.enabled", false));
-        dssUseDefaultLotl.set(cfg.getAsBool("engine.dss.trust.useDefaultLotl", false));
+        dssEuEnabled.set(cfg.getAsBool("engine.dss.trust.eu.enabled", false));
         dssLotlUrls.set(orEmpty(cfg.getProperty("engine.dss.trust.lotlUrls")));
         dssCertFiles.set(orEmpty(cfg.getProperty("engine.dss.trust.certFiles")));
         dssCertUrls.set(orEmpty(cfg.getProperty("engine.dss.trust.certUrls")));
@@ -102,7 +102,7 @@ public class PreferencesViewModel {
         cfg.setProperty("tsa.hashAlgorithm", tsaHashAlgorithm.get());
 
         cfg.setProperty("engine.dss.online.enabled", dssOnlineEnabled.get());
-        cfg.setProperty("engine.dss.trust.useDefaultLotl", dssUseDefaultLotl.get());
+        cfg.setProperty("engine.dss.trust.eu.enabled", dssEuEnabled.get());
         writeStringOrRemove(cfg, "engine.dss.trust.lotlUrls", dssLotlUrls.get());
         writeStringOrRemove(cfg, "engine.dss.trust.certFiles", dssCertFiles.get());
         writeStringOrRemove(cfg, "engine.dss.trust.certUrls", dssCertUrls.get());
@@ -152,7 +152,7 @@ public class PreferencesViewModel {
 
     public void applyDssDefaults(AdvancedConfig defaults) {
         dssOnlineEnabled.set(parseBool(defaults.getBundledDefault("engine.dss.online.enabled"), false));
-        dssUseDefaultLotl.set(parseBool(defaults.getBundledDefault("engine.dss.trust.useDefaultLotl"), false));
+        dssEuEnabled.set(parseBool(defaults.getBundledDefault("engine.dss.trust.eu.enabled"), false));
         dssLotlUrls.set(orEmpty(defaults.getBundledDefault("engine.dss.trust.lotlUrls")));
         dssCertFiles.set(orEmpty(defaults.getBundledDefault("engine.dss.trust.certFiles")));
         dssCertUrls.set(orEmpty(defaults.getBundledDefault("engine.dss.trust.certUrls")));
@@ -258,7 +258,7 @@ public class PreferencesViewModel {
     public IntegerProperty pdfLibOpenpdfOrderProperty() { return pdfLibOpenpdfOrder; }
     public StringProperty tsaHashAlgorithmProperty() { return tsaHashAlgorithm; }
     public BooleanProperty dssOnlineEnabledProperty() { return dssOnlineEnabled; }
-    public BooleanProperty dssUseDefaultLotlProperty() { return dssUseDefaultLotl; }
+    public BooleanProperty dssEuEnabledProperty() { return dssEuEnabled; }
     public StringProperty dssLotlUrlsProperty() { return dssLotlUrls; }
     public StringProperty dssCertFilesProperty() { return dssCertFiles; }
     public StringProperty dssCertUrlsProperty() { return dssCertUrls; }

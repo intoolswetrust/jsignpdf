@@ -998,11 +998,24 @@ DSS requires a PAdES digest, so the hash algorithm must be `SHA256`, `SHA384` or
 |`engine.dss.online.enabled`
 |Fetch revocation data (OCSP/CRL) and intermediate certificates (AIA) online. Must be `true` to produce `LT`/`LTA`. Default `false` (keeps `B`/`T` offline).
 
-|`engine.dss.trust.useDefaultLotl`
-|Build trust anchors from the default EU List of Trusted Lists (LOTL).
+|`engine.dss.trust.eu.enabled`
+|Build trust anchors from the bundled EU List of Trusted Lists (LOTL), validating the LOTL signature against the bundled Official Journal (OJ) keystore. Default `false`.
+
+|`engine.dss.trust.eu.lotlUrl`
+|Relocate the default EU LOTL (default `https://ec.europa.eu/tools/lotl/eu-lotl.xml`). Effective when `engine.dss.trust.eu.enabled=true`.
+
+|`engine.dss.trust.eu.ojUrl`
+|Official Journal scheme-information URL used for the OJ announcement predicate. Effective when `engine.dss.trust.eu.enabled=true`.
+
+|`engine.dss.trust.eu.ojKeystoreFile` +
+`engine.dss.trust.eu.ojKeystorePassword`
+|External OJ keystore (and its password) overriding the bundled one used to validate the EU LOTL signature.
 
 |`engine.dss.trust.lotlUrls`
 |Comma-separated custom LOTL URLs.
+
+|`engine.dss.trust.lotlMraSupport`
+|Enable MRA processing for the custom `lotlUrls` (third-country mutual-recognition LOTLs, e.g. the eIDAS international pilot `mra_lotl.xml`). Default `false`.
 
 |`engine.dss.trust.certFiles`
 |Comma-separated trusted X.509 certificate files.
@@ -1014,6 +1027,12 @@ DSS requires a PAdES digest, so the hash algorithm must be `SHA256`, `SHA384` or
 `engine.dss.trust.truststoreType` +
 `engine.dss.trust.truststorePassword`
 |A truststore holding trust anchors (type defaults to the JVM default).
+
+|`engine.dss.contentSize`
+|Bytes reserved in the PDF `/Contents` for the CMS signature. `0` (default) sizes it automatically from the certificate chain and options; set a positive value to force a fixed size.
+
+|`engine.dss.retryOnUndersize`
+|Re-sign with a larger reservation if the reserved `/Contents` turns out too small. Default `true`; each retry repeats signing (and refetches the TSA timestamp for level `T` and above).
 |===
 
 If `LT`/`LTA` is requested but revocation data cannot be reached (for example, with online fetching disabled), the signing fails with a logged error rather than silently emitting a weaker level.
