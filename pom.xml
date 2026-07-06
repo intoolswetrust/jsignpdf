@@ -28,6 +28,7 @@
         <jsign.pkcs11.version>1.1.0</jsign.pkcs11.version>
         <jsign.jpedal.version>4.92.13</jsign.jpedal.version>
         <pdfbox.version>3.0.7</pdfbox.version>
+        <jbig2-imageio.version>3.0.2</jbig2-imageio.version>
         <commons-io.version>2.22.0</commons-io.version>
         <commons-cli.version>1.11.0</commons-cli.version>
         <commons-lang3.version>3.20.0</commons-lang3.version>
@@ -110,6 +111,11 @@
                 <groupId>org.apache.pdfbox</groupId>
                 <artifactId>pdfbox</artifactId>
                 <version>${pdfbox.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.pdfbox</groupId>
+                <artifactId>jbig2-imageio</artifactId>
+                <version>${jbig2-imageio.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.github.kwart.jsign</groupId>

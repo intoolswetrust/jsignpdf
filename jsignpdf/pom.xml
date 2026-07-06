@@ -160,6 +160,10 @@
             <artifactId>pdfbox</artifactId>
         </dependency>
         <dependency>
+            <groupId>org.apache.pdfbox</groupId>
+            <artifactId>jbig2-imageio</artifactId>
+        </dependency>
+        <dependency>
             <groupId>com.github.kwart.jsign</groupId>
             <artifactId>jsign-jpedal</artifactId>
         </dependency>
