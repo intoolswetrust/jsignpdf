@@ -1,6 +1,7 @@
 package net.sf.jsignpdf.fx.view;
 
 import java.io.File;
+import java.nio.file.Path;
 import java.util.List;
 import java.util.Optional;
 import java.util.logging.Level;
@@ -63,8 +64,12 @@ import javafx.scene.layout.VBox;
 import javafx.util.StringConverter;
 import net.sf.jsignpdf.fx.control.PdfPageView;
 import net.sf.jsignpdf.fx.control.SignatureOverlay;
+import net.sf.jsignpdf.fx.service.JpxCodecPrompt;
 import net.sf.jsignpdf.fx.service.PdfRenderService;
 import net.sf.jsignpdf.fx.service.SigningService;
+import net.sf.jsignpdf.preview.JpxDetector;
+import net.sf.jsignpdf.preview.JpxPluginManager;
+import net.sf.jsignpdf.utils.ConfigLocationResolver;
 import net.sf.jsignpdf.fx.preferences.PreferencesController;
 import net.sf.jsignpdf.fx.preset.ManagePresetsDialog;
 import net.sf.jsignpdf.fx.preset.Preset;
@@ -94,6 +99,8 @@ public class MainWindowController {
     private Stage stage;
     private File lastOpenDir;
     private double lastZoomLevel = 1.0;
+    /** Session-only flag: once the user skips the JPEG 2000 codec offer, don't re-ask until the next app run. */
+    private boolean jpxPromptSkipped = false;
     private BasicSignerOptions options;
     private final DocumentViewModel documentVM = new DocumentViewModel();
     private final SigningOptionsViewModel signingVM = new SigningOptionsViewModel();
@@ -1311,6 +1318,7 @@ public class MainWindowController {
             documentVM.setCurrentPage(1);
             renderCurrentPage();
             updateNavButtonState();
+            maybeOfferJpxCodec(file);
         } catch (Exception e) {
             LOGGER.log(Level.SEVERE, "Failed to open document", e);
             updateStatus("Error: " + e.getMessage());
@@ -1394,6 +1402,48 @@ public class MainWindowController {
         });
 
         return dialog.showAndWait();
+    }
+
+    /**
+     * If a JPEG 2000 reader is missing and the just-opened document actually contains {@code /JPXDecode} images, offer to
+     * download the optional codec. Detection runs off the FX thread; the confirmation and download run on the FX thread.
+     */
+    private void maybeOfferJpxCodec(File file) {
+        if (jpxPromptSkipped) {
+            return;
+        }
+        final Path pluginsDir = ConfigLocationResolver.getInstance().getPluginsDir();
+        if (pluginsDir == null || JpxPluginManager.isJpxReaderAvailable()) {
+            return;
+        }
+        final String password = options.getPdfOwnerPwdStrX();
+        Thread detector = new Thread(() -> {
+            if (!JpxDetector.containsJpx(file, password)) {
+                return;
+            }
+            Platform.runLater(() -> offerJpxCodec(pluginsDir, file));
+        }, "jpx-detect");
+        detector.setDaemon(true);
+        detector.start();
+    }
+
+    private void offerJpxCodec(Path pluginsDir, File file) {
+        // Re-check on the FX thread: state may have changed while detection ran in the background, or the user may
+        // have navigated to another document.
+        if (jpxPromptSkipped || JpxPluginManager.isJpxReaderAvailable() || !file.equals(documentVM.getDocumentFile())) {
+            return;
+        }
+        JpxCodecPrompt prompt = new JpxCodecPrompt(stage);
+        if (!prompt.confirmDownload()) {
+            jpxPromptSkipped = true;
+            return;
+        }
+        if (prompt.runDownload(pluginsDir)) {
+            JpxPluginManager.registerInstalledPlugins();
+            renderCurrentPage();
+        }
+        // On failure/cancel we intentionally leave jpxPromptSkipped false so the offer returns the next time a
+        // JPEG 2000 document is opened this session.
     }
 
     private void closeDocument() {

@@ -158,4 +158,21 @@ public class ConfigLocationResolverTest {
         assertEquals(xdgRoot.resolve("jsignpdf").resolve("config.properties"), r.getMainConfigFile());
         assertEquals(xdgRoot.resolve("jsignpdf").resolve("presets"), r.getPresetsDir());
     }
+
+    @Test
+    public void getPluginsDir_returnsExpectedPath() throws Exception {
+        Path home = tmp.newFolder("home").toPath();
+        Path xdgRoot = tmp.newFolder("xdg").toPath();
+        Map<String, String> env = new HashMap<>();
+        env.put("XDG_CONFIG_HOME", xdgRoot.toString());
+
+        ConfigLocationResolver r = newResolver(ConfigLocationResolver.OsType.LINUX, env, home.toString());
+        assertEquals(xdgRoot.resolve("jsignpdf").resolve("plugins"), r.getPluginsDir());
+    }
+
+    @Test
+    public void getPluginsDir_isNull_whenHomeMissing() {
+        ConfigLocationResolver r = newResolver(ConfigLocationResolver.OsType.LINUX, new HashMap<>(), null);
+        assertNull(r.getPluginsDir());
+    }
 }
