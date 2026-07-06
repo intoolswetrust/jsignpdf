@@ -32,11 +32,17 @@ public final class DssLtTrustPreflight {
     /**
      * Outcome of the preflight.
      *
-     * @param applicable        whether the check applied at all (LT/LTA selected on an LT-capable engine)
-     * @param onlineMissing     LT/LTA needs online fetching but {@code online.enabled} is off
+     * @param applicable         whether the check applied at all (LT/LTA selected on an LT-capable engine)
+     * @param onlineMissing      LT/LTA needs online fetching but {@code online.enabled} is off
      * @param trustSourceMissing LT/LTA needs a trust anchor but none of the trust sources is configured
+     * @param customTrustSourceConfigured a user-supplied trust source ({@code trust.truststoreFile} /
+     *                           {@code certFiles} / {@code certUrls} / {@code lotlUrls}) is set. Excludes the
+     *                           bundled EU LOTL toggle ({@code trust.eu.enabled}), so the GUI auto-fix can
+     *                           default to enabling the EU LOTL only when the user has not brought their own
+     *                           trust material.
      */
-    public record Result(boolean applicable, boolean onlineMissing, boolean trustSourceMissing) {
+    public record Result(boolean applicable, boolean onlineMissing, boolean trustSourceMissing,
+            boolean customTrustSourceConfigured) {
         /** @return {@code true} when the configuration would make LT/LTA signing fail. */
         public boolean hasIssues() {
             return applicable && (onlineMissing || trustSourceMissing);
@@ -57,19 +63,19 @@ public final class DssLtTrustPreflight {
      */
     public static Result check(BasicSignerOptions o, SigningEngine engine, EngineConfig config) {
         if (o == null || engine == null || config == null) {
-            return new Result(false, false, false);
+            return new Result(false, false, false, false);
         }
         final PadesLevel level = o.getPadesLevel();
         final boolean ltOrLta = level == PadesLevel.BASELINE_LT || level == PadesLevel.BASELINE_LTA;
         if (!ltOrLta || !engine.capabilities().contains(Capability.PADES_BASELINE_LT)) {
-            return new Result(false, false, false);
+            return new Result(false, false, false, false);
         }
         final boolean online = config.getBoolean(KEY_ONLINE_ENABLED, false);
-        final boolean trustSource = config.getBoolean(KEY_EU_ENABLED, false)
-                || StringUtils.isNotBlank(config.getString(KEY_TRUSTSTORE_FILE))
+        final boolean customTrustSource = StringUtils.isNotBlank(config.getString(KEY_TRUSTSTORE_FILE))
                 || StringUtils.isNotBlank(config.getString(KEY_CERT_FILES))
                 || StringUtils.isNotBlank(config.getString(KEY_CERT_URLS))
                 || StringUtils.isNotBlank(config.getString(KEY_LOTL_URLS));
-        return new Result(true, !online, !trustSource);
+        final boolean trustSource = config.getBoolean(KEY_EU_ENABLED, false) || customTrustSource;
+        return new Result(true, !online, !trustSource, customTrustSource);
     }
 }

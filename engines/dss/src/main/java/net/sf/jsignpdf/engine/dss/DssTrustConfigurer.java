@@ -189,7 +189,8 @@ final class DssTrustConfigurer {
 
         final String truststoreFile = config.getString(KEY_TRUSTSTORE_FILE);
         if (StringUtils.isNotEmpty(truststoreFile)) {
-            final String type = config.getString(KEY_TRUSTSTORE_TYPE, KeyStore.getDefaultType());
+            final String type = StringUtils.defaultIfEmpty(config.getString(KEY_TRUSTSTORE_TYPE),
+                    KeyStore.getDefaultType());
             final String pwd = config.getString(KEY_TRUSTSTORE_PASSWORD, "");
             KeyStoreCertificateSource source = new KeyStoreCertificateSource(new File(truststoreFile), type,
                     pwd != null ? pwd.toCharArray() : null);
@@ -253,10 +254,10 @@ final class DssTrustConfigurer {
      */
     private LOTLSource europeanLotlSource(CertificateSource ojCertificateSource) {
         LOTLSource lotl = new LOTLSource();
-        lotl.setUrl(config.getString(KEY_EU_LOTL_URL, DEFAULT_EU_LOTL_URL));
+        lotl.setUrl(StringUtils.defaultIfEmpty(config.getString(KEY_EU_LOTL_URL), DEFAULT_EU_LOTL_URL));
         lotl.setCertificateSource(ojCertificateSource);
-        lotl.setSigningCertificatesAnnouncementPredicate(
-                new OfficialJournalSchemeInformationURI(config.getString(KEY_EU_OJ_URL, DEFAULT_OJ_URL)));
+        lotl.setSigningCertificatesAnnouncementPredicate(new OfficialJournalSchemeInformationURI(
+                StringUtils.defaultIfEmpty(config.getString(KEY_EU_OJ_URL), DEFAULT_OJ_URL)));
         lotl.setPivotSupport(true);
         return lotl;
     }

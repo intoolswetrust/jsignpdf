@@ -62,6 +62,31 @@ public class DssLtTrustPreflightTest {
     }
 
     @Test
+    public void euLotlToggleIsNotACustomTrustSource() {
+        // trust.eu.enabled is the bundled default LOTL, not user-supplied material: the GUI auto-fix may
+        // (re)enable it, so it must not count as a custom source.
+        Result r = check(PadesLevel.BASELINE_LT, LT_ENGINE, Map.of(
+                "online.enabled", "true", "trust.eu.enabled", "true"));
+        assertFalse("EU LOTL toggle is not a custom trust source", r.customTrustSourceConfigured());
+    }
+
+    @Test
+    public void customTrustSourceIsFlaggedAndPreservedByAutofix() {
+        // A user-supplied source (e.g. certFiles) must be reported so the GUI leaves the EU LOTL off and does
+        // not clobber the user's own trust material.
+        Result r = check(PadesLevel.BASELINE_LT, LT_ENGINE, Map.of(
+                "online.enabled", "true", "trust.certFiles", "/path/to/ca.pem"));
+        assertTrue("certFiles is a custom trust source", r.customTrustSourceConfigured());
+    }
+
+    @Test
+    public void noCustomTrustSourceWhenNothingConfigured() {
+        Result r = check(PadesLevel.BASELINE_LT, LT_ENGINE, Map.of());
+        assertFalse("no trust material means no custom source (auto-fix will enable the EU LOTL)",
+                r.customTrustSourceConfigured());
+    }
+
+    @Test
     public void lotlUrlsCountAsTrustSource() {
         Result r = check(PadesLevel.BASELINE_LT, LT_ENGINE, Map.of(
                 "online.enabled", "true", "trust.lotlUrls", "https://a.test/lotl.xml"));

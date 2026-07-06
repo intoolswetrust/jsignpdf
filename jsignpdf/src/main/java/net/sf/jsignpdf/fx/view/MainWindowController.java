@@ -1107,8 +1107,10 @@ public class MainWindowController {
     /**
      * Runs the LT/LTA trust preflight ({@link DssLtTrustPreflight}) against the active engine and its config.
      * When the configuration would make LT/LTA signing fail (issue #432), shows a confirmation offering to
-     * enable the missing prerequisites ({@code engine.dss.online.enabled} and, if no trust source is set,
-     * {@code engine.dss.trust.eu.enabled}) and persist them, with a "sign anyway" escape.
+     * enable the missing prerequisites and persist them, with a "sign anyway" escape. Confirming always turns on
+     * {@code engine.dss.online.enabled}; it also turns on the bundled EU LOTL ({@code engine.dss.trust.eu.enabled})
+     * unless the user has configured a custom trust source (truststore / certFiles / certUrls / lotlUrls), which
+     * is left untouched.
      *
      * @return {@code true} to proceed with signing, {@code false} to abort
      */
@@ -1141,7 +1143,7 @@ public class MainWindowController {
         if (result.get() == enableAndSign) {
             final AdvancedConfig cfg = PropertyStoreFactory.getInstance().advancedConfig();
             cfg.setProperty("engine.dss.online.enabled", true);
-            if (preflight.trustSourceMissing()) {
+            if (!preflight.customTrustSourceConfigured()) {
                 cfg.setProperty("engine.dss.trust.eu.enabled", true);
             }
             try {
