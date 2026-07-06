@@ -3,7 +3,6 @@ package net.sf.jsignpdf.fx.service;
 import static net.sf.jsignpdf.Constants.LOGGER;
 import static net.sf.jsignpdf.Constants.RES;
 
-import java.io.IOException;
 import java.nio.file.Path;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -83,15 +82,6 @@ public final class JpxCodecPrompt {
      * @return {@code true} if the codec was installed successfully
      */
     public boolean runDownload(Path pluginsDir) {
-        return runDownload(pluginsDir, (dir, handler) -> new JpxCodecInstaller(dir).install(handler));
-    }
-
-    /** Seam for tests: performs the actual download into {@code dir}, reporting progress via {@code handler}. */
-    interface Downloader {
-        void download(Path dir, JpxCodecInstaller.ProgressHandler handler) throws IOException, InterruptedException;
-    }
-
-    boolean runDownload(Path pluginsDir, Downloader downloader) {
         Dialog<Void> dialog = new Dialog<>();
         dialog.initOwner(owner);
         dialog.initModality(Modality.WINDOW_MODAL);
@@ -134,7 +124,7 @@ public final class JpxCodecPrompt {
 
         Thread worker = new Thread(() -> {
             try {
-                downloader.download(pluginsDir, new JpxCodecInstaller.ProgressHandler() {
+                new JpxCodecInstaller(pluginsDir).install(new JpxCodecInstaller.ProgressHandler() {
                     @Override
                     public void onProgress(long done, long total) {
                         double fraction = total > 0 ? (double) done / total : ProgressBar.INDETERMINATE_PROGRESS;
