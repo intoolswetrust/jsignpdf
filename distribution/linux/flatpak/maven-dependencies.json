@@ -4432,6 +4432,20 @@
   },
   {
     "type": "file",
+    "url": "https://repo1.maven.org/maven2/org/apache/pdfbox/jbig2-imageio/3.0.2/jbig2-imageio-3.0.2.jar",
+    "sha256": "3dc510cd41511f2e2382eb7ac3550b2f94e21847f0b7221be8ddd0f2252a8fe4",
+    "dest": "m2local/org/apache/pdfbox/jbig2-imageio/3.0.2",
+    "dest-filename": "jbig2-imageio-3.0.2.jar"
+  },
+  {
+    "type": "file",
+    "url": "https://repo1.maven.org/maven2/org/apache/pdfbox/jbig2-imageio/3.0.2/jbig2-imageio-3.0.2.pom",
+    "sha256": "a4b3e92a6d86f48731d8afef0e4e2e0ab65ee2b4facd2cce904a6938b13a9b6d",
+    "dest": "m2local/org/apache/pdfbox/jbig2-imageio/3.0.2",
+    "dest-filename": "jbig2-imageio-3.0.2.pom"
+  },
+  {
+    "type": "file",
     "url": "https://repo1.maven.org/maven2/org/apache/pdfbox/pdfbox-io/3.0.7/pdfbox-io-3.0.7.jar",
     "sha256": "b9a838291978069086efbcd1f62b81b9e4a6016e61dd2c68104ee9f4c2ff997b",
     "dest": "m2local/org/apache/pdfbox/pdfbox-io/3.0.7",
@@ -6851,6 +6865,20 @@
     "sha256": "85f97344eeeed2714eda6f800aa712c1aa7405b0d7f98e207499363f82f37eec",
     "dest": "m2local/org/slf4j/slf4j-jdk14/1.5.6",
     "dest-filename": "slf4j-jdk14-1.5.6.pom"
+  },
+  {
+    "type": "file",
+    "url": "https://repo1.maven.org/maven2/org/slf4j/slf4j-jdk14/2.0.17/slf4j-jdk14-2.0.17.jar",
+    "sha256": "ead25c1b15f59db1fb5552b76fe63de4164f0df40024d19287b75dece47ad3be",
+    "dest": "m2local/org/slf4j/slf4j-jdk14/2.0.17",
+    "dest-filename": "slf4j-jdk14-2.0.17.jar"
+  },
+  {
+    "type": "file",
+    "url": "https://repo1.maven.org/maven2/org/slf4j/slf4j-jdk14/2.0.17/slf4j-jdk14-2.0.17.pom",
+    "sha256": "2acf3dc73eb431da02e54a8550aec8b9e1d287427390a904a6c946500f1a7114",
+    "dest": "m2local/org/slf4j/slf4j-jdk14/2.0.17",
+    "dest-filename": "slf4j-jdk14-2.0.17.pom"
   },
   {
     "type": "file",
