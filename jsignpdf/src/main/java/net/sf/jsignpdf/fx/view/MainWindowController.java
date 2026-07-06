@@ -1109,8 +1109,8 @@ public class MainWindowController {
      * When the configuration would make LT/LTA signing fail (issue #432), shows a confirmation offering to
      * enable the missing prerequisites and persist them, with a "sign anyway" escape. Confirming always turns on
      * {@code engine.dss.online.enabled}; it also turns on the bundled EU LOTL ({@code engine.dss.trust.eu.enabled})
-     * unless the user has configured a custom trust source (truststore / certFiles / certUrls / lotlUrls), which
-     * is left untouched.
+     * unless the user has configured a custom LOTL ({@code engine.dss.trust.lotlUrls}), which replaces it. Extra
+     * anchor material (truststore / certFiles / certUrls) is additive and does not suppress the EU LOTL.
      *
      * @return {@code true} to proceed with signing, {@code false} to abort
      */
@@ -1143,7 +1143,7 @@ public class MainWindowController {
         if (result.get() == enableAndSign) {
             final AdvancedConfig cfg = PropertyStoreFactory.getInstance().advancedConfig();
             cfg.setProperty("engine.dss.online.enabled", true);
-            if (!preflight.customTrustSourceConfigured()) {
+            if (!preflight.customLotlConfigured()) {
                 cfg.setProperty("engine.dss.trust.eu.enabled", true);
             }
             try {

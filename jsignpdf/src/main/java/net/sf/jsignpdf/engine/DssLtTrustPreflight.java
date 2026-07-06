@@ -35,14 +35,14 @@ public final class DssLtTrustPreflight {
      * @param applicable         whether the check applied at all (LT/LTA selected on an LT-capable engine)
      * @param onlineMissing      LT/LTA needs online fetching but {@code online.enabled} is off
      * @param trustSourceMissing LT/LTA needs a trust anchor but none of the trust sources is configured
-     * @param customTrustSourceConfigured a user-supplied trust source ({@code trust.truststoreFile} /
-     *                           {@code certFiles} / {@code certUrls} / {@code lotlUrls}) is set. Excludes the
-     *                           bundled EU LOTL toggle ({@code trust.eu.enabled}), so the GUI auto-fix can
-     *                           default to enabling the EU LOTL only when the user has not brought their own
-     *                           trust material.
+     * @param customLotlConfigured a custom List-of-Trusted-Lists ({@code trust.lotlUrls}) is set. This is the
+     *                           only source that <em>replaces</em> the bundled EU LOTL, so the GUI auto-fix
+     *                           enables the EU LOTL ({@code trust.eu.enabled}) unless a custom LOTL is present.
+     *                           Extra anchor material ({@code trust.truststoreFile} / {@code certFiles} /
+     *                           {@code certUrls}) is additive (e.g. a TSA CA) and does not suppress the EU LOTL.
      */
     public record Result(boolean applicable, boolean onlineMissing, boolean trustSourceMissing,
-            boolean customTrustSourceConfigured) {
+            boolean customLotlConfigured) {
         /** @return {@code true} when the configuration would make LT/LTA signing fail. */
         public boolean hasIssues() {
             return applicable && (onlineMissing || trustSourceMissing);
@@ -71,11 +71,12 @@ public final class DssLtTrustPreflight {
             return new Result(false, false, false, false);
         }
         final boolean online = config.getBoolean(KEY_ONLINE_ENABLED, false);
-        final boolean customTrustSource = StringUtils.isNotBlank(config.getString(KEY_TRUSTSTORE_FILE))
+        final boolean customLotl = StringUtils.isNotBlank(config.getString(KEY_LOTL_URLS));
+        final boolean trustSource = config.getBoolean(KEY_EU_ENABLED, false)
+                || StringUtils.isNotBlank(config.getString(KEY_TRUSTSTORE_FILE))
                 || StringUtils.isNotBlank(config.getString(KEY_CERT_FILES))
                 || StringUtils.isNotBlank(config.getString(KEY_CERT_URLS))
-                || StringUtils.isNotBlank(config.getString(KEY_LOTL_URLS));
-        final boolean trustSource = config.getBoolean(KEY_EU_ENABLED, false) || customTrustSource;
-        return new Result(true, !online, !trustSource, customTrustSource);
+                || customLotl;
+        return new Result(true, !online, !trustSource, customLotl);
     }
 }

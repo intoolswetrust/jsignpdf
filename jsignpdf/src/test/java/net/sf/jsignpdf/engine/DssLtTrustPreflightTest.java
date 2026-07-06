@@ -62,28 +62,33 @@ public class DssLtTrustPreflightTest {
     }
 
     @Test
-    public void euLotlToggleIsNotACustomTrustSource() {
-        // trust.eu.enabled is the bundled default LOTL, not user-supplied material: the GUI auto-fix may
-        // (re)enable it, so it must not count as a custom source.
+    public void customLotlUrlsIsFlagged() {
+        // A custom LOTL replaces the bundled EU LOTL, so the GUI auto-fix must leave trust.eu.enabled alone.
+        Result r = check(PadesLevel.BASELINE_LT, LT_ENGINE, Map.of(
+                "online.enabled", "true", "trust.lotlUrls", "https://a.test/lotl.xml"));
+        assertTrue("custom lotlUrls is a custom LOTL", r.customLotlConfigured());
+    }
+
+    @Test
+    public void certFilesIsNotACustomLotl() {
+        // Extra anchor material (e.g. a TSA CA in certFiles) is additive; it must NOT suppress the EU LOTL, so
+        // the auto-fix still enables trust.eu.enabled.
+        Result r = check(PadesLevel.BASELINE_LT, LT_ENGINE, Map.of(
+                "online.enabled", "true", "trust.certFiles", "/tmp/tsa-ca.pem"));
+        assertFalse("certFiles is additive anchor material, not a custom LOTL", r.customLotlConfigured());
+    }
+
+    @Test
+    public void euLotlToggleIsNotACustomLotl() {
         Result r = check(PadesLevel.BASELINE_LT, LT_ENGINE, Map.of(
                 "online.enabled", "true", "trust.eu.enabled", "true"));
-        assertFalse("EU LOTL toggle is not a custom trust source", r.customTrustSourceConfigured());
+        assertFalse("the bundled EU LOTL toggle is not a custom LOTL", r.customLotlConfigured());
     }
 
     @Test
-    public void customTrustSourceIsFlaggedAndPreservedByAutofix() {
-        // A user-supplied source (e.g. certFiles) must be reported so the GUI leaves the EU LOTL off and does
-        // not clobber the user's own trust material.
-        Result r = check(PadesLevel.BASELINE_LT, LT_ENGINE, Map.of(
-                "online.enabled", "true", "trust.certFiles", "/path/to/ca.pem"));
-        assertTrue("certFiles is a custom trust source", r.customTrustSourceConfigured());
-    }
-
-    @Test
-    public void noCustomTrustSourceWhenNothingConfigured() {
+    public void noCustomLotlWhenNothingConfigured() {
         Result r = check(PadesLevel.BASELINE_LT, LT_ENGINE, Map.of());
-        assertFalse("no trust material means no custom source (auto-fix will enable the EU LOTL)",
-                r.customTrustSourceConfigured());
+        assertFalse("no custom LOTL means the auto-fix will enable the EU LOTL", r.customLotlConfigured());
     }
 
     @Test
