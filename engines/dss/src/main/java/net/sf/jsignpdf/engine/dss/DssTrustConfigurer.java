@@ -16,6 +16,7 @@ import net.sf.jsignpdf.utils.ConfigLocationResolver;
 
 import org.apache.commons.lang3.StringUtils;
 
+import eu.europa.esig.dss.model.tsl.TLValidationJobSummary;
 import eu.europa.esig.dss.service.crl.OnlineCRLSource;
 import eu.europa.esig.dss.service.http.commons.CommonsDataLoader;
 import eu.europa.esig.dss.service.http.commons.FileCacheDataLoader;
@@ -171,6 +172,7 @@ final class DssTrustConfigurer {
                 throw new IllegalStateException("Failed to refresh the EU LOTL / trusted lists (check network /"
                         + " proxy, or update the OJ keystore via " + KEY_EU_OJ_KEYSTORE_FILE + ")", e);
             }
+            logTrustAnchorSummary(trustedListsCertificateSource);
             trustedSources.add(trustedListsCertificateSource);
         }
 
@@ -197,6 +199,25 @@ final class DssTrustConfigurer {
             trustedSources.add(source);
         }
         return trustedSources.toArray(new CertificateSource[0]);
+    }
+
+    /**
+     * Logs how many trust anchors the trusted lists produced (plus the number of TLs / LOTLs processed). Without
+     * this, a LOTL that downloads but yields zero anchors (network/proxy filtering, a national TL that failed to
+     * sync) is indistinguishable in the logs from one where the anchors loaded fine but the signer's / TSA's
+     * particular CA simply is not listed &mdash; both surface later only as the opaque untrusted-chain
+     * {@code AlertException}. The count makes that distinction visible up front (issue #441).
+     */
+    private static void logTrustAnchorSummary(TrustedListsCertificateSource source) {
+        final String anchors = String.valueOf(source.getNumberOfCertificates());
+        final TLValidationJobSummary summary = source.getSummary();
+        final String tls = String.valueOf(summary != null ? summary.getNumberOfProcessedTLs() : 0);
+        final String lotls = String.valueOf(summary != null ? summary.getNumberOfProcessedLOTLs() : 0);
+        if (source.getNumberOfCertificates() == 0) {
+            Constants.LOGGER.warning(Constants.RES.get("console.dss.trustNoAnchors", anchors, tls, lotls));
+        } else {
+            Constants.LOGGER.info(Constants.RES.get("console.dss.trustLoaded", anchors, tls, lotls));
+        }
     }
 
     /**
