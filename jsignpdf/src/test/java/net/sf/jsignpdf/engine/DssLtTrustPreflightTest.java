@@ -62,6 +62,13 @@ public class DssLtTrustPreflightTest {
     }
 
     @Test
+    public void systemStoreCountsAsTrustSource() {
+        Result r = check(PadesLevel.BASELINE_LTA, LT_ENGINE, Map.of(
+                "online.enabled", "true", "trust.systemStore", "true"));
+        assertFalse("enabling the system store satisfies the trust requirement", r.hasIssues());
+    }
+
+    @Test
     public void customLotlUrlsIsFlagged() {
         // A custom LOTL replaces the bundled EU LOTL, so the GUI auto-fix must leave trust.eu.enabled alone.
         Result r = check(PadesLevel.BASELINE_LT, LT_ENGINE, Map.of(

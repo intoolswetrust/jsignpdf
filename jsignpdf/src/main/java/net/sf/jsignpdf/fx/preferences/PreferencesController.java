@@ -97,11 +97,13 @@ public class PreferencesController {
     @FXML private CheckBox chkDssOnlineEnabled;
     @FXML private CheckBox chkDssEuEnabled;
     @FXML private TextField txtDssLotlUrls;
+    @FXML private CheckBox chkDssLotlMraSupport;
     @FXML private TextField txtDssCertFiles;
     @FXML private TextField txtDssCertUrls;
     @FXML private TextField txtDssTruststoreFile;
     @FXML private TextField txtDssTruststoreType;
     @FXML private TextField txtDssTruststorePassword;
+    @FXML private CheckBox chkDssSystemStore;
 
     @FXML private Label lblPkcs11Path;
     @FXML private TextArea txtPkcs11Body;
@@ -233,11 +235,13 @@ public class PreferencesController {
         chkDssOnlineEnabled.selectedProperty().bindBidirectional(vm.dssOnlineEnabledProperty());
         chkDssEuEnabled.selectedProperty().bindBidirectional(vm.dssEuEnabledProperty());
         txtDssLotlUrls.textProperty().bindBidirectional(vm.dssLotlUrlsProperty());
+        chkDssLotlMraSupport.selectedProperty().bindBidirectional(vm.dssLotlMraSupportProperty());
         txtDssCertFiles.textProperty().bindBidirectional(vm.dssCertFilesProperty());
         txtDssCertUrls.textProperty().bindBidirectional(vm.dssCertUrlsProperty());
         txtDssTruststoreFile.textProperty().bindBidirectional(vm.dssTruststoreFileProperty());
         txtDssTruststoreType.textProperty().bindBidirectional(vm.dssTruststoreTypeProperty());
         txtDssTruststorePassword.textProperty().bindBidirectional(vm.dssTruststorePasswordProperty());
+        chkDssSystemStore.selectedProperty().bindBidirectional(vm.dssSystemStoreProperty());
 
         txtPkcs11Body.textProperty().bindBidirectional(vm.pkcs11BodyProperty());
         lblPkcs11EmptyHint.visibleProperty().bind(

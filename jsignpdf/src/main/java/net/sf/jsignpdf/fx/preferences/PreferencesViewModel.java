@@ -51,11 +51,13 @@ public class PreferencesViewModel {
     private final BooleanProperty dssOnlineEnabled = new SimpleBooleanProperty(false);
     private final BooleanProperty dssEuEnabled = new SimpleBooleanProperty(false);
     private final StringProperty dssLotlUrls = new SimpleStringProperty("");
+    private final BooleanProperty dssLotlMraSupport = new SimpleBooleanProperty(false);
     private final StringProperty dssCertFiles = new SimpleStringProperty("");
     private final StringProperty dssCertUrls = new SimpleStringProperty("");
     private final StringProperty dssTruststoreFile = new SimpleStringProperty("");
     private final StringProperty dssTruststoreType = new SimpleStringProperty("");
     private final StringProperty dssTruststorePassword = new SimpleStringProperty("");
+    private final BooleanProperty dssSystemStore = new SimpleBooleanProperty(false);
 
     private final StringProperty pkcs11Body = new SimpleStringProperty("");
 
@@ -79,11 +81,13 @@ public class PreferencesViewModel {
         dssOnlineEnabled.set(cfg.getAsBool("engine.dss.online.enabled", false));
         dssEuEnabled.set(cfg.getAsBool("engine.dss.trust.eu.enabled", false));
         dssLotlUrls.set(orEmpty(cfg.getProperty("engine.dss.trust.lotlUrls")));
+        dssLotlMraSupport.set(cfg.getAsBool("engine.dss.trust.lotlMraSupport", false));
         dssCertFiles.set(orEmpty(cfg.getProperty("engine.dss.trust.certFiles")));
         dssCertUrls.set(orEmpty(cfg.getProperty("engine.dss.trust.certUrls")));
         dssTruststoreFile.set(orEmpty(cfg.getProperty("engine.dss.trust.truststoreFile")));
         dssTruststoreType.set(orEmpty(cfg.getProperty("engine.dss.trust.truststoreType")));
         dssTruststorePassword.set(orEmpty(cfg.getProperty("engine.dss.trust.truststorePassword")));
+        dssSystemStore.set(cfg.getAsBool("engine.dss.trust.systemStore", false));
 
         pkcs11Body.set(pkcs11FileBody == null ? "" : pkcs11FileBody);
     }
@@ -104,11 +108,13 @@ public class PreferencesViewModel {
         cfg.setProperty("engine.dss.online.enabled", dssOnlineEnabled.get());
         cfg.setProperty("engine.dss.trust.eu.enabled", dssEuEnabled.get());
         writeStringOrRemove(cfg, "engine.dss.trust.lotlUrls", dssLotlUrls.get());
+        cfg.setProperty("engine.dss.trust.lotlMraSupport", dssLotlMraSupport.get());
         writeStringOrRemove(cfg, "engine.dss.trust.certFiles", dssCertFiles.get());
         writeStringOrRemove(cfg, "engine.dss.trust.certUrls", dssCertUrls.get());
         writeStringOrRemove(cfg, "engine.dss.trust.truststoreFile", dssTruststoreFile.get());
         writeStringOrRemove(cfg, "engine.dss.trust.truststoreType", dssTruststoreType.get());
         writeStringOrRemove(cfg, "engine.dss.trust.truststorePassword", dssTruststorePassword.get());
+        cfg.setProperty("engine.dss.trust.systemStore", dssSystemStore.get());
     }
 
     /** Resets every VM property to the bundled-default value (read from the given snapshot of bundled defaults). */
@@ -154,11 +160,13 @@ public class PreferencesViewModel {
         dssOnlineEnabled.set(parseBool(defaults.getBundledDefault("engine.dss.online.enabled"), false));
         dssEuEnabled.set(parseBool(defaults.getBundledDefault("engine.dss.trust.eu.enabled"), false));
         dssLotlUrls.set(orEmpty(defaults.getBundledDefault("engine.dss.trust.lotlUrls")));
+        dssLotlMraSupport.set(parseBool(defaults.getBundledDefault("engine.dss.trust.lotlMraSupport"), false));
         dssCertFiles.set(orEmpty(defaults.getBundledDefault("engine.dss.trust.certFiles")));
         dssCertUrls.set(orEmpty(defaults.getBundledDefault("engine.dss.trust.certUrls")));
         dssTruststoreFile.set(orEmpty(defaults.getBundledDefault("engine.dss.trust.truststoreFile")));
         dssTruststoreType.set(orEmpty(defaults.getBundledDefault("engine.dss.trust.truststoreType")));
         dssTruststorePassword.set(orEmpty(defaults.getBundledDefault("engine.dss.trust.truststorePassword")));
+        dssSystemStore.set(parseBool(defaults.getBundledDefault("engine.dss.trust.systemStore"), false));
     }
 
     public String encodePdfLibraries() {
@@ -260,11 +268,13 @@ public class PreferencesViewModel {
     public BooleanProperty dssOnlineEnabledProperty() { return dssOnlineEnabled; }
     public BooleanProperty dssEuEnabledProperty() { return dssEuEnabled; }
     public StringProperty dssLotlUrlsProperty() { return dssLotlUrls; }
+    public BooleanProperty dssLotlMraSupportProperty() { return dssLotlMraSupport; }
     public StringProperty dssCertFilesProperty() { return dssCertFiles; }
     public StringProperty dssCertUrlsProperty() { return dssCertUrls; }
     public StringProperty dssTruststoreFileProperty() { return dssTruststoreFile; }
     public StringProperty dssTruststoreTypeProperty() { return dssTruststoreType; }
     public StringProperty dssTruststorePasswordProperty() { return dssTruststorePassword; }
+    public BooleanProperty dssSystemStoreProperty() { return dssSystemStore; }
     public StringProperty pkcs11BodyProperty() { return pkcs11Body; }
 
     /** Move the given library one slot up (order--), swapping with the lib currently at that order. */
