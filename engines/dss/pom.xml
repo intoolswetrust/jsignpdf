@@ -74,16 +74,17 @@
             <scope>test</scope>
         </dependency>
 
-        <!-- BouncyCastle: used only by the tests (BC provider + the embedded RFC 3161 TSA server). -->
+        <!-- BouncyCastle: CapturingTspSource parses the RFC 3161 timestamp token (DSS TimestampToken, whose
+             constructor declares BC's TSPException/CMSException) to record the timestamp chain for the
+             untrusted-chain diagnostics (issue #448); the tests also use it (BC provider + embedded TSA server).
+             Already on the runtime classpath via DSS, so this only widens the compile scope. -->
         <dependency>
             <groupId>org.bouncycastle</groupId>
             <artifactId>bcprov-jdk18on</artifactId>
-            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.bouncycastle</groupId>
             <artifactId>bcpkix-jdk18on</artifactId>
-            <scope>test</scope>
         </dependency>
 
         <!-- DSS validation: required at runtime by the trusted-list validation job (TLValidatorTask uses

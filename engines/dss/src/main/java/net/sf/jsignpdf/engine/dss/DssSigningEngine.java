@@ -19,6 +19,7 @@ import java.security.cert.CertificateEncodingException;
 import java.security.cert.X509Certificate;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.Collection;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.Map;
@@ -171,6 +172,10 @@ public class DssSigningEngine implements SigningEngine {
         final String outFile = options.getOutFileX();
         boolean finished = false;
         File encryptedTempFile = null;
+        // Hoisted out of the try so the untrusted-chain handler can name the offending certificates: the signer
+        // chain, and the timestamp chain captured by the wrapping TSP source (issue #448).
+        Certificate[] chain = null;
+        CapturingTspSource tspSource = null;
         try {
             final PrivateKeyInfo pkInfo = KeyStoreUtils.getPkInfo(options);
             if (pkInfo == null) {
@@ -178,7 +183,7 @@ public class DssSigningEngine implements SigningEngine {
                 return false;
             }
             final PrivateKey key = pkInfo.getKey();
-            final Certificate[] chain = pkInfo.getChain();
+            chain = pkInfo.getChain();
             if (ArrayUtils.isEmpty(chain)) {
                 LOGGER.info(RES.get("console.certificateChainEmpty"));
                 return false;
@@ -302,7 +307,12 @@ public class DssSigningEngine implements SigningEngine {
 
                 if (useTsa) {
                     LOGGER.info(RES.get("console.creatingTsaClient"));
-                    service.setTspSource(buildTspSource(options, parameters, digestAlgorithm, proxyConfig));
+                    // Wrap the TSA source so the timestamp chain is captured for diagnostics: if DSS later
+                    // rejects the signature because that chain is not anchored, the untrusted-chain report can
+                    // name the timestamp certificate instead of a bare fingerprint (issue #448).
+                    tspSource = new CapturingTspSource(
+                            buildTspSource(options, parameters, digestAlgorithm, proxyConfig));
+                    service.setTspSource(tspSource);
                 }
 
                 LOGGER.info(RES.get("console.processing"));
@@ -323,11 +333,19 @@ public class DssSigningEngine implements SigningEngine {
             }
             finished = true;
         } catch (eu.europa.esig.dss.alert.exception.AlertException e) {
-            // LT/LTA: DSS refused because revocation data could not be collected for the signer chain — it is
-            // not anchored by the configured trust material (its CA is not in the truststore / cert files /
-            // LOTL, or an MRA LOTL needs engine.dss.trust.lotlMraSupport=true). Surface that instead of an
-            // opaque stack trace.
-            LOGGER.log(Level.SEVERE, RES.get("console.dss.untrustedChain"), e);
+            // LT/LTA: DSS refused because revocation data could not be collected for the signer or timestamp
+            // chain — it is not anchored by the configured trust material (its CA is not in the truststore /
+            // cert files / LOTL, or an MRA LOTL needs engine.dss.trust.lotlMraSupport=true). Surface that
+            // instead of an opaque stack trace, and name the offending certificate(s) rather than leaving the
+            // user to map a C-<fingerprint> back to a CA (issue #448).
+            final Collection<X509Certificate> tsaChain = tspSource != null
+                    ? tspSource.getCapturedCertificates() : null;
+            final String details = DssUntrustedChainReporter.describe(e, chain, tsaChain);
+            String message = RES.get("console.dss.untrustedChain");
+            if (!details.isEmpty()) {
+                message = message + System.lineSeparator() + details;
+            }
+            LOGGER.log(Level.SEVERE, message, e);
         } catch (Exception e) {
             LOGGER.log(Level.SEVERE, RES.get("console.exception"), e);
         } catch (OutOfMemoryError e) {

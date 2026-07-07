@@ -315,6 +315,59 @@ public class DssSigningEngineTest {
         assertSignatureLevel(outputFile, SignatureLevel.PAdES_BASELINE_LTA);
     }
 
+    @Test
+    public void untrustedSignerChainReportsCertificateIdentity() throws Exception {
+        BasicSignerOptions o = caSignerOptions(PadesLevel.BASELINE_LT);
+        // Online fetching is on and the TSA cert is trusted, but the signer's issuing CA is NOT: DSS reaches
+        // the revocation step, finds the signer chain untrusted, and raises the AlertException. The engine must
+        // catch it and log the enriched, self-service message that names the signer certificate (issue #448),
+        // not just its C-<fingerprint>.
+        File tsaFile = tmp.newFile("tsa-only.crt");
+        Files.write(tsaFile.toPath(), tsaServer.getCertificate().getEncoded());
+        Map<String, String> cfg = new HashMap<>();
+        cfg.put(DssTrustConfigurer.KEY_ONLINE_ENABLED, "true");
+        cfg.put(DssTrustConfigurer.KEY_CERT_FILES, tsaFile.getAbsolutePath());
+
+        CapturingLogHandler handler = new CapturingLogHandler();
+        java.util.logging.Logger logger = java.util.logging.Logger.getLogger("net.sf.jsignpdf");
+        logger.addHandler(handler);
+        try {
+            boolean ok = new DssSigningEngine().sign(o, new MapEngineConfig(cfg));
+            assertFalse("signing an untrusted chain at LT must fail", ok);
+        } finally {
+            logger.removeHandler(handler);
+        }
+
+        String severe = handler.severeMessages();
+        assertTrue("must name the signer-chain role", severe.contains("Signer chain certificate"));
+        assertTrue("must name the signer certificate subject", severe.contains("JSignPdf Test Signer"));
+        assertTrue("must name the issuing CA to add", severe.contains("JSignPdf Test Root CA"));
+    }
+
+    /** Collects the formatted messages of {@code SEVERE} log records, for asserting on engine diagnostics. */
+    private static final class CapturingLogHandler extends java.util.logging.Handler {
+        private final StringBuilder severe = new StringBuilder();
+
+        @Override
+        public void publish(java.util.logging.LogRecord record) {
+            if (record.getLevel().intValue() >= java.util.logging.Level.SEVERE.intValue()) {
+                severe.append(new java.util.logging.SimpleFormatter().formatMessage(record)).append('\n');
+            }
+        }
+
+        @Override
+        public void flush() {
+        }
+
+        @Override
+        public void close() {
+        }
+
+        String severeMessages() {
+            return severe.toString();
+        }
+    }
+
     /**
      * Builds options signing with a fresh leaf keystore issued by the embedded CA (its CRL distribution point
      * targets the loopback CRL endpoint), at the requested baseline level and through the embedded TSA.
