@@ -4432,17 +4432,17 @@
   },
   {
     "type": "file",
-    "url": "https://repo1.maven.org/maven2/org/apache/pdfbox/jbig2-imageio/3.0.2/jbig2-imageio-3.0.2.jar",
-    "sha256": "3dc510cd41511f2e2382eb7ac3550b2f94e21847f0b7221be8ddd0f2252a8fe4",
-    "dest": "m2local/org/apache/pdfbox/jbig2-imageio/3.0.2",
-    "dest-filename": "jbig2-imageio-3.0.2.jar"
+    "url": "https://repo1.maven.org/maven2/org/apache/pdfbox/jbig2-imageio/3.0.5/jbig2-imageio-3.0.5.jar",
+    "sha256": "d426cc8b6ac211dd5ffd120a86a65e55ae65d808c818207c1261bc1880b42653",
+    "dest": "m2local/org/apache/pdfbox/jbig2-imageio/3.0.5",
+    "dest-filename": "jbig2-imageio-3.0.5.jar"
   },
   {
     "type": "file",
-    "url": "https://repo1.maven.org/maven2/org/apache/pdfbox/jbig2-imageio/3.0.2/jbig2-imageio-3.0.2.pom",
-    "sha256": "a4b3e92a6d86f48731d8afef0e4e2e0ab65ee2b4facd2cce904a6938b13a9b6d",
-    "dest": "m2local/org/apache/pdfbox/jbig2-imageio/3.0.2",
-    "dest-filename": "jbig2-imageio-3.0.2.pom"
+    "url": "https://repo1.maven.org/maven2/org/apache/pdfbox/jbig2-imageio/3.0.5/jbig2-imageio-3.0.5.pom",
+    "sha256": "e3aef4d427209cfb111913bbb41561d85f9969bb5d8bdbaca4a67d62698ed120",
+    "dest": "m2local/org/apache/pdfbox/jbig2-imageio/3.0.5",
+    "dest-filename": "jbig2-imageio-3.0.5.pom"
   },
   {
     "type": "file",
@@ -6854,6 +6854,13 @@
   },
   {
     "type": "file",
+    "url": "https://repo1.maven.org/maven2/org/slf4j/slf4j-bom/2.0.18/slf4j-bom-2.0.18.pom",
+    "sha256": "9219aab601575126c4e66e1331eb2b0c6c17a330ac4d5a07e3cd11d580a0c12d",
+    "dest": "m2local/org/slf4j/slf4j-bom/2.0.18",
+    "dest-filename": "slf4j-bom-2.0.18.pom"
+  },
+  {
+    "type": "file",
     "url": "https://repo1.maven.org/maven2/org/slf4j/slf4j-jdk14/1.5.6/slf4j-jdk14-1.5.6.jar",
     "sha256": "9b659d87e77ef601b0c564019b0d7fd1267c141f2d2dc55c9ba7613e63ca6786",
     "dest": "m2local/org/slf4j/slf4j-jdk14/1.5.6",
@@ -6868,17 +6875,17 @@
   },
   {
     "type": "file",
-    "url": "https://repo1.maven.org/maven2/org/slf4j/slf4j-jdk14/2.0.17/slf4j-jdk14-2.0.17.jar",
-    "sha256": "ead25c1b15f59db1fb5552b76fe63de4164f0df40024d19287b75dece47ad3be",
-    "dest": "m2local/org/slf4j/slf4j-jdk14/2.0.17",
-    "dest-filename": "slf4j-jdk14-2.0.17.jar"
+    "url": "https://repo1.maven.org/maven2/org/slf4j/slf4j-jdk14/2.0.18/slf4j-jdk14-2.0.18.jar",
+    "sha256": "ab6ffe68caa8a0e3aed66022061b6cbabc76746784eff3c3ab4af0b0dd7dbb02",
+    "dest": "m2local/org/slf4j/slf4j-jdk14/2.0.18",
+    "dest-filename": "slf4j-jdk14-2.0.18.jar"
   },
   {
     "type": "file",
-    "url": "https://repo1.maven.org/maven2/org/slf4j/slf4j-jdk14/2.0.17/slf4j-jdk14-2.0.17.pom",
-    "sha256": "2acf3dc73eb431da02e54a8550aec8b9e1d287427390a904a6c946500f1a7114",
-    "dest": "m2local/org/slf4j/slf4j-jdk14/2.0.17",
-    "dest-filename": "slf4j-jdk14-2.0.17.pom"
+    "url": "https://repo1.maven.org/maven2/org/slf4j/slf4j-jdk14/2.0.18/slf4j-jdk14-2.0.18.pom",
+    "sha256": "746e8d58f3211e57f6eff5727fca3412bb55678da73d03a25d2a19f252550297",
+    "dest": "m2local/org/slf4j/slf4j-jdk14/2.0.18",
+    "dest-filename": "slf4j-jdk14-2.0.18.pom"
   },
   {
     "type": "file",
@@ -6921,6 +6928,13 @@
     "sha256": "95cd71e852dfdb29126e58b7b939d57ec2b2e6024391852e0b545dee082bbf3b",
     "dest": "m2local/org/slf4j/slf4j-parent/2.0.17",
     "dest-filename": "slf4j-parent-2.0.17.pom"
+  },
+  {
+    "type": "file",
+    "url": "https://repo1.maven.org/maven2/org/slf4j/slf4j-parent/2.0.18/slf4j-parent-2.0.18.pom",
+    "sha256": "0b3896bedad2c9ed9697edcbea1da0c54cd238a723583a81358a83bfb782e9fa",
+    "dest": "m2local/org/slf4j/slf4j-parent/2.0.18",
+    "dest-filename": "slf4j-parent-2.0.18.pom"
   },
   {
     "type": "file",
