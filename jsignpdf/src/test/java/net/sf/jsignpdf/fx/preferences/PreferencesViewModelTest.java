@@ -126,6 +126,26 @@ public class PreferencesViewModelTest {
     }
 
     @Test
+    public void dssSystemStoreAndMra_roundTripAndReset() throws Exception {
+        Path file = tmp.newFolder().toPath().resolve("advanced.properties");
+        AdvancedConfig cfg = new AdvancedConfig(file, bundledDefaults);
+        cfg.setProperty("engine.dss.trust.systemStore", true);
+        cfg.setProperty("engine.dss.trust.lotlMraSupport", true);
+        PreferencesViewModel vm = new PreferencesViewModel();
+        vm.loadFrom(cfg, "");
+        assertTrue(vm.dssSystemStoreProperty().get());
+        assertTrue(vm.dssLotlMraSupportProperty().get());
+
+        vm.writeTo(cfg);
+        assertTrue(cfg.getAsBool("engine.dss.trust.systemStore", false));
+        assertTrue(cfg.getAsBool("engine.dss.trust.lotlMraSupport", false));
+
+        vm.applyDefaults(new AdvancedConfig(null, bundledDefaults));
+        assertFalse(vm.dssSystemStoreProperty().get());
+        assertFalse(vm.dssLotlMraSupportProperty().get());
+    }
+
+    @Test
     public void validateFontPath_emptyOk_invalidNotOk() {
         assertTrue(PreferencesValidation.validateFontPath(""));
         assertTrue(PreferencesValidation.validateFontPath(null));

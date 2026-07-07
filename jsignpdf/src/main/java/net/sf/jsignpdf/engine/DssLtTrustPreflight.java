@@ -28,6 +28,7 @@ public final class DssLtTrustPreflight {
     static final String KEY_CERT_FILES = "trust.certFiles";
     static final String KEY_CERT_URLS = "trust.certUrls";
     static final String KEY_LOTL_URLS = "trust.lotlUrls";
+    static final String KEY_SYSTEM_STORE = "trust.systemStore";
 
     /**
      * Outcome of the preflight.
@@ -76,6 +77,7 @@ public final class DssLtTrustPreflight {
                 || StringUtils.isNotBlank(config.getString(KEY_TRUSTSTORE_FILE))
                 || StringUtils.isNotBlank(config.getString(KEY_CERT_FILES))
                 || StringUtils.isNotBlank(config.getString(KEY_CERT_URLS))
+                || config.getBoolean(KEY_SYSTEM_STORE, false)
                 || customLotl;
         return new Result(true, !online, !trustSource, customLotl);
     }

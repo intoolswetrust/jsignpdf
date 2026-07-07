@@ -106,6 +106,8 @@
                 <CheckBox fx:id="chkDssEuEnabled" text="%jfx.gui.dss.trust.eu.enabled"/>
                 <Label text="%jfx.gui.dss.trust.lotlUrls"/>
                 <TextField fx:id="txtDssLotlUrls"/>
+                <CheckBox fx:id="chkDssLotlMraSupport" text="%jfx.gui.dss.trust.lotlMraSupport"/>
+                <Label text="%jfx.gui.dss.trust.lotlMraSupport.tooltip" styleClass="pref-help" wrapText="true"/>
                 <Label text="%jfx.gui.dss.trust.certFiles"/>
                 <TextField fx:id="txtDssCertFiles"/>
                 <Label text="%jfx.gui.dss.trust.certUrls"/>
@@ -116,6 +118,8 @@
                 <TextField fx:id="txtDssTruststoreType"/>
                 <Label text="%jfx.gui.dss.trust.truststorePassword"/>
                 <PasswordField fx:id="txtDssTruststorePassword"/>
+                <CheckBox fx:id="chkDssSystemStore" text="%jfx.gui.dss.trust.systemStore"/>
+                <Label text="%jfx.gui.dss.trust.systemStore.tooltip" styleClass="pref-help" wrapText="true"/>
             </VBox>
         </ScrollPane>
     </Tab>

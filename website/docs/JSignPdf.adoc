@@ -1028,6 +1028,9 @@ DSS requires a PAdES digest, so the hash algorithm must be `SHA256`, `SHA384` or
 `engine.dss.trust.truststorePassword`
 |A truststore holding trust anchors (type defaults to the JVM default).
 
+|`engine.dss.trust.systemStore`
+|`true`/`false` (default `false`). When on, also trust this platform's OS / JVM certificate stores: `cacerts` everywhere, plus `Windows-ROOT` + `Windows-MY` on Windows and `KeychainStore` on macOS. These are public-CA / OS roots, not eIDAS trusted-list anchors: they let `LT`/`LTA` embed validation data for commercially-issued (non-qualified) certificates but do not confer qualified status.
+
 |`engine.dss.contentSize`
 |Bytes reserved in the PDF `/Contents` for the CMS signature. `0` (default) sizes it automatically from the certificate chain and options; set a positive value to force a fixed size.
 

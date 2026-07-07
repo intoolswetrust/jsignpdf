@@ -8,6 +8,7 @@ import java.nio.file.Path;
 import java.security.KeyStore;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.logging.Level;
 
 import net.sf.jsignpdf.Constants;
@@ -77,6 +78,18 @@ final class DssTrustConfigurer {
     static final String KEY_TRUSTSTORE_FILE = "trust.truststoreFile";
     static final String KEY_TRUSTSTORE_TYPE = "trust.truststoreType";
     static final String KEY_TRUSTSTORE_PASSWORD = "trust.truststorePassword";
+    /**
+     * Boolean flag: when on, seed trust anchors from every OS / JVM certificate store available on the current
+     * platform (issue #447) &mdash; the portable {@code cacerts} everywhere, plus {@code Windows-ROOT} /
+     * {@code Windows-MY} on Windows and {@code KeychainStore} on macOS. Off by default; these are public-CA / OS
+     * roots, not eIDAS trusted-list anchors.
+     */
+    static final String KEY_SYSTEM_STORE = "trust.systemStore";
+
+    /** Pseudo store name for the JVM's default CA truststore (a file, not a {@link KeyStore} provider type). */
+    private static final String CACERTS_STORE = "cacerts";
+    /** Default password for the JVM {@code cacerts} store when {@code javax.net.ssl.trustStorePassword} is unset. */
+    private static final String CACERTS_DEFAULT_PASSWORD = "changeit";
 
     /** Canonical EU List of Trusted Lists location. */
     static final String DEFAULT_EU_LOTL_URL = "https://ec.europa.eu/tools/lotl/eu-lotl.xml";
@@ -150,7 +163,7 @@ final class DssTrustConfigurer {
         return verifier;
     }
 
-    private CertificateSource[] createTrustedCertSources() throws Exception {
+    CertificateSource[] createTrustedCertSources() throws Exception {
         List<CertificateSource> trustedSources = new ArrayList<>();
 
         LOTLSource[] lotlSources = getLotlSources();
@@ -198,7 +211,80 @@ final class DssTrustConfigurer {
                     pwd != null ? pwd.toCharArray() : null);
             trustedSources.add(source);
         }
+
+        if (config.getBoolean(KEY_SYSTEM_STORE, false)) {
+            for (String store : systemStoreNames()) {
+                CertificateSource source = loadSystemStore(store);
+                if (source != null) {
+                    trustedSources.add(source);
+                }
+            }
+        }
         return trustedSources.toArray(new CertificateSource[0]);
+    }
+
+    /**
+     * The OS / JVM certificate stores to seed anchors from when {@link #KEY_SYSTEM_STORE} is on: the portable
+     * {@code cacerts} on every platform, plus the machine root / personal stores on Windows (via SunMSCAPI) and
+     * the login keychain on macOS. A store the current JRE can't provide is simply not listed.
+     */
+    private static List<String> systemStoreNames() {
+        List<String> stores = new ArrayList<>();
+        stores.add(CACERTS_STORE);
+        final String os = System.getProperty("os.name", "").toLowerCase(Locale.ROOT);
+        if (os.contains("win")) {
+            stores.add("Windows-ROOT");
+            stores.add("Windows-MY");
+        } else if (os.contains("mac")) {
+            stores.add("KeychainStore");
+        }
+        return stores;
+    }
+
+    /**
+     * Best-effort load of one OS / JVM certificate store (issue #447): {@code cacerts} resolves the JVM's default
+     * CA truststore (honouring the {@code javax.net.ssl.trustStore*} system properties, else
+     * {@code $JAVA_HOME/lib/security/jssecacerts|cacerts} with password {@code changeit}); any other name is a
+     * {@link KeyStore} type loaded from its provider with a null stream (e.g. {@code Windows-ROOT}). These are
+     * public-CA / OS roots, not eIDAS trusted-list anchors: they let LT/LTA embed validation data for
+     * commercially-issued (non-qualified) certificates but do not confer qualified status. A store that fails to
+     * load is logged and skipped rather than aborting signing.
+     *
+     * @return the loaded source, or {@code null} if the store could not be opened
+     */
+    private static CertificateSource loadSystemStore(String store) {
+        try {
+            KeyStoreCertificateSource source;
+            if (CACERTS_STORE.equalsIgnoreCase(store)) {
+                final String type = System.getProperty("javax.net.ssl.trustStoreType", KeyStore.getDefaultType());
+                final String pwd = System.getProperty("javax.net.ssl.trustStorePassword", CACERTS_DEFAULT_PASSWORD);
+                source = new KeyStoreCertificateSource(cacertsFile(), type, pwd.toCharArray());
+            } else {
+                source = new KeyStoreCertificateSource(store, (char[]) null);
+            }
+            Constants.LOGGER.info("Loaded " + source.getNumberOfCertificates()
+                    + " trust anchor(s) from system certificate store '" + store + "'");
+            return source;
+        } catch (Exception e) {
+            Constants.LOGGER.log(Level.WARNING,
+                    "Could not load system certificate store '" + store + "' (skipped)", e);
+            return null;
+        }
+    }
+
+    /**
+     * Resolves the JVM's default CA truststore file following the JSSE lookup order: an explicit
+     * {@code javax.net.ssl.trustStore} (unless {@code NONE}), else {@code $JAVA_HOME/lib/security/jssecacerts}
+     * when present, else {@code $JAVA_HOME/lib/security/cacerts}.
+     */
+    private static File cacertsFile() {
+        final String override = System.getProperty("javax.net.ssl.trustStore");
+        if (StringUtils.isNotEmpty(override) && !"NONE".equals(override)) {
+            return new File(override);
+        }
+        Path securityDir = Path.of(System.getProperty("java.home"), "lib", "security");
+        File jssecacerts = securityDir.resolve("jssecacerts").toFile();
+        return jssecacerts.exists() ? jssecacerts : securityDir.resolve("cacerts").toFile();
     }
 
     /**

@@ -14,6 +14,7 @@ import net.sf.jsignpdf.engine.EngineConfig;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.Test;
 
+import eu.europa.esig.dss.spi.x509.CertificateSource;
 import eu.europa.esig.dss.tsl.function.OfficialJournalSchemeInformationURI;
 import eu.europa.esig.dss.tsl.source.LOTLSource;
 
@@ -95,6 +96,28 @@ public class DssTrustConfigurerTest {
     @Test
     public void noLotlConfigYieldsNoSources() throws Exception {
         assertEquals("no LOTL config -> no sources", 0, lotlSources(Map.of()).length);
+    }
+
+    @Test
+    public void systemStoreEnabledLoadsTrustAnchors() throws Exception {
+        // cacerts ships with every JDK, so the enabled flag always yields at least the portable store offline
+        // (issue #447). Windows/macOS dev machines add their OS stores on top, hence the >= assertions.
+        CertificateSource[] sources = new DssTrustConfigurer(new MapEngineConfig(
+                Map.of(DssTrustConfigurer.KEY_SYSTEM_STORE, "true"))).createTrustedCertSources();
+
+        assertTrue("enabling systemStore must add at least the cacerts source", sources.length >= 1);
+        int anchors = 0;
+        for (CertificateSource source : sources) {
+            anchors += source.getCertificates().size();
+        }
+        assertTrue("the system stores must contribute trust anchors", anchors > 0);
+    }
+
+    @Test
+    public void systemStoreDisabledYieldsNoSources() throws Exception {
+        CertificateSource[] sources = new DssTrustConfigurer(new MapEngineConfig(
+                Map.of(DssTrustConfigurer.KEY_SYSTEM_STORE, "false"))).createTrustedCertSources();
+        assertEquals("systemStore off must contribute no trusted source", 0, sources.length);
     }
 
     private static LOTLSource[] lotlSources(Map<String, String> cfg) throws Exception {
