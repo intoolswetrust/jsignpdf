@@ -347,7 +347,8 @@ public class DssSigningEngine implements SigningEngine {
             }
             LOGGER.log(Level.SEVERE, message, e);
         } catch (Exception e) {
-            LOGGER.log(Level.SEVERE, RES.get("console.exception"), e);
+            final String httpHint = remoteHttpErrorHint(e);
+            LOGGER.log(Level.SEVERE, httpHint != null ? httpHint : RES.get("console.exception"), e);
         } catch (OutOfMemoryError e) {
             LOGGER.log(Level.SEVERE, RES.get("console.memoryError"), e);
         } finally {
@@ -459,6 +460,21 @@ public class DssSigningEngine implements SigningEngine {
                 return Integer.valueOf(matcher.group(1));
             } catch (NumberFormatException e) {
                 return null;
+            }
+        }
+        return null;
+    }
+
+    private static final Pattern HTTP_STATUS_CODE = Pattern.compile("HTTP status code\\s*:\\s*(\\d{3})");
+
+    private static String remoteHttpErrorHint(Throwable e) {
+        for (Throwable t = e; t != null; t = t.getCause()) {
+            final String msg = t.getMessage();
+            if (msg != null) {
+                final Matcher m = HTTP_STATUS_CODE.matcher(msg);
+                if (m.find() && ("400".equals(m.group(1)) || "429".equals(m.group(1)))) {
+                    return RES.get("console.dss.tsaHttpError", m.group(1));
+                }
             }
         }
         return null;
