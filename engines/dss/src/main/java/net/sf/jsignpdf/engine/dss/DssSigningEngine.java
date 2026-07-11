@@ -310,7 +310,7 @@ public class DssSigningEngine implements SigningEngine {
                     // Wrap the TSA source so the timestamp chain is captured for diagnostics: if DSS later
                     // rejects the signature because that chain is not anchored, the untrusted-chain report can
                     // name the timestamp certificate instead of a bare fingerprint (issue #448).
-                    tspSource = new CapturingTspSource(
+                    tspSource = new CapturingTspSource(options.getTsaUrl(),
                             buildTspSource(options, parameters, digestAlgorithm, proxyConfig));
                     service.setTspSource(tspSource);
                 }
@@ -405,6 +405,9 @@ public class DssSigningEngine implements SigningEngine {
         int contentSize = initialContentSize;
         for (int attempt = 0;; attempt++) {
             parameters.setContentSize(contentSize);
+            if (LOGGER.isLoggable(Level.FINE)) {
+                LOGGER.fine("Signing attempt " + attempt + " reserving " + contentSize + " bytes for /Contents");
+            }
             final ToBeSigned dataToSign = service.getDataToSign(document, parameters);
             final SignatureValue signatureValue = token.sign(dataToSign, digestAlgorithm, null);
             try {
@@ -500,7 +503,10 @@ public class DssSigningEngine implements SigningEngine {
         final String tsaHashAlg = options.getTsaHashAlgWithFallback();
         if (StringUtils.isNotEmpty(tsaHashAlg)) {
             LOGGER.info(RES.get("console.settingTsaHashAlg", tsaHashAlg));
-            parameters.getSignatureTimestampParameters().setDigestAlgorithm(DigestAlgorithm.forJavaName(tsaHashAlg));
+            final DigestAlgorithm tsaDigest = DigestAlgorithm.forJavaName(tsaHashAlg);
+            parameters.getContentTimestampParameters().setDigestAlgorithm(tsaDigest);
+            parameters.getSignatureTimestampParameters().setDigestAlgorithm(tsaDigest);
+            parameters.getArchiveTimestampParameters().setDigestAlgorithm(tsaDigest);
         }
         return tspSource;
     }

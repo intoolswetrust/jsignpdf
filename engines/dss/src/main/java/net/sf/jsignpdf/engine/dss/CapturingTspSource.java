@@ -2,8 +2,12 @@ package net.sf.jsignpdf.engine.dss;
 
 import java.security.cert.X509Certificate;
 import java.util.Collection;
+import java.util.HexFormat;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.logging.Level;
+
+import net.sf.jsignpdf.Constants;
 
 import eu.europa.esig.dss.enumerations.DigestAlgorithm;
 import eu.europa.esig.dss.enumerations.TimestampType;
@@ -31,20 +35,51 @@ final class CapturingTspSource implements TSPSource {
 
     private static final long serialVersionUID = 1L;
 
+    private final String tsaUrl;
+
     private final TSPSource delegate;
 
     /** Captured timestamp certificates, keyed by DSS token id to de-duplicate across signature/archive tokens. */
     private final Map<String, X509Certificate> capturedCerts = new LinkedHashMap<>();
 
-    CapturingTspSource(TSPSource delegate) {
+    CapturingTspSource(String tsaUrl, TSPSource delegate) {
+        this.tsaUrl = tsaUrl;
         this.delegate = delegate;
     }
 
     @Override
     public TimestampBinary getTimeStampResponse(DigestAlgorithm digestAlgorithm, byte[] digest) throws DSSException {
+        final boolean debug = Constants.LOGGER.isLoggable(Level.FINE);
+        if (debug) {
+            Constants.LOGGER.fine("TSA request -> " + tsaUrl + ": digestAlgorithm=" + digestAlgorithm + ", digest="
+                    + (digest != null ? HexFormat.of().formatHex(digest) : "null"));
+        }
+        final long startNanos = System.nanoTime();
         TimestampBinary token = delegate.getTimeStampResponse(digestAlgorithm, digest);
+        final long elapsedMs = (System.nanoTime() - startNanos) / 1_000_000L;
         capture(token);
+        if (debug) {
+            logResponse(token, elapsedMs);
+        }
         return token;
+    }
+
+    private void logResponse(TimestampBinary token, long elapsedMs) {
+        if (token == null) {
+            Constants.LOGGER.fine("TSA response <- " + tsaUrl + ": empty response, elapsed=" + elapsedMs + "ms");
+            return;
+        }
+        String genTime = "?";
+        int certs = 0;
+        try {
+            TimestampToken parsed = new TimestampToken(token.getBytes(), TimestampType.SIGNATURE_TIMESTAMP);
+            genTime = String.valueOf(parsed.getGenerationTime());
+            certs = parsed.getCertificates().size();
+        } catch (Exception e) {
+            genTime = "unparseable";
+        }
+        Constants.LOGGER.fine("TSA response <- " + tsaUrl + ": " + token.getBytes().length + " bytes, genTime="
+                + genTime + ", certs=" + certs + ", elapsed=" + elapsedMs + "ms");
     }
 
     private void capture(TimestampBinary token) {
