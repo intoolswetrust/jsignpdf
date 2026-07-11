@@ -108,6 +108,10 @@ public class DssTrustConfigurerTest {
         assertTrue("enabling systemStore must add at least the cacerts source", sources.length >= 1);
         int anchors = 0;
         for (CertificateSource source : sources) {
+            // CommonCertificateVerifier.setTrustedCertSources rejects anything that is not TRUSTED_STORE /
+            // TRUSTED_LIST, so a raw KeyStoreCertificateSource (type OTHER) must be wrapped before use.
+            assertTrue("system store source must be a trusted source, was " + source.getCertificateSourceType(),
+                    source.getCertificateSourceType().isTrusted());
             anchors += source.getCertificates().size();
         }
         assertTrue("the system stores must contribute trust anchors", anchors > 0);

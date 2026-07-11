@@ -209,7 +209,7 @@ final class DssTrustConfigurer {
             final String pwd = config.getString(KEY_TRUSTSTORE_PASSWORD, "");
             KeyStoreCertificateSource source = new KeyStoreCertificateSource(new File(truststoreFile), type,
                     pwd != null ? pwd.toCharArray() : null);
-            trustedSources.add(source);
+            trustedSources.add(asTrusted(source));
         }
 
         if (config.getBoolean(KEY_SYSTEM_STORE, false)) {
@@ -264,7 +264,7 @@ final class DssTrustConfigurer {
             }
             Constants.LOGGER.info("Loaded " + source.getNumberOfCertificates()
                     + " trust anchor(s) from system certificate store '" + store + "'");
-            return source;
+            return asTrusted(source);
         } catch (Exception e) {
             Constants.LOGGER.log(Level.WARNING,
                     "Could not load system certificate store '" + store + "' (skipped)", e);
@@ -389,6 +389,18 @@ final class DssTrustConfigurer {
             }
             return new KeyStoreCertificateSource(is, OJ_KEYSTORE_TYPE, OJ_KEYSTORE_PASSWORD.toCharArray());
         }
+    }
+
+    /**
+     * Wraps a {@link KeyStoreCertificateSource} (whose source type is {@code OTHER}) in a
+     * {@link CommonTrustedCertificateSource} so it qualifies as a {@code TRUSTED_STORE}. DSS's
+     * {@link CommonCertificateVerifier#setTrustedCertSources} rejects anything that is not {@code TRUSTED_STORE} or
+     * {@code TRUSTED_LIST}, so a raw keystore source cannot be used as a trust anchor directly.
+     */
+    private static CertificateSource asTrusted(KeyStoreCertificateSource source) {
+        CommonTrustedCertificateSource trusted = new CommonTrustedCertificateSource();
+        trusted.importAsTrusted(source);
+        return trusted;
     }
 
     private static List<String> splitList(String value) {
