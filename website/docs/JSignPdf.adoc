@@ -1029,7 +1029,10 @@ DSS requires a PAdES digest, so the hash algorithm must be `SHA256`, `SHA384` or
 |A truststore holding trust anchors (type defaults to the JVM default).
 
 |`engine.dss.trust.systemStore`
-|`true`/`false` (default `false`). When on, also trust this platform's OS / JVM certificate stores: `cacerts` everywhere, plus `Windows-ROOT` + `Windows-MY` on Windows and `KeychainStore` on macOS. These are public-CA / OS roots, not eIDAS trusted-list anchors: they let `LT`/`LTA` embed validation data for commercially-issued (non-qualified) certificates but do not confer qualified status.
+|`true`/`false` (default `false`). When on, also trust this platform's OS / JVM *root* certificate stores: `cacerts` everywhere, plus `Windows-ROOT` on Windows and `KeychainStore` on macOS. These are public-CA / OS roots, not eIDAS trusted-list anchors: they let `LT`/`LTA` embed validation data for commercially-issued (non-qualified) certificates but do not confer qualified status. The Windows personal store (`Windows-MY`) is intentionally not included -- it holds your own end-entity certificates, and trusting the signing certificate itself breaks LT/LTA (see <<Self-signed and private-PKI certificates>>).
+
+|`engine.dss.trust.allowUntrusted`
+|`true`/`false` (default `false`). *Advanced / private-PKI or testing only.* Downgrades DSS's untrusted-chain and missing-revocation checks to warnings so `LT`/`LTA` completes for a self-signed or otherwise untrusted signer chain that has no revocation service. The output has the `LT`/`LTA` structure but *not* the revocation data a conformant long-term signature must embed, so strict validators will not accept it as such. See <<Self-signed and private-PKI certificates>>.
 
 |`engine.dss.contentSize`
 |Bytes reserved in the PDF `/Contents` for the CMS signature. `0` (default) sizes it automatically from the certificate chain and options; set a positive value to force a fixed size.
@@ -1048,6 +1051,25 @@ jsignpdf doc.pdf -eng dss -pl LT -ts <tsa-url> \
     -o engine.dss.online.enabled=true \
     -o engine.dss.trust.certFiles=/path/to/ca.pem
 ----
+
+==== Self-signed and private-PKI certificates
+
+`LT`/`LTA` are defined around trusted CAs that publish revocation data, so a *plain self-signed* certificate cannot produce a conformant long-term signature: it is its own root (no revocation service), and if you trust that certificate as an anchor DSS aborts with `Signing-certificate token was not found!` because the signing certificate must not be a trust anchor. You have three options:
+
+* *Use level `B` or `T`.* Level `T` embeds a qualified timestamp and needs no trust anchor or revocation, so it works with a self-signed certificate. This is the recommended level for self-signed / test keys.
+
+* *Run a proper private PKI (real `LT`/`LTA`).* Issue your signing certificates from your own *root (or intermediate) CA*, and give each leaf a reachable *CRL Distribution Point* and/or *OCSP (AIA)* endpoint. Then trust the *CA* -- not the leaf -- as an anchor, and enable online fetching:
++
+[source,shell]
+----
+jsignpdf doc.pdf -eng dss -pl LTA -ts <tsa-url> \
+    -o engine.dss.online.enabled=true \
+    -o engine.dss.trust.certFiles=/path/to/your-root-ca.pem
+----
++
+DSS skips revocation for trust anchors, so the CA needs none; the leaf's chain is anchored through the CA and its revocation is fetched from the endpoint in the certificate. (For a TSA whose root is likewise outside the public trust lists, add that root to `certFiles`/`truststoreFile` too.)
+
+* *Force it with permissive trust (non-conformant).* Setting `engine.dss.trust.allowUntrusted=true` lets `LT`/`LTA` complete for a self-signed or untrusted chain by downgrading the trust and revocation checks to warnings. The file then has the `LT`/`LTA` *structure* but no real revocation material, so it is *not* valid for eIDAS long-term validation -- use it only for private-PKI or testing.
 
 == Advanced application configuration
 
