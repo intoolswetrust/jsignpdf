@@ -17,6 +17,7 @@ import net.sf.jsignpdf.utils.ConfigLocationResolver;
 
 import org.apache.commons.lang3.StringUtils;
 
+import eu.europa.esig.dss.alert.LogOnStatusAlert;
 import eu.europa.esig.dss.model.tsl.TLValidationJobSummary;
 import eu.europa.esig.dss.service.crl.OnlineCRLSource;
 import eu.europa.esig.dss.service.http.commons.CommonsDataLoader;
@@ -79,12 +80,22 @@ final class DssTrustConfigurer {
     static final String KEY_TRUSTSTORE_TYPE = "trust.truststoreType";
     static final String KEY_TRUSTSTORE_PASSWORD = "trust.truststorePassword";
     /**
-     * Boolean flag: when on, seed trust anchors from every OS / JVM certificate store available on the current
-     * platform (issue #447) &mdash; the portable {@code cacerts} everywhere, plus {@code Windows-ROOT} /
-     * {@code Windows-MY} on Windows and {@code KeychainStore} on macOS. Off by default; these are public-CA / OS
-     * roots, not eIDAS trusted-list anchors.
+     * Boolean flag: when on, seed trust anchors from every OS / JVM root certificate store available on the
+     * current platform (issue #447) &mdash; the portable {@code cacerts} everywhere, plus {@code Windows-ROOT} on
+     * Windows and {@code KeychainStore} on macOS. Off by default; these are public-CA / OS roots, not eIDAS
+     * trusted-list anchors.
      */
     static final String KEY_SYSTEM_STORE = "trust.systemStore";
+
+    /**
+     * Boolean flag (advanced / private-PKI): when on, downgrade DSS's fatal trust / revocation augmentation
+     * alerts to warnings so LT/LTA completes for self-signed or otherwise untrusted signer chains that carry no
+     * revocation services. Off by default. The produced file has the LT/LTA <em>structure</em> but not the
+     * revocation material the baseline is defined to embed, so it is <strong>not</strong> a conformant long-term
+     * signature &mdash; strict validators will not treat it as LT/LTA. Intended for internal / testing / private
+     * PKI use only.
+     */
+    static final String KEY_ALLOW_UNTRUSTED = "trust.allowUntrusted";
 
     /** Pseudo store name for the JVM's default CA truststore (a file, not a {@link KeyStore} provider type). */
     private static final String CACERTS_STORE = "cacerts";
@@ -160,7 +171,26 @@ final class DssTrustConfigurer {
             verifier.setOcspSource(new OnlineOCSPSource(ocspDataLoader));
             verifier.setCrlSource(new OnlineCRLSource(dataLoader));
         }
+        if (config.getBoolean(KEY_ALLOW_UNTRUSTED, false)) {
+            relaxTrustAndRevocationAlerts(verifier);
+        }
         return verifier;
+    }
+
+    /**
+     * Downgrades the augmentation alerts that otherwise abort LT/LTA when the signer chain is self-signed /
+     * untrusted or carries no revocation data (issue #441). Each alert becomes a warning instead of an
+     * exception, so DSS attaches the baseline structure it can and logs what is missing. See
+     * {@link #KEY_ALLOW_UNTRUSTED} for the conformance caveat.
+     */
+    private static void relaxTrustAndRevocationAlerts(CommonCertificateVerifier verifier) {
+        Constants.LOGGER.warning(Constants.RES.get("console.dss.allowUntrusted"));
+        final LogOnStatusAlert warn = new LogOnStatusAlert(org.slf4j.event.Level.WARN);
+        verifier.setAugmentationAlertOnSelfSignedCertificateChains(warn);
+        verifier.setAugmentationAlertOnSignatureWithoutCertificates(warn);
+        verifier.setAlertOnMissingRevocationData(warn);
+        verifier.setAlertOnUncoveredPOE(warn);
+        verifier.setAlertOnNoRevocationAfterBestSignatureTime(warn);
     }
 
     CertificateSource[] createTrustedCertSources() throws Exception {
@@ -225,8 +255,16 @@ final class DssTrustConfigurer {
 
     /**
      * The OS / JVM certificate stores to seed anchors from when {@link #KEY_SYSTEM_STORE} is on: the portable
-     * {@code cacerts} on every platform, plus the machine root / personal stores on Windows (via SunMSCAPI) and
-     * the login keychain on macOS. A store the current JRE can't provide is simply not listed.
+     * {@code cacerts} on every platform, plus the machine root store on Windows (via SunMSCAPI) and the login
+     * keychain on macOS. A store the current JRE can't provide is simply not listed.
+     *
+     * <p>
+     * Only <em>root / CA</em> stores belong here. The Windows personal store {@code Windows-MY} is deliberately
+     * excluded: it holds the user's own end-entity certificates, not CAs, and loading the signer's own
+     * certificate as a trust anchor makes DSS reject the signature during LT/LTA self-validation with
+     * {@code "Signing-certificate token was not found!"} (issue #441). The signer's chain stays anchored through
+     * its issuing CA in {@code Windows-ROOT}.
+     * </p>
      */
     private static List<String> systemStoreNames() {
         List<String> stores = new ArrayList<>();
@@ -234,7 +272,6 @@ final class DssTrustConfigurer {
         final String os = System.getProperty("os.name", "").toLowerCase(Locale.ROOT);
         if (os.contains("win")) {
             stores.add("Windows-ROOT");
-            stores.add("Windows-MY");
         } else if (os.contains("mac")) {
             stores.add("KeychainStore");
         }

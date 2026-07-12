@@ -58,6 +58,7 @@ public class PreferencesViewModel {
     private final StringProperty dssTruststoreType = new SimpleStringProperty("");
     private final StringProperty dssTruststorePassword = new SimpleStringProperty("");
     private final BooleanProperty dssSystemStore = new SimpleBooleanProperty(false);
+    private final BooleanProperty dssAllowUntrusted = new SimpleBooleanProperty(false);
 
     private final StringProperty pkcs11Body = new SimpleStringProperty("");
 
@@ -88,6 +89,7 @@ public class PreferencesViewModel {
         dssTruststoreType.set(orEmpty(cfg.getProperty("engine.dss.trust.truststoreType")));
         dssTruststorePassword.set(orEmpty(cfg.getProperty("engine.dss.trust.truststorePassword")));
         dssSystemStore.set(cfg.getAsBool("engine.dss.trust.systemStore", false));
+        dssAllowUntrusted.set(cfg.getAsBool("engine.dss.trust.allowUntrusted", false));
 
         pkcs11Body.set(pkcs11FileBody == null ? "" : pkcs11FileBody);
     }
@@ -115,6 +117,7 @@ public class PreferencesViewModel {
         writeStringOrRemove(cfg, "engine.dss.trust.truststoreType", dssTruststoreType.get());
         writeStringOrRemove(cfg, "engine.dss.trust.truststorePassword", dssTruststorePassword.get());
         cfg.setProperty("engine.dss.trust.systemStore", dssSystemStore.get());
+        cfg.setProperty("engine.dss.trust.allowUntrusted", dssAllowUntrusted.get());
     }
 
     /** Resets every VM property to the bundled-default value (read from the given snapshot of bundled defaults). */
@@ -167,6 +170,7 @@ public class PreferencesViewModel {
         dssTruststoreType.set(orEmpty(defaults.getBundledDefault("engine.dss.trust.truststoreType")));
         dssTruststorePassword.set(orEmpty(defaults.getBundledDefault("engine.dss.trust.truststorePassword")));
         dssSystemStore.set(parseBool(defaults.getBundledDefault("engine.dss.trust.systemStore"), false));
+        dssAllowUntrusted.set(parseBool(defaults.getBundledDefault("engine.dss.trust.allowUntrusted"), false));
     }
 
     public String encodePdfLibraries() {
@@ -275,6 +279,7 @@ public class PreferencesViewModel {
     public StringProperty dssTruststoreTypeProperty() { return dssTruststoreType; }
     public StringProperty dssTruststorePasswordProperty() { return dssTruststorePassword; }
     public BooleanProperty dssSystemStoreProperty() { return dssSystemStore; }
+    public BooleanProperty dssAllowUntrustedProperty() { return dssAllowUntrusted; }
     public StringProperty pkcs11BodyProperty() { return pkcs11Body; }
 
     /** Move the given library one slot up (order--), swapping with the lib currently at that order. */

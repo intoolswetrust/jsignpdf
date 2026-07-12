@@ -29,6 +29,7 @@ public final class DssLtTrustPreflight {
     static final String KEY_CERT_URLS = "trust.certUrls";
     static final String KEY_LOTL_URLS = "trust.lotlUrls";
     static final String KEY_SYSTEM_STORE = "trust.systemStore";
+    static final String KEY_ALLOW_UNTRUSTED = "trust.allowUntrusted";
 
     /**
      * Outcome of the preflight.
@@ -73,7 +74,8 @@ public final class DssLtTrustPreflight {
         }
         final boolean online = config.getBoolean(KEY_ONLINE_ENABLED, false);
         final boolean customLotl = StringUtils.isNotBlank(config.getString(KEY_LOTL_URLS));
-        final boolean trustSource = config.getBoolean(KEY_EU_ENABLED, false)
+        final boolean trustSource = config.getBoolean(KEY_ALLOW_UNTRUSTED, false)
+                || config.getBoolean(KEY_EU_ENABLED, false)
                 || StringUtils.isNotBlank(config.getString(KEY_TRUSTSTORE_FILE))
                 || StringUtils.isNotBlank(config.getString(KEY_CERT_FILES))
                 || StringUtils.isNotBlank(config.getString(KEY_CERT_URLS))

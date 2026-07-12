@@ -69,6 +69,24 @@ public class DssLtTrustPreflightTest {
     }
 
     @Test
+    public void allowUntrustedCountsAsTrustSource() {
+        // Permissive / private-PKI mode signs without a trust anchor on purpose, so it must clear the
+        // trust-source requirement; online is still required for the (relaxed) revocation handling.
+        Result r = check(PadesLevel.BASELINE_LTA, LT_ENGINE, Map.of(
+                "online.enabled", "true", "trust.allowUntrusted", "true"));
+        assertFalse("permissive trust satisfies the trust requirement", r.hasIssues());
+        assertFalse(r.trustSourceMissing());
+    }
+
+    @Test
+    public void allowUntrustedStillNeedsOnline() {
+        Result r = check(PadesLevel.BASELINE_LTA, LT_ENGINE, Map.of("trust.allowUntrusted", "true"));
+        assertTrue(r.hasIssues());
+        assertTrue("online is still required", r.onlineMissing());
+        assertFalse("permissive trust satisfies the trust requirement", r.trustSourceMissing());
+    }
+
+    @Test
     public void customLotlUrlsIsFlagged() {
         // A custom LOTL replaces the bundled EU LOTL, so the GUI auto-fix must leave trust.eu.enabled alone.
         Result r = check(PadesLevel.BASELINE_LT, LT_ENGINE, Map.of(

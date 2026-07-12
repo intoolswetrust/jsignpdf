@@ -104,6 +104,7 @@ public class PreferencesController {
     @FXML private TextField txtDssTruststoreType;
     @FXML private TextField txtDssTruststorePassword;
     @FXML private CheckBox chkDssSystemStore;
+    @FXML private CheckBox chkDssAllowUntrusted;
 
     @FXML private Label lblPkcs11Path;
     @FXML private TextArea txtPkcs11Body;
@@ -242,6 +243,7 @@ public class PreferencesController {
         txtDssTruststoreType.textProperty().bindBidirectional(vm.dssTruststoreTypeProperty());
         txtDssTruststorePassword.textProperty().bindBidirectional(vm.dssTruststorePasswordProperty());
         chkDssSystemStore.selectedProperty().bindBidirectional(vm.dssSystemStoreProperty());
+        chkDssAllowUntrusted.selectedProperty().bindBidirectional(vm.dssAllowUntrustedProperty());
 
         txtPkcs11Body.textProperty().bindBidirectional(vm.pkcs11BodyProperty());
         lblPkcs11EmptyHint.visibleProperty().bind(

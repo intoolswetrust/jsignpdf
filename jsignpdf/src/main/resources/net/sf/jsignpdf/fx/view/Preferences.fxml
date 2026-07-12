@@ -120,6 +120,8 @@
                 <PasswordField fx:id="txtDssTruststorePassword"/>
                 <CheckBox fx:id="chkDssSystemStore" text="%jfx.gui.dss.trust.systemStore"/>
                 <Label text="%jfx.gui.dss.trust.systemStore.tooltip" styleClass="pref-help" wrapText="true"/>
+                <CheckBox fx:id="chkDssAllowUntrusted" text="%jfx.gui.dss.trust.allowUntrusted"/>
+                <Label text="%jfx.gui.dss.trust.allowUntrusted.tooltip" styleClass="pref-help" wrapText="true"/>
             </VBox>
         </ScrollPane>
     </Tab>
