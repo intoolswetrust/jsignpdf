@@ -136,7 +136,7 @@ Every release bundles a small `demo/` folder so you can try JSignPdf immediately
 |===
 |File |Description
 
-|`service-agreeement.pdf`
+|`service-agreement.pdf`
 |Sample unsigned PDF document.
 
 |`jsmith.p12`
