@@ -84,15 +84,6 @@ Notes:
 * `engine.dss.online.enabled=true` is required for any `LT`/`LTA` signing.
 * For a genuine `LT`/`LTA` signature, use a certificate issued by a CA that publishes a reachable CRL/OCSP endpoint and trust that CA — see the _Self-signed and private-PKI certificates_ section of the JSignPdf guide.
 
-### Append a signature to an already-signed document
-
-```shell
-../bin/jsignpdf.sh \
-    -kst PKCS12 -ksf jsmith.p12 -ksp 123456 \
-    -a \
-    service-agreement_signed.pdf
-```
-
 ### List keys in the demo keystore
 
 ```shell
