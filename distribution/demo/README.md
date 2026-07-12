@@ -62,6 +62,28 @@ The signed file is written next to the input as `service-agreeement_signed.pdf`.
 
 If FreeTSA's root certificate is not trusted by your Java runtime, import it into the `cacerts` truststore first (see the _Untrusted TSA certificate_ section of the JSignPdf guide).
 
+### PAdES LT/LTA with the self-signed demo certificate (permissive trust)
+
+The demo certificate is self-signed, so it has no issuing CA and no revocation service — the requirements a conformant PAdES **LT/LTA** signature is built around. The DSS (PAdES) engine can still produce an LTA-level signature if you enable **permissive trust**, which downgrades the trust and revocation checks to warnings:
+
+```shell
+../bin/jsignpdf.sh \
+    -eng dss -pl LTA \
+    -kst PKCS12 -ksf jsmith.p12 -ksp 123456 -ka jsmith \
+    -ha SHA256 -tsh SHA256 \
+    -ts https://freetsa.org/tsr -ta NONE \
+    -o engine.dss.online.enabled=true \
+    -o engine.dss.trust.allowUntrusted=true \
+    service-agreement.pdf
+```
+
+> **Testing only — not a conformant long-term signature.** The output has the LT/LTA *structure* but no real revocation data, so strict validators will not accept it as LT/LTA. `engine.dss.trust.allowUntrusted` exists for private-PKI / testing scenarios only.
+
+Notes:
+
+* `engine.dss.online.enabled=true` is required for any `LT`/`LTA` signing.
+* For a genuine `LT`/`LTA` signature, use a certificate issued by a CA that publishes a reachable CRL/OCSP endpoint and trust that CA — see the _Self-signed and private-PKI certificates_ section of the JSignPdf guide.
+
 ### Append a signature to an already-signed document
 
 ```shell
