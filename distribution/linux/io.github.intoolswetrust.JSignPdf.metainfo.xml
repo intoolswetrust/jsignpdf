@@ -31,6 +31,25 @@
   </branding>
   <content_rating type="oars-1.1" />
   <releases>
+    <release version="3.1.0" date="2026-07-13">
+      <url type="details">https://github.com/intoolswetrust/jsignpdf/releases/tag/JSignPdf_3_1_0</url>
+      <description>
+        <p>Version 3.1.0</p>
+        <p>Packaging-focused release: the fat jar is gone and every supported platform ships a native installer with its own bundled Java runtime. Also introduces a pluggable signing-engine architecture with a new EU DSS (PAdES) engine.</p>
+        <ul>
+          <li><em>Per-platform native installers</em> built with <code>jpackage</code> and a bundled Zulu+FX 21 runtime, so no system Java is required: Windows MSI, Linux DEB and RPM, and macOS DMG, each alongside a portable ZIP. Flatpak bundles are published for Linux x64 and aarch64.</li>
+          <li><em>Two cross-platform ZIPs</em> for users who already have Java 21: a <code>full</code> ZIP carrying JavaFX natives for all platforms (with a Swing fallback when none match) and a <code>minimal</code> ZIP without JavaFX for headless/CLI signing and downstream packagers.</li>
+          <li><em>Fat jar dropped</em> — the shaded all-in-one jar is no longer produced; the cross-platform ZIPs use <code>bin/jsignpdf.sh</code> and <code>bin\jsignpdf.cmd</code> launchers instead. The library jar published to Maven Central is unchanged.</li>
+          <li><em>Pluggable signing engines</em> selectable with the new <code>--list-engines</code> and <code>-eng</code> / <code>--engine</code> options or the Engine selector in Preferences. JSignPdf ships <em>OpenPDF</em> as the default engine.</li>
+          <li><em>New EU DSS (PAdES) engine</em> (id <code>dss</code>) producing PAdES signatures at the ETSI baseline levels B, T, LT, and LTA, which the OpenPDF engine cannot create.</li>
+          <li><em>Default hash algorithm is now SHA-256</em> (was SHA-1) for signing that relies on the implicit default. An explicit or saved <code>hash.algorithm</code> is untouched, and SHA-1 stays selectable for the OpenPDF engine.</li>
+          <li><em>CLI signatures now append by default</em>, matching the GUI. Use the new <code>--overwrite</code> flag to replace existing signatures; the legacy <code>--append</code> / <code>-a</code> flag is kept as a no-op.</li>
+          <li><em>Signed Windows installers</em> — the Windows MSI installers are Authenticode-signed via SignPath, so they install without an unknown-publisher warning. Pre-release builds ship unsigned.</li>
+          <li><em>Configurable default output suffix</em> — the <code>_signed</code> marker appended to the output file name can now be changed with the new <code>output.suffix</code> key in <code>advanced.properties</code>, so non-English users can localize it (e.g. <code>_firmado</code>). It feeds both GUIs and the default for the CLI <code>-os</code> / <code>--out-suffix</code> option.</li>
+          <li><em>Checksums for every artifact</em> — a <code>jsignpdf-&lt;version&gt;-SHA256SUMS.txt</code> file now covers all published release assets.</li>
+        </ul>
+      </description>
+    </release>
     <release version="3.0.1" date="2026-05-07">
       <url type="details">https://github.com/intoolswetrust/jsignpdf/releases/tag/JSignPdf_3_0_1</url>
       <description>
