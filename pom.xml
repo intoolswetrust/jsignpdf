@@ -24,7 +24,7 @@
         <maven.appassembler.plugin.version>2.1.0</maven.appassembler.plugin.version>
         <build.helper.plugin.version>3.6.1</build.helper.plugin.version>
 
-        <bouncycastle.version>1.84</bouncycastle.version>
+        <bouncycastle.version>1.85</bouncycastle.version>
         <jsign.pkcs11.version>1.1.0</jsign.pkcs11.version>
         <jsign.jpedal.version>4.92.13</jsign.jpedal.version>
         <pdfbox.version>3.0.7</pdfbox.version>
