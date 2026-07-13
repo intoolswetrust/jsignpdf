@@ -52,3 +52,7 @@ The `version`, `date`, and the `<url type="details">` link to the
 GitHub release tag are injected by the workflow — do **not** put them in
 the Markdown. Pre-release versions (`-ALPHA`/`-BETA`/`-RC`/`-MILESTONE`)
 are skipped: they get a GitHub release but no AppStream entry.
+
+The metainfo lists only the release being made: the generator replaces
+the whole `<releases>` element, so the entries of older versions are
+dropped.

@@ -1,20 +1,23 @@
 #!/usr/bin/env python3
-"""Insert an AppStream <release> entry into the JSignPdf metainfo file.
+"""Set the AppStream <release> entry of the JSignPdf metainfo file.
 
 Reads a release-notes Markdown file (see
 distribution/doc/release-notes/README.md for the required format) and
-prepends a matching <release> element to the <releases> list in the
-metainfo XML, so Linux app catalogs (Flathub, distros) show the new
-version. Run at release time, before the tag is cut.
+replaces the whole <releases> list in the metainfo XML with a single
+<release> element for the version being released, so Linux app catalogs
+(Flathub, distros) show it. Run at release time, before the tag is cut.
+
+Only the current release is listed; entries for older versions are
+dropped.
 
 The metainfo file is edited as text, not reparsed, so existing comments,
-formatting, and unrelated entries are left byte-for-byte untouched.
+formatting, and unrelated elements are left byte-for-byte untouched.
 
 Behaviour:
   * Pre-release versions (ALPHA/BETA/RC/MILESTONE) are skipped (exit 0,
     no change) -- they get a GitHub release but no AppStream entry.
-  * If an entry for the version already exists, it is left as-is
-    (idempotent re-runs).
+  * Re-runs are idempotent: rebuilding the same entry yields the same
+    file.
 
 Usage:
   update-metainfo-release.py --version 3.1.0 \
@@ -137,26 +140,28 @@ def main():
     with open(args.metainfo, encoding="utf-8") as f:
         xml = f.read()
 
-    if ('version="%s"' % args.version) in xml:
-        print("metainfo already has a <release> for %s: nothing to do."
-              % args.version)
-        return
+    # A re-run keeps the date the entry was first released with.
+    known = re.search(r'<release\s+version="%s"\s+date="([^"]+)"'
+                      % re.escape(args.version), xml)
+    date = known.group(1) if known else args.date
 
     with open(args.notes, encoding="utf-8") as f:
         intro, bullets = parse_notes(f.read())
 
-    entry = build_entry(args.version, args.date, intro, bullets)
+    entry = build_entry(args.version, date, intro, bullets)
+    block = "  <releases>\n" + entry + "  </releases>\n"
 
-    # Insert right after the <releases> opening tag, keeping newest first.
-    new_xml, n = re.subn(r"(^[ \t]*<releases>[ \t]*\n)",
-                         lambda m: m.group(1) + entry, xml,
-                         count=1, flags=re.MULTILINE)
+    # Only the version being released is listed; older entries are dropped.
+    new_xml, n = re.subn(r"^[ \t]*<releases>[ \t]*\n.*?^[ \t]*</releases>[ \t]*\n",
+                         lambda m: block, xml,
+                         count=1, flags=re.MULTILINE | re.DOTALL)
     if n != 1:
-        fail("could not find a <releases> opening tag in %s" % args.metainfo)
+        fail("could not find a <releases> element in %s" % args.metainfo)
 
     with open(args.metainfo, "w", encoding="utf-8") as f:
         f.write(new_xml)
-    print("Added <release> for %s to %s" % (args.version, args.metainfo))
+    print("Set <release> %s as the only entry in %s"
+          % (args.version, args.metainfo))
 
 
 if __name__ == "__main__":

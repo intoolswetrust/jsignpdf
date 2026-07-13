@@ -50,34 +50,6 @@
         </ul>
       </description>
     </release>
-    <release version="3.0.1" date="2026-05-07">
-      <url type="details">https://github.com/intoolswetrust/jsignpdf/releases/tag/JSignPdf_3_0_1</url>
-      <description>
-        <p>Version 3.0.1</p>
-        <p>Patch release fixing the Linux Flatpak build for the 3.0.0 release.</p>
-        <ul>
-          <li>Fix: drop the stale conf/ reference from the Flatpak manifests</li>
-        </ul>
-      </description>
-    </release>
-    <release version="3.0.0" date="2026-05-07">
-      <url type="details">https://github.com/intoolswetrust/jsignpdf/releases/tag/JSignPdf_3_0_0</url>
-      <description>
-        <p>Version 3.0.0</p>
-        <p>Major release with a brand-new desktop UI and modernized packaging.</p>
-        <ul>
-          <li>New JavaFX GUI with PDF preview, drag-to-place visible signatures, and drag-and-drop loading; legacy Swing UI remains available via -Djsignpdf.swing=true</li>
-          <li>New Windows installers built with jpackage (EXE, MSI, portable ZIP with bundled JRE)</li>
-          <li>New Linux Flatpak bundle with bundled OpenJDK 21</li>
-          <li>Java 21 is now the minimum runtime</li>
-          <li>Named signature-setting presets — save and switch between signing configurations</li>
-          <li>Configuration moved to XDG-aware locations; legacy ~/.JSignPdf settings migrate automatically</li>
-          <li>Read passwords from stdin (opt in with --enable-stdin-passwords)</li>
-          <li>Migrated PDF engine to OpenPDF 3; updated PDFBox to 3.0.7 and BouncyCastle to 1.84</li>
-          <li>Improved symlink handling on macOS; UTF-8 translation bundles with many language updates</li>
-        </ul>
-      </description>
-    </release>
   </releases>
   <screenshots>
     <screenshot type="default">

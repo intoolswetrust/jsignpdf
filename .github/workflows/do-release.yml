@@ -77,6 +77,8 @@ jobs:
     # tagged tree. Validation runs here, before the irreversible Maven release,
     # so a malformed entry fails the release early instead of downstream at
     # Flathub. Pre-release versions are skipped by the script (no commit).
+    # The metainfo lists the current release only: the script replaces the
+    # whole <releases> element, dropping the previous version's entry.
     - name: Update AppStream metainfo with the release entry
       run: |
         set -euo pipefail
@@ -92,10 +94,10 @@ jobs:
           --metainfo "$METAINFO"
         appstreamcli validate --no-net "$METAINFO"
         if git diff --quiet -- "$METAINFO"; then
-          echo "No metainfo change to commit (pre-release or entry already present)."
+          echo "No metainfo change to commit (pre-release or entry already up to date)."
         else
           git add "$METAINFO"
-          git commit -m "Add ${VERSION} release entry to AppStream metainfo"
+          git commit -m "Set ${VERSION} release entry in AppStream metainfo"
           echo "Committed metainfo update for ${VERSION}."
         fi
 
