@@ -17,8 +17,13 @@ if ! command -v flatpak >/dev/null 2>&1; then
   exit 1
 fi
 
-# Verify SDK is installed
-if ! flatpak info "$SDK_REF" &>/dev/null; then
+# Verify SDK is installed. When it is installed both user- and
+# system-wide, flatpak refuses to guess which one to run, so pin it.
+if flatpak info --user "$SDK_REF" &>/dev/null; then
+  INSTALLATION="--user"
+elif flatpak info --system "$SDK_REF" &>/dev/null; then
+  INSTALLATION="--system"
+else
   echo "Error: ${SDK_REF} is not installed" >&2
   echo "  flatpak install flathub ${SDK_REF}" >&2
   exit 1
@@ -26,9 +31,9 @@ fi
 
 # Verify OpenJDK extension is installed
 EXT_REF="org.freedesktop.Sdk.Extension.${SDK_EXT}//${SDK_REF##*/}"
-if ! flatpak info "$EXT_REF" &>/dev/null; then
-  echo "Error: extension ${EXT_REF} is not installed" >&2
-  echo "  flatpak install flathub ${EXT_REF}" >&2
+if ! flatpak info "$INSTALLATION" "$EXT_REF" &>/dev/null; then
+  echo "Error: extension ${EXT_REF} is not installed ${INSTALLATION#--}-wide" >&2
+  echo "  flatpak install ${INSTALLATION} flathub ${EXT_REF}" >&2
   exit 1
 fi
 
@@ -37,6 +42,7 @@ echo "==> Generating dependencies in Flatpak SDK (${SDK_REF} + ${SDK_EXT})"
 # Run the dependency generation inside the Flatpak SDK
 # All the work is done in a single command pipeline
 cat << SCRIPT_EOF | env FLATPAK_ENABLE_SDK_EXT="${SDK_EXT}" SCRIPT_DIR="${SCRIPT_DIR}" flatpak run \
+  "${INSTALLATION}" \
   --share=network \
   --filesystem="${SCRIPT_DIR}:rw" \
   --env=SCRIPT_DIR="${SCRIPT_DIR}" \
@@ -68,6 +74,44 @@ mvn --batch-mode clean install \
   -Dmaven.javadoc.skip=true \
   -Dmaven.source.skip=true \
   -Dasciidoctor.skip=true
+
+# Maven resolves some artifacts against the *build host* arch, so a list
+# generated on x86_64 makes the offline build fail on Flathub's aarch64
+# builder (and vice versa). Pull the aarch64 counterparts explicitly.
+# The two mechanisms need different handling:
+#   * JavaFX picks its natives from the javafx.platform property.
+#   * brotli4j (via OpenPDF) encodes the arch in the artifactId and
+#     activates it with <os><arch> in its own POM, which no property can
+#     override -- so the artifact has to be fetched by coordinates.
+echo "==> Adding the aarch64 artifacts"
+mvn --batch-mode dependency:resolve \
+  -Dmaven.repo.local="\$M2_DIR" \
+  -DskipTests \
+  -Djavafx.platform=linux-aarch64
+
+find "\$M2_DIR" -type d -path "*/native-linux-x86_64/*" | while read -r dir; do
+  version=\$(basename "\$dir")
+  group=\$(dirname "\$(dirname "\$dir")")
+  group=\${group#\$M2_DIR/}
+  group=\${group//\//.}
+  echo "  fetching \${group}:native-linux-aarch64:\${version}"
+  mvn --batch-mode dependency:get \
+    -Dmaven.repo.local="\$M2_DIR" \
+    -Dartifact="\${group}:native-linux-aarch64:\${version}"
+done
+
+# The offline build breaks in ways that only surface on the aarch64
+# builder, so fail here rather than downstream at Flathub.
+missing=0
+for artifact in javafx-base javafx-controls javafx-fxml javafx-graphics javafx-swing; do
+  find "\$M2_DIR" -name "\${artifact}-*-linux-aarch64.jar" | grep -q . \
+    || { echo "Error: no linux-aarch64 jar for \${artifact}" >&2; missing=1; }
+done
+find "\$M2_DIR" -path "*native-linux-x86_64*" -name "*.jar" | grep -q . && {
+  find "\$M2_DIR" -path "*native-linux-aarch64*" -name "*.jar" | grep -q . \
+    || { echo "Error: host-arch native jar has no aarch64 counterpart" >&2; missing=1; }
+}
+[ "\$missing" -eq 0 ] || exit 1
 
 echo "==> Generating maven-dependencies.json"
 cd "\$WORK_DIR"
