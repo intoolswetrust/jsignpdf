@@ -57,6 +57,20 @@
   },
   {
     "type": "file",
+    "url": "https://repo1.maven.org/maven2/com/aayushatharva/brotli4j/native-linux-aarch64/1.23.0/native-linux-aarch64-1.23.0.jar",
+    "sha256": "900c73dac7330ebe966071c770d2d4357c4de3f9417262ed4408dc08f2b573b6",
+    "dest": "m2local/com/aayushatharva/brotli4j/native-linux-aarch64/1.23.0",
+    "dest-filename": "native-linux-aarch64-1.23.0.jar"
+  },
+  {
+    "type": "file",
+    "url": "https://repo1.maven.org/maven2/com/aayushatharva/brotli4j/native-linux-aarch64/1.23.0/native-linux-aarch64-1.23.0.pom",
+    "sha256": "4448378836320c50909c7770435c0c3bdafb60bb7d255359e468104a59f695fc",
+    "dest": "m2local/com/aayushatharva/brotli4j/native-linux-aarch64/1.23.0",
+    "dest-filename": "native-linux-aarch64-1.23.0.pom"
+  },
+  {
+    "type": "file",
     "url": "https://repo1.maven.org/maven2/com/aayushatharva/brotli4j/native-linux-x86_64/1.23.0/native-linux-x86_64-1.23.0.jar",
     "sha256": "c504e243961c4229d8e486ca8f87b757ad9a033dda471061c0134c050ddcaa7c",
     "dest": "m2local/com/aayushatharva/brotli4j/native-linux-x86_64/1.23.0",
@@ -1779,6 +1793,20 @@
   },
   {
     "type": "file",
+    "url": "https://repo1.maven.org/maven2/io/netty/netty-buffer/4.2.12.Final/netty-buffer-4.2.12.Final.jar",
+    "sha256": "20dffa0e42c7b90b8c114d00c73bdf8f8ff5b363e3180b449359b2609e339561",
+    "dest": "m2local/io/netty/netty-buffer/4.2.12.Final",
+    "dest-filename": "netty-buffer-4.2.12.Final.jar"
+  },
+  {
+    "type": "file",
+    "url": "https://repo1.maven.org/maven2/io/netty/netty-buffer/4.2.12.Final/netty-buffer-4.2.12.Final.pom",
+    "sha256": "37cbafe983985b5c5b555619adbba2ee3546f60261beeeedad36cf2cab6dcef1",
+    "dest": "m2local/io/netty/netty-buffer/4.2.12.Final",
+    "dest-filename": "netty-buffer-4.2.12.Final.pom"
+  },
+  {
+    "type": "file",
     "url": "https://repo1.maven.org/maven2/io/netty/netty-codec-http/4.1.119.Final/netty-codec-http-4.1.119.Final.jar",
     "sha256": "ff48db63e44e273e677832e52cc2a1ce2670da796f22af129a8bd4c3786a2d34",
     "dest": "m2local/io/netty/netty-codec-http/4.1.119.Final",
@@ -1821,6 +1849,20 @@
   },
   {
     "type": "file",
+    "url": "https://repo1.maven.org/maven2/io/netty/netty-common/4.2.12.Final/netty-common-4.2.12.Final.jar",
+    "sha256": "9b03e4d08ef4c3e4e97065186fd3e1485301532ef4303f9fc29049dd13475b8d",
+    "dest": "m2local/io/netty/netty-common/4.2.12.Final",
+    "dest-filename": "netty-common-4.2.12.Final.jar"
+  },
+  {
+    "type": "file",
+    "url": "https://repo1.maven.org/maven2/io/netty/netty-common/4.2.12.Final/netty-common-4.2.12.Final.pom",
+    "sha256": "3d558bbcd7fdf8cb7fdbe56c110242578a489184278cb584e7f94741ff0ed200",
+    "dest": "m2local/io/netty/netty-common/4.2.12.Final",
+    "dest-filename": "netty-common-4.2.12.Final.pom"
+  },
+  {
+    "type": "file",
     "url": "https://repo1.maven.org/maven2/io/netty/netty-handler/4.1.119.Final/netty-handler-4.1.119.Final.jar",
     "sha256": "9b49be98e36bb79a2025ffb5159aec87da2720cfa545f56de39c3bc108587b1b",
     "dest": "m2local/io/netty/netty-handler/4.1.119.Final",
@@ -1839,6 +1881,13 @@
     "sha256": "ff3a8c495158659bdd21317f612548bf58d714db304fcec69b80496a47b68603",
     "dest": "m2local/io/netty/netty-parent/4.1.119.Final",
     "dest-filename": "netty-parent-4.1.119.Final.pom"
+  },
+  {
+    "type": "file",
+    "url": "https://repo1.maven.org/maven2/io/netty/netty-parent/4.2.12.Final/netty-parent-4.2.12.Final.pom",
+    "sha256": "6effbfcb8834110f44edc2f3060791adcb7081fda0160144e29c17dec7f0acc5",
+    "dest": "m2local/io/netty/netty-parent/4.2.12.Final",
+    "dest-filename": "netty-parent-4.2.12.Final.pom"
   },
   {
     "type": "file",
@@ -4740,6 +4789,13 @@
   },
   {
     "type": "file",
+    "url": "https://repo1.maven.org/maven2/org/bouncycastle/bc-jdk18on-bom/1.83/bc-jdk18on-bom-1.83.pom",
+    "sha256": "68a8b85f440adb724b27e657269870e1095c56027ffa887a0b5277656fb666a4",
+    "dest": "m2local/org/bouncycastle/bc-jdk18on-bom/1.83",
+    "dest-filename": "bc-jdk18on-bom-1.83.pom"
+  },
+  {
+    "type": "file",
     "url": "https://repo1.maven.org/maven2/org/bouncycastle/bcpkix-jdk18on/1.84/bcpkix-jdk18on-1.84.jar",
     "sha256": "c87f16ed9e5ec61bc94151e9f3646ac44e50cd448121ce84367fa4b7ec7ec1bb",
     "dest": "m2local/org/bouncycastle/bcpkix-jdk18on/1.84",
@@ -6329,6 +6385,13 @@
   },
   {
     "type": "file",
+    "url": "https://repo1.maven.org/maven2/org/openjfx/javafx-base/21.0.11/javafx-base-21.0.11-linux-aarch64.jar",
+    "sha256": "e7d5043b8852eeaba9b544563ce42914384983028e02b401c54ebeb32565866b",
+    "dest": "m2local/org/openjfx/javafx-base/21.0.11",
+    "dest-filename": "javafx-base-21.0.11-linux-aarch64.jar"
+  },
+  {
+    "type": "file",
     "url": "https://repo1.maven.org/maven2/org/openjfx/javafx-base/21.0.11/javafx-base-21.0.11-linux.jar",
     "sha256": "80fec582d54d09d4580af9430230e9b8e24eef385c967c3019cc207e08e05c34",
     "dest": "m2local/org/openjfx/javafx-base/21.0.11",
@@ -6368,6 +6431,13 @@
     "sha256": "bc08f40f6bc40b1aa7b7a0bef62fac51617e9ceff0ba2815779653d1c728722c",
     "dest": "m2local/org/openjfx/javafx-base/21.0.11",
     "dest-filename": "javafx-base-21.0.11.pom"
+  },
+  {
+    "type": "file",
+    "url": "https://repo1.maven.org/maven2/org/openjfx/javafx-controls/21.0.11/javafx-controls-21.0.11-linux-aarch64.jar",
+    "sha256": "2d81779001a3fa78c1676af3388aac3e91a2c4a875230cc0d596fc9b66549049",
+    "dest": "m2local/org/openjfx/javafx-controls/21.0.11",
+    "dest-filename": "javafx-controls-21.0.11-linux-aarch64.jar"
   },
   {
     "type": "file",
@@ -6413,6 +6483,13 @@
   },
   {
     "type": "file",
+    "url": "https://repo1.maven.org/maven2/org/openjfx/javafx-fxml/21.0.11/javafx-fxml-21.0.11-linux-aarch64.jar",
+    "sha256": "6bb82779476ca504a2f3e4fe25c4d68569d25951563562bcf2ae801f5a07cf45",
+    "dest": "m2local/org/openjfx/javafx-fxml/21.0.11",
+    "dest-filename": "javafx-fxml-21.0.11-linux-aarch64.jar"
+  },
+  {
+    "type": "file",
     "url": "https://repo1.maven.org/maven2/org/openjfx/javafx-fxml/21.0.11/javafx-fxml-21.0.11-linux.jar",
     "sha256": "ede7f0563b3afcd608f0531e03c96e5726a382498a4b9bf5c7baaa81af6212e5",
     "dest": "m2local/org/openjfx/javafx-fxml/21.0.11",
@@ -6455,6 +6532,13 @@
   },
   {
     "type": "file",
+    "url": "https://repo1.maven.org/maven2/org/openjfx/javafx-graphics/21.0.11/javafx-graphics-21.0.11-linux-aarch64.jar",
+    "sha256": "5af12d933f0aa3d7508ad1980f8e5dd2f2dff34b9bfc873cbd3d6cff5a552b2c",
+    "dest": "m2local/org/openjfx/javafx-graphics/21.0.11",
+    "dest-filename": "javafx-graphics-21.0.11-linux-aarch64.jar"
+  },
+  {
+    "type": "file",
     "url": "https://repo1.maven.org/maven2/org/openjfx/javafx-graphics/21.0.11/javafx-graphics-21.0.11-linux.jar",
     "sha256": "a8d10c8f587c5d1248f36050a3df0626b440f8295c5ca2e2820606af213ee7c4",
     "dest": "m2local/org/openjfx/javafx-graphics/21.0.11",
@@ -6494,6 +6578,13 @@
     "sha256": "6595dacbea9cdb84512bf482ddf7ad02203270128a41d129d76c4cec42edbb17",
     "dest": "m2local/org/openjfx/javafx-graphics/21.0.11",
     "dest-filename": "javafx-graphics-21.0.11.pom"
+  },
+  {
+    "type": "file",
+    "url": "https://repo1.maven.org/maven2/org/openjfx/javafx-swing/21.0.11/javafx-swing-21.0.11-linux-aarch64.jar",
+    "sha256": "257e9601da30941b9d5fee89af5b3dd22de63618268976534ccc488b361621d8",
+    "dest": "m2local/org/openjfx/javafx-swing/21.0.11",
+    "dest-filename": "javafx-swing-21.0.11-linux-aarch64.jar"
   },
   {
     "type": "file",
