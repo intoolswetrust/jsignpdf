@@ -51,6 +51,16 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.List;
 
+/*
+ * Custom DSS PDFBox drawer for JSignPdf.
+ * Draws background, then image, then overlays text on top.
+ *
+ * Forks DSS's NativePdfBoxVisibleSignatureDrawer to add background-image
+ * layering and per-image rotation. Coupled to DSS-internal nativedrawer and
+ * spi packages, so breakage on DSS upgrades is quarantined behind
+ * {@link JSignPdfSignatureDrawerFactory} — this drawer only activates when
+ * a background image is configured.
+ */
 public class JSignPdfOverlaySignatureDrawer extends AbstractPdfBoxSignatureDrawer {
 
     private static final Logger LOG = LoggerFactory.getLogger(JSignPdfOverlaySignatureDrawer.class);
@@ -236,7 +246,7 @@ public class JSignPdfOverlaySignatureDrawer extends AbstractPdfBoxSignatureDrawe
             return;
         }
 
-        int imageRotation = dimensionAndPosition.getCurrentImageRotation();
+        int imageRotation = dimensionAndPosition.getGlobalRotation();
         boolean rotated = imageRotation == ImageRotationUtils.ANGLE_90
                 || imageRotation == ImageRotationUtils.ANGLE_270;
         if (rotated) {

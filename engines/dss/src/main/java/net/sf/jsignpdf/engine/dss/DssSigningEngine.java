@@ -57,6 +57,7 @@ import org.apache.pdfbox.pdmodel.common.PDRectangle;
 import eu.europa.esig.dss.alert.LogOnStatusAlert;
 import eu.europa.esig.dss.enumerations.CertificationPermission;
 import eu.europa.esig.dss.enumerations.DigestAlgorithm;
+import eu.europa.esig.dss.enumerations.ImageScaling;
 import eu.europa.esig.dss.enumerations.SignatureLevel;
 import eu.europa.esig.dss.enumerations.TextWrapping;
 import eu.europa.esig.dss.pdf.PdfSignatureFieldPositionChecker;
@@ -105,6 +106,14 @@ public class DssSigningEngine implements SigningEngine {
      * The retry repeats the signing operation (and, for timestamped levels, fetches a fresh TSA token).
      */
     static final String KEY_RETRY_ON_UNDERSIZE = "retryOnUndersize";
+
+    /**
+     * Config key ({@code engine.dss.relaxFieldOverlap}): when {@code true}, a visible signature rectangle
+     * that overlaps an existing PDF annotation logs a warning instead of throwing an error. Defaults to
+     * {@code false} — DSS's strict behaviour is safer and only users who knowingly sign over annotations
+     * should enable this.
+     */
+    static final String KEY_RELAX_FIELD_OVERLAP = "relaxFieldOverlap";
 
     /** Lower bound for the reserved {@code /Contents} size, matching DSS's own default; never estimate below it. */
     private static final int MIN_CONTENT_SIZE = 9472;
@@ -311,11 +320,16 @@ public class DssSigningEngine implements SigningEngine {
                 final PAdESService service = new PAdESService(verifier);
 
                 // Use custom PDF object factory with background-image layering
-                // and tolerant signature field position checking
                 JSignPdfPdfObjFactory pdfObjFactory = new JSignPdfPdfObjFactory();
-                PdfSignatureFieldPositionChecker positionChecker = new PdfSignatureFieldPositionChecker();
-                positionChecker.setAlertOnSignatureFieldOverlap(new LogOnStatusAlert());
-                pdfObjFactory.setPdfSignatureFieldPositionChecker(positionChecker);
+
+                // Opt-in overlap relaxation: when enabled, a visible signature that overlaps
+                // an existing PDF annotation logs a warning instead of throwing an error.
+                if (engineConfig.getBoolean(KEY_RELAX_FIELD_OVERLAP, false)) {
+                    PdfSignatureFieldPositionChecker positionChecker = new PdfSignatureFieldPositionChecker();
+                    positionChecker.setAlertOnSignatureFieldOverlap(new LogOnStatusAlert());
+                    pdfObjFactory.setPdfSignatureFieldPositionChecker(positionChecker);
+                }
+
                 service.setPdfObjFactory(pdfObjFactory);
 
                 if (useTsa) {
@@ -687,6 +701,11 @@ public class DssSigningEngine implements SigningEngine {
             textParams.setFont(font);
         }
         imageParams.setTextParameters(textParams);
+
+        // DSS 6.4+: STRETCH is incompatible with FILL_BOX_AND_LINEBREAK.
+        // The custom drawer handles its own scaling, so ZOOM_AND_CENTER
+        // (or any non-STRETCH value) works here as a validation pass-through.
+        imageParams.setImageScaling(ImageScaling.ZOOM_AND_CENTER);
 
         parameters.setImageParameters(imageParams);
     }
