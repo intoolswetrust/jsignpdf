@@ -1,3 +1,29 @@
+/*
+ * JSignPdf custom DSS PDFBox signature drawer
+ *
+ * Provides background-image layering, text auto-scaling, and flexible field placement
+ * on top of the DSS PAdES signing pipeline.
+ *
+ * This file is derived from DSS's NativePdfBoxVisibleSignatureDrawer
+ * (https://github.com/esig/dss), which is licensed under the GNU Lesser General
+ * Public License version 2.1 (LGPL-2.1). JSignPdf is also LGPL-2.1 licensed.
+ *
+ * Copyright (C) 2025 JSignPdf contributors
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+ */
 package net.sf.jsignpdf.engine.dss.pdfbox;
 
 import eu.europa.esig.dss.model.DSSDocument;
@@ -49,10 +75,6 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.List;
 
-/*
- * Custom DSS PDFBox drawer for JSignPdf.
- * Draws background, then image, then overlays text on top.
- */
 public class JSignPdfOverlaySignatureDrawer extends AbstractPdfBoxSignatureDrawer {
 
     private static final Logger LOG = LoggerFactory.getLogger(JSignPdfOverlaySignatureDrawer.class);
@@ -65,10 +87,26 @@ public class JSignPdfOverlaySignatureDrawer extends AbstractPdfBoxSignatureDrawe
         this.resourcesHandlerBuilder = resourcesHandlerBuilder;
     }
 
+    /**
+     * Custom init that allows background-only signatures.
+     * The DSS {@code super.init()} calls {@code assertSignatureParametersAreValid()} which
+     * checks {@code getImage() == null && text.isEmpty()} directly — it never consults the
+     * overridden {@link JSignPdfSignatureImageParameters#isEmpty()}, so a signature with only
+     * a background image (no foreground graphic, no text) would be rejected. This override
+     * replicates the setup from {@code AbstractPdfBoxSignatureDrawer.init()} but applies a
+     * validation that respects the background-image field.
+     */
     @Override
     public void init(SignatureImageParameters parameters, PDDocument document, SignatureOptions signatureOptions)
             throws IOException {
-        super.init(parameters, document, signatureOptions);
+        boolean hasBackground = parameters instanceof JSignPdfSignatureImageParameters
+                && ((JSignPdfSignatureImageParameters) parameters).getBackgroundImage() != null;
+        if (parameters.getImage() == null && parameters.getTextParameters().isEmpty() && !hasBackground) {
+            throw new IllegalArgumentException("Neither image nor text parameters are defined!");
+        }
+        this.parameters = parameters;
+        this.document = document;
+        this.signatureOptions = signatureOptions;
         if (!parameters.getTextParameters().isEmpty()) {
             this.pdFont = initFont();
         }
@@ -222,6 +260,15 @@ public class JSignPdfOverlaySignatureDrawer extends AbstractPdfBoxSignatureDrawe
             return;
         }
 
+        int imageRotation = dimensionAndPosition.getCurrentImageRotation();
+        boolean rotated = imageRotation == ImageRotationUtils.ANGLE_90
+                || imageRotation == ImageRotationUtils.ANGLE_270;
+        if (rotated) {
+            float tmp = imageWidth;
+            imageWidth = imageHeight;
+            imageHeight = tmp;
+        }
+
         float imageRatio = imageWidth / imageHeight;
         float boxRatio = boxWidth / boxHeight;
         float drawWidth;
@@ -242,10 +289,41 @@ public class JSignPdfOverlaySignatureDrawer extends AbstractPdfBoxSignatureDrawe
 
         try (InputStream is = image.openStream()) {
             cs.saveGraphicsState();
+            applyImageRotation(cs, boxWidth, boxHeight, drawWidth, drawHeight, drawX, drawY, imageRotation);
             byte[] bytes = IOUtils.toByteArray(is);
             PDImageXObject imageXObject = PDImageXObject.createFromByteArray(doc, bytes, image.getName());
             cs.drawImage(imageXObject, drawX, drawY, drawWidth, drawHeight);
             cs.restoreGraphicsState();
+        }
+    }
+
+    /**
+     * Applies a per-image rotation transform so rotated fields render the graphic with
+     * the same orientation. Mirror of {@code NativePdfBoxVisibleSignatureDrawer}'s
+     * image-rotation handling.
+     */
+    private void applyImageRotation(PDPageContentStream cs, float boxWidth, float boxHeight,
+            float drawWidth, float drawHeight, float drawX, float drawY, int imageRotation) throws IOException {
+        switch (imageRotation) {
+        case ImageRotationUtils.ANGLE_90:
+            cs.transform(Matrix.getTranslateInstance(drawX + drawWidth, drawY));
+            cs.transform(Matrix.getRotateInstance(Math.toRadians(ImageRotationUtils.ANGLE_90), 0, 0));
+            cs.transform(Matrix.getTranslateInstance(-drawX - drawWidth, -drawY));
+            break;
+        case ImageRotationUtils.ANGLE_180:
+            cs.transform(Matrix.getTranslateInstance(drawX + drawWidth, drawY + drawHeight));
+            cs.transform(Matrix.getRotateInstance(Math.toRadians(ImageRotationUtils.ANGLE_180), 0, 0));
+            cs.transform(Matrix.getTranslateInstance(-drawX - drawWidth, -drawY - drawHeight));
+            break;
+        case ImageRotationUtils.ANGLE_270:
+            cs.transform(Matrix.getTranslateInstance(drawX, drawY + drawHeight));
+            cs.transform(Matrix.getRotateInstance(Math.toRadians(ImageRotationUtils.ANGLE_270), 0, 0));
+            cs.transform(Matrix.getTranslateInstance(-drawX, -drawY - drawHeight));
+            break;
+        case ImageRotationUtils.ANGLE_0:
+        case ImageRotationUtils.ANGLE_360:
+        default:
+            break;
         }
     }
 
@@ -402,12 +480,28 @@ public class JSignPdfOverlaySignatureDrawer extends AbstractPdfBoxSignatureDrawe
 
     @Override
     protected String getExpectedColorSpaceName() throws IOException {
+        // Check the foreground image first
         if (parameters.getImage() != null) {
             try (InputStream is = parameters.getImage().openStream()) {
                 byte[] bytes = IOUtils.toByteArray(is);
                 PDImageXObject imageXObject = PDImageXObject.createFromByteArray(document, bytes, parameters.getImage().getName());
                 PDColorSpace colorSpace = imageXObject.getColorSpace();
                 return colorSpace.getName();
+            }
+        }
+        // Also inspect the background image (otherwise a background-only signature with
+        // an RGB/CMYK image can get a DEVICEGRAY output intent injected, producing wrong
+        // output and a PDF/A inconsistency)
+        if (parameters instanceof JSignPdfSignatureImageParameters) {
+            JSignPdfSignatureImageParameters jsignParams = (JSignPdfSignatureImageParameters) parameters;
+            DSSDocument background = jsignParams.getBackgroundImage();
+            if (background != null) {
+                try (InputStream is = background.openStream()) {
+                    byte[] bytes = IOUtils.toByteArray(is);
+                    PDImageXObject imageXObject = PDImageXObject.createFromByteArray(document, bytes, background.getName());
+                    PDColorSpace colorSpace = imageXObject.getColorSpace();
+                    return colorSpace.getName();
+                }
             }
         }
         return ImageUtils.containRGBColor(parameters) ? COSName.DEVICERGB.getName() : COSName.DEVICEGRAY.getName();
