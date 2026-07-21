@@ -54,9 +54,13 @@ import org.apache.pdfbox.pdmodel.encryption.StandardProtectionPolicy;
 import org.apache.pdfbox.pdmodel.PDPage;
 import org.apache.pdfbox.pdmodel.common.PDRectangle;
 
+import eu.europa.esig.dss.alert.LogOnStatusAlert;
 import eu.europa.esig.dss.enumerations.CertificationPermission;
 import eu.europa.esig.dss.enumerations.DigestAlgorithm;
+import eu.europa.esig.dss.enumerations.ImageScaling;
 import eu.europa.esig.dss.enumerations.SignatureLevel;
+import eu.europa.esig.dss.enumerations.TextWrapping;
+import eu.europa.esig.dss.pdf.PdfSignatureFieldPositionChecker;
 import eu.europa.esig.dss.model.DSSDocument;
 import eu.europa.esig.dss.model.FileDocument;
 import eu.europa.esig.dss.model.SignatureValue;
@@ -65,6 +69,8 @@ import eu.europa.esig.dss.pades.DSSFont;
 import eu.europa.esig.dss.pades.PAdESSignatureParameters;
 import eu.europa.esig.dss.pades.SignatureFieldParameters;
 import eu.europa.esig.dss.pades.SignatureImageParameters;
+import net.sf.jsignpdf.engine.dss.pdfbox.JSignPdfPdfObjFactory;
+import net.sf.jsignpdf.engine.dss.pdfbox.JSignPdfSignatureImageParameters;
 import eu.europa.esig.dss.pades.SignatureImageTextParameters;
 import eu.europa.esig.dss.pades.signature.PAdESService;
 import eu.europa.esig.dss.service.http.commons.TimestampDataLoader;
@@ -100,6 +106,14 @@ public class DssSigningEngine implements SigningEngine {
      * The retry repeats the signing operation (and, for timestamped levels, fetches a fresh TSA token).
      */
     static final String KEY_RETRY_ON_UNDERSIZE = "retryOnUndersize";
+
+    /**
+     * Config key ({@code engine.dss.relaxFieldOverlap}): when {@code true}, a visible signature rectangle
+     * that overlaps an existing PDF annotation logs a warning instead of throwing an error. Defaults to
+     * {@code false} — DSS's strict behaviour is safer and only users who knowingly sign over annotations
+     * should enable this.
+     */
+    static final String KEY_RELAX_FIELD_OVERLAP = "relaxFieldOverlap";
 
     /** Lower bound for the reserved {@code /Contents} size, matching DSS's own default; never estimate below it. */
     private static final int MIN_CONTENT_SIZE = 9472;
@@ -304,6 +318,19 @@ public class DssSigningEngine implements SigningEngine {
                     return false;
                 }
                 final PAdESService service = new PAdESService(verifier);
+
+                // Use custom PDF object factory with background-image layering
+                JSignPdfPdfObjFactory pdfObjFactory = new JSignPdfPdfObjFactory();
+
+                // Opt-in overlap relaxation: when enabled, a visible signature that overlaps
+                // an existing PDF annotation logs a warning instead of throwing an error.
+                if (engineConfig.getBoolean(KEY_RELAX_FIELD_OVERLAP, false)) {
+                    PdfSignatureFieldPositionChecker positionChecker = new PdfSignatureFieldPositionChecker();
+                    positionChecker.setAlertOnSignatureFieldOverlap(new LogOnStatusAlert());
+                    pdfObjFactory.setPdfSignatureFieldPositionChecker(positionChecker);
+                }
+
+                service.setPdfObjFactory(pdfObjFactory);
 
                 if (useTsa) {
                     LOGGER.info(RES.get("console.creatingTsaClient"));
@@ -597,7 +624,7 @@ public class DssSigningEngine implements SigningEngine {
 
     private void configureVisibleSignature(PAdESSignatureParameters parameters, BasicSignerOptions options,
             Certificate[] chain, Calendar signingCal, File inFile) throws Exception {
-        final SignatureImageParameters imageParams = new SignatureImageParameters();
+        final JSignPdfSignatureImageParameters imageParams = new JSignPdfSignatureImageParameters();
 
         int page = options.getPage();
         float pageWidth;
@@ -636,19 +663,34 @@ public class DssSigningEngine implements SigningEngine {
         final RenderMode renderMode = options.getRenderMode();
         final boolean withGraphic = renderMode == RenderMode.GRAPHIC_AND_DESCRIPTION;
 
-        // DSS renders a single signature image. In GRAPHIC_AND_DESCRIPTION mode that image is the signature
-        // graphic (options.imgPath); in the other render modes it is the background image (options.bgImgPath).
-        // The two are mutually exclusive here (unlike OpenPDF, which layers them), and we never silently
-        // substitute one for the other: a graphic render mode with no graphic configured yields text only.
-        final String imagePath = withGraphic ? options.getImgPath() : options.getBgImgPath();
-        if (imagePath != null) {
-            LOGGER.info(RES.get("console.createImage", imagePath));
-            imageParams.setImage(new FileDocument(imagePath));
+        // Background image (drawn first, behind everything) — available in all modes
+        final String bgImgPath = options.getBgImgPath();
+        if (bgImgPath != null) {
+            LOGGER.info(RES.get("console.createImage", bgImgPath));
+            imageParams.setBackgroundImage(new FileDocument(bgImgPath));
+            imageParams.setBackgroundScale(options.getBgImgScale());
+        }
+
+        // Foreground signature graphic (drawn above background, below text) — used in GRAPHIC_AND_DESCRIPTION mode
+        if (withGraphic) {
+            final String imgPath = options.getImgPath();
+            if (imgPath != null) {
+                LOGGER.info(RES.get("console.createImage", imgPath));
+                imageParams.setImage(new FileDocument(imgPath));
+            }
         }
 
         LOGGER.info(RES.get("console.setL2Text"));
         final SignatureImageTextParameters textParams = new SignatureImageTextParameters();
         textParams.setText(buildSignatureText(options, chain, signingCal));
+        // FILL_BOX_AND_LINEBREAK: DSS auto-calculates the largest font that fits
+        // the signature rectangle, wrapping lines as needed. The font-size field
+        // in the GUI is used as the starting reference but the actual size is
+        // driven entirely by the box dimensions in this mode.
+        textParams.setTextWrapping(TextWrapping.FILL_BOX_AND_LINEBREAK);
+        // Transparent text background so the background image shows through.
+        // (DSS defaults to solid white which would paint over the image.)
+        textParams.setBackgroundColor(null);
         final DSSFont font = DssFontUtils.getVisibleSignatureFont();
         if (font != null) {
             float fontSize = options.getL2TextFontSize();
@@ -659,6 +701,11 @@ public class DssSigningEngine implements SigningEngine {
             textParams.setFont(font);
         }
         imageParams.setTextParameters(textParams);
+
+        // DSS 6.4+: STRETCH is incompatible with FILL_BOX_AND_LINEBREAK.
+        // The custom drawer handles its own scaling, so ZOOM_AND_CENTER
+        // (or any non-STRETCH value) works here as a validation pass-through.
+        imageParams.setImageScaling(ImageScaling.ZOOM_AND_CENTER);
 
         parameters.setImageParameters(imageParams);
     }

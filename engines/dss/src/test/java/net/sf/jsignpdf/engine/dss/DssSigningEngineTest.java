@@ -4,6 +4,9 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
+import java.awt.Color;
+import java.awt.Graphics2D;
+import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.nio.file.Files;
@@ -12,6 +15,8 @@ import java.security.Security;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import javax.imageio.ImageIO;
 
 import net.sf.jsignpdf.BasicSignerOptions;
 import net.sf.jsignpdf.engine.Capability;
@@ -408,6 +413,50 @@ public class DssSigningEngineTest {
         cfg.put(DssTrustConfigurer.KEY_ONLINE_ENABLED, "true");
         cfg.put(DssTrustConfigurer.KEY_CERT_FILES, caFile.getAbsolutePath() + "," + tsaFile.getAbsolutePath());
         return new MapEngineConfig(cfg);
+    }
+
+    /**
+     * Creates a minimal 10x10 PNG image and writes it to a temp file.
+     */
+    private File createTestImage(String name, Color color) throws Exception {
+        BufferedImage img = new BufferedImage(10, 10, BufferedImage.TYPE_INT_RGB);
+        Graphics2D g2d = img.createGraphics();
+        g2d.setColor(color);
+        g2d.fillRect(0, 0, 10, 10);
+        g2d.dispose();
+        File file = tmp.newFile(name + ".png");
+        ImageIO.write(img, "png", file);
+        return file;
+    }
+
+    @Test
+    public void visibleSignatureWithBackgroundImageProducesValidSignature() throws Exception {
+        BasicSignerOptions o = baseOptions();
+        o.setVisible(true);
+        o.setPage(1);
+        o.setPositionLLX(100f);
+        o.setPositionLLY(100f);
+        o.setPositionURX(300f);
+        o.setPositionURY(250f);
+        o.setReason("testing");
+        o.setLocation("here");
+
+        // Background image (rendered behind everything)
+        File bgImage = createTestImage("bg-test", Color.LIGHT_GRAY);
+        o.setBgImgPath(bgImage.getAbsolutePath());
+        o.setBgImgScale(100f);
+
+        // Foreground graphic (rendered above background)
+        o.setRenderMode(net.sf.jsignpdf.types.RenderMode.GRAPHIC_AND_DESCRIPTION);
+        File fgImage = createTestImage("fg-test", Color.BLUE);
+        o.setImgPath(fgImage.getAbsolutePath());
+
+        assertTrue("signing with background + graphic + text must succeed",
+                new DssSigningEngine().sign(o, EMPTY_CONFIG));
+        assertTrue("output must exist", outputFile.exists());
+
+        // Verify the output is a structurally valid PAdES signature
+        assertSignatureLevel(outputFile, SignatureLevel.PAdES_BASELINE_B);
     }
 
     @Test
