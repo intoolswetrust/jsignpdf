@@ -1071,6 +1071,14 @@ DSS skips revocation for trust anchors, so the CA needs none; the leaf's chain i
 
 * *Force it with permissive trust (non-conformant).* Setting `engine.dss.trust.allowUntrusted=true` lets `LT`/`LTA` complete for a self-signed or untrusted chain by downgrading the trust and revocation checks to warnings. The file then has the `LT`/`LTA` *structure* but no real revocation material, so it is *not* valid for eIDAS long-term validation -- use it only for private-PKI or testing.
 
+=== Certification level and encryption with LT/LTA
+
+`LT` and `LTA` extend a signature by appending validation material (the DSS dictionary) and, for `LTA`, an archive timestamp *after* the signature, as PDF incremental updates. This is required by the levels and is explicitly permitted by ISO 32000-2 and ETSI EN 319 142.
+
+A *certification* signature (certification level other than `NOT_CERTIFIED` -- i.e. `CERTIFIED_NO_CHANGES_ALLOWED`, `CERTIFIED_FORM_FILLING`, or `CERTIFIED_FORM_FILLING_AND_ANNOTATIONS`) records a `DocMDP` restriction on what may change after signing. Some strict PDF readers (for example Foxit) treat the `LT`/`LTA` additions as violating that restriction and report the document as *modified or corrupted since it was signed*, even though the signature validates on the official eIDAS/EU validators and in Adobe. To keep `LT`/`LTA` signatures compatible with the widest range of readers, leave the certification level at the default `NOT_CERTIFIED`.
+
+Password-based PDF encryption combined with signing is likewise not honoured uniformly across readers. If a signed document must validate in third-party viewers, prefer an unencrypted document.
+
 == Advanced application configuration
 
 Application-wide tweaks beyond the per-document signing options live in `<config-dir>/advanced.properties` and -- for hardware tokens -- `<config-dir>/pkcs11.cfg`. Both are plain text files; the easiest way to edit them is the JavaFX <<Adjusting advanced preferences,Preferences dialog>>, which writes them on _OK_. Power users can also hand-edit the files directly while JSignPdf is closed; the next launch picks up the changes.
