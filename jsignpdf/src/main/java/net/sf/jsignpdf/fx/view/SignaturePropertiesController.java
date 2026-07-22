@@ -66,12 +66,21 @@ public class SignaturePropertiesController {
      * with the shared "not supported" tooltip while such an engine is active. This mirrors the CLI
      * fail-soft handled by {@link net.sf.jsignpdf.engine.EngineMismatchValidator}.
      *
+     * <p>Enforcement also guards the {@code append} property directly, not just engine changes: the
+     * persisted options are loaded after this wiring runs, and a stored {@code append=false} would
+     * otherwise survive when the startup engine is already a non-overwrite one (no change event fires).
+     *
      * @param caps the capability source driving the gating; must be wired after {@link #setViewModel}
      */
     public void gateCapabilities(EngineCapabilities caps) {
         caps.gate(chkAppend, Capability.OVERWRITE_MODE);
         enforceAppendForEngine(caps.activeEngineProperty().get());
         caps.activeEngineProperty().addListener((obs, oldEngine, newEngine) -> enforceAppendForEngine(newEngine));
+        viewModel.appendProperty().addListener((obs, was, isAppend) -> {
+            if (Boolean.FALSE.equals(isAppend)) {
+                enforceAppendForEngine(caps.activeEngineProperty().get());
+            }
+        });
     }
 
     private void enforceAppendForEngine(SigningEngine engine) {
