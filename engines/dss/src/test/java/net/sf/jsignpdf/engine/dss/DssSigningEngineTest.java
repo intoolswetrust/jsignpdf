@@ -37,6 +37,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 
+import eu.europa.esig.dss.enumerations.ImageScaling;
 import eu.europa.esig.dss.enumerations.SignatureLevel;
 import eu.europa.esig.dss.model.FileDocument;
 import eu.europa.esig.dss.simplereport.SimpleReport;
@@ -270,6 +271,19 @@ public class DssSigningEngineTest {
             assertEquals("visible signature width", 200f, rect.getWidth(), 1f);
             assertEquals("visible signature height", 150f, rect.getHeight(), 1f);
         }
+    }
+
+    @Test
+    public void bgImgScaleMapsToImageScaling() {
+        // Default (-1) and any non-zero value preserve aspect ratio; 0 stretches to fill (issue #460).
+        assertEquals(ImageScaling.ZOOM_AND_CENTER, DssSigningEngine.imageScalingFor(-1f));
+        assertEquals(ImageScaling.ZOOM_AND_CENTER, DssSigningEngine.imageScalingFor(2f));
+        assertEquals(ImageScaling.STRETCH, DssSigningEngine.imageScalingFor(0f));
+    }
+
+    @Test
+    public void capabilitiesDeclareBackgroundImageScale() {
+        assertTrue(new DssSigningEngine().capabilities().contains(Capability.VISIBLE_BACKGROUND_IMAGE_SCALE));
     }
 
     @Test
