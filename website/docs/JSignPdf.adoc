@@ -499,7 +499,7 @@ See <<Visible signature options>> for details.
 | Background image path for the visible signature.
 
 | `--bg-scale <scale>`
-| Background image scale. Positive: multiply size. Zero: stretch to fill. Negative: best-fit resize.
+| Background image scale. Positive: multiply size. Zero: stretch to fill. Negative: best-fit resize. The DSS (PAdES) engine only distinguishes stretch (zero) from aspect-ratio-preserving fit (any non-zero value); it does not apply positive values as absolute scale factors.
 
 | `--disable-acrobat6-layer-mode`
 | Disable Acrobat 6 layer mode (creates all signature layers instead of just n2 and n4).

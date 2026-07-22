@@ -56,6 +56,7 @@ import org.apache.pdfbox.pdmodel.common.PDRectangle;
 
 import eu.europa.esig.dss.enumerations.CertificationPermission;
 import eu.europa.esig.dss.enumerations.DigestAlgorithm;
+import eu.europa.esig.dss.enumerations.ImageScaling;
 import eu.europa.esig.dss.enumerations.SignatureLevel;
 import eu.europa.esig.dss.model.DSSDocument;
 import eu.europa.esig.dss.model.FileDocument;
@@ -141,7 +142,8 @@ public class DssSigningEngine implements SigningEngine {
             Capability.ENCRYPTION_PASSWORD, Capability.PERMISSIONS_BITMASK,
 
             Capability.VISIBLE_SIGNATURE, Capability.VISIBLE_LAYER2_TEXT,
-            Capability.VISIBLE_BACKGROUND_IMAGE, Capability.VISIBLE_SIGNATURE_GRAPHIC,
+            Capability.VISIBLE_BACKGROUND_IMAGE, Capability.VISIBLE_BACKGROUND_IMAGE_SCALE,
+            Capability.VISIBLE_SIGNATURE_GRAPHIC,
             Capability.VISIBLE_CUSTOM_FONT,
             Capability.VISIBLE_RENDER_MODE_DESCRIPTION_ONLY,
             Capability.VISIBLE_RENDER_MODE_GRAPHIC_AND_DESCRIPTION,
@@ -644,6 +646,7 @@ public class DssSigningEngine implements SigningEngine {
         if (imagePath != null) {
             LOGGER.info(RES.get("console.createImage", imagePath));
             imageParams.setImage(new FileDocument(imagePath));
+            imageParams.setImageScaling(imageScalingFor(options.getBgImgScale()));
         }
 
         LOGGER.info(RES.get("console.setL2Text"));
@@ -661,6 +664,11 @@ public class DssSigningEngine implements SigningEngine {
         imageParams.setTextParameters(textParams);
 
         parameters.setImageParameters(imageParams);
+    }
+
+    // bgImgScale mirrors OpenPDF: 0 = stretch to fill, otherwise fit preserving aspect ratio.
+    static ImageScaling imageScalingFor(float bgImgScale) {
+        return bgImgScale == 0f ? ImageScaling.STRETCH : ImageScaling.ZOOM_AND_CENTER;
     }
 
     private String buildSignatureText(BasicSignerOptions options, Certificate[] chain, Calendar signingCal) {
