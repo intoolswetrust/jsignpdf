@@ -3,6 +3,8 @@ package net.sf.jsignpdf.fx.util;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import net.sf.jsignpdf.Constants;
 import net.sf.jsignpdf.utils.PropertyProvider;
@@ -13,6 +15,7 @@ import net.sf.jsignpdf.utils.PropertyStoreFactory;
  */
 public class RecentFilesManager {
 
+    private static final Logger LOGGER = Logger.getLogger(RecentFilesManager.class.getName());
     private static final int MAX_RECENT = 10;
     private final PropertyProvider props = PropertyStoreFactory.getInstance().mainConfig();
 
@@ -36,6 +39,17 @@ public class RecentFilesManager {
             }
         }
         return result;
+    }
+
+    public void clear() {
+        for (int i = 0; i < MAX_RECENT; i++) {
+            props.removeProperty(Constants.PROPERTY_RECENT_FILE_PREFIX + i);
+        }
+        try {
+            props.save();
+        } catch (Exception e) {
+            LOGGER.log(Level.WARNING, "Could not persist cleared recent files list", e);
+        }
     }
 
     private void saveFiles(List<String> files) {
