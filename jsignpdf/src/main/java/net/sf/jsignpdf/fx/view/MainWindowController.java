@@ -30,6 +30,7 @@ import javafx.scene.control.PasswordField;
 import javafx.scene.control.Tooltip;
 import javafx.scene.control.ProgressBar;
 import javafx.scene.control.ScrollPane;
+import javafx.scene.control.SeparatorMenuItem;
 import javafx.scene.control.SplitPane;
 import javafx.scene.control.TextField;
 import javafx.scene.control.ToggleButton;
@@ -711,6 +712,13 @@ public class MainWindowController {
                 item.setOnAction(e -> openDocument(new File(path)));
                 menuRecentFiles.getItems().add(item);
             }
+            menuRecentFiles.getItems().add(new SeparatorMenuItem());
+            MenuItem clear = new MenuItem(RES.get("jfx.gui.menu.file.recentFiles.clear"));
+            clear.setOnAction(e -> {
+                recentFilesManager.clear();
+                refreshRecentFilesMenu();
+            });
+            menuRecentFiles.getItems().add(clear);
         }
     }
 
