@@ -2,13 +2,10 @@ package net.sf.jsignpdf.engine.dss;
 
 import static net.sf.jsignpdf.Constants.RES;
 
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.security.cert.Certificate;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HexFormat;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -17,9 +14,7 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import javax.naming.ldap.LdapName;
-import javax.naming.ldap.Rdn;
-import javax.security.auth.x500.X500Principal;
+import net.sf.jsignpdf.utils.CertificateInfo;
 
 /**
  * Turns the opaque untrusted-chain {@code AlertException} DSS raises for the LT / LTA levels into an
@@ -112,21 +107,14 @@ final class DssUntrustedChainReporter {
         if (certs == null) {
             return index;
         }
-        MessageDigest sha256;
-        try {
-            sha256 = MessageDigest.getInstance("SHA-256");
-        } catch (NoSuchAlgorithmException e) {
-            return index; // SHA-256 is mandated by the platform; unreachable in practice.
-        }
         for (X509Certificate cert : certs) {
             if (cert == null) {
                 continue;
             }
-            try {
-                String tokenId = "C-" + HexFormat.of().withUpperCase().formatHex(sha256.digest(cert.getEncoded()));
+            // A certificate that cannot be re-encoded has no id and simply stays unidentified in the report.
+            final String tokenId = CertificateInfo.tokenId(cert);
+            if (tokenId != null) {
                 index.putIfAbsent(tokenId, cert);
-            } catch (Exception e) {
-                // A certificate that cannot be re-encoded simply stays unidentified in the report.
             }
         }
         return index;
@@ -145,25 +133,10 @@ final class DssUntrustedChainReporter {
     }
 
     private static String subjectOf(X509Certificate cert) {
-        return commonNameOrDn(cert.getSubjectX500Principal());
+        return CertificateInfo.subjectOf(cert);
     }
 
     private static String issuerOf(X509Certificate cert) {
-        return commonNameOrDn(cert.getIssuerX500Principal());
-    }
-
-    /** Returns the principal's CN when present, otherwise its full RFC 2253 DN. */
-    private static String commonNameOrDn(X500Principal principal) {
-        try {
-            LdapName ldapName = new LdapName(principal.getName());
-            for (Rdn rdn : ldapName.getRdns()) {
-                if ("CN".equalsIgnoreCase(rdn.getType())) {
-                    return rdn.getValue().toString();
-                }
-            }
-        } catch (Exception e) {
-            // fall through to the full DN
-        }
-        return principal.getName();
+        return CertificateInfo.issuerOf(cert);
     }
 }
