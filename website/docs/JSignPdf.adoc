@@ -1041,7 +1041,7 @@ DSS requires a PAdES digest, so the hash algorithm must be `SHA256`, `SHA384` or
 |Re-sign with a larger reservation if the reserved `/Contents` turns out too small. Default `true`; each retry repeats signing (and refetches the TSA timestamp for level `T` and above).
 |===
 
-If `LT`/`LTA` is requested but revocation data cannot be reached (for example, with online fetching disabled), the signing fails with a logged error rather than silently emitting a weaker level.
+If `LT`/`LTA` is requested but revocation data cannot be reached (for example, with online fetching disabled), the signing fails with a logged error rather than silently emitting a weaker level. The log also records which trust anchors were loaded and every AIA / CRL / OCSP call the engine made, which is usually enough to tell a network problem from a missing anchor -- see <<Reading the signing diagnostics>>.
 
 On the command line these keys can be set for a single run with `-o` (see <<General options>>), without editing `advanced.properties`:
 
@@ -1212,6 +1212,50 @@ If timestamping fails:
 * If you are behind a proxy, configure the proxy settings (see <<Proxy settings>>).
 * Check if the TSA server requires authentication and configure it accordingly.
 * If you get an `SSLHandshakeException`, see <<SSL/TLS certificate errors>>.
+
+=== Reading the signing diagnostics
+
+Every run logs the certificate material it uses and, for the DSS engine, every network call it makes while collecting validation data. This is what to look at when a signature fails for a reason that is not obvious from the error message itself.
+
+*Certificate chain.* Right after the key is loaded, the whole signing chain is dumped -- one block per certificate, leaf first:
+
+[source]
+----
+Signing certificate chain (2 certificates)
+  [0] subject=O=Acme,CN=Jane Doe
+      issuer=O=Acme,CN=Acme Issuing CA
+      serial=2a1f, validity=2026-01-01 00:00:00 UTC .. 2027-01-01 00:00:00 UTC
+      id=C-958E99061FA999181718D8FE3E6D70ECC4EF46DD78FC76E76AD348214E7AD6EE
+      keyUsage=digitalSignature,nonRepudiation
+      qcStatements=QcCompliance,QcSSCD
+      AIA caIssuers=http://pki.acme.example/ca.crt
+      AIA OCSP=http://ocsp.acme.example
+      CRL DP=http://crl.acme.example/issuing.crl
+----
+
+The `id=C-...` value is the identifier the DSS engine uses in its own error messages, so a `No revocation data found for C-...` failure can be matched to a real certificate without inspecting it with `openssl`. A certificate outside its validity window is flagged with `(EXPIRED)` / `(NOT YET VALID)` next to the dates. The timestamp token's own chain is dumped the same way once the TSA has answered.
+
+*Trust anchors (DSS engine).* Each configured `engine.dss.trust.*` source is logged with the number of anchors it contributed, followed by the total. A total of `0` means nothing is trusted at all -- a configuration problem -- as opposed to a specific CA simply not being covered:
+
+[source]
+----
+Trust source trust.certFiles=/etc/pki/acme-root.pem: 1 anchor(s)
+Trust anchors loaded: 1 from 1 configured source(s)
+----
+
+*Revocation and issuer downloads (DSS engine).* For `LT`/`LTA`, every AIA, CRL and OCSP call is reported twice: once for the HTTP request (URL, response size, elapsed time, or the failure) and once for what the answer meant, naming the certificate it was for:
+
+[source]
+----
+CRL GET http://crl.acme.example/issuing.crl: 503 bytes, elapsed=18ms
+CRL lookup for Jane Doe (C-958E...): status=GOOD, source=http://crl.acme.example/issuing.crl,
+    thisUpdate=2026-07-24 06:24:29 UTC, nextUpdate=2027-07-24 07:24:29 UTC, elapsed=27ms
+OCSP lookup for Jane Doe (C-958E...): no OCSP data (no access point on the certificate, or none usable), elapsed=0ms
+----
+
+A `FAILED` line names the responder that could not be reached and why -- the usual cause of an `LT`/`LTA` failure behind a proxy or a firewall (see <<Proxy settings>>). A `no CRL data` / `no OCSP data` line means the certificate itself carries no matching distribution point, which no amount of trust configuration can fix.
+
+These messages are logged at the `FINE` level. To silence them (together with the rest of the progress output) use `-q` on the command line; to change what is logged, point Java at your own logging configuration with `JAVA_OPTS=-Djava.util.logging.config.file=<file>`.
 
 == Other command line tools
 
