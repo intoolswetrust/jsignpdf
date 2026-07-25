@@ -167,9 +167,14 @@ final class DssTrustConfigurer {
             ocspDataLoader.setProxyConfig(proxyConfig);
             CommonsDataLoader dataLoader = new CommonsDataLoader();
             dataLoader.setProxyConfig(proxyConfig);
-            verifier.setAIASource(new DefaultAIASource(dataLoader));
-            verifier.setOcspSource(new OnlineOCSPSource(ocspDataLoader));
-            verifier.setCrlSource(new OnlineCRLSource(dataLoader));
+            // The loaders and sources are wrapped for FINE-level tracing of every AIA / CRL / OCSP call
+            // (issue #452); the wrappers are pass-through and are skipped entirely when FINE is off.
+            verifier.setAIASource(LoggingAIASource.wrap(
+                    new DefaultAIASource(LoggingDataLoader.wrap("AIA", dataLoader))));
+            verifier.setOcspSource(LoggingRevocationSource.wrap("OCSP",
+                    new OnlineOCSPSource(LoggingDataLoader.wrap("OCSP", ocspDataLoader))));
+            verifier.setCrlSource(LoggingRevocationSource.wrap("CRL",
+                    new OnlineCRLSource(LoggingDataLoader.wrap("CRL", dataLoader))));
         }
         if (config.getBoolean(KEY_ALLOW_UNTRUSTED, false)) {
             relaxTrustAndRevocationAlerts(verifier);
@@ -222,6 +227,7 @@ final class DssTrustConfigurer {
         for (String certFile : splitList(config.getString(KEY_CERT_FILES))) {
             CommonTrustedCertificateSource source = new CommonTrustedCertificateSource();
             source.addCertificate(DSSUtils.loadCertificate(new File(certFile)));
+            logSourceAnchors(KEY_CERT_FILES + "=" + certFile, source);
             trustedSources.add(source);
         }
         for (String certUrl : splitList(config.getString(KEY_CERT_URLS))) {
@@ -229,6 +235,7 @@ final class DssTrustConfigurer {
             try (InputStream is = new URL(certUrl).openStream()) {
                 source.addCertificate(DSSUtils.loadCertificate(is));
             }
+            logSourceAnchors(KEY_CERT_URLS + "=" + certUrl, source);
             trustedSources.add(source);
         }
 
@@ -239,7 +246,9 @@ final class DssTrustConfigurer {
             final String pwd = config.getString(KEY_TRUSTSTORE_PASSWORD, "");
             KeyStoreCertificateSource source = new KeyStoreCertificateSource(new File(truststoreFile), type,
                     pwd != null ? pwd.toCharArray() : null);
-            trustedSources.add(asTrusted(source));
+            CertificateSource trusted = asTrusted(source);
+            logSourceAnchors(KEY_TRUSTSTORE_FILE + "=" + truststoreFile, trusted);
+            trustedSources.add(trusted);
         }
 
         if (config.getBoolean(KEY_SYSTEM_STORE, false)) {
@@ -250,7 +259,35 @@ final class DssTrustConfigurer {
                 }
             }
         }
+        logTotalAnchors(trustedSources);
         return trustedSources.toArray(new CertificateSource[0]);
+    }
+
+    /** Names one configured trust source and the number of anchors it contributed, at FINE (issue #452). */
+    private static void logSourceAnchors(String origin, CertificateSource source) {
+        if (Constants.LOGGER.isLoggable(Level.FINE)) {
+            Constants.LOGGER.fine("Trust source " + origin + ": " + source.getCertificates().size()
+                    + " anchor(s)");
+        }
+    }
+
+    /**
+     * Logs the total number of trust anchors across every configured source. This is the line that separates
+     * "nothing is trusted at all" (a mis-set / empty {@code engine.dss.trust.*} configuration) from "the
+     * anchors loaded but this particular CA is not among them" &mdash; both otherwise surface only as the same
+     * untrusted-chain alert (issue #452). No trust source at all is normal for the B / T levels, which need
+     * none; for LT/LTA {@code DssLtTrustPreflight} rejects that configuration before signing starts.
+     */
+    private static void logTotalAnchors(List<CertificateSource> trustedSources) {
+        if (!Constants.LOGGER.isLoggable(Level.FINE)) {
+            return;
+        }
+        int total = 0;
+        for (CertificateSource source : trustedSources) {
+            total += source.getCertificates().size();
+        }
+        Constants.LOGGER.fine("Trust anchors loaded: " + total + " from " + trustedSources.size()
+                + " configured source(s)");
     }
 
     /**

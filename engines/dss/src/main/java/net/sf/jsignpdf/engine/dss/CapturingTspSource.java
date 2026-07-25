@@ -8,6 +8,7 @@ import java.util.Map;
 import java.util.logging.Level;
 
 import net.sf.jsignpdf.Constants;
+import net.sf.jsignpdf.utils.CertificateInfo;
 
 import eu.europa.esig.dss.enumerations.DigestAlgorithm;
 import eu.europa.esig.dss.enumerations.TimestampType;
@@ -57,9 +58,13 @@ final class CapturingTspSource implements TSPSource {
         final long startNanos = System.nanoTime();
         TimestampBinary token = delegate.getTimeStampResponse(digestAlgorithm, digest);
         final long elapsedMs = (System.nanoTime() - startNanos) / 1_000_000L;
+        final int knownCerts = capturedCerts.size();
         capture(token);
         if (debug) {
             logResponse(token, elapsedMs);
+            if (capturedCerts.size() > knownCerts) {
+                CertificateInfo.logChain("Timestamp certificate chain", capturedCerts.values());
+            }
         }
         return token;
     }

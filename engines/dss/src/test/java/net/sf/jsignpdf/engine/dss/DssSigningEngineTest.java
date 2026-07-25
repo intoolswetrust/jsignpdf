@@ -358,14 +358,50 @@ public class DssSigningEngineTest {
         assertTrue("must name the issuing CA to add", severe.contains("JSignPdf Test Root CA"));
     }
 
-    /** Collects the formatted messages of {@code SEVERE} log records, for asserting on engine diagnostics. */
+    @Test
+    public void ltSigningTracesCertificatesAndRevocationFetchesAtFine() throws Exception {
+        // Issue #452: with FINE enabled the whole network-facing side of an LT signature must be visible --
+        // the signer and timestamp chains, the trust anchors that were loaded, and every CRL / TSA call.
+        BasicSignerOptions o = caSignerOptions(PadesLevel.BASELINE_LT);
+
+        CapturingLogHandler handler = new CapturingLogHandler();
+        handler.setLevel(java.util.logging.Level.ALL);
+        java.util.logging.Logger logger = java.util.logging.Logger.getLogger("net.sf.jsignpdf");
+        java.util.logging.Level originalLevel = logger.getLevel();
+        logger.setLevel(java.util.logging.Level.FINE);
+        logger.addHandler(handler);
+        try {
+            assertTrue("LT must succeed with a trusted issuer and reachable CRL",
+                    new DssSigningEngine().sign(o, caTrustConfig()));
+        } finally {
+            logger.removeHandler(handler);
+            logger.setLevel(originalLevel);
+        }
+
+        String trace = handler.allMessages();
+        assertTrue("must dump the signer chain", trace.contains("Signing certificate chain (2 certificates)"));
+        assertTrue("must name the signer certificate", trace.contains("JSignPdf Test Signer"));
+        assertTrue("must list the signer's CRL distribution point",
+                trace.contains("CRL DP=" + embeddedCa.getCrlUrl()));
+        assertTrue("must dump the timestamp chain", trace.contains("Timestamp certificate chain"));
+        assertTrue("must report how many trust anchors were loaded", trace.contains("Trust anchors loaded:"));
+        assertTrue("must trace the CRL HTTP fetch", trace.contains("CRL GET " + embeddedCa.getCrlUrl()));
+        assertTrue("must trace the CRL lookup outcome", trace.contains("CRL lookup for JSignPdf Test Signer"));
+        assertTrue("must report the CRL validity window", trace.contains("thisUpdate="));
+        assertTrue("must trace the TSA request", trace.contains("TSA request -> "));
+    }
+
+    /** Collects the formatted messages of log records, for asserting on engine diagnostics. */
     private static final class CapturingLogHandler extends java.util.logging.Handler {
         private final StringBuilder severe = new StringBuilder();
+        private final StringBuilder all = new StringBuilder();
 
         @Override
         public void publish(java.util.logging.LogRecord record) {
+            final String message = new java.util.logging.SimpleFormatter().formatMessage(record);
+            all.append(message).append('\n');
             if (record.getLevel().intValue() >= java.util.logging.Level.SEVERE.intValue()) {
-                severe.append(new java.util.logging.SimpleFormatter().formatMessage(record)).append('\n');
+                severe.append(message).append('\n');
             }
         }
 
@@ -379,6 +415,10 @@ public class DssSigningEngineTest {
 
         String severeMessages() {
             return severe.toString();
+        }
+
+        String allMessages() {
+            return all.toString();
         }
     }
 

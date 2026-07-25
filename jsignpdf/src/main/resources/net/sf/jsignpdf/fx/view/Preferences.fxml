@@ -11,8 +11,8 @@
          tabClosingPolicy="UNAVAILABLE"
          prefWidth="720" prefHeight="520">
 
-    <!-- Signing engine -->
-    <Tab fx:id="tabEngine" text="%jfx.gui.preferences.section.engine">
+    <!-- General: signing engine + diagnostics -->
+    <Tab fx:id="tabGeneral" text="%jfx.gui.preferences.section.general">
         <VBox spacing="8">
             <padding><Insets top="12" right="12" bottom="12" left="12"/></padding>
             <Label text="%jfx.gui.engine.label"/>
@@ -20,6 +20,8 @@
                 <tooltip><Tooltip text="%jfx.gui.engine.tooltip"/></tooltip>
             </ChoiceBox>
             <Label text="%jfx.gui.preferences.engine.help" styleClass="pref-help" wrapText="true"/>
+            <CheckBox fx:id="chkDebug" text="%jfx.gui.preferences.general.debug"/>
+            <Label text="%jfx.gui.preferences.general.debug.help" styleClass="pref-help" wrapText="true"/>
         </VBox>
     </Tab>
 

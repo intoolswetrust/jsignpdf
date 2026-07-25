@@ -57,6 +57,7 @@ public class FxTranslationsTest {
 
     @BeforeClass
     public static void initFx() throws Exception {
+        MonocleAssumption.assumeUsable();
         CountDownLatch latch = new CountDownLatch(1);
         try {
             Platform.startup(latch::countDown);

@@ -105,6 +105,11 @@ final class EmbeddedCa {
         return caCertificate;
     }
 
+    /** @return the loopback CRL endpoint issued certificates point their distribution point at. */
+    String getCrlUrl() {
+        return crlUrl;
+    }
+
     /**
      * Issues a fresh RSA-2048 leaf signing certificate (with a CRL distribution point pointing at this CA's
      * loopback CRL endpoint) and packages the private key plus the {@code [leaf, CA]} chain into an in-memory

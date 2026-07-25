@@ -277,6 +277,7 @@ Presets are plain Java properties files under the <<Configuration directory,conf
 
 Open _File > Preferences..._ (shortcut `Ctrl+,` / `⌘,`) for application-wide tweaks that fall outside the per-document signing options. The dialog has the following tabs:
 
+* **General** -- the default signing engine, and the *Debug output* toggle that enables the verbose signing diagnostics (see <<Reading the signing diagnostics>>)
 * **Visible Signature** -- font file, font name and encoding for the visible-signature L2 text
 * **Certificates** -- which certificate checks (validity, key usage, critical extensions) are applied when listing aliases
 * **Network** -- relax SSL security for TSA / OCSP / CRL traffic
@@ -1041,7 +1042,7 @@ DSS requires a PAdES digest, so the hash algorithm must be `SHA256`, `SHA384` or
 |Re-sign with a larger reservation if the reserved `/Contents` turns out too small. Default `true`; each retry repeats signing (and refetches the TSA timestamp for level `T` and above).
 |===
 
-If `LT`/`LTA` is requested but revocation data cannot be reached (for example, with online fetching disabled), the signing fails with a logged error rather than silently emitting a weaker level.
+If `LT`/`LTA` is requested but revocation data cannot be reached (for example, with online fetching disabled), the signing fails with a logged error rather than silently emitting a weaker level. The log also records which trust anchors were loaded and every AIA / CRL / OCSP call the engine made, which is usually enough to tell a network problem from a missing anchor -- see <<Reading the signing diagnostics>>.
 
 On the command line these keys can be set for a single run with `-o` (see <<General options>>), without editing `advanced.properties`:
 
@@ -1083,7 +1084,9 @@ Password-based PDF encryption combined with signing is likewise not honoured uni
 
 Application-wide tweaks beyond the per-document signing options live in `<config-dir>/advanced.properties` and -- for hardware tokens -- `<config-dir>/pkcs11.cfg`. Both are plain text files; the easiest way to edit them is the JavaFX <<Adjusting advanced preferences,Preferences dialog>>, which writes them on _OK_. Power users can also hand-edit the files directly while JSignPdf is closed; the next launch picks up the changes.
 
-`advanced.properties` covers the same topics as the Preferences dialog (visible-signature font, certificate-validation toggles, relaxed SSL, PDF preview backend order, default TSA hash algorithm) plus a few file-editable knobs such as `output.suffix` -- the suffix appended to the input file name to derive the default output file name (bundled default `_signed`; e.g. set `output.suffix=_firmado` to produce `mydocument_firmado.pdf`). When a key is missing from `advanced.properties`, JSignPdf falls back to defaults bundled inside the application jar, so a fresh install needs no config file at all.
+`advanced.properties` covers the same topics as the Preferences dialog (the signing engine, verbose `debug` output, visible-signature font, certificate-validation toggles, relaxed SSL, PDF preview backend order, default TSA hash algorithm) plus a few file-editable knobs such as `output.suffix` -- the suffix appended to the input file name to derive the default output file name (bundled default `_signed`; e.g. set `output.suffix=_firmado` to produce `mydocument_firmado.pdf`). When a key is missing from `advanced.properties`, JSignPdf falls back to defaults bundled inside the application jar, so a fresh install needs no config file at all.
+
+Set `debug=true` (bundled default `false`, the *Debug output* checkbox on the _General_ tab of the Preferences dialog) to log the verbose signing diagnostics -- the certificate chain, the loaded trust anchors, and every timestamp / OCSP / CRL / AIA network call. See <<Reading the signing diagnostics>>.
 
 In batch mode, any of these keys can be overridden for a single run with the `-o key=value` command-line option (see <<General options>>), without changing the file. CLI overrides take precedence over `advanced.properties` and the bundled defaults, and are not persisted.
 
@@ -1212,6 +1215,52 @@ If timestamping fails:
 * If you are behind a proxy, configure the proxy settings (see <<Proxy settings>>).
 * Check if the TSA server requires authentication and configure it accordingly.
 * If you get an `SSLHandshakeException`, see <<SSL/TLS certificate errors>>.
+
+=== Reading the signing diagnostics
+
+With *debug output* enabled, JSignPdf logs the certificate material it uses and, for the DSS engine, every network call it makes while collecting validation data. This is what to look at when a signature fails for a reason that is not obvious from the error message itself.
+
+Turn it on by ticking *Debug output* on the _General_ tab of the Preferences dialog, or by setting `debug=true` in `advanced.properties` (it can also be set for a single CLI run with `-o debug=true`). It is off by default so normal runs stay quiet. Everything below is emitted only while it is on.
+
+*Certificate chain.* Right after the key is loaded, the whole signing chain is dumped -- one block per certificate, leaf first:
+
+[source]
+----
+Signing certificate chain (2 certificates)
+  [0] subject=O=Acme,CN=Jane Doe
+      issuer=O=Acme,CN=Acme Issuing CA
+      serial=2a1f, validity=2026-01-01 00:00:00 UTC .. 2027-01-01 00:00:00 UTC
+      id=C-958E99061FA999181718D8FE3E6D70ECC4EF46DD78FC76E76AD348214E7AD6EE
+      keyUsage=digitalSignature,nonRepudiation
+      qcStatements=QcCompliance,QcSSCD
+      AIA caIssuers=http://pki.acme.example/ca.crt
+      AIA OCSP=http://ocsp.acme.example
+      CRL DP=http://crl.acme.example/issuing.crl
+----
+
+The `id=C-...` value is the identifier the DSS engine uses in its own error messages, so a `No revocation data found for C-...` failure can be matched to a real certificate without inspecting it with `openssl`. A certificate outside its validity window is flagged with `(EXPIRED)` / `(NOT YET VALID)` next to the dates. The timestamp token's own chain is dumped the same way once the TSA has answered.
+
+*Trust anchors (DSS engine).* Each configured `engine.dss.trust.*` source is logged with the number of anchors it contributed, followed by the total. A total of `0` means nothing is trusted at all -- a configuration problem -- as opposed to a specific CA simply not being covered:
+
+[source]
+----
+Trust source trust.certFiles=/etc/pki/acme-root.pem: 1 anchor(s)
+Trust anchors loaded: 1 from 1 configured source(s)
+----
+
+*Revocation and issuer downloads (DSS engine).* For `LT`/`LTA`, every AIA, CRL and OCSP call is reported twice: once for the HTTP request (URL, response size, elapsed time, or the failure) and once for what the answer meant, naming the certificate it was for:
+
+[source]
+----
+CRL GET http://crl.acme.example/issuing.crl: 503 bytes, elapsed=18ms
+CRL lookup for Jane Doe (C-958E...): status=GOOD, source=http://crl.acme.example/issuing.crl,
+    thisUpdate=2026-07-24 06:24:29 UTC, nextUpdate=2027-07-24 07:24:29 UTC, elapsed=27ms
+OCSP lookup for Jane Doe (C-958E...): no OCSP data (no access point on the certificate, or none usable), elapsed=0ms
+----
+
+A `FAILED` line names the responder that could not be reached and why -- the usual cause of an `LT`/`LTA` failure behind a proxy or a firewall (see <<Proxy settings>>). A `no CRL data` / `no OCSP data` line means the certificate itself carries no matching distribution point, which no amount of trust configuration can fix.
+
+These messages are logged at the `FINE` level, which `debug=true` enables. The `-q` / `--quiet` flag silences all output (including the normal progress messages) regardless of the debug setting; for full control over what is logged, point Java at your own configuration with `JAVA_OPTS=-Djava.util.logging.config.file=<file>`.
 
 == Other command line tools
 

@@ -25,6 +25,7 @@ import javax.swing.WindowConstants;
 import net.sf.jsignpdf.engine.EngineRegistry;
 import net.sf.jsignpdf.engine.SigningEngine;
 import net.sf.jsignpdf.ssl.SSLInitializer;
+import net.sf.jsignpdf.utils.AppConfig;
 import net.sf.jsignpdf.utils.GuiUtils;
 import net.sf.jsignpdf.utils.KeyStoreUtils;
 import net.sf.jsignpdf.utils.PKCS11Utils;
@@ -113,6 +114,10 @@ public class Signer {
             tmpOpts = new SignerOptionsFromCmdLine();
             parseCommandLine(args, tmpOpts);
         }
+
+        // Raise the log level to FINE when advanced.properties has debug=true (a no-op under -q, which has
+        // already muted the logger during parsing). Applies to both the CLI and the GUI launched below.
+        AppConfig.applyDebugLogLevel();
 
         try {
             SSLInitializer.init();
