@@ -34,8 +34,11 @@ import net.sf.jsignpdf.utils.CertificateInfo;
  */
 final class DssUntrustedChainReporter {
 
-    /** DSS certificate token id as it appears in the alert message: {@code C-} + uppercase SHA-256 hex (64 chars). */
-    private static final Pattern TOKEN_ID = Pattern.compile("C-[0-9A-Fa-f]{64}");
+    /**
+     * DSS certificate token id as it appears in the alert message: {@code C-} + uppercase SHA-256 hex. DSS
+     * strips leading zero bytes from the digest, so the id is at most 64 characters but can be shorter.
+     */
+    private static final Pattern TOKEN_ID = Pattern.compile("C-[0-9A-Fa-f]{2,64}");
 
     private DssUntrustedChainReporter() {
     }
