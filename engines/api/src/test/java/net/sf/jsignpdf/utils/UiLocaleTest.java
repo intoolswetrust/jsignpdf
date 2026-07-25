@@ -76,6 +76,16 @@ public class UiLocaleTest {
     public void initKeepsSystemDefaultForUnknownOverride() {
         Locale.setDefault(Locale.Category.DISPLAY, Locale.ITALIAN);
         UiLocale.init(new String[] { "-o", "ui.language=xx" });
-        assertEquals(Locale.ITALIAN, UiLocale.current());
+        assertEquals(UiLocale.systemDefault(), UiLocale.current());
+        assertEquals("DISPLAY category left untouched", Locale.ITALIAN,
+                Locale.getDefault(Locale.Category.DISPLAY));
+    }
+
+    @Test
+    public void systemDefaultIgnoresInstalledChoice() {
+        Locale osLocale = UiLocale.systemDefault();
+        UiLocale.init(new String[] { "-o", "ui.language=cs" });
+        assertEquals("cs", Locale.getDefault(Locale.Category.DISPLAY).getLanguage());
+        assertEquals("systemDefault() reports the OS locale, not the chosen one", osLocale, UiLocale.systemDefault());
     }
 }

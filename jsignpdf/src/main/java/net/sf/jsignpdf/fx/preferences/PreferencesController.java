@@ -131,9 +131,8 @@ public class PreferencesController {
             @Override
             public String toString(String tag) {
                 if (tag == null || tag.isEmpty()) {
-                    Locale osLocale = Locale.getDefault(Locale.Category.DISPLAY);
                     return RES.get("jfx.gui.preferences.general.language.system",
-                            SupportedLanguages.displayName(osLocale));
+                            SupportedLanguages.displayName(UiLocale.systemDefault()));
                 }
                 return SupportedLanguages.displayName(Locale.forLanguageTag(tag));
             }

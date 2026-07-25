@@ -26,7 +26,9 @@ public final class UiLocale {
     private static final ResourceBundle.Control NO_FALLBACK =
             ResourceBundle.Control.getNoFallbackControl(ResourceBundle.Control.FORMAT_PROPERTIES);
 
-    private static volatile Locale current = Locale.getDefault(Locale.Category.DISPLAY);
+    private static final Locale SYSTEM_DEFAULT = Locale.getDefault(Locale.Category.DISPLAY);
+
+    private static volatile Locale current = SYSTEM_DEFAULT;
 
     private UiLocale() {
     }
@@ -43,7 +45,7 @@ public final class UiLocale {
         }
         Locale locale = resolve(tag);
         if (locale == null) {
-            current = Locale.getDefault(Locale.Category.DISPLAY);
+            current = SYSTEM_DEFAULT;
             return;
         }
         current = locale;
@@ -55,6 +57,11 @@ public final class UiLocale {
     /** The resolved UI locale (the system default when unset). */
     public static Locale current() {
         return current;
+    }
+
+    /** The OS display locale, unaffected by an installed {@code ui.language} choice. */
+    public static Locale systemDefault() {
+        return SYSTEM_DEFAULT;
     }
 
     /** A {@link ResourceBundle} for {@link #current()} with English-only fallback (no OS-locale fallback). */
