@@ -1,5 +1,6 @@
 package net.sf.jsignpdf.utils;
 
+import java.math.BigInteger;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.Certificate;
@@ -11,8 +12,8 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
-import java.util.HexFormat;
 import java.util.List;
+import java.util.Locale;
 import java.util.logging.Level;
 
 import javax.naming.ldap.LdapName;
@@ -152,13 +153,20 @@ public class CertificateInfo {
      * The DSS certificate token id ({@code C-} + uppercase SHA-256 hex of the DER encoding) &mdash; the
      * identifier DSS uses when it reports a missing trust anchor or missing revocation data.
      *
+     * <p>
+     * DSS renders the digest through {@code BigInteger} ({@code Digest#getHexValue()}), so leading zero
+     * <em>bytes</em> are dropped and only an odd nibble count is padded back. A plain zero-padded 64-char hex
+     * would therefore differ from the id DSS prints for roughly one certificate in 256.
+     * </p>
+     *
      * @param cert the certificate
      * @return the token id, or {@code null} when the certificate cannot be re-encoded
      */
     public static String tokenId(X509Certificate cert) {
         try {
             final MessageDigest sha256 = MessageDigest.getInstance("SHA-256");
-            return "C-" + HexFormat.of().withUpperCase().formatHex(sha256.digest(cert.getEncoded()));
+            final String hex = new BigInteger(1, sha256.digest(cert.getEncoded())).toString(16);
+            return "C-" + (hex.length() % 2 == 0 ? hex : "0" + hex).toUpperCase(Locale.ENGLISH);
         } catch (NoSuchAlgorithmException | CertificateEncodingException e) {
             return null;
         }

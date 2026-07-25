@@ -1,6 +1,7 @@
 package net.sf.jsignpdf.utils;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
@@ -13,7 +14,6 @@ import java.security.cert.Certificate;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HexFormat;
 import java.util.List;
 import java.util.logging.Handler;
 import java.util.logging.Level;
@@ -63,9 +63,23 @@ public class CertificateInfoTest {
     @Test
     public void tokenIdIsDssCertificateTokenId() throws Exception {
         final X509Certificate cert = selfSigned("CN=Token Id Test", true);
-        final String expected = "C-" + HexFormat.of().withUpperCase()
-                .formatHex(MessageDigest.getInstance("SHA-256").digest(cert.getEncoded()));
-        assertEquals(expected, CertificateInfo.tokenId(cert));
+        assertEquals(dssTokenId(cert), CertificateInfo.tokenId(cert));
+    }
+
+    /**
+     * DSS prints the digest through {@code BigInteger}, so a certificate whose SHA-256 starts with a zero byte
+     * gets a token id shorter than the usual 64 hex characters. Zero-padding it (as {@code HexFormat} does)
+     * produced an id that never matched the one in the DSS alert for roughly one certificate in 256, which
+     * silently disabled the issue #448 enrichment.
+     */
+    @Test
+    public void tokenIdDropsLeadingZeroBytesLikeDss() throws Exception {
+        final X509Certificate cert = withLeadingZeroDigestByte();
+        final String tokenId = CertificateInfo.tokenId(cert);
+
+        assertEquals(dssTokenId(cert), tokenId);
+        assertEquals("the leading zero byte must be dropped, not padded", 62, tokenId.length() - 2);
+        assertFalse("id must not keep the zero-padded prefix", tokenId.startsWith("C-00"));
     }
 
     @Test
@@ -169,6 +183,39 @@ public class CertificateInfoTest {
             Constants.LOGGER.setLevel(originalLevel);
         }
         return records;
+    }
+
+    /** The token id as DSS builds it ({@code Digest#getHexValue()}), the value the reporter has to match. */
+    private static String dssTokenId(X509Certificate cert) throws Exception {
+        final String hex = new BigInteger(1, MessageDigest.getInstance("SHA-256").digest(cert.getEncoded()))
+                .toString(16);
+        return "C-" + (hex.length() % 2 == 0 ? hex : "0" + hex).toUpperCase(java.util.Locale.ENGLISH);
+    }
+
+    /**
+     * Mines a certificate whose DER SHA-256 starts with a {@code 0x00} byte (about one attempt in 256) by
+     * re-signing with a single key pair and only varying the serial number, which keeps this cheap.
+     */
+    private static X509Certificate withLeadingZeroDigestByte() throws Exception {
+        final KeyPairGenerator kpg = KeyPairGenerator.getInstance("RSA");
+        kpg.initialize(2048);
+        final KeyPair keyPair = kpg.generateKeyPair();
+        final X500Name name = new X500Name("CN=Leading Zero Digest");
+        final Date notBefore = new Date(System.currentTimeMillis() - 24L * 60 * 60 * 1000);
+        final Date notAfter = new Date(System.currentTimeMillis() + 365L * 24 * 60 * 60 * 1000);
+        final ContentSigner signer = new JcaContentSignerBuilder("SHA256withRSA")
+                .setProvider(BouncyCastleProvider.PROVIDER_NAME).build(keyPair.getPrivate());
+        final MessageDigest sha256 = MessageDigest.getInstance("SHA-256");
+
+        for (int serial = 1; serial < 20000; serial++) {
+            final X509CertificateHolder holder = new JcaX509v3CertificateBuilder(name, BigInteger.valueOf(serial),
+                    notBefore, notAfter, name, keyPair.getPublic()).build(signer);
+            if (sha256.digest(holder.getEncoded())[0] == 0) {
+                return new JcaX509CertificateConverter().setProvider(BouncyCastleProvider.PROVIDER_NAME)
+                        .getCertificate(holder);
+            }
+        }
+        throw new AssertionError("no certificate with a leading zero digest byte found");
     }
 
     private static X509Certificate selfSigned(String dn, boolean withExtensions) throws Exception {
