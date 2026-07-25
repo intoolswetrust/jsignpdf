@@ -2,6 +2,7 @@ package net.sf.jsignpdf.utils;
 
 import java.util.Locale;
 import java.util.Map;
+import java.util.logging.Level;
 
 import net.sf.jsignpdf.Constants;
 import net.sf.jsignpdf.engine.AdvancedEngineConfig;
@@ -40,6 +41,28 @@ public final class AppConfig {
 
     public static boolean relaxSslSecurity() {
         return cfg().getAsBool("relax.ssl.security", false);
+    }
+
+    /**
+     * Whether verbose signing diagnostics are enabled ({@code debug} in {@code advanced.properties}). When on,
+     * the signing pipeline logs the certificate chain, the loaded trust anchors, and every TSA / AIA / CRL /
+     * OCSP call at {@link Level#FINE}.
+     */
+    public static boolean debug() {
+        return cfg().getAsBool("debug", false);
+    }
+
+    /**
+     * Aligns the {@code net.sf.jsignpdf} logger level with the {@link #debug()} setting: {@link Level#FINE}
+     * when debug is on, {@link Level#INFO} otherwise. A logger already muted to {@link Level#OFF} (the CLI
+     * {@code -q} / {@code --quiet} flag) is left untouched, so quiet always wins over debug. Safe to call at
+     * startup and again whenever the setting changes (e.g. the Preferences dialog toggles it live).
+     */
+    public static void applyDebugLogLevel() {
+        if (Constants.LOGGER.getLevel() == Level.OFF) {
+            return;
+        }
+        Constants.LOGGER.setLevel(debug() ? Level.FINE : Level.INFO);
     }
 
     public static String pdf2imageLibraries() {

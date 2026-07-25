@@ -2,6 +2,11 @@ package net.sf.jsignpdf.utils;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertSame;
+
+import java.util.logging.Level;
+
+import net.sf.jsignpdf.Constants;
 
 import org.junit.Test;
 
@@ -19,6 +24,7 @@ public class AppConfigTest {
         AppConfig.checkValidity();
         AppConfig.checkKeyUsage();
         AppConfig.checkCriticalExtensions();
+        AppConfig.debug();
 
         // String accessors backed by getNotEmptyProperty + literal default never return null/empty.
         assertNotNull(AppConfig.pdf2imageLibraries());
@@ -59,5 +65,69 @@ public class AppConfigTest {
                 // If a developer has a real override, this assertion can be skipped — but on a clean checkout the
                 // bundled default matches the Constants literal.
                 libs.isEmpty() ? net.sf.jsignpdf.Constants.PDF2IMAGE_LIBRARIES_DEFAULT : libs);
+    }
+
+    @Test
+    public void debugReadsTheDebugKey() {
+        AdvancedConfig cfg = PropertyStoreFactory.getInstance().advancedConfig();
+        String original = cfg.hasUserOverride("debug") ? cfg.getProperty("debug") : null;
+        try {
+            cfg.setProperty("debug", "true");
+            org.junit.Assert.assertTrue("debug() must read the debug key", AppConfig.debug());
+            cfg.setProperty("debug", "false");
+            org.junit.Assert.assertFalse(AppConfig.debug());
+        } finally {
+            if (original != null) {
+                cfg.setProperty("debug", original);
+            } else {
+                cfg.removeProperty("debug");
+            }
+        }
+    }
+
+    @Test
+    public void applyDebugLogLevelMapsDebugToFineElseInfo() {
+        AdvancedConfig cfg = PropertyStoreFactory.getInstance().advancedConfig();
+        String original = cfg.hasUserOverride("debug") ? cfg.getProperty("debug") : null;
+        Level originalLevel = Constants.LOGGER.getLevel();
+        try {
+            Constants.LOGGER.setLevel(Level.INFO);
+
+            cfg.setProperty("debug", "true");
+            AppConfig.applyDebugLogLevel();
+            assertSame("debug=true raises the logger to FINE", Level.FINE, Constants.LOGGER.getLevel());
+
+            cfg.setProperty("debug", "false");
+            AppConfig.applyDebugLogLevel();
+            assertSame("debug=false lowers the logger to INFO", Level.INFO, Constants.LOGGER.getLevel());
+        } finally {
+            Constants.LOGGER.setLevel(originalLevel);
+            if (original != null) {
+                cfg.setProperty("debug", original);
+            } else {
+                cfg.removeProperty("debug");
+            }
+        }
+    }
+
+    @Test
+    public void applyDebugLogLevelLeavesQuietLoggerOff() {
+        // -q mutes the logger to OFF; debug must never override that.
+        AdvancedConfig cfg = PropertyStoreFactory.getInstance().advancedConfig();
+        String original = cfg.hasUserOverride("debug") ? cfg.getProperty("debug") : null;
+        Level originalLevel = Constants.LOGGER.getLevel();
+        try {
+            Constants.LOGGER.setLevel(Level.OFF);
+            cfg.setProperty("debug", "true");
+            AppConfig.applyDebugLogLevel();
+            assertSame("quiet (OFF) must win over debug", Level.OFF, Constants.LOGGER.getLevel());
+        } finally {
+            Constants.LOGGER.setLevel(originalLevel);
+            if (original != null) {
+                cfg.setProperty("debug", original);
+            } else {
+                cfg.removeProperty("debug");
+            }
+        }
     }
 }

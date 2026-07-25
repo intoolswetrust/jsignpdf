@@ -23,12 +23,14 @@ import net.sf.jsignpdf.engine.Capability;
 import net.sf.jsignpdf.engine.EngineConfig;
 import net.sf.jsignpdf.engine.SigningEngine;
 import net.sf.jsignpdf.fx.EngineCapabilities;
+import net.sf.jsignpdf.fx.MonocleAssumption;
 import net.sf.jsignpdf.fx.viewmodel.SigningOptionsViewModel;
 
 public class SignaturePropertiesControllerTest {
 
     @BeforeClass
     public static void initFx() throws Exception {
+        MonocleAssumption.assumeUsable();
         CountDownLatch latch = new CountDownLatch(1);
         try {
             Platform.startup(latch::countDown);

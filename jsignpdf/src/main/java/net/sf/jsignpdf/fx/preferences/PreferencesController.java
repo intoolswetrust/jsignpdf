@@ -49,6 +49,7 @@ import net.sf.jsignpdf.fx.util.NativeFileChooser;
 import net.sf.jsignpdf.fx.util.NativeFileChooser.ExtensionFilter;
 import net.sf.jsignpdf.ssl.SSLInitializer;
 import net.sf.jsignpdf.utils.AdvancedConfig;
+import net.sf.jsignpdf.utils.AppConfig;
 import net.sf.jsignpdf.utils.ConfigLocationResolver;
 import net.sf.jsignpdf.utils.FontUtils;
 import net.sf.jsignpdf.utils.PKCS11Utils;
@@ -68,7 +69,7 @@ public class PreferencesController {
     private static final String DEFAULTS_RESOURCE = "/net/sf/jsignpdf/conf/advanced.default.properties";
 
     @FXML private TabPane tabPane;
-    @FXML private Tab tabEngine;
+    @FXML private Tab tabGeneral;
     @FXML private Tab tabFont;
     @FXML private Tab tabCertificate;
     @FXML private Tab tabNetwork;
@@ -78,6 +79,7 @@ public class PreferencesController {
     @FXML private Tab tabPkcs11;
 
     @FXML private ChoiceBox<SigningEngine> cmbEngine;
+    @FXML private CheckBox chkDebug;
 
     @FXML private TextField txtFontPath;
     @FXML private Button btnFontPathBrowse;
@@ -221,6 +223,8 @@ public class PreferencesController {
             }
         });
 
+        chkDebug.selectedProperty().bindBidirectional(vm.debugProperty());
+
         txtFontPath.textProperty().bindBidirectional(vm.fontPathProperty());
         txtFontName.textProperty().bindBidirectional(vm.fontNameProperty());
         cmbFontEncoding.valueProperty().bindBidirectional(vm.fontEncodingProperty());
@@ -349,8 +353,8 @@ public class PreferencesController {
     private void resetActiveTabToDefaults() {
         Tab active = tabPane.getSelectionModel().getSelectedItem();
         AdvancedConfig defaults = bundledDefaultsHolder();
-        if (active == tabEngine) {
-            vm.applyEngineDefaults(defaults);
+        if (active == tabGeneral) {
+            vm.applyGeneralDefaults(defaults);
         } else if (active == tabFont) {
             vm.applyFontDefaults(defaults);
         } else if (active == tabCertificate) {
@@ -404,6 +408,11 @@ public class PreferencesController {
             Set<String> changed = cfg.save();
             if (changed.stream().anyMatch(k -> k.startsWith("font."))) {
                 FontUtils.reset();
+            }
+            if (changed.contains("debug")) {
+                // The logger is a process-global singleton, so a debug toggle takes effect for the next
+                // signing run without a restart.
+                AppConfig.applyDebugLogLevel();
             }
             if (changed.contains("relax.ssl.security")) {
                 // Re-apply the trust-manager / hostname-verifier so a false→true toggle takes effect for the next request.

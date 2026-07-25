@@ -126,6 +126,31 @@ public class PreferencesViewModelTest {
     }
 
     @Test
+    public void debug_roundTripsAndResetsToDefault() throws Exception {
+        Path file = tmp.newFolder().toPath().resolve("advanced.properties");
+        AdvancedConfig cfg = new AdvancedConfig(file, bundledDefaults);
+        PreferencesViewModel vm = new PreferencesViewModel();
+
+        // Bundled default is off.
+        vm.loadFrom(cfg, "");
+        assertFalse(vm.debugProperty().get());
+
+        // Turn it on and persist; it must be written under the 'debug' key.
+        vm.debugProperty().set(true);
+        vm.writeTo(cfg);
+        assertTrue(cfg.getAsBool("debug", false));
+
+        // Reload picks the persisted value back up.
+        PreferencesViewModel reloaded = new PreferencesViewModel();
+        reloaded.loadFrom(cfg, "");
+        assertTrue(reloaded.debugProperty().get());
+
+        // Reset-to-defaults for the General tab clears it.
+        reloaded.applyGeneralDefaults(new AdvancedConfig(null, bundledDefaults));
+        assertFalse(reloaded.debugProperty().get());
+    }
+
+    @Test
     public void dssSystemStoreAndMra_roundTripAndReset() throws Exception {
         Path file = tmp.newFolder().toPath().resolve("advanced.properties");
         AdvancedConfig cfg = new AdvancedConfig(file, bundledDefaults);
