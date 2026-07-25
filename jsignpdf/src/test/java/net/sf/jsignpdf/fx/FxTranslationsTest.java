@@ -53,6 +53,7 @@ public class FxTranslationsTest {
             new Locale("es"),
             new Locale("ja"),
             new Locale("zh", "CN"),
+            new Locale("nb", "NO"),
     };
 
     @BeforeClass
@@ -143,6 +144,33 @@ public class FxTranslationsTest {
             assertEquals("Exactly one visible-sig CheckMenuItem for " + locale, 1L, checkItems);
             assertEquals("Exactly one Sign menu item for " + locale, 1L, signItems);
         }
+    }
+
+    @Test
+    public void testPreferencesLoadsWithAllLocalesAndHasLanguageLabel() throws Exception {
+        for (Locale locale : TEST_LOCALES) {
+            ResourceBundle bundle = ResourceBundle.getBundle(BUNDLE_BASE, locale);
+            Parent root = loadFxml("/net/sf/jsignpdf/fx/view/Preferences.fxml", bundle);
+            assertNotNull("Preferences failed to load for locale " + locale, root);
+
+            javafx.scene.control.TabPane tabPane = (javafx.scene.control.TabPane) root;
+            javafx.scene.control.Tab general = tabPane.getTabs().get(0);
+            String expected = bundle.getString("jfx.gui.preferences.general.language");
+            boolean found = collectLabelTexts((Parent) general.getContent()).stream().anyMatch(expected::equals);
+            assertEquals("Language label missing on General tab for " + locale, true, found);
+        }
+    }
+
+    private static java.util.List<String> collectLabelTexts(Parent parent) {
+        java.util.List<String> texts = new java.util.ArrayList<>();
+        for (Node node : parent.getChildrenUnmodifiable()) {
+            if (node instanceof Label) {
+                texts.add(((Label) node).getText());
+            } else if (node instanceof Parent) {
+                texts.addAll(collectLabelTexts((Parent) node));
+            }
+        }
+        return texts;
     }
 
     private static void assertMenuContains(Menu menu, ResourceBundle bundle, String key, Locale locale) {

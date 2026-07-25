@@ -44,6 +44,14 @@ public final class AppConfig {
     }
 
     /**
+     * BCP-47 language tag of the user interface ({@code ui.language} in {@code advanced.properties}), or {@code null}
+     * when unset. Empty / unset means "follow the OS locale". Read once at startup by {@link UiLocale}.
+     */
+    public static String uiLanguage() {
+        return cfg().getProperty(UiLocale.KEY);
+    }
+
+    /**
      * Whether verbose signing diagnostics are enabled ({@code debug} in {@code advanced.properties}). When on,
      * the signing pipeline logs the certificate chain, the loaded trust anchors, and every TSA / AIA / CRL /
      * OCSP call at {@link Level#FINE}.

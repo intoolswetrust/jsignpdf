@@ -3,9 +3,12 @@ package net.sf.jsignpdf.utils;
 import static net.sf.jsignpdf.Constants.LOGGER;
 
 import java.text.MessageFormat;
+import java.util.Locale;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
 import java.util.logging.Level;
+
+import net.sf.jsignpdf.Constants;
 
 import javax.swing.AbstractButton;
 import javax.swing.JComponent;
@@ -36,6 +39,18 @@ public class ResourceProvider {
             throw new IllegalArgumentException("ResourceBundle must be not-null.");
         }
         this.bundle = bundle;
+    }
+
+    /**
+     * Swaps the active {@link ResourceBundle} to the given locale, with English-only fallback (no OS-locale
+     * fallback). Called once at startup by {@link UiLocale} so every static-import call site keeps reading through
+     * this same shared instance.
+     *
+     * @param locale target UI locale
+     */
+    public void reload(final Locale locale) {
+        this.bundle = ResourceBundle.getBundle(Constants.RESOURCE_BUNDLE_BASE, locale,
+                ResourceBundle.Control.getNoFallbackControl(ResourceBundle.Control.FORMAT_PROPERTIES));
     }
 
     /**

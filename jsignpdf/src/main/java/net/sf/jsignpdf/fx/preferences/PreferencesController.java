@@ -11,6 +11,7 @@ import java.nio.file.Path;
 import java.text.MessageFormat;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Locale;
 import java.util.Properties;
 import java.util.ResourceBundle;
 import java.util.Set;
@@ -54,6 +55,8 @@ import net.sf.jsignpdf.utils.ConfigLocationResolver;
 import net.sf.jsignpdf.utils.FontUtils;
 import net.sf.jsignpdf.utils.PKCS11Utils;
 import net.sf.jsignpdf.utils.PropertyStoreFactory;
+import net.sf.jsignpdf.utils.SupportedLanguages;
+import net.sf.jsignpdf.utils.UiLocale;
 
 /**
  * Controller for the Preferences dialog. Holds the live editing state in a {@link PreferencesViewModel}, mirrors UI changes
@@ -78,6 +81,7 @@ public class PreferencesController {
     @FXML private Tab tabDss;
     @FXML private Tab tabPkcs11;
 
+    @FXML private ChoiceBox<String> cmbUiLanguage;
     @FXML private ChoiceBox<SigningEngine> cmbEngine;
     @FXML private CheckBox chkDebug;
 
@@ -120,6 +124,26 @@ public class PreferencesController {
 
     @FXML
     private void initialize() {
+        // Language selector: empty tag = "System default", then the bundled translations.
+        cmbUiLanguage.getItems().add("");
+        cmbUiLanguage.getItems().addAll(SupportedLanguages.tags());
+        cmbUiLanguage.setConverter(new StringConverter<String>() {
+            @Override
+            public String toString(String tag) {
+                if (tag == null || tag.isEmpty()) {
+                    Locale osLocale = Locale.getDefault(Locale.Category.DISPLAY);
+                    return RES.get("jfx.gui.preferences.general.language.system",
+                            SupportedLanguages.displayName(osLocale));
+                }
+                return SupportedLanguages.displayName(Locale.forLanguageTag(tag));
+            }
+
+            @Override
+            public String fromString(String s) {
+                return null;
+            }
+        });
+
         cmbEngine.getItems().setAll(EngineRegistry.getInstance().listAll());
         cmbEngine.setConverter(new StringConverter<SigningEngine>() {
             @Override
@@ -142,7 +166,7 @@ public class PreferencesController {
      * dialog modally and persists changes on OK. Returns true if the user pressed OK and the save succeeded.
      */
     public static boolean show(Stage owner) {
-        ResourceBundle bundle = ResourceBundle.getBundle(Constants.RESOURCE_BUNDLE_BASE);
+        ResourceBundle bundle = UiLocale.bundle();
         FXMLLoader loader = new FXMLLoader(
                 PreferencesController.class.getResource("/net/sf/jsignpdf/fx/view/Preferences.fxml"), bundle);
         Parent root;
@@ -207,6 +231,8 @@ public class PreferencesController {
 
     void bind(PreferencesViewModel viewModel) {
         this.vm = viewModel;
+
+        cmbUiLanguage.valueProperty().bindBidirectional(vm.uiLanguageProperty());
 
         // The engine ChoiceBox holds SigningEngine objects; the VM stores the engine id string. Keep the two
         // in sync manually (both directions, so "Reset section" reselecting the default reflects in the combo).

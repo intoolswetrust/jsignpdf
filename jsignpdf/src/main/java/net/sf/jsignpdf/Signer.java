@@ -29,6 +29,7 @@ import net.sf.jsignpdf.utils.AppConfig;
 import net.sf.jsignpdf.utils.GuiUtils;
 import net.sf.jsignpdf.utils.KeyStoreUtils;
 import net.sf.jsignpdf.utils.PKCS11Utils;
+import net.sf.jsignpdf.utils.UiLocale;
 
 import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.ParseException;
@@ -108,6 +109,9 @@ public class Signer {
      * @param args
      */
     public static void main(String[] args) {
+        // Settle the UI locale before Constants.RES / the commons-cli option descriptions capture any strings.
+        UiLocale.init(args);
+
         SignerOptionsFromCmdLine tmpOpts = null;
 
         if (args != null && args.length > 0) {

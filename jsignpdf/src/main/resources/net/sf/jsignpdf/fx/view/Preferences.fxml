@@ -11,10 +11,18 @@
          tabClosingPolicy="UNAVAILABLE"
          prefWidth="720" prefHeight="520">
 
-    <!-- General: signing engine + diagnostics -->
+    <!-- General: UI language + signing engine + diagnostics -->
     <Tab fx:id="tabGeneral" text="%jfx.gui.preferences.section.general">
         <VBox spacing="8">
             <padding><Insets top="12" right="12" bottom="12" left="12"/></padding>
+            <HBox spacing="10" alignment="CENTER_LEFT">
+                <Label text="%jfx.gui.preferences.general.language"/>
+                <Label text="%jfx.gui.preferences.restartHint" styleClass="pref-restart-hint">
+                    <tooltip><Tooltip text="%jfx.gui.preferences.restartHint.tooltip"/></tooltip>
+                </Label>
+            </HBox>
+            <ChoiceBox fx:id="cmbUiLanguage" prefWidth="220"/>
+            <Label text="%jfx.gui.preferences.general.language.help" styleClass="pref-help" wrapText="true"/>
             <Label text="%jfx.gui.engine.label"/>
             <ChoiceBox fx:id="cmbEngine" prefWidth="220">
                 <tooltip><Tooltip text="%jfx.gui.engine.tooltip"/></tooltip>
