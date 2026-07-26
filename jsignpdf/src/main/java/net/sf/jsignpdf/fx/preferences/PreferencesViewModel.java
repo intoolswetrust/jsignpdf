@@ -14,6 +14,7 @@ import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import net.sf.jsignpdf.utils.AdvancedConfig;
 import net.sf.jsignpdf.utils.AppConfig;
+import net.sf.jsignpdf.utils.UiLocale;
 
 /**
  * Backing model for the Preferences dialog. Loaded from {@link AdvancedConfig} on dialog open and written back on OK.
@@ -66,7 +67,8 @@ public class PreferencesViewModel {
 
     /** Loads the VM from the given snapshot of {@link AdvancedConfig} and a pkcs11 file body. */
     public void loadFrom(AdvancedConfig cfg, String pkcs11FileBody) {
-        uiLanguage.set(orEmpty(cfg.getProperty("ui.language")));
+        // Canonicalised so a hand-edited zh_CN / de-AT shows up as the selector item it actually loads.
+        uiLanguage.set(UiLocale.canonicalTag(cfg.getProperty("ui.language")));
         engineId.set(cfg.getNotEmptyProperty("engine", AppConfig.DEFAULT_ENGINE_ID));
         debug.set(cfg.getAsBool("debug", false));
         fontPath.set(orEmpty(cfg.getProperty("font.path")));

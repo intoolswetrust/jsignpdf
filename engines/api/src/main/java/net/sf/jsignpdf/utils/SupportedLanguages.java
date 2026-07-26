@@ -36,7 +36,9 @@ public final class SupportedLanguages {
 
     /**
      * Label for the selector: native name plus English name, e.g. {@code "Deutsch (German)"}. The English part keeps
-     * the list readable to someone who cannot read the current UI language — the scenario behind issue #444.
+     * the list readable to someone who cannot read the current UI language — the scenario behind issue #444. Names
+     * carrying a region already bracket it, so those get an en-dash separator ({@code "中文 (中国) – Chinese (China)"})
+     * rather than a second, nested pair of parentheses.
      */
     public static String displayName(Locale locale) {
         String self = locale.getDisplayName(locale);
@@ -46,6 +48,9 @@ public final class SupportedLanguages {
         }
         if (self.equalsIgnoreCase(english)) {
             return self;
+        }
+        if (self.indexOf('(') >= 0 || english.indexOf('(') >= 0) {
+            return self + " – " + english;
         }
         return self + " (" + english + ")";
     }

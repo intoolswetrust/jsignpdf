@@ -3,12 +3,9 @@ package net.sf.jsignpdf.utils;
 import static net.sf.jsignpdf.Constants.LOGGER;
 
 import java.text.MessageFormat;
-import java.util.Locale;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
 import java.util.logging.Level;
-
-import net.sf.jsignpdf.Constants;
 
 import javax.swing.AbstractButton;
 import javax.swing.JComponent;
@@ -27,7 +24,7 @@ import javax.swing.border.TitledBorder;
  */
 public class ResourceProvider {
 
-    private ResourceBundle bundle;
+    private volatile ResourceBundle bundle;
 
     /**
      * Constructor which takes a not-<code>null</code> {@link ResourceBundle} as an argument.
@@ -42,15 +39,17 @@ public class ResourceProvider {
     }
 
     /**
-     * Swaps the active {@link ResourceBundle} to the given locale, with English-only fallback (no OS-locale
-     * fallback). Called once at startup by {@link UiLocale} so every static-import call site keeps reading through
-     * this same shared instance.
+     * Swaps the active {@link ResourceBundle}. Called once at startup by {@link UiLocale#init(String[])}, which owns
+     * the bundle base name and the fallback policy, so every static-import call site keeps reading through this same
+     * shared instance.
      *
-     * @param locale target UI locale
+     * @param newBundle the bundle to read from, not-<code>null</code>
      */
-    public void reload(final Locale locale) {
-        this.bundle = ResourceBundle.getBundle(Constants.RESOURCE_BUNDLE_BASE, locale,
-                ResourceBundle.Control.getNoFallbackControl(ResourceBundle.Control.FORMAT_PROPERTIES));
+    public void reload(final ResourceBundle newBundle) {
+        if (newBundle == null) {
+            throw new IllegalArgumentException("ResourceBundle must be not-null.");
+        }
+        this.bundle = newBundle;
     }
 
     /**

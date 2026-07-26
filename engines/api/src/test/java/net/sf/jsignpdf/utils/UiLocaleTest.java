@@ -9,25 +9,34 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import net.sf.jsignpdf.Constants;
+
 /**
  * Unit tests for {@link UiLocale}: tag resolution (including underscore normalisation and the legacy {@code no -> nb}
- * mapping) and the DISPLAY-only install (FORMAT category left untouched, so signed output cannot change).
+ * mapping) and the install, which moves the base default and the DISPLAY category while pinning FORMAT to the OS
+ * locale, so signed output cannot change.
  */
 public class UiLocaleTest {
 
+    private Locale savedDefault;
     private Locale savedDisplay;
     private Locale savedFormat;
 
     @Before
     public void saveDefaults() {
+        savedDefault = Locale.getDefault();
         savedDisplay = Locale.getDefault(Locale.Category.DISPLAY);
         savedFormat = Locale.getDefault(Locale.Category.FORMAT);
     }
 
     @After
     public void restoreDefaults() {
+        Locale.setDefault(savedDefault);
         Locale.setDefault(Locale.Category.DISPLAY, savedDisplay);
         Locale.setDefault(Locale.Category.FORMAT, savedFormat);
+        // init() swaps the process-wide Constants.RES; put it back so test execution order cannot leak a translated
+        // bundle into a later test in the same surefire fork.
+        Constants.RES.reload(UiLocale.bundle(savedDisplay));
     }
 
     @Test
@@ -58,27 +67,48 @@ public class UiLocaleTest {
         assertNull(UiLocale.resolve(""));
         assertNull(UiLocale.resolve("   "));
         assertNull("unsupported language", UiLocale.resolve("xx"));
-        assertNull("plain zh has no bundle (only zh-CN/zh-TW)", UiLocale.resolve("zh"));
         assertNull("garbage", UiLocale.resolve("@@@"));
     }
 
     @Test
-    public void initInstallsDisplayOnlyFromCliOverride() {
+    public void resolveExpandsRegionlessChinese() {
+        assertEquals("zh-CN", UiLocale.resolve("zh").toLanguageTag());
+        assertEquals("zh-TW", UiLocale.resolve("zh-TW").toLanguageTag());
+    }
+
+    @Test
+    public void canonicalTagMapsToASelectorItem() {
+        assertEquals("de", UiLocale.canonicalTag("de"));
+        assertEquals("zh-CN", UiLocale.canonicalTag("zh_CN"));
+        assertEquals("regional variant collapses to its bundle", "de", UiLocale.canonicalTag("de-AT"));
+        assertEquals("nb", UiLocale.canonicalTag("nb-NO"));
+        assertEquals("nb", UiLocale.canonicalTag("no"));
+        assertEquals("unsupported means System default", "", UiLocale.canonicalTag("xx"));
+        assertEquals("", UiLocale.canonicalTag(""));
+        assertEquals("", UiLocale.canonicalTag(null));
+    }
+
+    @Test
+    public void initInstallsBaseAndDisplayButPinsFormatToTheOsLocale() {
         Locale.setDefault(Locale.Category.FORMAT, Locale.US);
         UiLocale.init(new String[] { "-o", "ui.language=de" });
         assertEquals("de", UiLocale.current().getLanguage());
         assertEquals("DISPLAY category follows the choice", "de",
                 Locale.getDefault(Locale.Category.DISPLAY).getLanguage());
+        // getBundle(baseName) - as JavaFX uses for its own control strings - resolves against the base default, not
+        // the DISPLAY category, so the base default has to move too or the UI ends up half-translated.
+        assertEquals("base default follows the choice", "de", Locale.getDefault().getLanguage());
         assertEquals("FORMAT category is left untouched", Locale.US, Locale.getDefault(Locale.Category.FORMAT));
     }
 
     @Test
     public void initKeepsSystemDefaultForUnknownOverride() {
-        Locale.setDefault(Locale.Category.DISPLAY, Locale.ITALIAN);
+        Locale.setDefault(Locale.ITALIAN);
         UiLocale.init(new String[] { "-o", "ui.language=xx" });
         assertEquals(UiLocale.systemDefault(), UiLocale.current());
         assertEquals("DISPLAY category left untouched", Locale.ITALIAN,
                 Locale.getDefault(Locale.Category.DISPLAY));
+        assertEquals("base default left untouched", Locale.ITALIAN, Locale.getDefault());
     }
 
     @Test

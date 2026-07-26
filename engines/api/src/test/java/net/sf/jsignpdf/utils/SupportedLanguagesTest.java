@@ -1,6 +1,7 @@
 package net.sf.jsignpdf.utils;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
@@ -10,7 +11,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Locale;
-import java.util.ResourceBundle;
 import java.util.TreeSet;
 
 import org.junit.Test;
@@ -34,14 +34,13 @@ public class SupportedLanguagesTest {
     @Test
     public void norwegianBundleResolvesForNbAndNbNo() {
         // A known key whose Norwegian value differs from English, proving the nb file (not the English base) is used.
-        String english = ResourceBundle.getBundle(net.sf.jsignpdf.Constants.RESOURCE_BUNDLE_BASE, Locale.ENGLISH)
-                .getString("console.exception");
+        // Both lookups need the no-fallback control: with the default one, a machine whose locale is nb would resolve
+        // the English reference through the default-locale fallback to messages_nb and the comparison would invert.
+        String english = UiLocale.bundle(Locale.ENGLISH).getString("console.exception");
         for (Locale locale : new Locale[] { Locale.forLanguageTag("nb"), Locale.forLanguageTag("nb-NO") }) {
-            ResourceBundle bundle = ResourceBundle.getBundle(net.sf.jsignpdf.Constants.RESOURCE_BUNDLE_BASE, locale,
-                    ResourceBundle.Control.getNoFallbackControl(ResourceBundle.Control.FORMAT_PROPERTIES));
-            String value = bundle.getString("console.exception");
-            assertTrue("Expected Norwegian text for " + locale + " but got the English base value",
-                    !value.equals(english));
+            String value = UiLocale.bundle(locale).getString("console.exception");
+            assertNotEquals("Expected Norwegian text for " + locale + " but got the English base value",
+                    english, value);
         }
     }
 

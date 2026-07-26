@@ -11,8 +11,13 @@ import net.sf.jsignpdf.Constants;
  * translated string is read. {@link #init(String[])} must run first thing in {@code main()}, because
  * {@link Constants#RES} and the commons-cli option descriptions capture strings during class initialization.
  *
- * <p>The scope is deliberately {@link Locale.Category#DISPLAY} only: UI text follows the choice while number/date
- * formatting keeps following the OS locale, so a UI-language preference can never change signed output.
+ * <p>The choice is installed as the base default plus {@link Locale.Category#DISPLAY}, while
+ * {@link Locale.Category#FORMAT} is pinned to the OS locale: UI text follows the choice while number/date formatting
+ * keeps following the OS locale, so a UI-language preference can never change signed output. The base default matters
+ * because {@code ResourceBundle.getBundle(baseName)} without an explicit locale resolves against
+ * {@link Locale#getDefault()} and ignores the DISPLAY category — that is how JavaFX loads its own control strings
+ * (the OK / Cancel labels of {@code ButtonType}, text-field context menus), which would otherwise stay in the OS
+ * language and produce a half-translated UI.
  */
 public final class UiLocale {
 
@@ -49,9 +54,13 @@ public final class UiLocale {
             return;
         }
         current = locale;
-        Locale.setDefault(Locale.Category.DISPLAY, locale);
+        // setDefault(Locale) sets the base default and both categories; pin FORMAT back to the OS locale afterwards
+        // so number/date formatting - and therefore the signed output - is untouched by a UI-language choice.
+        final Locale osFormat = Locale.getDefault(Locale.Category.FORMAT);
+        Locale.setDefault(locale);
+        Locale.setDefault(Locale.Category.FORMAT, osFormat);
         ResourceBundle.clearCache();
-        Constants.RES.reload(locale);
+        Constants.RES.reload(bundle());
     }
 
     /** The resolved UI locale (the system default when unset). */
@@ -66,13 +75,34 @@ public final class UiLocale {
 
     /** A {@link ResourceBundle} for {@link #current()} with English-only fallback (no OS-locale fallback). */
     public static ResourceBundle bundle() {
-        return ResourceBundle.getBundle(Constants.RESOURCE_BUNDLE_BASE, current, NO_FALLBACK);
+        return bundle(current);
+    }
+
+    /** A {@link ResourceBundle} for the given locale with English-only fallback (no OS-locale fallback). */
+    public static ResourceBundle bundle(Locale locale) {
+        return ResourceBundle.getBundle(Constants.RESOURCE_BUNDLE_BASE, locale, NO_FALLBACK);
+    }
+
+    /**
+     * Maps a configured tag to the matching entry of {@link SupportedLanguages#tags()}, or {@code ""} when it resolves
+     * to no bundled translation. Lets the Preferences selector show a hand-edited {@code zh_CN} or {@code de-AT} as the
+     * {@code zh-CN} / {@code de} item it actually loads, instead of an unselected entry.
+     */
+    public static String canonicalTag(String tag) {
+        Locale locale = resolve(tag);
+        if (locale == null) {
+            return "";
+        }
+        String exact = locale.toLanguageTag();
+        return SupportedLanguages.tags().contains(exact) ? exact : locale.getLanguage();
     }
 
     /**
      * Resolves a configured tag to a supported {@link Locale}, or {@code null} to keep the system default. Underscores
-     * are normalised to hyphens (so a hand-edited {@code zh_CN} works) and the legacy Norwegian macrolanguage code
-     * {@code no} is mapped to {@code nb} (Java does not do this itself).
+     * are normalised to hyphens (so a hand-edited {@code zh_CN} works), the legacy Norwegian macrolanguage code
+     * {@code no} is mapped to {@code nb} (Java does not do this itself), and a region-less {@code zh} is expanded to
+     * {@code zh-CN} — the CLDR likely-subtags expansion, and the only way a bare {@code zh} can pick one of the two
+     * Chinese bundles rather than falling back to English.
      */
     static Locale resolve(String tag) {
         if (tag == null) {
@@ -86,6 +116,8 @@ public final class UiLocale {
             normalized = "nb";
         } else if (normalized.regionMatches(true, 0, "no-", 0, 3)) {
             normalized = "nb" + normalized.substring(2);
+        } else if (normalized.equalsIgnoreCase("zh")) {
+            normalized = "zh-CN";
         }
         Locale locale = Locale.forLanguageTag(normalized);
         if (locale.getLanguage().isEmpty()) {
