@@ -174,18 +174,20 @@ public class OpenPdfSigningEngine implements SigningEngine {
                 // this covers also problems with visible signatures (embedded
                 // fonts) in PDF 1.2, because the minimal version
                 // for hash algorithms is 1.3 (for SHA1)
+                final PdfVersion inputVersion = PdfVersion.fromStringVersion(inputPdfVersion);
+                final String inputVersionName = inputVersion != null ? inputVersion.getVersionName() : inputPdfVersion;
                 if (options.isAppendX()) {
-                    // if we are in append mode and version should be updated
-                    // then return false (not possible)
-                    LOGGER.info(RES.get("console.updateVersionNotPossibleInAppendModeForGivenHash",
+                    // OpenPDF can't rewrite the header version of an incremental update, so the document keeps
+                    // declaring the original version. This is a conformance detail only - the signature bytes and
+                    // their validation don't depend on the declared version.
+                    LOGGER.warning(RES.get("console.appendModeVersionNotUpdated",
                             hashAlgorithm.getAlgorithmName(), hashAlgorithm.getPdfVersion().getVersionName(),
-                            PdfVersion.fromStringVersion(inputPdfVersion).getVersionName(),
-                            HashAlgorithm.valuesWithPdfVersionAsString()));
-                    return false;
+                            inputVersionName, HashAlgorithm.valuesWithPdfVersionAsString()));
+                } else {
+                    tmpPdfVersion = requiredPdfVersionForGivenHash;
+                    LOGGER.info(RES.get("console.updateVersion", inputVersionName,
+                            hashAlgorithm.getPdfVersion().getVersionName()));
                 }
-                tmpPdfVersion = requiredPdfVersionForGivenHash;
-                LOGGER.info(RES.get("console.updateVersion",
-                        new String[] { inputPdfVersion, tmpPdfVersion }));
             }
 
             final PdfStamper stp = PdfStamper.createSignature(reader, fout, tmpPdfVersion, null, options.isAppendX());
