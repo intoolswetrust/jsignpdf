@@ -14,6 +14,7 @@ import net.sf.jsignpdf.BasicSignerOptions;
 import net.sf.jsignpdf.Constants;
 import net.sf.jsignpdf.fx.view.MainWindowController;
 import net.sf.jsignpdf.preview.JpxPluginManager;
+import net.sf.jsignpdf.utils.UiLocale;
 
 /**
  * JavaFX Application entry point for JSignPdf.
@@ -31,7 +32,7 @@ public class JSignPdfApp extends Application {
         // Register any user-installed image codecs (e.g. the optional JPEG 2000 reader) so the preview can use them.
         JpxPluginManager.registerInstalledPlugins();
 
-        ResourceBundle bundle = ResourceBundle.getBundle(Constants.RESOURCE_BUNDLE_BASE);
+        ResourceBundle bundle = UiLocale.bundle();
         FXMLLoader loader = new FXMLLoader(
                 getClass().getResource("/net/sf/jsignpdf/fx/view/MainWindow.fxml"), bundle);
         Parent root = loader.load();

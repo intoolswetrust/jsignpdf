@@ -151,6 +151,38 @@ public class PreferencesViewModelTest {
     }
 
     @Test
+    public void uiLanguage_roundTripsEmptyRemovesKeyAndResets() throws Exception {
+        Path file = tmp.newFolder().toPath().resolve("advanced.properties");
+        AdvancedConfig cfg = new AdvancedConfig(file, bundledDefaults);
+        PreferencesViewModel vm = new PreferencesViewModel();
+
+        // Bundled default is empty (follow the OS locale).
+        vm.loadFrom(cfg, "");
+        assertEquals("", vm.uiLanguageProperty().get());
+
+        // Set a language and persist under the 'ui.language' key.
+        vm.uiLanguageProperty().set("de");
+        vm.writeTo(cfg);
+        assertEquals("de", cfg.getProperty("ui.language"));
+        assertTrue(cfg.hasUserOverride("ui.language"));
+
+        // Reload picks the persisted value up.
+        PreferencesViewModel reloaded = new PreferencesViewModel();
+        reloaded.loadFrom(cfg, "");
+        assertEquals("de", reloaded.uiLanguageProperty().get());
+
+        // Clearing the field removes the user override (falls back to the empty bundled default).
+        reloaded.uiLanguageProperty().set("");
+        reloaded.writeTo(cfg);
+        assertFalse(cfg.hasUserOverride("ui.language"));
+
+        // Reset-to-defaults for the General tab also clears it.
+        reloaded.uiLanguageProperty().set("fr");
+        reloaded.applyGeneralDefaults(new AdvancedConfig(null, bundledDefaults));
+        assertEquals("", reloaded.uiLanguageProperty().get());
+    }
+
+    @Test
     public void dssSystemStoreAndMra_roundTripAndReset() throws Exception {
         Path file = tmp.newFolder().toPath().resolve("advanced.properties");
         AdvancedConfig cfg = new AdvancedConfig(file, bundledDefaults);

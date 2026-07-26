@@ -1088,6 +1088,8 @@ Application-wide tweaks beyond the per-document signing options live in `<config
 
 Set `debug=true` (bundled default `false`, the *Debug output* checkbox on the _General_ tab of the Preferences dialog) to log the verbose signing diagnostics -- the certificate chain, the loaded trust anchors, and every timestamp / OCSP / CRL / AIA network call. See <<Reading the signing diagnostics>>.
 
+Set `ui.language` to a BCP-47 language tag (e.g. `de`, `fr`, `pt`, `zh-CN`) to pick the interface language explicitly instead of following the operating-system locale; the empty bundled default keeps *System default*. The value is read once at startup, so restart JSignPdf for a change to take effect. It is exposed as the *Language* selector on the _General_ tab of the Preferences dialog (which lists the bundled translations and writes this key), and on the command line as `-o ui.language=<tag>` -- for example `jsignpdf --help -o ui.language=de` prints the help in German. The choice affects the interface text only; number and date formatting (and therefore the signed output) keep following the OS locale.
+
 In batch mode, any of these keys can be overridden for a single run with the `-o key=value` command-line option (see <<General options>>), without changing the file. CLI overrides take precedence over `advanced.properties` and the bundled defaults, and are not persisted.
 
 === Migration from earlier versions

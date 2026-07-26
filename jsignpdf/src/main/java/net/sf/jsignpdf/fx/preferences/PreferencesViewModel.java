@@ -14,6 +14,7 @@ import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import net.sf.jsignpdf.utils.AdvancedConfig;
 import net.sf.jsignpdf.utils.AppConfig;
+import net.sf.jsignpdf.utils.UiLocale;
 
 /**
  * Backing model for the Preferences dialog. Loaded from {@link AdvancedConfig} on dialog open and written back on OK.
@@ -26,6 +27,7 @@ public class PreferencesViewModel {
     public static final String LIB_PDFBOX = "pdfbox";
     public static final String LIB_OPENPDF = "openpdf";
 
+    private final StringProperty uiLanguage = new SimpleStringProperty("");
     private final StringProperty engineId = new SimpleStringProperty(AppConfig.DEFAULT_ENGINE_ID);
     private final BooleanProperty debug = new SimpleBooleanProperty(false);
 
@@ -65,6 +67,8 @@ public class PreferencesViewModel {
 
     /** Loads the VM from the given snapshot of {@link AdvancedConfig} and a pkcs11 file body. */
     public void loadFrom(AdvancedConfig cfg, String pkcs11FileBody) {
+        // Canonicalised so a hand-edited zh_CN / de-AT shows up as the selector item it actually loads.
+        uiLanguage.set(UiLocale.canonicalTag(cfg.getProperty("ui.language")));
         engineId.set(cfg.getNotEmptyProperty("engine", AppConfig.DEFAULT_ENGINE_ID));
         debug.set(cfg.getAsBool("debug", false));
         fontPath.set(orEmpty(cfg.getProperty("font.path")));
@@ -98,6 +102,7 @@ public class PreferencesViewModel {
 
     /** Writes the VM back into the given {@link AdvancedConfig} (does not persist; caller should call {@code save()}). */
     public void writeTo(AdvancedConfig cfg) {
+        writeStringOrRemove(cfg, "ui.language", uiLanguage.get());
         cfg.setProperty("engine", orFallback(engineId.get(), AppConfig.DEFAULT_ENGINE_ID));
         cfg.setProperty("debug", debug.get());
         writeStringOrRemove(cfg, "font.path", fontPath.get());
@@ -135,6 +140,7 @@ public class PreferencesViewModel {
     }
 
     public void applyGeneralDefaults(AdvancedConfig defaults) {
+        uiLanguage.set(orEmpty(defaults.getBundledDefault("ui.language")));
         engineId.set(orFallback(defaults.getBundledDefault("engine"), AppConfig.DEFAULT_ENGINE_ID));
         debug.set(parseBool(defaults.getBundledDefault("debug"), false));
     }
@@ -258,6 +264,7 @@ public class PreferencesViewModel {
         }
     }
 
+    public StringProperty uiLanguageProperty() { return uiLanguage; }
     public StringProperty engineIdProperty() { return engineId; }
     public BooleanProperty debugProperty() { return debug; }
     public StringProperty fontPathProperty() { return fontPath; }

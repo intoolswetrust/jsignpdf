@@ -24,7 +24,7 @@ import javax.swing.border.TitledBorder;
  */
 public class ResourceProvider {
 
-    private ResourceBundle bundle;
+    private volatile ResourceBundle bundle;
 
     /**
      * Constructor which takes a not-<code>null</code> {@link ResourceBundle} as an argument.
@@ -36,6 +36,20 @@ public class ResourceProvider {
             throw new IllegalArgumentException("ResourceBundle must be not-null.");
         }
         this.bundle = bundle;
+    }
+
+    /**
+     * Swaps the active {@link ResourceBundle}. Called once at startup by {@link UiLocale#init(String[])}, which owns
+     * the bundle base name and the fallback policy, so every static-import call site keeps reading through this same
+     * shared instance.
+     *
+     * @param newBundle the bundle to read from, not-<code>null</code>
+     */
+    public void reload(final ResourceBundle newBundle) {
+        if (newBundle == null) {
+            throw new IllegalArgumentException("ResourceBundle must be not-null.");
+        }
+        this.bundle = newBundle;
     }
 
     /**
