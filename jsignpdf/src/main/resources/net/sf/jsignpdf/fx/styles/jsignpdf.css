@@ -129,6 +129,14 @@
     -fx-stroke-width: 1;
 }
 
+/* Rectangle of a selected existing signature field - display only, so a different colour than the
+   draggable placement rectangle and no handles. */
+.signature-field-rect {
+    -fx-stroke: #2e7d32;
+    -fx-stroke-width: 2;
+    -fx-fill: rgba(46, 125, 50, 0.15);
+}
+
 /* Accordion in side panel */
 .titled-pane > .title {
     -fx-font-weight: bold;

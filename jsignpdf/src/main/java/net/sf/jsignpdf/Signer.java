@@ -25,6 +25,7 @@ import javax.swing.WindowConstants;
 import net.sf.jsignpdf.engine.EngineRegistry;
 import net.sf.jsignpdf.engine.SigningEngine;
 import net.sf.jsignpdf.ssl.SSLInitializer;
+import net.sf.jsignpdf.types.SignatureFieldInfo;
 import net.sf.jsignpdf.utils.AppConfig;
 import net.sf.jsignpdf.utils.GuiUtils;
 import net.sf.jsignpdf.utils.KeyStoreUtils;
@@ -164,6 +165,17 @@ public class Signer {
                 listEngines();
                 return;
             }
+            if (tmpOpts.isListSigFields()) {
+                // Unlike the other listing commands this one needs an input PDF, so it is handled after the
+                // input files have been collected.
+                if (ArrayUtils.isEmpty(tmpOpts.getFiles()) && StringUtils.isEmpty(tmpOpts.getInFile())) {
+                    printHelp();
+                    exit(EXIT_CODE_NO_COMMAND);
+                    return;
+                }
+                exit(listSigFields(tmpOpts));
+                return;
+            }
             if (tmpOpts.isGui()) {
                 showGui = true;
             } else if (ArrayUtils.isNotEmpty(tmpOpts.getFiles())
@@ -172,7 +184,7 @@ public class Signer {
                 exit(0);
             } else {
                 final boolean tmpCommand = tmpOpts.isPrintVersion() || tmpOpts.isPrintHelp() || tmpOpts.isListKeyStores()
-                        || tmpOpts.isListKeys() || tmpOpts.isListEngines();
+                        || tmpOpts.isListKeys() || tmpOpts.isListEngines() || tmpOpts.isListSigFields();
                 if (!tmpCommand) {
                     // no valid command provided - print help and exit
                     printHelp();
@@ -292,50 +304,114 @@ public class Signer {
         int successCount = 0;
         int failedCount = 0;
 
-        for (final String wildcardPath : anOpts.getFiles()) {
-            final File wildcardFile = new File(wildcardPath);
-
-            File[] inputFiles;
-            if (StringUtils.containsAny(wildcardFile.getName(), '*', '?')) {
-                final File inputFolder = wildcardFile.getAbsoluteFile().getParentFile();
-                final FileFilter fileFilter = new AndFileFilter(FileFileFilter.FILE,
-                        new WildcardFileFilter(wildcardFile.getName()));
-                inputFiles = inputFolder.listFiles(fileFilter);
-                if (inputFiles == null) {
-                    continue;
-                }
-            } else {
-                inputFiles = new File[] { wildcardFile };
+        for (File inputFile : expandInputFiles(anOpts.getFiles())) {
+            final String tmpInFile = inputFile.getPath();
+            if (!inputFile.canRead()) {
+                failedCount++;
+                System.err.println(RES.get("file.notReadable", new String[] { tmpInFile }));
+                continue;
             }
-            for (File inputFile : inputFiles) {
-                final String tmpInFile = inputFile.getPath();
-                if (!inputFile.canRead()) {
-                    failedCount++;
-                    System.err.println(RES.get("file.notReadable", new String[] { tmpInFile }));
-                    continue;
-                }
-                anOpts.setInFile(tmpInFile);
-                String tmpNameBase = inputFile.getName();
-                String tmpSuffix = ".pdf";
-                if (StringUtils.endsWithIgnoreCase(tmpNameBase, tmpSuffix)) {
-                    tmpSuffix = StringUtils.right(tmpNameBase, 4);
-                    tmpNameBase = StringUtils.left(tmpNameBase, tmpNameBase.length() - 4);
-                }
-                final StringBuilder tmpName = new StringBuilder(anOpts.getOutPath());
-                tmpName.append(anOpts.getOutPrefix());
-                tmpName.append(tmpNameBase).append(anOpts.getOutSuffix()).append(tmpSuffix);
-                anOpts.setOutFile(tmpName.toString());
-                if (tmpLogic.signFile()) {
-                    successCount++;
-                } else {
-                    failedCount++;
-                }
-
+            anOpts.setInFile(tmpInFile);
+            String tmpNameBase = inputFile.getName();
+            String tmpSuffix = ".pdf";
+            if (StringUtils.endsWithIgnoreCase(tmpNameBase, tmpSuffix)) {
+                tmpSuffix = StringUtils.right(tmpNameBase, 4);
+                tmpNameBase = StringUtils.left(tmpNameBase, tmpNameBase.length() - 4);
+            }
+            final StringBuilder tmpName = new StringBuilder(anOpts.getOutPath());
+            tmpName.append(anOpts.getOutPrefix());
+            tmpName.append(tmpNameBase).append(anOpts.getOutSuffix()).append(tmpSuffix);
+            anOpts.setOutFile(tmpName.toString());
+            if (tmpLogic.signFile()) {
+                successCount++;
+            } else {
+                failedCount++;
             }
         }
         if (failedCount > 0) {
             exit(successCount > 0 ? Constants.EXIT_CODE_SOME_SIG_FAILED : Constants.EXIT_CODE_ALL_SIG_FAILED);
         }
+    }
+
+    /**
+     * Expands the input file arguments - a path with {@code *} or {@code ?} in its name is matched against its
+     * folder, everything else is taken as-is.
+     */
+    private static List<File> expandInputFiles(String[] wildcardPaths) {
+        final List<File> result = new ArrayList<>();
+        for (final String wildcardPath : wildcardPaths) {
+            final File wildcardFile = new File(wildcardPath);
+            if (StringUtils.containsAny(wildcardFile.getName(), '*', '?')) {
+                final File inputFolder = wildcardFile.getAbsoluteFile().getParentFile();
+                final FileFilter fileFilter = new AndFileFilter(FileFileFilter.FILE,
+                        new WildcardFileFilter(wildcardFile.getName()));
+                final File[] inputFiles = inputFolder.listFiles(fileFilter);
+                if (inputFiles == null) {
+                    continue;
+                }
+                Collections.addAll(result, inputFiles);
+            } else {
+                result.add(wildcardFile);
+            }
+        }
+        return result;
+    }
+
+    /**
+     * Prints the signature fields of every input PDF: number, name, page, rectangle and state. The numbers are
+     * the ones {@code --sig-field #N} accepts.
+     *
+     * @return the exit code - {@link Constants#EXIT_CODE_CANT_READ_FILE} when a file couldn't be read
+     */
+    private static int listSigFields(SignerOptionsFromCmdLine anOpts) {
+        final List<File> inputFiles = ArrayUtils.isEmpty(anOpts.getFiles())
+                ? List.of(new File(anOpts.getInFile()))
+                : expandInputFiles(anOpts.getFiles());
+        int failedCount = 0;
+        for (File inputFile : inputFiles) {
+            anOpts.setInFile(inputFile.getPath());
+            try {
+                final List<SignatureFieldInfo> fields = new PdfExtraInfo(anOpts).getSignatureFields();
+                if (fields.isEmpty()) {
+                    System.out.println(RES.get("console.sigFields.none", inputFile.getPath()));
+                    continue;
+                }
+                System.out.println(RES.get("console.sigFields", inputFile.getPath()));
+                for (SignatureFieldInfo field : fields) {
+                    System.out.println(formatSigField(field));
+                }
+            } catch (Exception e) {
+                failedCount++;
+                System.err.println(RES.get("console.sigField.cantReadFields", inputFile.getPath(),
+                        StringUtils.defaultString(e.getMessage(), e.getClass().getName())));
+            }
+        }
+        return failedCount > 0 ? Constants.EXIT_CODE_CANT_READ_FILE : 0;
+    }
+
+    private static String formatSigField(SignatureFieldInfo field) {
+        final StringBuilder sb = new StringBuilder();
+        sb.append(String.format("%s%-3d %-30s page %-4d [%.1f %.1f %.1f %.1f] %s",
+                Constants.SIG_FIELD_SELECTOR_NUMBER_PREFIX, field.number(), field.name(), field.page(), field.llx(),
+                field.lly(), field.urx(), field.ury(),
+                RES.get(field.signed() ? "console.sigField.state.signed" : "console.sigField.state.blank")));
+        if (field.hidden()) {
+            sb.append(", ").append(RES.get("console.sigField.state.hidden"));
+        }
+        if (shadowsSelector(field.name())) {
+            sb.append(' ').append(RES.get("console.sigField.shadowsSelector"));
+        }
+        return sb.toString();
+    }
+
+    /**
+     * A field whose name is literally {@code auto} or {@code #N} shadows the selector of the same spelling - an
+     * exact name match wins, so the selector can't be used to mean anything else in this document.
+     */
+    private static boolean shadowsSelector(String fieldName) {
+        return Constants.SIG_FIELD_SELECTOR_AUTO.equals(fieldName)
+                || (fieldName.startsWith(Constants.SIG_FIELD_SELECTOR_NUMBER_PREFIX)
+                        && StringUtils.isNumeric(fieldName.substring(1)) && fieldName.length() > 1);
     }
 
     /**

@@ -80,6 +80,11 @@ public class BasicSignerOptions {
     private String imgPath;
     private String bgImgPath;
     private boolean acro6Layers = Constants.DEFVAL_ACRO6LAYERS;
+    // Existing (empty) signature field to sign into. null = create a new field. This holds what the user
+    // configured, which may be a "#N" / "auto" selector; the name resolved against the current input file is
+    // kept separately so a batch run re-resolves the selector for every file.
+    private String sigFieldName = Constants.DEFVAL_SIG_FIELD;
+    private String resolvedSigFieldName;
 
     // options for timestamps (provided by external TSA)
     private boolean timestamp;
@@ -185,6 +190,7 @@ public class BasicSignerOptions {
         setBgImgPath(store.getProperty(Constants.PROPERTY_VISIBLE_BGIMG));
         setAcro6Layers(!store.exists(Constants.PROPERTY_VISIBLE_ACRO6LAYERS)
                 || store.getAsBool(Constants.PROPERTY_VISIBLE_ACRO6LAYERS));
+        setSigFieldName(store.getProperty(Constants.PROPERTY_VISIBLE_FIELD_NAME));
 
         // TSA
         setTimestamp(store.getAsBool(Constants.PROPERTY_TSA_ENABLED));
@@ -307,6 +313,7 @@ public class BasicSignerOptions {
         store.setProperty(Constants.PROPERTY_VISIBLE_IMG, getImgPath());
         store.setProperty(Constants.PROPERTY_VISIBLE_BGIMG, getBgImgPath());
         store.setProperty(Constants.PROPERTY_VISIBLE_ACRO6LAYERS, isAcro6Layers());
+        store.setProperty(Constants.PROPERTY_VISIBLE_FIELD_NAME, getSigFieldName());
 
         store.setProperty(Constants.PROPERTY_TSA_ENABLED, isTimestamp());
         store.setProperty(Constants.PROPERTY_TSA_URL, getTsaUrl());
@@ -877,6 +884,52 @@ public class BasicSignerOptions {
     }
 
     /**
+     * The configured existing signature field to sign into, or {@code null} when a new field should be created.
+     * This is what the user set and what gets persisted - it may be a {@code #N} or {@code auto} selector rather
+     * than a field name. Engines must use {@link #getSigFieldNameX()} instead.
+     *
+     * @return the configured signature field selector or {@code null}
+     */
+    public String getSigFieldName() {
+        return sigFieldName;
+    }
+
+    /**
+     * @param sigFieldName the signature field name or selector to set (empty value is normalized to {@code null})
+     */
+    public void setSigFieldName(final String sigFieldName) {
+        this.sigFieldName = StringUtils.isEmpty(sigFieldName) ? null : sigFieldName;
+    }
+
+    /**
+     * Records the field name the configured selector resolved to for the file being signed. Set per input file,
+     * so that a selector stays a selector across the files of a batch run.
+     *
+     * @param resolvedSigFieldName the resolved field name, or {@code null} to drop a previous resolution
+     */
+    public void setResolvedSigFieldName(final String resolvedSigFieldName) {
+        this.resolvedSigFieldName = StringUtils.isEmpty(resolvedSigFieldName) ? null : resolvedSigFieldName;
+    }
+
+    /**
+     * The name of the existing signature field to sign into - the resolved one when a selector was resolved for
+     * this file, the configured value otherwise. This is what engines pass to
+     * {@code PdfSignatureAppearance.setVisibleSignature(String)} / {@code SignatureFieldParameters.setFieldId}.
+     *
+     * @return the signature field name or {@code null} when a new field should be created
+     */
+    public String getSigFieldNameX() {
+        return resolvedSigFieldName != null ? resolvedSigFieldName : sigFieldName;
+    }
+
+    /**
+     * Returns true when the signature goes into an existing signature field.
+     */
+    public boolean isSigFieldSet() {
+        return getSigFieldNameX() != null;
+    }
+
+    /**
      * Returns decrypted property from the backing main-config store.
      */
     protected String getDecrypted(final String aProperty) {
@@ -1364,6 +1417,7 @@ public class BasicSignerOptions {
         copy.setImgPath(getImgPath());
         copy.setBgImgPath(getBgImgPath());
         copy.setAcro6Layers(isAcro6Layers());
+        copy.setSigFieldName(getSigFieldName());
         copy.setTimestamp(isTimestamp());
         copy.setTsaUrl(getTsaUrl());
         copy.setTsaServerAuthn(getTsaServerAuthn());

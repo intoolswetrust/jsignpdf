@@ -85,7 +85,7 @@ public class OpenPdfSigningEngine implements SigningEngine {
             Capability.VISIBLE_RENDER_MODE_DESCRIPTION_ONLY, Capability.VISIBLE_RENDER_MODE_GRAPHIC_AND_DESCRIPTION,
             Capability.VISIBLE_RENDER_MODE_NAME_AND_DESCRIPTION, Capability.VISIBLE_BACKGROUND_IMAGE,
             Capability.VISIBLE_BACKGROUND_IMAGE_SCALE, Capability.VISIBLE_SIGNATURE_GRAPHIC, Capability.VISIBLE_CUSTOM_FONT,
-            Capability.ACRO6_LAYERS,
+            Capability.ACRO6_LAYERS, Capability.SIGN_EXISTING_FIELD,
             Capability.TSA, Capability.TSA_POLICY_OID, Capability.TSA_BASIC_AUTH, Capability.OCSP_EMBED,
             Capability.CRL_EMBED,
             Capability.PROXY_SUPPORT,
@@ -325,12 +325,20 @@ public class OpenPdfSigningEngine implements SigningEngine {
                 }
                 sap.setRender(renderMode.getRender());
                 LOGGER.info(RES.get("console.setVisibleSignature"));
-                int page = options.getPage();
-                if (page < 1 || page > reader.getNumberOfPages()) {
-                    page = reader.getNumberOfPages();
+                final String sigFieldName = options.getSigFieldNameX();
+                if (sigFieldName != null) {
+                    // The field's own /Rect and page win - OpenPDF reads both from the field itself (and
+                    // applies the page rotation), so the configured coordinates are not used at all.
+                    LOGGER.info(RES.get("console.sigField.placing", sigFieldName));
+                    sap.setVisibleSignature(sigFieldName);
+                } else {
+                    int page = options.getPage();
+                    if (page < 1 || page > reader.getNumberOfPages()) {
+                        page = reader.getNumberOfPages();
+                    }
+                    Rectangle signitureRect = computeSignatureRectangle(reader.getPageSize(page), options);
+                    sap.setVisibleSignature(signitureRect, page, null);
                 }
-                Rectangle signitureRect = computeSignatureRectangle(reader.getPageSize(page), options);
-                sap.setVisibleSignature(signitureRect, page, null);
             }
 
             LOGGER.info(RES.get("console.processing"));

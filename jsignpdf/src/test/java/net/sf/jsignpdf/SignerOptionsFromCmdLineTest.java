@@ -411,6 +411,52 @@ public class SignerOptionsFromCmdLineTest {
         }
     }
 
+    @Test
+    public void sigFieldOptionIsParsed() throws Exception {
+        Fixture f = new Fixture("");
+        f.opts.setCmdLine(new String[] { "-sf", "Signature2" });
+        f.opts.loadCmdLine();
+        assertEquals("Signature2", f.opts.getSigFieldName());
+        assertTrue(f.opts.isSigFieldSet());
+    }
+
+    @Test
+    public void sigFieldSelectorsArePassedThroughUnresolved() throws Exception {
+        // The selectors are resolved per input file at signing time, so parsing must keep them verbatim.
+        Fixture f = new Fixture("");
+        f.opts.setCmdLine(new String[] { "--sig-field", "#2" });
+        f.opts.loadCmdLine();
+        assertEquals("#2", f.opts.getSigFieldName());
+
+        Fixture auto = new Fixture("");
+        auto.opts.setCmdLine(new String[] { "--sig-field", "auto" });
+        auto.opts.loadCmdLine();
+        assertEquals("auto", auto.opts.getSigFieldName());
+    }
+
+    @Test
+    public void noSigFieldOptionMeansNewField() throws Exception {
+        Fixture f = new Fixture("");
+        f.opts.setCmdLine(new String[] { "-ksf", "/tmp/x.p12" });
+        f.opts.loadCmdLine();
+        assertNull(f.opts.getSigFieldName());
+        assertFalse(f.opts.isSigFieldSet());
+    }
+
+    @Test
+    public void listSigFieldsIsACommand() throws Exception {
+        Fixture f = new Fixture("");
+        f.opts.setCmdLine(new String[] { "-lsf", "document.pdf" });
+        f.opts.loadCmdLine();
+        assertTrue(f.opts.isListSigFields());
+        assertEquals("document.pdf", f.opts.getInFile());
+
+        Fixture without = new Fixture("");
+        without.opts.setCmdLine(new String[] { "document.pdf" });
+        without.opts.loadCmdLine();
+        assertFalse(without.opts.isListSigFields());
+    }
+
     /** Convenience wiring: captures warnings and feeds a canned stdin reader with no Console. */
     private static final class Fixture {
         final SignerOptionsFromCmdLine opts = new SignerOptionsFromCmdLine();

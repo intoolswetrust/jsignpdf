@@ -17,6 +17,9 @@ public class SignatureOverlay extends Pane {
     private final SignaturePlacementViewModel viewModel;
     private final Rectangle sigRect = new Rectangle();
     private final Rectangle[] handles = new Rectangle[4]; // corners: TL, TR, BL, BR
+    /** Read-only marker for the rectangle of a selected existing signature field (no drag handles). */
+    private final Rectangle fieldRect = new Rectangle();
+    private double fieldRelX, fieldRelY, fieldRelWidth, fieldRelHeight;
 
     // Drag state
     private double dragStartX, dragStartY;
@@ -35,6 +38,11 @@ public class SignatureOverlay extends Pane {
         sigRect.getStyleClass().add("signature-rect");
         sigRect.setVisible(false);
         getChildren().add(sigRect);
+
+        fieldRect.getStyleClass().add("signature-field-rect");
+        fieldRect.setVisible(false);
+        fieldRect.setMouseTransparent(true);
+        getChildren().add(fieldRect);
 
         // Setup corner handles
         for (int i = 0; i < 4; i++) {
@@ -68,7 +76,39 @@ public class SignatureOverlay extends Pane {
         heightProperty().addListener((obs, o, n) -> updateRectPosition());
     }
 
+    /**
+     * Marks the rectangle of a selected existing signature field, in relative (0..1) page coordinates with the
+     * origin in the top-left corner. The marker is display-only - the field's own {@code /Rect} decides where
+     * the signature goes, so there is nothing to drag.
+     */
+    public void setFieldHighlight(double relX, double relY, double relWidth, double relHeight) {
+        fieldRelX = relX;
+        fieldRelY = relY;
+        fieldRelWidth = relWidth;
+        fieldRelHeight = relHeight;
+        fieldRect.setVisible(true);
+        updateFieldRectPosition();
+    }
+
+    /**
+     * Removes the existing-field marker (no field selected any more, or another page is shown).
+     */
+    public void clearFieldHighlight() {
+        fieldRect.setVisible(false);
+    }
+
+    private void updateFieldRectPosition() {
+        double w = getWidth();
+        double h = getHeight();
+        if (w <= 0 || h <= 0) return;
+        fieldRect.setX(fieldRelX * w);
+        fieldRect.setY(fieldRelY * h);
+        fieldRect.setWidth(fieldRelWidth * w);
+        fieldRect.setHeight(fieldRelHeight * h);
+    }
+
     private void updateRectPosition() {
+        updateFieldRectPosition();
         double w = getWidth();
         double h = getHeight();
         if (w <= 0 || h <= 0) return;

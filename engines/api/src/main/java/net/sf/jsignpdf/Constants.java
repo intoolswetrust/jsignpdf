@@ -153,6 +153,7 @@ public class Constants {
     public static final String PROPERTY_VISIBLE_IMG = "visibleSignature.img";
     public static final String PROPERTY_VISIBLE_BGIMG = "visibleSignature.bgImg";
     public static final String PROPERTY_VISIBLE_ACRO6LAYERS = "visibleSignature.acro6layers";
+    public static final String PROPERTY_VISIBLE_FIELD_NAME = "visibleSignature.fieldName";
 
     public static final String PROPERTY_TSA_ENABLED = "tsa.enabled";
     public static final String PROPERTY_TSA_URL = "tsa.url";
@@ -209,6 +210,8 @@ public class Constants {
 
     public static final int DEFVAL_KEY_INDEX = 0;
     public static final int DEFVAL_PAGE = 1;
+    /** No signature field selected - a new field is created for the signature. */
+    public static final String DEFVAL_SIG_FIELD = null;
     public static final float DEFVAL_LLX = 0f;
     public static final float DEFVAL_LLY = 0f;
     public static final float DEFVAL_URX = 100f;
@@ -255,6 +258,9 @@ public class Constants {
 
     public static final String ARG_LIST_ENGINES = "le";
     public static final String ARG_LIST_ENGINES_LONG = "list-engines";
+
+    public static final String ARG_LIST_SIG_FIELDS = "lsf";
+    public static final String ARG_LIST_SIG_FIELDS_LONG = "list-sig-fields";
 
     public static final String ARG_KS_TYPE_LONG = "keystore-type";
     public static final String ARG_KS_TYPE = "kst";
@@ -344,6 +350,14 @@ public class Constants {
     public static final String ARG_VISIBLE_LONG = "visible-signature";
     public static final String ARG_PAGE = "pg";
     public static final String ARG_PAGE_LONG = "page";
+
+    public static final String ARG_SIG_FIELD = "sf";
+    public static final String ARG_SIG_FIELD_LONG = "sig-field";
+
+    /** Selector for the first blank signature field in document order. */
+    public static final String SIG_FIELD_SELECTOR_AUTO = "auto";
+    /** Prefix of the "N-th signature field in document order" selector. */
+    public static final String SIG_FIELD_SELECTOR_NUMBER_PREFIX = "#";
 
     public static final String ARG_POS_LLX = "llx";
     public static final String ARG_POS_LLY = "lly";

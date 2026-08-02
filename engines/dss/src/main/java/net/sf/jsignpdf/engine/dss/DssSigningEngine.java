@@ -11,6 +11,7 @@ import static net.sf.jsignpdf.Constants.RES;
 
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.net.Proxy;
 import java.net.URI;
 import java.security.PrivateKey;
@@ -22,6 +23,7 @@ import java.util.Calendar;
 import java.util.Collection;
 import java.util.EnumSet;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.logging.Level;
@@ -53,6 +55,11 @@ import org.apache.pdfbox.pdmodel.encryption.AccessPermission;
 import org.apache.pdfbox.pdmodel.encryption.StandardProtectionPolicy;
 import org.apache.pdfbox.pdmodel.PDPage;
 import org.apache.pdfbox.pdmodel.common.PDRectangle;
+import org.apache.pdfbox.pdmodel.interactive.annotation.PDAnnotation;
+import org.apache.pdfbox.pdmodel.interactive.annotation.PDAnnotationWidget;
+import org.apache.pdfbox.pdmodel.interactive.form.PDAcroForm;
+import org.apache.pdfbox.pdmodel.interactive.form.PDField;
+import org.apache.pdfbox.pdmodel.interactive.form.PDSignatureField;
 
 import eu.europa.esig.dss.alert.LogOnStatusAlert;
 import eu.europa.esig.dss.enumerations.CertificationPermission;
@@ -160,6 +167,7 @@ public class DssSigningEngine implements SigningEngine {
             Capability.VISIBLE_CUSTOM_FONT,
             Capability.VISIBLE_RENDER_MODE_DESCRIPTION_ONLY,
             Capability.VISIBLE_RENDER_MODE_GRAPHIC_AND_DESCRIPTION,
+            Capability.SIGN_EXISTING_FIELD,
 
             Capability.TSA, Capability.TSA_POLICY_OID, Capability.TSA_BASIC_AUTH,
             Capability.OCSP_EMBED, Capability.CRL_EMBED,
@@ -626,39 +634,64 @@ public class DssSigningEngine implements SigningEngine {
     private void configureVisibleSignature(PAdESSignatureParameters parameters, BasicSignerOptions options,
             Certificate[] chain, Calendar signingCal, File inFile) throws Exception {
         final JSignPdfSignatureImageParameters imageParams = new JSignPdfSignatureImageParameters();
-
-        int page = options.getPage();
-        float pageWidth;
-        float pageHeight;
-        try (PDDocument pdDoc = Loader.loadPDF(inFile)) {
-            final int totalPages = pdDoc.getNumberOfPages();
-            if (page < 1 || page > totalPages) {
-                page = totalPages;
-            }
-            final PDPage pdPage = pdDoc.getPage(page - 1);
-            final PDRectangle mediaBox = pdPage.getMediaBox();
-            final int rotation = pdPage.getRotation();
-            if (rotation == 90 || rotation == 270) {
-                pageWidth = mediaBox.getHeight();
-                pageHeight = mediaBox.getWidth();
-            } else {
-                pageWidth = mediaBox.getWidth();
-                pageHeight = mediaBox.getHeight();
-            }
-        }
-
-        final float llx = fixPosition(options.getPositionLLX(), pageWidth);
-        final float lly = fixPosition(options.getPositionLLY(), pageHeight);
-        final float urx = fixPosition(options.getPositionURX(), pageWidth);
-        final float ury = fixPosition(options.getPositionURY(), pageHeight);
-
         final SignatureFieldParameters fieldParams = new SignatureFieldParameters();
-        fieldParams.setPage(page);
-        fieldParams.setOriginX(llx);
-        // DSS uses a top-left origin (PDF uses bottom-left), so flip the Y coordinate.
-        fieldParams.setOriginY(pageHeight - ury);
-        fieldParams.setWidth(urx - llx);
-        fieldParams.setHeight(ury - lly);
+        // Size of the box the appearance is drawn into, whatever its source - used for the text wrapping mode.
+        final float boxWidth;
+        final float boxHeight;
+
+        final String sigFieldName = options.getSigFieldNameX();
+        if (sigFieldName != null) {
+            final PDRectangle fieldRect;
+            final int fieldPage;
+            try (PDDocument pdDoc = Loader.loadPDF(inFile)) {
+                final PDAnnotationWidget widget = findSignatureFieldWidget(pdDoc, sigFieldName);
+                fieldRect = widget.getRectangle();
+                fieldPage = pageNumberOf(pdDoc, widget);
+            }
+            LOGGER.info(RES.get("console.sigField.placing", sigFieldName));
+            fieldParams.setFieldId(sigFieldName);
+            // No coordinates: DSS reads the appearance rectangle off the existing widget. The page is set so the
+            // parameters describe the field actually being filled rather than their page-1 default - DSS passes
+            // it to PDFBox' SignatureOptions, which only consults it when it has to create a widget itself, so
+            // this does not change the output for a pre-existing field (verified in ExistingFieldSigningTest).
+            fieldParams.setPage(fieldPage);
+            boxWidth = fieldRect == null ? 0f : Math.abs(fieldRect.getWidth());
+            boxHeight = fieldRect == null ? 0f : Math.abs(fieldRect.getHeight());
+        } else {
+            int page = options.getPage();
+            float pageWidth;
+            float pageHeight;
+            try (PDDocument pdDoc = Loader.loadPDF(inFile)) {
+                final int totalPages = pdDoc.getNumberOfPages();
+                if (page < 1 || page > totalPages) {
+                    page = totalPages;
+                }
+                final PDPage pdPage = pdDoc.getPage(page - 1);
+                final PDRectangle mediaBox = pdPage.getMediaBox();
+                final int rotation = pdPage.getRotation();
+                if (rotation == 90 || rotation == 270) {
+                    pageWidth = mediaBox.getHeight();
+                    pageHeight = mediaBox.getWidth();
+                } else {
+                    pageWidth = mediaBox.getWidth();
+                    pageHeight = mediaBox.getHeight();
+                }
+            }
+
+            final float llx = fixPosition(options.getPositionLLX(), pageWidth);
+            final float lly = fixPosition(options.getPositionLLY(), pageHeight);
+            final float urx = fixPosition(options.getPositionURX(), pageWidth);
+            final float ury = fixPosition(options.getPositionURY(), pageHeight);
+
+            fieldParams.setPage(page);
+            fieldParams.setOriginX(llx);
+            // DSS uses a top-left origin (PDF uses bottom-left), so flip the Y coordinate.
+            fieldParams.setOriginY(pageHeight - ury);
+            fieldParams.setWidth(urx - llx);
+            fieldParams.setHeight(ury - lly);
+            boxWidth = urx - llx;
+            boxHeight = ury - lly;
+        }
         imageParams.setFieldParameters(fieldParams);
 
         final RenderMode renderMode = options.getRenderMode();
@@ -690,7 +723,7 @@ public class DssSigningEngine implements SigningEngine {
         // wrapping lines as needed, so text is never clipped on a small box. The configured font size stays
         // an upper bound — both drawers returned by JSignPdfSignatureDrawerFactory cap the computed size at
         // it. DSS rejects this mode when the field has no explicit size, so keep its default there.
-        if (fieldParams.getWidth() > 0f && fieldParams.getHeight() > 0f) {
+        if (boxWidth > 0f && boxHeight > 0f) {
             textParams.setTextWrapping(TextWrapping.FILL_BOX_AND_LINEBREAK);
         }
         // Transparent text background so the background image shows through.
@@ -712,6 +745,52 @@ public class DssSigningEngine implements SigningEngine {
         imageParams.setImageScaling(ImageScaling.ZOOM_AND_CENTER);
 
         parameters.setImageParameters(imageParams);
+    }
+
+    /**
+     * Returns the first widget of the named signature field. DSS itself resolves the field by id and rejects a
+     * missing, already signed or non-signature field, but it does so only while signing - and the widget is
+     * needed here to feed the field's page and box size into the parameters.
+     */
+    private PDAnnotationWidget findSignatureFieldWidget(PDDocument doc, String fieldName) throws Exception {
+        final PDAcroForm acroForm = doc.getDocumentCatalog().getAcroForm();
+        final PDField field = acroForm == null ? null : acroForm.getField(fieldName);
+        if (!(field instanceof PDSignatureField sigField)) {
+            throw new IllegalArgumentException(RES.get("console.sigField.notASignatureField", fieldName));
+        }
+        final List<PDAnnotationWidget> widgets = sigField.getWidgets();
+        if (widgets == null || widgets.isEmpty() || widgets.get(0) == null) {
+            throw new IllegalArgumentException(RES.get("console.sigField.noWidget", fieldName));
+        }
+        return widgets.get(0);
+    }
+
+    /**
+     * Returns the 1-based page number the widget sits on. {@code /P} is optional, so fall back to scanning the
+     * pages for the annotation.
+     */
+    private int pageNumberOf(PDDocument doc, PDAnnotationWidget widget) {
+        final PDPage widgetPage = widget.getPage();
+        int pageNumber = 1;
+        for (PDPage page : doc.getPages()) {
+            if (widgetPage != null) {
+                if (page.getCOSObject().equals(widgetPage.getCOSObject())) {
+                    return pageNumber;
+                }
+            } else {
+                try {
+                    for (PDAnnotation annotation : page.getAnnotations()) {
+                        if (annotation != null && annotation.getCOSObject().equals(widget.getCOSObject())) {
+                            return pageNumber;
+                        }
+                    }
+                } catch (IOException e) {
+                    LOGGER.log(Level.FINE, "Unable to read annotations of page " + pageNumber, e);
+                }
+            }
+            pageNumber++;
+        }
+        return 1;
     }
 
     private String buildSignatureText(BasicSignerOptions options, Certificate[] chain, Calendar signingCal) {

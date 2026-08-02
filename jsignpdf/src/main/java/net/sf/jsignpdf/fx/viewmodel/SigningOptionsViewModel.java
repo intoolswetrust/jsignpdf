@@ -70,6 +70,9 @@ public class SigningOptionsViewModel {
     private final StringProperty imgPath = new SimpleStringProperty();
     private final StringProperty bgImgPath = new SimpleStringProperty();
     private final BooleanProperty acro6Layers = new SimpleBooleanProperty(Constants.DEFVAL_ACRO6LAYERS);
+    // Existing signature field to sign into; null = create a new field. Only ever a concrete field name here -
+    // the GUI picks from the fields of the loaded document, so the CLI selectors don't apply.
+    private final StringProperty sigFieldName = new SimpleStringProperty(Constants.DEFVAL_SIG_FIELD);
 
     // PDF Encryption
     private final ObjectProperty<PDFEncryption> pdfEncryption = new SimpleObjectProperty<>();
@@ -152,6 +155,7 @@ public class SigningOptionsViewModel {
         opts.setL4Text(null);
         opts.setL2TextFontSize(l2TextFontSize.get());
         opts.setAcro6Layers(Constants.DEFVAL_ACRO6LAYERS);
+        opts.setSigFieldName(sigFieldName.get());
 
         // Encryption
         opts.setPdfEncryption(pdfEncryption.get());
@@ -227,6 +231,7 @@ public class SigningOptionsViewModel {
         imgPath.set(opts.getImgPath());
         bgImgPath.set(opts.getBgImgPath());
         acro6Layers.set(opts.isAcro6Layers());
+        sigFieldName.set(opts.getSigFieldName());
 
         pdfEncryption.set(opts.getPdfEncryption());
         pdfOwnerPassword.set(opts.getPdfOwnerPwdStr());
@@ -300,6 +305,7 @@ public class SigningOptionsViewModel {
         imgPath.set(null);
         bgImgPath.set(null);
         acro6Layers.set(Constants.DEFVAL_ACRO6LAYERS);
+        sigFieldName.set(Constants.DEFVAL_SIG_FIELD);
 
         // Encryption & rights
         pdfEncryption.set(PDFEncryption.NONE);
@@ -402,6 +408,7 @@ public class SigningOptionsViewModel {
     public StringProperty imgPathProperty() { return imgPath; }
     public StringProperty bgImgPathProperty() { return bgImgPath; }
     public BooleanProperty acro6LayersProperty() { return acro6Layers; }
+    public StringProperty sigFieldNameProperty() { return sigFieldName; }
     public ObjectProperty<PDFEncryption> pdfEncryptionProperty() { return pdfEncryption; }
     public StringProperty pdfOwnerPasswordProperty() { return pdfOwnerPassword; }
     public StringProperty pdfUserPasswordProperty() { return pdfUserPassword; }
