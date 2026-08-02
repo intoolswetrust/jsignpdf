@@ -500,7 +500,7 @@ See <<Visible signature options>> for details.
 | Background image path for the visible signature.
 
 | `--bg-scale <scale>`
-| Background image scale. Positive: multiply size. Zero: stretch to fill. Negative: best-fit resize. The DSS (PAdES) engine only distinguishes stretch (zero) from aspect-ratio-preserving fit (any non-zero value); it does not apply positive values as absolute scale factors.
+| Background image scale. Positive: multiply size. Zero: stretch to fill. Negative: best-fit resize.
 
 | `--disable-acrobat6-layer-mode`
 | Disable Acrobat 6 layer mode (creates all signature layers instead of just n2 and n4).
@@ -1040,6 +1040,9 @@ DSS requires a PAdES digest, so the hash algorithm must be `SHA256`, `SHA384` or
 
 |`engine.dss.retryOnUndersize`
 |Re-sign with a larger reservation if the reserved `/Contents` turns out too small. Default `true`; each retry repeats signing (and refetches the TSA timestamp for level `T` and above).
+
+|`engine.dss.relaxFieldOverlap`
+|`true`/`false` (default `false`). By default DSS refuses to sign when the visible signature rectangle overlaps an existing annotation, because the overlapped content may be what the signer believes they are signing. Set to `true` to log a warning and place the signature on top instead -- useful when signing documents that already carry stamps or form widgets in that area.
 |===
 
 If `LT`/`LTA` is requested but revocation data cannot be reached (for example, with online fetching disabled), the signing fails with a logged error rather than silently emitting a weaker level. The log also records which trust anchors were loaded and every AIA / CRL / OCSP call the engine made, which is usually enough to tell a network problem from a missing anchor -- see <<Reading the signing diagnostics>>.

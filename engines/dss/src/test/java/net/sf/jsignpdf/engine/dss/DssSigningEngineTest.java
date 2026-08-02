@@ -4,6 +4,9 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
+import java.awt.Color;
+import java.awt.Graphics2D;
+import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.nio.file.Files;
@@ -12,6 +15,8 @@ import java.security.Security;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import javax.imageio.ImageIO;
 
 import net.sf.jsignpdf.BasicSignerOptions;
 import net.sf.jsignpdf.engine.Capability;
@@ -24,6 +29,7 @@ import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDPage;
 import org.apache.pdfbox.pdmodel.PDPageContentStream;
 import org.apache.pdfbox.pdmodel.common.PDRectangle;
+import org.apache.pdfbox.pdmodel.graphics.color.PDOutputIntent;
 import org.apache.pdfbox.pdmodel.font.PDType1Font;
 import org.apache.pdfbox.pdmodel.font.Standard14Fonts;
 import org.apache.pdfbox.pdmodel.interactive.annotation.PDAnnotationWidget;
@@ -37,7 +43,6 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 
-import eu.europa.esig.dss.enumerations.ImageScaling;
 import eu.europa.esig.dss.enumerations.SignatureLevel;
 import eu.europa.esig.dss.model.FileDocument;
 import eu.europa.esig.dss.simplereport.SimpleReport;
@@ -274,14 +279,6 @@ public class DssSigningEngineTest {
     }
 
     @Test
-    public void bgImgScaleMapsToImageScaling() {
-        // Default (-1) and any non-zero value preserve aspect ratio; 0 stretches to fill (issue #460).
-        assertEquals(ImageScaling.ZOOM_AND_CENTER, DssSigningEngine.imageScalingFor(-1f));
-        assertEquals(ImageScaling.ZOOM_AND_CENTER, DssSigningEngine.imageScalingFor(2f));
-        assertEquals(ImageScaling.STRETCH, DssSigningEngine.imageScalingFor(0f));
-    }
-
-    @Test
     public void capabilitiesDeclareBackgroundImageScale() {
         assertTrue(new DssSigningEngine().capabilities().contains(Capability.VISIBLE_BACKGROUND_IMAGE_SCALE));
     }
@@ -462,6 +459,89 @@ public class DssSigningEngineTest {
         cfg.put(DssTrustConfigurer.KEY_ONLINE_ENABLED, "true");
         cfg.put(DssTrustConfigurer.KEY_CERT_FILES, caFile.getAbsolutePath() + "," + tsaFile.getAbsolutePath());
         return new MapEngineConfig(cfg);
+    }
+
+    /**
+     * Creates a minimal 10x10 PNG image and writes it to a temp file.
+     */
+    private File createTestImage(String name, Color color) throws Exception {
+        BufferedImage img = new BufferedImage(10, 10, BufferedImage.TYPE_INT_RGB);
+        Graphics2D g2d = img.createGraphics();
+        g2d.setColor(color);
+        g2d.fillRect(0, 0, 10, 10);
+        g2d.dispose();
+        File file = tmp.newFile(name + ".png");
+        ImageIO.write(img, "png", file);
+        return file;
+    }
+
+    @Test
+    public void visibleSignatureWithBackgroundImageProducesValidSignature() throws Exception {
+        BasicSignerOptions o = baseOptions();
+        o.setVisible(true);
+        o.setPage(1);
+        o.setPositionLLX(100f);
+        o.setPositionLLY(100f);
+        o.setPositionURX(300f);
+        o.setPositionURY(250f);
+        o.setReason("testing");
+        o.setLocation("here");
+
+        // Background image (rendered behind everything), best-fit scaled — the default bgImgScale
+        File bgImage = createTestImage("bg-test", Color.LIGHT_GRAY);
+        o.setBgImgPath(bgImage.getAbsolutePath());
+        o.setBgImgScale(-1f);
+
+        // Foreground graphic (rendered above background)
+        o.setRenderMode(net.sf.jsignpdf.types.RenderMode.GRAPHIC_AND_DESCRIPTION);
+        File fgImage = createTestImage("fg-test", Color.BLUE);
+        o.setImgPath(fgImage.getAbsolutePath());
+
+        assertTrue("signing with background + graphic + text must succeed",
+                new DssSigningEngine().sign(o, EMPTY_CONFIG));
+        assertTrue("output must exist", outputFile.exists());
+
+        // Verify the output is a structurally valid PAdES signature
+        assertSignatureLevel(outputFile, SignatureLevel.PAdES_BASELINE_B);
+        assertSingleSrgbOutputIntent(outputFile);
+    }
+
+    /**
+     * A background-only signature must not be rejected: the drawer has to accept parameters carrying
+     * nothing but a background image, and still register the colour space for it.
+     */
+    @Test
+    public void visibleSignatureWithBackgroundImageOnlyProducesValidSignature() throws Exception {
+        BasicSignerOptions o = baseOptions();
+        o.setVisible(true);
+        o.setPage(1);
+        o.setPositionLLX(100f);
+        o.setPositionLLY(100f);
+        o.setPositionURX(300f);
+        o.setPositionURY(250f);
+        o.setL2Text("");
+
+        File bgImage = createTestImage("bg-only", Color.LIGHT_GRAY);
+        o.setBgImgPath(bgImage.getAbsolutePath());
+        o.setBgImgScale(0f);
+
+        assertTrue("signing with a background image and no text must succeed",
+                new DssSigningEngine().sign(o, EMPTY_CONFIG));
+        assertSignatureLevel(outputFile, SignatureLevel.PAdES_BASELINE_B);
+        assertSingleSrgbOutputIntent(outputFile);
+    }
+
+    /**
+     * The background image participates in the colour-space decision, so an RGB background must not make
+     * DSS inject a second, contradictory output intent. Guards the {@code getExpectedColorSpaceName()} fix
+     * and the {@code checkColorSpace()} call the custom drawer's {@code init()} has to keep.
+     */
+    private static void assertSingleSrgbOutputIntent(File pdf) throws Exception {
+        try (PDDocument doc = Loader.loadPDF(pdf)) {
+            List<PDOutputIntent> intents = doc.getDocumentCatalog().getOutputIntents();
+            assertEquals("exactly one output intent expected", 1, intents.size());
+            assertEquals("sRGB", intents.get(0).getOutputConditionIdentifier());
+        }
     }
 
     @Test
