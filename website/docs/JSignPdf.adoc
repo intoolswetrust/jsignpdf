@@ -1187,7 +1187,34 @@ The same `.cfg` files are present inside the per-platform portable ZIPs (`jsignp
 
 === Out of memory error
 
-If you see an OutOfMemoryError in the program console, you need to allow Java to use more memory.
+If you see an OutOfMemoryError in the program console, the document is bigger than the heap Java was given.
+
+==== Signing very large documents
+
+Try this first. By default both engines build the whole signed document on the Java heap, so a large PDF needs a large heap. Setting `buffering.mode=temp` in `advanced.properties` stages the intermediates in temporary files instead, and document size stops driving heap usage:
+
+[source]
+----
+buffering.mode=temp
+
+# Optional: stage on a specific disk. Must already exist and be writable.
+buffering.tempDir=/var/tmp/jsignpdf
+----
+
+Or for a single run, without changing the configuration file:
+
+[source]
+----
+$ bin/jsignpdf.sh -o buffering.mode=temp ...
+----
+
+The signed output is the same either way; only the staging location changes. The cost is disk I/O and free space: roughly the size of the document for the `openpdf` engine, two to three times that for `dss` (it stages a copy while computing the digest and another while assembling the signature). Point `buffering.tempDir` at a fast local disk when signing very large files.
+
+NOTE: `buffering.mode=temp` also lifts a limit that `-Xmx` cannot. In the default mode the `openpdf` engine stages the document in a single Java array, which caps the *output* at 2 GB no matter how much heap is available. Its PDF reader still cannot open an *input* larger than 2 GB, though — use the `dss` engine for those.
+
+==== Raising the heap
+
+If the document is not unusually large, or `temp` mode is not enough, allow Java to use more memory.
 
 When running from a cross-platform ZIP, set the `-Xmx<size>` flag via `JAVA_OPTS` before invoking the launcher. The following example allows Java to use 512 MB of heap:
 

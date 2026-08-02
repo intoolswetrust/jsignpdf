@@ -11,6 +11,7 @@ import static net.sf.jsignpdf.Constants.RES;
 
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.net.Proxy;
 import java.net.URI;
 import java.security.PrivateKey;
@@ -36,12 +37,14 @@ import net.sf.jsignpdf.PrivateKeyInfo;
 import net.sf.jsignpdf.engine.Capability;
 import net.sf.jsignpdf.engine.EngineConfig;
 import net.sf.jsignpdf.engine.SigningEngine;
+import net.sf.jsignpdf.types.BufferingMode;
 import net.sf.jsignpdf.types.CertificationLevel;
 import net.sf.jsignpdf.types.HashAlgorithm;
 import net.sf.jsignpdf.types.PadesLevel;
 import net.sf.jsignpdf.types.PrintRight;
 import net.sf.jsignpdf.types.RenderMode;
 import net.sf.jsignpdf.types.ServerAuthentication;
+import net.sf.jsignpdf.utils.AppConfig;
 import net.sf.jsignpdf.utils.KeyStoreUtils;
 
 import org.apache.commons.lang3.ArrayUtils;
@@ -53,6 +56,8 @@ import org.apache.pdfbox.pdmodel.encryption.AccessPermission;
 import org.apache.pdfbox.pdmodel.encryption.StandardProtectionPolicy;
 import org.apache.pdfbox.pdmodel.PDPage;
 import org.apache.pdfbox.pdmodel.common.PDRectangle;
+import org.apache.pdfbox.io.MemoryUsageSetting;
+import org.apache.pdfbox.io.RandomAccessStreamCache.StreamCacheCreateFunction;
 
 import eu.europa.esig.dss.alert.LogOnStatusAlert;
 import eu.europa.esig.dss.enumerations.CertificationPermission;
@@ -69,7 +74,9 @@ import eu.europa.esig.dss.pades.PAdESSignatureParameters;
 import eu.europa.esig.dss.pades.SignatureFieldParameters;
 import eu.europa.esig.dss.pades.SignatureImageTextParameters;
 import eu.europa.esig.dss.pades.signature.PAdESService;
+import eu.europa.esig.dss.pdf.PdfMemoryUsageSetting;
 import eu.europa.esig.dss.pdf.PdfSignatureFieldPositionChecker;
+import eu.europa.esig.dss.signature.resources.TempFileResourcesHandlerBuilder;
 import eu.europa.esig.dss.service.http.commons.TimestampDataLoader;
 import eu.europa.esig.dss.service.http.proxy.ProxyConfig;
 import eu.europa.esig.dss.service.http.proxy.ProxyProperties;
@@ -139,6 +146,13 @@ public class DssSigningEngine implements SigningEngine {
     /** Cap on undersize retries; DSS reports the exact required size, so a single retry normally suffices. */
     private static final int MAX_CONTENT_SIZE_RETRIES = 3;
 
+    /**
+     * Per-document spill threshold used in {@link BufferingMode#TEMP}: documents below this stay in memory,
+     * larger ones spill to disk. Keeps the common case fast when a user leaves temp mode enabled
+     * permanently. This is a per-document budget, not a global one, and the disk side is unrestricted.
+     */
+    private static final long MIXED_THRESHOLD_BYTES = 64L * 1024 * 1024;
+
     /** Extracts the actual CMS length from the DSS "signature size too small" message; see {@code assertContentSizeSufficient}. */
     private static final Pattern UNDERSIZE_LENGTH_PATTERN = Pattern.compile("with a length \\[(\\d+)\\]");
 
@@ -187,11 +201,21 @@ public class DssSigningEngine implements SigningEngine {
         final String outFile = options.getOutFileX();
         boolean finished = false;
         File encryptedTempFile = null;
+        TempFileResourcesHandlerBuilder resourcesHandlerBuilder = null;
         // Hoisted out of the try so the untrusted-chain handler can name the offending certificates: the signer
         // chain, and the timestamp chain captured by the wrapping TSP source (issue #448).
         Certificate[] chain = null;
         CapturingTspSource tspSource = null;
         try {
+            // Resolved up front so an unusable buffering.tempDir aborts before any work is done. The
+            // directory is only read in TEMP mode, so a stale path cannot break a memory-mode sign.
+            final BufferingMode bufferingMode = AppConfig.bufferingMode();
+            final File bufferingTempDir = bufferingMode == BufferingMode.TEMP ? AppConfig.bufferingTempDir() : null;
+            if (bufferingMode == BufferingMode.TEMP) {
+                LOGGER.info(RES.get("console.buffering.temp", bufferingTempDir != null
+                        ? bufferingTempDir.getAbsolutePath() : System.getProperty("java.io.tmpdir")));
+            }
+
             final PrivateKeyInfo pkInfo = KeyStoreUtils.getPkInfo(options);
             if (pkInfo == null) {
                 LOGGER.info(RES.get("console.certificateChainEmpty"));
@@ -268,7 +292,8 @@ public class DssSigningEngine implements SigningEngine {
                 File effectiveInFile = new File(options.getInFile());
                 if (options.isAdvanced() && options.getPdfEncryption() == net.sf.jsignpdf.types.PDFEncryption.PASSWORD) {
                     LOGGER.info(RES.get("console.setEncryption"));
-                    encryptedTempFile = encryptPdf(effectiveInFile, options);
+                    encryptedTempFile = encryptPdf(effectiveInFile, options,
+                            streamCache(bufferingMode, bufferingTempDir), bufferingTempDir);
                     if (encryptedTempFile == null) {
                         return false;
                     }
@@ -288,7 +313,8 @@ public class DssSigningEngine implements SigningEngine {
 
                 if (options.isVisible()) {
                     LOGGER.info(RES.get("console.configureVisible"));
-                    configureVisibleSignature(parameters, options, chain, signingCal, effectiveInFile);
+                    configureVisibleSignature(parameters, options, chain, signingCal, effectiveInFile,
+                            streamCache(bufferingMode, bufferingTempDir));
                 }
 
                 // Certificate verifier + trust material (LT/LTA).
@@ -331,6 +357,18 @@ public class DssSigningEngine implements SigningEngine {
                     pdfObjFactory.setPdfSignatureFieldPositionChecker(positionChecker);
                 }
 
+                if (bufferingMode == BufferingMode.TEMP) {
+                    // Kept local on purpose: clear() deletes every temp file the builder ever created, so a
+                    // shared instance would let one sign delete another concurrent sign's output document.
+                    resourcesHandlerBuilder = new TempFileResourcesHandlerBuilder();
+                    resourcesHandlerBuilder.setFileNamePrefix("jsignpdf-dss-");
+                    if (bufferingTempDir != null) {
+                        resourcesHandlerBuilder.setTempFileDirectory(bufferingTempDir);
+                    }
+                    pdfObjFactory.setResourcesHandlerBuilder(resourcesHandlerBuilder);
+                    pdfObjFactory.setPdfMemoryUsageSetting(PdfMemoryUsageSetting.mixed(MIXED_THRESHOLD_BYTES));
+                }
+
                 service.setPdfObjFactory(pdfObjFactory);
 
                 if (useTsa) {
@@ -351,7 +389,7 @@ public class DssSigningEngine implements SigningEngine {
                         : estimateContentSize(chain, useTsa);
                 final boolean retryOnUndersize = engineConfig.getBoolean(KEY_RETRY_ON_UNDERSIZE, true);
                 final DSSDocument signedDocument = signWithContentSize(service, document, parameters, token,
-                        digestAlgorithm, initialContentSize, retryOnUndersize);
+                        digestAlgorithm, initialContentSize, retryOnUndersize, resourcesHandlerBuilder);
 
                 LOGGER.info(RES.get("console.createOutPdf", outFile));
                 try (FileOutputStream fos = new FileOutputStream(outFile)) {
@@ -382,6 +420,11 @@ public class DssSigningEngine implements SigningEngine {
         } finally {
             if (encryptedTempFile != null) {
                 encryptedTempFile.delete();
+            }
+            if (resourcesHandlerBuilder != null) {
+                // Must run after writeTo(): the signed DSSDocument is a FileDocument backed by one of
+                // these temp files.
+                resourcesHandlerBuilder.clear();
             }
         }
         return finished;
@@ -429,7 +472,7 @@ public class DssSigningEngine implements SigningEngine {
      */
     private DSSDocument signWithContentSize(PAdESService service, DSSDocument document,
             PAdESSignatureParameters parameters, PrivateKeySignatureToken token, DigestAlgorithm digestAlgorithm,
-            int initialContentSize, boolean retryOnUndersize) {
+            int initialContentSize, boolean retryOnUndersize, TempFileResourcesHandlerBuilder resourcesHandlerBuilder) {
         int contentSize = initialContentSize;
         for (int attempt = 0;; attempt++) {
             parameters.setContentSize(contentSize);
@@ -451,6 +494,12 @@ public class DssSigningEngine implements SigningEngine {
                 }
                 LOGGER.info(RES.get("console.dss.contentSizeRetry", String.valueOf(contentSize),
                         String.valueOf(grown)));
+                if (resourcesHandlerBuilder != null) {
+                    // Each attempt stages a full copy of the document in getDataToSign() and another in
+                    // signDocument(); nothing from a failed attempt is reachable, so release it before
+                    // retrying rather than letting temp files pile up across the loop.
+                    resourcesHandlerBuilder.clear();
+                }
                 contentSize = grown;
             }
         }
@@ -584,8 +633,31 @@ public class DssSigningEngine implements SigningEngine {
         return props;
     }
 
-    private File encryptPdf(File inFile, BasicSignerOptions options) throws Exception {
-        try (PDDocument doc = Loader.loadPDF(inFile)) {
+    /**
+     * PDFBox stream cache for the engine's direct {@code Loader.loadPDF} calls. These bypass DSS entirely,
+     * so {@code IPdfObjFactory.setPdfMemoryUsageSetting} does not reach them &mdash; without this a large
+     * input would be fully buffered on the heap before DSS is involved.
+     *
+     * @return the temp-file-backed cache function, or {@code null} to keep PDFBox's memory-only default
+     */
+    private static StreamCacheCreateFunction streamCache(BufferingMode mode, File tempDir) {
+        if (mode != BufferingMode.TEMP) {
+            return null;
+        }
+        final MemoryUsageSetting setting = MemoryUsageSetting.setupMixed(MIXED_THRESHOLD_BYTES);
+        if (tempDir != null) {
+            setting.setTempDir(tempDir);
+        }
+        return setting.streamCache;
+    }
+
+    private static PDDocument loadPdf(File file, StreamCacheCreateFunction streamCache) throws IOException {
+        return streamCache != null ? Loader.loadPDF(file, streamCache) : Loader.loadPDF(file);
+    }
+
+    private File encryptPdf(File inFile, BasicSignerOptions options, StreamCacheCreateFunction streamCache,
+            File tempDir) throws Exception {
+        try (PDDocument doc = loadPdf(inFile, streamCache)) {
             if (!doc.getSignatureDictionaries().isEmpty()) {
                 LOGGER.info(RES.get("console.dss.cannotEncryptSigned"));
                 return null;
@@ -599,7 +671,7 @@ public class DssSigningEngine implements SigningEngine {
             policy.setEncryptionKeyLength(128);
             doc.protect(policy);
 
-            final File tempFile = File.createTempFile("jsignpdf-dss-enc-", ".pdf");
+            final File tempFile = File.createTempFile("jsignpdf-dss-enc-", ".pdf", tempDir);
             tempFile.deleteOnExit();
             doc.save(tempFile);
             return tempFile;
@@ -624,13 +696,14 @@ public class DssSigningEngine implements SigningEngine {
     }
 
     private void configureVisibleSignature(PAdESSignatureParameters parameters, BasicSignerOptions options,
-            Certificate[] chain, Calendar signingCal, File inFile) throws Exception {
+            Certificate[] chain, Calendar signingCal, File inFile, StreamCacheCreateFunction streamCache)
+            throws Exception {
         final JSignPdfSignatureImageParameters imageParams = new JSignPdfSignatureImageParameters();
 
         int page = options.getPage();
         float pageWidth;
         float pageHeight;
-        try (PDDocument pdDoc = Loader.loadPDF(inFile)) {
+        try (PDDocument pdDoc = loadPdf(inFile, streamCache)) {
             final int totalPages = pdDoc.getNumberOfPages();
             if (page < 1 || page > totalPages) {
                 page = totalPages;

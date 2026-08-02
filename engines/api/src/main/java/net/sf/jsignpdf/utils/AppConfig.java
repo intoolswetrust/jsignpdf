@@ -1,5 +1,7 @@
 package net.sf.jsignpdf.utils;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.Locale;
 import java.util.Map;
 import java.util.logging.Level;
@@ -7,6 +9,7 @@ import java.util.logging.Level;
 import net.sf.jsignpdf.Constants;
 import net.sf.jsignpdf.engine.AdvancedEngineConfig;
 import net.sf.jsignpdf.engine.EngineConfig;
+import net.sf.jsignpdf.types.BufferingMode;
 
 /**
  * Static facade over {@link AdvancedConfig}. Call sites read app-global toggles through these typed accessors so they stay
@@ -16,6 +19,12 @@ public final class AppConfig {
 
     /** Bundled-default signing engine id (used when {@code advanced.properties} has no {@code engine} key). */
     public static final String DEFAULT_ENGINE_ID = "openpdf";
+
+    /** Key selecting where signing intermediates are staged. */
+    public static final String KEY_BUFFERING_MODE = "buffering.mode";
+
+    /** Key naming the directory used for staged temporary files. */
+    public static final String KEY_BUFFERING_TEMP_DIR = "buffering.tempDir";
 
     private AppConfig() {
     }
@@ -41,6 +50,51 @@ public final class AppConfig {
 
     public static boolean relaxSslSecurity() {
         return cfg().getAsBool("relax.ssl.security", false);
+    }
+
+    /**
+     * Where the signing engines stage the document they are producing ({@code buffering.mode} in
+     * {@code advanced.properties}). An unrecognised value logs a warning and falls back to
+     * {@link BufferingMode#MEMORY}, so a typo degrades to today's behaviour rather than failing a sign.
+     */
+    public static BufferingMode bufferingMode() {
+        final String value = cfg().getNotEmptyProperty(KEY_BUFFERING_MODE, null);
+        if (value == null) {
+            return BufferingMode.MEMORY;
+        }
+        final BufferingMode mode = BufferingMode.fromString(value);
+        if (mode == null) {
+            Constants.LOGGER.warning(Constants.RES.get("console.buffering.unknownMode", value));
+            return BufferingMode.MEMORY;
+        }
+        return mode;
+    }
+
+    /**
+     * Directory for the temporary files staged in {@link BufferingMode#TEMP} ({@code buffering.tempDir}),
+     * or {@code null} to use {@code java.io.tmpdir}.
+     *
+     * <p>
+     * Only meaningful in {@link BufferingMode#TEMP}; callers must not read it otherwise, so a stale path
+     * left in a user's configuration cannot break a sign that never stages anything. A configured
+     * directory must already exist and be writable &mdash; JSignPdf does not create it, because the engines
+     * disagree on their own ({@code File.createTempFile} throws for a missing directory while DSS's
+     * {@code TempFileResourcesHandlerBuilder} silently creates one).
+     * </p>
+     *
+     * @return the validated directory, or {@code null} for {@code java.io.tmpdir}
+     * @throws IOException when the configured directory is missing, not a directory, or not writable
+     */
+    public static File bufferingTempDir() throws IOException {
+        final String value = cfg().getNotEmptyProperty(KEY_BUFFERING_TEMP_DIR, null);
+        if (value == null) {
+            return null;
+        }
+        final File dir = new File(value.trim());
+        if (!dir.isDirectory() || !dir.canWrite()) {
+            throw new IOException(Constants.RES.get("console.buffering.tempDirUnusable", dir.getAbsolutePath()));
+        }
+        return dir;
     }
 
     /**

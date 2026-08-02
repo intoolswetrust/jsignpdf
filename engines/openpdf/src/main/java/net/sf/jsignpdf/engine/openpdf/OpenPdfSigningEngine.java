@@ -9,6 +9,7 @@ import static net.sf.jsignpdf.Constants.L2TEXT_PLACEHOLDER_CERTIFICATE;
 import static net.sf.jsignpdf.Constants.RES;
 import static net.sf.jsignpdf.Constants.LOGGER;
 
+import java.io.File;
 import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.net.Proxy;
@@ -34,11 +35,13 @@ import net.sf.jsignpdf.engine.EngineConfig;
 import net.sf.jsignpdf.engine.SigningEngine;
 import net.sf.jsignpdf.extcsp.CloudFoxy;
 import net.sf.jsignpdf.ssl.SSLInitializer;
+import net.sf.jsignpdf.types.BufferingMode;
 import net.sf.jsignpdf.types.HashAlgorithm;
 import net.sf.jsignpdf.types.PDFEncryption;
 import net.sf.jsignpdf.types.PdfVersion;
 import net.sf.jsignpdf.types.RenderMode;
 import net.sf.jsignpdf.types.ServerAuthentication;
+import net.sf.jsignpdf.utils.AppConfig;
 import net.sf.jsignpdf.utils.KeyStoreUtils;
 import net.sf.jsignpdf.utils.PKCS11Utils;
 
@@ -116,6 +119,7 @@ public class OpenPdfSigningEngine implements SigningEngine {
         final String outFile = options.getOutFileX();
         boolean finished = false;
         FileOutputStream fout = null;
+        File sigTempFile = null;
         try {
             SSLInitializer.init(options);
 
@@ -190,7 +194,18 @@ public class OpenPdfSigningEngine implements SigningEngine {
                 }
             }
 
-            final PdfStamper stp = PdfStamper.createSignature(reader, fout, tmpPdfVersion, null, options.isAppendX());
+            if (AppConfig.bufferingMode() == BufferingMode.TEMP) {
+                // Own the temp file rather than letting createSignature() make one: OpenPDF never returns
+                // the name and only deletes it in close(), so an abort between preClose() and close() —
+                // exactly where TSA/OCSP failures land — would leak a file the size of the document.
+                final File tempDir = AppConfig.bufferingTempDir();
+                LOGGER.info(RES.get("console.buffering.temp",
+                        tempDir != null ? tempDir.getAbsolutePath() : System.getProperty("java.io.tmpdir")));
+                sigTempFile = File.createTempFile("jsignpdf-sig-", ".pdf", tempDir);
+                sigTempFile.deleteOnExit();
+            }
+            final PdfStamper stp = PdfStamper.createSignature(reader, fout, tmpPdfVersion, sigTempFile,
+                    options.isAppendX());
             if (!options.isAppendX()) {
                 // we are not in append mode, let's remove existing signatures
                 // (otherwise we're getting to troubles)
@@ -448,6 +463,9 @@ public class OpenPdfSigningEngine implements SigningEngine {
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
+            }
+            if (sigTempFile != null) {
+                sigTempFile.delete();
             }
         }
         return finished;
