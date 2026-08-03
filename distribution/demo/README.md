@@ -4,7 +4,7 @@ Sample material for trying out JSignPdf from the command line.
 
 | File | Description |
 | --- | --- |
-| `service-agreement.pdf` | Sample unsigned PDF document. |
+| `service-agreement.pdf` | Sample unsigned PDF document. Its signature block on page 2 carries an empty signature field named `JaneDoe`, pre-placed by the form author for the client signatory. |
 | `jsmith.p12` | Demo PKCS#12 keystore with a self-signed certificate (CN=John Smith). Keystore and key password: `123456`. |
 
 > The keystore is for demonstration only &mdash; do **not** use it to sign real documents.
@@ -46,6 +46,32 @@ The signed file is written next to the input as `service-agreement_signed.pdf`.
     --render-mode DESCRIPTION_ONLY \
     service-agreement.pdf
 ```
+
+### Sign into the pre-placed signature field
+
+The agreement's signature block on page 2 has a signature field waiting for the client signatory. Ask the document what it offers:
+
+```shell
+../bin/jsignpdf.sh -lsf service-agreement.pdf
+```
+
+```
+Signature fields of service-agreement.pdf:
+#1   JaneDoe                        page 2    [326.0 209.0 524.4 257.0] blank
+```
+
+Then fill it, by name or by the number the listing printed:
+
+```shell
+../bin/jsignpdf.sh \
+    -kst PKCS12 -ksf jsmith.p12 -ksp 123456 \
+    -sf JaneDoe \
+    service-agreement.pdf
+```
+
+The field's own rectangle and page decide where the signature goes, so no position options are needed and the appearance is drawn even without `-V`. `-sf '#1'` and `-sf auto` (the first empty field) select the same field here.
+
+> The demo keystore holds one certificate, `CN=John Smith`, so the appearance above the client's signature line reads _Digitally signed by John Smith_. In a real multi-signer flow each signatory fills their own field with their own certificate; the mechanics are the same.
 
 ### Timestamped signature (FreeTSA)
 

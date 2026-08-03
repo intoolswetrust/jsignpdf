@@ -137,13 +137,13 @@ Every release bundles a small `demo/` folder so you can try JSignPdf immediately
 |File |Description
 
 |`service-agreement.pdf`
-|Sample unsigned PDF document.
+|Sample unsigned PDF document. The signature block on page 2 carries an empty signature field named `JaneDoe`, so <<Signing an existing signature field>> can be tried out without authoring a form first.
 
 |`jsmith.p12`
 |Demo PKCS#12 keystore with a self-signed certificate for `CN=John Smith`. The keystore and key password is `123456`.
 
 |`README.md`
-|Walk-through of the most common command-line scenarios (basic signature, visible signature, timestamped signature with FreeTSA, appending a signature, listing keys).
+|Walk-through of the most common command-line scenarios (basic signature, visible signature, signing into the pre-placed signature field, timestamped signature with FreeTSA, appending a signature, listing keys).
 |===
 
 You can find the folder:
@@ -876,7 +876,8 @@ Supported file formats for the _Image_ and _Background Image_ are GIF, JPEG, JPE
 
 Documents that are meant to be signed by several people usually carry the signature boxes already: the form
 author pre-places an empty signature field for each signer ("Signature #1", "Signature #2"), and every signer
-fills their own box. JSignPdf can sign into such a field instead of creating a new one.
+fills their own box. JSignPdf can sign into such a field instead of creating a new one. The bundled
+`demo/service-agreement.pdf` carries one, so you can try this out right away -- see <<Demo files>>.
 
 In the JavaFX UI, the _Signature field_ combo box at the top of the _Signature Appearance_ panel lists the
 empty signature fields of the opened document. Pick one and the signature goes there; the field is marked on
