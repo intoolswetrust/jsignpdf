@@ -119,6 +119,10 @@ public class SignatureFieldResolutionTest {
         assertResolutionFails(pdf, "#2");
         assertResolutionFails(pdf, "#0");
         assertResolutionFails(pdf, "#x");
+        // Out of range stays out of range past Integer.MAX_VALUE - the user gets the same message, not a
+        // NumberFormatException escaping as an unexpected error.
+        assertResolutionFails(pdf, "#2147483648");
+        assertResolutionFails(pdf, "#99999999999999999999");
     }
 
     @Test
@@ -135,6 +139,53 @@ public class SignatureFieldResolutionTest {
         File pdf = createPdf(1, FieldSpec.signed("Signature1", 1, 70, 700, 300, 760));
 
         assertResolutionFails(pdf, "auto");
+    }
+
+    /**
+     * The GUI marks the selected field on the rendered page, which shows the page turned by its {@code /Rotate}
+     * while the field rectangle is in unrotated user space. Rotating the page must move the marker with it.
+     */
+    @Test
+    public void fieldMarkerFollowsThePageRotation() {
+        // A 200x400 page with the field in the bottom-left quarter: x 0..50, y 0..100.
+        float llx = 0f;
+        float lly = 0f;
+        float urx = 50f;
+        float ury = 100f;
+
+        assertRelativeRect("unrotated: bottom-left quarter stays bottom-left",
+                PdfExtraInfo.relativeRect(llx, lly, urx, ury, 200f, 400f, 0), 0f, 0.75f, 0.25f, 0.25f);
+        // Turned 90 degrees clockwise the unrotated bottom edge is on the left and the left edge is on top.
+        assertRelativeRect("90 degrees: bottom-left becomes top-left",
+                PdfExtraInfo.relativeRect(llx, lly, urx, ury, 200f, 400f, 90), 0f, 0f, 0.25f, 0.25f);
+        assertRelativeRect("180 degrees: bottom-left becomes top-right",
+                PdfExtraInfo.relativeRect(llx, lly, urx, ury, 200f, 400f, 180), 0.75f, 0f, 0.25f, 0.25f);
+        assertRelativeRect("270 degrees: bottom-left becomes bottom-right",
+                PdfExtraInfo.relativeRect(llx, lly, urx, ury, 200f, 400f, 270), 0.75f, 0.75f, 0.25f, 0.25f);
+        assertRelativeRect("a negative /Rotate is normalized",
+                PdfExtraInfo.relativeRect(llx, lly, urx, ury, 200f, 400f, -90), 0.75f, 0.75f, 0.25f, 0.25f);
+    }
+
+    /** The marker is read off the real document, media-box origin and all. */
+    @Test
+    public void fieldMarkerIsReadFromTheDocument() throws Exception {
+        File pdf = createPdf(1, FieldSpec.blank("Signature1", 1, 70, 700, 300, 760));
+
+        List<SignatureFieldInfo> fields = extraInfo(pdf).getSignatureFields();
+        float[] marker = extraInfo(pdf).getFieldRelativeRect(fields.get(0));
+
+        // A4 is 595x842; the field's top edge is 842-760 = 82 points below the top of the page.
+        assertNotNull(marker);
+        assertRelativeRect("A4 field marker", marker, 70f / 595f, 82f / 842f, 230f / 595f, 60f / 842f);
+    }
+
+    private static void assertRelativeRect(String message, float[] actual, float x, float y, float width,
+            float height) {
+        assertNotNull(message, actual);
+        assertEquals(message + " (x)", x, actual[0], 0.001f);
+        assertEquals(message + " (y)", y, actual[1], 0.001f);
+        assertEquals(message + " (width)", width, actual[2], 0.001f);
+        assertEquals(message + " (height)", height, actual[3], 0.001f);
     }
 
     private File createPdf(int pageCount, FieldSpec... fields) throws Exception {

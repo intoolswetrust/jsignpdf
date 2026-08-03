@@ -300,6 +300,33 @@ public class BasicSignerOptionsTest {
         assertEquals("#2", options.getSigFieldNameX());
     }
 
+    /**
+     * The selected field is session state, like the input file: a name means something only for the document it
+     * was chosen from, so storing it would make a GUI selection reappear as an implicit {@code --sig-field} on
+     * the next {@code --load-properties} run against an unrelated PDF.
+     */
+    @Test
+    public void sigFieldNameIsNeitherStoredNorLoaded() {
+        PropertyProvider mainConfig = PropertyStoreFactory.getInstance().mainConfig();
+        mainConfig.clear();
+        try {
+            BasicSignerOptions opts = new BasicSignerOptions();
+            opts.setSigFieldName("Manager");
+            opts.storeToPreset(mainConfig);
+            for (String key : mainConfig.stringPropertyNames()) {
+                assertFalse("no property may carry the field name, found " + key + "=" + mainConfig.getProperty(key),
+                        "Manager".equals(mainConfig.getProperty(key)));
+            }
+
+            mainConfig.setProperty("visibleSignature.fieldName", "Manager");
+            BasicSignerOptions loaded = new BasicSignerOptions();
+            loaded.loadFromPreset(mainConfig);
+            assertNull("a field name left in a store by an older version must be ignored", loaded.getSigFieldName());
+        } finally {
+            mainConfig.clear();
+        }
+    }
+
     @Test
     public void emptySigFieldNameMeansNoField() {
         BasicSignerOptions options = new BasicSignerOptions();

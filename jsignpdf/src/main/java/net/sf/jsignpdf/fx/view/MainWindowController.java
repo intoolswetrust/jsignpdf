@@ -114,6 +114,8 @@ public class MainWindowController {
     private final EngineCapabilities engineCapabilities = new EngineCapabilities();
     /** Existing signature field the signature goes into, or null when a new field is created. */
     private SignatureFieldInfo selectedSigField;
+    /** Marker rectangle of {@link #selectedSigField}, relative to the displayed page (see PdfExtraInfo). */
+    private float[] selectedSigFieldMarker;
     private PdfPageView pdfPageView;
     private SignatureOverlay signatureOverlay;
     /** Holds the side panel node while it's detached from the SplitPane (hidden). */
@@ -1494,11 +1496,17 @@ public class MainWindowController {
      */
     private void onSigFieldSelected(SignatureFieldInfo field) {
         selectedSigField = field;
+        selectedSigFieldMarker = null;
         if (field == null) {
             signatureOverlay.clearFieldHighlight();
             signatureOverlay.setMouseTransparent(false);
             updateSigStateBadge();
             return;
+        }
+        if (field.hasVisibleRect() && options != null) {
+            // Read once per selection - the marker is then redrawn from these relative coordinates on every
+            // page change and resize, without reopening the document.
+            selectedSigFieldMarker = new PdfExtraInfo(options).getFieldRelativeRect(field);
         }
         placementVM.reset();
         signingVM.pageProperty().set(Constants.DEFVAL_PAGE);
@@ -1515,27 +1523,16 @@ public class MainWindowController {
     }
 
     /**
-     * Draws (or hides) the marker of the selected field. The rectangle is in PDF user space with a bottom-left
-     * origin, the overlay works in relative page coordinates from the top-left corner.
+     * Draws (or hides) the marker of the selected field, from the relative coordinates computed when the field
+     * was selected. Nothing is marked while another page than the field's own is being shown.
      */
     private void updateFieldHighlight(SignatureFieldInfo field) {
-        if (field == null || !field.hasVisibleRect() || options == null) {
+        if (field == null || selectedSigFieldMarker == null || field.page() != documentVM.getCurrentPage()) {
             signatureOverlay.clearFieldHighlight();
             return;
         }
-        if (field.page() != documentVM.getCurrentPage()) {
-            // The field is on another page - nothing to mark on the one being shown.
-            signatureOverlay.clearFieldHighlight();
-            return;
-        }
-        PageInfo pageInfo = new PdfExtraInfo(options).getPageInfo(field.page());
-        if (pageInfo == null || pageInfo.getWidth() <= 0 || pageInfo.getHeight() <= 0) {
-            signatureOverlay.clearFieldHighlight();
-            return;
-        }
-        signatureOverlay.setFieldHighlight(field.llx() / pageInfo.getWidth(),
-                (pageInfo.getHeight() - field.ury()) / pageInfo.getHeight(), field.width() / pageInfo.getWidth(),
-                field.height() / pageInfo.getHeight());
+        signatureOverlay.setFieldHighlight(selectedSigFieldMarker[0], selectedSigFieldMarker[1],
+                selectedSigFieldMarker[2], selectedSigFieldMarker[3]);
     }
 
     private void closeDocument() {

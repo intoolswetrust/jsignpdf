@@ -131,6 +131,14 @@ public class SignerLogic implements Runnable {
      * the input happens to be signed yet. Position options are only ignored, with a warning: the field's own
      * {@code /Rect} decides where the signature goes and neither library can relocate an existing widget.
      *
+     * <p>A selected field also implies a visible signature: the whole appearance handling in both engines -
+     * including the call that attaches the signature to the field - hangs off {@code isVisible()}, and an
+     * author who drew a signature box wants something drawn in it. A zero-size field rectangle still yields an
+     * invisible signature; that is the field's decision, not the flag's. The flag is set here rather than
+     * together with the field resolution, because {@link EngineMismatchValidator} gates every
+     * visible-signature capability check behind {@code isVisible()} and runs in between - setting it later
+     * would leave {@code --img-path} and friends unvalidated for a field-placed appearance.
+     *
      * @return true when signing can continue
      */
     private boolean validateSigField() {
@@ -148,6 +156,7 @@ public class SignerLogic implements Runnable {
         if (isPositionSet()) {
             LOGGER.warning(RES.get("console.sigField.positionIgnored", options.getSigFieldName()));
         }
+        options.setVisible(true);
         return true;
     }
 
@@ -160,12 +169,7 @@ public class SignerLogic implements Runnable {
     /**
      * Resolves the configured {@code --sig-field} selector against the input file. The resolution is kept
      * separate from the configured value so that {@code #N} / {@code auto} are re-resolved for every file of a
-     * batch run.
-     *
-     * <p>A selected field also implies a visible signature: the whole appearance handling in both engines -
-     * including the call that attaches the signature to the field - hangs off {@code isVisible()}, and an
-     * author who drew a signature box wants something drawn in it. A zero-size field rectangle still yields an
-     * invisible signature; that is the field's decision, not the flag's.
+     * batch run. The visible flag the selection implies is set earlier, in {@link #validateSigField()}.
      *
      * @return true when signing can continue
      */
@@ -177,7 +181,6 @@ public class SignerLogic implements Runnable {
         try {
             final SignatureFieldInfo field = new PdfExtraInfo(options).resolveSignatureField(selector);
             options.setResolvedSigFieldName(field.name());
-            options.setVisible(true);
             LOGGER.info(RES.get("console.sigField.using", field.name(), String.valueOf(field.page())));
             if (!field.hasVisibleRect()) {
                 LOGGER.info(RES.get("console.sigField.zeroSizeRect", field.name()));

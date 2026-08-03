@@ -790,6 +790,7 @@ public class DssSigningEngine implements SigningEngine {
             }
             pageNumber++;
         }
+        LOGGER.log(Level.FINE, "Signature field widget not found on any page, assuming page 1");
         return 1;
     }
 

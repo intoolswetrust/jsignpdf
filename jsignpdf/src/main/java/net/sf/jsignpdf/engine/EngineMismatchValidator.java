@@ -133,9 +133,10 @@ public final class EngineMismatchValidator {
             out.add(new Mismatch("--sig-field", Capability.SIGN_EXISTING_FIELD));
         }
 
-        // visible signature (umbrella + fields). --sig-field implies visible (see SignerLogic), so the
-        // sub-options below are validated for a field-placed appearance too.
-        if (o.isVisible()) {
+        // visible signature (umbrella + fields). A selected field is drawn into, so it counts as visible here
+        // even before SignerLogic#validateSigField sets the flag - otherwise --sig-field without -V would slip
+        // the sub-options below (--img-path, --bg-path, --render-mode, ...) past this check unvalidated.
+        if (o.isVisible() || o.isSigFieldSet()) {
             if (!caps.contains(Capability.VISIBLE_SIGNATURE)) {
                 out.add(new Mismatch("--visible-signature", Capability.VISIBLE_SIGNATURE));
             } else {

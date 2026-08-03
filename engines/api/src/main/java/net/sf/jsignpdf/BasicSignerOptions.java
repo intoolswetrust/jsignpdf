@@ -190,7 +190,7 @@ public class BasicSignerOptions {
         setBgImgPath(store.getProperty(Constants.PROPERTY_VISIBLE_BGIMG));
         setAcro6Layers(!store.exists(Constants.PROPERTY_VISIBLE_ACRO6LAYERS)
                 || store.getAsBool(Constants.PROPERTY_VISIBLE_ACRO6LAYERS));
-        setSigFieldName(store.getProperty(Constants.PROPERTY_VISIBLE_FIELD_NAME));
+        // sigFieldName is intentionally not loaded here - see getSigFieldName().
 
         // TSA
         setTimestamp(store.getAsBool(Constants.PROPERTY_TSA_ENABLED));
@@ -313,7 +313,7 @@ public class BasicSignerOptions {
         store.setProperty(Constants.PROPERTY_VISIBLE_IMG, getImgPath());
         store.setProperty(Constants.PROPERTY_VISIBLE_BGIMG, getBgImgPath());
         store.setProperty(Constants.PROPERTY_VISIBLE_ACRO6LAYERS, isAcro6Layers());
-        store.setProperty(Constants.PROPERTY_VISIBLE_FIELD_NAME, getSigFieldName());
+        // sigFieldName is intentionally not stored here - see getSigFieldName().
 
         store.setProperty(Constants.PROPERTY_TSA_ENABLED, isTimestamp());
         store.setProperty(Constants.PROPERTY_TSA_URL, getTsaUrl());
@@ -885,8 +885,13 @@ public class BasicSignerOptions {
 
     /**
      * The configured existing signature field to sign into, or {@code null} when a new field should be created.
-     * This is what the user set and what gets persisted - it may be a {@code #N} or {@code auto} selector rather
-     * than a field name. Engines must use {@link #getSigFieldNameX()} instead.
+     * This is what the user set - it may be a {@code #N} or {@code auto} selector rather than a field name.
+     * Engines must use {@link #getSigFieldNameX()} instead.
+     *
+     * <p>Like the input and output paths, this is session state and is deliberately not written to the
+     * properties store or to presets: a field name means something only for the document it was chosen from,
+     * so a remembered one would either hard-fail on the next document or, worse, hit a same-named field
+     * somewhere else in it.
      *
      * @return the configured signature field selector or {@code null}
      */

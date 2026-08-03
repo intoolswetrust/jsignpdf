@@ -93,6 +93,25 @@ public class EngineMismatchValidatorTest {
         assertEquals("--sig-field", m.option());
     }
 
+    /**
+     * A selected field is drawn into whether or not {@code -V} was passed, so the appearance sub-options must
+     * be capability-checked for it. The visible flag itself is only set later (SignerLogic), which is exactly
+     * why this check must not depend on it.
+     */
+    @Test
+    public void sigFieldValidatesTheAppearanceOptionsWithoutTheVisibleFlag() {
+        BasicSignerOptions opts = new BasicSignerOptions();
+        opts.setAdvanced(true);
+        opts.setSigFieldName("Signature1");
+        opts.setBgImgPath("/bg.png");
+        assertFalse("the fixture must not pre-set the flag this test is about", opts.isVisible());
+
+        StubSigningEngine engine = new StubSigningEngine("noBgImage", Capability.SIGN_EXISTING_FIELD,
+                Capability.VISIBLE_SIGNATURE);
+        Set<Capability> reported = caps(EngineMismatchValidator.findMismatches(opts, engine));
+        assertTrue(reported.contains(Capability.VISIBLE_BACKGROUND_IMAGE));
+    }
+
     @Test
     public void sigFieldNotFlaggedWhenEngineSupportsIt() {
         BasicSignerOptions opts = new BasicSignerOptions();

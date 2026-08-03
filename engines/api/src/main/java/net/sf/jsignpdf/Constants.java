@@ -153,7 +153,6 @@ public class Constants {
     public static final String PROPERTY_VISIBLE_IMG = "visibleSignature.img";
     public static final String PROPERTY_VISIBLE_BGIMG = "visibleSignature.bgImg";
     public static final String PROPERTY_VISIBLE_ACRO6LAYERS = "visibleSignature.acro6layers";
-    public static final String PROPERTY_VISIBLE_FIELD_NAME = "visibleSignature.fieldName";
 
     public static final String PROPERTY_TSA_ENABLED = "tsa.enabled";
     public static final String PROPERTY_TSA_URL = "tsa.url";

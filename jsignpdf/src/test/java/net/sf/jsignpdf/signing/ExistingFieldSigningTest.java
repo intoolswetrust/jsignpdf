@@ -17,6 +17,7 @@ import net.sf.jsignpdf.Constants;
 import net.sf.jsignpdf.SignerLogic;
 import net.sf.jsignpdf.TestPdfFields;
 import net.sf.jsignpdf.TestPdfFields.FieldSpec;
+import net.sf.jsignpdf.signing.validation.PdfSignatureValidator;
 import net.sf.jsignpdf.signing.validation.PdfSignatureValidator.ValidationResult;
 import net.sf.jsignpdf.types.PDFEncryption;
 
@@ -137,6 +138,22 @@ public class ExistingFieldSigningTest extends SigningTestBase {
     }
 
     /**
+     * The point of the whole feature: the second signer fills their own box and the first signer's signature
+     * survives it. That is what the incremental append gives us and what the {@code --overwrite} / encryption
+     * refusals protect, so both engines are pinned on it - the earlier signature must still verify
+     * cryptographically, over a byte range that starts at the beginning of the file.
+     */
+    @Test
+    public void openPdfCoSigningKeepsTheEarlierSignatureValid() throws Exception {
+        coSigningKeepsTheEarlierSignatureValid(OPENPDF);
+    }
+
+    @Test
+    public void dssCoSigningKeepsTheEarlierSignatureValid() throws Exception {
+        coSigningKeepsTheEarlierSignatureValid(DSS);
+    }
+
+    /**
      * A selector is re-resolved for every file, so the same {@code --sig-field} value can be used for a batch
      * of documents built from the same template.
      */
@@ -229,6 +246,28 @@ public class ExistingFieldSigningTest extends SigningTestBase {
                 warnings.stream().anyMatch(m -> m.contains("Signature1")));
         assertEquals("The field rectangle wins", 70f, result.rectLLX, 1f);
         assertEquals(700f, result.rectLLY, 1f);
+    }
+
+    private void coSigningKeepsTheEarlierSignatureValid(String engine) throws Exception {
+        BasicSignerOptions first = optionsFor(engine, 1, FieldSpec.blank("Employee", 1, 70, 700, 300, 760),
+                FieldSpec.blank("Manager", 1, 70, 600, 300, 660));
+        first.setSigFieldName("Employee");
+        assertTrue(new SignerLogic(first).signFile());
+
+        BasicSignerOptions second = first.createCopy();
+        second.setInFile(first.getOutFileX());
+        second.setOutFile(new File(tempFolder.getRoot(), "co-signed.pdf").getAbsolutePath());
+        second.setSigFieldName("Manager");
+        assertTrue(new SignerLogic(second).signFile());
+
+        File coSigned = new File(second.getOutFileX());
+        assertEquals("both boxes are filled", List.of("Employee", "Manager"), signedFieldNames(coSigned));
+
+        ValidationResult employee = PdfSignatureValidator.validate(coSigned, 0);
+        assertEquals("both signatures are in the document", 2, employee.signatureCount);
+        assertTrue("the first signer's signature must survive the second signing", employee.signatureValid);
+        assertTrue("it must still cover the document from its start", employee.byteRangeStartsAtZero);
+        assertTrue("the second signature is valid too", PdfSignatureValidator.validate(coSigned, 1).signatureValid);
     }
 
     private void signsIntoNamedField(String engine) throws Exception {

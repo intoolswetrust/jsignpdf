@@ -15,6 +15,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
 import java.util.function.Consumer;
 import java.util.logging.Level;
 
@@ -391,7 +392,9 @@ public class Signer {
 
     private static String formatSigField(SignatureFieldInfo field) {
         final StringBuilder sb = new StringBuilder();
-        sb.append(String.format("%s%-3d %-30s page %-4d [%.1f %.1f %.1f %.1f] %s",
+        // Locale.ROOT: the numbers are PDF coordinates and a field number to be typed back into --sig-field,
+        // not prose - a locale-dependent decimal comma would only make them harder to read.
+        sb.append(String.format(Locale.ROOT, "%s%-3d %-30s page %-4d [%.1f %.1f %.1f %.1f] %s",
                 Constants.SIG_FIELD_SELECTOR_NUMBER_PREFIX, field.number(), field.name(), field.page(), field.llx(),
                 field.lly(), field.urx(), field.ury(),
                 RES.get(field.signed() ? "console.sigField.state.signed" : "console.sigField.state.blank")));

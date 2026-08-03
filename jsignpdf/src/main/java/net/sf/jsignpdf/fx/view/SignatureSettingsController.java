@@ -2,6 +2,7 @@ package net.sf.jsignpdf.fx.view;
 
 import java.io.File;
 import java.util.List;
+import java.util.Objects;
 import java.util.function.Consumer;
 
 import static net.sf.jsignpdf.Constants.RES;
@@ -117,10 +118,45 @@ public class SignatureSettingsController {
 
     /**
      * Disables the field combo while the given binding is true (the active engine can't sign existing fields),
-     * or while the document has no blank field to offer.
+     * or while the document has no blank field to offer. Switching to an engine without the capability also
+     * drops a selection made under the previous one - a disabled combo still showing a field would sign into
+     * it, or rather fail the capability check at signing time.
      */
     public void gateSigFieldCombo(BooleanBinding unsupportedByEngine) {
         cmbSigField.disableProperty().bind(unsupportedByEngine.or(noBlankFields));
+        unsupportedByEngine.addListener((obs, o, unsupported) -> {
+            if (Boolean.TRUE.equals(unsupported)) {
+                cmbSigField.setValue(null);
+            }
+        });
+        if (unsupportedByEngine.get()) {
+            cmbSigField.setValue(null);
+        }
+    }
+
+    /**
+     * Points the combo at the field of the given name. A name the loaded document does not offer - a preset
+     * saved while working on another document, say - is dropped instead of silently signing into a field the
+     * user can't see selected.
+     */
+    private void selectFieldNamed(String name) {
+        if (updatingSigFields) {
+            return;
+        }
+        SignatureFieldInfo match = null;
+        for (SignatureFieldInfo field : cmbSigField.getItems()) {
+            if (field != null && field.name().equals(name)) {
+                match = field;
+                break;
+            }
+        }
+        if (match == null && name != null) {
+            viewModel.sigFieldNameProperty().set(null);
+            return;
+        }
+        if (!Objects.equals(cmbSigField.getValue(), match)) {
+            cmbSigField.setValue(match);
+        }
     }
 
     private void onSigFieldChanged(SignatureFieldInfo field) {
@@ -157,9 +193,11 @@ public class SignatureSettingsController {
     }
 
     private void bindToViewModel() {
-        // A field name is only meaningful for the document it came from, and the properties file happily
-        // remembers one. Drop whatever was persisted; the user picks a field from the loaded document.
+        // A field name is only meaningful for the document it came from, so the combo is the authority on it:
+        // the view model starts empty and the listener keeps the two in step for the paths that write the
+        // property without going through the combo (loading a preset, resetting to defaults).
         viewModel.sigFieldNameProperty().set(null);
+        viewModel.sigFieldNameProperty().addListener((obs, o, name) -> selectFieldNamed(name));
         chkVisibleSig.selectedProperty().bindBidirectional(viewModel.visibleProperty());
         txtL2Text.textProperty().bindBidirectional(viewModel.l2TextProperty());
         txtBgImgPath.textProperty().bindBidirectional(viewModel.bgImgPathProperty());
