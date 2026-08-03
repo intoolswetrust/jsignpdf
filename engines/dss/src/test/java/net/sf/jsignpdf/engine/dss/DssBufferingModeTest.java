@@ -4,10 +4,11 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 import java.io.File;
-import java.io.FilenameFilter;
 import java.security.Security;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -49,6 +50,9 @@ public class DssBufferingModeTest {
      * failed attempt's files are not released before the retry.
      */
     private static final int MAX_CONCURRENT_STAGED = 2;
+
+    /** Prefix of the temp the encrypt-before-sign path writes; see {@code DssSigningEngine.encryptPdf}. */
+    private static final String ENC_PREFIX = "jsignpdf-dss-enc-";
 
     @Rule
     public TemporaryFolder tmp = new TemporaryFolder();
@@ -136,28 +140,20 @@ public class DssBufferingModeTest {
         // Forces DSS's "signature size too small" error, so the loop runs more than one attempt.
         engineCfg.put(DssSigningEngine.KEY_CONTENT_SIZE, "100");
 
-        AtomicInteger peak = new AtomicInteger();
-        AtomicBoolean sampling = new AtomicBoolean(true);
-        Thread sampler = new Thread(() -> {
-            while (sampling.get()) {
-                File[] staged = stagingDir.listFiles();
-                if (staged != null) {
-                    peak.accumulateAndGet(staged.length, Math::max);
-                }
-            }
-        });
-        sampler.setDaemon(true);
-        sampler.start();
+        StagingWatcher watcher = new StagingWatcher(stagingDir);
         try {
             assertTrue("The undersize retry must still recover in temp mode",
                     new DssSigningEngine().sign(baseOptions(), new MapEngineConfig(engineCfg)));
         } finally {
-            sampling.set(false);
-            sampler.join();
+            watcher.close();
         }
 
-        assertTrue("A failed attempt's staged files must be released before retrying, but " + peak.get()
-                + " were alive at once", peak.get() <= MAX_CONCURRENT_STAGED);
+        // Doubles as the proof that DSS stages in buffering.tempDir at all: with the directory ignored the
+        // peak would be 0 and the upper bound below would hold vacuously.
+        assertTrue("DSS must stage in the configured directory, but nothing ever appeared there",
+                watcher.peak() > 0);
+        assertTrue("A failed attempt's staged files must be released before retrying, but " + watcher.peak()
+                + " were alive at once", watcher.peak() <= MAX_CONCURRENT_STAGED);
         assertNoStagedFiles();
     }
 
@@ -173,7 +169,10 @@ public class DssBufferingModeTest {
         assertNoStagedFiles();
     }
 
-    /** The encrypt-before-sign temp must land in buffering.tempDir, not java.io.tmpdir. */
+    /**
+     * The encrypt-before-sign temp must land in buffering.tempDir, not java.io.tmpdir. It exists from
+     * {@code encryptPdf} until the engine's {@code finally}, so it is only observable while the sign runs.
+     */
     @Test
     public void encryptBeforeSignStagesInTheConfiguredDirectory() throws Exception {
         BasicSignerOptions o = baseOptions();
@@ -181,19 +180,90 @@ public class DssBufferingModeTest {
         o.setPdfOwnerPwd("owner".toCharArray());
         o.setPdfUserPwd("user".toCharArray());
 
-        assertTrue("Encrypt-then-sign must succeed in temp mode", new DssSigningEngine().sign(o, EMPTY_CONFIG));
+        StagingWatcher watcher = new StagingWatcher(stagingDir);
+        try {
+            assertTrue("Encrypt-then-sign must succeed in temp mode", new DssSigningEngine().sign(o, EMPTY_CONFIG));
+        } finally {
+            watcher.close();
+        }
+
+        assertTrue("The encrypt-before-sign temp must be created in buffering.tempDir, but nothing named "
+                + ENC_PREFIX + "* ever appeared there; saw " + watcher.seen(), watcher.sawPrefix(ENC_PREFIX));
         assertNoStagedFiles();
     }
 
+    /** An unusable buffering.tempDir must abort the sign rather than silently fall back to java.io.tmpdir. */
+    @Test
+    public void unusableTempDirAbortsTheSign() throws Exception {
+        cfg.setProperty(AppConfig.KEY_BUFFERING_TEMP_DIR,
+                new File(tmp.getRoot(), "does-not-exist").getAbsolutePath());
+
+        assertTrue("Signing must fail when the configured staging directory is unusable",
+                !new DssSigningEngine().sign(baseOptions(), EMPTY_CONFIG));
+    }
+
+    /**
+     * Everything left in the staging directory, whatever its name. Deliberately unfiltered: a
+     * {@code jsignpdf-} prefix filter would hide PDFBox's own scratch files ({@code PDFBox*.tmp}), which the
+     * engine's stream-cache wiring also directs here.
+     */
     private void assertNoStagedFiles() {
-        File[] left = stagingDir.listFiles(new FilenameFilter() {
-            @Override
-            public boolean accept(File dir, String name) {
-                return name.startsWith("jsignpdf-");
-            }
-        });
+        File[] left = stagingDir.listFiles();
         assertEquals("Staged temp files must not survive the sign: " + java.util.Arrays.toString(left),
                 0, left.length);
+    }
+
+    /**
+     * Records what appears in the staging directory while a sign runs, and the highest number of files
+     * alive at once. Millisecond-paced: the staged files live for a large fraction of the sign, so this
+     * takes hundreds of looks inside the window without spinning a core flat out.
+     */
+    private static final class StagingWatcher implements AutoCloseable {
+
+        private final Set<String> seen = ConcurrentHashMap.newKeySet();
+        private final AtomicInteger peak = new AtomicInteger();
+        private final AtomicBoolean running = new AtomicBoolean(true);
+        private final Thread thread;
+
+        StagingWatcher(File dir) {
+            thread = new Thread(() -> {
+                while (running.get()) {
+                    File[] staged = dir.listFiles();
+                    if (staged != null) {
+                        peak.accumulateAndGet(staged.length, Math::max);
+                        for (File f : staged) {
+                            seen.add(f.getName());
+                        }
+                    }
+                    try {
+                        Thread.sleep(1L);
+                    } catch (InterruptedException e) {
+                        Thread.currentThread().interrupt();
+                        return;
+                    }
+                }
+            }, "staging-watcher");
+            thread.setDaemon(true);
+            thread.start();
+        }
+
+        int peak() {
+            return peak.get();
+        }
+
+        boolean sawPrefix(String prefix) {
+            return seen.stream().anyMatch(name -> name.startsWith(prefix));
+        }
+
+        Set<String> seen() {
+            return seen;
+        }
+
+        @Override
+        public void close() throws InterruptedException {
+            running.set(false);
+            thread.join();
+        }
     }
 
     /** Minimal {@link EngineConfig} over a map; each DSS test class carries its own copy. */

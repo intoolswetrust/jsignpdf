@@ -11,6 +11,7 @@ import static net.sf.jsignpdf.Constants.LOGGER;
 
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.net.Proxy;
 import java.security.MessageDigest;
@@ -123,6 +124,24 @@ public class OpenPdfSigningEngine implements SigningEngine {
         try {
             SSLInitializer.init(options);
 
+            // Resolved up front so an unusable buffering.tempDir aborts before the output file is created
+            // and before the keystore is opened. The directory is only read in TEMP mode, so a stale path
+            // cannot break a memory-mode sign.
+            final BufferingMode bufferingMode = AppConfig.bufferingMode();
+            final File bufferingTempDir;
+            if (bufferingMode == BufferingMode.TEMP) {
+                try {
+                    bufferingTempDir = AppConfig.bufferingTempDir();
+                } catch (IOException e) {
+                    LOGGER.severe(e.getMessage());
+                    return false;
+                }
+                LOGGER.info(RES.get("console.buffering.temp", bufferingTempDir != null
+                        ? bufferingTempDir.getAbsolutePath() : System.getProperty("java.io.tmpdir")));
+            } else {
+                bufferingTempDir = null;
+            }
+
             final PrivateKeyInfo pkInfo;
             final PrivateKey key;
             final Certificate[] chain;
@@ -194,15 +213,11 @@ public class OpenPdfSigningEngine implements SigningEngine {
                 }
             }
 
-            if (AppConfig.bufferingMode() == BufferingMode.TEMP) {
+            if (bufferingMode == BufferingMode.TEMP) {
                 // Own the temp file rather than letting createSignature() make one: OpenPDF never returns
                 // the name and only deletes it in close(), so an abort between preClose() and close() —
                 // exactly where TSA/OCSP failures land — would leak a file the size of the document.
-                final File tempDir = AppConfig.bufferingTempDir();
-                LOGGER.info(RES.get("console.buffering.temp",
-                        tempDir != null ? tempDir.getAbsolutePath() : System.getProperty("java.io.tmpdir")));
-                sigTempFile = File.createTempFile("jsignpdf-sig-", ".pdf", tempDir);
-                sigTempFile.deleteOnExit();
+                sigTempFile = File.createTempFile("jsignpdf-sig-", ".pdf", bufferingTempDir);
             }
             final PdfStamper stp = PdfStamper.createSignature(reader, fout, tmpPdfVersion, sigTempFile,
                     options.isAppendX());
@@ -464,8 +479,12 @@ public class OpenPdfSigningEngine implements SigningEngine {
                     e.printStackTrace();
                 }
             }
-            if (sigTempFile != null) {
-                sigTempFile.delete();
+            if (sigTempFile != null && sigTempFile.exists() && !sigTempFile.delete()) {
+                // Windows refuses to delete a file that is still open, and an abort between preClose() and
+                // close() leaves OpenPDF's RandomAccessFile on this one open with no way to reach it. Say so
+                // instead of silently leaving a document-sized file behind. The exists() guard keeps the
+                // success path quiet, where OpenPDF's own close() already deleted it.
+                LOGGER.warning(RES.get("console.buffering.tempFileNotDeleted", sigTempFile.getAbsolutePath()));
             }
         }
         return finished;

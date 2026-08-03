@@ -210,10 +210,18 @@ public class DssSigningEngine implements SigningEngine {
             // Resolved up front so an unusable buffering.tempDir aborts before any work is done. The
             // directory is only read in TEMP mode, so a stale path cannot break a memory-mode sign.
             final BufferingMode bufferingMode = AppConfig.bufferingMode();
-            final File bufferingTempDir = bufferingMode == BufferingMode.TEMP ? AppConfig.bufferingTempDir() : null;
+            final File bufferingTempDir;
             if (bufferingMode == BufferingMode.TEMP) {
+                try {
+                    bufferingTempDir = AppConfig.bufferingTempDir();
+                } catch (IOException e) {
+                    LOGGER.severe(e.getMessage());
+                    return false;
+                }
                 LOGGER.info(RES.get("console.buffering.temp", bufferingTempDir != null
                         ? bufferingTempDir.getAbsolutePath() : System.getProperty("java.io.tmpdir")));
+            } else {
+                bufferingTempDir = null;
             }
 
             final PrivateKeyInfo pkInfo = KeyStoreUtils.getPkInfo(options);
@@ -366,6 +374,10 @@ public class DssSigningEngine implements SigningEngine {
                         resourcesHandlerBuilder.setTempFileDirectory(bufferingTempDir);
                     }
                     pdfObjFactory.setResourcesHandlerBuilder(resourcesHandlerBuilder);
+                    // Note: this one cannot honour buffering.tempDir. DSS's PdfMemoryUsageSetting carries no
+                    // directory and PdfBoxUtils.getMemoryUsageSetting never calls MemoryUsageSetting
+                    // .setTempDir, so DSS's internal PDFBox scratch always lands in java.io.tmpdir. Users who
+                    // need it elsewhere have to point java.io.tmpdir there; see JSignPdf.adoc.
                     pdfObjFactory.setPdfMemoryUsageSetting(PdfMemoryUsageSetting.mixed(MIXED_THRESHOLD_BYTES));
                 }
 
@@ -635,8 +647,15 @@ public class DssSigningEngine implements SigningEngine {
 
     /**
      * PDFBox stream cache for the engine's direct {@code Loader.loadPDF} calls. These bypass DSS entirely,
-     * so {@code IPdfObjFactory.setPdfMemoryUsageSetting} does not reach them &mdash; without this a large
-     * input would be fully buffered on the heap before DSS is involved.
+     * so {@code IPdfObjFactory.setPdfMemoryUsageSetting} does not reach them &mdash; without this their
+     * decoded stream data would be cached on the heap before DSS is involved. (The raw file bytes are read
+     * lazily either way; it is the stream cache that defaults to memory-only.)
+     *
+     * <p>
+     * Unlike the DSS-internal setting, this one honours {@code buffering.tempDir}: PDFBox's
+     * {@code MemoryUsageSetting} takes a directory, whereas DSS's {@code PdfMemoryUsageSetting} has no
+     * equivalent and always lands in {@code java.io.tmpdir}.
+     * </p>
      *
      * @return the temp-file-backed cache function, or {@code null} to keep PDFBox's memory-only default
      */
@@ -672,8 +691,14 @@ public class DssSigningEngine implements SigningEngine {
             doc.protect(policy);
 
             final File tempFile = File.createTempFile("jsignpdf-dss-enc-", ".pdf", tempDir);
-            tempFile.deleteOnExit();
-            doc.save(tempFile);
+            try {
+                doc.save(tempFile);
+            } catch (Exception e) {
+                // Only the returned file reaches the caller's finally, so a failed save has to clean up
+                // after itself rather than leave a document-sized file behind.
+                tempFile.delete();
+                throw e;
+            }
             return tempFile;
         }
     }
