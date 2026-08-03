@@ -8,17 +8,24 @@ import static org.junit.Assert.fail;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.PrintStream;
 import java.io.StringReader;
+import java.nio.file.Files;
 
 import org.apache.commons.cli.ParseException;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.TemporaryFolder;
 
 /**
  * Integration tests for {@link SignerOptionsFromCmdLine} that exercise the stdin-password feature end-to-end:
  * CLI parsing + canonical ordering + warning emission.
  */
 public class SignerOptionsFromCmdLineTest {
+
+    @Rule
+    public TemporaryFolder tempFolder = new TemporaryFolder();
 
     @Test
     public void flagAndSentinel_singlePasswordReadFromStdin() throws Exception {
@@ -455,6 +462,27 @@ public class SignerOptionsFromCmdLineTest {
         without.opts.setCmdLine(new String[] { "document.pdf" });
         without.opts.loadCmdLine();
         assertFalse(without.opts.isListSigFields());
+    }
+
+    /**
+     * The command line has no basic mode, so a properties file must not be able to turn the advanced flag off:
+     * it gates whether the key password is used at all ({@code getKeyPasswdX()} falls back to the keystore
+     * password without it), and signing then dies with an UnrecoverableKeyException. Same for the PDF
+     * passwords and the permissions.
+     */
+    @Test
+    public void loadedPropertiesCanNotTurnOffAdvancedMode() throws Exception {
+        File props = tempFolder.newFile("basic-mode.properties");
+        Files.writeString(props.toPath(), "view.advanced=false\n");
+
+        Fixture f = new Fixture("");
+        f.opts.setCmdLine(new String[] { "-lpf", props.getAbsolutePath(), "-ksp", "storepass", "-kp", "keypass",
+                "-opwd", "ownerpass", "document.pdf" });
+        f.opts.loadCmdLine();
+
+        assertTrue("the command line is always advanced", f.opts.isAdvanced());
+        assertEquals("keypass", new String(f.opts.getKeyPasswdX()));
+        assertEquals("ownerpass", f.opts.getPdfOwnerPwdStrX());
     }
 
     /** Convenience wiring: captures warnings and feeds a canned stdin reader with no Console. */
