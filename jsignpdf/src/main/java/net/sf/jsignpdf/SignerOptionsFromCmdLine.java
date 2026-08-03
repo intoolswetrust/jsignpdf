@@ -91,12 +91,16 @@ public class SignerOptionsFromCmdLine extends BasicSignerOptions {
             props.loadProperties(line.getOptionValue(ARG_LOADPROPS_FILE));
         }
 
-        // use the advanced mode for the command line even if the properties file says "view.advanced=false"
-        setAdvanced(true);
-
         if (line.hasOption(ARG_LOADPROPS) || line.hasOption(ARG_LOADPROPS_FILE)) {
             loadOptions();
         }
+
+        // Use the advanced mode for the command line even if the properties file says "view.advanced=false" -
+        // after the load, which sets the flag from that very property. The command line has no basic mode, and
+        // the flag gates whether the key password, the PDF passwords and the permissions are used at all: with
+        // it off, --key-pwd silently falls back to the keystore password (getKeyPasswdX) and signing fails with
+        // an UnrecoverableKeyException.
+        setAdvanced(true);
 
         if (line.hasOption(ARG_QUIET)) {
             // disable logging
