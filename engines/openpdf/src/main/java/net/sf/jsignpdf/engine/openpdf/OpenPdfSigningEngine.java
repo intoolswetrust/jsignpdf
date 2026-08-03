@@ -9,7 +9,9 @@ import static net.sf.jsignpdf.Constants.L2TEXT_PLACEHOLDER_CERTIFICATE;
 import static net.sf.jsignpdf.Constants.RES;
 import static net.sf.jsignpdf.Constants.LOGGER;
 
+import java.io.File;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.net.Proxy;
 import java.security.MessageDigest;
@@ -34,11 +36,13 @@ import net.sf.jsignpdf.engine.EngineConfig;
 import net.sf.jsignpdf.engine.SigningEngine;
 import net.sf.jsignpdf.extcsp.CloudFoxy;
 import net.sf.jsignpdf.ssl.SSLInitializer;
+import net.sf.jsignpdf.types.BufferingMode;
 import net.sf.jsignpdf.types.HashAlgorithm;
 import net.sf.jsignpdf.types.PDFEncryption;
 import net.sf.jsignpdf.types.PdfVersion;
 import net.sf.jsignpdf.types.RenderMode;
 import net.sf.jsignpdf.types.ServerAuthentication;
+import net.sf.jsignpdf.utils.AppConfig;
 import net.sf.jsignpdf.utils.KeyStoreUtils;
 import net.sf.jsignpdf.utils.PKCS11Utils;
 
@@ -116,8 +120,27 @@ public class OpenPdfSigningEngine implements SigningEngine {
         final String outFile = options.getOutFileX();
         boolean finished = false;
         FileOutputStream fout = null;
+        File sigTempFile = null;
         try {
             SSLInitializer.init(options);
+
+            // Resolved up front so an unusable buffering.tempDir aborts before the output file is created
+            // and before the keystore is opened. The directory is only read in TEMP mode, so a stale path
+            // cannot break a memory-mode sign.
+            final BufferingMode bufferingMode = AppConfig.bufferingMode();
+            final File bufferingTempDir;
+            if (bufferingMode == BufferingMode.TEMP) {
+                try {
+                    bufferingTempDir = AppConfig.bufferingTempDir();
+                } catch (IOException e) {
+                    LOGGER.severe(e.getMessage());
+                    return false;
+                }
+                LOGGER.info(RES.get("console.buffering.temp", bufferingTempDir != null
+                        ? bufferingTempDir.getAbsolutePath() : System.getProperty("java.io.tmpdir")));
+            } else {
+                bufferingTempDir = null;
+            }
 
             final PrivateKeyInfo pkInfo;
             final PrivateKey key;
@@ -190,7 +213,14 @@ public class OpenPdfSigningEngine implements SigningEngine {
                 }
             }
 
-            final PdfStamper stp = PdfStamper.createSignature(reader, fout, tmpPdfVersion, null, options.isAppendX());
+            if (bufferingMode == BufferingMode.TEMP) {
+                // Own the temp file rather than letting createSignature() make one: OpenPDF never returns
+                // the name and only deletes it in close(), so an abort between preClose() and close() —
+                // exactly where TSA/OCSP failures land — would leak a file the size of the document.
+                sigTempFile = File.createTempFile("jsignpdf-sig-", ".pdf", bufferingTempDir);
+            }
+            final PdfStamper stp = PdfStamper.createSignature(reader, fout, tmpPdfVersion, sigTempFile,
+                    options.isAppendX());
             if (!options.isAppendX()) {
                 // we are not in append mode, let's remove existing signatures
                 // (otherwise we're getting to troubles)
@@ -448,6 +478,13 @@ public class OpenPdfSigningEngine implements SigningEngine {
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
+            }
+            if (sigTempFile != null && sigTempFile.exists() && !sigTempFile.delete()) {
+                // Windows refuses to delete a file that is still open, and an abort between preClose() and
+                // close() leaves OpenPDF's RandomAccessFile on this one open with no way to reach it. Say so
+                // instead of silently leaving a document-sized file behind. The exists() guard keeps the
+                // success path quiet, where OpenPDF's own close() already deleted it.
+                LOGGER.warning(RES.get("console.buffering.tempFileNotDeleted", sigTempFile.getAbsolutePath()));
             }
         }
         return finished;
