@@ -325,8 +325,11 @@ public class FxTranslationsTest {
             VBox root = (VBox) loadFxml("/net/sf/jsignpdf/fx/view/SignatureSettings.fxml", bundle);
             assertNotNull("SignatureSettings load failed for " + locale, root);
 
-            // First child is the "Enable visible signature" checkbox
-            CheckBox visibleSig = (CheckBox) root.getChildren().get(0);
+            // The panel starts with the "Signature field:" label and its combo, then the visible-signature toggle
+            Label sigFieldLabel = (Label) root.getChildren().get(0);
+            assertEquals("Signature field label for " + locale,
+                    bundle.getString("jfx.gui.sig.field"), sigFieldLabel.getText());
+            CheckBox visibleSig = (CheckBox) root.getChildren().get(2);
             assertEquals("Enable visible sig for " + locale,
                     bundle.getString("jfx.gui.sig.enableVisible"), visibleSig.getText());
         }

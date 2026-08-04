@@ -2,7 +2,9 @@ package net.sf.jsignpdf;
 
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotSame;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import java.net.Proxy;
@@ -75,6 +77,7 @@ public class BasicSignerOptionsTest {
         original.setImgPath("/img.png");
         original.setBgImgPath("/bg.png");
         original.setAcro6Layers(true);
+        original.setSigFieldName("Signature2");
 
         // TSA
         original.setTimestamp(true);
@@ -153,6 +156,7 @@ public class BasicSignerOptionsTest {
         assertEquals(original.getImgPath(), copy.getImgPath());
         assertEquals(original.getBgImgPath(), copy.getBgImgPath());
         assertEquals(original.isAcro6Layers(), copy.isAcro6Layers());
+        assertEquals(original.getSigFieldName(), copy.getSigFieldName());
 
         // TSA
         assertEquals(original.isTimestamp(), copy.isTimestamp());
@@ -274,5 +278,61 @@ public class BasicSignerOptionsTest {
 
         assertArrayEquals(original.getPdfUserPwd(), copy.getPdfUserPwd());
         assertNotSame(original.getPdfUserPwd(), copy.getPdfUserPwd());
+    }
+
+    /**
+     * The configured selector is what gets persisted and copied; the name it resolved to for the file being
+     * signed is per-file state, so a batch run re-resolves it instead of reusing the first file's field.
+     */
+    @Test
+    public void resolvedSigFieldNameIsSeparateFromTheConfiguredSelector() {
+        BasicSignerOptions options = new BasicSignerOptions();
+        options.setSigFieldName("#2");
+        assertEquals("#2", options.getSigFieldNameX());
+
+        options.setResolvedSigFieldName("Signature2");
+        assertEquals("the engines get the resolved name", "Signature2", options.getSigFieldNameX());
+        assertEquals("the selector is kept as configured", "#2", options.getSigFieldName());
+        assertEquals("a copy carries the selector, not the resolution", "#2",
+                options.createCopy().getSigFieldNameX());
+
+        options.setResolvedSigFieldName(null);
+        assertEquals("#2", options.getSigFieldNameX());
+    }
+
+    /**
+     * The selected field is session state, like the input file: a name means something only for the document it
+     * was chosen from, so storing it would make a GUI selection reappear as an implicit {@code --sig-field} on
+     * the next {@code --load-properties} run against an unrelated PDF.
+     */
+    @Test
+    public void sigFieldNameIsNeitherStoredNorLoaded() {
+        PropertyProvider mainConfig = PropertyStoreFactory.getInstance().mainConfig();
+        mainConfig.clear();
+        try {
+            BasicSignerOptions opts = new BasicSignerOptions();
+            opts.setSigFieldName("Manager");
+            opts.storeToPreset(mainConfig);
+            for (String key : mainConfig.stringPropertyNames()) {
+                assertFalse("no property may carry the field name, found " + key + "=" + mainConfig.getProperty(key),
+                        "Manager".equals(mainConfig.getProperty(key)));
+            }
+
+            mainConfig.setProperty("visibleSignature.fieldName", "Manager");
+            BasicSignerOptions loaded = new BasicSignerOptions();
+            loaded.loadFromPreset(mainConfig);
+            assertNull("a field name left in a store by an older version must be ignored", loaded.getSigFieldName());
+        } finally {
+            mainConfig.clear();
+        }
+    }
+
+    @Test
+    public void emptySigFieldNameMeansNoField() {
+        BasicSignerOptions options = new BasicSignerOptions();
+        assertFalse(options.isSigFieldSet());
+        options.setSigFieldName("");
+        assertNull(options.getSigFieldName());
+        assertFalse(options.isSigFieldSet());
     }
 }

@@ -101,7 +101,10 @@ public final class EngineMismatchValidator {
         // overwrite (non-incremental) mode — incremental append is the default and universal, so only an
         // explicit --overwrite request against an engine that can't do it (e.g. DSS, which PAdES forces to
         // be incremental) is a mismatch. The request is deliberate, so fail fast rather than silently append.
-        if (!o.isAppendX() && !caps.contains(Capability.OVERWRITE_MODE)) {
+        // The encryption case is excluded: isAppendX() is also false whenever encryption is requested, which
+        // used to report an engine with its own encryption path (DSS, which pre-encrypts and then appends) as
+        // failing at "--overwrite". Whether an engine can encrypt at all is the ENCRYPTION_* check below.
+        if (o.getPdfEncryption() == PDFEncryption.NONE && !o.isAppendX() && !caps.contains(Capability.OVERWRITE_MODE)) {
             out.add(new Mismatch("--overwrite", Capability.OVERWRITE_MODE));
         }
 
@@ -125,8 +128,15 @@ public final class EngineMismatchValidator {
             out.add(new Mismatch("--print-right / permissions", Capability.PERMISSIONS_BITMASK));
         }
 
-        // visible signature (umbrella + fields)
-        if (o.isVisible()) {
+        // existing signature field
+        if (o.isSigFieldSet() && !caps.contains(Capability.SIGN_EXISTING_FIELD)) {
+            out.add(new Mismatch("--sig-field", Capability.SIGN_EXISTING_FIELD));
+        }
+
+        // visible signature (umbrella + fields). A selected field is drawn into, so it counts as visible here
+        // even before SignerLogic#validateSigField sets the flag - otherwise --sig-field without -V would slip
+        // the sub-options below (--img-path, --bg-path, --render-mode, ...) past this check unvalidated.
+        if (o.isVisible() || o.isSigFieldSet()) {
             if (!caps.contains(Capability.VISIBLE_SIGNATURE)) {
                 out.add(new Mismatch("--visible-signature", Capability.VISIBLE_SIGNATURE));
             } else {

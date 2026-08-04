@@ -64,6 +64,64 @@ public class EngineMismatchValidatorTest {
         assertEquals("--overwrite", m.option());
     }
 
+    /**
+     * Encryption makes {@code isAppendX()} false as well, but an engine that encrypts by pre-encrypting and
+     * then appending (DSS) needs no OVERWRITE_MODE for it - reporting one sent the user chasing a
+     * {@code --overwrite} they never passed.
+     */
+    @Test
+    public void encryptionAloneIsNotAnOverwriteRequest() {
+        BasicSignerOptions opts = new BasicSignerOptions();
+        opts.setAdvanced(true);
+        opts.setPdfEncryption(net.sf.jsignpdf.types.PDFEncryption.PASSWORD);
+        StubSigningEngine engine = new StubSigningEngine("encryptOnly", Capability.ENCRYPTION_PASSWORD);
+        Set<Capability> reported = caps(EngineMismatchValidator.findMismatches(opts, engine));
+        assertFalse(reported.contains(Capability.OVERWRITE_MODE));
+        assertFalse(reported.contains(Capability.ENCRYPTION_PASSWORD));
+    }
+
+    @Test
+    public void sigFieldFlaggedWhenEngineLacksCapability() {
+        BasicSignerOptions opts = new BasicSignerOptions();
+        opts.setAdvanced(true);
+        opts.setSigFieldName("Signature1");
+        StubSigningEngine engine = new StubSigningEngine("noSigField", Capability.VISIBLE_SIGNATURE);
+        List<Mismatch> mismatches = EngineMismatchValidator.findMismatches(opts, engine);
+        assertTrue(caps(mismatches).contains(Capability.SIGN_EXISTING_FIELD));
+        Mismatch m = mismatches.stream().filter(x -> x.capability() == Capability.SIGN_EXISTING_FIELD)
+                .findFirst().orElseThrow();
+        assertEquals("--sig-field", m.option());
+    }
+
+    /**
+     * A selected field is drawn into whether or not {@code -V} was passed, so the appearance sub-options must
+     * be capability-checked for it. The visible flag itself is only set later (SignerLogic), which is exactly
+     * why this check must not depend on it.
+     */
+    @Test
+    public void sigFieldValidatesTheAppearanceOptionsWithoutTheVisibleFlag() {
+        BasicSignerOptions opts = new BasicSignerOptions();
+        opts.setAdvanced(true);
+        opts.setSigFieldName("Signature1");
+        opts.setBgImgPath("/bg.png");
+        assertFalse("the fixture must not pre-set the flag this test is about", opts.isVisible());
+
+        StubSigningEngine engine = new StubSigningEngine("noBgImage", Capability.SIGN_EXISTING_FIELD,
+                Capability.VISIBLE_SIGNATURE);
+        Set<Capability> reported = caps(EngineMismatchValidator.findMismatches(opts, engine));
+        assertTrue(reported.contains(Capability.VISIBLE_BACKGROUND_IMAGE));
+    }
+
+    @Test
+    public void sigFieldNotFlaggedWhenEngineSupportsIt() {
+        BasicSignerOptions opts = new BasicSignerOptions();
+        opts.setAdvanced(true);
+        opts.setSigFieldName("Signature1");
+        StubSigningEngine engine = new StubSigningEngine("sigField", Capability.SIGN_EXISTING_FIELD);
+        assertFalse(caps(EngineMismatchValidator.findMismatches(opts, engine))
+                .contains(Capability.SIGN_EXISTING_FIELD));
+    }
+
     @Test
     public void overwriteNotFlaggedWhenEngineSupportsIt() {
         BasicSignerOptions opts = new BasicSignerOptions();

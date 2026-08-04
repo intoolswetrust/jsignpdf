@@ -14,6 +14,11 @@
         <Insets top="8" right="8" bottom="8" left="8"/>
     </padding>
 
+    <Label text="%jfx.gui.sig.field"/>
+    <ComboBox fx:id="cmbSigField" maxWidth="Infinity">
+        <tooltip><Tooltip text="%jfx.gui.sig.field.tooltip"/></tooltip>
+    </ComboBox>
+
     <CheckBox fx:id="chkVisibleSig" text="%jfx.gui.sig.enableVisible"/>
 
     <Separator/>

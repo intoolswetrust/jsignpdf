@@ -53,6 +53,7 @@ public class SignerOptionsFromCmdLine extends BasicSignerOptions {
     private boolean listKeyStores;
     private boolean listKeys;
     private boolean listEngines;
+    private boolean listSigFields;
 
     private boolean gui;
 
@@ -118,6 +119,7 @@ public class SignerOptionsFromCmdLine extends BasicSignerOptions {
         setListKeyStores(line.hasOption(ARG_LIST_KS_TYPES));
         setListKeys(line.hasOption(ARG_LIST_KEYS));
         setListEngines(line.hasOption(ARG_LIST_ENGINES));
+        setListSigFields(line.hasOption(ARG_LIST_SIG_FIELDS));
 
         AppConfig.applyAdvancedOverrides(parseAdvancedOverrides(line));
 
@@ -207,6 +209,8 @@ public class SignerOptionsFromCmdLine extends BasicSignerOptions {
         if (line.hasOption(ARG_BG_PATH))
             setBgImgPath(line.getOptionValue(ARG_BG_PATH));
         setAcro6Layers(!line.hasOption(ARG_DISABLE_ACRO6LAYERS));
+        if (line.hasOption(ARG_SIG_FIELD))
+            setSigFieldName(line.getOptionValue(ARG_SIG_FIELD));
 
         // TSA & OCSP
         if (line.hasOption(ARG_TSA_URL)) {
@@ -370,6 +374,8 @@ public class SignerOptionsFromCmdLine extends BasicSignerOptions {
                 OptionBuilder.withLongOpt(ARG_LIST_KEYS_LONG).withDescription(RES.get("hlp.listKeys")).create(ARG_LIST_KEYS));
         OPTS.addOption(OptionBuilder.withLongOpt(ARG_LIST_ENGINES_LONG).withDescription(RES.get("hlp.listEngines"))
                 .create(ARG_LIST_ENGINES));
+        OPTS.addOption(OptionBuilder.withLongOpt(ARG_LIST_SIG_FIELDS_LONG).withDescription(RES.get("hlp.listSigFields"))
+                .create(ARG_LIST_SIG_FIELDS));
 
         // signing engine selection
         OPTS.addOption(OptionBuilder.withLongOpt(ARG_ENGINE_LONG).withDescription(RES.get("hlp.engine")).hasArg()
@@ -476,6 +482,8 @@ public class SignerOptionsFromCmdLine extends BasicSignerOptions {
                         .create(ARG_L2TEXT_FONT_SIZE));
         OPTS.addOption(OptionBuilder.withDescription(RES.get("hlp.l4Text")).withLongOpt(ARG_L4_TEXT_LONG).hasArg()
                 .withArgName("text").create());
+        OPTS.addOption(OptionBuilder.withLongOpt(ARG_SIG_FIELD_LONG).withDescription(RES.get("hlp.sigField")).hasArg()
+                .withArgName("field").create(ARG_SIG_FIELD));
 
         // TSA & OCSP
         OPTS.addOption(OptionBuilder.withLongOpt(ARG_TSA_URL_LONG).withDescription(RES.get("hlp.tsaUrl")).hasArg()
@@ -659,6 +667,20 @@ public class SignerOptionsFromCmdLine extends BasicSignerOptions {
      */
     public void setListEngines(boolean listEngines) {
         this.listEngines = listEngines;
+    }
+
+    /**
+     * @return the listSigFields
+     */
+    public boolean isListSigFields() {
+        return listSigFields;
+    }
+
+    /**
+     * @param listSigFields the listSigFields to set
+     */
+    public void setListSigFields(boolean listSigFields) {
+        this.listSigFields = listSigFields;
     }
 
     /**

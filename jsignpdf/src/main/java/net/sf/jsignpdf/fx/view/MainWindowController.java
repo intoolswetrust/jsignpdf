@@ -83,6 +83,7 @@ import net.sf.jsignpdf.fx.viewmodel.SigningOptionsViewModel;
 import net.sf.jsignpdf.fx.viewmodel.VisibleSignatureCoordinator;
 import net.sf.jsignpdf.types.PadesLevel;
 import net.sf.jsignpdf.types.PageInfo;
+import net.sf.jsignpdf.types.SignatureFieldInfo;
 import net.sf.jsignpdf.utils.PropertyProvider;
 import net.sf.jsignpdf.utils.PropertyStoreFactory;
 
@@ -111,6 +112,10 @@ public class MainWindowController {
     private final RecentFilesManager recentFilesManager = new RecentFilesManager();
     private final PresetManager presetManager = new PresetManager();
     private final EngineCapabilities engineCapabilities = new EngineCapabilities();
+    /** Existing signature field the signature goes into, or null when a new field is created. */
+    private SignatureFieldInfo selectedSigField;
+    /** Marker rectangle of {@link #selectedSigField}, relative to the displayed page (see PdfExtraInfo). */
+    private float[] selectedSigFieldMarker;
     private PdfPageView pdfPageView;
     private SignatureOverlay signatureOverlay;
     /** Holds the side panel node while it's detached from the SplitPane (hidden). */
@@ -355,6 +360,7 @@ public class MainWindowController {
             updateNavButtonState();
             capturePlacementToSigningVM();
             updateSigCoordsBadge();
+            updateFieldHighlight(selectedSigField);
         });
 
         // Zoom combo box changes
@@ -470,6 +476,11 @@ public class MainWindowController {
         // forced on and disabled there.
         if (signaturePropertiesController != null) {
             signaturePropertiesController.gateCapabilities(engineCapabilities);
+        }
+        if (signatureSettingsController != null) {
+            signatureSettingsController.gateSigFieldCombo(
+                    engineCapabilities.unsupported(Capability.SIGN_EXISTING_FIELD));
+            signatureSettingsController.setOnSigFieldSelected(this::onSigFieldSelected);
         }
 
         // TODO(phase-2): field-level capability gating is still missing for the remaining sub-controller
@@ -1321,6 +1332,8 @@ public class MainWindowController {
             recentFilesManager.addFile(file);
             refreshRecentFilesMenu();
 
+            refreshSignatureFields();
+
             // Show signature overlay and render first page
             signatureOverlay.setVisible(true);
             documentVM.setCurrentPage(1);
@@ -1454,11 +1467,82 @@ public class MainWindowController {
         // JPEG 2000 document is opened this session.
     }
 
+    /**
+     * Offers the blank signature fields of the freshly opened document in the appearance panel. Already signed
+     * fields are left out - the combo is a "sign into this one" picker, and the CLI listing is the place to see
+     * the full inventory.
+     */
+    private void refreshSignatureFields() {
+        if (signatureSettingsController == null) {
+            return;
+        }
+        List<SignatureFieldInfo> blankFields = List.of();
+        try {
+            blankFields = new PdfExtraInfo(options).getSignatureFields().stream().filter(SignatureFieldInfo::blank)
+                    .toList();
+        } catch (Exception e) {
+            LOGGER.log(Level.WARNING, "Unable to read the signature fields of the document", e);
+        }
+        signatureSettingsController.setSignatureFields(blankFields);
+    }
+
+    /**
+     * Reacts to a signature field being (de)selected: the field's own rectangle decides where the signature
+     * goes, so the placement rectangle is dropped, the position options go back to their defaults (they would
+     * only be ignored - and warned about - during signing) and the overlay stops accepting drags. The field is
+     * marked on its own page instead.
+     *
+     * @param field the selected field, or {@code null} for "create a new field"
+     */
+    private void onSigFieldSelected(SignatureFieldInfo field) {
+        selectedSigField = field;
+        selectedSigFieldMarker = null;
+        if (field == null) {
+            signatureOverlay.clearFieldHighlight();
+            signatureOverlay.setMouseTransparent(false);
+            updateSigStateBadge();
+            return;
+        }
+        if (field.hasVisibleRect() && options != null) {
+            // Read once per selection - the marker is then redrawn from these relative coordinates on every
+            // page change and resize, without reopening the document.
+            selectedSigFieldMarker = new PdfExtraInfo(options).getFieldRelativeRect(field);
+        }
+        placementVM.reset();
+        signingVM.pageProperty().set(Constants.DEFVAL_PAGE);
+        signingVM.positionLLXProperty().set(Constants.DEFVAL_LLX);
+        signingVM.positionLLYProperty().set(Constants.DEFVAL_LLY);
+        signingVM.positionURXProperty().set(Constants.DEFVAL_URX);
+        signingVM.positionURYProperty().set(Constants.DEFVAL_URY);
+        signatureOverlay.setMouseTransparent(true);
+        if (documentVM.isDocumentLoaded() && field.page() >= 1 && field.page() != documentVM.getCurrentPage()) {
+            documentVM.setCurrentPage(field.page());
+        }
+        updateFieldHighlight(field);
+        updateSigStateBadge();
+    }
+
+    /**
+     * Draws (or hides) the marker of the selected field, from the relative coordinates computed when the field
+     * was selected. Nothing is marked while another page than the field's own is being shown.
+     */
+    private void updateFieldHighlight(SignatureFieldInfo field) {
+        if (field == null || selectedSigFieldMarker == null || field.page() != documentVM.getCurrentPage()) {
+            signatureOverlay.clearFieldHighlight();
+            return;
+        }
+        signatureOverlay.setFieldHighlight(selectedSigFieldMarker[0], selectedSigFieldMarker[1],
+                selectedSigFieldMarker[2], selectedSigFieldMarker[3]);
+    }
+
     private void closeDocument() {
         renderService.cancel();
         signingVM.visibleProperty().set(false);
         documentVM.reset();
         placementVM.reset();
+        if (signatureSettingsController != null) {
+            signatureSettingsController.setSignatureFields(List.of());
+        }
         signatureOverlay.setVisible(false);
         if (options != null) {
             options.setInFile(null);

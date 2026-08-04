@@ -44,6 +44,7 @@ public enum Capability {
     VISIBLE_SIGNATURE_GRAPHIC,
     VISIBLE_CUSTOM_FONT,
     ACRO6_LAYERS,
+    SIGN_EXISTING_FIELD, // place the signature into a pre-existing empty /FT /Sig field instead of creating one
 
     // revocation / timestamp
     TSA,

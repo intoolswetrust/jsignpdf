@@ -137,13 +137,13 @@ Every release bundles a small `demo/` folder so you can try JSignPdf immediately
 |File |Description
 
 |`service-agreement.pdf`
-|Sample unsigned PDF document.
+|Sample unsigned PDF document. The signature block on page 2 carries an empty signature field named `JaneDoe`, so <<Signing an existing signature field>> can be tried out without authoring a form first.
 
 |`jsmith.p12`
 |Demo PKCS#12 keystore with a self-signed certificate for `CN=John Smith`. The keystore and key password is `123456`.
 
 |`README.md`
-|Walk-through of the most common command-line scenarios (basic signature, visible signature, timestamped signature with FreeTSA, appending a signature, listing keys).
+|Walk-through of the most common command-line scenarios (basic signature, visible signature, signing into the pre-placed signature field, timestamped signature with FreeTSA, appending a signature, listing keys).
 |===
 
 You can find the folder:
@@ -360,6 +360,9 @@ usage: jsignpdf [file1.pdf [file2.pdf ...]] [-a] [--bg-path
 | `-le, --list-engines`
 | Lists the available signing engines (use as values for `-eng`). See <<Signing engines>>.
 
+| `-lsf, --list-sig-fields`
+| Lists the signature fields of the given PDF file(s) -- number, name, page, rectangle and whether the field is still empty -- and exits. The numbers are the ones `--sig-field #N` accepts. See <<Signing an existing signature field>>.
+
 | `-eng, --engine <engine>`
 | Selects the signing engine for this invocation, overriding the `engine` key in `advanced.properties`. Use `-le` to list available engines. See <<Signing engines>>.
 
@@ -464,10 +467,13 @@ See <<Visible signature options>> for details.
 |Option |Description
 
 | `-V, --visible-signature`
-| Enables a visible signature.
+| Enables a visible signature. Implied by `-sf`.
+
+| `-sf, --sig-field <field>`
+| Signs into an existing empty signature field instead of creating a new one: a field name, `#N` for the N-th signature field in document order (see `-lsf`) or `auto` for the first empty field. The field's own rectangle and page are used, so the position options below are ignored. See <<Signing an existing signature field>>.
 
 | `-pg, --page <pageNumber>`
-| Page for the visible signature. Default: `1`. If out of bounds, the last page is used.
+| Page for the visible signature. Default: `1`. If out of bounds, the last page is used. Ignored when `-sf` is used.
 
 | `-llx <position>`
 | Lower left corner X-axis position (negative value is subtracted from page width).
@@ -865,6 +871,60 @@ For example, a _Signature Text_ of `Signed by ${signer}` + `on ${timestamp}` ren
 _Background image scale_ defines the size of a background image. Any negative number means the best-fit algorithm will be used. Zero value means to stretch, which fills the whole field -- it doesn't keep the image ratio. A positive value means the multiplicator of the original size.
 
 Supported file formats for the _Image_ and _Background Image_ are GIF, JPEG, JPEG2000, PNG, WMF, BMP, and TIFF.
+
+=== Signing an existing signature field
+
+Documents that are meant to be signed by several people usually carry the signature boxes already: the form
+author pre-places an empty signature field for each signer ("Signature #1", "Signature #2"), and every signer
+fills their own box. JSignPdf can sign into such a field instead of creating a new one. The bundled
+`demo/service-agreement.pdf` carries one, so you can try this out right away -- see <<Demo files>>.
+
+In the JavaFX UI, the _Signature field_ combo box at the top of the _Signature Appearance_ panel lists the
+empty signature fields of the opened document. Pick one and the signature goes there; the field is marked on
+the page preview and the position controls are switched off, because the field's own rectangle decides where
+the signature lands. The combo stays on _(create new field)_ for documents without empty fields, and the
+selection is reset whenever you open another document.
+
+On the command line, `-lsf` shows what a document offers:
+
+[source,shell]
+----
+$ jsignpdf -lsf contract.pdf
+Signature fields of contract.pdf:
+#1   Employee                       page 1    [70.0 700.0 300.0 760.0] blank
+#2   Witness                        page 1    [320.0 700.0 500.0 760.0] signed
+#3   Manager                        page 3    [70.0 500.0 300.0 560.0] blank
+----
+
+and `-sf` picks one of them:
+
+[source,shell]
+----
+$ jsignpdf -kst PKCS12 -ksf key.p12 -ksp secret -sf Manager contract.pdf
+$ jsignpdf -kst PKCS12 -ksf key.p12 -ksp secret -sf '#3' contract.pdf     # the same field, by number
+$ jsignpdf -kst PKCS12 -ksf key.p12 -ksp secret -sf auto contract.pdf     # the first empty field
+----
+
+Things worth knowing:
+
+* **The numbers count all signature fields**, empty and signed alike, in document order (page by page). A
+  number therefore keeps pointing at the same field as the other signers fill theirs.
+* **A field name always wins over a selector.** If a document really contains a field named `auto` or `#1`,
+  that field is what you get; `-lsf` marks such a name.
+* **`#N` and `auto` are resolved per input file**, so the same command works for a batch of documents built
+  from one template.
+* **The field's rectangle and page are used**, so `-pg`, `--llx`, `--lly`, `--urx` and `--ury` are ignored
+  (with a warning) -- neither signing engine can move an existing field. The appearance is drawn into the
+  field even without `-V`; a field with a zero-size rectangle gives an invisible signature.
+* **A name that does not match an empty field is an error**, and the message lists what the document offers.
+  JSignPdf never creates a field under a name you asked for, so a typo cannot silently produce a stray
+  signature somewhere else on the page.
+* **`--overwrite` and PDF encryption are refused** together with `-sf`. Both rewrite the document instead of
+  appending to it, which contradicts signing a document the way its author built it -- and a rewrite drops the
+  signatures your co-signers already added. Sign first and encrypt the result afterwards.
+* JSignPdf does not evaluate `/Lock` dictionaries or a previous certification signature. Signing a field that
+  an earlier signer locked, or any field of a document certified with "no changes allowed", produces a
+  technically valid signature that PDF readers will nonetheless report as invalidating the earlier one.
 
 === TSA -- timestamps
 

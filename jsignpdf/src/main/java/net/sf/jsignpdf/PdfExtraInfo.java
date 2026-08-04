@@ -1,10 +1,25 @@
 package net.sf.jsignpdf;
 
+import static net.sf.jsignpdf.Constants.RES;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Map;
+
 import net.sf.jsignpdf.types.PageInfo;
+import net.sf.jsignpdf.types.SignatureFieldInfo;
 import net.sf.jsignpdf.utils.PdfUtils;
 
+import org.apache.commons.lang3.StringUtils;
 import org.openpdf.text.Rectangle;
 import org.openpdf.text.exceptions.BadPasswordException;
+import org.openpdf.text.pdf.AcroFields;
+import org.openpdf.text.pdf.PdfArray;
+import org.openpdf.text.pdf.PdfDictionary;
+import org.openpdf.text.pdf.PdfName;
+import org.openpdf.text.pdf.PdfNumber;
 import org.openpdf.text.pdf.PdfReader;
 
 /**
@@ -93,5 +108,276 @@ public class PdfExtraInfo {
         }
 
         return tmpResult;
+    }
+
+    /**
+     * Returns all signature form fields of the input PDF - both blank and already signed ones - in document
+     * order: pages in order, and within a page the order of the widget in the page's {@code /Annots} array.
+     * Neither {@code AcroFields.getFieldNamesWithBlankSignatures()} (a {@code HashMap} iteration) nor the
+     * AcroForm {@code /Fields} array gives that order, so it is computed here and used both for the
+     * {@code --list-sig-fields} output and for resolving the {@code #N} selector - the numbers a user reads
+     * are the numbers they can pass back.
+     *
+     * <p>Unlike the other methods of this class, failures are reported rather than swallowed: the listing
+     * command has to tell "this PDF has no signature fields" from "this PDF could not be opened".
+     *
+     * @return signature fields in document order, numbered from 1 (never {@code null})
+     * @throws IOException when the input PDF can't be opened
+     */
+    public List<SignatureFieldInfo> getSignatureFields() throws IOException {
+        PdfReader reader = null;
+        try {
+            reader = PdfUtils.getPdfReader(options.getInFile(), options.getPdfOwnerPwdStrX().getBytes());
+            return readSignatureFields(reader);
+        } finally {
+            if (reader != null) {
+                try {
+                    reader.close();
+                } catch (Exception e) {
+                    // nothing to do
+                }
+            }
+        }
+    }
+
+    /**
+     * Returns the widget rectangle of the given field as relative coordinates of the page <em>as displayed</em>
+     * - origin in the top-left corner, values in {@code 0..1} - for marking the field on a rendered page.
+     *
+     * <p>The field rectangle is in unrotated PDF user space while a viewer shows the page turned by its
+     * {@code /Rotate}, so the corners are mapped through that rotation here; a media box that does not start at
+     * the origin is accounted for as well.
+     *
+     * @param field the field to mark
+     * @return {@code {x, y, width, height}} relative to the displayed page, or {@code null} when the page
+     *         geometry can't be read
+     */
+    public float[] getFieldRelativeRect(SignatureFieldInfo field) {
+        if (field == null) {
+            return null;
+        }
+        PdfReader reader = null;
+        try {
+            reader = PdfUtils.getPdfReader(options.getInFile(), options.getPdfOwnerPwdStrX().getBytes());
+            final Rectangle page = reader.getPageSize(field.page());
+            return relativeRect(field.llx() - page.getLeft(), field.lly() - page.getBottom(),
+                    field.urx() - page.getLeft(), field.ury() - page.getBottom(), page.getWidth(), page.getHeight(),
+                    reader.getPageRotation(field.page()));
+        } catch (Exception e) {
+            return null;
+        } finally {
+            if (reader != null) {
+                try {
+                    reader.close();
+                } catch (Exception e) {
+                    // nothing to do
+                }
+            }
+        }
+    }
+
+    /**
+     * Maps a rectangle of the unrotated page - coordinates relative to the media box corner, bottom-left origin
+     * - to relative coordinates of the page as displayed, with a top-left origin.
+     *
+     * @param pageWidth width of the unrotated page
+     * @param pageHeight height of the unrotated page
+     * @param rotation the page's {@code /Rotate}, a multiple of 90 (anything else is treated as 0)
+     * @return {@code {x, y, width, height}}, or {@code null} for a degenerate page size
+     */
+    static float[] relativeRect(float llx, float lly, float urx, float ury, float pageWidth, float pageHeight,
+            int rotation) {
+        if (pageWidth <= 0f || pageHeight <= 0f) {
+            return null;
+        }
+        final int rot = ((rotation % 360) + 360) % 360;
+        final boolean swapped = rot == 90 || rot == 270;
+        final float displayWidth = swapped ? pageHeight : pageWidth;
+        final float displayHeight = swapped ? pageWidth : pageHeight;
+
+        // The rotation turns the page clockwise: at 90 the unrotated bottom edge becomes the displayed left
+        // edge and the unrotated left edge becomes the displayed top edge, and so on around.
+        final float[] x = new float[2];
+        final float[] y = new float[2];
+        for (int i = 0; i < 2; i++) {
+            final float px = i == 0 ? llx : urx;
+            final float py = i == 0 ? lly : ury;
+            switch (rot) {
+                case 90 -> {
+                    x[i] = py;
+                    y[i] = px;
+                }
+                case 180 -> {
+                    x[i] = pageWidth - px;
+                    y[i] = py;
+                }
+                case 270 -> {
+                    x[i] = pageHeight - py;
+                    y[i] = pageWidth - px;
+                }
+                default -> {
+                    x[i] = px;
+                    y[i] = pageHeight - py;
+                }
+            }
+        }
+        return new float[] { Math.min(x[0], x[1]) / displayWidth, Math.min(y[0], y[1]) / displayHeight,
+                Math.abs(x[1] - x[0]) / displayWidth, Math.abs(y[1] - y[0]) / displayHeight };
+    }
+
+    /**
+     * Resolves a {@code --sig-field} selector against the input PDF.
+     *
+     * @param selector field name, {@code #N} or {@code auto}
+     * @return the resolved blank signature field
+     * @throws IOException when the input PDF can't be opened
+     * @throws SignatureFieldException when the selector doesn't resolve to a signable field
+     */
+    public SignatureFieldInfo resolveSignatureField(String selector) throws IOException, SignatureFieldException {
+        return resolveSignatureField(getSignatureFields(), selector);
+    }
+
+    /**
+     * Resolves a {@code --sig-field} selector against an already read field list.
+     *
+     * <p>An exact field name always wins, so a field really named {@code auto} or {@code #1} stays reachable;
+     * the selectors are only interpreted when no field carries that literal name.
+     *
+     * @param fields signature fields in document order
+     * @param selector field name, {@code #N} or {@code auto}
+     * @return the resolved blank signature field
+     * @throws SignatureFieldException when the selector doesn't resolve to a signable field
+     */
+    public static SignatureFieldInfo resolveSignatureField(List<SignatureFieldInfo> fields, String selector)
+            throws SignatureFieldException {
+        if (fields.isEmpty()) {
+            throw new SignatureFieldException(RES.get("console.sigField.noFields"));
+        }
+        for (SignatureFieldInfo field : fields) {
+            if (field.name().equals(selector)) {
+                return requireBlank(field);
+            }
+        }
+        if (Constants.SIG_FIELD_SELECTOR_AUTO.equals(selector)) {
+            for (SignatureFieldInfo field : fields) {
+                if (field.blank()) {
+                    return field;
+                }
+            }
+            throw new SignatureFieldException(RES.get("console.sigField.noBlankField", describe(fields)));
+        }
+        if (selector != null && selector.startsWith(Constants.SIG_FIELD_SELECTOR_NUMBER_PREFIX)) {
+            final String number = selector.substring(Constants.SIG_FIELD_SELECTOR_NUMBER_PREFIX.length());
+            if (StringUtils.isNumeric(number)) {
+                // A number too big for an int is simply out of range - it must not escape as a parse error.
+                final int idx = parseFieldNumber(number);
+                if (idx < 1 || idx > fields.size()) {
+                    throw new SignatureFieldException(RES.get("console.sigField.numberOutOfRange", selector,
+                            String.valueOf(fields.size()), describe(fields)));
+                }
+                return requireBlank(fields.get(idx - 1));
+            }
+        }
+        throw new SignatureFieldException(
+                RES.get("console.sigField.notFound", String.valueOf(selector), describe(fields)));
+    }
+
+    private static int parseFieldNumber(String number) {
+        try {
+            return Integer.parseInt(number);
+        } catch (NumberFormatException e) {
+            return -1;
+        }
+    }
+
+    private static SignatureFieldInfo requireBlank(SignatureFieldInfo field) throws SignatureFieldException {
+        if (field.signed()) {
+            throw new SignatureFieldException(RES.get("console.sigField.alreadySigned", field.name()));
+        }
+        return field;
+    }
+
+    /**
+     * Renders the available fields for an error message, e.g. {@code #1 Signature1, #2 Signature2 (signed)}.
+     */
+    public static String describe(List<SignatureFieldInfo> fields) {
+        final StringBuilder sb = new StringBuilder();
+        for (SignatureFieldInfo field : fields) {
+            if (sb.length() > 0) {
+                sb.append(", ");
+            }
+            sb.append(Constants.SIG_FIELD_SELECTOR_NUMBER_PREFIX).append(field.number()).append(' ').append(field.name());
+            if (field.signed()) {
+                sb.append(' ').append(RES.get("console.sigField.state.signed"));
+            }
+        }
+        return sb.toString();
+    }
+
+    static List<SignatureFieldInfo> readSignatureFields(PdfReader reader) {
+        final AcroFields acroFields = reader.getAcroFields();
+        final List<Widget> widgets = new ArrayList<>();
+        for (Map.Entry<String, AcroFields.Item> entry : acroFields.getAllFields().entrySet()) {
+            final AcroFields.Item item = entry.getValue();
+            if (item == null || item.size() == 0) {
+                continue;
+            }
+            final PdfDictionary merged = item.getMerged(0);
+            if (merged == null || !PdfName.SIG.equals(merged.getAsName(PdfName.FT))) {
+                continue;
+            }
+            // Widget 0 is what both engines fill: OpenPDF's setVisibleSignature(String) uses getMerged(0) /
+            // getPage(0), DSS's drawer uses the first widget of the field. A multi-widget signature field is
+            // pathological; reporting the same widget keeps the listing, the resolution and the output aligned.
+            final Integer page = item.getPage(0);
+            final Integer tabOrder = item.getTabOrder(0);
+            widgets.add(new Widget(entry.getKey(), page == null ? Integer.MAX_VALUE : page,
+                    tabOrder == null ? Integer.MAX_VALUE : tabOrder, rectangleOf(merged),
+                    merged.get(PdfName.V) != null, isHidden(merged)));
+        }
+        widgets.sort(Comparator.comparingInt(Widget::page).thenComparingInt(Widget::tabOrder).thenComparing(Widget::name));
+
+        final List<SignatureFieldInfo> result = new ArrayList<>(widgets.size());
+        int number = 1;
+        for (Widget w : widgets) {
+            final Rectangle r = w.rect();
+            result.add(new SignatureFieldInfo(number++, w.name(), w.page() == Integer.MAX_VALUE ? 0 : w.page(),
+                    r.getLeft(), r.getBottom(), r.getRight(), r.getTop(), w.signed(), w.hidden()));
+        }
+        return result;
+    }
+
+    private static Rectangle rectangleOf(PdfDictionary widget) {
+        final PdfArray rect = widget.getAsArray(PdfName.RECT);
+        if (rect == null || rect.size() < 4) {
+            return new Rectangle(0f, 0f, 0f, 0f);
+        }
+        final float[] coords = new float[4];
+        for (int i = 0; i < 4; i++) {
+            final PdfNumber number = rect.getAsNumber(i);
+            coords[i] = number == null ? 0f : number.floatValue();
+        }
+        final Rectangle result = new Rectangle(coords[0], coords[1], coords[2], coords[3]);
+        result.normalize();
+        return result;
+    }
+
+    /**
+     * Hidden and NoView widgets are still listed and signable - an invisible pre-placed field is a legitimate
+     * authoring choice - but the flag is reported so the listing explains why nothing shows up in a viewer.
+     */
+    private static boolean isHidden(PdfDictionary widget) {
+        final PdfNumber flags = widget.getAsNumber(PdfName.F);
+        if (flags == null) {
+            return false;
+        }
+        final int value = flags.intValue();
+        return (value & ANNOT_FLAG_HIDDEN) != 0 || (value & ANNOT_FLAG_NO_VIEW) != 0;
+    }
+
+    private static final int ANNOT_FLAG_HIDDEN = 2;
+    private static final int ANNOT_FLAG_NO_VIEW = 32;
+
+    private record Widget(String name, int page, int tabOrder, Rectangle rect, boolean signed, boolean hidden) {
     }
 }
