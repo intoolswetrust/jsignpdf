@@ -10,10 +10,10 @@ import java.util.Locale;
  */
 public final class SupportedLanguages {
 
-    /** English (the base bundle) first; the rest sorted by tag. Region kept only where it disambiguates (zh). */
+    /** English (the base bundle) first; the rest sorted by tag. Region kept only where it disambiguates (zh, pt). */
     private static final List<String> TAGS = List.of(
             "en", "cs", "de", "el", "es", "fr", "hr", "hu", "hy", "it",
-            "ja", "nb", "pl", "pt", "ru", "sk", "ta", "zh-CN", "zh-TW");
+            "ja", "nb", "pl", "pt", "pt-BR", "ru", "sk", "ta", "zh-CN", "zh-TW");
 
     private SupportedLanguages() {
     }
