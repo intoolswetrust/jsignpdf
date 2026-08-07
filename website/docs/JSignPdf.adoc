@@ -882,8 +882,11 @@ fills their own box. JSignPdf can sign into such a field instead of creating a n
 In the JavaFX UI, the _Signature field_ combo box at the top of the _Signature Appearance_ panel lists the
 empty signature fields of the opened document. Pick one and the signature goes there; the field is marked on
 the page preview and the position controls are switched off, because the field's own rectangle decides where
-the signature lands. The combo stays on _(create new field)_ for documents without empty fields, and the
-selection is reset whenever you open another document.
+the signature lands. _Visible signature_ is turned on and locked (in the panel, the toolbar and the menu
+alike) for as long as a field is selected, because the appearance is always drawn into the field -- switch
+back to _(create new field)_ if you want an invisible signature, or pick a field whose rectangle has zero
+size, which gives one anyway. The combo stays on _(create new field)_ for documents without empty fields, and
+the selection is reset whenever you open another document.
 
 On the command line, `-lsf` shows what a document offers:
 
