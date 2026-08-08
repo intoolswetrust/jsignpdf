@@ -6,6 +6,8 @@ import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
 
+import net.sf.jsignpdf.Constants;
+
 /**
  * Tests for {@link VisibleSignatureCoordinator} — the placement↔signing view-model sync used by the preset save/load flows
  * and the sign/close flows.
@@ -126,6 +128,54 @@ public class VisibleSignatureCoordinatorTest {
         VisibleSignatureCoordinator.pushSigningToPlacement(svm, pvm, PAGE_W, PAGE_H);
 
         assertFalse(pvm.isPlaced());
+    }
+
+    /**
+     * The default rectangle fits any page, but it is what a fresh profile carries and what selecting an existing
+     * signature field writes back - restoring it would drop a 100×100 box in the lower-left corner of the page.
+     */
+    @Test
+    public void pushSigning_noOp_whenCoordsAreTheUntouchedDefaults() {
+        SigningOptionsViewModel svm = new SigningOptionsViewModel();
+        svm.visibleProperty().set(true);
+        svm.positionLLXProperty().set(Constants.DEFVAL_LLX);
+        svm.positionLLYProperty().set(Constants.DEFVAL_LLY);
+        svm.positionURXProperty().set(Constants.DEFVAL_URX);
+        svm.positionURYProperty().set(Constants.DEFVAL_URY);
+        SignaturePlacementViewModel pvm = new SignaturePlacementViewModel();
+
+        VisibleSignatureCoordinator.pushSigningToPlacement(svm, pvm, PAGE_W, PAGE_H);
+
+        assertFalse("the default rectangle means 'no position chosen yet'", pvm.isPlaced());
+    }
+
+    // ---- hasUsablePosition ----
+
+    @Test
+    public void hasUsablePosition_acceptsARectangleInsideThePage() {
+        assertTrue(VisibleSignatureCoordinator.hasUsablePosition(120f, 560f, 180f, 640f, PAGE_W, PAGE_H));
+    }
+
+    @Test
+    public void hasUsablePosition_rejectsTheDefaultRectangle() {
+        assertFalse(VisibleSignatureCoordinator.hasUsablePosition(Constants.DEFVAL_LLX, Constants.DEFVAL_LLY,
+                Constants.DEFVAL_URX, Constants.DEFVAL_URY, PAGE_W, PAGE_H));
+    }
+
+    /** Only the untouched defaults are special - the same box moved anywhere else is a real user choice. */
+    @Test
+    public void hasUsablePosition_acceptsTheDefaultSizedRectangleElsewhere() {
+        assertTrue(VisibleSignatureCoordinator.hasUsablePosition(Constants.DEFVAL_LLX, Constants.DEFVAL_LLY + 10f,
+                Constants.DEFVAL_URX, Constants.DEFVAL_URY + 10f, PAGE_W, PAGE_H));
+    }
+
+    @Test
+    public void hasUsablePosition_rejectsDegenerateAndOutOfPageRectangles() {
+        assertFalse("zero width", VisibleSignatureCoordinator.hasUsablePosition(10f, 10f, 10f, 80f, PAGE_W, PAGE_H));
+        assertFalse("beyond the page", VisibleSignatureCoordinator.hasUsablePosition(10f, 10f, PAGE_W + 1f, 80f,
+                PAGE_W, PAGE_H));
+        assertFalse("negative origin", VisibleSignatureCoordinator.hasUsablePosition(-5f, 10f, 80f, 80f,
+                PAGE_W, PAGE_H));
     }
 
     @Test

@@ -8,6 +8,8 @@ import java.util.logging.Level;
 
 import javafx.animation.PauseTransition;
 import javafx.application.Platform;
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.fxml.FXML;
 import javafx.geometry.Insets;
 import javafx.scene.Node;
@@ -116,6 +118,10 @@ public class MainWindowController {
     private SignatureFieldInfo selectedSigField;
     /** Marker rectangle of {@link #selectedSigField}, relative to the displayed page (see PdfExtraInfo). */
     private float[] selectedSigFieldMarker;
+    /** Mirrors {@link #selectedSigField} for the bindings that lock the visible-signature toggles. */
+    private final BooleanProperty sigFieldSelected = new SimpleBooleanProperty(false);
+    /** True while no document is loaded, i.e. there is nothing to place a visible signature on. */
+    private final BooleanProperty noDocument = new SimpleBooleanProperty(true);
     private PdfPageView pdfPageView;
     private SignatureOverlay signatureOverlay;
     /** Holds the side panel node while it's detached from the SplitPane (hidden). */
@@ -304,6 +310,13 @@ public class MainWindowController {
         menuVisibleSig.selectedProperty().bindBidirectional(signingVM.visibleProperty());
         btnVisibleSig.selectedProperty().bindBidirectional(signingVM.visibleProperty());
         btnTsa.selectedProperty().bindBidirectional(signingVM.tsaEnabledProperty());
+
+        // Signing into an existing field always draws the appearance into that field's rectangle - SignerLogic
+        // forces visible=true for it regardless of this flag - so the menu item and the toolbar toggle lock
+        // together with the side-panel checkbox. Left switchable they would only make the UI disagree with the
+        // signature that comes out. "(create new field)" is the way back to an invisible signature.
+        menuVisibleSig.disableProperty().bind(noDocument.or(sigFieldSelected));
+        btnVisibleSig.disableProperty().bind(noDocument.or(sigFieldSelected));
 
         // When TSA is turned on but no URL is configured yet, jump the side-panel
         // accordion to the TSA section so the user can fill the required field.
@@ -742,14 +755,15 @@ public class MainWindowController {
         txtPageNumber.setDisable(disabled);
         btnNextPage.setDisable(disabled);
         btnSign.setDisable(disabled);
-        btnVisibleSig.setDisable(disabled);
         menuSign.setDisable(disabled);
         menuClose.setDisable(disabled);
         menuSaveAs.setDisable(disabled);
-        menuVisibleSig.setDisable(disabled);
         menuZoomIn.setDisable(disabled);
         menuZoomOut.setDisable(disabled);
         menuZoomFit.setDisable(disabled);
+        // The visible-signature toggles (menu item + toolbar button) are bound to this property instead of being
+        // disabled here, so that a selected signature field can lock them as well.
+        noDocument.set(disabled);
         if (signatureSettingsController != null) {
             signatureSettingsController.setVisibleSigCheckBoxDisabled(disabled);
         }
@@ -792,9 +806,13 @@ public class MainWindowController {
      * coordinates persisted in the ViewModel — if they form a valid rectangle
      * that fits the current page — and falls back to a safe bottom-right
      * default otherwise. Always re-targets the current page.
+     * <p>
+     * Does nothing while an existing signature field is selected: that field's own {@code /Rect} decides where the
+     * signature goes, so a placement rectangle would only promise a position the signing path ignores.
      */
     private void autoPlaceVisibleSignature() {
-        if (!documentVM.isDocumentLoaded() || placementVM.isPlaced() || options == null) {
+        if (!documentVM.isDocumentLoaded() || placementVM.isPlaced() || options == null
+                || selectedSigField != null) {
             return;
         }
         PageInfo pageInfo = new PdfExtraInfo(options).getPageInfo(documentVM.getCurrentPage());
@@ -809,11 +827,7 @@ public class MainWindowController {
         float urx = signingVM.positionURXProperty().get();
         float ury = signingVM.positionURYProperty().get();
 
-        boolean fits = urx - llx > 1f && ury - lly > 1f
-                && llx >= 0f && lly >= 0f
-                && urx <= pw && ury <= ph;
-
-        if (fits) {
+        if (VisibleSignatureCoordinator.hasUsablePosition(llx, lly, urx, ury, pw, ph)) {
             placementVM.fromPdfCoordinates(llx, lly, urx, ury, pw, ph);
         } else {
             // Safe default: bottom-right, 15% × 8% of the page with ~5% margins.
@@ -1495,11 +1509,19 @@ public class MainWindowController {
      * @param field the selected field, or {@code null} for "create a new field"
      */
     private void onSigFieldSelected(SignatureFieldInfo field) {
+        final boolean hadField = selectedSigField != null;
         selectedSigField = field;
         selectedSigFieldMarker = null;
+        sigFieldSelected.set(field != null);
         if (field == null) {
             signatureOverlay.clearFieldHighlight();
             signatureOverlay.setMouseTransparent(false);
+            if (hadField && signingVM.visibleProperty().get()) {
+                // The visible flag the field forced on survives its deselection, so the rectangle has to come
+                // back with it - otherwise signing would place the appearance at coordinates nothing on screen
+                // shows. The position options were reset with the selection, so this lands on the default spot.
+                autoPlaceVisibleSignature();
+            }
             updateSigStateBadge();
             return;
         }
