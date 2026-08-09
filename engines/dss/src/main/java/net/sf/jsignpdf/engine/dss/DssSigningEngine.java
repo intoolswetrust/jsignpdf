@@ -83,6 +83,7 @@ import eu.europa.esig.dss.pades.signature.PAdESService;
 import eu.europa.esig.dss.pdf.PdfMemoryUsageSetting;
 import eu.europa.esig.dss.pdf.PdfSignatureFieldPositionChecker;
 import eu.europa.esig.dss.signature.resources.TempFileResourcesHandlerBuilder;
+import eu.europa.esig.dss.service.SecureRandomNonceSource;
 import eu.europa.esig.dss.service.http.commons.TimestampDataLoader;
 import eu.europa.esig.dss.service.http.proxy.ProxyConfig;
 import eu.europa.esig.dss.service.http.proxy.ProxyProperties;
@@ -127,6 +128,14 @@ public class DssSigningEngine implements SigningEngine {
      * should enable this.
      */
     static final String KEY_RELAX_FIELD_OVERLAP = "relaxFieldOverlap";
+
+    /**
+     * Config key ({@code engine.dss.tsa.nonce}): when {@code true} (the default), a random nonce is sent in
+     * the RFC 3161 timestamp request and the TSA is required to echo it back, which protects against replayed
+     * timestamp responses. Set to {@code false} only for a TSA that rejects or mishandles nonced requests.
+     * The openpdf engine always sends a nonce and ignores this key.
+     */
+    static final String KEY_TSA_NONCE = "tsa.nonce";
 
     /** Lower bound for the reserved {@code /Contents} size, matching DSS's own default; never estimate below it. */
     private static final int MIN_CONTENT_SIZE = 9472;
@@ -254,7 +263,7 @@ public class DssSigningEngine implements SigningEngine {
                 return false;
             }
 
-            try (PrivateKeySignatureToken token = new PrivateKeySignatureToken(key, chain)) {
+            try (PrivateKeySignatureToken token = new PrivateKeySignatureToken(key, chain, pkInfo.getProvider())) {
                 final PAdESSignatureParameters parameters = new PAdESSignatureParameters();
                 parameters.setDigestAlgorithm(digestAlgorithm);
                 parameters.setSigningCertificate(token.getKeyEntry().getCertificate());
@@ -396,7 +405,7 @@ public class DssSigningEngine implements SigningEngine {
                     // rejects the signature because that chain is not anchored, the untrusted-chain report can
                     // name the timestamp certificate instead of a bare fingerprint (issue #448).
                     tspSource = new CapturingTspSource(options.getTsaUrl(),
-                            buildTspSource(options, parameters, digestAlgorithm, proxyConfig));
+                            buildTspSource(options, parameters, digestAlgorithm, proxyConfig, engineConfig));
                     service.setTspSource(tspSource);
                 }
 
@@ -408,7 +417,7 @@ public class DssSigningEngine implements SigningEngine {
                         : estimateContentSize(chain, useTsa);
                 final boolean retryOnUndersize = engineConfig.getBoolean(KEY_RETRY_ON_UNDERSIZE, true);
                 final DSSDocument signedDocument = signWithContentSize(service, document, parameters, token,
-                        digestAlgorithm, initialContentSize, retryOnUndersize, resourcesHandlerBuilder);
+                        initialContentSize, retryOnUndersize, resourcesHandlerBuilder);
 
                 LOGGER.info(RES.get("console.createOutPdf", outFile));
                 try (FileOutputStream fos = new FileOutputStream(outFile)) {
@@ -490,7 +499,7 @@ public class DssSigningEngine implements SigningEngine {
      * timestamped levels each retry fetches a fresh TSA token, hence the {@link #MAX_CONTENT_SIZE_RETRIES} cap.
      */
     private DSSDocument signWithContentSize(PAdESService service, DSSDocument document,
-            PAdESSignatureParameters parameters, PrivateKeySignatureToken token, DigestAlgorithm digestAlgorithm,
+            PAdESSignatureParameters parameters, PrivateKeySignatureToken token,
             int initialContentSize, boolean retryOnUndersize, TempFileResourcesHandlerBuilder resourcesHandlerBuilder) {
         int contentSize = initialContentSize;
         for (int attempt = 0;; attempt++) {
@@ -499,7 +508,10 @@ public class DssSigningEngine implements SigningEngine {
                 LOGGER.fine("Signing attempt " + attempt + " reserving " + contentSize + " bytes for /Contents");
             }
             final ToBeSigned dataToSign = service.getDataToSign(document, parameters);
-            final SignatureValue signatureValue = token.sign(dataToSign, digestAlgorithm, null);
+            // From the parameters, not the key: they disagree when a PKCS#11 key reports "RSA" under an
+            // id-RSASSA-PSS certificate, and DSS rejects a SignatureValue that does not match.
+            final SignatureValue signatureValue = token.sign(dataToSign, parameters.getSignatureAlgorithm(),
+                    token.getKeyEntry());
             try {
                 return service.signDocument(document, parameters, signatureValue);
             } catch (IllegalArgumentException e) {
@@ -580,7 +592,7 @@ public class DssSigningEngine implements SigningEngine {
     }
 
     private OnlineTSPSource buildTspSource(BasicSignerOptions options, PAdESSignatureParameters parameters,
-            DigestAlgorithm digestAlgorithm, ProxyConfig proxyConfig) {
+            DigestAlgorithm digestAlgorithm, ProxyConfig proxyConfig, EngineConfig engineConfig) {
         final String tsaUrl = options.getTsaUrl();
         final TimestampDataLoader tsDataLoader = new TimestampDataLoader();
         tsDataLoader.setProxyConfig(proxyConfig);
@@ -591,6 +603,9 @@ public class DssSigningEngine implements SigningEngine {
                     StringUtils.defaultString(options.getTsaPasswd()).toCharArray());
         }
         final OnlineTSPSource tspSource = new OnlineTSPSource(tsaUrl, tsDataLoader);
+        if (engineConfig.getBoolean(KEY_TSA_NONCE, true)) {
+            tspSource.setNonceSource(new SecureRandomNonceSource());
+        }
         final String policyOid = options.getTsaPolicy();
         if (StringUtils.isNotEmpty(policyOid)) {
             LOGGER.info(RES.get("console.settingTsaPolicy", policyOid));

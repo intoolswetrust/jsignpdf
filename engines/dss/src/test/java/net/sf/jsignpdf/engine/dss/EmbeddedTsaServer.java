@@ -31,6 +31,7 @@ import org.bouncycastle.operator.jcajce.JcaContentSignerBuilder;
 import org.bouncycastle.operator.jcajce.JcaDigestCalculatorProviderBuilder;
 import org.bouncycastle.tsp.TSPAlgorithms;
 import org.bouncycastle.tsp.TimeStampRequest;
+import org.bouncycastle.tsp.TimeStampRequestGenerator;
 import org.bouncycastle.tsp.TimeStampResponse;
 import org.bouncycastle.tsp.TimeStampResponseGenerator;
 import org.bouncycastle.tsp.TimeStampTokenGenerator;
@@ -57,6 +58,21 @@ final class EmbeddedTsaServer {
     private final AtomicLong serialCounter = new AtomicLong(1);
     private String requiredUsername;
     private String requiredPassword;
+    private volatile BigInteger lastRequestNonce;
+    private volatile boolean echoWrongNonce;
+
+    /** @return the nonce carried by the most recent timestamp request, or {@code null} if it had none. */
+    BigInteger getLastRequestNonce() {
+        return lastRequestNonce;
+    }
+
+    /**
+     * Makes the server answer with a token generated for a <em>different</em> nonce than the one requested,
+     * simulating a replayed or mishandled response. A client that checks the echo must reject it.
+     */
+    void echoWrongNonce(boolean corrupt) {
+        this.echoWrongNonce = corrupt;
+    }
 
     /**
      * Configures the server to require HTTP Basic authentication. Must be called before {@link #start()}.
@@ -143,6 +159,15 @@ final class EmbeddedTsaServer {
                 }
 
                 TimeStampRequest tsRequest = new TimeStampRequest(requestBytes);
+                lastRequestNonce = tsRequest.getNonce();
+                if (echoWrongNonce && tsRequest.getNonce() != null) {
+                    TimeStampRequestGenerator regen = new TimeStampRequestGenerator();
+                    regen.setCertReq(true);
+                    tsRequest = regen.generate(
+                            new ASN1ObjectIdentifier(tsRequest.getMessageImprintAlgOID().getId()),
+                            tsRequest.getMessageImprintDigest(),
+                            tsRequest.getNonce().add(BigInteger.ONE));
+                }
 
                 // SHA-1 digest calculator, used internally by the token generator for serial-number hashing.
                 DigestCalculator digestCalculator = new JcaDigestCalculatorProviderBuilder().setProvider("BC").build()

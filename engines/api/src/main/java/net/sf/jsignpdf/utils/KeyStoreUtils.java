@@ -388,7 +388,7 @@ public class KeyStoreUtils {
         LOGGER.info(RES.get("console.getCertChain"));
         final Certificate[] tmpChain = tmpKs.getCertificateChain(tmpAlias);
         CertificateInfo.logChain("Signing certificate chain", tmpChain);
-        PrivateKeyInfo tmpResult = new PrivateKeyInfo(tmpPk, tmpChain);
+        PrivateKeyInfo tmpResult = new PrivateKeyInfo(tmpPk, tmpChain, tmpKs.getProvider());
         return tmpResult;
     }
 
