@@ -9,12 +9,12 @@
 > PR (#422). Issues that the DSS engine PR covers only *partially* are kept and
 > annotated inline.
 >
-> This pass dropped **7** newly closed issues from the tracked list (#178, #179,
-> #186, #223, #253, #259, #307), plus the 5 reference rows for the DSS-resolved LTV
-> cluster (#27, #46, #95, #247, #254), taking the list from 29 to **22**.
-> Cumulatively: of the 47 open issues in the original review, **26 have been
-> removed** (17 closed on GitHub, 9 resolved by the DSS engine); the remaining 21,
-> plus #349 (opened after the original review), make up the **22 issues tracked
+> This pass dropped **8** newly closed issues from the tracked list (#172, #178,
+> #179, #186, #223, #253, #259, #307), plus the 5 reference rows for the DSS-resolved
+> LTV cluster (#27, #46, #95, #247, #254), taking the list from 29 to **21**.
+> Cumulatively: of the 47 open issues in the original review, **27 have been
+> removed** (18 closed on GitHub, 9 resolved by the DSS engine); the remaining 20,
+> plus #349 (opened after the original review), make up the **21 issues tracked
 > below**.
 
 ---
@@ -57,12 +57,6 @@ All experts reviewed the same 47 issues against the code on disk, flagged duplic
 ---
 
 ## Quick-close candidates
-
-Issues recommended for closing with a short comment pointing to the current state:
-
-| # | Title | Reason |
-|---|---|---|
-| **#172** | No window on Win11 | Packaging / JRE issue. The 3.x installer already ships a bundled JRE via jpackage. Add a troubleshooting note and close unless reproducible on the current installer. |
 
 Close-eligible conditional on verification (PR already merged or behaviour changed by OpenPDF 3 / JavaFX migration):
 
@@ -160,7 +154,6 @@ Columns: **Status** — `close` (see quick-close list), `valid` (open, action ne
 | 141 | Append-only timestamp | partial | L | P1 | DSS engine emits an archive timestamp at LTA signing; standalone DocTimeStamp / LTA refresh on an already-signed PDF still out of scope. |
 | 148 | Show equivalent CLI in GUI | valid | M | P2 | High-value learning aid; nice-to-have. |
 | 165 | Width/height for visible sig | cluster | S | P2 | Visible Signature v2. |
-| 172 | Win11 window does not open | close? | S | P1 | Push users to bundled-JRE installer; add troubleshooting. |
 | 180 | JCA provider support | cluster | M | P1 | Key-source pluggability — `--provider-class`/`--provider-arg`. |
 | 184 | Batch-mode hangs after PKCS11 | valid | M | P1 | `AuthProvider.logout()`, remove the blind `Thread.sleep(1000)` in `PKCS11Utils.java:82-90`; force `System.exit` on CLI. |
 | 187 | Multiple PKCS11 providers | cluster | M | P2 | After #180 generalization. |
@@ -176,7 +169,7 @@ Columns: **Status** — `close` (see quick-close list), `valid` (open, action ne
 1. **LTV was the single most valuable engineering investment — now delivered.** Six tickets, from 2019 onward, converged on the same gap; the DSS engine (PR #422) closed five of them outright and partially covers #141.
 2. **Error messages are the cheapest UX upgrade.** Several tickets surface stack traces where a one-line user-facing message would do (e.g. the residual #63 login noise). Adding a thin user-facing error layer pays off across dozens of tickets.
 3. **CLI ↔ GUI feature parity** (#30, #148) — the CLI has options the GUI lacks and vice versa. A small parity audit exposes most of them.
-4. **Packaging has quietly matured**: Flatpak, Windows jpackage with bundled JRE, macOS DMG. Several "it doesn't run" issues (#172, #184) can be retired by steering users toward the bundled installer rather than `java -jar`.
+4. **Packaging has quietly matured**: Flatpak, Windows jpackage with bundled JRE, macOS DMG. Several "it doesn't run" issues (#184, and #172 which was closed on these grounds) can be retired by steering users toward the bundled installer rather than `java -jar`.
 5. **Swing/JavaFX duality**: JavaFX is now the default GUI. Several Swing-only tickets (#30, #51, #67, #165) should first be verified against the FX code path before being worked on — some may already be moot.
 6. **Documentation discoverability** is a silent source of issues: #30 is partially "user didn't find the docs." A FAQ plus cookbook pages (TSA, PKCS#11, LTV, install channels) would absorb most of them.
 
@@ -190,7 +183,7 @@ Columns: **Status** — `close` (see quick-close list), `valid` (open, action ne
 | **3.2 — Algorithm pluggability + Key-source pluggability** | `SignatureAlgorithm` abstraction (#255, residual #23, #33 nonce), `--provider-class`/`--provider-arg` (#180), multi-PKCS#11 (#187), remote signing hook (#20) | ~2 weeks | #20, #33, #180, #187, #255 |
 | **3.3 — Visible Signature v2 + GUI parity** | #51, #55, #67, #99, #165, #231; JavaFX multi-select (#30); verbose CLI preview (#148) | ~1 week | several |
 | **3.4 — LTA refresh** | Standalone DocTimeStamp / LTA refresh on already-signed PDFs (#141) on top of the DSS engine | ~1 week | #141 |
-| **Ongoing / low** | #140 (validation mode), #243 (track OpenPDF), #63/#139/#172 (retest & close), #349 (website i18n) | — | as PRs arrive |
+| **Ongoing / low** | #140 (validation mode), #243 (track OpenPDF), #63/#139 (retest & close), #349 (website i18n) | — | as PRs arrive |
 
 ---
 
