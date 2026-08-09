@@ -753,6 +753,14 @@ JSignPdf has been extended to support remote/external keystore types. The first 
 
 If you use PKCS#12 or Java keystore types (JKS, JCEKS), you have to select the file where the keys are stored and provide the password of this file. Path to the keystore file can be inserted directly by typing or you can use the browse button to navigate through the file system with Open File Dialog.
 
+==== Supported key types
+
+Both bundled engines sign with RSA and EC (ECDSA) keys, and derive the signature algorithm from the key itself -- there is nothing to configure.
+
+RSASSA-PSS needs the `dss` engine. A PSS-only certificate (one whose public key is marked `id-RSASSA-PSS` rather than `rsaEncryption`, increasingly common for eIDAS qualified certificates) produces a conformant PSS signature there, including when the key lives on a PKCS#11 token that reports it as a plain RSA key. The `openpdf` engine cannot encode the PSS parameters a signature needs, so sign with `-eng dss` for such certificates.
+
+For EC keys the two engines differ in one detail: the `dss` engine records the signature algorithm as `ecdsa-with-SHA256`, while `openpdf` records `id-ecPublicKey`, which some strict validators may not accept. Prefer `-eng dss` for EC signing.
+
 === Key alias & key password
 
 _JavaFX panel: Certificate_
@@ -1103,6 +1111,9 @@ DSS requires a PAdES digest, so the hash algorithm must be `SHA256`, `SHA384` or
 
 |`engine.dss.retryOnUndersize`
 |Re-sign with a larger reservation if the reserved `/Contents` turns out too small. Default `true`; each retry repeats signing (and refetches the TSA timestamp for level `T` and above).
+
+|`engine.dss.tsa.nonce`
+|`true`/`false` (default `true`). Send a random nonce in the RFC 3161 timestamp request and require the TSA to echo it back, so a replayed or substituted timestamp response is rejected. Turn it off only for a TSA that rejects or mishandles nonced requests. The `openpdf` engine always sends a nonce and ignores this key.
 
 |`engine.dss.relaxFieldOverlap`
 |`true`/`false` (default `false`). By default DSS refuses to sign when the visible signature rectangle overlaps an existing annotation, because the overlapped content may be what the signer believes they are signing. Set to `true` to log a warning and place the signature on top instead -- useful when signing documents that already carry stamps or form widgets in that area.

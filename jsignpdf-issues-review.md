@@ -1,6 +1,6 @@
 # JSignPdf — Open Issues Review and Action Plan
 
-**Date:** 2026-04-19 (revised 2026-08-08)
+**Date:** 2026-04-19 (revised 2026-08-08, 2026-08-09)
 **Scope:** open issues at https://github.com/intoolswetrust/jsignpdf/issues
 **Baseline:** `master` after OpenPDF 3 / Java 21 migration (commits `97c8fbe`, `b806893`, `158d4a7`)
 
@@ -16,6 +16,12 @@
 > removed** (18 closed on GitHub, 9 resolved by the DSS engine); the remaining 20,
 > plus #349 (opened after the original review), make up the **21 issues tracked
 > below**.
+>
+> **2026-08-09 revision.** The algorithm-agility cluster (#23, #33, #255) was
+> re-examined against the code for `design-doc/3.2-algorithm-agility.md`. Three of
+> its premises were wrong and are corrected in that section; all three issues are
+> now fixed or verified in code. No issues were added or removed from the tracked
+> list.
 
 ---
 
@@ -49,7 +55,7 @@ All experts reviewed the same 47 issues against the code on disk, flagged duplic
 ## Executive summary
 
 - **The LTV compliance cluster is resolved** by the EU DSS (PAdES) signing engine (PR #422). Selecting `-eng dss` produces genuine PAdES B / B-T / B-LT / B-LTA output with a real DSS dictionary, full-chain revocation, and TSA-chain revocation material — something the OpenPDF engine structurally cannot satisfy. The single remaining piece is **#141** (standalone DocTimeStamp / LTA refresh).
-- **The remaining headline gap is algorithm agility.** `SignerLogic.java:411` still hardcodes RSA PKCS#1 v1.5 on the OpenPDF path, so **#255 (RSASSA-PSS)** is unaddressed. The DSS path derives the algorithm from the key, which should unblock **#23 (EC keys)** — needs retest on an EC token.
+- **The algorithm-agility cluster turned out to be mostly already solved**, and is now closed on the code side (see [Algorithm-agility cluster](#algorithm-agility-cluster)). **#23** was fixed by the OpenPDF 3 migration and is covered by tests on both engines; **#33** was a one-line gap on the *DSS* engine, not OpenPDF, and is implemented; **#255** worked for PSS-only software certificates and failed only for the PKCS#11 shape (key reports `RSA` under an `id-RSASSA-PSS` certificate), which is now fixed. What remains optional is a user-facing `--signature-algorithm` selector to *force* PSS on a plain `rsaEncryption` certificate.
 - **PKCS#11 stability** is the largest *support-traffic* cluster. Most are environment-specific; a dedicated PKCS#11 troubleshooting page plus better diagnostics would absorb the recurring tickets at low engineering cost.
 - **Visible-signature rendering** (timezone, alignment, width/height, font size, date format) is the largest remaining user-visible cluster. Bundling them into a single "Visible Signature v2" release would close several tickets and materially raise perceived quality vs. Adobe's output.
 - **Documentation debt is real**: several open tickets are wholly or partly "user did not find the existing docs." A FAQ / troubleshooting chapter plus focused cookbook sections (TSA, PKCS#11, LTV, install channels) would retire those without touching code.
@@ -62,7 +68,7 @@ Close-eligible conditional on verification (PR already merged or behaviour chang
 
 | # | Title | Verify |
 |---|---|---|
-| **#23** | "Private keys must be RSAPrivate(Crt)Key" | The DSS engine derives the algorithm from the key (`EncryptionAlgorithm.forKey`), so EC keys should sign via `-eng dss`. Retest on an EC PKCS#11 token. |
+| **#23** | "Private keys must be RSAPrivate(Crt)Key" | **Verified — close.** The message came from the iText-2.1-era `PdfPKCS7` and no longer exists; OpenPDF 3 maps `privKey.getAlgorithm()` to the OID. EC signing is covered on both engines by `DssEcSigningTest` / `OpenPdfEcSigningTest`. An EC PKCS#11 token is still worth a manual check. |
 | **#63** | `LoginException: Unable to perform password callback` | Retest — likely benign on 3.x. |
 | **#139** | Comodo AAA auto-added to PKCS7 | Reporter never followed up. Close after a short investigation note in the FAQ. |
 
@@ -82,15 +88,21 @@ The historically dominant LTV cluster is resolved. With `-eng dss` (and `engine.
 
 ## Algorithm-agility cluster
 
-Today `SignerLogic.java:411` hardcodes `sgn.setExternalDigest(..., "RSA")` on the OpenPDF path. This forces PKCS#1 v1.5 output even when the certificate mandates PSS, and blocks pluggable EC / EdDSA signatures. The DSS engine sidesteps part of this by deriving the algorithm from the key, but PSS is still not produced by either path.
+This cluster was re-examined against the code and the two engine libraries for the 3.2 design (`design-doc/3.2-algorithm-agility.md`). Three premises in the original review were wrong; the corrected picture and the delivered fixes are below.
+
+**What the original review got wrong.**
+
+* The hardcoded `"RSA"` is at `OpenPdfSigningEngine.java:435`, not `SignerLogic.java:411`, and it sits *inside the CloudFoxy external-signing branch*. Normal signing goes through `sgn.update(...)`, where `PdfPKCS7` built the `Signature` from the key itself — so it never forced PKCS#1 v1.5 for anyone but CloudFoxy users.
+* The nonce gap was on the **DSS** engine, not OpenPDF. `TSAClientBouncyCastle.java:196` has always sent a nonce and validated the echo; DSS omits it unless a `NonceSource` is configured, which `buildTspSource()` never did.
+* PSS was **not** missing everywhere on DSS. A PSS-only certificate in a software keystore already produced a conformant PSS signature, because `setSigningCertificate` derives `RSASSA_PSS` from the certificate's public key.
 
 | # | Aspect | State |
 |---|---|---|
-| **#255** | RSASSA-PSS required by PSS-only certificates (increasingly common for eIDAS QSCDs) | **Not covered** — both the OpenPDF and DSS tokens still emit RSA PKCS#1 v1.5, not PSS. |
-| **#23** | EC / non-RSA private keys fail in the RSA path | *Partial* — the DSS token uses `EncryptionAlgorithm.forKey`, so EC keys should sign via `-eng dss`. Retest needed. |
-| **#33** | RFC 3161 TSA nonce | *Partial* — the TSA policy OID is now wired through the DSS `OnlineTSPSource`; the **nonce is still not implemented**. |
+| **#255** | RSASSA-PSS required by PSS-only certificates (increasingly common for eIDAS QSCDs) | **Fixed** on `dss`. Worked already for PSS-only software certificates; failed for the PKCS#11 shape (key reports `RSA` under an `id-RSASSA-PSS` certificate) with a DSS algorithm-mismatch error. The token is now driven by the signature parameters instead of the key, and selects the key's own provider under the portable `RSASSA-PSS` JCE name. `openpdf` structurally cannot emit PSS (its SignerInfo writer has no parameter slot). |
+| **#23** | EC / non-RSA private keys fail in the RSA path | **Fixed** — by the OpenPDF 3 migration, not by this work. Both engines sign with EC; note `dss` writes `ecdsa-with-SHA256` while `openpdf` writes `id-ecPublicKey`. |
+| **#33** | RFC 3161 TSA nonce | **Fixed** on `dss` via `engine.dss.tsa.nonce` (default on), including rejection of a mismatched echo. `openpdf` always sent one. |
 
-**Recommendation — "Algorithm pluggability" (M, ~1 week):** introduce a `SignatureAlgorithm` abstraction (RSA / RSA-PSS / ECDSA / EdDSA), wire it through `SignerLogic` and the TSA client, and expose a CLI / GUI selector. Covers #255, the remaining part of #23 on the OpenPDF path, and the #33 nonce without more refactoring.
+**Remaining (optional):** a `SignatureAlgorithm` model plus `--signature-algorithm` CLI / GUI selector, whose only real function is to *force* PSS on a plain `rsaEncryption` certificate for a CA that mandates PSS without marking the key. Everything else in this cluster is closed. Effort S, not M — the abstraction the original recommendation proposed is not needed for the fixes themselves.
 
 ---
 
@@ -126,7 +138,7 @@ Largely environment-specific:
 
 | # | Nature |
 |---|---|
-| **#23**, **#63** | Probably already fixed; retest and close (see algorithm cluster for #23) |
+| **#23**, **#63** | #23 verified fixed and covered by tests — close it (see algorithm cluster); #63 still needs a retest |
 | **#184** | Windows batch-mode hang after unregister — real bug in `PKCS11Utils.unregisterProviders` (P1) |
 | **#187** | Multi-provider support (P2, see pluggability cluster) |
 
@@ -159,7 +171,7 @@ Columns: **Status** — `close` (see quick-close list), `valid` (open, action ne
 | 187 | Multiple PKCS11 providers | cluster | M | P2 | After #180 generalization. |
 | 231 | Date format | cluster | S | P2 | Visible Signature v2. Duplicate of #55 in spirit. |
 | 243 | `sun.misc.Unsafe` deprecation | valid | S | P2 | Track OpenPDF upstream; bump `openpdf.version` when fix lands. **Will be P0 on a future JDK.** |
-| 255 | RSASSA-PSS signing | cluster | M | P0 | Algorithm pluggability. Not covered by the DSS engine — still RSA PKCS#1 v1.5. P0 for certs that mandate PSS. |
+| 255 | RSASSA-PSS signing | cluster | S | P0 | **Fixed on the `dss` engine** (3.2). PSS-only software certs already worked; the PKCS#11 shape now does too. Residual: optional `--signature-algorithm` to force PSS on an `rsaEncryption` cert. |
 | 349 | Translate website | valid | M | P3 | Website i18n (Docusaurus i18n). Community-PR-friendly; not planned. |
 
 ---
@@ -180,7 +192,7 @@ Columns: **Status** — `close` (see quick-close list), `valid` (open, action ne
 | Milestone | Contents | Effort | Closes |
 |---|---|---|---|
 | **3.1 — DSS engine (PAdES)** | EU DSS signing engine: PAdES B / T / LT / LTA, DSS dictionary, full-chain + TSA-chain revocation, TSA hash hardening, `--pades-level`, `--overwrite` (PR #422) | delivered | LTV cluster (+ #141 partial) |
-| **3.2 — Algorithm pluggability + Key-source pluggability** | `SignatureAlgorithm` abstraction (#255, residual #23, #33 nonce), `--provider-class`/`--provider-arg` (#180), multi-PKCS#11 (#187), remote signing hook (#20) | ~2 weeks | #20, #33, #180, #187, #255 |
+| **3.2 — Algorithm agility + Key-source pluggability** | Algorithm agility **done**: #23 verified, #33 DSS nonce, #255 PKCS#11 PSS shape (the `SignatureAlgorithm` abstraction proved unnecessary for these; it survives only as an optional force-PSS selector). Remaining: `--provider-class`/`--provider-arg` (#180), multi-PKCS#11 (#187), remote signing hook (#20) | ~1 week | #20, #23, #33, #180, #187, #255 |
 | **3.3 — Visible Signature v2 + GUI parity** | #51, #55, #67, #99, #165, #231; JavaFX multi-select (#30); verbose CLI preview (#148) | ~1 week | several |
 | **3.4 — LTA refresh** | Standalone DocTimeStamp / LTA refresh on already-signed PDFs (#141) on top of the DSS engine | ~1 week | #141 |
 | **Ongoing / low** | #140 (validation mode), #243 (track OpenPDF), #63/#139 (retest & close), #349 (website i18n) | — | as PRs arrive |
