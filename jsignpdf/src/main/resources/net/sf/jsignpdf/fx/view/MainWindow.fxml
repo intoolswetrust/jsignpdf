@@ -236,8 +236,8 @@
                    styleClass="invisible-sig-badge" managed="false" visible="false"/>
             <Label fx:id="lblSigCoords" styleClass="sig-coords-badge"
                    managed="false" visible="false"/>
-            <Label text="Sufijo:"/>
-            <OutputSuffixField prefWidth="78" promptText="signed"/>
+            <Label text="%jfx.gui.outputSuffix.label"/>
+            <OutputSuffixField prefWidth="78" promptText="%jfx.gui.outputSuffix.prompt"/>
             <Label fx:id="lblOutputPath" id="lblOutputPath" styleClass="output-path-label"
                    managed="false" visible="false"/>
             <ProgressBar fx:id="progressBar" prefWidth="150"/>

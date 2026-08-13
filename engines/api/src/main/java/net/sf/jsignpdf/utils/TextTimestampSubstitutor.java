@@ -1,4 +1,4 @@
-package net.sf.jsignpdf.engine.openpdf;
+package net.sf.jsignpdf.utils;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;

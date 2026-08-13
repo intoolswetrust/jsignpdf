@@ -45,6 +45,7 @@ import net.sf.jsignpdf.types.ServerAuthentication;
 import net.sf.jsignpdf.utils.AppConfig;
 import net.sf.jsignpdf.utils.KeyStoreUtils;
 import net.sf.jsignpdf.utils.PKCS11Utils;
+import net.sf.jsignpdf.utils.TextTimestampSubstitutor;
 
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;

@@ -2,6 +2,7 @@ package net.sf.jsignpdf.fx.control;
 
 import java.io.File;
 import java.util.Locale;
+import net.sf.jsignpdf.utils.AppConfig;
 
 /** Session-only output filename suffix state shared by the UI field and signing flow. */
 public final class OutputSuffixSupport {
@@ -48,7 +49,7 @@ public final class OutputSuffixSupport {
             base = inputPath.substring(0, inputPath.length() - ext.length());
             ext = inputPath.substring(inputPath.length() - ext.length());
         }
-        String suffix = token.isEmpty() ? "_signed" : "_" + token;
+        String suffix = token.isEmpty() ? AppConfig.defaultOutSuffix() : "_" + token;
         return base + suffix + ext;
     }
 

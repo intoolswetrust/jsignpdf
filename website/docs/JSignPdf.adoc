@@ -235,7 +235,15 @@ At a minimum, you need to select a keystore and provide its password in the _Cer
 
 To add a visible signature to the PDF, enable _Visible signature_ in the _Signature Appearance_ panel. You can then configure the render mode, signature text, status text, images, and font size.
 
-To position the signature on the page, hold *Shift* and drag a rectangle directly on the document preview. The coordinates are updated automatically in the sidebar.
+To create the signature rectangle, hold *Shift* and drag directly on the document preview. The coordinates are updated automatically in the sidebar.
+
+Once the signature rectangle is visible, it can be adjusted directly in the preview:
+
+* drag inside the rectangle to move the signature;
+* drag an edge to resize it horizontally or vertically;
+* drag a corner to resize it in both directions.
+
+The mouse cursor changes according to the available operation. The preview also renders the configured signature text and images inside the rectangle, making it easier to position and size the signature before signing.
 
 image:img/javafx/visible-signature-placement.png[Placing visible signature,width=562,height=403]
 
@@ -245,7 +253,9 @@ When you are ready, click the _Sign_ button in the toolbar. JSignPdf signs the d
 
 image:img/javafx/signing-result.png[Signing complete,width=562,height=400]
 
-The signed PDF is saved to the output path shown in the _Signature Properties_ panel. By default, it is the input file name with a `_signed` suffix (e.g. `document_signed.pdf`). The suffix can be changed with the `output.suffix` key in `advanced.properties` (see <<Advanced application configuration>>) -- handy for localizing the marker (e.g. `_signe`, `_firmado`).
+The signed PDF is saved to the output path shown in the _Signature Properties_ panel. By default, the input file name is combined with the suffix configured by the `output.suffix` key in `advanced.properties` (bundled default `_signed`), so `document.pdf` becomes `document_signed.pdf`.
+
+The JavaFX status bar also provides a _Suffix_ field for changing the output suffix for the current session. For example, entering `DL` produces `document_DL.pdf`. Leaving the field empty preserves the configured `output.suffix` value.
 
 === Using presets
 
@@ -491,7 +501,7 @@ See <<Visible signature options>> for details.
 | Render mode. Default: `DESCRIPTION_ONLY`. Values: `DESCRIPTION_ONLY`, `GRAPHIC_AND_DESCRIPTION`, `SIGNAME_AND_DESCRIPTION`.
 
 | `--l2-text <text>`
-| Signature text. Supports placeholders: `${signer}`, `${certificate}`, `${timestamp}`, `${location}`, `${reason}`, `${contact}`.
+| Signature text. Supports placeholders: `${signer}`, `${certificate}`, `${timestamp}`, `${location}`, `${reason}`, `${contact}`. The timestamp can optionally use a custom display format, for example `${timestamp:yyyy.MM.dd}` or `${timestamp:dd/MM/yyyy HH:mm}`.
 
 | `--l4-text <text>`
 | Status text.
@@ -846,7 +856,9 @@ The four inputs _Lower Left (X, Y)_ and _Upper Right (X, Y)_ define the position
 
 The zero ([0,0]) position on the page is in the left bottom corner.
 
-In the JavaFX interface you can place the signature visually by holding Shift and dragging a rectangle on the document preview.
+In the JavaFX interface you can create the signature rectangle visually by holding *Shift* and dragging on the document preview.
+
+After the rectangle has been created, it can be edited directly with the mouse. Drag inside the rectangle to move it, drag an edge to resize it in one direction, or drag a corner to resize it in both directions. The signature coordinates are updated automatically while the rectangle is moved or resized.
 
 ==== Display
 
@@ -867,14 +879,32 @@ The _Signature Text_ supports placeholders that are expanded when the document i
 |Placeholder |Expands to
 
 |`${signer}`      |Common name (CN) of the signing certificate.
-|`${timestamp}`   |Signing date and time -- use this to **show the date/time on the visible signature**.
+|`${timestamp}`   |Signing date and time using the default display format.
+|`${timestamp:<pattern>}` |Signing date and time using a custom Java date/time pattern, for example `${timestamp:yyyy.MM.dd}`.
 |`${certificate}` |Description of the signing certificate.
 |`${location}`    |The _Location_ field value.
 |`${reason}`      |The _Reason_ field value.
 |`${contact}`     |The _Contact_ field value.
 |===
 
-For example, a _Signature Text_ of `Signed by ${signer}` + `on ${timestamp}` renders the signer name and the signing date/time. When _Signature Text_ is left empty, JSignPdf uses a default layout that already includes the signer and the date.
+For example, a _Signature Text_ of `Signed by ${signer}` + `on ${timestamp}` renders the signer name and the signing date/time.
+
+A custom timestamp format can be specified after a colon. Examples:
+
+[source,text]
+----
+${timestamp:yyyy.MM.dd}
+${timestamp:dd.MM.yyyy}
+${timestamp:yyyy-MM-dd}
+${timestamp:dd/MM/yyyy HH:mm}
+${timestamp:yyyy-MM-dd HH:mm:ss}
+----
+
+Common pattern letters include `yyyy` for the four-digit year, `MM` for month, `dd` for day, `HH` for hour in 24-hour format, `mm` for minutes, and `ss` for seconds. Note that `MM` means month while `mm` means minutes.
+
+Custom timestamp formatting changes only the date/time text shown in the visible signature. It does not change or configure the cryptographic timestamp produced by a timestamp authority (TSA).
+
+When _Signature Text_ is left empty, JSignPdf uses a default layout that already includes the signer and the date.
 
 _Background image scale_ defines the size of a background image. Any negative number means the best-fit algorithm will be used. Zero value means to stretch, which fills the whole field -- it doesn't keep the image ratio. A positive value means the multiplicator of the original size.
 
