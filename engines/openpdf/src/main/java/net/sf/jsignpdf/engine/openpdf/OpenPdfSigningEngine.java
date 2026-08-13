@@ -48,11 +48,14 @@ import net.sf.jsignpdf.utils.PKCS11Utils;
 
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.text.StrSubstitutor;
 
+import org.openpdf.text.DocumentException;
+import org.openpdf.text.Element;
 import org.openpdf.text.Font;
 import org.openpdf.text.Image;
+import org.openpdf.text.Phrase;
 import org.openpdf.text.Rectangle;
+import org.openpdf.text.pdf.ColumnText;
 import org.openpdf.text.pdf.AcroFields;
 import org.openpdf.text.pdf.OcspClientBouncyCastle;
 import org.openpdf.text.pdf.PdfDate;
@@ -63,6 +66,7 @@ import org.openpdf.text.pdf.PdfReader;
 import org.openpdf.text.pdf.PdfSignature;
 import org.openpdf.text.pdf.PdfSignatureAppearance;
 import org.openpdf.text.pdf.PdfStamper;
+import org.openpdf.text.pdf.PdfTemplate;
 import org.openpdf.text.pdf.PdfString;
 import org.openpdf.text.pdf.PdfWriter;
 import org.openpdf.text.pdf.TSAClientBouncyCastle;
@@ -336,7 +340,7 @@ public class OpenPdfSigningEngine implements SigningEngine {
                     replacements.put(L2TEXT_PLACEHOLDER_LOCATION, StringUtils.defaultString(location));
                     replacements.put(L2TEXT_PLACEHOLDER_REASON, StringUtils.defaultString(reason));
                     replacements.put(L2TEXT_PLACEHOLDER_CONTACT, StringUtils.defaultString(contact));
-                    final String l2text = StrSubstitutor.replace(options.getL2Text(), replacements);
+                    final String l2text = TextTimestampSubstitutor.replace(options.getL2Text(), replacements);
                     sap.setLayer2Text(l2text);
                 }
                 final org.openpdf.text.pdf.BaseFont l2BaseFont = OpenPdfFonts.getL2BaseFont();
@@ -368,6 +372,9 @@ public class OpenPdfSigningEngine implements SigningEngine {
                     }
                     Rectangle signitureRect = computeSignatureRectangle(reader.getPageSize(page), options);
                     sap.setVisibleSignature(signitureRect, page, null);
+                }
+                if (renderMode == RenderMode.DESCRIPTION_ONLY) {
+                    configureDescriptionLayer2(sap);
                 }
             }
 
@@ -496,6 +503,55 @@ public class OpenPdfSigningEngine implements SigningEngine {
             }
         }
         return finished;
+    }
+
+    /**
+     * Builds the description-only layer 2 appearance over the complete signature rectangle.
+     *
+     * <p>OpenPDF 3.0.5 reserves the top 30% of the description-only layer for the legacy
+     * layer-4 status text. JSignPdf already controls the complete visible appearance, so that
+     * reservation can clip multiline layer-2 text in short signature rectangles. Creating layer 2
+     * explicitly keeps the public OpenPDF dependency unchanged while matching the full-rectangle
+     * layout used by JSignPdf's preview.</p>
+     */
+    private void configureDescriptionLayer2(final PdfSignatureAppearance sap) throws DocumentException {
+        final PdfTemplate layer = sap.getLayer(2);
+        final Rectangle rect = sap.getRect();
+
+        final Image background = sap.getImage();
+        if (background != null) {
+            final float imageScale = sap.getImageScale();
+            if (imageScale == 0) {
+                layer.addImage(background, rect.getWidth(), 0, 0, rect.getHeight(), 0, 0);
+            } else {
+                float usableScale = imageScale;
+                if (imageScale < 0) {
+                    usableScale = Math.min(rect.getWidth() / background.getWidth(),
+                            rect.getHeight() / background.getHeight());
+                }
+                final float width = background.getWidth() * usableScale;
+                final float height = background.getHeight() * usableScale;
+                final float x = (rect.getWidth() - width) / 2;
+                final float y = (rect.getHeight() - height) / 2;
+                layer.addImage(background, width, 0, 0, height, x, y);
+            }
+        }
+
+        final Font configuredFont = sap.getLayer2Font();
+        final Font font = configuredFont == null ? new Font() : new Font(configuredFont);
+        float size = font.getSize();
+        final String text = StringUtils.defaultString(sap.getLayer2Text());
+        final Rectangle dataRect = new Rectangle(0, 0, rect.getWidth(), rect.getHeight());
+        if (size <= 0) {
+            final Rectangle fitRect = new Rectangle(dataRect.getWidth(), dataRect.getHeight());
+            size = PdfSignatureAppearance.fitText(font, text, fitRect, 12, sap.getRunDirection());
+        }
+
+        final ColumnText column = new ColumnText(layer);
+        column.setRunDirection(sap.getRunDirection());
+        column.setSimpleColumn(new Phrase(text, font), dataRect.getLeft(), dataRect.getBottom(),
+                dataRect.getRight(), dataRect.getTop(), size, Element.ALIGN_LEFT);
+        column.go();
     }
 
     private Rectangle computeSignatureRectangle(Rectangle pageRect, BasicSignerOptions options) {
