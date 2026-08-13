@@ -1,5 +1,8 @@
 package net.sf.jsignpdf.fx.control;
 
+import java.awt.HeadlessException;
+import java.awt.Toolkit;
+
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleDoubleProperty;
@@ -7,12 +10,15 @@ import javafx.beans.property.SimpleObjectProperty;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.Region;
+import net.sf.jsignpdf.preview.PreviewRenderSettings;
 
 /**
- * Custom Region that displays a rendered PDF page with zoom support.
- * The image is scaled by the zoomLevel property.
+ * Displays a high-resolution raster preview at a logical UI zoom.
+ * Raster resolution affects image detail only; it does not change the
+ * apparent size of the page on screen.
  */
 public class PdfPageView extends Region {
+    private static final double FALLBACK_SCREEN_DPI = 96.0;
 
     private final ImageView imageView = new ImageView();
     private final ObjectProperty<Image> pageImage = new SimpleObjectProperty<>();
@@ -22,28 +28,35 @@ public class PdfPageView extends Region {
         getChildren().add(imageView);
         imageView.setPreserveRatio(true);
         imageView.setSmooth(true);
-
-        // Bind image
         imageView.imageProperty().bind(pageImage);
-
-        // Update size when image or zoom changes
-        pageImage.addListener((obs, o, n) -> updateSize());
-        zoomLevel.addListener((obs, o, n) -> updateSize());
-
+        pageImage.addListener((obs, oldImage, newImage) -> updateSize());
+        zoomLevel.addListener((obs, oldZoom, newZoom) -> updateSize());
         getStyleClass().add("pdf-page-view");
     }
 
     private void updateSize() {
-        Image img = pageImage.get();
-        if (img != null) {
-            double zoom = zoomLevel.get();
-            double w = img.getWidth() * zoom;
-            double h = img.getHeight() * zoom;
-            imageView.setFitWidth(w);
-            imageView.setFitHeight(h);
-            setPrefSize(w, h);
-            setMinSize(w, h);
-            setMaxSize(w, h);
+        Image image = pageImage.get();
+        if (image == null) {
+            return;
+        }
+
+        double rasterToDisplayScale = getScreenDpi() / PreviewRenderSettings.RENDER_DPI;
+        double displayScale = rasterToDisplayScale * zoomLevel.get();
+        double width = image.getWidth() * displayScale;
+        double height = image.getHeight() * displayScale;
+
+        imageView.setFitWidth(width);
+        imageView.setFitHeight(height);
+        setPrefSize(width, height);
+        setMinSize(width, height);
+        setMaxSize(width, height);
+    }
+
+    private static double getScreenDpi() {
+        try {
+            return Toolkit.getDefaultToolkit().getScreenResolution();
+        } catch (HeadlessException e) {
+            return FALLBACK_SCREEN_DPI;
         }
     }
 
@@ -52,7 +65,6 @@ public class PdfPageView extends Region {
         imageView.relocate(0, 0);
     }
 
-    // --- Properties ---
     public ObjectProperty<Image> pageImageProperty() { return pageImage; }
     public Image getPageImage() { return pageImage.get(); }
     public void setPageImage(Image image) { pageImage.set(image); }

@@ -6,6 +6,8 @@
 <?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.shape.SVGPath?>
+<?import net.sf.jsignpdf.fx.control.OutputSuffixField?>
+<?import net.sf.jsignpdf.fx.control.SignaturePreviewStackPane?>
 
 <BorderPane xmlns="http://javafx.com/javafx"
             xmlns:fx="http://javafx.com/fxml"
@@ -210,10 +212,10 @@
                 <ScrollPane fx:id="scrollPane" pannable="true" styleClass="pdf-scroll-pane"
                             fitToWidth="true" fitToHeight="true"
                             onDragOver="#onDragOver" onDragDropped="#onDragDropped">
-                    <StackPane fx:id="pdfArea" styleClass="pdf-area">
+                    <SignaturePreviewStackPane fx:id="pdfArea" styleClass="pdf-area">
                         <Label fx:id="lblDropHint" text="%jfx.gui.dropHint"
                                styleClass="drop-hint"/>
-                    </StackPane>
+                    </SignaturePreviewStackPane>
                 </ScrollPane>
             </SplitPane>
 
@@ -234,7 +236,9 @@
                    styleClass="invisible-sig-badge" managed="false" visible="false"/>
             <Label fx:id="lblSigCoords" styleClass="sig-coords-badge"
                    managed="false" visible="false"/>
-            <Label fx:id="lblOutputPath" styleClass="output-path-label"
+            <Label text="Sufijo:"/>
+            <OutputSuffixField prefWidth="78" promptText="signed"/>
+            <Label fx:id="lblOutputPath" id="lblOutputPath" styleClass="output-path-label"
                    managed="false" visible="false"/>
             <ProgressBar fx:id="progressBar" prefWidth="150"/>
         </HBox>

@@ -1,8 +1,6 @@
 package net.sf.jsignpdf.preview;
 
-import java.awt.HeadlessException;
 import java.awt.Rectangle;
-import java.awt.Toolkit;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
@@ -14,197 +12,125 @@ import net.sf.jsignpdf.BasicSignerOptions;
 import net.sf.jsignpdf.Constants;
 import net.sf.jsignpdf.utils.AppConfig;
 import net.sf.jsignpdf.utils.PdfUtils;
-
 import org.apache.pdfbox.Loader;
 import org.apache.pdfbox.pdmodel.PDDocument;
-import org.apache.pdfbox.pdmodel.PDPage;
 import org.apache.pdfbox.rendering.PDFRenderer;
 import org.jpedal.PdfDecoder;
 import org.jpedal.exception.PdfException;
-
 import org.openpdf.renderer.PDFFile;
 import org.openpdf.renderer.PDFPage;
 import org.openpdf.renderer.PDFParseException;
 import org.openpdf.renderer.decrypt.PDFPassword;
 import org.openpdf.text.pdf.PdfReader;
 
-/**
- * Helper class for converting a page in PDF to a {@link BufferedImage} object.
- *
- * @author Josef Cacek
- */
+/** Converts PDF pages to images for the JavaFX preview. */
 public class Pdf2Image {
-
     private static final int JPEDAL_MAX_IMAGE_RENDER_SIZE = 2000 * 2000;
 
-    private BasicSignerOptions options;
+    private final BasicSignerOptions options;
 
-    /**
-     * Constructor - gets an options object with configured input PDF and possibly decoding (owner) password.
-     *
-     * @param anOpts
-     */
-    public Pdf2Image(BasicSignerOptions anOpts) {
-        if (anOpts == null)
+    public Pdf2Image(BasicSignerOptions options) {
+        if (options == null) {
             throw new NullPointerException("Options have to be not-null");
-        options = anOpts;
+        }
+        this.options = options;
     }
 
     /**
-     * Returns an image preview of given page.
-     *
-     * @param aPage Page to preview (counted from 1)
-     * @return image or null if error occures.
+     * Uses PDFBox first because placement accuracy depends on preserving page geometry.
+     * Configured renderers remain available as fallbacks if PDFBox cannot render a page.
      */
-    public BufferedImage getImageForPage(final int aPage) {
-        BufferedImage tmpResult = null;
-        for (String libname : AppConfig.pdf2imageLibraries().split("\\s*,\\s*")) {
-            tmpResult = switch (libname) {
-                case Constants.PDF2IMAGE_JPEDAL -> getImageUsingJPedal(aPage);
-                case Constants.PDF2IMAGE_PDFBOX -> getImageUsingPdfBox(aPage);
-                case Constants.PDF2IMAGE_OPENPDF -> getImageUsingOpenPdfRenderer(aPage);
+    public BufferedImage getImageForPage(final int page) {
+        BufferedImage image = getImageUsingPdfBox(page);
+        if (image != null) {
+            return image;
+        }
+
+        for (String library : AppConfig.pdf2imageLibraries().split("\\s*,\\s*")) {
+            if (Constants.PDF2IMAGE_PDFBOX.equals(library)) {
+                continue;
+            }
+            image = switch (library) {
+                case Constants.PDF2IMAGE_JPEDAL -> getImageUsingJPedal(page);
+                case Constants.PDF2IMAGE_OPENPDF -> getImageUsingOpenPdfRenderer(page);
                 default -> {
-                    Constants.LOGGER.fine("Unknown pdf2image library: " + libname);
+                    Constants.LOGGER.fine("Unknown pdf2image library: " + library);
                     yield null;
                 }
             };
-            if (tmpResult != null)
-                break;
+            if (image != null) {
+                return image;
+            }
         }
-        return tmpResult;
+        return null;
     }
 
-    /**
-     * Returns image (or null if failed) generated from given page in PDF using JPedal LGPL.
-     *
-     * @param aPage page in PDF (1 based)
-     * @return image or null
-     */
-    public BufferedImage getImageUsingJPedal(final int aPage) {
-        BufferedImage tmpResult = null;
+    public BufferedImage getImageUsingJPedal(final int page) {
+        BufferedImage result = null;
         PdfReader reader = null;
-        PdfDecoder pdfDecoder = null;
+        PdfDecoder decoder = null;
         try {
-
             reader = PdfUtils.getPdfReader(options.getInFile(), options.getPdfOwnerPwdStrX().getBytes());
-            if (JPEDAL_MAX_IMAGE_RENDER_SIZE > reader.getPageSize(aPage).getWidth() * reader.getPageSize(aPage).getHeight()) {
-                pdfDecoder = new PdfDecoder();
+            if (JPEDAL_MAX_IMAGE_RENDER_SIZE > reader.getPageSize(page).getWidth() * reader.getPageSize(page).getHeight()) {
+                decoder = new PdfDecoder();
                 try {
-                    pdfDecoder.openPdfFile(options.getInFile(), options.getPdfOwnerPwdStrX());
+                    decoder.openPdfFile(options.getInFile(), options.getPdfOwnerPwdStrX());
                 } catch (PdfException e) {
                     try {
-                        // try to read PDF with empty password
-                        pdfDecoder.openPdfFile(options.getInFile(), "");
+                        decoder.openPdfFile(options.getInFile(), "");
                     } catch (PdfException e1) {
-                        // try to read PDF without password
-                        pdfDecoder.openPdfFile(options.getInFile());
+                        decoder.openPdfFile(options.getInFile());
                     }
                 }
-                tmpResult = pdfDecoder.getPageAsImage(aPage);
+                result = decoder.getPageAsImage(page);
             }
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
-            if (reader != null) {
-                reader.close();
-            }
-            if (pdfDecoder != null) {
-                pdfDecoder.closePdfFile();
-            }
+            if (reader != null) reader.close();
+            if (decoder != null) decoder.closePdfFile();
         }
-        return tmpResult;
+        return result;
     }
 
-    /**
-     * Returns image (or null if failed) generated from given page in PDF using the OpenPDF renderer
-     * (actively-maintained descendant of the Sun Labs PDFRenderer).
-     *
-     * @param aPage page in PDF (1 based)
-     * @return image or null
-     */
-    public BufferedImage getImageUsingOpenPdfRenderer(final int aPage) {
-        BufferedImage tmpResult = null;
+    public BufferedImage getImageUsingOpenPdfRenderer(final int pageNumber) {
+        BufferedImage result = null;
         RandomAccessFile raf = null;
         try {
-            // load a pdf from a byte buffer
             File file = new File(options.getInFile());
             raf = new RandomAccessFile(file, "r");
             FileChannel channel = raf.getChannel();
-            ByteBuffer buf = channel.map(FileChannel.MapMode.READ_ONLY, 0, channel.size());
-            PDFFile pdffile = null;
+            ByteBuffer buffer = channel.map(FileChannel.MapMode.READ_ONLY, 0, channel.size());
+            PDFFile pdfFile;
             try {
-                // try to read PDF with owner password
-                pdffile = new PDFFile(buf, new PDFPassword(options.getPdfOwnerPwdStrX()));
-            } catch (PDFParseException ppe) {
+                pdfFile = new PDFFile(buffer, new PDFPassword(options.getPdfOwnerPwdStrX()));
+            } catch (PDFParseException e) {
                 try {
-                    // try to read PDF with empty password
-                    pdffile = new PDFFile(buf, new PDFPassword(""));
-                } catch (PDFParseException ppe2) {
-                    // try to read PDF without password
-                    pdffile = new PDFFile(buf);
+                    pdfFile = new PDFFile(buffer, new PDFPassword(""));
+                } catch (PDFParseException e2) {
+                    pdfFile = new PDFFile(buffer);
                 }
             }
-
-            // draw the page to an image
-            PDFPage page = pdffile.getPage(aPage);
-
-            // get the width and height for the doc at the default zoom
+            PDFPage page = pdfFile.getPage(pageNumber);
             Rectangle rect = new Rectangle(0, 0, (int) page.getBBox().getWidth(), (int) page.getBBox().getHeight());
-
-            // generate the image
-            tmpResult = (BufferedImage) page.getImage(rect.width, rect.height, rect, // clip
-                    // rect
-                    null, // null for the ImageObserver
-                    true, // fill background with white
-                    true // block until drawing is done
-            );
+            result = (BufferedImage) page.getImage(rect.width, rect.height, rect, null, true, true);
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
             if (raf != null) {
-                try {
-                    raf.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
+                try { raf.close(); } catch (IOException e) { e.printStackTrace(); }
             }
         }
-        return tmpResult;
+        return result;
     }
 
-    /**
-     * Returns image (or null if failed) generated from given page in PDF using PDFBox tool.
-     *
-     * @param aPage page in PDF (1 based)
-     * @return image or null
-     */
-    public BufferedImage getImageUsingPdfBox(final int aPage) {
-        BufferedImage tmpResult = null;
-        PDDocument tmpDoc = null;
-
-        try {
-            File tmpFile = new File(options.getInFile());
-            tmpDoc = Loader.loadPDF(tmpFile, options.getPdfOwnerPwdStrX());
-            int resolution;
-            try {
-                resolution = Toolkit.getDefaultToolkit().getScreenResolution();
-            } catch (HeadlessException e) {
-                resolution = 96;
-            }
-
-            PDFRenderer rendedrer = new PDFRenderer(tmpDoc);
-            tmpResult = rendedrer.renderImageWithDPI(aPage - 1, resolution);
+    public BufferedImage getImageUsingPdfBox(final int page) {
+        try (PDDocument document = Loader.loadPDF(new File(options.getInFile()), options.getPdfOwnerPwdStrX())) {
+            PDFRenderer renderer = new PDFRenderer(document);
+            return renderer.renderImageWithDPI(page - 1, PreviewRenderSettings.RENDER_DPI);
         } catch (Exception e) {
             e.printStackTrace();
-        } finally {
-            if (tmpDoc != null) {
-                try {
-                    tmpDoc.close();
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            }
+            return null;
         }
-        return tmpResult;
     }
 }

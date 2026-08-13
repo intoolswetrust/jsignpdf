@@ -66,6 +66,7 @@ import net.sf.jsignpdf.utils.AppConfig;
 import javafx.scene.layout.VBox;
 import javafx.util.StringConverter;
 import net.sf.jsignpdf.fx.control.PdfPageView;
+import net.sf.jsignpdf.fx.control.OutputSuffixSupport;
 import net.sf.jsignpdf.fx.control.SignatureOverlay;
 import net.sf.jsignpdf.fx.service.JpxCodecPrompt;
 import net.sf.jsignpdf.fx.service.PdfRenderService;
@@ -874,15 +875,7 @@ public class MainWindowController {
      * Returns null if the input is null.
      */
     private static String suggestedOutFileFor(File inputFile) {
-        if (inputFile == null) return null;
-        String inFile = inputFile.getAbsolutePath();
-        String suffix = ".pdf";
-        String nameBase = inFile;
-        if (inFile.toLowerCase().endsWith(suffix)) {
-            nameBase = inFile.substring(0, inFile.length() - 4);
-            suffix = inFile.substring(inFile.length() - 4);
-        }
-        return nameBase + AppConfig.defaultOutSuffix() + suffix;
+        return OutputSuffixSupport.suggestedFor(inputFile);
     }
 
 
@@ -1127,6 +1120,11 @@ public class MainWindowController {
         // Capture live placement into the signing VM, then sync VM → options.
         capturePlacementToSigningVM();
         signingVM.syncToOptions(options);
+
+        // Apply the session suffix immediately before signing so edits made after
+        // opening the PDF are reflected in the generated output filename.
+        options.setOutFile(OutputSuffixSupport.resolveForSign(
+                options.getInFile(), options.getOutFile()));
 
         // Generate output file name if not set
         if (options.getOutFile() == null || options.getOutFile().isEmpty()) {
