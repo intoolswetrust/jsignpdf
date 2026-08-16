@@ -8,6 +8,7 @@ import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import java.io.File;
+import java.io.InputStream;
 import java.util.List;
 
 import javax.imageio.ImageIO;
@@ -24,7 +25,8 @@ import org.junit.rules.TemporaryFolder;
 import eu.europa.esig.dss.enumerations.TextWrapping;
 import eu.europa.esig.dss.model.FileDocument;
 import eu.europa.esig.dss.model.InMemoryDocument;
-import eu.europa.esig.dss.pades.DSSJavaFont;
+import eu.europa.esig.dss.pades.DSSFileFont;
+import eu.europa.esig.dss.pades.DSSFont;
 import eu.europa.esig.dss.pades.SignatureFieldParameters;
 import eu.europa.esig.dss.pades.SignatureImageTextParameters;
 import eu.europa.esig.dss.pdf.pdfbox.visible.AbstractPdfBoxSignatureDrawer;
@@ -37,6 +39,9 @@ import eu.europa.esig.dss.pdf.visible.SignatureFieldDimensionAndPosition;
 public class JSignPdfSignatureDrawerTest {
 
     private static final int PREFERRED_FONT_SIZE = 8;
+
+    /** DejaVuSans bundled as a resource in jsignpdf-engine-api. */
+    private static final String EMBEDDED_FONT_PATH = "/net/sf/jsignpdf/fonts/DejaVuSans.ttf";
 
     @Rule
     public TemporaryFolder tmp = new TemporaryFolder();
@@ -104,7 +109,7 @@ public class JSignPdfSignatureDrawerTest {
     }
 
     @Test
-    public void factoryUsesTheStockDrawerWhenNoBackgroundImageIsSet() {
+    public void factoryUsesTheStockDrawerWhenNoBackgroundImageIsSet() throws Exception {
         JSignPdfSignatureDrawerFactory factory = new JSignPdfSignatureDrawerFactory();
         assertTrue(factory.getSignatureDrawer(baseParameters()) instanceof JSignPdfNativeSignatureDrawer);
 
@@ -113,7 +118,7 @@ public class JSignPdfSignatureDrawerTest {
         assertTrue(factory.getSignatureDrawer(withBackground) instanceof JSignPdfOverlaySignatureDrawer);
     }
 
-    private JSignPdfSignatureImageParameters baseParameters() {
+    private JSignPdfSignatureImageParameters baseParameters() throws Exception {
         JSignPdfSignatureImageParameters params = new JSignPdfSignatureImageParameters();
         SignatureFieldParameters field = new SignatureFieldParameters();
         field.setPage(1);
@@ -127,9 +132,23 @@ public class JSignPdfSignatureDrawerTest {
         text.setText("Signed by Test\n2026.08.02 12:00:00 CEST");
         text.setTextWrapping(TextWrapping.FILL_BOX_AND_LINEBREAK);
         text.setBackgroundColor(null);
-        text.setFont(new DSSJavaFont("Helvetica", java.awt.Font.PLAIN, PREFERRED_FONT_SIZE));
+        text.setFont(embeddedFont());
         params.setTextParameters(text);
         return params;
+    }
+
+    /**
+     * The same DejaVuSans that {@code DssFontUtils} embeds for real signatures. A logical AWT name such
+     * as "Helvetica" is not portable: on Windows it resolves to Symbol and the text measuring then fails
+     * on the first Latin glyph.
+     */
+    private DSSFont embeddedFont() throws Exception {
+        try (InputStream is = getClass().getResourceAsStream(EMBEDDED_FONT_PATH)) {
+            assertNotNull("bundled font " + EMBEDDED_FONT_PATH + " must be on the test classpath", is);
+            DSSFileFont font = new DSSFileFont(new InMemoryDocument(is.readAllBytes()));
+            font.setSize(PREFERRED_FONT_SIZE);
+            return font;
+        }
     }
 
     private PDDocument singlePageDocument() {
