@@ -12,6 +12,8 @@ import java.io.File;
 import java.io.PrintStream;
 import java.io.StringReader;
 import java.nio.file.Files;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.apache.commons.cli.ParseException;
 import org.junit.Rule;
@@ -126,13 +128,25 @@ public class SignerOptionsFromCmdLineTest {
         assertTrue("warning should mention key-password, was: " + w, w.contains("--key-password"));
     }
 
+    /**
+     * {@code -q} silences the loggers for the whole process, which is what the flag is for but outlives this
+     * test in a shared surefire JVM - every later test that asserts on a log record would see nothing. The
+     * levels are restored here; the class order that decides who runs after this is platform-dependent.
+     */
     @Test
     public void sentinelWithoutFlag_quietSuppressesWarning() throws Exception {
-        Fixture f = new Fixture("");
-        f.opts.setCmdLine(new String[] { "-q", "-ksp", "-" });
-        f.opts.loadCmdLine();
-        assertEquals("-", new String(f.opts.getKsPasswd()));
-        assertTrue("quiet mode must suppress the warning, was: " + f.warnings(), f.warnings().isEmpty());
+        Level appLevel = Constants.LOGGER.getLevel();
+        Level globalLevel = Logger.getGlobal().getLevel();
+        try {
+            Fixture f = new Fixture("");
+            f.opts.setCmdLine(new String[] { "-q", "-ksp", "-" });
+            f.opts.loadCmdLine();
+            assertEquals("-", new String(f.opts.getKsPasswd()));
+            assertTrue("quiet mode must suppress the warning, was: " + f.warnings(), f.warnings().isEmpty());
+        } finally {
+            Constants.LOGGER.setLevel(appLevel);
+            Logger.getGlobal().setLevel(globalLevel);
+        }
     }
 
     @Test
