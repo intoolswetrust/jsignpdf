@@ -6,16 +6,31 @@ import static org.junit.Assert.assertTrue;
 
 import java.io.File;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.ClosedWatchServiceException;
+import java.nio.file.FileSystems;
 import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardWatchEventKinds;
+import java.nio.file.WatchEvent;
+import java.nio.file.WatchKey;
+import java.nio.file.WatchService;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.logging.Handler;
+import java.util.logging.Level;
+import java.util.logging.LogRecord;
 import java.util.regex.Pattern;
 
+import org.apache.commons.lang3.SystemUtils;
 import org.junit.After;
 import org.junit.Test;
 
 import net.sf.jsignpdf.BasicSignerOptions;
+import net.sf.jsignpdf.Constants;
 import net.sf.jsignpdf.SignerLogic;
 import net.sf.jsignpdf.signing.validation.PdfSignatureValidator;
 import net.sf.jsignpdf.signing.validation.PdfSignatureValidator.ValidationResult;
@@ -133,6 +148,11 @@ public class BufferingModeSigningTest extends SigningTestBase {
      * The case OpenPDF itself gets wrong: an unreachable TSA aborts between {@code preClose()} and
      * {@code close()}, and OpenPDF only deletes its temp file in {@code close()}. Owning the file is what
      * makes this pass.
+     *
+     * <p>On Windows the delete cannot succeed: the abort leaves OpenPDF's own {@code RandomAccessFile} on
+     * the staging file open with no way to reach it, and Windows refuses to delete an open file. The engine
+     * says so rather than leaving a document-sized file behind silently, so that warning is what gets
+     * asserted there.
      */
     @Test
     public void tempFileIsRemovedAfterFailure() throws Exception {
@@ -144,9 +164,37 @@ public class BufferingModeSigningTest extends SigningTestBase {
         options.setTimestamp(true);
         options.setTsaUrl("http://127.0.0.1:1/tsa-does-not-exist");
 
-        assertTrue("Signing should fail with an unreachable TSA", !new SignerLogic(options).signFile());
+        List<String> warnings = new ArrayList<>();
+        Handler handler = new Handler() {
+            @Override
+            public void publish(LogRecord record) {
+                if (record.getLevel().intValue() >= Level.WARNING.intValue() && record.getMessage() != null) {
+                    warnings.add(record.getMessage());
+                }
+            }
 
-        assertEquals("A failed sign must not leak the staging file", 0, stagingFiles(stagingDir).length);
+            @Override
+            public void flush() {
+            }
+
+            @Override
+            public void close() {
+            }
+        };
+        Constants.LOGGER.addHandler(handler);
+        try {
+            assertTrue("Signing should fail with an unreachable TSA", !new SignerLogic(options).signFile());
+        } finally {
+            Constants.LOGGER.removeHandler(handler);
+        }
+
+        File[] left = stagingFiles(stagingDir);
+        if (SystemUtils.IS_OS_WINDOWS && left.length > 0) {
+            assertTrue("A staging file that could not be deleted must be reported: " + warnings,
+                    warnings.stream().anyMatch(m -> m.contains(left[0].getName())));
+        } else {
+            assertEquals("A failed sign must not leak the staging file", 0, left.length);
+        }
     }
 
     /**
@@ -335,22 +383,34 @@ public class BufferingModeSigningTest extends SigningTestBase {
     private static final class StagingWatcher implements AutoCloseable {
 
         private final Set<String> seen = ConcurrentHashMap.newKeySet();
+        private final WatchService watchService;
         private final AtomicBoolean running = new AtomicBoolean(true);
         private final Thread thread;
 
-        StagingWatcher(File dir) {
+        StagingWatcher(File dir) throws Exception {
+            // Creation events rather than directory listings: the staging file lives only for the duration of
+            // one sign, and a sampling loop has to guess an interval short enough to catch that. Thread.sleep()
+            // cannot go below the platform timer granularity - ~15 ms on Windows - so a fast sign fits between
+            // two looks and the file is missed. The watch service reports the creation whenever it happens.
+            watchService = FileSystems.getDefault().newWatchService();
+            dir.toPath().register(watchService, StandardWatchEventKinds.ENTRY_CREATE);
             thread = new Thread(() -> {
                 while (running.get()) {
-                    File[] files = dir.listFiles();
-                    if (files != null) {
-                        for (File f : files) {
-                            seen.add(f.getName());
-                        }
-                    }
                     try {
-                        Thread.sleep(1L);
+                        WatchKey key = watchService.poll(50L, TimeUnit.MILLISECONDS);
+                        if (key == null) {
+                            continue;
+                        }
+                        for (WatchEvent<?> event : key.pollEvents()) {
+                            if (event.context() instanceof Path name) {
+                                seen.add(name.toString());
+                            }
+                        }
+                        key.reset();
                     } catch (InterruptedException e) {
                         Thread.currentThread().interrupt();
+                        return;
+                    } catch (ClosedWatchServiceException e) {
                         return;
                     }
                 }
@@ -368,9 +428,10 @@ public class BufferingModeSigningTest extends SigningTestBase {
         }
 
         @Override
-        public void close() throws InterruptedException {
+        public void close() throws Exception {
             running.set(false);
             thread.join();
+            watchService.close();
         }
     }
 }
