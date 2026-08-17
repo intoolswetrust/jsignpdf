@@ -6,11 +6,19 @@ import static org.junit.Assert.assertTrue;
 
 import java.io.File;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.ClosedWatchServiceException;
+import java.nio.file.FileSystems;
 import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardWatchEventKinds;
+import java.nio.file.WatchEvent;
+import java.nio.file.WatchKey;
+import java.nio.file.WatchService;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.Handler;
 import java.util.logging.Level;
@@ -375,22 +383,34 @@ public class BufferingModeSigningTest extends SigningTestBase {
     private static final class StagingWatcher implements AutoCloseable {
 
         private final Set<String> seen = ConcurrentHashMap.newKeySet();
+        private final WatchService watchService;
         private final AtomicBoolean running = new AtomicBoolean(true);
         private final Thread thread;
 
-        StagingWatcher(File dir) {
+        StagingWatcher(File dir) throws Exception {
+            // Creation events rather than directory listings: the staging file lives only for the duration of
+            // one sign, and a sampling loop has to guess an interval short enough to catch that. Thread.sleep()
+            // cannot go below the platform timer granularity - ~15 ms on Windows - so a fast sign fits between
+            // two looks and the file is missed. The watch service reports the creation whenever it happens.
+            watchService = FileSystems.getDefault().newWatchService();
+            dir.toPath().register(watchService, StandardWatchEventKinds.ENTRY_CREATE);
             thread = new Thread(() -> {
                 while (running.get()) {
-                    File[] files = dir.listFiles();
-                    if (files != null) {
-                        for (File f : files) {
-                            seen.add(f.getName());
-                        }
-                    }
                     try {
-                        Thread.sleep(1L);
+                        WatchKey key = watchService.poll(50L, TimeUnit.MILLISECONDS);
+                        if (key == null) {
+                            continue;
+                        }
+                        for (WatchEvent<?> event : key.pollEvents()) {
+                            if (event.context() instanceof Path name) {
+                                seen.add(name.toString());
+                            }
+                        }
+                        key.reset();
                     } catch (InterruptedException e) {
                         Thread.currentThread().interrupt();
+                        return;
+                    } catch (ClosedWatchServiceException e) {
                         return;
                     }
                 }
@@ -408,9 +428,10 @@ public class BufferingModeSigningTest extends SigningTestBase {
         }
 
         @Override
-        public void close() throws InterruptedException {
+        public void close() throws Exception {
             running.set(false);
             thread.join();
+            watchService.close();
         }
     }
 }
