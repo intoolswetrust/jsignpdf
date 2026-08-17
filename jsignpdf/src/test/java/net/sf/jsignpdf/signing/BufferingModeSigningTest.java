@@ -7,15 +7,22 @@ import static org.junit.Assert.assertTrue;
 import java.io.File;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.logging.Handler;
+import java.util.logging.Level;
+import java.util.logging.LogRecord;
 import java.util.regex.Pattern;
 
+import org.apache.commons.lang3.SystemUtils;
 import org.junit.After;
 import org.junit.Test;
 
 import net.sf.jsignpdf.BasicSignerOptions;
+import net.sf.jsignpdf.Constants;
 import net.sf.jsignpdf.SignerLogic;
 import net.sf.jsignpdf.signing.validation.PdfSignatureValidator;
 import net.sf.jsignpdf.signing.validation.PdfSignatureValidator.ValidationResult;
@@ -133,6 +140,11 @@ public class BufferingModeSigningTest extends SigningTestBase {
      * The case OpenPDF itself gets wrong: an unreachable TSA aborts between {@code preClose()} and
      * {@code close()}, and OpenPDF only deletes its temp file in {@code close()}. Owning the file is what
      * makes this pass.
+     *
+     * <p>On Windows the delete cannot succeed: the abort leaves OpenPDF's own {@code RandomAccessFile} on
+     * the staging file open with no way to reach it, and Windows refuses to delete an open file. The engine
+     * says so rather than leaving a document-sized file behind silently, so that warning is what gets
+     * asserted there.
      */
     @Test
     public void tempFileIsRemovedAfterFailure() throws Exception {
@@ -144,9 +156,37 @@ public class BufferingModeSigningTest extends SigningTestBase {
         options.setTimestamp(true);
         options.setTsaUrl("http://127.0.0.1:1/tsa-does-not-exist");
 
-        assertTrue("Signing should fail with an unreachable TSA", !new SignerLogic(options).signFile());
+        List<String> warnings = new ArrayList<>();
+        Handler handler = new Handler() {
+            @Override
+            public void publish(LogRecord record) {
+                if (record.getLevel().intValue() >= Level.WARNING.intValue() && record.getMessage() != null) {
+                    warnings.add(record.getMessage());
+                }
+            }
 
-        assertEquals("A failed sign must not leak the staging file", 0, stagingFiles(stagingDir).length);
+            @Override
+            public void flush() {
+            }
+
+            @Override
+            public void close() {
+            }
+        };
+        Constants.LOGGER.addHandler(handler);
+        try {
+            assertTrue("Signing should fail with an unreachable TSA", !new SignerLogic(options).signFile());
+        } finally {
+            Constants.LOGGER.removeHandler(handler);
+        }
+
+        File[] left = stagingFiles(stagingDir);
+        if (SystemUtils.IS_OS_WINDOWS && left.length > 0) {
+            assertTrue("A staging file that could not be deleted must be reported: " + warnings,
+                    warnings.stream().anyMatch(m -> m.contains(left[0].getName())));
+        } else {
+            assertEquals("A failed sign must not leak the staging file", 0, left.length);
+        }
     }
 
     /**
