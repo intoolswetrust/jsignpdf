@@ -4,13 +4,19 @@ on:
   push:
     branches:
       - master
+      - 'test/windows-ci-**'
   pull_request:
     branches:
       - master
 
 jobs:
   build:
-    runs-on: ubuntu-24.04
+    runs-on: ${{ matrix.os }}
+    strategy:
+      # Report both platforms; a failure on one is not a reason to hide the other's result.
+      fail-fast: false
+      matrix:
+        os: [ubuntu-24.04, windows-2025]
 
     steps:
       - uses: actions/checkout@v7
@@ -22,3 +28,9 @@ jobs:
           cache: 'maven'
       - name: Build with Maven
         run: mvn --batch-mode --update-snapshots verify
+      - name: Upload surefire reports
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: surefire-reports-${{ matrix.os }}
+          path: '**/target/surefire-reports/**'
