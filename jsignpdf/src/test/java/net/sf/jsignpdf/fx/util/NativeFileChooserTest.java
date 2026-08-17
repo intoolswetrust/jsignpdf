@@ -33,7 +33,7 @@ public class NativeFileChooserTest {
                 List.of(ExtensionFilter.of("PDF Files", "*.pdf")), null);
         Path input = Path.of("/tmp/myfile");
         Path result = c.appendExtensionIfNeeded(input);
-        assertEquals("/tmp/myfile.pdf", result.toString());
+        assertEquals(Path.of("/tmp/myfile.pdf"), result);
     }
 
     @Test
@@ -42,7 +42,7 @@ public class NativeFileChooserTest {
                 List.of(ExtensionFilter.of("PDF Files", "*.pdf")), null);
         Path input = Path.of("/tmp/myfile.pdf");
         Path result = c.appendExtensionIfNeeded(input);
-        assertEquals("/tmp/myfile.pdf", result.toString());
+        assertEquals(Path.of("/tmp/myfile.pdf"), result);
     }
 
     @Test
@@ -52,7 +52,7 @@ public class NativeFileChooserTest {
                 List.of(ExtensionFilter.of("Image Files", "*.png", "*.jpg", "*.gif")), null);
         Path input = Path.of("/tmp/image");
         Path result = c.appendExtensionIfNeeded(input);
-        assertEquals("/tmp/image", result.toString());
+        assertEquals(Path.of("/tmp/image"), result);
     }
 
     @Test
@@ -61,7 +61,7 @@ public class NativeFileChooserTest {
                 List.of(ExtensionFilter.of("All Files", "*.*")), null);
         Path input = Path.of("/tmp/myfile");
         Path result = c.appendExtensionIfNeeded(input);
-        assertEquals("/tmp/myfile", result.toString()); // *.* is not a simple extension
+        assertEquals(Path.of("/tmp/myfile"), result); // *.* is not a simple extension
     }
 
     @Test
@@ -73,7 +73,7 @@ public class NativeFileChooserTest {
                 ExtensionFilter.of("PDF Files", "*.pdf"));
         Path input = Path.of("/tmp/report");
         Path result = c.appendExtensionIfNeeded(input);
-        assertEquals("/tmp/report.pdf", result.toString());
+        assertEquals(Path.of("/tmp/report.pdf"), result);
     }
 
     @Test
@@ -81,7 +81,7 @@ public class NativeFileChooserTest {
         NativeFileChooser c = new NativeFileChooser();
         Path input = Path.of("/tmp/myfile");
         Path result = c.appendExtensionIfNeeded(input);
-        assertEquals("/tmp/myfile", result.toString());
+        assertEquals(Path.of("/tmp/myfile"), result);
     }
 
     @Test
@@ -93,7 +93,7 @@ public class NativeFileChooserTest {
         Path input = Path.of("/tmp/my.dir/filename");
         Path result = c.appendExtensionIfNeeded(input);
         // getFileName() returns "filename" which has no dot → append
-        assertEquals("/tmp/my.dir/filename.pdf", result.toString());
+        assertEquals(Path.of("/tmp/my.dir/filename.pdf"), result);
     }
 
     @Test
@@ -105,7 +105,7 @@ public class NativeFileChooserTest {
                 null); // no selectedFilter
         Path input = Path.of("/tmp/output");
         Path result = c.appendExtensionIfNeeded(input);
-        assertEquals("/tmp/output.pdf", result.toString()); // first filter = PDF
+        assertEquals(Path.of("/tmp/output.pdf"), result); // first filter = PDF
     }
 
     // -----------------------------------------------------------------------
