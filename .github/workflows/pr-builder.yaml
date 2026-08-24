@@ -29,7 +29,7 @@ jobs:
         run: mvn --batch-mode --update-snapshots verify
       - name: Upload surefire reports
         if: failure()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: surefire-reports-${{ matrix.os }}
           path: '**/target/surefire-reports/**'
