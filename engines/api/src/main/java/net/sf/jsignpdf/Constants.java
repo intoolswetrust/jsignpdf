@@ -106,6 +106,9 @@ public class Constants {
     public static final String PDF2IMAGE_LIBRARIES_DEFAULT = PDF2IMAGE_PDFBOX + "," + PDF2IMAGE_JPEDAL + ","
             + PDF2IMAGE_OPENPDF;
 
+    /** Default raster resolution (DPI) for the visible-signature preview. */
+    public static final int PREVIEW_RENDER_DPI_DEFAULT = 300;
+
     /**
      * Property name.
      */

@@ -28,12 +28,18 @@ public class Pdf2Image {
     private static final int JPEDAL_MAX_IMAGE_RENDER_SIZE = 2000 * 2000;
 
     private final BasicSignerOptions options;
+    private double lastRenderDpi = PreviewRenderSettings.PDF_POINTS_PER_INCH;
 
     public Pdf2Image(BasicSignerOptions options) {
         if (options == null) {
             throw new NullPointerException("Options have to be not-null");
         }
         this.options = options;
+    }
+
+    /** DPI actually used for the most recent successful render (may be below the target for large pages). */
+    public double getLastRenderDpi() {
+        return lastRenderDpi;
     }
 
     /**
@@ -77,7 +83,10 @@ public class Pdf2Image {
                         decoder.openPdfFile(options.getInFile());
                     }
                 }
-                decoder.setPageParameters(PreviewRenderSettings.RENDER_SCALE, page);
+                double dpi = PreviewRenderSettings.effectiveRenderDpi(
+                        reader.getPageSize(page).getWidth(), reader.getPageSize(page).getHeight());
+                lastRenderDpi = dpi;
+                decoder.setPageParameters((float) (dpi / PreviewRenderSettings.PDF_POINTS_PER_INCH), page);
                 result = decoder.getPageAsImage(page);
             }
         } catch (Exception e) {
@@ -109,8 +118,11 @@ public class Pdf2Image {
             }
             PDFPage page = pdfFile.getPage(pageNumber);
             Rectangle rect = new Rectangle(0, 0, (int) page.getBBox().getWidth(), (int) page.getBBox().getHeight());
-            int imgWidth = Math.round(rect.width * PreviewRenderSettings.RENDER_SCALE);
-            int imgHeight = Math.round(rect.height * PreviewRenderSettings.RENDER_SCALE);
+            double dpi = PreviewRenderSettings.effectiveRenderDpi(rect.width, rect.height);
+            lastRenderDpi = dpi;
+            double scale = dpi / PreviewRenderSettings.PDF_POINTS_PER_INCH;
+            int imgWidth = (int) Math.round(rect.width * scale);
+            int imgHeight = (int) Math.round(rect.height * scale);
             result = (BufferedImage) page.getImage(imgWidth, imgHeight, rect, null, true, true);
         } catch (Exception e) {
             e.printStackTrace();
@@ -124,8 +136,11 @@ public class Pdf2Image {
 
     public BufferedImage getImageUsingPdfBox(final int page) {
         try (PDDocument document = Loader.loadPDF(new File(options.getInFile()), options.getPdfOwnerPwdStrX())) {
+            var mediaBox = document.getPage(page - 1).getMediaBox();
+            double dpi = PreviewRenderSettings.effectiveRenderDpi(mediaBox.getWidth(), mediaBox.getHeight());
+            lastRenderDpi = dpi;
             PDFRenderer renderer = new PDFRenderer(document);
-            return renderer.renderImageWithDPI(page - 1, PreviewRenderSettings.RENDER_DPI);
+            return renderer.renderImageWithDPI(page - 1, (float) dpi);
         } catch (Exception e) {
             e.printStackTrace();
             return null;

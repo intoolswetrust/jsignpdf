@@ -23,6 +23,7 @@ public class PdfPageView extends Region {
     private final ImageView imageView = new ImageView();
     private final ObjectProperty<Image> pageImage = new SimpleObjectProperty<>();
     private final DoubleProperty zoomLevel = new SimpleDoubleProperty(1.0);
+    private final DoubleProperty renderDpi = new SimpleDoubleProperty(PreviewRenderSettings.targetRenderDpi());
 
     public PdfPageView() {
         getChildren().add(imageView);
@@ -31,6 +32,7 @@ public class PdfPageView extends Region {
         imageView.imageProperty().bind(pageImage);
         pageImage.addListener((obs, oldImage, newImage) -> updateSize());
         zoomLevel.addListener((obs, oldZoom, newZoom) -> updateSize());
+        renderDpi.addListener((obs, oldDpi, newDpi) -> updateSize());
         getStyleClass().add("pdf-page-view");
     }
 
@@ -40,7 +42,8 @@ public class PdfPageView extends Region {
             return;
         }
 
-        double rasterToDisplayScale = getScreenDpi() / PreviewRenderSettings.RENDER_DPI;
+        double dpi = renderDpi.get() > 0 ? renderDpi.get() : PreviewRenderSettings.targetRenderDpi();
+        double rasterToDisplayScale = getScreenDpi() / dpi;
         double displayScale = rasterToDisplayScale * zoomLevel.get();
         double width = image.getWidth() * displayScale;
         double height = image.getHeight() * displayScale;
@@ -72,4 +75,8 @@ public class PdfPageView extends Region {
     public DoubleProperty zoomLevelProperty() { return zoomLevel; }
     public double getZoomLevel() { return zoomLevel.get(); }
     public void setZoomLevel(double zoom) { zoomLevel.set(zoom); }
+
+    public DoubleProperty renderDpiProperty() { return renderDpi; }
+    public double getRenderDpi() { return renderDpi.get(); }
+    public void setRenderDpi(double dpi) { renderDpi.set(dpi); }
 }

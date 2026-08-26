@@ -69,6 +69,7 @@ import net.sf.jsignpdf.fx.control.PdfPageView;
 import net.sf.jsignpdf.fx.control.SignatureOverlay;
 import net.sf.jsignpdf.fx.service.JpxCodecPrompt;
 import net.sf.jsignpdf.fx.service.PdfRenderService;
+import net.sf.jsignpdf.fx.service.RenderedPage;
 import net.sf.jsignpdf.fx.service.SigningService;
 import net.sf.jsignpdf.preview.JpxDetector;
 import net.sf.jsignpdf.preview.JpxPluginManager;
@@ -368,6 +369,7 @@ public class MainWindowController {
         // Bind PDF page view to ViewModel
         pdfPageView.pageImageProperty().bind(documentVM.currentPageImageProperty());
         pdfPageView.zoomLevelProperty().bind(documentVM.zoomLevelProperty());
+        pdfPageView.renderDpiProperty().bind(documentVM.renderDpiProperty());
 
         // Listen for page changes to trigger re-render
         documentVM.currentPageProperty().addListener((obs, oldVal, newVal) -> {
@@ -412,7 +414,9 @@ public class MainWindowController {
 
         // Setup render service callbacks
         renderService.setOnSucceeded(e -> {
-            documentVM.setCurrentPageImage(renderService.getValue());
+            RenderedPage rendered = renderService.getValue();
+            documentVM.setRenderDpi(rendered.dpi());
+            documentVM.setCurrentPageImage(rendered.image());
             pdfPageView.setVisible(true);
             progressBar.setVisible(false);
             updateStatusForDocument();
