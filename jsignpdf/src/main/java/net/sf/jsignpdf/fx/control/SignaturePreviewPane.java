@@ -12,10 +12,10 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import java.util.Map;
 import javax.naming.ldap.LdapName;
 import javax.naming.ldap.Rdn;
 
@@ -34,7 +34,9 @@ import net.sf.jsignpdf.Constants;
 import net.sf.jsignpdf.fx.viewmodel.SigningOptionsViewModel;
 import net.sf.jsignpdf.utils.FontUtils;
 import net.sf.jsignpdf.utils.FontUtils.L2Font;
+import net.sf.jsignpdf.utils.TextTimestampSubstitutor;
 import org.openpdf.text.pdf.BaseFont;
+import org.openpdf.text.pdf.PdfPKCS7;
 import org.openpdf.text.pdf.PdfSignatureAppearance;
 import org.openpdf.text.pdf.PdfWriter;
 
@@ -54,8 +56,6 @@ import org.openpdf.text.pdf.PdfWriter;
  */
 final class SignaturePreviewPane extends Pane {
     private static final double DEFAULT_FONT_SIZE = 10.0;
-    private static final Pattern FORMATTED_TIMESTAMP_PATTERN =
-            Pattern.compile("\\$\\{timestamp:([^}]+)}");
 
     private final SigningOptionsViewModel signingVM;
 
@@ -66,7 +66,7 @@ final class SignaturePreviewPane extends Pane {
     private String loadedImagePath = "";
     private Image loadedImage;
     private String cachedSignerKey = "";
-    private String cachedCertificateSigner = "";
+    private CertificateInfo cachedCertificate = CertificateInfo.EMPTY;
 
     // Signer-name resolution is a preview convenience only. It runs off the FX
     // thread, debounced, and never touches a hardware keystore (see
@@ -82,9 +82,7 @@ final class SignaturePreviewPane extends Pane {
     private byte[] l2FontData;
     private String l2FontName;
     private String l2FontEncoding;
-    private String fxFontFaceName;
-    private Font cachedFxFont;
-    private double cachedFxFontPx = -1;
+    private String fxFontFullName;
     private BaseFont openPdfBaseFont;
 
     SignaturePreviewPane(SigningOptionsViewModel signingVM) {
@@ -319,8 +317,12 @@ final class SignaturePreviewPane extends Pane {
         return 1.0;
     }
 
+    /**
+     * Registers the L2 font once, because {@link Font#loadFont(java.io.InputStream, double)} re-parses the
+     * face on every call and repaints resize the text continuously while the rectangle is dragged.
+     */
     private void ensureExactFont() {
-        if (l2FontData != null && fxFontFaceName != null && openPdfBaseFont != null) return;
+        if (l2FontData != null && fxFontFullName != null && openPdfBaseFont != null) return;
         try {
             L2Font l2 = FontUtils.getL2Font();
             if (l2 != null) {
@@ -329,9 +331,7 @@ final class SignaturePreviewPane extends Pane {
                 l2FontEncoding = l2.getEncoding();
                 Font loaded = Font.loadFont(new ByteArrayInputStream(l2FontData), DEFAULT_FONT_SIZE);
                 if (loaded != null) {
-                    fxFontFaceName = loaded.getName();
-                    cachedFxFont = loaded;
-                    cachedFxFontPx = DEFAULT_FONT_SIZE;
+                    fxFontFullName = loaded.getName();
                 }
                 openPdfBaseFont = BaseFont.createFont(l2FontName, l2FontEncoding,
                         BaseFont.EMBEDDED, BaseFont.CACHED, l2FontData, null);
@@ -346,21 +346,16 @@ final class SignaturePreviewPane extends Pane {
                 // Width fallback remains available.
             }
         }
-        if (fxFontFaceName == null) fxFontFaceName = "Arial";
+        if (fxFontFullName == null) fxFontFullName = "Arial";
     }
 
+    /**
+     * Returns the registered L2 face at the given size. The full font name is used because a family-only
+     * lookup would drop the weight and posture of the loaded face.
+     */
     private Font createFxFont(double fontPx) {
         try {
-            if (l2FontData != null && (cachedFxFont == null || Math.abs(cachedFxFontPx - fontPx) > 0.02)) {
-                Font loaded = Font.loadFont(new ByteArrayInputStream(l2FontData), fontPx);
-                if (loaded != null) {
-                    cachedFxFont = loaded;
-                    cachedFxFontPx = fontPx;
-                    fxFontFaceName = loaded.getName();
-                }
-            }
-            if (cachedFxFont != null) return cachedFxFont;
-            return Font.font(fxFontFaceName, fontPx);
+            return new Font(fxFontFullName, fontPx);
         } catch (Exception ignored) {
             return Font.font(fontPx);
         }
@@ -383,41 +378,30 @@ final class SignaturePreviewPane extends Pane {
         layoutImage(getWidth(), getHeight());
     }
 
+    /**
+     * Expands the placeholders through the same {@link TextTimestampSubstitutor} the engines use, so
+     * escaping, default values and timestamp patterns render identically here and in the signed PDF.
+     */
     private String expandPlaceholders(String text) {
+        CertificateInfo certificate = resolveCertificate();
         String signer = safeTrim(signingVM.signerNameProperty().get());
-        if (signer.isEmpty()) signer = resolveCertificateSigner();
-        String reason = safeTrim(signingVM.reasonProperty().get());
-        String location = safeTrim(signingVM.locationProperty().get());
-        String contact = safeTrim(signingVM.contactProperty().get());
-        Date now = new Date();
-        String timestamp = new SimpleDateFormat("yyyy.MM.dd HH:mm:ss z").format(now);
-        String expanded = expandFormattedTimestamps(text, now);
-        return expanded.replace("${timestamp}", timestamp)
-                .replace("${signer}", signer)
-                .replace("${reason}", reason)
-                .replace("${location}", location)
-                .replace("${contact}", contact);
-    }
+        if (signer.isEmpty()) signer = certificate.commonName();
 
-    private String expandFormattedTimestamps(String text, Date date) {
-        Matcher matcher = FORMATTED_TIMESTAMP_PATTERN.matcher(text);
-        StringBuffer out = new StringBuffer();
-        while (matcher.find()) {
-            String replacement = matcher.group(0);
-            try {
-                replacement = new SimpleDateFormat(matcher.group(1)).format(date);
-            } catch (IllegalArgumentException ignored) {
-                // Keep invalid patterns visible.
-            }
-            matcher.appendReplacement(out, Matcher.quoteReplacement(replacement));
-        }
-        matcher.appendTail(out);
-        return out.toString();
+        Date now = new Date();
+        Map<String, String> replacements = new HashMap<>();
+        replacements.put(Constants.L2TEXT_PLACEHOLDER_SIGNER, signer);
+        replacements.put(Constants.L2TEXT_PLACEHOLDER_CERTIFICATE, certificate.subjectFields());
+        replacements.put(Constants.L2TEXT_PLACEHOLDER_TIMESTAMP,
+                new SimpleDateFormat("yyyy.MM.dd HH:mm:ss z").format(now));
+        replacements.put(Constants.L2TEXT_PLACEHOLDER_LOCATION, safeTrim(signingVM.locationProperty().get()));
+        replacements.put(Constants.L2TEXT_PLACEHOLDER_REASON, safeTrim(signingVM.reasonProperty().get()));
+        replacements.put(Constants.L2TEXT_PLACEHOLDER_CONTACT, safeTrim(signingVM.contactProperty().get()));
+        return TextTimestampSubstitutor.replace(text, replacements, now);
     }
 
     private String buildAutomaticText() {
         String signer = safeTrim(signingVM.signerNameProperty().get());
-        if (signer.isEmpty()) signer = resolveCertificateSigner();
+        if (signer.isEmpty()) signer = resolveCertificate().commonName();
         if (signer.isEmpty()) signer = "...";
         String timestamp = new SimpleDateFormat("yyyy.MM.dd HH:mm:ss z").format(new Date());
         StringBuilder out = new StringBuilder();
@@ -440,12 +424,12 @@ final class SignaturePreviewPane extends Pane {
     }
 
     /**
-     * Returns the last resolved signer CN, scheduling an off-thread reload when
+     * Returns the last resolved certificate details, scheduling an off-thread reload when
      * the file-based keystore inputs change. Never blocks the FX thread and
      * never probes a hardware or system keystore, whose token could be locked by
      * repeated loads with a partially typed PIN.
      */
-    private String resolveCertificateSigner() {
+    private CertificateInfo resolveCertificate() {
         String type = safeTrim(signingVM.ksTypeProperty().get());
         String path = safeTrim(signingVM.ksFileProperty().get());
         String password = signingVM.ksPasswordProperty().get();
@@ -453,12 +437,12 @@ final class SignaturePreviewPane extends Pane {
 
         File file = path.isEmpty() ? null : new File(path);
         if (file == null || !file.isFile() || isHardwareKeystore(type)) {
-            return cachedCertificateSigner;
+            return cachedCertificate;
         }
 
         String key = type + "\n" + path + "\n" + hash(password) + "\n" + alias;
         if (key.equals(cachedSignerKey) || key.equals(pendingSignerKey)) {
-            return cachedCertificateSigner;
+            return cachedCertificate;
         }
 
         pendingSignerKey = key;
@@ -467,7 +451,7 @@ final class SignaturePreviewPane extends Pane {
         pendingPassword = password;
         pendingAlias = alias;
         signerDebounce.playFromStart();
-        return cachedCertificateSigner;
+        return cachedCertificate;
     }
 
     private void startSignerResolve() {
@@ -478,10 +462,10 @@ final class SignaturePreviewPane extends Pane {
         final String alias = pendingAlias;
         pendingPassword = null;
         Thread worker = new Thread(() -> {
-            String signer = loadSignerName(type, file, password, alias);
+            CertificateInfo certificate = loadCertificate(type, file, password, alias);
             Platform.runLater(() -> {
                 cachedSignerKey = key;
-                cachedCertificateSigner = signer;
+                cachedCertificate = certificate;
                 if (key.equals(pendingSignerKey)) pendingSignerKey = null;
                 renderText(getWidth(), getHeight());
             });
@@ -490,7 +474,7 @@ final class SignaturePreviewPane extends Pane {
         worker.start();
     }
 
-    private static String loadSignerName(String type, File file, String password, String alias) {
+    private static CertificateInfo loadCertificate(String type, File file, String password, String alias) {
         try {
             KeyStore keyStore = KeyStore.getInstance(type.isEmpty() ? "PKCS12" : type);
             try (FileInputStream input = new FileInputStream(file)) {
@@ -509,17 +493,34 @@ final class SignaturePreviewPane extends Pane {
             }
             Certificate certificate = selected.isEmpty() ? null : keyStore.getCertificate(selected);
             if (certificate instanceof X509Certificate x509) {
-                LdapName name = new LdapName(x509.getSubjectX500Principal().getName());
-                for (Rdn rdn : name.getRdns()) {
-                    if ("CN".equalsIgnoreCase(rdn.getType())) {
-                        return String.valueOf(rdn.getValue());
-                    }
-                }
+                return new CertificateInfo(extractCommonName(x509),
+                        PdfPKCS7.getSubjectFields(x509).toString());
             }
         } catch (Exception ignored) {
             // Preview convenience only; a failed load simply shows no signer name.
         }
+        return CertificateInfo.EMPTY;
+    }
+
+    private static String extractCommonName(X509Certificate certificate) {
+        try {
+            LdapName name = new LdapName(certificate.getSubjectX500Principal().getName());
+            for (Rdn rdn : name.getRdns()) {
+                if ("CN".equalsIgnoreCase(rdn.getType())) {
+                    return String.valueOf(rdn.getValue());
+                }
+            }
+        } catch (Exception ignored) {
+            // No usable CN; the preview falls back to an empty signer name.
+        }
         return "";
+    }
+
+    /**
+     * Signer CN and the {@code ${certificate}} description of the preview's signing certificate.
+     */
+    private record CertificateInfo(String commonName, String subjectFields) {
+        static final CertificateInfo EMPTY = new CertificateInfo("", "");
     }
 
     private static boolean isHardwareKeystore(String type) {

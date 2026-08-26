@@ -95,6 +95,18 @@ public class TextTimestampSubstitutorTest {
     }
 
     @Test
+    public void dollarEscapeAlsoProtectsFormattedTimestamps() throws Exception {
+        assertEquals("${timestamp:yyyy}",
+                TextTimestampSubstitutor.replace("$${timestamp:yyyy}", map(), date("2026-08-26")));
+    }
+
+    @Test
+    public void escapeAndDefaultSyntaxApplyWithoutReplacements() throws Exception {
+        assertEquals("${signer}", TextTimestampSubstitutor.replace("$${signer}", null, date("2026-08-26")));
+        assertEquals("fallback", TextTimestampSubstitutor.replace("${missing:-fallback}", map()));
+    }
+
+    @Test
     public void monthNameUsesExplicitLocale() throws Exception {
         Date signDate = date("2026-08-26");
         String expected = new SimpleDateFormat("MMMM", Locale.getDefault()).format(signDate);
