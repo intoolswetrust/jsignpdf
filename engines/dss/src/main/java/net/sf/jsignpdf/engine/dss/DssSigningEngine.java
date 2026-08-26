@@ -938,7 +938,7 @@ public class DssSigningEngine implements SigningEngine {
         replacements.put(L2TEXT_PLACEHOLDER_LOCATION, StringUtils.defaultString(location));
         replacements.put(L2TEXT_PLACEHOLDER_REASON, StringUtils.defaultString(reason));
         replacements.put(L2TEXT_PLACEHOLDER_CONTACT, StringUtils.defaultString(options.getContact()));
-        return TextTimestampSubstitutor.replace(options.getL2Text(), replacements);
+        return TextTimestampSubstitutor.replace(options.getL2Text(), replacements, signingCal.getTime());
     }
 
     private String extractCN(X509Certificate cert) {

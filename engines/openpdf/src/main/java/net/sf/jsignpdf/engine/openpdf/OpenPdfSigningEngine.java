@@ -20,6 +20,7 @@ import java.security.cert.Certificate;
 import java.security.cert.X509Certificate;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.List;
@@ -323,7 +324,8 @@ public class OpenPdfSigningEngine implements SigningEngine {
                     signer = options.getSignerName();
                 }
                 final String certificate = PdfPKCS7.getSubjectFields((X509Certificate) chain[0]).toString();
-                final String timestamp = new SimpleDateFormat("yyyy.MM.dd HH:mm:ss z").format(sap.getSignDateNullSafe().getTime());
+                final Date signDate = sap.getSignDateNullSafe().getTime();
+                final String timestamp = new SimpleDateFormat("yyyy.MM.dd HH:mm:ss z").format(signDate);
                 if (options.getL2Text() == null) {
                     final StringBuilder buf = new StringBuilder();
                     buf.append(RES.get("default.l2text.signedBy")).append(" ").append(signer).append('\n');
@@ -341,7 +343,7 @@ public class OpenPdfSigningEngine implements SigningEngine {
                     replacements.put(L2TEXT_PLACEHOLDER_LOCATION, StringUtils.defaultString(location));
                     replacements.put(L2TEXT_PLACEHOLDER_REASON, StringUtils.defaultString(reason));
                     replacements.put(L2TEXT_PLACEHOLDER_CONTACT, StringUtils.defaultString(contact));
-                    final String l2text = TextTimestampSubstitutor.replace(options.getL2Text(), replacements);
+                    final String l2text = TextTimestampSubstitutor.replace(options.getL2Text(), replacements, signDate);
                     sap.setLayer2Text(l2text);
                 }
                 final org.openpdf.text.pdf.BaseFont l2BaseFont = OpenPdfFonts.getL2BaseFont();
