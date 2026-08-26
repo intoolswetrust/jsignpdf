@@ -400,18 +400,16 @@ public class SignerOptionsFromCmdLineTest {
     }
 
     @Test
-    public void outSuffix_defaultIsResolvedAtParseTimeNotConstruction() throws Exception {
-        // Regression for the construction-time capture: the outSuffix field initializer reads the default before
-        // loadCmdLine runs (and before advanced overrides are applied). When -os is absent, loadCmdLine must
-        // re-resolve the configured output.suffix so a value set after construction (e.g. a -o override) is honored.
+    public void outSuffix_withoutFlagStaysUnsetAndResolvesLazily() throws Exception {
         net.sf.jsignpdf.utils.AdvancedConfig cfg = net.sf.jsignpdf.utils.PropertyStoreFactory.getInstance()
                 .advancedConfig();
-        Fixture f = new Fixture(""); // constructs the opts -> field initializer captures the current default
-        cfg.setProperty("output.suffix", "_resolvedlate"); // change the config AFTER construction
+        Fixture f = new Fixture("");
         try {
             f.opts.setCmdLine(new String[] { "-ksf", "/tmp/x.p12" }); // no -os
             f.opts.loadCmdLine();
-            assertEquals("_resolvedlate", f.opts.getOutSuffix());
+            assertNull("No -os must leave the suffix unset so lower precedence levels apply", f.opts.getOutSuffix());
+            cfg.setProperty("output.suffix", "_resolvedlate"); // changed after parsing
+            assertEquals("_resolvedlate", f.opts.getOutSuffixX());
         } finally {
             cfg.removeProperty("output.suffix");
         }

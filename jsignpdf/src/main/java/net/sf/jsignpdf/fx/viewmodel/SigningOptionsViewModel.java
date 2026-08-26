@@ -41,6 +41,7 @@ public class SigningOptionsViewModel {
 
     // File settings
     private final StringProperty outFile = new SimpleStringProperty();
+    private final StringProperty outSuffix = new SimpleStringProperty();
     private final BooleanProperty append = new SimpleBooleanProperty(Constants.DEFVAL_APPEND);
 
     // Signature metadata
@@ -126,6 +127,7 @@ public class SigningOptionsViewModel {
         opts.setKeyPasswd(toCharArray(keyPassword.get()));
         opts.setStorePasswords(storePasswords.get());
         opts.setOutFile(outFile.get());
+        opts.setOutSuffix(outSuffix.get());
         opts.setAppend(append.get());
         opts.setSignerName(signerName.get());
         opts.setReason(reason.get());
@@ -208,6 +210,7 @@ public class SigningOptionsViewModel {
         keyPassword.set(fromCharArray(opts.getKeyPasswd()));
         storePasswords.set(opts.isStorePasswords());
         outFile.set(opts.getOutFile());
+        outSuffix.set(opts.getOutSuffix());
         append.set(opts.isAppend());
         signerName.set(opts.getSignerName());
         reason.set(opts.getReason());
@@ -281,6 +284,7 @@ public class SigningOptionsViewModel {
 
         // File & metadata
         outFile.set(null);
+        outSuffix.set(null);
         append.set(Constants.DEFVAL_APPEND);
         signerName.set(null);
         reason.set(null);
@@ -386,6 +390,7 @@ public class SigningOptionsViewModel {
     public StringProperty keyPasswordProperty() { return keyPassword; }
     public BooleanProperty storePasswordsProperty() { return storePasswords; }
     public StringProperty outFileProperty() { return outFile; }
+    public StringProperty outSuffixProperty() { return outSuffix; }
     public BooleanProperty appendProperty() { return append; }
     public StringProperty signerNameProperty() { return signerName; }
     public StringProperty reasonProperty() { return reason; }

@@ -253,9 +253,9 @@ When you are ready, click the _Sign_ button in the toolbar. JSignPdf signs the d
 
 image:img/javafx/signing-result.png[Signing complete,width=562,height=400]
 
-The signed PDF is saved to the output path shown in the _Signature Properties_ panel. By default, the input file name is combined with the suffix configured by the `output.suffix` key in `advanced.properties` (bundled default `_signed`), so `document.pdf` becomes `document_signed.pdf`.
+The signed PDF is saved to the output path shown in the _Signature Properties_ panel. By default, the input file name is combined with the _Output suffix_ from the same panel, so `document.pdf` becomes `document_signed.pdf`.
 
-The JavaFX status bar also provides a _Suffix_ field for changing the output suffix for the current session. For example, entering `DL` produces `document_DL.pdf`. Leaving the field empty preserves the configured `output.suffix` value.
+The suffix is used exactly as typed, so it has to include the separator: `_signed` produces `document_signed.pdf` and `-DL` produces `document-DL.pdf`. Leaving the field empty falls back to the configured default, which the field shows as its prompt text. The starting value comes from the `output.suffix` key, set by the *Output file suffix* field in the <<Adjusting advanced preferences,Preferences dialog>>; changing it in the _Signature Properties_ panel overrides it for the current document, is remembered for the next session, and is stored in a preset along with the other signing settings. Typing a full path into _Output file_ always wins over the suffix.
 
 === Using presets
 
@@ -287,7 +287,7 @@ Presets are plain Java properties files under the <<Configuration directory,conf
 
 Open _File > Preferences..._ (shortcut `Ctrl+,` / `⌘,`) for application-wide tweaks that fall outside the per-document signing options. The dialog has the following tabs:
 
-* **General** -- the default signing engine, and the *Debug output* toggle that enables the verbose signing diagnostics (see <<Reading the signing diagnostics>>)
+* **General** -- the interface language, the default signing engine, the *Output file suffix* used to derive output file names, and the *Debug output* toggle that enables the verbose signing diagnostics (see <<Reading the signing diagnostics>>)
 * **Visible Signature** -- font file, font name and encoding for the visible-signature L2 text
 * **Certificates** -- which certificate checks (validity, key usage, critical extensions) are applied when listing aliases
 * **Network** -- relax SSL security for TSA / OCSP / CRL traffic
@@ -465,7 +465,7 @@ See <<Signing properties>> for details.
 | Prefix for the signed filename. Default: empty.
 
 | `-os, --out-suffix <suffix>`
-| Suffix for the signed filename. Default: the `output.suffix` key in `advanced.properties` (bundled default `_signed`), so `mydocument.pdf` becomes `mydocument_signed.pdf`.
+| Suffix for the signed filename, used exactly as given. Default: the `output.suffix` key in `advanced.properties` (bundled default `_signed`), so `mydocument.pdf` becomes `mydocument_signed.pdf`.
 |===
 
 === Visible signature options
@@ -789,7 +789,7 @@ _JavaFX panel: Signature Properties_
 
 _Input PDF file_ is the existing PDF file to which a digital signature will be added.
 
-_Output PDF file_ is the name of the resulting PDF file. If not specified, the _Input PDF file_ name with the suffix `_signed` is used automatically (e.g. input _test.pdf_ will produce _test_signed.pdf_). The suffix is taken from the `output.suffix` key in `advanced.properties`, so it can be localized (see <<Advanced application configuration>>).
+_Output PDF file_ is the name of the resulting PDF file. If not specified, the _Input PDF file_ name with the suffix `_signed` is used automatically (e.g. input _test.pdf_ will produce _test_signed.pdf_). The suffix is taken from the `output.suffix` key in `advanced.properties`, so it can be localized (see <<Advanced application configuration>>). The Swing UI has no suffix field of its own.
 
 _*The Input and Output files have to be different!*_
 
@@ -1191,9 +1191,11 @@ Password-based PDF encryption combined with signing is likewise not honoured uni
 
 Application-wide tweaks beyond the per-document signing options live in `<config-dir>/advanced.properties` and -- for hardware tokens -- `<config-dir>/pkcs11.cfg`. Both are plain text files; the easiest way to edit them is the JavaFX <<Adjusting advanced preferences,Preferences dialog>>, which writes them on _OK_. Power users can also hand-edit the files directly while JSignPdf is closed; the next launch picks up the changes.
 
-`advanced.properties` covers the same topics as the Preferences dialog (the signing engine, verbose `debug` output, visible-signature font, certificate-validation toggles, relaxed SSL, PDF preview backend order, default TSA hash algorithm) plus a few file-editable knobs such as `output.suffix` -- the suffix appended to the input file name to derive the default output file name (bundled default `_signed`; e.g. set `output.suffix=_firmado` to produce `mydocument_firmado.pdf`). When a key is missing from `advanced.properties`, JSignPdf falls back to defaults bundled inside the application jar, so a fresh install needs no config file at all.
+`advanced.properties` covers the same topics as the Preferences dialog (the signing engine, verbose `debug` output, visible-signature font, certificate-validation toggles, relaxed SSL, PDF preview backend order, default TSA hash algorithm) plus a few file-editable knobs. When a key is missing from `advanced.properties`, JSignPdf falls back to defaults bundled inside the application jar, so a fresh install needs no config file at all.
 
 Set `debug=true` (bundled default `false`, the *Debug output* checkbox on the _General_ tab of the Preferences dialog) to log the verbose signing diagnostics -- the certificate chain, the loaded trust anchors, and every timestamp / OCSP / CRL / AIA network call. See <<Reading the signing diagnostics>>.
+
+Set `output.suffix` (bundled default `_signed`, the *Output file suffix* field on the _General_ tab of the Preferences dialog) to the text appended to the input file name when no output file is given -- for example `output.suffix=_firmado` produces `mydocument_firmado.pdf`. It is used exactly as configured, so it has to include the separator. It is the starting value for the _Output suffix_ field in the _Signature Properties_ panel and the default for the CLI `-os` option.
 
 Set `ui.language` to a BCP-47 language tag (e.g. `de`, `fr`, `pt`, `zh-CN`) to pick the interface language explicitly instead of following the operating-system locale; the empty bundled default keeps *System default*. The value is read once at startup, so restart JSignPdf for a change to take effect. It is exposed as the *Language* selector on the _General_ tab of the Preferences dialog (which lists the bundled translations and writes this key), and on the command line as `-o ui.language=<tag>` -- for example `jsignpdf --help -o ui.language=de` prints the help in German. The choice affects the interface text only; number and date formatting (and therefore the signed output) keep following the OS locale.
 

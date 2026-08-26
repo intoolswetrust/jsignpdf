@@ -38,6 +38,7 @@ public class BasicSignerOptions {
     private char[] keyPasswd;
     private String inFile;
     private String outFile;
+    private String outSuffix;
     private String signerName;
     private String reason;
     private String location;
@@ -152,6 +153,7 @@ public class BasicSignerOptions {
             setInFile(store.getProperty(Constants.PROPERTY_INPDF));
             setOutFile(store.getProperty(Constants.PROPERTY_OUTPDF));
         }
+        setOutSuffix(store.getPropNullSensitive(Constants.PROPERTY_OUT_SUFFIX));
         setReason(store.getProperty(Constants.PROPERTY_REASON));
         setLocation(store.getProperty(Constants.PROPERTY_LOCATION));
         setContact(store.getProperty(Constants.PROPERTY_CONTACT));
@@ -280,6 +282,7 @@ public class BasicSignerOptions {
             store.setProperty(Constants.PROPERTY_INPDF, getInFile());
             store.setProperty(Constants.PROPERTY_OUTPDF, getOutFile());
         }
+        store.setPropNullSensitive(Constants.PROPERTY_OUT_SUFFIX, getOutSuffix());
         store.setProperty(Constants.PROPERTY_REASON, getReason());
         store.setProperty(Constants.PROPERTY_LOCATION, getLocation());
         store.setProperty(Constants.PROPERTY_CONTACT, getContact());
@@ -434,28 +437,59 @@ public class BasicSignerOptions {
     }
 
     /**
-     * Returns output file name if filled or input file name with the configured default output suffix
-     * (the {@code output.suffix} advanced-config key; bundled default {@code "_signed"}).
+     * Returns the suffix appended to the input file name when no explicit output file is set. Falls back to the
+     * {@code output.suffix} advanced-config key and finally to {@link Constants#DEFAULT_OUT_SUFFIX} when this instance
+     * carries no suffix of its own.
+     *
+     * @return the effective output suffix, never {@code null}
+     */
+    public String getOutSuffixX() {
+        return outSuffix != null ? outSuffix : AppConfig.defaultOutSuffix();
+    }
+
+    /**
+     * Returns the suffix set on this instance, or {@code null} when none is set and the configured default applies.
+     *
+     * @return the suffix or {@code null}
+     */
+    public String getOutSuffix() {
+        return outSuffix;
+    }
+
+    public void setOutSuffix(final String outSuffix) {
+        this.outSuffix = outSuffix;
+    }
+
+    /**
+     * Returns output file name if filled or input file name with the effective output suffix.
      *
      * @return
      */
     public String getOutFileX() {
         String tmpOut = StringUtils.defaultIfBlank(outFile, null);
-        if (tmpOut == null) {
-            String tmpExtension = "";
-            String tmpNameBase = StringUtils.defaultIfBlank(getInFile(), null);
-            if (tmpNameBase == null) {
-                tmpOut = "signed.pdf";
-            } else {
-                if (tmpNameBase.toLowerCase().endsWith(".pdf")) {
-                    final int tmpBaseLen = tmpNameBase.length() - 4;
-                    tmpExtension = tmpNameBase.substring(tmpBaseLen);
-                    tmpNameBase = tmpNameBase.substring(0, tmpBaseLen);
-                }
-                tmpOut = tmpNameBase + AppConfig.defaultOutSuffix() + tmpExtension;
-            }
+        return tmpOut != null ? tmpOut : deriveOutFileName(getInFile(), outSuffix);
+    }
+
+    /**
+     * Derives the output file name from an input file name and a suffix. A {@code null} suffix falls back to the
+     * configured {@code output.suffix}; a {@code null} or blank input name yields {@code "signed.pdf"}.
+     *
+     * @param inFileName the input file name or path
+     * @param outSuffix the suffix to append, or {@code null} for the configured default
+     * @return the derived output file name
+     */
+    public static String deriveOutFileName(final String inFileName, final String outSuffix) {
+        String tmpNameBase = StringUtils.defaultIfBlank(inFileName, null);
+        if (tmpNameBase == null) {
+            return "signed.pdf";
         }
-        return tmpOut;
+        String tmpExtension = "";
+        if (tmpNameBase.toLowerCase().endsWith(".pdf")) {
+            final int tmpBaseLen = tmpNameBase.length() - 4;
+            tmpExtension = tmpNameBase.substring(tmpBaseLen);
+            tmpNameBase = tmpNameBase.substring(0, tmpBaseLen);
+        }
+        return tmpNameBase + (outSuffix != null ? outSuffix : AppConfig.defaultOutSuffix()) + tmpExtension;
     }
 
     public void setOutFile(final String outFile) {

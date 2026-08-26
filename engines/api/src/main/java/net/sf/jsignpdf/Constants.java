@@ -186,6 +186,10 @@ public class Constants {
     /**
      * Property name.
      */
+    public static final String PROPERTY_OUT_SUFFIX = "outpdf.suffix";
+    /**
+     * Property name.
+     */
     public static final String PROPERTY_INPDF = "inpdf.file";
     /**
      * Property name.
