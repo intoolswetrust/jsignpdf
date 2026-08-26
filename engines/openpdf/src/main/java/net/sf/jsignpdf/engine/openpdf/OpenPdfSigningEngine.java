@@ -377,7 +377,7 @@ public class OpenPdfSigningEngine implements SigningEngine {
                     sap.setVisibleSignature(signitureRect, page, null);
                 }
                 if (renderMode == RenderMode.DESCRIPTION_ONLY) {
-                    configureDescriptionLayer2(sap);
+                    configureDescriptionLayer2(sap, options.isAcro6Layers());
                 }
             }
 
@@ -508,16 +508,23 @@ public class OpenPdfSigningEngine implements SigningEngine {
         return finished;
     }
 
+    /** OpenPDF's own description-layer inset, kept for the legacy layer-4 layout. */
+    private static final float LAYER2_MARGIN = 2f;
+    /** Fraction of the rectangle OpenPDF reserves at the top for the layer-4 status text. */
+    private static final float LAYER4_TOP_SECTION = 0.3f;
+
     /**
-     * Builds the description-only layer 2 appearance over the complete signature rectangle.
+     * Builds the description-only layer 2 appearance.
      *
-     * <p>OpenPDF 3.0.5 reserves the top 30% of the description-only layer for the legacy
-     * layer-4 status text. JSignPdf already controls the complete visible appearance, so that
-     * reservation can clip multiline layer-2 text in short signature rectangles. Creating layer 2
-     * explicitly keeps the public OpenPDF dependency unchanged while matching the full-rectangle
-     * layout used by JSignPdf's preview.</p>
+     * <p>With acro6 layers (the default) there is no separate layer-4 status text, so the
+     * description uses the whole signature rectangle - OpenPDF 3.0.5 would otherwise reserve
+     * the top 30% and clip multiline text in short rectangles. With the legacy multi-layer
+     * appearance ({@code acro6Layers = false}) OpenPDF still draws layer 4 in that top 30%, so
+     * the description is confined to the bottom 70% to avoid overlapping it. Creating layer 2
+     * explicitly keeps the public OpenPDF dependency unchanged.</p>
      */
-    private void configureDescriptionLayer2(final PdfSignatureAppearance sap) throws DocumentException {
+    private void configureDescriptionLayer2(final PdfSignatureAppearance sap, final boolean acro6Layers)
+            throws DocumentException {
         final PdfTemplate layer = sap.getLayer(2);
         final Rectangle rect = sap.getRect();
 
@@ -544,7 +551,10 @@ public class OpenPdfSigningEngine implements SigningEngine {
         final Font font = configuredFont == null ? new Font() : new Font(configuredFont);
         float size = font.getSize();
         final String text = StringUtils.defaultString(sap.getLayer2Text());
-        final Rectangle dataRect = new Rectangle(0, 0, rect.getWidth(), rect.getHeight());
+        final Rectangle dataRect = acro6Layers
+                ? new Rectangle(0, 0, rect.getWidth(), rect.getHeight())
+                : new Rectangle(LAYER2_MARGIN, LAYER2_MARGIN, rect.getWidth() - LAYER2_MARGIN,
+                        rect.getHeight() * (1f - LAYER4_TOP_SECTION) - LAYER2_MARGIN);
         if (size <= 0) {
             final Rectangle fitRect = new Rectangle(dataRect.getWidth(), dataRect.getHeight());
             size = PdfSignatureAppearance.fitText(font, text, fitRect, 12, sap.getRunDirection());
