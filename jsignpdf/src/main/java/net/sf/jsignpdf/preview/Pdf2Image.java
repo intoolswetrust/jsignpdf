@@ -37,20 +37,15 @@ public class Pdf2Image {
     }
 
     /**
-     * Uses PDFBox first because placement accuracy depends on preserving page geometry.
-     * Configured renderers remain available as fallbacks if PDFBox cannot render a page.
+     * Renders the page with the libraries named in {@code pdf2image.libraries}, in the configured
+     * order, returning the first one that succeeds. The bundled default lists {@code pdfbox} first
+     * because placement accuracy depends on preserving page geometry; the remaining entries act as
+     * fallbacks.
      */
     public BufferedImage getImageForPage(final int page) {
-        BufferedImage image = getImageUsingPdfBox(page);
-        if (image != null) {
-            return image;
-        }
-
         for (String library : AppConfig.pdf2imageLibraries().split("\\s*,\\s*")) {
-            if (Constants.PDF2IMAGE_PDFBOX.equals(library)) {
-                continue;
-            }
-            image = switch (library) {
+            BufferedImage image = switch (library) {
+                case Constants.PDF2IMAGE_PDFBOX -> getImageUsingPdfBox(page);
                 case Constants.PDF2IMAGE_JPEDAL -> getImageUsingJPedal(page);
                 case Constants.PDF2IMAGE_OPENPDF -> getImageUsingOpenPdfRenderer(page);
                 default -> {

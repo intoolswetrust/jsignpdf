@@ -84,7 +84,7 @@ public class PreferencesViewModel {
 
         relaxSslSecurity.set(cfg.getAsBool("relax.ssl.security", false));
 
-        decodePdfLibraries(cfg.getNotEmptyProperty("pdf2image.libraries", "jpedal,pdfbox,openpdf"));
+        decodePdfLibraries(cfg.getNotEmptyProperty("pdf2image.libraries", Constants.PDF2IMAGE_LIBRARIES_DEFAULT));
 
         tsaHashAlgorithm.set(cfg.getNotEmptyProperty("tsa.hashAlgorithm", "SHA-256"));
 
@@ -167,7 +167,7 @@ public class PreferencesViewModel {
     }
 
     public void applyPdfRenderDefaults(AdvancedConfig defaults) {
-        decodePdfLibraries(orFallback(defaults.getBundledDefault("pdf2image.libraries"), "jpedal,pdfbox,openpdf"));
+        decodePdfLibraries(orFallback(defaults.getBundledDefault("pdf2image.libraries"), Constants.PDF2IMAGE_LIBRARIES_DEFAULT));
     }
 
     public void applyTsaDefaults(AdvancedConfig defaults) {

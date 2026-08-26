@@ -103,7 +103,7 @@ public class Constants {
     public static final String PDF2IMAGE_JPEDAL = "jpedal";
     public static final String PDF2IMAGE_PDFBOX = "pdfbox";
     public static final String PDF2IMAGE_OPENPDF = "openpdf";
-    public static final String PDF2IMAGE_LIBRARIES_DEFAULT = PDF2IMAGE_JPEDAL + "," + PDF2IMAGE_PDFBOX + ","
+    public static final String PDF2IMAGE_LIBRARIES_DEFAULT = PDF2IMAGE_PDFBOX + "," + PDF2IMAGE_JPEDAL + ","
             + PDF2IMAGE_OPENPDF;
 
     /**

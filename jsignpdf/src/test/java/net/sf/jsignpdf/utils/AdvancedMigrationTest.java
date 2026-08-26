@@ -67,7 +67,7 @@ public class AdvancedMigrationTest {
     public void bundledAdvancedDefaults_areReadable() throws IOException {
         byte[] bytes = bundled("/net/sf/jsignpdf/conf/advanced.default.properties");
         assertTrue("Bundled defaults must contain pdf2image.libraries entry",
-                new String(bytes).contains("pdf2image.libraries=jpedal,pdfbox,openpdf"));
+                new String(bytes).contains("pdf2image.libraries=pdfbox,jpedal,openpdf"));
     }
 
     @Test
