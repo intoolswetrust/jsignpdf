@@ -240,8 +240,7 @@ To create the signature rectangle, hold *Shift* and drag directly on the documen
 Once the signature rectangle is visible, it can be adjusted directly in the preview:
 
 * drag inside the rectangle to move the signature;
-* drag an edge to resize it horizontally or vertically;
-* drag a corner to resize it in both directions.
+* drag a corner handle to resize it.
 
 The mouse cursor changes according to the available operation. The preview also renders the configured signature text and images inside the rectangle, making it easier to position and size the signature before signing.
 
@@ -255,7 +254,7 @@ image:img/javafx/signing-result.png[Signing complete,width=562,height=400]
 
 The signed PDF is saved to the output path shown in the _Signature Properties_ panel. By default, the input file name is combined with the _Output suffix_ from the same panel, so `document.pdf` becomes `document_signed.pdf`.
 
-The suffix is used exactly as typed, so it has to include the separator: `_signed` produces `document_signed.pdf` and `-DL` produces `document-DL.pdf`. Leaving the field empty falls back to the configured default, which the field shows as its prompt text. The starting value comes from the `output.suffix` key, set by the *Output file suffix* field in the <<Adjusting advanced preferences,Preferences dialog>>; changing it in the _Signature Properties_ panel overrides it for the current document, is remembered for the next session, and is stored in a preset along with the other signing settings. Typing a full path into _Output file_ always wins over the suffix.
+The suffix is used exactly as typed, so it has to include the separator: `_signed` produces `document_signed.pdf` and `-DL` produces `document-DL.pdf`. Because it becomes part of a file name, the field does not accept the path separators or reserved characters `/ \ : * ? " < > |` (or leading/trailing spaces), and is limited to 40 characters. Leaving the field empty falls back to the configured default, which the field shows as its prompt text. The starting value comes from the `output.suffix` key, set by the *Output file suffix* field in the <<Adjusting advanced preferences,Preferences dialog>>; changing it in the _Signature Properties_ panel overrides it for the current document, is remembered for the next session, and is stored in a preset along with the other signing settings. Typing a full path into _Output file_ always wins over the suffix.
 
 === Using presets
 
@@ -858,7 +857,7 @@ The zero ([0,0]) position on the page is in the left bottom corner.
 
 In the JavaFX interface you can create the signature rectangle visually by holding *Shift* and dragging on the document preview.
 
-After the rectangle has been created, it can be edited directly with the mouse. Drag inside the rectangle to move it, drag an edge to resize it in one direction, or drag a corner to resize it in both directions. The signature coordinates are updated automatically while the rectangle is moved or resized.
+After the rectangle has been created, it can be edited directly with the mouse. Drag inside the rectangle to move it, or drag one of its corner handles to resize it. The signature coordinates are updated automatically while the rectangle is moved or resized.
 
 ==== Display
 

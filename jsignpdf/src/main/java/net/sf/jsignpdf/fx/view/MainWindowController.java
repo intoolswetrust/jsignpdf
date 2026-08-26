@@ -42,7 +42,6 @@ import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.TransferMode;
 import javafx.scene.layout.GridPane;
-import javafx.scene.layout.StackPane;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 
@@ -67,6 +66,7 @@ import javafx.scene.layout.VBox;
 import javafx.util.StringConverter;
 import net.sf.jsignpdf.fx.control.PdfPageView;
 import net.sf.jsignpdf.fx.control.SignatureOverlay;
+import net.sf.jsignpdf.fx.control.SignaturePreviewStackPane;
 import net.sf.jsignpdf.fx.service.JpxCodecPrompt;
 import net.sf.jsignpdf.fx.service.PdfRenderService;
 import net.sf.jsignpdf.fx.service.RenderedPage;
@@ -188,7 +188,7 @@ public class MainWindowController {
     @FXML private TitledPane tsaAccordionPane;
     @FXML private TitledPane encryptionAccordionPane;
     @FXML private ScrollPane scrollPane;
-    @FXML private StackPane pdfArea;
+    @FXML private SignaturePreviewStackPane pdfArea;
     @FXML private Label lblDropHint;
 
     // Status bar
@@ -268,6 +268,7 @@ public class MainWindowController {
         signatureOverlay.setOnReplaceBlocked(this::showShiftHint);
         pdfArea.getChildren().add(0, pdfPageView);
         pdfArea.getChildren().add(1, signatureOverlay);
+        pdfArea.installPreview(signingVM, placementVM, signatureOverlay);
 
         // Bind pdfArea min size to pdfPageView so scrollbars appear when the page
         // exceeds the viewport. With fitToWidth/fitToHeight on the ScrollPane, the

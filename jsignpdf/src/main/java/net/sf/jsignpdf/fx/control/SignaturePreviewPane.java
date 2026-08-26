@@ -3,7 +3,6 @@ package net.sf.jsignpdf.fx.control;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
-import java.lang.reflect.Method;
 import java.nio.charset.StandardCharsets;
 import java.security.KeyStore;
 import java.security.MessageDigest;
@@ -12,9 +11,9 @@ import java.security.cert.X509Certificate;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.Enumeration;
 import java.util.List;
 import java.util.Locale;
-import java.util.Enumeration;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.naming.ldap.LdapName;
@@ -22,10 +21,8 @@ import javax.naming.ldap.Rdn;
 
 import javafx.animation.PauseTransition;
 import javafx.application.Platform;
-import javafx.beans.value.ObservableValue;
+import javafx.beans.InvalidationListener;
 import javafx.geometry.VPos;
-import javafx.scene.Node;
-import javafx.scene.Scene;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.Pane;
@@ -33,40 +30,38 @@ import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 import javafx.util.Duration;
+import net.sf.jsignpdf.Constants;
+import net.sf.jsignpdf.fx.viewmodel.SigningOptionsViewModel;
 import net.sf.jsignpdf.utils.FontUtils;
 import net.sf.jsignpdf.utils.FontUtils.L2Font;
 import org.openpdf.text.pdf.BaseFont;
+import org.openpdf.text.pdf.PdfSignatureAppearance;
+import org.openpdf.text.pdf.PdfWriter;
 
 /**
  * Purely visual live preview of the visible signature contents.
  *
+ * <p>All inputs come from {@link SigningOptionsViewModel} observables - the same
+ * source the signing engines read - so the preview never scrapes the UI via
+ * {@code scene.lookup}, reflection, or the localized coordinates label, and it
+ * repaints only when a value it depends on actually changes.</p>
+ *
  * <p>This pane never participates in mouse picking. Placement, moving and
- * resizing remain entirely owned by {@link SignatureOverlay}.</p>
+ * resizing remain entirely owned by {@link SignatureOverlay}. The reproduced
+ * text layout mirrors the OpenPDF description-only appearance
+ * ({@code OpenPdfSigningEngine.configureDescriptionLayer2}); the DSS drawer lays
+ * text out slightly differently, which the preview does not reproduce.</p>
  */
 final class SignaturePreviewPane extends Pane {
     private static final double DEFAULT_FONT_SIZE = 10.0;
     private static final Pattern FORMATTED_TIMESTAMP_PATTERN =
             Pattern.compile("\\$\\{timestamp:([^}]+)}");
-    private static final Pattern COORD_PATTERN = Pattern.compile(
-            "\\((-?\\d+(?:\\.\\d+)?)\\s*,\\s*(-?\\d+(?:\\.\\d+)?)\\)\\s*[—–-]\\s*\\((-?\\d+(?:\\.\\d+)?)\\s*,\\s*(-?\\d+(?:\\.\\d+)?)\\)");
+
+    private final SigningOptionsViewModel signingVM;
 
     private final ImageView imageView = new ImageView();
     private final Pane textPane = new Pane();
     private final Rectangle clip = new Rectangle();
-
-    private Node l2TextControl;
-    private Node fontSizeControl;
-    private Node bgImagePathControl;
-    private Node sigCoordsControl;
-    private Node signerNameControl;
-    private Node reasonControl;
-    private Node locationControl;
-    private Node contactControl;
-    private Node keystoreTypeControl;
-    private Node keystoreFileControl;
-    private Node keystorePasswordControl;
-    private Node keyAliasControl;
-    private boolean listenersAttached;
 
     private String loadedImagePath = "";
     private Image loadedImage;
@@ -92,14 +87,14 @@ final class SignaturePreviewPane extends Pane {
     private double cachedFxFontPx = -1;
     private BaseFont openPdfBaseFont;
 
-    SignaturePreviewPane() {
+    SignaturePreviewPane(SigningOptionsViewModel signingVM) {
+        this.signingVM = signingVM;
         setMouseTransparent(true);
         setPickOnBounds(false);
         setVisible(false);
         setClip(clip);
 
         imageView.setMouseTransparent(true);
-        imageView.setPreserveRatio(true);
         imageView.setSmooth(true);
         textPane.setMouseTransparent(true);
 
@@ -108,12 +103,27 @@ final class SignaturePreviewPane extends Pane {
         getChildren().add(imageView);
         getChildren().add(textPane);
 
-        sceneProperty().addListener((obs, oldScene, newScene) -> {
-            if (newScene != null) {
-                bindControls();
-                refresh();
-            }
-        });
+        bindToViewModel();
+    }
+
+    private void bindToViewModel() {
+        InvalidationListener rerender = o -> refresh();
+        signingVM.l2TextProperty().addListener(rerender);
+        signingVM.l2TextFontSizeProperty().addListener(rerender);
+        signingVM.bgImgPathProperty().addListener(rerender);
+        signingVM.bgImgScaleProperty().addListener(rerender);
+        signingVM.signerNameProperty().addListener(rerender);
+        signingVM.reasonProperty().addListener(rerender);
+        signingVM.locationProperty().addListener(rerender);
+        signingVM.contactProperty().addListener(rerender);
+        signingVM.ksTypeProperty().addListener(rerender);
+        signingVM.ksFileProperty().addListener(rerender);
+        signingVM.ksPasswordProperty().addListener(rerender);
+        signingVM.keyAliasProperty().addListener(rerender);
+        signingVM.positionLLXProperty().addListener(rerender);
+        signingVM.positionLLYProperty().addListener(rerender);
+        signingVM.positionURXProperty().addListener(rerender);
+        signingVM.positionURYProperty().addListener(rerender);
     }
 
     void updateBounds(double x, double y, double width, double height) {
@@ -129,7 +139,6 @@ final class SignaturePreviewPane extends Pane {
     }
 
     void refresh() {
-        bindControls();
         refreshImage();
         renderText(getWidth(), getHeight());
     }
@@ -143,9 +152,30 @@ final class SignaturePreviewPane extends Pane {
             imageView.setY(0);
             return;
         }
-        double scale = Math.min(width / loadedImage.getWidth(), height / loadedImage.getHeight());
-        double imageWidth = loadedImage.getWidth() * scale;
-        double imageHeight = loadedImage.getHeight() * scale;
+        // Mirror OpenPdfSigningEngine.configureDescriptionLayer2 background scaling:
+        //   scale == 0  -> stretch to fill the whole rectangle
+        //   scale <  0  -> best-fit, preserving the aspect ratio, centered
+        //   scale >  0  -> multiplier on the image's natural size, centered
+        double scale = signingVM.bgImgScaleProperty().get();
+        if (scale == 0) {
+            imageView.setPreserveRatio(false);
+            imageView.setFitWidth(width);
+            imageView.setFitHeight(height);
+            imageView.setX(0);
+            imageView.setY(0);
+            return;
+        }
+        imageView.setPreserveRatio(true);
+        double factor;
+        if (scale < 0) {
+            factor = Math.min(width / loadedImage.getWidth(), height / loadedImage.getHeight());
+        } else {
+            double pointScale = getActualPointScale(width, height);
+            if (!(pointScale > 0.0) || !Double.isFinite(pointScale)) pointScale = 1.0;
+            factor = scale * pointScale;
+        }
+        double imageWidth = loadedImage.getWidth() * factor;
+        double imageHeight = loadedImage.getHeight() * factor;
         imageView.setFitWidth(imageWidth);
         imageView.setFitHeight(imageHeight);
         imageView.setX((width - imageWidth) / 2.0);
@@ -156,7 +186,7 @@ final class SignaturePreviewPane extends Pane {
         textPane.getChildren().clear();
         if (width <= 0 || height <= 0) return;
 
-        String rawText = readText(l2TextControl);
+        String rawText = signingVM.l2TextProperty().get();
         String text = rawText == null || rawText.isEmpty()
                 ? buildAutomaticText()
                 : expandPlaceholders(rawText);
@@ -166,14 +196,21 @@ final class SignaturePreviewPane extends Pane {
         // with the JavaFX system font. OpenPDF uses the configured L2 font in
         // PDF points, ColumnText leading equal to that font size, and the exact
         // BaseFont widths for wrapping.
-        double fontPt = parsePositiveDouble(readText(fontSizeControl), DEFAULT_FONT_SIZE);
         double pointScale = getActualPointScale(width, height);
         if (!(pointScale > 0.0) || !Double.isFinite(pointScale)) pointScale = 1.0;
+
+        ensureExactFont();
+        double maxWidthPt = width / pointScale;
+
+        // A configured size of 0 means auto-fit; reproduce OpenPDF's fitText over
+        // the same point-sized rectangle so the preview matches the output size.
+        double fontPt = signingVM.l2TextFontSizeProperty().get();
+        if (fontPt <= 0) {
+            fontPt = autoFitFontPt(text, maxWidthPt, height / pointScale);
+        }
         double fontPx = Math.max(1.0, fontPt * pointScale);
 
-        ensureExactFont(fontPx);
         Font fxFont = createFxFont(fontPx);
-        double maxWidthPt = width / pointScale;
         List<String> lines = wrapForOpenPdf(text, maxWidthPt, fontPt);
 
         // PdfSignatureAppearance -> ColumnText.setSimpleColumn(..., leading=fontSize).
@@ -193,6 +230,21 @@ final class SignaturePreviewPane extends Pane {
             }
             baseline += fontPx;
             if (baseline - fontPx > height + fontPx) break;
+        }
+    }
+
+    private double autoFitFontPt(String text, double rectWidthPt, double rectHeightPt) {
+        try {
+            org.openpdf.text.Font font = openPdfBaseFont != null
+                    ? new org.openpdf.text.Font(openPdfBaseFont)
+                    : new org.openpdf.text.Font();
+            org.openpdf.text.Rectangle fitRect =
+                    new org.openpdf.text.Rectangle((float) rectWidthPt, (float) rectHeightPt);
+            float size = PdfSignatureAppearance.fitText(font, text, fitRect, 12f,
+                    PdfWriter.RUN_DIRECTION_NO_BIDI);
+            return size > 0 ? size : DEFAULT_FONT_SIZE;
+        } catch (Exception ignored) {
+            return DEFAULT_FONT_SIZE;
         }
     }
 
@@ -251,42 +303,23 @@ final class SignaturePreviewPane extends Pane {
         }
     }
 
+    /**
+     * Points-to-pixels scale of the preview, derived from the signature rectangle
+     * held on the signing view model (PDF points) against this pane's pixel size.
+     * Both are kept live by the placement listeners in {@code MainWindowController}.
+     */
     private double getActualPointScale(double width, double height) {
-        String coords = readText(sigCoordsControl);
-        if (coords != null && !coords.isEmpty()) {
-            Matcher matcher = COORD_PATTERN.matcher(coords);
-            if (matcher.find()) {
-                try {
-                    double x1 = Double.parseDouble(matcher.group(1));
-                    double y1 = Double.parseDouble(matcher.group(2));
-                    double x2 = Double.parseDouble(matcher.group(3));
-                    double y2 = Double.parseDouble(matcher.group(4));
-                    double pdfWidth = Math.abs(x2 - x1);
-                    double pdfHeight = Math.abs(y2 - y1);
-                    double sx = pdfWidth > 0.5 ? width / pdfWidth : Double.NaN;
-                    double sy = pdfHeight > 0.5 ? height / pdfHeight : Double.NaN;
-                    if (pdfWidth >= pdfHeight && Double.isFinite(sx) && sx > 0.0) return sx;
-                    if (Double.isFinite(sy) && sy > 0.0) return sy;
-                    if (Double.isFinite(sx) && sx > 0.0) return sx;
-                } catch (Exception ignored) {
-                    // Use zoom fallback below.
-                }
-            }
-        }
-        Scene scene = getScene();
-        Node zoom = scene == null ? null : scene.lookup("#cmbZoom");
-        String z = readValue(zoom);
-        if (z != null && z.endsWith("%")) {
-            try {
-                return Math.max(0.05, Double.parseDouble(z.substring(0, z.length() - 1).trim()) / 100.0);
-            } catch (Exception ignored) {
-                // Safe fallback below.
-            }
-        }
+        double pdfWidth = signingVM.positionURXProperty().get() - signingVM.positionLLXProperty().get();
+        double pdfHeight = signingVM.positionURYProperty().get() - signingVM.positionLLYProperty().get();
+        double sx = pdfWidth > 0.5 ? width / pdfWidth : Double.NaN;
+        double sy = pdfHeight > 0.5 ? height / pdfHeight : Double.NaN;
+        if (pdfWidth >= pdfHeight && Double.isFinite(sx) && sx > 0.0) return sx;
+        if (Double.isFinite(sy) && sy > 0.0) return sy;
+        if (Double.isFinite(sx) && sx > 0.0) return sx;
         return 1.0;
     }
 
-    private void ensureExactFont(double fontPx) {
+    private void ensureExactFont() {
         if (l2FontData != null && fxFontFaceName != null && openPdfBaseFont != null) return;
         try {
             L2Font l2 = FontUtils.getL2Font();
@@ -294,11 +327,11 @@ final class SignaturePreviewPane extends Pane {
                 l2FontData = l2.getData();
                 l2FontName = l2.getName();
                 l2FontEncoding = l2.getEncoding();
-                Font loaded = Font.loadFont(new ByteArrayInputStream(l2FontData), Math.max(1.0, fontPx));
+                Font loaded = Font.loadFont(new ByteArrayInputStream(l2FontData), DEFAULT_FONT_SIZE);
                 if (loaded != null) {
                     fxFontFaceName = loaded.getName();
                     cachedFxFont = loaded;
-                    cachedFxFontPx = Math.max(1.0, fontPx);
+                    cachedFxFontPx = DEFAULT_FONT_SIZE;
                 }
                 openPdfBaseFont = BaseFont.createFont(l2FontName, l2FontEncoding,
                         BaseFont.EMBEDDED, BaseFont.CACHED, l2FontData, null);
@@ -334,7 +367,7 @@ final class SignaturePreviewPane extends Pane {
     }
 
     private void refreshImage() {
-        String path = safeTrim(readText(bgImagePathControl));
+        String path = safeTrim(signingVM.bgImgPathProperty().get());
         if (path.equals(loadedImagePath)) return;
         loadedImagePath = path;
         loadedImage = null;
@@ -350,63 +383,12 @@ final class SignaturePreviewPane extends Pane {
         layoutImage(getWidth(), getHeight());
     }
 
-    private void bindControls() {
-        if (listenersAttached) return;
-        Scene scene = getScene();
-        if (scene == null) return;
-
-        l2TextControl = scene.lookup("#txtL2Text");
-        fontSizeControl = scene.lookup("#txtFontSize");
-        bgImagePathControl = scene.lookup("#txtBgImgPath");
-        sigCoordsControl = scene.lookup("#lblSigCoords");
-        signerNameControl = scene.lookup("#txtSignerName");
-        reasonControl = scene.lookup("#txtReason");
-        locationControl = scene.lookup("#txtLocation");
-        contactControl = scene.lookup("#txtContact");
-        keystoreTypeControl = scene.lookup("#cmbKeystoreType");
-        keystoreFileControl = scene.lookup("#txtKeystoreFile");
-        keystorePasswordControl = scene.lookup("#txtKeystorePassword");
-        keyAliasControl = scene.lookup("#cmbKeyAlias");
-
-        // The three appearance controls must exist before we consider binding complete.
-        if (l2TextControl == null || fontSizeControl == null || bgImagePathControl == null) return;
-
-        attachListener(l2TextControl, "textProperty");
-        attachListener(fontSizeControl, "textProperty");
-        attachListener(bgImagePathControl, "textProperty");
-        attachListener(sigCoordsControl, "textProperty");
-        attachListener(signerNameControl, "textProperty");
-        attachListener(reasonControl, "textProperty");
-        attachListener(locationControl, "textProperty");
-        attachListener(contactControl, "textProperty");
-        attachListener(keystoreTypeControl, "valueProperty");
-        attachListener(keystoreFileControl, "textProperty");
-        attachListener(keystorePasswordControl, "textProperty");
-        attachListener(keyAliasControl, "valueProperty");
-        listenersAttached = true;
-    }
-
-    private void attachListener(Node node, String propertyMethod) {
-        if (node == null) return;
-        try {
-            Method method = node.getClass().getMethod(propertyMethod);
-            Object property = method.invoke(node);
-            if (property instanceof ObservableValue) {
-                @SuppressWarnings("unchecked")
-                ObservableValue<Object> observable = (ObservableValue<Object>) property;
-                observable.addListener((obs, oldValue, newValue) -> refresh());
-            }
-        } catch (Exception ignored) {
-            // A missing optional control must never affect signature placement.
-        }
-    }
-
     private String expandPlaceholders(String text) {
-        String signer = safeTrim(readText(signerNameControl));
+        String signer = safeTrim(signingVM.signerNameProperty().get());
         if (signer.isEmpty()) signer = resolveCertificateSigner();
-        String reason = safeTrim(readText(reasonControl));
-        String location = safeTrim(readText(locationControl));
-        String contact = safeTrim(readText(contactControl));
+        String reason = safeTrim(signingVM.reasonProperty().get());
+        String location = safeTrim(signingVM.locationProperty().get());
+        String contact = safeTrim(signingVM.contactProperty().get());
         Date now = new Date();
         String timestamp = new SimpleDateFormat("yyyy.MM.dd HH:mm:ss z").format(now);
         String expanded = expandFormattedTimestamps(text, now);
@@ -434,27 +416,24 @@ final class SignaturePreviewPane extends Pane {
     }
 
     private String buildAutomaticText() {
-        String signer = safeTrim(readText(signerNameControl));
+        String signer = safeTrim(signingVM.signerNameProperty().get());
         if (signer.isEmpty()) signer = resolveCertificateSigner();
         if (signer.isEmpty()) signer = "...";
         String timestamp = new SimpleDateFormat("yyyy.MM.dd HH:mm:ss z").format(new Date());
         StringBuilder out = new StringBuilder();
         out.append(resource("default.l2text.signedBy", "Digitally signed by:")).append(' ').append(signer).append('\n');
         out.append(resource("default.l2text.date", "Date:")).append(' ').append(timestamp);
-        String reason = safeTrim(readText(reasonControl));
+        String reason = safeTrim(signingVM.reasonProperty().get());
         if (!reason.isEmpty()) out.append('\n').append(resource("default.l2text.reason", "Reason:")).append(' ').append(reason);
-        String location = safeTrim(readText(locationControl));
+        String location = safeTrim(signingVM.locationProperty().get());
         if (!location.isEmpty()) out.append('\n').append(resource("default.l2text.location", "Location:")).append(' ').append(location);
         return out.toString();
     }
 
     private String resource(String key, String fallback) {
         try {
-            Class<?> constants = Class.forName("net.sf.jsignpdf.Constants");
-            Object resources = constants.getField("RES").get(null);
-            Object value = resources.getClass().getMethod("get", String.class).invoke(resources, key);
-            String text = value == null ? "" : value.toString();
-            return text.isEmpty() ? fallback : text;
+            String text = Constants.RES.get(key);
+            return text == null || text.isEmpty() ? fallback : text;
         } catch (Exception ignored) {
             return fallback;
         }
@@ -467,10 +446,10 @@ final class SignaturePreviewPane extends Pane {
      * repeated loads with a partially typed PIN.
      */
     private String resolveCertificateSigner() {
-        String type = safeTrim(readValue(keystoreTypeControl));
-        String path = safeTrim(readText(keystoreFileControl));
-        String password = readText(keystorePasswordControl);
-        String alias = safeTrim(readValue(keyAliasControl));
+        String type = safeTrim(signingVM.ksTypeProperty().get());
+        String path = safeTrim(signingVM.ksFileProperty().get());
+        String password = signingVM.ksPasswordProperty().get();
+        String alias = safeTrim(signingVM.keyAliasProperty().get());
 
         File file = path.isEmpty() ? null : new File(path);
         if (file == null || !file.isFile() || isHardwareKeystore(type)) {
@@ -559,36 +538,6 @@ final class SignaturePreviewPane extends Pane {
             return sb.toString();
         } catch (Exception e) {
             return Integer.toHexString(value.hashCode());
-        }
-    }
-
-    private static String readText(Node node) {
-        if (node == null) return "";
-        try {
-            Object value = node.getClass().getMethod("getText").invoke(node);
-            return value == null ? "" : value.toString();
-        } catch (Exception ignored) {
-            return "";
-        }
-    }
-
-    private static String readValue(Node node) {
-        if (node == null) return "";
-        try {
-            Object value = node.getClass().getMethod("getValue").invoke(node);
-            return value == null ? "" : value.toString();
-        } catch (Exception ignored) {
-            return "";
-        }
-    }
-
-    private static double parsePositiveDouble(String value, double fallback) {
-        if (value == null) return fallback;
-        try {
-            double parsed = Double.parseDouble(value.trim());
-            return parsed > 0 ? parsed : fallback;
-        } catch (NumberFormatException ignored) {
-            return fallback;
         }
     }
 
