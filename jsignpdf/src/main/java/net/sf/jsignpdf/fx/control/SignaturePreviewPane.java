@@ -4,19 +4,24 @@ import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.lang.reflect.Method;
+import java.nio.charset.StandardCharsets;
 import java.security.KeyStore;
+import java.security.MessageDigest;
 import java.security.cert.Certificate;
 import java.security.cert.X509Certificate;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 import java.util.Enumeration;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.naming.ldap.LdapName;
 import javax.naming.ldap.Rdn;
 
+import javafx.animation.PauseTransition;
+import javafx.application.Platform;
 import javafx.beans.value.ObservableValue;
 import javafx.geometry.VPos;
 import javafx.scene.Node;
@@ -27,6 +32,7 @@ import javafx.scene.layout.Pane;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
+import javafx.util.Duration;
 import net.sf.jsignpdf.utils.FontUtils;
 import net.sf.jsignpdf.utils.FontUtils.L2Font;
 import org.openpdf.text.pdf.BaseFont;
@@ -67,6 +73,16 @@ final class SignaturePreviewPane extends Pane {
     private String cachedSignerKey = "";
     private String cachedCertificateSigner = "";
 
+    // Signer-name resolution is a preview convenience only. It runs off the FX
+    // thread, debounced, and never touches a hardware keystore (see
+    // resolveCertificateSigner), so a half-typed PIN can never lock a token.
+    private final PauseTransition signerDebounce = new PauseTransition(Duration.millis(400));
+    private String pendingSignerKey;
+    private String pendingType = "";
+    private File pendingFile;
+    private String pendingPassword;
+    private String pendingAlias = "";
+
     // Same font source and metrics used by the OpenPDF signing engine.
     private byte[] l2FontData;
     private String l2FontName;
@@ -86,6 +102,8 @@ final class SignaturePreviewPane extends Pane {
         imageView.setPreserveRatio(true);
         imageView.setSmooth(true);
         textPane.setMouseTransparent(true);
+
+        signerDebounce.setOnFinished(e -> startSignerResolve());
 
         getChildren().add(imageView);
         getChildren().add(textPane);
@@ -442,49 +460,106 @@ final class SignaturePreviewPane extends Pane {
         }
     }
 
+    /**
+     * Returns the last resolved signer CN, scheduling an off-thread reload when
+     * the file-based keystore inputs change. Never blocks the FX thread and
+     * never probes a hardware or system keystore, whose token could be locked by
+     * repeated loads with a partially typed PIN.
+     */
     private String resolveCertificateSigner() {
         String type = safeTrim(readValue(keystoreTypeControl));
         String path = safeTrim(readText(keystoreFileControl));
         String password = readText(keystorePasswordControl);
         String alias = safeTrim(readValue(keyAliasControl));
-        String key = type + "\n" + path + "\n" + password + "\n" + alias;
-        if (key.equals(cachedSignerKey)) return cachedCertificateSigner;
-        cachedSignerKey = key;
-        cachedCertificateSigner = "";
+
+        File file = path.isEmpty() ? null : new File(path);
+        if (file == null || !file.isFile() || isHardwareKeystore(type)) {
+            return cachedCertificateSigner;
+        }
+
+        String key = type + "\n" + path + "\n" + hash(password) + "\n" + alias;
+        if (key.equals(cachedSignerKey) || key.equals(pendingSignerKey)) {
+            return cachedCertificateSigner;
+        }
+
+        pendingSignerKey = key;
+        pendingType = type;
+        pendingFile = file;
+        pendingPassword = password;
+        pendingAlias = alias;
+        signerDebounce.playFromStart();
+        return cachedCertificateSigner;
+    }
+
+    private void startSignerResolve() {
+        final String key = pendingSignerKey;
+        final String type = pendingType;
+        final File file = pendingFile;
+        final String password = pendingPassword;
+        final String alias = pendingAlias;
+        pendingPassword = null;
+        Thread worker = new Thread(() -> {
+            String signer = loadSignerName(type, file, password, alias);
+            Platform.runLater(() -> {
+                cachedSignerKey = key;
+                cachedCertificateSigner = signer;
+                if (key.equals(pendingSignerKey)) pendingSignerKey = null;
+                renderText(getWidth(), getHeight());
+            });
+        }, "sig-preview-signer");
+        worker.setDaemon(true);
+        worker.start();
+    }
+
+    private static String loadSignerName(String type, File file, String password, String alias) {
         try {
-            if (type.isEmpty()) type = "PKCS12";
-            KeyStore keyStore = KeyStore.getInstance(type);
-            if (path.isEmpty()) {
-                keyStore.load(null, null);
-            } else {
-                try (FileInputStream input = new FileInputStream(path)) {
-                    keyStore.load(input, password == null ? null : password.toCharArray());
-                }
+            KeyStore keyStore = KeyStore.getInstance(type.isEmpty() ? "PKCS12" : type);
+            try (FileInputStream input = new FileInputStream(file)) {
+                keyStore.load(input, password == null ? null : password.toCharArray());
             }
-            if (alias.isEmpty() || !keyStore.containsAlias(alias)) {
+            String selected = alias;
+            if (selected.isEmpty() || !keyStore.containsAlias(selected)) {
                 Enumeration<String> aliases = keyStore.aliases();
                 while (aliases.hasMoreElements()) {
                     String candidate = aliases.nextElement();
                     if (keyStore.isKeyEntry(candidate) || keyStore.getCertificate(candidate) != null) {
-                        alias = candidate;
+                        selected = candidate;
                         break;
                     }
                 }
             }
-            Certificate certificate = alias.isEmpty() ? null : keyStore.getCertificate(alias);
+            Certificate certificate = selected.isEmpty() ? null : keyStore.getCertificate(selected);
             if (certificate instanceof X509Certificate x509) {
                 LdapName name = new LdapName(x509.getSubjectX500Principal().getName());
                 for (Rdn rdn : name.getRdns()) {
                     if ("CN".equalsIgnoreCase(rdn.getType())) {
-                        cachedCertificateSigner = String.valueOf(rdn.getValue());
-                        break;
+                        return String.valueOf(rdn.getValue());
                     }
                 }
             }
         } catch (Exception ignored) {
-            cachedCertificateSigner = "";
+            // Preview convenience only; a failed load simply shows no signer name.
         }
-        return cachedCertificateSigner;
+        return "";
+    }
+
+    private static boolean isHardwareKeystore(String type) {
+        String t = type.toUpperCase(Locale.ROOT);
+        return t.contains("PKCS11") || t.contains("WINDOWS") || t.contains("KEYCHAIN");
+    }
+
+    private static String hash(String value) {
+        if (value == null || value.isEmpty()) return "";
+        try {
+            byte[] digest = MessageDigest.getInstance("SHA-256").digest(value.getBytes(StandardCharsets.UTF_8));
+            StringBuilder sb = new StringBuilder(digest.length * 2);
+            for (byte b : digest) {
+                sb.append(Character.forDigit((b >> 4) & 0xF, 16)).append(Character.forDigit(b & 0xF, 16));
+            }
+            return sb.toString();
+        } catch (Exception e) {
+            return Integer.toHexString(value.hashCode());
+        }
     }
 
     private static String readText(Node node) {
