@@ -82,6 +82,7 @@ public class Pdf2Image {
                         decoder.openPdfFile(options.getInFile());
                     }
                 }
+                decoder.setPageParameters(PreviewRenderSettings.RENDER_SCALE, page);
                 result = decoder.getPageAsImage(page);
             }
         } catch (Exception e) {
@@ -113,7 +114,9 @@ public class Pdf2Image {
             }
             PDFPage page = pdfFile.getPage(pageNumber);
             Rectangle rect = new Rectangle(0, 0, (int) page.getBBox().getWidth(), (int) page.getBBox().getHeight());
-            result = (BufferedImage) page.getImage(rect.width, rect.height, rect, null, true, true);
+            int imgWidth = Math.round(rect.width * PreviewRenderSettings.RENDER_SCALE);
+            int imgHeight = Math.round(rect.height * PreviewRenderSettings.RENDER_SCALE);
+            result = (BufferedImage) page.getImage(imgWidth, imgHeight, rect, null, true, true);
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
