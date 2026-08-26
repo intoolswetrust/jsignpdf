@@ -49,7 +49,7 @@ public class PreferencesViewModelTest {
         assertFalse(vm.checkCriticalExtensionsProperty().get());
         assertFalse(vm.relaxSslSecurityProperty().get());
         assertEquals("SHA-256", vm.tsaHashAlgorithmProperty().get());
-        assertEquals("jpedal,pdfbox,openpdf", vm.encodePdfLibraries());
+        assertEquals("pdfbox,jpedal,openpdf", vm.encodePdfLibraries());
     }
 
     @Test
@@ -73,7 +73,7 @@ public class PreferencesViewModelTest {
         PreferencesViewModel vm = new PreferencesViewModel();
         Path file = tmp.newFolder().toPath().resolve("advanced.properties");
         vm.loadFrom(new AdvancedConfig(file, bundledDefaults), "");
-        assertEquals("jpedal,pdfbox,openpdf", vm.encodePdfLibraries());
+        assertEquals("pdfbox,jpedal,openpdf", vm.encodePdfLibraries());
     }
 
     @Test
