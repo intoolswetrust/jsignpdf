@@ -105,9 +105,26 @@ public class Constants {
     public static final String PDF2IMAGE_OPENPDF = "openpdf";
     public static final String PDF2IMAGE_LIBRARIES_DEFAULT = PDF2IMAGE_PDFBOX + "," + PDF2IMAGE_JPEDAL + ","
             + PDF2IMAGE_OPENPDF;
+    /**
+     * The default before 3.2.0. Preferences wrote the key on every OK, so an unstamped config holding
+     * exactly this value was never customized and the version 1 migration upgrades it to
+     * {@link #PDF2IMAGE_LIBRARIES_DEFAULT}.
+     */
+    public static final String PDF2IMAGE_LIBRARIES_LEGACY_DEFAULT = PDF2IMAGE_JPEDAL + "," + PDF2IMAGE_PDFBOX + ","
+            + PDF2IMAGE_OPENPDF;
 
     /** Default raster resolution (DPI) for the visible-signature preview. */
     public static final int PREVIEW_RENDER_DPI_DEFAULT = 300;
+
+    /**
+     * Schema version stamped into {@code advanced.properties} so each migration runs exactly once. Bump
+     * when adding a migration step; an unstamped file counts as version 0.
+     */
+    public static final int CONFIG_VERSION = 1;
+    /**
+     * Property name of the {@link #CONFIG_VERSION} stamp.
+     */
+    public static final String PROPERTY_CONFIG_VERSION = "config.version";
 
     /**
      * Property name.

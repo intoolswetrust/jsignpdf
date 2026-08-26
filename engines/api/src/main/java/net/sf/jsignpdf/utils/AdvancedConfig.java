@@ -10,6 +10,7 @@ import java.util.Objects;
 import java.util.Properties;
 import java.util.Set;
 
+import net.sf.jsignpdf.Constants;
 import net.sf.jsignpdf.utils.PropertyProvider.ProperyProviderException;
 
 import org.apache.commons.lang3.StringUtils;
@@ -21,6 +22,8 @@ import org.apache.commons.lang3.StringUtils;
  * construct it directly with a temp path and an in-memory defaults Properties.
  */
 public final class AdvancedConfig {
+
+    private static final String PDF2IMAGE_LIBRARIES = "pdf2image.libraries";
 
     private final PropertyProvider userLayer;
     private final Properties bundledDefaults;
@@ -35,6 +38,7 @@ public final class AdvancedConfig {
         this.userLayer = new PropertyProvider(userFile);
         this.bundledDefaults = (Properties) Objects.requireNonNullElseGet(bundledDefaults, Properties::new).clone();
         this.userLayer.load();
+        migrateUserLayer();
         this.baseline = userLayerSnapshot();
     }
 
@@ -45,7 +49,48 @@ public final class AdvancedConfig {
         if (path != null && Files.isRegularFile(path)) {
             userLayer.load();
         }
+        migrateUserLayer();
         baseline = userLayerSnapshot();
+    }
+
+    /**
+     * Brings an older {@code advanced.properties} up to {@link Constants#CONFIG_VERSION} and stamps it, so a
+     * step that treats a stored value as a superseded default cannot revert the same value again once the
+     * user picks it deliberately. An empty config is skipped rather than stamped, so a fresh install still
+     * needs no file; {@link #save()} stamps it when it is first written.
+     */
+    private void migrateUserLayer() {
+        if (userLayer.stringPropertyNames().isEmpty()) {
+            return;
+        }
+        int from = storedConfigVersion();
+        if (from >= Constants.CONFIG_VERSION) {
+            return;
+        }
+        if (from < 1
+                && Constants.PDF2IMAGE_LIBRARIES_LEGACY_DEFAULT.equals(userLayer.getProperty(PDF2IMAGE_LIBRARIES))) {
+            userLayer.removeProperty(PDF2IMAGE_LIBRARIES);
+        }
+        stampConfigVersion();
+        Path path = userLayer.getPath();
+        if (path == null) {
+            return;
+        }
+        try {
+            userLayer.save();
+            LOGGER.fine("Migrated " + path + " from config version " + from + " to " + Constants.CONFIG_VERSION);
+        } catch (Exception e) {
+            // Leaves the file unstamped, so the next launch retries; this run uses the migrated values.
+            LOGGER.fine("Failed to persist migrated " + path + ": " + e.getMessage());
+        }
+    }
+
+    private int storedConfigVersion() {
+        return ConvertUtils.toInt(userLayer.getProperty(Constants.PROPERTY_CONFIG_VERSION), 0);
+    }
+
+    private void stampConfigVersion() {
+        userLayer.setProperty(Constants.PROPERTY_CONFIG_VERSION, String.valueOf(Constants.CONFIG_VERSION));
     }
 
     /** Drops every user override and deletes the backing file. Subsequent getters return bundled defaults. */
@@ -68,6 +113,7 @@ public final class AdvancedConfig {
      */
     public synchronized Set<String> save() throws ProperyProviderException {
         if (userLayer.getPath() != null) {
+            stampConfigVersion();
             userLayer.save();
         }
         Properties current = userLayerSnapshot();
@@ -169,11 +215,16 @@ public final class AdvancedConfig {
         return snapshot;
     }
 
+    /**
+     * Keys that differ between the two snapshots. The {@link Constants#PROPERTY_CONFIG_VERSION} stamp is
+     * excluded because callers act on the change set to re-apply user-facing settings.
+     */
     private static Set<String> diff(Properties a, Properties b) {
         Set<String> changed = new HashSet<>();
         Set<String> keys = new HashSet<>();
         keys.addAll(a.stringPropertyNames());
         keys.addAll(b.stringPropertyNames());
+        keys.remove(Constants.PROPERTY_CONFIG_VERSION);
         for (String key : keys) {
             if (!Objects.equals(a.getProperty(key), b.getProperty(key))) {
                 changed.add(key);
