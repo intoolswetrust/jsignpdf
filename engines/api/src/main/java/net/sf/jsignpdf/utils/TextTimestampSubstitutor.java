@@ -2,9 +2,12 @@ package net.sf.jsignpdf.utils;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Locale;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import org.apache.commons.lang3.text.StrSubstitutor;
 
 /**
  * Expands normal JSignPdf placeholders and optional formatted timestamp
@@ -16,16 +19,19 @@ public final class TextTimestampSubstitutor {
     private TextTimestampSubstitutor() {
     }
 
-    public static String replace(Object template, Map<?, ?> replacements) {
+    public static String replace(Object template, Map<String, String> replacements) {
         return replace(template, replacements, null);
     }
 
     /**
      * Expands the placeholders in {@code template}. Formatted timestamp
-     * placeholders (${timestamp:pattern}) are rendered from {@code signDate};
-     * they are left untouched when {@code signDate} is null.
+     * placeholders (${timestamp:pattern}) are rendered from {@code signDate}, or
+     * left untouched when it is null. The remaining ${...} placeholders are
+     * resolved by {@link StrSubstitutor}, so $$ escaping, ${var:-default} and
+     * cycle detection all apply and the result never depends on map iteration
+     * order.
      */
-    public static String replace(Object template, Map<?, ?> replacements, Date signDate) {
+    public static String replace(Object template, Map<String, String> replacements, Date signDate) {
         if (template == null) {
             return null;
         }
@@ -35,17 +41,10 @@ public final class TextTimestampSubstitutor {
             result = expandFormattedTimestamps(result, signDate);
         }
 
-        if (replacements == null) {
+        if (replacements == null || replacements.isEmpty()) {
             return result;
         }
-        for (Map.Entry<?, ?> entry : replacements.entrySet()) {
-            if (entry.getKey() == null || entry.getValue() == null) {
-                continue;
-            }
-            String placeholder = "${" + entry.getKey() + "}";
-            result = result.replace(placeholder, String.valueOf(entry.getValue()));
-        }
-        return result;
+        return new StrSubstitutor(replacements).replace(result);
     }
 
     private static String expandFormattedTimestamps(String template, Date signDate) {
@@ -54,7 +53,8 @@ public final class TextTimestampSubstitutor {
         while (matcher.find()) {
             String replacement = matcher.group(0);
             try {
-                replacement = new SimpleDateFormat(matcher.group(1)).format(signDate);
+                // Explicit locale so month/day names do not silently vary with the JVM default.
+                replacement = new SimpleDateFormat(matcher.group(1), Locale.getDefault()).format(signDate);
             } catch (IllegalArgumentException ignored) {
                 // Invalid format: leave the original placeholder visible.
             }
