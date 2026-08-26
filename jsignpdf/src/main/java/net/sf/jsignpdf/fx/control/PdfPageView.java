@@ -1,8 +1,5 @@
 package net.sf.jsignpdf.fx.control;
 
-import java.awt.HeadlessException;
-import java.awt.Toolkit;
-
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleDoubleProperty;
@@ -10,6 +7,7 @@ import javafx.beans.property.SimpleObjectProperty;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.Region;
+import javafx.stage.Screen;
 import net.sf.jsignpdf.preview.PreviewRenderSettings;
 
 /**
@@ -55,10 +53,15 @@ public class PdfPageView extends Region {
         setMaxSize(width, height);
     }
 
+    /**
+     * Screen DPI from JavaFX rather than AWT's {@code Toolkit}, which would initialize AWT on the FX thread
+     * and can fail with an {@code AWTError} in a headless run.
+     */
     private static double getScreenDpi() {
         try {
-            return Toolkit.getDefaultToolkit().getScreenResolution();
-        } catch (HeadlessException e) {
+            double dpi = Screen.getPrimary().getDpi();
+            return dpi > 0 ? dpi : FALLBACK_SCREEN_DPI;
+        } catch (RuntimeException e) {
             return FALLBACK_SCREEN_DPI;
         }
     }

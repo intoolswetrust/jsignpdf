@@ -79,7 +79,10 @@ public class SignaturePropertiesController {
         });
         txtOutSuffix.textProperty().addListener((obs, o, n) -> {
             if (!OutputSuffixValidation.isValid(n)) {
+                // Keep the caret put, so editing mid-value does not jump to the end on a refused character.
+                int caret = Math.min(txtOutSuffix.getCaretPosition(), o == null ? 0 : o.length());
                 txtOutSuffix.setText(o);
+                txtOutSuffix.positionCaret(caret);
                 return;
             }
             syncingSuffix = true;
