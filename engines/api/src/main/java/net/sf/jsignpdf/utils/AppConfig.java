@@ -131,6 +131,19 @@ public final class AppConfig {
         return cfg().getNotEmptyProperty("pdf2image.libraries", Constants.PDF2IMAGE_LIBRARIES_DEFAULT);
     }
 
+    /** Configured target DPI for the preview raster, or the default when unset or unparseable. */
+    public static int previewRenderDpi() {
+        String value = cfg().getNotEmptyProperty("preview.render.dpi", null);
+        if (value != null) {
+            try {
+                return Integer.parseInt(value.trim());
+            } catch (NumberFormatException ignored) {
+                // Fall back to the default below.
+            }
+        }
+        return Constants.PREVIEW_RENDER_DPI_DEFAULT;
+    }
+
     public static String defaultTsaHashAlg() {
         return cfg().getNotEmptyProperty("tsa.hashAlgorithm", "SHA-256");
     }

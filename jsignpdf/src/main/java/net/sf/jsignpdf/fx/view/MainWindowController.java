@@ -42,7 +42,6 @@ import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.TransferMode;
 import javafx.scene.layout.GridPane;
-import javafx.scene.layout.StackPane;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 
@@ -67,8 +66,10 @@ import javafx.scene.layout.VBox;
 import javafx.util.StringConverter;
 import net.sf.jsignpdf.fx.control.PdfPageView;
 import net.sf.jsignpdf.fx.control.SignatureOverlay;
+import net.sf.jsignpdf.fx.control.SignaturePreviewStackPane;
 import net.sf.jsignpdf.fx.service.JpxCodecPrompt;
 import net.sf.jsignpdf.fx.service.PdfRenderService;
+import net.sf.jsignpdf.fx.service.RenderedPage;
 import net.sf.jsignpdf.fx.service.SigningService;
 import net.sf.jsignpdf.preview.JpxDetector;
 import net.sf.jsignpdf.preview.JpxPluginManager;
@@ -114,6 +115,8 @@ public class MainWindowController {
     private final RecentFilesManager recentFilesManager = new RecentFilesManager();
     private final PresetManager presetManager = new PresetManager();
     private final EngineCapabilities engineCapabilities = new EngineCapabilities();
+    /** Last output path derived from the input file and suffix; anything else in the field is the user's own choice. */
+    private String derivedOutFile;
     /** Existing signature field the signature goes into, or null when a new field is created. */
     private SignatureFieldInfo selectedSigField;
     /** Marker rectangle of {@link #selectedSigField}, relative to the displayed page (see PdfExtraInfo). */
@@ -185,7 +188,7 @@ public class MainWindowController {
     @FXML private TitledPane tsaAccordionPane;
     @FXML private TitledPane encryptionAccordionPane;
     @FXML private ScrollPane scrollPane;
-    @FXML private StackPane pdfArea;
+    @FXML private SignaturePreviewStackPane pdfArea;
     @FXML private Label lblDropHint;
 
     // Status bar
@@ -265,6 +268,7 @@ public class MainWindowController {
         signatureOverlay.setOnReplaceBlocked(this::showShiftHint);
         pdfArea.getChildren().add(0, pdfPageView);
         pdfArea.getChildren().add(1, signatureOverlay);
+        pdfArea.installPreview(signingVM, placementVM, signatureOverlay);
 
         // Bind pdfArea min size to pdfPageView so scrollbars appear when the page
         // exceeds the viewport. With fitToWidth/fitToHeight on the ScrollPane, the
@@ -338,6 +342,7 @@ public class MainWindowController {
         lblOutputPath.managedProperty().bind(lblOutputPath.visibleProperty());
         signingVM.outFileProperty().addListener((obs, oldVal, newVal) -> updateOutputPathLabel());
         documentVM.documentFileProperty().addListener((obs, oldVal, newVal) -> updateOutputPathLabel());
+        signingVM.outSuffixProperty().addListener((obs, oldVal, newVal) -> refreshDerivedOutFile());
 
         // Initial state for the visible-signature controls.
         // The badge's initial text and style come from FXML (correct for
@@ -365,6 +370,7 @@ public class MainWindowController {
         // Bind PDF page view to ViewModel
         pdfPageView.pageImageProperty().bind(documentVM.currentPageImageProperty());
         pdfPageView.zoomLevelProperty().bind(documentVM.zoomLevelProperty());
+        pdfPageView.renderDpiProperty().bind(documentVM.renderDpiProperty());
 
         // Listen for page changes to trigger re-render
         documentVM.currentPageProperty().addListener((obs, oldVal, newVal) -> {
@@ -409,7 +415,9 @@ public class MainWindowController {
 
         // Setup render service callbacks
         renderService.setOnSucceeded(e -> {
-            documentVM.setCurrentPageImage(renderService.getValue());
+            RenderedPage rendered = renderService.getValue();
+            documentVM.setRenderDpi(rendered.dpi());
+            documentVM.setCurrentPageImage(rendered.image());
             pdfPageView.setVisible(true);
             progressBar.setVisible(false);
             updateStatusForDocument();
@@ -607,6 +615,7 @@ public class MainWindowController {
         signingVM.syncToOptions(options);
         presetManager.load(preset, options);
         signingVM.syncFromOptions(options);
+        refreshDerivedOutFile();
         // Move the on-screen rectangle to match the preset's position.
         applySigningVMPositionToPlacement();
         updateStatus(java.text.MessageFormat.format(
@@ -698,6 +707,8 @@ public class MainWindowController {
             // The engine may have been changed in Preferences. Re-seed the capability bindings from the
             // persisted value so toolbar buttons and accordion sections re-gate immediately (no restart).
             refreshActiveEngineFromConfig();
+            signaturePropertiesController.refreshDefaultSuffix();
+            refreshDerivedOutFile();
         }
     }
 
@@ -870,19 +881,30 @@ public class MainWindowController {
     }
 
     /**
-     * Computes the default "{input}_signed.pdf" output path for a given input file.
+     * Computes the default output path for a given input file, using the suffix currently held by the signing view model.
      * Returns null if the input is null.
      */
-    private static String suggestedOutFileFor(File inputFile) {
-        if (inputFile == null) return null;
-        String inFile = inputFile.getAbsolutePath();
-        String suffix = ".pdf";
-        String nameBase = inFile;
-        if (inFile.toLowerCase().endsWith(suffix)) {
-            nameBase = inFile.substring(0, inFile.length() - 4);
-            suffix = inFile.substring(inFile.length() - 4);
+    private String suggestedOutFileFor(File inputFile) {
+        return inputFile == null ? null
+                : BasicSignerOptions.deriveOutFileName(inputFile.getAbsolutePath(), signingVM.outSuffixProperty().get());
+    }
+
+    /**
+     * Recomputes the output path from the current input file and suffix, unless the user picked a path explicitly. An
+     * explicit choice is anything in the field that is not the value this method last wrote; it survives suffix and preset
+     * changes and is discarded when a different document is opened.
+     */
+    private void refreshDerivedOutFile() {
+        File input = documentVM.getDocumentFile();
+        if (input == null) {
+            return;
         }
-        return nameBase + AppConfig.defaultOutSuffix() + suffix;
+        String current = signingVM.outFileProperty().get();
+        if (current != null && !current.isEmpty() && !current.equals(derivedOutFile)) {
+            return;
+        }
+        derivedOutFile = suggestedOutFileFor(input);
+        signingVM.outFileProperty().set(derivedOutFile);
     }
 
 
@@ -1128,17 +1150,7 @@ public class MainWindowController {
         capturePlacementToSigningVM();
         signingVM.syncToOptions(options);
 
-        // Generate output file name if not set
-        if (options.getOutFile() == null || options.getOutFile().isEmpty()) {
-            String inFile = options.getInFile();
-            String suffix = ".pdf";
-            String nameBase = inFile;
-            if (inFile.toLowerCase().endsWith(suffix)) {
-                nameBase = inFile.substring(0, inFile.length() - 4);
-                suffix = inFile.substring(inFile.length() - 4);
-            }
-            options.setOutFile(nameBase + AppConfig.defaultOutSuffix() + suffix);
-        }
+        options.setOutFile(options.getOutFileX());
 
         // LT/LTA preflight (issue #432): warn before signing if the DSS engine isn't configured for the
         // online fetching + trust anchor that LT/LTA require, and offer to enable them.
@@ -1311,10 +1323,10 @@ public class MainWindowController {
 
             options.setInFile(file.getAbsolutePath());
 
-            // Always reset the output path to the default for the new input file.
-            // Any custom path from a previous session is intentionally discarded —
-            // the user can still override via the field or File > Save Output As.
-            signingVM.outFileProperty().set(suggestedOutFileFor(file));
+            // Any custom path from a previous session is intentionally discarded — the user can still override via the
+            // output file field or File > Save Output As.
+            derivedOutFile = suggestedOutFileFor(file);
+            signingVM.outFileProperty().set(derivedOutFile);
 
             // Try to open PDF, prompting for owner password if needed
             int pages;

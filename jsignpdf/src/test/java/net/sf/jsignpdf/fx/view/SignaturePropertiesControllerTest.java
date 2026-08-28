@@ -1,6 +1,8 @@
 package net.sf.jsignpdf.fx.view;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import java.lang.reflect.Field;
@@ -25,6 +27,7 @@ import net.sf.jsignpdf.engine.SigningEngine;
 import net.sf.jsignpdf.fx.EngineCapabilities;
 import net.sf.jsignpdf.fx.MonocleAssumption;
 import net.sf.jsignpdf.fx.viewmodel.SigningOptionsViewModel;
+import net.sf.jsignpdf.utils.AppConfig;
 
 public class SignaturePropertiesControllerTest {
 
@@ -46,15 +49,7 @@ public class SignaturePropertiesControllerTest {
         runOnFxThread(() -> {
             SigningOptionsViewModel vm = new SigningOptionsViewModel();
 
-            SignaturePropertiesController controller = new SignaturePropertiesController();
-            setField(controller, "cmbHashAlgorithm", new ComboBox<>());
-            setField(controller, "cmbCertLevel", new ComboBox<>());
-            setField(controller, "txtSignerName", new TextField());
-            setField(controller, "txtReason", new TextField());
-            setField(controller, "txtLocation", new TextField());
-            setField(controller, "txtContact", new TextField());
-            setField(controller, "chkAppend", new CheckBox());
-            setField(controller, "txtOutFile", new TextField());
+            SignaturePropertiesController controller = newController(new TextField());
             controller.setViewModel(vm);
 
             EngineCapabilities caps = new EngineCapabilities();
@@ -74,15 +69,7 @@ public class SignaturePropertiesControllerTest {
         runOnFxThread(() -> {
             SigningOptionsViewModel vm = new SigningOptionsViewModel();
 
-            SignaturePropertiesController controller = new SignaturePropertiesController();
-            setField(controller, "cmbHashAlgorithm", new ComboBox<>());
-            setField(controller, "cmbCertLevel", new ComboBox<>());
-            setField(controller, "txtSignerName", new TextField());
-            setField(controller, "txtReason", new TextField());
-            setField(controller, "txtLocation", new TextField());
-            setField(controller, "txtContact", new TextField());
-            setField(controller, "chkAppend", new CheckBox());
-            setField(controller, "txtOutFile", new TextField());
+            SignaturePropertiesController controller = newController(new TextField());
             controller.setViewModel(vm);
 
             EngineCapabilities caps = new EngineCapabilities();
@@ -94,6 +81,57 @@ public class SignaturePropertiesControllerTest {
             appendAfterLoad.set(vm.appendProperty().get());
         });
         assertFalse("overwrite must survive for an overwrite-capable engine", appendAfterLoad.get());
+    }
+
+    @Test
+    public void blankSuffixFieldMeansUnset() throws Exception {
+        AtomicReference<String> afterTyping = new AtomicReference<>();
+        AtomicReference<String> afterClearing = new AtomicReference<>();
+        AtomicReference<String> promptText = new AtomicReference<>();
+        runOnFxThread(() -> {
+            SigningOptionsViewModel vm = new SigningOptionsViewModel();
+            TextField suffix = new TextField();
+
+            SignaturePropertiesController controller = newController(suffix);
+            controller.setViewModel(vm);
+
+            suffix.setText("-DL");
+            afterTyping.set(vm.outSuffixProperty().get());
+
+            suffix.setText("");
+            afterClearing.set(vm.outSuffixProperty().get());
+            promptText.set(suffix.getPromptText());
+        });
+        assertEquals("-DL", afterTyping.get());
+        assertNull("A blank field must clear the suffix so the configured default applies", afterClearing.get());
+        assertEquals("The configured default is shown as the prompt text",
+                AppConfig.defaultOutSuffix(), promptText.get());
+    }
+
+    @Test
+    public void unsetSuffixLeavesTheFieldBlank() throws Exception {
+        AtomicReference<String> text = new AtomicReference<>();
+        runOnFxThread(() -> {
+            SigningOptionsViewModel vm = new SigningOptionsViewModel();
+            TextField suffix = new TextField();
+            newController(suffix).setViewModel(vm);
+            text.set(suffix.getText());
+        });
+        assertEquals("", text.get());
+    }
+
+    private static SignaturePropertiesController newController(TextField outSuffix) {
+        SignaturePropertiesController controller = new SignaturePropertiesController();
+        setField(controller, "cmbHashAlgorithm", new ComboBox<>());
+        setField(controller, "cmbCertLevel", new ComboBox<>());
+        setField(controller, "txtSignerName", new TextField());
+        setField(controller, "txtReason", new TextField());
+        setField(controller, "txtLocation", new TextField());
+        setField(controller, "txtContact", new TextField());
+        setField(controller, "chkAppend", new CheckBox());
+        setField(controller, "txtOutFile", new TextField());
+        setField(controller, "txtOutSuffix", outSuffix);
+        return controller;
     }
 
     private static void runOnFxThread(Runnable action) throws Exception {

@@ -28,6 +28,9 @@
                 <tooltip><Tooltip text="%jfx.gui.engine.tooltip"/></tooltip>
             </ChoiceBox>
             <Label text="%jfx.gui.preferences.engine.help" styleClass="pref-help" wrapText="true"/>
+            <Label text="%jfx.gui.preferences.general.outputSuffix"/>
+            <TextField fx:id="txtOutputSuffix" prefWidth="220" maxWidth="220"/>
+            <Label text="%jfx.gui.preferences.general.outputSuffix.help" styleClass="pref-help" wrapText="true"/>
             <CheckBox fx:id="chkDebug" text="%jfx.gui.preferences.general.debug"/>
             <Label text="%jfx.gui.preferences.general.debug.help" styleClass="pref-help" wrapText="true"/>
         </VBox>

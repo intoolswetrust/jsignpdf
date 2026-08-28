@@ -15,6 +15,7 @@ import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.scene.image.Image;
+import net.sf.jsignpdf.Constants;
 
 /**
  * ViewModel holding the state of the currently loaded PDF document.
@@ -26,6 +27,7 @@ public class DocumentViewModel {
     private final IntegerProperty currentPage = new SimpleIntegerProperty(1);
     private final DoubleProperty zoomLevel = new SimpleDoubleProperty(1.0);
     private final ObjectProperty<Image> currentPageImage = new SimpleObjectProperty<>();
+    private final DoubleProperty renderDpi = new SimpleDoubleProperty(Constants.PREVIEW_RENDER_DPI_DEFAULT);
     private final ReadOnlyBooleanWrapper documentLoaded = new ReadOnlyBooleanWrapper(false);
     private final StringProperty statusText = new SimpleStringProperty("");
 
@@ -64,6 +66,11 @@ public class DocumentViewModel {
     public ObjectProperty<Image> currentPageImageProperty() { return currentPageImage; }
     public Image getCurrentPageImage() { return currentPageImage.get(); }
     public void setCurrentPageImage(Image image) { currentPageImage.set(image); }
+
+    // --- Render DPI of the current page image ---
+    public DoubleProperty renderDpiProperty() { return renderDpi; }
+    public double getRenderDpi() { return renderDpi.get(); }
+    public void setRenderDpi(double dpi) { renderDpi.set(dpi); }
 
     // --- Document loaded (read-only) ---
     public ReadOnlyBooleanProperty documentLoadedProperty() { return documentLoaded.getReadOnlyProperty(); }

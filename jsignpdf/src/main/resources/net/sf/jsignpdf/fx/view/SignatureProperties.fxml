@@ -24,6 +24,11 @@
         </Button>
     </HBox>
 
+    <Label text="%jfx.gui.sig.outputSuffix"/>
+    <TextField fx:id="txtOutSuffix">
+        <tooltip><Tooltip text="%jfx.gui.sig.outputSuffix.tooltip"/></tooltip>
+    </TextField>
+
     <CheckBox fx:id="chkAppend" text="%jfx.gui.sig.appendSignature"/>
 
     <Label text="%jfx.gui.sig.hashAlgorithm"/>

@@ -20,6 +20,7 @@ import java.security.cert.Certificate;
 import java.security.cert.X509Certificate;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.List;
@@ -45,14 +46,18 @@ import net.sf.jsignpdf.types.ServerAuthentication;
 import net.sf.jsignpdf.utils.AppConfig;
 import net.sf.jsignpdf.utils.KeyStoreUtils;
 import net.sf.jsignpdf.utils.PKCS11Utils;
+import net.sf.jsignpdf.utils.TextTimestampSubstitutor;
 
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.text.StrSubstitutor;
 
+import org.openpdf.text.DocumentException;
+import org.openpdf.text.Element;
 import org.openpdf.text.Font;
 import org.openpdf.text.Image;
+import org.openpdf.text.Phrase;
 import org.openpdf.text.Rectangle;
+import org.openpdf.text.pdf.ColumnText;
 import org.openpdf.text.pdf.AcroFields;
 import org.openpdf.text.pdf.OcspClientBouncyCastle;
 import org.openpdf.text.pdf.PdfDate;
@@ -63,6 +68,7 @@ import org.openpdf.text.pdf.PdfReader;
 import org.openpdf.text.pdf.PdfSignature;
 import org.openpdf.text.pdf.PdfSignatureAppearance;
 import org.openpdf.text.pdf.PdfStamper;
+import org.openpdf.text.pdf.PdfTemplate;
 import org.openpdf.text.pdf.PdfString;
 import org.openpdf.text.pdf.PdfWriter;
 import org.openpdf.text.pdf.TSAClientBouncyCastle;
@@ -318,7 +324,8 @@ public class OpenPdfSigningEngine implements SigningEngine {
                     signer = options.getSignerName();
                 }
                 final String certificate = PdfPKCS7.getSubjectFields((X509Certificate) chain[0]).toString();
-                final String timestamp = new SimpleDateFormat("yyyy.MM.dd HH:mm:ss z").format(sap.getSignDateNullSafe().getTime());
+                final Date signDate = sap.getSignDateNullSafe().getTime();
+                final String timestamp = new SimpleDateFormat("yyyy.MM.dd HH:mm:ss z").format(signDate);
                 if (options.getL2Text() == null) {
                     final StringBuilder buf = new StringBuilder();
                     buf.append(RES.get("default.l2text.signedBy")).append(" ").append(signer).append('\n');
@@ -336,7 +343,7 @@ public class OpenPdfSigningEngine implements SigningEngine {
                     replacements.put(L2TEXT_PLACEHOLDER_LOCATION, StringUtils.defaultString(location));
                     replacements.put(L2TEXT_PLACEHOLDER_REASON, StringUtils.defaultString(reason));
                     replacements.put(L2TEXT_PLACEHOLDER_CONTACT, StringUtils.defaultString(contact));
-                    final String l2text = StrSubstitutor.replace(options.getL2Text(), replacements);
+                    final String l2text = TextTimestampSubstitutor.replace(options.getL2Text(), replacements, signDate);
                     sap.setLayer2Text(l2text);
                 }
                 final org.openpdf.text.pdf.BaseFont l2BaseFont = OpenPdfFonts.getL2BaseFont();
@@ -368,6 +375,9 @@ public class OpenPdfSigningEngine implements SigningEngine {
                     }
                     Rectangle signitureRect = computeSignatureRectangle(reader.getPageSize(page), options);
                     sap.setVisibleSignature(signitureRect, page, null);
+                }
+                if (renderMode == RenderMode.DESCRIPTION_ONLY) {
+                    configureDescriptionLayer2(sap, options.isAcro6Layers());
                 }
             }
 
@@ -496,6 +506,65 @@ public class OpenPdfSigningEngine implements SigningEngine {
             }
         }
         return finished;
+    }
+
+    /** OpenPDF's own description-layer inset, kept for the legacy layer-4 layout. */
+    private static final float LAYER2_MARGIN = 2f;
+    /** Fraction of the rectangle OpenPDF reserves at the top for the layer-4 status text. */
+    private static final float LAYER4_TOP_SECTION = 0.3f;
+
+    /**
+     * Builds the description-only layer 2 appearance.
+     *
+     * <p>With acro6 layers (the default) there is no separate layer-4 status text, so the
+     * description uses the whole signature rectangle - OpenPDF 3.0.5 would otherwise reserve
+     * the top 30% and clip multiline text in short rectangles. With the legacy multi-layer
+     * appearance ({@code acro6Layers = false}) OpenPDF still draws layer 4 in that top 30%, so
+     * the description is confined to the bottom 70% to avoid overlapping it. Creating layer 2
+     * explicitly keeps the public OpenPDF dependency unchanged.</p>
+     */
+    private void configureDescriptionLayer2(final PdfSignatureAppearance sap, final boolean acro6Layers)
+            throws DocumentException {
+        final PdfTemplate layer = sap.getLayer(2);
+        final Rectangle rect = sap.getRect();
+
+        final Image background = sap.getImage();
+        if (background != null) {
+            final float imageScale = sap.getImageScale();
+            if (imageScale == 0) {
+                layer.addImage(background, rect.getWidth(), 0, 0, rect.getHeight(), 0, 0);
+            } else {
+                float usableScale = imageScale;
+                if (imageScale < 0) {
+                    usableScale = Math.min(rect.getWidth() / background.getWidth(),
+                            rect.getHeight() / background.getHeight());
+                }
+                final float width = background.getWidth() * usableScale;
+                final float height = background.getHeight() * usableScale;
+                final float x = (rect.getWidth() - width) / 2;
+                final float y = (rect.getHeight() - height) / 2;
+                layer.addImage(background, width, 0, 0, height, x, y);
+            }
+        }
+
+        final Font configuredFont = sap.getLayer2Font();
+        final Font font = configuredFont == null ? new Font() : new Font(configuredFont);
+        float size = font.getSize();
+        final String text = StringUtils.defaultString(sap.getLayer2Text());
+        final Rectangle dataRect = acro6Layers
+                ? new Rectangle(0, 0, rect.getWidth(), rect.getHeight())
+                : new Rectangle(LAYER2_MARGIN, LAYER2_MARGIN, rect.getWidth() - LAYER2_MARGIN,
+                        rect.getHeight() * (1f - LAYER4_TOP_SECTION) - LAYER2_MARGIN);
+        if (size <= 0) {
+            final Rectangle fitRect = new Rectangle(dataRect.getWidth(), dataRect.getHeight());
+            size = PdfSignatureAppearance.fitText(font, text, fitRect, 12, sap.getRunDirection());
+        }
+
+        final ColumnText column = new ColumnText(layer);
+        column.setRunDirection(sap.getRunDirection());
+        column.setSimpleColumn(new Phrase(text, font), dataRect.getLeft(), dataRect.getBottom(),
+                dataRect.getRight(), dataRect.getTop(), size, Element.ALIGN_LEFT);
+        column.go();
     }
 
     private Rectangle computeSignatureRectangle(Rectangle pageRect, BasicSignerOptions options) {

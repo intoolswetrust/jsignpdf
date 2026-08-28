@@ -12,6 +12,7 @@ import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
+import net.sf.jsignpdf.Constants;
 import net.sf.jsignpdf.utils.AdvancedConfig;
 import net.sf.jsignpdf.utils.AppConfig;
 import net.sf.jsignpdf.utils.UiLocale;
@@ -30,6 +31,7 @@ public class PreferencesViewModel {
     private final StringProperty uiLanguage = new SimpleStringProperty("");
     private final StringProperty engineId = new SimpleStringProperty(AppConfig.DEFAULT_ENGINE_ID);
     private final BooleanProperty debug = new SimpleBooleanProperty(false);
+    private final StringProperty outputSuffix = new SimpleStringProperty(Constants.DEFAULT_OUT_SUFFIX);
 
     private final StringProperty fontPath = new SimpleStringProperty("");
     private final StringProperty fontName = new SimpleStringProperty("");
@@ -71,6 +73,7 @@ public class PreferencesViewModel {
         uiLanguage.set(UiLocale.canonicalTag(cfg.getProperty("ui.language")));
         engineId.set(cfg.getNotEmptyProperty("engine", AppConfig.DEFAULT_ENGINE_ID));
         debug.set(cfg.getAsBool("debug", false));
+        outputSuffix.set(cfg.getNotEmptyProperty("output.suffix", Constants.DEFAULT_OUT_SUFFIX));
         fontPath.set(orEmpty(cfg.getProperty("font.path")));
         fontName.set(orEmpty(cfg.getProperty("font.name")));
         fontEncoding.set(orEmpty(cfg.getProperty("font.encoding")));
@@ -81,7 +84,7 @@ public class PreferencesViewModel {
 
         relaxSslSecurity.set(cfg.getAsBool("relax.ssl.security", false));
 
-        decodePdfLibraries(cfg.getNotEmptyProperty("pdf2image.libraries", "jpedal,pdfbox,openpdf"));
+        decodePdfLibraries(cfg.getNotEmptyProperty("pdf2image.libraries", Constants.PDF2IMAGE_LIBRARIES_DEFAULT));
 
         tsaHashAlgorithm.set(cfg.getNotEmptyProperty("tsa.hashAlgorithm", "SHA-256"));
 
@@ -105,6 +108,7 @@ public class PreferencesViewModel {
         writeStringOrRemove(cfg, "ui.language", uiLanguage.get());
         cfg.setProperty("engine", orFallback(engineId.get(), AppConfig.DEFAULT_ENGINE_ID));
         cfg.setProperty("debug", debug.get());
+        writeStringOrRemove(cfg, "output.suffix", outputSuffix.get());
         writeStringOrRemove(cfg, "font.path", fontPath.get());
         writeStringOrRemove(cfg, "font.name", fontName.get());
         writeStringOrRemove(cfg, "font.encoding", fontEncoding.get());
@@ -143,6 +147,7 @@ public class PreferencesViewModel {
         uiLanguage.set(orEmpty(defaults.getBundledDefault("ui.language")));
         engineId.set(orFallback(defaults.getBundledDefault("engine"), AppConfig.DEFAULT_ENGINE_ID));
         debug.set(parseBool(defaults.getBundledDefault("debug"), false));
+        outputSuffix.set(orFallback(defaults.getBundledDefault("output.suffix"), Constants.DEFAULT_OUT_SUFFIX));
     }
 
     public void applyFontDefaults(AdvancedConfig defaults) {
@@ -162,7 +167,7 @@ public class PreferencesViewModel {
     }
 
     public void applyPdfRenderDefaults(AdvancedConfig defaults) {
-        decodePdfLibraries(orFallback(defaults.getBundledDefault("pdf2image.libraries"), "jpedal,pdfbox,openpdf"));
+        decodePdfLibraries(orFallback(defaults.getBundledDefault("pdf2image.libraries"), Constants.PDF2IMAGE_LIBRARIES_DEFAULT));
     }
 
     public void applyTsaDefaults(AdvancedConfig defaults) {
@@ -267,6 +272,7 @@ public class PreferencesViewModel {
     public StringProperty uiLanguageProperty() { return uiLanguage; }
     public StringProperty engineIdProperty() { return engineId; }
     public BooleanProperty debugProperty() { return debug; }
+    public StringProperty outputSuffixProperty() { return outputSuffix; }
     public StringProperty fontPathProperty() { return fontPath; }
     public StringProperty fontNameProperty() { return fontName; }
     public StringProperty fontEncodingProperty() { return fontEncoding; }

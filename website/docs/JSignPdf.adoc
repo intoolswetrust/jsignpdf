@@ -235,7 +235,16 @@ At a minimum, you need to select a keystore and provide its password in the _Cer
 
 To add a visible signature to the PDF, enable _Visible signature_ in the _Signature Appearance_ panel. You can then configure the render mode, signature text, status text, images, and font size.
 
-To position the signature on the page, hold *Shift* and drag a rectangle directly on the document preview. The coordinates are updated automatically in the sidebar.
+To create the signature rectangle, hold *Shift* and drag directly on the document preview. The coordinates are updated automatically in the sidebar.
+
+Once the signature rectangle is visible, it can be adjusted directly in the preview:
+
+* drag inside the rectangle to move the signature;
+* drag a corner handle to resize it.
+
+The mouse cursor changes according to the available operation. The preview also renders the configured signature text and images inside the rectangle, making it easier to position and size the signature before signing.
+
+The preview reproduces the appearance of the OpenPDF engine. It is an approximation of the final result: the DSS engine wraps and insets the signature text slightly differently, so with that engine the preview shows the right content and placement, but the text may not break across lines exactly as it does in the signed document.
 
 image:img/javafx/visible-signature-placement.png[Placing visible signature,width=562,height=403]
 
@@ -245,7 +254,9 @@ When you are ready, click the _Sign_ button in the toolbar. JSignPdf signs the d
 
 image:img/javafx/signing-result.png[Signing complete,width=562,height=400]
 
-The signed PDF is saved to the output path shown in the _Signature Properties_ panel. By default, it is the input file name with a `_signed` suffix (e.g. `document_signed.pdf`). The suffix can be changed with the `output.suffix` key in `advanced.properties` (see <<Advanced application configuration>>) -- handy for localizing the marker (e.g. `_signe`, `_firmado`).
+The signed PDF is saved to the output path shown in the _Signature Properties_ panel. By default, the input file name is combined with the _Output suffix_ from the same panel, so `document.pdf` becomes `document_signed.pdf`.
+
+The suffix is used exactly as typed, so it has to include the separator: `_signed` produces `document_signed.pdf` and `-DL` produces `document-DL.pdf`. Because it becomes part of a file name, the field does not accept the path separators or reserved characters `/ \ : * ? " < > |` (or leading/trailing spaces), and is limited to 40 characters. Leaving the field empty falls back to the configured default, which the field shows as its prompt text. The starting value comes from the `output.suffix` key, set by the *Output file suffix* field in the <<Adjusting advanced preferences,Preferences dialog>>; changing it in the _Signature Properties_ panel overrides it for the current document, is remembered for the next session, and is stored in a preset along with the other signing settings. Typing a full path into _Output file_ always wins over the suffix.
 
 === Using presets
 
@@ -277,7 +288,7 @@ Presets are plain Java properties files under the <<Configuration directory,conf
 
 Open _File > Preferences..._ (shortcut `Ctrl+,` / `⌘,`) for application-wide tweaks that fall outside the per-document signing options. The dialog has the following tabs:
 
-* **General** -- the default signing engine, and the *Debug output* toggle that enables the verbose signing diagnostics (see <<Reading the signing diagnostics>>)
+* **General** -- the interface language, the default signing engine, the *Output file suffix* used to derive output file names, and the *Debug output* toggle that enables the verbose signing diagnostics (see <<Reading the signing diagnostics>>)
 * **Visible Signature** -- font file, font name and encoding for the visible-signature L2 text
 * **Certificates** -- which certificate checks (validity, key usage, critical extensions) are applied when listing aliases
 * **Network** -- relax SSL security for TSA / OCSP / CRL traffic
@@ -455,7 +466,7 @@ See <<Signing properties>> for details.
 | Prefix for the signed filename. Default: empty.
 
 | `-os, --out-suffix <suffix>`
-| Suffix for the signed filename. Default: the `output.suffix` key in `advanced.properties` (bundled default `_signed`), so `mydocument.pdf` becomes `mydocument_signed.pdf`.
+| Suffix for the signed filename, used exactly as given. Default: the `output.suffix` key in `advanced.properties` (bundled default `_signed`), so `mydocument.pdf` becomes `mydocument_signed.pdf`.
 |===
 
 === Visible signature options
@@ -491,7 +502,7 @@ See <<Visible signature options>> for details.
 | Render mode. Default: `DESCRIPTION_ONLY`. Values: `DESCRIPTION_ONLY`, `GRAPHIC_AND_DESCRIPTION`, `SIGNAME_AND_DESCRIPTION`.
 
 | `--l2-text <text>`
-| Signature text. Supports placeholders: `${signer}`, `${certificate}`, `${timestamp}`, `${location}`, `${reason}`, `${contact}`.
+| Signature text. Supports placeholders: `${signer}`, `${certificate}`, `${timestamp}`, `${location}`, `${reason}`, `${contact}`. The timestamp can optionally use a custom display format, for example `${timestamp:yyyy.MM.dd}` or `${timestamp:dd/MM/yyyy HH:mm}`.
 
 | `--l4-text <text>`
 | Status text.
@@ -779,7 +790,7 @@ _JavaFX panel: Signature Properties_
 
 _Input PDF file_ is the existing PDF file to which a digital signature will be added.
 
-_Output PDF file_ is the name of the resulting PDF file. If not specified, the _Input PDF file_ name with the suffix `_signed` is used automatically (e.g. input _test.pdf_ will produce _test_signed.pdf_). The suffix is taken from the `output.suffix` key in `advanced.properties`, so it can be localized (see <<Advanced application configuration>>).
+_Output PDF file_ is the name of the resulting PDF file. If not specified, the _Input PDF file_ name with the suffix `_signed` is used automatically (e.g. input _test.pdf_ will produce _test_signed.pdf_). The suffix is taken from the `output.suffix` key in `advanced.properties`, so it can be localized (see <<Advanced application configuration>>). The Swing UI has no suffix field of its own.
 
 _*The Input and Output files have to be different!*_
 
@@ -846,7 +857,9 @@ The four inputs _Lower Left (X, Y)_ and _Upper Right (X, Y)_ define the position
 
 The zero ([0,0]) position on the page is in the left bottom corner.
 
-In the JavaFX interface you can place the signature visually by holding Shift and dragging a rectangle on the document preview.
+In the JavaFX interface you can create the signature rectangle visually by holding *Shift* and dragging on the document preview.
+
+After the rectangle has been created, it can be edited directly with the mouse. Drag inside the rectangle to move it, or drag one of its corner handles to resize it. The signature coordinates are updated automatically while the rectangle is moved or resized.
 
 ==== Display
 
@@ -867,14 +880,32 @@ The _Signature Text_ supports placeholders that are expanded when the document i
 |Placeholder |Expands to
 
 |`${signer}`      |Common name (CN) of the signing certificate.
-|`${timestamp}`   |Signing date and time -- use this to **show the date/time on the visible signature**.
+|`${timestamp}`   |Signing date and time using the default display format.
+|`${timestamp:<pattern>}` |Signing date and time using a custom Java date/time pattern, for example `${timestamp:yyyy.MM.dd}`.
 |`${certificate}` |Description of the signing certificate.
 |`${location}`    |The _Location_ field value.
 |`${reason}`      |The _Reason_ field value.
 |`${contact}`     |The _Contact_ field value.
 |===
 
-For example, a _Signature Text_ of `Signed by ${signer}` + `on ${timestamp}` renders the signer name and the signing date/time. When _Signature Text_ is left empty, JSignPdf uses a default layout that already includes the signer and the date.
+For example, a _Signature Text_ of `Signed by ${signer}` + `on ${timestamp}` renders the signer name and the signing date/time.
+
+A custom timestamp format can be specified after a colon. Examples:
+
+[source,text]
+----
+${timestamp:yyyy.MM.dd}
+${timestamp:dd.MM.yyyy}
+${timestamp:yyyy-MM-dd}
+${timestamp:dd/MM/yyyy HH:mm}
+${timestamp:yyyy-MM-dd HH:mm:ss}
+----
+
+Common pattern letters include `yyyy` for the four-digit year, `MM` for month, `dd` for day, `HH` for hour in 24-hour format, `mm` for minutes, and `ss` for seconds. Note that `MM` means month while `mm` means minutes.
+
+Custom timestamp formatting changes only the date/time text shown in the visible signature. It does not change or configure the cryptographic timestamp produced by a timestamp authority (TSA).
+
+When _Signature Text_ is left empty, JSignPdf uses a default layout that already includes the signer and the date.
 
 _Background image scale_ defines the size of a background image. Any negative number means the best-fit algorithm will be used. Zero value means to stretch, which fills the whole field -- it doesn't keep the image ratio. A positive value means the multiplicator of the original size.
 
@@ -1161,11 +1192,17 @@ Password-based PDF encryption combined with signing is likewise not honoured uni
 
 Application-wide tweaks beyond the per-document signing options live in `<config-dir>/advanced.properties` and -- for hardware tokens -- `<config-dir>/pkcs11.cfg`. Both are plain text files; the easiest way to edit them is the JavaFX <<Adjusting advanced preferences,Preferences dialog>>, which writes them on _OK_. Power users can also hand-edit the files directly while JSignPdf is closed; the next launch picks up the changes.
 
-`advanced.properties` covers the same topics as the Preferences dialog (the signing engine, verbose `debug` output, visible-signature font, certificate-validation toggles, relaxed SSL, PDF preview backend order, default TSA hash algorithm) plus a few file-editable knobs such as `output.suffix` -- the suffix appended to the input file name to derive the default output file name (bundled default `_signed`; e.g. set `output.suffix=_firmado` to produce `mydocument_firmado.pdf`). When a key is missing from `advanced.properties`, JSignPdf falls back to defaults bundled inside the application jar, so a fresh install needs no config file at all.
+`advanced.properties` covers the same topics as the Preferences dialog (the signing engine, verbose `debug` output, visible-signature font, certificate-validation toggles, relaxed SSL, PDF preview backend order, default TSA hash algorithm) plus a few file-editable knobs. When a key is missing from `advanced.properties`, JSignPdf falls back to defaults bundled inside the application jar, so a fresh install needs no config file at all.
 
 Set `debug=true` (bundled default `false`, the *Debug output* checkbox on the _General_ tab of the Preferences dialog) to log the verbose signing diagnostics -- the certificate chain, the loaded trust anchors, and every timestamp / OCSP / CRL / AIA network call. See <<Reading the signing diagnostics>>.
 
+Set `output.suffix` (bundled default `_signed`, the *Output file suffix* field on the _General_ tab of the Preferences dialog) to the text appended to the input file name when no output file is given -- for example `output.suffix=_firmado` produces `mydocument_firmado.pdf`. It is used exactly as configured, so it has to include the separator. It is the starting value for the _Output suffix_ field in the _Signature Properties_ panel and the default for the CLI `-os` option.
+
 Set `ui.language` to a BCP-47 language tag (e.g. `de`, `fr`, `pt`, `zh-CN`) to pick the interface language explicitly instead of following the operating-system locale; the empty bundled default keeps *System default*. The value is read once at startup, so restart JSignPdf for a change to take effect. It is exposed as the *Language* selector on the _General_ tab of the Preferences dialog (which lists the bundled translations and writes this key), and on the command line as `-o ui.language=<tag>` -- for example `jsignpdf --help -o ui.language=de` prints the help in German. The choice affects the interface text only; number and date formatting (and therefore the signed output) keep following the OS locale.
+
+Set `preview.render.dpi` (bundled default `300`, no Preferences control) to change the resolution at which document pages are rasterized for the on-screen preview. A higher value gives a sharper preview at the cost of memory; the value is clamped to the 72--600 range, and pages large enough to exceed a safe pixel budget (A0 or CAD drawings, for example) are automatically rendered at a lower resolution. The setting affects the preview only -- it never changes the signed document. The order of the preview backends themselves is `pdf2image.libraries`, which the _PDF Render_ tab of the Preferences dialog writes.
+
+JSignPdf stamps `config.version` into the file to record which one-time upgrades have already been applied to it. Leave it alone; deleting it only makes an upgrade run again. Version 1 covers the 3.2.0 change of the preview backend order: a file that still held the previous default `jpedal,pdfbox,openpdf` is moved to the new default, while an order you set yourself is kept. Once the file is stamped the order is never second-guessed again, so selecting `jpedal,pdfbox,openpdf` on purpose afterwards is preserved.
 
 Set `buffering.mode=temp` (bundled default `memory`, no Preferences control) to stage the document being signed in temporary files instead of on the Java heap, so its size no longer has to fit in `-Xmx`; `buffering.tempDir` chooses where those files go. Both keys are described under <<Signing very large documents>>.
 

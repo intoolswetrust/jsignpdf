@@ -48,6 +48,7 @@ import net.sf.jsignpdf.engine.EngineRegistry;
 import net.sf.jsignpdf.engine.SigningEngine;
 import net.sf.jsignpdf.fx.util.NativeFileChooser;
 import net.sf.jsignpdf.fx.util.NativeFileChooser.ExtensionFilter;
+import net.sf.jsignpdf.fx.util.OutputSuffixValidation;
 import net.sf.jsignpdf.ssl.SSLInitializer;
 import net.sf.jsignpdf.utils.AdvancedConfig;
 import net.sf.jsignpdf.utils.AppConfig;
@@ -84,6 +85,7 @@ public class PreferencesController {
     @FXML private ChoiceBox<String> cmbUiLanguage;
     @FXML private ChoiceBox<SigningEngine> cmbEngine;
     @FXML private CheckBox chkDebug;
+    @FXML private TextField txtOutputSuffix;
 
     @FXML private TextField txtFontPath;
     @FXML private Button btnFontPathBrowse;
@@ -249,6 +251,7 @@ public class PreferencesController {
         });
 
         chkDebug.selectedProperty().bindBidirectional(vm.debugProperty());
+        txtOutputSuffix.textProperty().bindBidirectional(vm.outputSuffixProperty());
 
         txtFontPath.textProperty().bindBidirectional(vm.fontPathProperty());
         txtFontName.textProperty().bindBidirectional(vm.fontNameProperty());
@@ -411,6 +414,11 @@ public class PreferencesController {
     }
 
     private boolean validate() {
+        if (!OutputSuffixValidation.isValid(vm.outputSuffixProperty().get())) {
+            tabPane.getSelectionModel().select(tabGeneral);
+            showError(RES.get("jfx.gui.preferences.validation.outputSuffix"));
+            return false;
+        }
         if (!PreferencesValidation.validateFontPath(vm.fontPathProperty().get())) {
             tabPane.getSelectionModel().select(tabFont);
             showError(RES.get("jfx.gui.preferences.validation.fontFileUnreadable"));

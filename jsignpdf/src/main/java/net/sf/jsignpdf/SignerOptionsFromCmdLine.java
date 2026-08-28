@@ -43,7 +43,6 @@ public class SignerOptionsFromCmdLine extends BasicSignerOptions {
     static final Options OPTS = new Options();
 
     private String outPrefix;
-    private String outSuffix = AppConfig.defaultOutSuffix();
     private String outPath;
 
     private String[] files;
@@ -142,10 +141,6 @@ public class SignerOptionsFromCmdLine extends BasicSignerOptions {
             setOutPrefix(line.getOptionValue(ARG_OPREFIX));
         if (line.hasOption(ARG_OSUFFIX))
             setOutSuffix(line.getOptionValue(ARG_OSUFFIX));
-        else
-            // Re-resolve here so the configured output.suffix is honored even though the field initializer captured
-            // its value at construction time (i.e. before any advanced-config override was applied).
-            setOutSuffix(AppConfig.defaultOutSuffix());
         if (line.hasOption(ARG_SIGNER_NAME))
             setSignerName(line.getOptionValue(ARG_SIGNER_NAME));
         if (line.hasOption(ARG_REASON))
@@ -567,22 +562,6 @@ public class SignerOptionsFromCmdLine extends BasicSignerOptions {
      */
     public void setOutPrefix(String outPrefix) {
         this.outPrefix = outPrefix;
-    }
-
-    /**
-     * @return the outSuffix
-     */
-    public String getOutSuffix() {
-        if (outSuffix == null)
-            outSuffix = "";
-        return outSuffix;
-    }
-
-    /**
-     * @param outSuffix the outSuffix to set
-     */
-    public void setOutSuffix(String outSuffix) {
-        this.outSuffix = outSuffix;
     }
 
     /**

@@ -7,43 +7,62 @@ import javafx.beans.property.SimpleObjectProperty;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.Region;
+import javafx.stage.Screen;
+import net.sf.jsignpdf.preview.PreviewRenderSettings;
 
 /**
- * Custom Region that displays a rendered PDF page with zoom support.
- * The image is scaled by the zoomLevel property.
+ * Displays a high-resolution raster preview at a logical UI zoom.
+ * Raster resolution affects image detail only; it does not change the
+ * apparent size of the page on screen.
  */
 public class PdfPageView extends Region {
+    private static final double FALLBACK_SCREEN_DPI = 96.0;
 
     private final ImageView imageView = new ImageView();
     private final ObjectProperty<Image> pageImage = new SimpleObjectProperty<>();
     private final DoubleProperty zoomLevel = new SimpleDoubleProperty(1.0);
+    private final DoubleProperty renderDpi = new SimpleDoubleProperty(PreviewRenderSettings.targetRenderDpi());
 
     public PdfPageView() {
         getChildren().add(imageView);
         imageView.setPreserveRatio(true);
         imageView.setSmooth(true);
-
-        // Bind image
         imageView.imageProperty().bind(pageImage);
-
-        // Update size when image or zoom changes
-        pageImage.addListener((obs, o, n) -> updateSize());
-        zoomLevel.addListener((obs, o, n) -> updateSize());
-
+        pageImage.addListener((obs, oldImage, newImage) -> updateSize());
+        zoomLevel.addListener((obs, oldZoom, newZoom) -> updateSize());
+        renderDpi.addListener((obs, oldDpi, newDpi) -> updateSize());
         getStyleClass().add("pdf-page-view");
     }
 
     private void updateSize() {
-        Image img = pageImage.get();
-        if (img != null) {
-            double zoom = zoomLevel.get();
-            double w = img.getWidth() * zoom;
-            double h = img.getHeight() * zoom;
-            imageView.setFitWidth(w);
-            imageView.setFitHeight(h);
-            setPrefSize(w, h);
-            setMinSize(w, h);
-            setMaxSize(w, h);
+        Image image = pageImage.get();
+        if (image == null) {
+            return;
+        }
+
+        double dpi = renderDpi.get() > 0 ? renderDpi.get() : PreviewRenderSettings.targetRenderDpi();
+        double rasterToDisplayScale = getScreenDpi() / dpi;
+        double displayScale = rasterToDisplayScale * zoomLevel.get();
+        double width = image.getWidth() * displayScale;
+        double height = image.getHeight() * displayScale;
+
+        imageView.setFitWidth(width);
+        imageView.setFitHeight(height);
+        setPrefSize(width, height);
+        setMinSize(width, height);
+        setMaxSize(width, height);
+    }
+
+    /**
+     * Screen DPI from JavaFX rather than AWT's {@code Toolkit}, which would initialize AWT on the FX thread
+     * and can fail with an {@code AWTError} in a headless run.
+     */
+    private static double getScreenDpi() {
+        try {
+            double dpi = Screen.getPrimary().getDpi();
+            return dpi > 0 ? dpi : FALLBACK_SCREEN_DPI;
+        } catch (RuntimeException e) {
+            return FALLBACK_SCREEN_DPI;
         }
     }
 
@@ -52,7 +71,6 @@ public class PdfPageView extends Region {
         imageView.relocate(0, 0);
     }
 
-    // --- Properties ---
     public ObjectProperty<Image> pageImageProperty() { return pageImage; }
     public Image getPageImage() { return pageImage.get(); }
     public void setPageImage(Image image) { pageImage.set(image); }
@@ -60,4 +78,8 @@ public class PdfPageView extends Region {
     public DoubleProperty zoomLevelProperty() { return zoomLevel; }
     public double getZoomLevel() { return zoomLevel.get(); }
     public void setZoomLevel(double zoom) { zoomLevel.set(zoom); }
+
+    public DoubleProperty renderDpiProperty() { return renderDpi; }
+    public double getRenderDpi() { return renderDpi.get(); }
+    public void setRenderDpi(double dpi) { renderDpi.set(dpi); }
 }

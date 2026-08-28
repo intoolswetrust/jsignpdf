@@ -118,8 +118,8 @@
 /* Signature overlay */
 .signature-rect {
     -fx-stroke: #1565c0;
-    -fx-stroke-width: 2;
-    -fx-fill: rgba(21, 101, 192, 0.15);
+    -fx-stroke-width: 1;
+    -fx-fill: rgba(21, 101, 192, 0.08);
     -fx-stroke-dash-array: 6 4;
 }
 

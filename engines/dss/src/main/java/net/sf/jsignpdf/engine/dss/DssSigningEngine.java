@@ -47,10 +47,10 @@ import net.sf.jsignpdf.types.RenderMode;
 import net.sf.jsignpdf.types.ServerAuthentication;
 import net.sf.jsignpdf.utils.AppConfig;
 import net.sf.jsignpdf.utils.KeyStoreUtils;
+import net.sf.jsignpdf.utils.TextTimestampSubstitutor;
 
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.text.StrSubstitutor;
 import org.apache.pdfbox.Loader;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.encryption.AccessPermission;
@@ -938,7 +938,7 @@ public class DssSigningEngine implements SigningEngine {
         replacements.put(L2TEXT_PLACEHOLDER_LOCATION, StringUtils.defaultString(location));
         replacements.put(L2TEXT_PLACEHOLDER_REASON, StringUtils.defaultString(reason));
         replacements.put(L2TEXT_PLACEHOLDER_CONTACT, StringUtils.defaultString(options.getContact()));
-        return StrSubstitutor.replace(options.getL2Text(), replacements);
+        return TextTimestampSubstitutor.replace(options.getL2Text(), replacements, signingCal.getTime());
     }
 
     private String extractCN(X509Certificate cert) {

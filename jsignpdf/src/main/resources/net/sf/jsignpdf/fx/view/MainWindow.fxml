@@ -6,6 +6,7 @@
 <?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.shape.SVGPath?>
+<?import net.sf.jsignpdf.fx.control.SignaturePreviewStackPane?>
 
 <BorderPane xmlns="http://javafx.com/javafx"
             xmlns:fx="http://javafx.com/fxml"
@@ -210,10 +211,10 @@
                 <ScrollPane fx:id="scrollPane" pannable="true" styleClass="pdf-scroll-pane"
                             fitToWidth="true" fitToHeight="true"
                             onDragOver="#onDragOver" onDragDropped="#onDragDropped">
-                    <StackPane fx:id="pdfArea" styleClass="pdf-area">
+                    <SignaturePreviewStackPane fx:id="pdfArea" styleClass="pdf-area">
                         <Label fx:id="lblDropHint" text="%jfx.gui.dropHint"
                                styleClass="drop-hint"/>
-                    </StackPane>
+                    </SignaturePreviewStackPane>
                 </ScrollPane>
             </SplitPane>
 

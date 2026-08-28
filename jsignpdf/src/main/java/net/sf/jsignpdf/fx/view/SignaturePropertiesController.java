@@ -14,9 +14,11 @@ import net.sf.jsignpdf.engine.SigningEngine;
 import net.sf.jsignpdf.fx.EngineCapabilities;
 import net.sf.jsignpdf.fx.util.NativeFileChooser;
 import net.sf.jsignpdf.fx.util.NativeFileChooser.ExtensionFilter;
+import net.sf.jsignpdf.fx.util.OutputSuffixValidation;
 import net.sf.jsignpdf.fx.viewmodel.SigningOptionsViewModel;
 import net.sf.jsignpdf.types.CertificationLevel;
 import net.sf.jsignpdf.types.HashAlgorithm;
+import net.sf.jsignpdf.utils.AppConfig;
 
 /**
  * Controller for signature-properties settings (hash algorithm, certification
@@ -34,8 +36,10 @@ public class SignaturePropertiesController {
     @FXML private TextField txtContact;
     @FXML private CheckBox chkAppend;
     @FXML private TextField txtOutFile;
+    @FXML private TextField txtOutSuffix;
 
     private SigningOptionsViewModel viewModel;
+    private boolean syncingSuffix;
 
     @FXML
     private void initialize() {
@@ -57,6 +61,54 @@ public class SignaturePropertiesController {
         txtContact.textProperty().bindBidirectional(viewModel.contactProperty());
         chkAppend.selectedProperty().bindBidirectional(viewModel.appendProperty());
         txtOutFile.textProperty().bindBidirectional(viewModel.outFileProperty());
+        bindOutSuffix();
+    }
+
+    /**
+     * Binds the suffix field to the view model. A blank field means "no suffix of my own" and falls back to the
+     * configured {@code output.suffix}, shown as the prompt text; anything typed becomes the explicit value for this
+     * document.
+     */
+    private void bindOutSuffix() {
+        showSuffix(viewModel.outSuffixProperty().get());
+        refreshDefaultSuffix();
+        viewModel.outSuffixProperty().addListener((obs, o, n) -> {
+            if (!syncingSuffix) {
+                showSuffix(n);
+            }
+        });
+        txtOutSuffix.textProperty().addListener((obs, o, n) -> {
+            if (!OutputSuffixValidation.isValid(n)) {
+                // Keep the caret put, so editing mid-value does not jump to the end on a refused character.
+                int caret = Math.min(txtOutSuffix.getCaretPosition(), o == null ? 0 : o.length());
+                txtOutSuffix.setText(o);
+                txtOutSuffix.positionCaret(caret);
+                return;
+            }
+            syncingSuffix = true;
+            try {
+                viewModel.outSuffixProperty().set(n == null || n.isEmpty() ? null : n);
+            } finally {
+                syncingSuffix = false;
+            }
+        });
+    }
+
+    /**
+     * Refreshes the configured default shown as the prompt text of an empty field. Called after the Preferences dialog
+     * changes {@code output.suffix}.
+     */
+    public void refreshDefaultSuffix() {
+        txtOutSuffix.setPromptText(AppConfig.defaultOutSuffix());
+    }
+
+    private void showSuffix(String suffix) {
+        syncingSuffix = true;
+        try {
+            txtOutSuffix.setText(suffix != null ? suffix : "");
+        } finally {
+            syncingSuffix = false;
+        }
     }
 
     /**

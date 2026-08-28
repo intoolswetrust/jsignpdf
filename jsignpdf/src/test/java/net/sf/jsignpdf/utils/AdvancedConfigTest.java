@@ -45,7 +45,7 @@ public class AdvancedConfigTest {
         assertFalse(Files.exists(file));
         assertFalse(cfg.getAsBool("relax.ssl.security", true));
         assertEquals("SHA-256", cfg.getNotEmptyProperty("tsa.hashAlgorithm", "should-not-be-used"));
-        assertEquals("jpedal,pdfbox,openpdf", cfg.getNotEmptyProperty("pdf2image.libraries", null));
+        assertEquals("pdfbox,jpedal,openpdf", cfg.getNotEmptyProperty("pdf2image.libraries", null));
         assertTrue(cfg.getAsBool("certificate.checkValidity", false));
         assertTrue(cfg.getAsBool("certificate.checkKeyUsage", false));
         assertFalse(cfg.getAsBool("certificate.checkCriticalExtensions", true));
