@@ -92,6 +92,34 @@ public final class PortalFileChooserBackend {
         });
     }
 
+    /**
+     * Opens a directory picker. The returned folder is granted to the sandbox for writing
+     * throughout its subtree, which is what lets a configured output directory compose an
+     * output path without a per-file Save dialog. The grant lasts for the running instance
+     * only — it is not persisted across restarts. Filters do not apply in directory mode.
+     */
+    public static Optional<List<Path>> openDirectory(
+            String title,
+            File initialDirectory) throws Exception {
+
+        DBusConnection c = conn();
+        String[] handle = computeHandle(c);
+        String token       = handle[0];
+        String requestPath = handle[1];
+
+        Map<String, Variant<?>> options = buildCommonOptions(token, List.of(), null);
+        options.put("directory", new Variant<>(Boolean.TRUE));
+        if (initialDirectory != null) {
+            options.put("current_folder",
+                    new Variant<>(nullTerminatedUtf8(initialDirectory.getAbsolutePath()), "ay"));
+        }
+
+        return callPortal(c, requestPath, () -> {
+            XdgFileChooser fc = c.getRemoteObject(PORTAL_BUS, PORTAL_PATH, XdgFileChooser.class);
+            fc.OpenFile("", title, options);
+        });
+    }
+
     public static Optional<List<Path>> saveFile(
             String title,
             List<ExtensionFilter> filters,

@@ -313,16 +313,8 @@ public class Signer {
                 continue;
             }
             anOpts.setInFile(tmpInFile);
-            String tmpNameBase = inputFile.getName();
-            String tmpSuffix = ".pdf";
-            if (StringUtils.endsWithIgnoreCase(tmpNameBase, tmpSuffix)) {
-                tmpSuffix = StringUtils.right(tmpNameBase, 4);
-                tmpNameBase = StringUtils.left(tmpNameBase, tmpNameBase.length() - 4);
-            }
-            final StringBuilder tmpName = new StringBuilder(anOpts.getOutPath());
-            tmpName.append(anOpts.getOutPrefix());
-            tmpName.append(tmpNameBase).append(anOpts.getOutSuffixX()).append(tmpSuffix);
-            anOpts.setOutFile(tmpName.toString());
+            anOpts.setOutFile(BasicSignerOptions.composeOutFileName(
+                    anOpts.getOutPath(), anOpts.getOutPrefix(), inputFile.getName(), anOpts.getOutSuffixX()));
             if (tmpLogic.signFile()) {
                 successCount++;
             } else {

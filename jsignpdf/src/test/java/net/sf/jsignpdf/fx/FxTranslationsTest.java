@@ -342,8 +342,11 @@ public class FxTranslationsTest {
             VBox root = (VBox) loadFxml("/net/sf/jsignpdf/fx/view/SignatureProperties.fxml", bundle);
             assertNotNull("SignatureProperties load failed for " + locale, root);
 
-            // First child is the "Output file:" label
-            Label outFileLabel = (Label) root.getChildren().get(0);
+            // First child is the "Output directory:" label, the third the "Output file name:" label
+            Label outDirLabel = (Label) root.getChildren().get(0);
+            assertEquals("Output directory label for " + locale,
+                    bundle.getString("jfx.gui.sig.outputDir"), outDirLabel.getText());
+            Label outFileLabel = (Label) root.getChildren().get(2);
             assertEquals("Output file label for " + locale,
                     bundle.getString("jfx.gui.sig.outputFile"), outFileLabel.getText());
         }

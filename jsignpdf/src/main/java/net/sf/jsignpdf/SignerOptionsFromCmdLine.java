@@ -27,7 +27,6 @@ import org.apache.commons.cli.OptionBuilder;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.lang3.ArrayUtils;
-import org.apache.commons.lang3.StringUtils;
 
 /**
  * This class parses and holds options from command line
@@ -41,9 +40,6 @@ public class SignerOptionsFromCmdLine extends BasicSignerOptions {
     // Logger.getLogger(SignerOptionsFromCmdLine.class);
 
     static final Options OPTS = new Options();
-
-    private String outPrefix;
-    private String outPath;
 
     private String[] files;
 
@@ -529,15 +525,6 @@ public class SignerOptionsFromCmdLine extends BasicSignerOptions {
     }
 
     /**
-     * @return the outPrefix
-     */
-    public String getOutPrefix() {
-        if (outPrefix == null)
-            outPrefix = "";
-        return outPrefix;
-    }
-
-    /**
      * Return comma separated names from enum values array.
      *
      * @param aEnumVals
@@ -555,13 +542,6 @@ public class SignerOptionsFromCmdLine extends BasicSignerOptions {
             tmpResult.append(tmpEnu.name());
         }
         return tmpResult.toString();
-    }
-
-    /**
-     * @param outPrefix the outPrefix to set
-     */
-    public void setOutPrefix(String outPrefix) {
-        this.outPrefix = outPrefix;
     }
 
     /**
@@ -662,30 +642,6 @@ public class SignerOptionsFromCmdLine extends BasicSignerOptions {
         this.listSigFields = listSigFields;
     }
 
-    /**
-     * Returns output path including tailing slash character
-     *
-     * @return the outPath
-     */
-    public String getOutPath() {
-        String tmpResult;
-        if (StringUtils.isEmpty(outPath)) {
-            tmpResult = "./";
-        } else {
-            tmpResult = outPath.replaceAll("\\\\", "/");
-            if (!tmpResult.endsWith("/")) {
-                tmpResult = tmpResult + "/";
-            }
-        }
-        return tmpResult;
-    }
-
-    /**
-     * @param outPath the outPath to set
-     */
-    public void setOutPath(String outPath) {
-        this.outPath = outPath;
-    }
 
     public boolean isGui() {
         return gui;

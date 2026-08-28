@@ -17,6 +17,7 @@ import javafx.scene.control.Accordion;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonBar;
+import javafx.css.PseudoClass;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.CheckMenuItem;
 import javafx.scene.control.TitledPane;
@@ -100,6 +101,10 @@ public class MainWindowController {
 
     private static final String KEY_LAST_OPEN_DIR = "last.open.dir";
     private static final String KEY_LAST_ZOOM = "last.zoom";
+    /**
+     * Styles the output-path label when the resolved output would overwrite the input (":warning" in CSS).
+     */
+    private static final PseudoClass WARNING_PSEUDO_CLASS = PseudoClass.getPseudoClass("warning");
 
     private Stage stage;
     private File lastOpenDir;
@@ -115,8 +120,6 @@ public class MainWindowController {
     private final RecentFilesManager recentFilesManager = new RecentFilesManager();
     private final PresetManager presetManager = new PresetManager();
     private final EngineCapabilities engineCapabilities = new EngineCapabilities();
-    /** Last output path derived from the input file and suffix; anything else in the field is the user's own choice. */
-    private String derivedOutFile;
     /** Existing signature field the signature goes into, or null when a new field is created. */
     private SignatureFieldInfo selectedSigField;
     /** Marker rectangle of {@link #selectedSigField}, relative to the displayed page (see PdfExtraInfo). */
@@ -341,8 +344,13 @@ public class MainWindowController {
         // Status-bar output path label: visible when a document is loaded
         lblOutputPath.managedProperty().bind(lblOutputPath.visibleProperty());
         signingVM.outFileProperty().addListener((obs, oldVal, newVal) -> updateOutputPathLabel());
-        documentVM.documentFileProperty().addListener((obs, oldVal, newVal) -> updateOutputPathLabel());
-        signingVM.outSuffixProperty().addListener((obs, oldVal, newVal) -> refreshDerivedOutFile());
+        documentVM.documentFileProperty().addListener((obs, oldVal, newVal) -> {
+            resolveOutputFile();
+            updateOutputPathLabel();
+        });
+        signingVM.outSuffixProperty().addListener((obs, oldVal, newVal) -> resolveOutputFile());
+        signingVM.outPathProperty().addListener((obs, oldVal, newVal) -> resolveOutputFile());
+        signingVM.outBaseNameProperty().addListener((obs, oldVal, newVal) -> resolveOutputFile());
 
         // Initial state for the visible-signature controls.
         // The badge's initial text and style come from FXML (correct for
@@ -615,7 +623,7 @@ public class MainWindowController {
         signingVM.syncToOptions(options);
         presetManager.load(preset, options);
         signingVM.syncFromOptions(options);
-        refreshDerivedOutFile();
+        resolveOutputFile();
         // Move the on-screen rectangle to match the preset's position.
         applySigningVMPositionToPlacement();
         updateStatus(java.text.MessageFormat.format(
@@ -708,7 +716,7 @@ public class MainWindowController {
             // persisted value so toolbar buttons and accordion sections re-gate immediately (no restart).
             refreshActiveEngineFromConfig();
             signaturePropertiesController.refreshDefaultSuffix();
-            refreshDerivedOutFile();
+            resolveOutputFile();
         }
     }
 
@@ -875,36 +883,88 @@ public class MainWindowController {
             return;
         }
         File f = new File(displayPath);
-        lblOutputPath.setText("→ " + f.getName());
-        lblOutputPath.setTooltip(new Tooltip(displayPath));
+        boolean collides = outputEqualsInput(f, documentVM.getDocumentFile());
+        lblOutputPath.setText((collides ? "⚠ " : "→ ") + f.getName());
+        lblOutputPath.setTooltip(new Tooltip(
+                collides ? RES.get("jfx.gui.sig.outputEqualsInput.warning") : displayPath));
+        lblOutputPath.pseudoClassStateChanged(WARNING_PSEUDO_CLASS, collides);
         lblOutputPath.setVisible(true);
     }
 
     /**
-     * Computes the default output path for a given input file, using the suffix currently held by the signing view model.
-     * Returns null if the input is null.
+     * True when the resolved output path points at the input file itself — signing would overwrite the source.
      */
-    private String suggestedOutFileFor(File inputFile) {
-        return inputFile == null ? null
-                : BasicSignerOptions.deriveOutFileName(inputFile.getAbsolutePath(), signingVM.outSuffixProperty().get());
+    private static boolean outputEqualsInput(File output, File input) {
+        if (input == null) {
+            return false;
+        }
+        try {
+            return output.getCanonicalFile().equals(input.getCanonicalFile());
+        } catch (java.io.IOException e) {
+            return output.getAbsoluteFile().equals(input.getAbsoluteFile());
+        }
     }
 
     /**
-     * Recomputes the output path from the current input file and suffix, unless the user picked a path explicitly. An
-     * explicit choice is anything in the field that is not the value this method last wrote; it survives suffix and preset
-     * changes and is discarded when a different document is opened.
+     * Computes the default output path for a given input file, honoring the output directory ({@code outPath}) and the
+     * suffix currently held by the signing view model. Returns null if the input is null.
      */
-    private void refreshDerivedOutFile() {
+    private String suggestedOutFileFor(File inputFile) {
+        return inputFile == null ? null
+                : BasicSignerOptions.composeOutFileName(trimToNull(signingVM.outPathProperty().get()), null,
+                        inputFile.getAbsolutePath(), signingVM.outSuffixProperty().get());
+    }
+
+    /**
+     * Resolves the effective output path from the two user-facing fields — the output directory ({@code outPath}) and the
+     * output file name ({@code outBaseName}) — plus the input file and suffix, and writes it to {@code outFile} (the value
+     * the engines, the status-bar label and the sandbox portal check consume). A blank name means "use the name derived
+     * from the input and the suffix", shown as the field's prompt text; a blank directory means "next to the input".
+     */
+    private void resolveOutputFile() {
         File input = documentVM.getDocumentFile();
-        if (input == null) {
-            return;
+        String name = trimToNull(signingVM.outBaseNameProperty().get());
+        if (signaturePropertiesController != null) {
+            String derived = input == null ? null : new File(suggestedOutFileFor(input)).getName();
+            signaturePropertiesController.setOutFileNamePrompt(derived);
         }
-        String current = signingVM.outFileProperty().get();
-        if (current != null && !current.isEmpty() && !current.equals(derivedOutFile)) {
-            return;
+        String resolved;
+        if (name == null) {
+            resolved = suggestedOutFileFor(input);
+        } else {
+            String dir = trimToNull(signingVM.outPathProperty().get());
+            if (dir == null && input != null) {
+                dir = input.getParent();
+            }
+            resolved = joinDirAndName(dir, name);
         }
-        derivedOutFile = suggestedOutFileFor(input);
-        signingVM.outFileProperty().set(derivedOutFile);
+        signingVM.outFileProperty().set(resolved);
+    }
+
+    private static String joinDirAndName(String dir, String name) {
+        if (dir == null || dir.isEmpty()) {
+            return name;
+        }
+        String d = dir.replace('\\', '/');
+        return d.endsWith("/") ? d + name : d + "/" + name;
+    }
+
+    private static String trimToNull(String s) {
+        if (s == null) {
+            return null;
+        }
+        String t = s.trim();
+        return t.isEmpty() ? null : t;
+    }
+
+    /**
+     * Splits an absolute output path chosen through a Save or directory dialog into the directory and base-name fields,
+     * so the two controls reflect the choice and {@link #resolveOutputFile()} recomposes the same path.
+     */
+    private void applyChosenOutputFile(String absolutePath) {
+        File f = new File(absolutePath);
+        signingVM.outPathProperty().set(f.getParent());
+        signingVM.outBaseNameProperty().set(f.getName());
     }
 
 
@@ -1101,7 +1161,28 @@ public class MainWindowController {
         }
         File file = fc.showSaveDialog(stage);
         if (file == null) return false;
-        signingVM.outFileProperty().set(file.getAbsolutePath());
+        applyChosenOutputFile(file.getAbsolutePath());
+        return true;
+    }
+
+    /**
+     * Opens the directory picker to (re-)acquire a portal write grant for the fixed output directory, seeded at the
+     * current directory. Returns true if the user picked one — the chosen directory becomes the new {@code outPath} and
+     * is recorded as granted for the session — false if they cancelled. Used only inside the sandbox.
+     */
+    private boolean promptForOutputDir() {
+        NativeFileChooser fc = new NativeFileChooser()
+                .setTitle(RES.get("jfx.gui.dialog.selectOutputDir"));
+        String current = trimToNull(signingVM.outPathProperty().get());
+        if (current != null) {
+            File dir = new File(current);
+            if (dir.isDirectory()) {
+                fc.setInitialDirectory(dir);
+            }
+        }
+        File chosen = fc.showOpenDirectoryDialog(stage);
+        if (chosen == null) return false;
+        signingVM.outPathProperty().set(chosen.getAbsolutePath());
         return true;
     }
 
@@ -1131,6 +1212,16 @@ public class MainWindowController {
                     RES.get("jfx.gui.dialog.missingTsaUrl.title"),
                     RES.get("jfx.gui.dialog.missingTsaUrl.text"));
             return;
+        }
+
+        // In a sandbox, a fixed output directory loaded from a preset or the stored config has no portal
+        // write grant across restarts. Re-acquire it once per session through the directory picker before
+        // signing, so the composed "<dir>/<name>" is actually writable.
+        String outDir = trimToNull(signingVM.outPathProperty().get());
+        if (Sandbox.isSandboxed() && outDir != null && !Sandbox.hasDirectoryGrant(outDir)) {
+            if (!promptForOutputDir()) {
+                return;
+            }
         }
 
         // In a sandbox, the auto-derived "<input>_signed.pdf" lands inside the doc
@@ -1323,10 +1414,10 @@ public class MainWindowController {
 
             options.setInFile(file.getAbsolutePath());
 
-            // Any custom path from a previous session is intentionally discarded — the user can still override via the
-            // output file field or File > Save Output As.
-            derivedOutFile = suggestedOutFileFor(file);
-            signingVM.outFileProperty().set(derivedOutFile);
+            // A custom output name from the previous document is discarded so the new document derives its own; a
+            // deliberately chosen output directory is config-like and kept. The path resolves via the document-file
+            // listener once documentVM is updated below.
+            signingVM.outBaseNameProperty().set(null);
 
             // Try to open PDF, prompting for owner password if needed
             int pages;

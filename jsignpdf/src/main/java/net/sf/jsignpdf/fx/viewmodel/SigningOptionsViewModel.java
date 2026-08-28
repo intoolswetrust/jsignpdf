@@ -42,6 +42,8 @@ public class SigningOptionsViewModel {
     // File settings
     private final StringProperty outFile = new SimpleStringProperty();
     private final StringProperty outSuffix = new SimpleStringProperty();
+    private final StringProperty outPath = new SimpleStringProperty();
+    private final StringProperty outBaseName = new SimpleStringProperty();
     private final BooleanProperty append = new SimpleBooleanProperty(Constants.DEFVAL_APPEND);
 
     // Signature metadata
@@ -128,6 +130,7 @@ public class SigningOptionsViewModel {
         opts.setStorePasswords(storePasswords.get());
         opts.setOutFile(outFile.get());
         opts.setOutSuffix(outSuffix.get());
+        opts.setOutPath(outPath.get());
         opts.setAppend(append.get());
         opts.setSignerName(signerName.get());
         opts.setReason(reason.get());
@@ -211,6 +214,8 @@ public class SigningOptionsViewModel {
         storePasswords.set(opts.isStorePasswords());
         outFile.set(opts.getOutFile());
         outSuffix.set(opts.getOutSuffix());
+        outPath.set(opts.getOutPathRaw());
+        outBaseName.set(baseNameOf(opts.getOutFile()));
         append.set(opts.isAppend());
         signerName.set(opts.getSignerName());
         reason.set(opts.getReason());
@@ -285,6 +290,8 @@ public class SigningOptionsViewModel {
         // File & metadata
         outFile.set(null);
         outSuffix.set(null);
+        outPath.set(null);
+        outBaseName.set(null);
         append.set(Constants.DEFVAL_APPEND);
         signerName.set(null);
         reason.set(null);
@@ -381,6 +388,13 @@ public class SigningOptionsViewModel {
         return c != null ? new String(c) : null;
     }
 
+    private static String baseNameOf(String path) {
+        if (path == null || path.isEmpty()) {
+            return null;
+        }
+        return new java.io.File(path).getName();
+    }
+
     // --- Property accessors ---
     public StringProperty ksTypeProperty() { return ksType; }
     public StringProperty ksFileProperty() { return ksFile; }
@@ -391,6 +405,8 @@ public class SigningOptionsViewModel {
     public BooleanProperty storePasswordsProperty() { return storePasswords; }
     public StringProperty outFileProperty() { return outFile; }
     public StringProperty outSuffixProperty() { return outSuffix; }
+    public StringProperty outPathProperty() { return outPath; }
+    public StringProperty outBaseNameProperty() { return outBaseName; }
     public BooleanProperty appendProperty() { return append; }
     public StringProperty signerNameProperty() { return signerName; }
     public StringProperty reasonProperty() { return reason; }

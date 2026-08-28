@@ -12,6 +12,7 @@ import java.util.logging.Level;
 
 import javafx.application.Platform;
 import javafx.scene.control.Alert;
+import javafx.stage.DirectoryChooser;
 import javafx.stage.FileChooser;
 import javafx.stage.Window;
 
@@ -164,6 +165,37 @@ public final class NativeFileChooser {
         return result;
     }
 
+    /**
+     * Directory picker. Under the sandbox the chosen folder is granted for writing across
+     * its subtree (see {@link PortalFileChooserBackend#openDirectory}); elsewhere it is a
+     * plain JavaFX {@code DirectoryChooser}. Filters and {@code initialFileName} are ignored.
+     */
+    public File showOpenDirectoryDialog(Window owner) {
+        if (shouldUsePortal()) {
+            try {
+                Optional<List<Path>> result =
+                        PortalFileChooserBackend.openDirectory(title, initialDirectory);
+                markPortalSuccess();
+                if (result.isEmpty()) return null;
+                List<Path> paths = result.get();
+                if (paths.isEmpty()) return null;
+                return recordGrant(toFileIfOwnerShowing(paths.get(0), owner));
+            } catch (Exception e) {
+                markPortalFailed(e);
+            }
+        }
+        File result = recordGrant(fxOpenDirectoryDialog(owner));
+        if (portalDisabled) showFallbackAlertOnce(owner);
+        return result;
+    }
+
+    private static File recordGrant(File dir) {
+        if (dir != null) {
+            Sandbox.recordDirectoryGrant(dir.getAbsolutePath());
+        }
+        return dir;
+    }
+
     // -----------------------------------------------------------------------
     // Extension auto-append for Save (portal does not do this unlike JavaFX)
     // -----------------------------------------------------------------------
@@ -282,6 +314,15 @@ public final class NativeFileChooser {
             fc.setInitialFileName(initialFileName);
         }
         return fc.showSaveDialog(owner);
+    }
+
+    private File fxOpenDirectoryDialog(Window owner) {
+        DirectoryChooser dc = new DirectoryChooser();
+        if (title != null) dc.setTitle(title);
+        if (initialDirectory != null && initialDirectory.isDirectory()) {
+            dc.setInitialDirectory(initialDirectory);
+        }
+        return dc.showDialog(owner);
     }
 
     private FileChooser buildFxChooser() {
