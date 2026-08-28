@@ -85,6 +85,40 @@ public class OutputSuffixResolutionTest {
     }
 
     @Test
+    public void outputDirectoryReducesInputToBaseNameUnderThatDirectory() {
+        assertEquals("/out/drawing-DL.pdf",
+                BasicSignerOptions.composeOutFileName("/out", null, "/docs/drawing.pdf", "-DL"));
+    }
+
+    @Test
+    public void outputDirectoryGetsATrailingSlashAndPrefixGoesBeforeTheBaseName() {
+        assertEquals("/out/signed-drawing-DL.pdf",
+                BasicSignerOptions.composeOutFileName("/out/", "signed-", "/docs/drawing.pdf", "-DL"));
+    }
+
+    @Test
+    public void outputDirectoryBackslashesAreNormalized() {
+        assertEquals("C:/out/drawing-DL.pdf",
+                BasicSignerOptions.composeOutFileName("C:\\out", null, "C:\\docs\\drawing.pdf", "-DL"));
+    }
+
+    @Test
+    public void blankOutputDirectoryDerivesNextToInputAndIgnoresPrefix() {
+        assertEquals("/docs/drawing-DL.pdf",
+                BasicSignerOptions.composeOutFileName("", "ignored-", "/docs/drawing.pdf", "-DL"));
+    }
+
+    @Test
+    public void getOutFileXHonorsConfiguredOutputDirectoryAndPrefix() {
+        BasicSignerOptions options = new BasicSignerOptions();
+        options.setInFile("/docs/drawing.pdf");
+        options.setOutSuffix("-DL");
+        options.setOutPath("/out");
+        options.setOutPrefix("signed-");
+        assertEquals("/out/signed-drawing-DL.pdf", options.getOutFileX());
+    }
+
+    @Test
     public void presetRoundTripPreservesUnsetAndEmpty() throws Exception {
         Path file = tmp.newFile("preset.properties").toPath();
         PropertyProvider store = new PropertyProvider(file);

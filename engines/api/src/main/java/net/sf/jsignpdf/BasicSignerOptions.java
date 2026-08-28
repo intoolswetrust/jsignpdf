@@ -39,6 +39,8 @@ public class BasicSignerOptions {
     private String inFile;
     private String outFile;
     private String outSuffix;
+    private String outPath;
+    private String outPrefix;
     private String signerName;
     private String reason;
     private String location;
@@ -154,6 +156,7 @@ public class BasicSignerOptions {
             setOutFile(store.getProperty(Constants.PROPERTY_OUTPDF));
         }
         setOutSuffix(store.getPropNullSensitive(Constants.PROPERTY_OUT_SUFFIX));
+        setOutPath(store.getPropNullSensitive(Constants.PROPERTY_OUT_PATH));
         setReason(store.getProperty(Constants.PROPERTY_REASON));
         setLocation(store.getProperty(Constants.PROPERTY_LOCATION));
         setContact(store.getProperty(Constants.PROPERTY_CONTACT));
@@ -283,6 +286,7 @@ public class BasicSignerOptions {
             store.setProperty(Constants.PROPERTY_OUTPDF, getOutFile());
         }
         store.setPropNullSensitive(Constants.PROPERTY_OUT_SUFFIX, getOutSuffix());
+        store.setPropNullSensitive(Constants.PROPERTY_OUT_PATH, getOutPathRaw());
         store.setProperty(Constants.PROPERTY_REASON, getReason());
         store.setProperty(Constants.PROPERTY_LOCATION, getLocation());
         store.setProperty(Constants.PROPERTY_CONTACT, getContact());
@@ -461,35 +465,104 @@ public class BasicSignerOptions {
     }
 
     /**
-     * Returns output file name if filled or input file name with the effective output suffix.
+     * Returns output file name if filled or the name composed from the input file, the output directory
+     * ({@code -op}), the prefix ({@code -opre}) and the effective output suffix.
      *
      * @return
      */
     public String getOutFileX() {
         String tmpOut = StringUtils.defaultIfBlank(outFile, null);
-        return tmpOut != null ? tmpOut : deriveOutFileName(getInFile(), outSuffix);
+        return tmpOut != null ? tmpOut : composeOutFileName(outPath, outPrefix, getInFile(), outSuffix);
     }
 
     /**
-     * Derives the output file name from an input file name and a suffix. A {@code null} suffix falls back to the
-     * configured {@code output.suffix}; a {@code null} or blank input name yields {@code "signed.pdf"}.
+     * Derives the output file name from an input file name and a suffix, next to the input. A {@code null} suffix
+     * falls back to the configured {@code output.suffix}; a {@code null} or blank input name yields {@code "signed.pdf"}.
      *
      * @param inFileName the input file name or path
      * @param outSuffix the suffix to append, or {@code null} for the configured default
      * @return the derived output file name
      */
     public static String deriveOutFileName(final String inFileName, final String outSuffix) {
+        return composeOutFileName(null, null, inFileName, outSuffix);
+    }
+
+    /**
+     * Single rule for composing an output file name, shared by {@link #getOutFileX()} and the batch loop in
+     * {@code Signer}. With a blank {@code outPath} the name is derived next to the input (its own directory kept,
+     * the prefix ignored); with a non-blank {@code outPath} the input is reduced to its base name and placed under
+     * that directory with the prefix. A {@code null} suffix falls back to the configured {@code output.suffix};
+     * a {@code null} or blank input name yields {@code "signed.pdf"}.
+     *
+     * @param outPath the output directory, or {@code null}/blank to derive next to the input
+     * @param outPrefix the prefix prepended to the base name in directory mode, or {@code null} for none
+     * @param inFileName the input file name or path
+     * @param outSuffix the suffix to append, or {@code null} for the configured default
+     * @return the composed output file name
+     */
+    public static String composeOutFileName(final String outPath, final String outPrefix,
+            final String inFileName, final String outSuffix) {
         String tmpNameBase = StringUtils.defaultIfBlank(inFileName, null);
         if (tmpNameBase == null) {
             return "signed.pdf";
         }
+        final String suffix = outSuffix != null ? outSuffix : AppConfig.defaultOutSuffix();
         String tmpExtension = "";
         if (tmpNameBase.toLowerCase().endsWith(".pdf")) {
             final int tmpBaseLen = tmpNameBase.length() - 4;
             tmpExtension = tmpNameBase.substring(tmpBaseLen);
             tmpNameBase = tmpNameBase.substring(0, tmpBaseLen);
         }
-        return tmpNameBase + (outSuffix != null ? outSuffix : AppConfig.defaultOutSuffix()) + tmpExtension;
+        if (StringUtils.isEmpty(outPath)) {
+            return tmpNameBase + suffix + tmpExtension;
+        }
+        tmpNameBase = tmpNameBase.replace('\\', '/');
+        final int slash = tmpNameBase.lastIndexOf('/');
+        if (slash >= 0) {
+            tmpNameBase = tmpNameBase.substring(slash + 1);
+        }
+        return normalizeOutPath(outPath) + StringUtils.defaultString(outPrefix) + tmpNameBase + suffix + tmpExtension;
+    }
+
+    private static String normalizeOutPath(final String outPath) {
+        String tmpResult = outPath.replace('\\', '/');
+        return tmpResult.endsWith("/") ? tmpResult : tmpResult + "/";
+    }
+
+    /**
+     * Returns the output directory ({@code -op}) including a trailing slash, or {@code "./"} when unset.
+     *
+     * @return the outPath
+     */
+    public String getOutPath() {
+        return StringUtils.isEmpty(outPath) ? "./" : normalizeOutPath(outPath);
+    }
+
+    /**
+     * Returns the raw output directory as set, or {@code null}/blank when unset. Unlike {@link #getOutPath()} this does
+     * not normalize or default to {@code "./"} — the UI and presets need the value verbatim to tell "unset" apart.
+     *
+     * @return the raw outPath
+     */
+    public String getOutPathRaw() {
+        return outPath;
+    }
+
+    public void setOutPath(final String outPath) {
+        this.outPath = outPath;
+    }
+
+    /**
+     * Returns the output name prefix ({@code -opre}), never {@code null}.
+     *
+     * @return the outPrefix
+     */
+    public String getOutPrefix() {
+        return StringUtils.defaultString(outPrefix);
+    }
+
+    public void setOutPrefix(final String outPrefix) {
+        this.outPrefix = outPrefix;
     }
 
     public void setOutFile(final String outFile) {

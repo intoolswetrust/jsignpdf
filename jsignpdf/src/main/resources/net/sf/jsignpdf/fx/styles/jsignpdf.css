@@ -115,6 +115,11 @@
     -fx-font-style: italic;
 }
 
+.output-path-label:warning {
+    -fx-text-fill: #c62828;
+    -fx-font-style: normal;
+}
+
 /* Signature overlay */
 .signature-rect {
     -fx-stroke: #1565c0;

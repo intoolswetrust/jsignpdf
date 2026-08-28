@@ -66,4 +66,35 @@ public class SandboxTest {
         assertFalse(Sandbox.isDocPortalPath("/run/user/abc/doc/file.pdf")); // non-numeric uid
         assertFalse(Sandbox.isDocPortalPath("/tmp/run/user/1000/doc/file.pdf")); // not anchored
     }
+
+    @Test
+    public void directoryGrant_alwaysGrantedOutsideSandbox() {
+        Sandbox.clearDirectoryGrants();
+        assertTrue(Sandbox.hasDirectoryGrant("/home/user/signed", false));
+        assertTrue(Sandbox.hasDirectoryGrant(null, false));
+    }
+
+    @Test
+    public void directoryGrant_deniedInSandboxUntilRecorded() {
+        Sandbox.clearDirectoryGrants();
+        assertFalse(Sandbox.hasDirectoryGrant("/home/user/signed", true));
+        Sandbox.recordDirectoryGrant("/home/user/signed");
+        assertTrue(Sandbox.hasDirectoryGrant("/home/user/signed", true));
+    }
+
+    @Test
+    public void directoryGrant_coversSubtreeButNotSiblings() {
+        Sandbox.clearDirectoryGrants();
+        Sandbox.recordDirectoryGrant("/home/user/signed/");
+        assertTrue("subtree is covered", Sandbox.hasDirectoryGrant("/home/user/signed/2026", true));
+        assertFalse("a sibling is not", Sandbox.hasDirectoryGrant("/home/user/signed-other", true));
+        assertFalse("a parent is not", Sandbox.hasDirectoryGrant("/home/user", true));
+    }
+
+    @Test
+    public void directoryGrant_blankIsNeverGrantedInSandbox() {
+        Sandbox.clearDirectoryGrants();
+        assertFalse(Sandbox.hasDirectoryGrant(null, true));
+        assertFalse(Sandbox.hasDirectoryGrant("  ", true));
+    }
 }

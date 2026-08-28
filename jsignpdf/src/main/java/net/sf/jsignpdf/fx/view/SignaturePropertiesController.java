@@ -14,6 +14,7 @@ import net.sf.jsignpdf.engine.SigningEngine;
 import net.sf.jsignpdf.fx.EngineCapabilities;
 import net.sf.jsignpdf.fx.util.NativeFileChooser;
 import net.sf.jsignpdf.fx.util.NativeFileChooser.ExtensionFilter;
+import net.sf.jsignpdf.fx.util.OutputBaseNameValidation;
 import net.sf.jsignpdf.fx.util.OutputSuffixValidation;
 import net.sf.jsignpdf.fx.viewmodel.SigningOptionsViewModel;
 import net.sf.jsignpdf.types.CertificationLevel;
@@ -35,11 +36,15 @@ public class SignaturePropertiesController {
     @FXML private TextField txtLocation;
     @FXML private TextField txtContact;
     @FXML private CheckBox chkAppend;
+    @FXML private TextField txtOutDir;
     @FXML private TextField txtOutFile;
+    @FXML private CheckBox chkUseSuffix;
     @FXML private TextField txtOutSuffix;
 
     private SigningOptionsViewModel viewModel;
     private boolean syncingSuffix;
+    private boolean syncingBaseName;
+    private boolean syncingDir;
 
     @FXML
     private void initialize() {
@@ -60,14 +65,94 @@ public class SignaturePropertiesController {
         txtLocation.textProperty().bindBidirectional(viewModel.locationProperty());
         txtContact.textProperty().bindBidirectional(viewModel.contactProperty());
         chkAppend.selectedProperty().bindBidirectional(viewModel.appendProperty());
-        txtOutFile.textProperty().bindBidirectional(viewModel.outFileProperty());
+        bindOutDir();
+        bindOutBaseName();
         bindOutSuffix();
     }
 
     /**
-     * Binds the suffix field to the view model. A blank field means "no suffix of my own" and falls back to the
-     * configured {@code output.suffix}, shown as the prompt text; anything typed becomes the explicit value for this
-     * document.
+     * Binds the output directory field to the view model. A blank field means "next to the input file"; anything typed is
+     * a fixed output directory that survives opening a different document and is stored with presets.
+     */
+    private void bindOutDir() {
+        showDir(viewModel.outPathProperty().get());
+        viewModel.outPathProperty().addListener((obs, o, n) -> {
+            if (!syncingDir) {
+                showDir(n);
+            }
+        });
+        txtOutDir.textProperty().addListener((obs, o, n) -> {
+            syncingDir = true;
+            try {
+                viewModel.outPathProperty().set(n == null || n.isEmpty() ? null : n);
+            } finally {
+                syncingDir = false;
+            }
+        });
+    }
+
+    private void showDir(String dir) {
+        syncingDir = true;
+        try {
+            txtOutDir.setText(dir != null ? dir : "");
+        } finally {
+            syncingDir = false;
+        }
+    }
+
+    /**
+     * Binds the output file name field to the view model. A blank field means "use the name derived from the input file
+     * and the suffix", shown as the prompt text; anything typed is an explicit base name. Path separators and traversal
+     * are rejected so the name cannot move the write out of the chosen directory.
+     */
+    private void bindOutBaseName() {
+        showBaseName(viewModel.outBaseNameProperty().get());
+        viewModel.outBaseNameProperty().addListener((obs, o, n) -> {
+            if (!syncingBaseName) {
+                showBaseName(n);
+            }
+        });
+        txtOutFile.textProperty().addListener((obs, o, n) -> {
+            if (!OutputBaseNameValidation.isValid(n)) {
+                int caret = Math.min(txtOutFile.getCaretPosition(), o == null ? 0 : o.length());
+                txtOutFile.setText(o);
+                txtOutFile.positionCaret(caret);
+                return;
+            }
+            syncingBaseName = true;
+            try {
+                viewModel.outBaseNameProperty().set(n == null || n.isEmpty() ? null : n);
+            } finally {
+                syncingBaseName = false;
+            }
+        });
+    }
+
+    private void showBaseName(String name) {
+        syncingBaseName = true;
+        try {
+            txtOutFile.setText(name != null ? name : "");
+        } finally {
+            syncingBaseName = false;
+        }
+    }
+
+    /**
+     * Sets the derived output name shown as the prompt text of an empty output-file field. Called by the main
+     * controller when the input file or suffix changes.
+     */
+    public void setOutFileNamePrompt(String derivedName) {
+        txtOutFile.setPromptText(derivedName != null ? derivedName : "");
+    }
+
+    /**
+     * Binds the suffix switch and field to the view model as a three-state view over {@code outSuffix}:
+     * <ul>
+     *   <li>switch off &rArr; {@code outSuffix == ""} — the output keeps the input name (no suffix);</li>
+     *   <li>switch on, field blank &rArr; {@code outSuffix == null} — the configured {@code output.suffix} default
+     *       applies, shown as the prompt text;</li>
+     *   <li>switch on, field typed &rArr; the explicit suffix for this document.</li>
+     * </ul>
      */
     private void bindOutSuffix() {
         showSuffix(viewModel.outSuffixProperty().get());
@@ -77,7 +162,28 @@ public class SignaturePropertiesController {
                 showSuffix(n);
             }
         });
+        chkUseSuffix.selectedProperty().addListener((obs, was, on) -> {
+            if (syncingSuffix) {
+                return;
+            }
+            syncingSuffix = true;
+            try {
+                if (Boolean.TRUE.equals(on)) {
+                    txtOutSuffix.setDisable(false);
+                    String t = txtOutSuffix.getText();
+                    viewModel.outSuffixProperty().set(t == null || t.isEmpty() ? null : t);
+                } else {
+                    viewModel.outSuffixProperty().set("");
+                    txtOutSuffix.setDisable(true);
+                }
+            } finally {
+                syncingSuffix = false;
+            }
+        });
         txtOutSuffix.textProperty().addListener((obs, o, n) -> {
+            if (syncingSuffix) {
+                return;
+            }
             if (!OutputSuffixValidation.isValid(n)) {
                 // Keep the caret put, so editing mid-value does not jump to the end on a refused character.
                 int caret = Math.min(txtOutSuffix.getCaretPosition(), o == null ? 0 : o.length());
@@ -105,7 +211,10 @@ public class SignaturePropertiesController {
     private void showSuffix(String suffix) {
         syncingSuffix = true;
         try {
-            txtOutSuffix.setText(suffix != null ? suffix : "");
+            boolean on = !"".equals(suffix); // null or explicit text => switch on; "" => off
+            chkUseSuffix.setSelected(on);
+            txtOutSuffix.setDisable(!on);
+            txtOutSuffix.setText(on && suffix != null ? suffix : "");
         } finally {
             syncingSuffix = false;
         }
@@ -147,6 +256,17 @@ public class SignaturePropertiesController {
                 .setTitle(RES.get("jfx.gui.dialog.selectOutputPdf"))
                 .addFilter(ExtensionFilter.of("PDF Files", "*.pdf"))
                 .showSaveDialog(txtOutFile.getScene().getWindow());
-        if (file != null) txtOutFile.setText(file.getAbsolutePath());
+        if (file != null) {
+            viewModel.outPathProperty().set(file.getParent());
+            viewModel.outBaseNameProperty().set(file.getName());
+        }
+    }
+
+    @FXML
+    private void onBrowseOutDir() {
+        File dir = new NativeFileChooser()
+                .setTitle(RES.get("jfx.gui.dialog.selectOutputDir"))
+                .showOpenDirectoryDialog(txtOutDir.getScene().getWindow());
+        if (dir != null) viewModel.outPathProperty().set(dir.getAbsolutePath());
     }
 }

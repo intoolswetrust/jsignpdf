@@ -14,9 +14,23 @@
         <Insets top="8" right="8" bottom="8" left="8"/>
     </padding>
 
+    <Label text="%jfx.gui.sig.outputDir"/>
+    <HBox spacing="4">
+        <TextField fx:id="txtOutDir" HBox.hgrow="ALWAYS" promptText="%jfx.gui.sig.outputDir.prompt">
+            <tooltip><Tooltip text="%jfx.gui.sig.outputDir.tooltip"/></tooltip>
+        </TextField>
+        <Button onAction="#onBrowseOutDir" minWidth="30">
+            <graphic><ImageView fitWidth="16" fitHeight="16" preserveRatio="true">
+                <Image url="@/net/sf/jsignpdf/fileopen16.png"/>
+            </ImageView></graphic>
+        </Button>
+    </HBox>
+
     <Label text="%jfx.gui.sig.outputFile"/>
     <HBox spacing="4">
-        <TextField fx:id="txtOutFile" HBox.hgrow="ALWAYS"/>
+        <TextField fx:id="txtOutFile" HBox.hgrow="ALWAYS">
+            <tooltip><Tooltip text="%jfx.gui.sig.outputFile.tooltip"/></tooltip>
+        </TextField>
         <Button onAction="#onBrowseOutFile" minWidth="30">
             <graphic><ImageView fitWidth="16" fitHeight="16" preserveRatio="true">
                 <Image url="@/net/sf/jsignpdf/fileopen16.png"/>
@@ -24,6 +38,9 @@
         </Button>
     </HBox>
 
+    <CheckBox fx:id="chkUseSuffix" text="%jfx.gui.sig.useSuffix">
+        <tooltip><Tooltip text="%jfx.gui.sig.useSuffix.tooltip"/></tooltip>
+    </CheckBox>
     <Label text="%jfx.gui.sig.outputSuffix"/>
     <TextField fx:id="txtOutSuffix">
         <tooltip><Tooltip text="%jfx.gui.sig.outputSuffix.tooltip"/></tooltip>

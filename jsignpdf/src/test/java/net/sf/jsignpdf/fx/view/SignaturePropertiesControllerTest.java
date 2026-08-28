@@ -120,7 +120,63 @@ public class SignaturePropertiesControllerTest {
         assertEquals("", text.get());
     }
 
+    @Test
+    public void switchOffSetsEmptySuffix() throws Exception {
+        AtomicReference<String> suffix = new AtomicReference<>();
+        AtomicReference<Boolean> fieldDisabled = new AtomicReference<>();
+        runOnFxThread(() -> {
+            SigningOptionsViewModel vm = new SigningOptionsViewModel();
+            CheckBox useSuffix = new CheckBox();
+            TextField field = new TextField();
+            newController(field, useSuffix).setViewModel(vm);
+
+            useSuffix.setSelected(false);
+            suffix.set(vm.outSuffixProperty().get());
+            fieldDisabled.set(field.isDisable());
+        });
+        assertEquals("Switch off means an empty suffix so the output keeps the input name", "", suffix.get());
+        assertTrue("The suffix field is disabled while the switch is off", fieldDisabled.get());
+    }
+
+    @Test
+    public void switchOnWithBlankFieldMeansUnset() throws Exception {
+        AtomicReference<String> suffix = new AtomicReference<>();
+        runOnFxThread(() -> {
+            SigningOptionsViewModel vm = new SigningOptionsViewModel();
+            vm.outSuffixProperty().set("");
+            CheckBox useSuffix = new CheckBox();
+            TextField field = new TextField();
+            newController(field, useSuffix).setViewModel(vm);
+
+            useSuffix.setSelected(true);
+            suffix.set(vm.outSuffixProperty().get());
+        });
+        assertNull("Switch on with a blank field falls back to the configured default", suffix.get());
+    }
+
+    @Test
+    public void loadedEmptySuffixShowsTheSwitchOff() throws Exception {
+        AtomicReference<Boolean> selected = new AtomicReference<>();
+        AtomicReference<Boolean> fieldDisabled = new AtomicReference<>();
+        runOnFxThread(() -> {
+            SigningOptionsViewModel vm = new SigningOptionsViewModel();
+            CheckBox useSuffix = new CheckBox();
+            TextField field = new TextField();
+            newController(field, useSuffix).setViewModel(vm);
+
+            vm.outSuffixProperty().set(""); // e.g. loaded from a preset
+            selected.set(useSuffix.isSelected());
+            fieldDisabled.set(field.isDisable());
+        });
+        assertFalse("An empty suffix shows the switch off", selected.get());
+        assertTrue("An empty suffix disables the field", fieldDisabled.get());
+    }
+
     private static SignaturePropertiesController newController(TextField outSuffix) {
+        return newController(outSuffix, new CheckBox());
+    }
+
+    private static SignaturePropertiesController newController(TextField outSuffix, CheckBox useSuffix) {
         SignaturePropertiesController controller = new SignaturePropertiesController();
         setField(controller, "cmbHashAlgorithm", new ComboBox<>());
         setField(controller, "cmbCertLevel", new ComboBox<>());
@@ -129,7 +185,9 @@ public class SignaturePropertiesControllerTest {
         setField(controller, "txtLocation", new TextField());
         setField(controller, "txtContact", new TextField());
         setField(controller, "chkAppend", new CheckBox());
+        setField(controller, "txtOutDir", new TextField());
         setField(controller, "txtOutFile", new TextField());
+        setField(controller, "chkUseSuffix", useSuffix);
         setField(controller, "txtOutSuffix", outSuffix);
         return controller;
     }
