@@ -1337,13 +1337,11 @@ public class MainWindowController {
 
     @FXML
     private void onZoomFit() {
-        if (!documentVM.isDocumentLoaded() || documentVM.getCurrentPageImage() == null) return;
-        double imgWidth = documentVM.getCurrentPageImage().getWidth();
-        double imgHeight = documentVM.getCurrentPageImage().getHeight();
-        double viewWidth = scrollPane.getViewportBounds().getWidth();
-        double viewHeight = scrollPane.getViewportBounds().getHeight();
-        if (imgWidth > 0 && imgHeight > 0 && viewWidth > 0 && viewHeight > 0) {
-            documentVM.setZoomLevel(Math.min(viewWidth / imgWidth, viewHeight / imgHeight));
+        if (!documentVM.isDocumentLoaded()) return;
+        double zoom = pdfPageView.zoomToFit(scrollPane.getViewportBounds().getWidth(),
+                scrollPane.getViewportBounds().getHeight());
+        if (zoom > 0) {
+            documentVM.setZoomLevel(zoom);
         }
     }
 

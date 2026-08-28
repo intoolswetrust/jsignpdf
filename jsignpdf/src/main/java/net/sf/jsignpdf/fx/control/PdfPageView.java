@@ -40,9 +40,7 @@ public class PdfPageView extends Region {
             return;
         }
 
-        double dpi = renderDpi.get() > 0 ? renderDpi.get() : PreviewRenderSettings.targetRenderDpi();
-        double rasterToDisplayScale = getScreenDpi() / dpi;
-        double displayScale = rasterToDisplayScale * zoomLevel.get();
+        double displayScale = rasterToDisplayScale() * zoomLevel.get();
         double width = image.getWidth() * displayScale;
         double height = image.getHeight() * displayScale;
 
@@ -51,6 +49,30 @@ public class PdfPageView extends Region {
         setPrefSize(width, height);
         setMinSize(width, height);
         setMaxSize(width, height);
+    }
+
+    private double rasterToDisplayScale() {
+        double dpi = renderDpi.get() > 0 ? renderDpi.get() : PreviewRenderSettings.targetRenderDpi();
+        return getScreenDpi() / dpi;
+    }
+
+    /**
+     * Zoom level at which the current page image exactly fits the given viewport, or {@code 0}
+     * when there is nothing to fit. The raster is displayed at {@code screenDpi / renderDpi}, so
+     * the viewport must be compared against that display size rather than the raster pixel size.
+     */
+    public double zoomToFit(double viewportWidth, double viewportHeight) {
+        Image image = pageImage.get();
+        if (image == null || viewportWidth <= 0 || viewportHeight <= 0) {
+            return 0;
+        }
+        double scale = rasterToDisplayScale();
+        double displayWidth = image.getWidth() * scale;
+        double displayHeight = image.getHeight() * scale;
+        if (displayWidth <= 0 || displayHeight <= 0) {
+            return 0;
+        }
+        return Math.min(viewportWidth / displayWidth, viewportHeight / displayHeight);
     }
 
     /**
