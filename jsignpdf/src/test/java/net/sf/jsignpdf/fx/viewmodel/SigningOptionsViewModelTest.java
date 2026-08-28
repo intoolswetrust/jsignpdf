@@ -323,4 +323,32 @@ public class SigningOptionsViewModelTest {
         assertEquals(HashAlgorithm.SHA384, vm2.hashAlgorithmProperty().get());
         assertTrue(vm2.tsaEnabledProperty().get());
     }
+
+    @Test
+    public void syncFromOptions_clearedOutputNameLoadsAsCleared() {
+        BasicSignerOptions opts = new BasicSignerOptions();
+        opts.setInFile("/docs/drawing.pdf");
+        opts.setOutSuffix("-DL");
+        opts.setOutFile(opts.getOutFileX()); // what resolveOutputFile persists when the box is cleared
+
+        SigningOptionsViewModel vm = new SigningOptionsViewModel();
+        vm.syncFromOptions(opts);
+
+        assertNull("A derived output file must load with the name field cleared",
+                vm.outBaseNameProperty().get());
+    }
+
+    @Test
+    public void syncFromOptions_customOutputNameSurvives() {
+        BasicSignerOptions opts = new BasicSignerOptions();
+        opts.setInFile("/docs/drawing.pdf");
+        opts.setOutSuffix("-DL");
+        opts.setOutFile("/docs/final.pdf");
+
+        SigningOptionsViewModel vm = new SigningOptionsViewModel();
+        vm.syncFromOptions(opts);
+
+        assertEquals("A deliberately chosen name must survive the round trip",
+                "final.pdf", vm.outBaseNameProperty().get());
+    }
 }

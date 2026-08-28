@@ -215,7 +215,7 @@ public class SigningOptionsViewModel {
         outFile.set(opts.getOutFile());
         outSuffix.set(opts.getOutSuffix());
         outPath.set(opts.getOutPathRaw());
-        outBaseName.set(baseNameOf(opts.getOutFile()));
+        outBaseName.set(loadedBaseName(opts));
         append.set(opts.isAppend());
         signerName.set(opts.getSignerName());
         reason.set(opts.getReason());
@@ -386,6 +386,21 @@ public class SigningOptionsViewModel {
 
     private static String fromCharArray(char[] c) {
         return c != null ? new String(c) : null;
+    }
+
+    /**
+     * The output file name to show on load: {@code null} (the field stays cleared, deriving from the input and suffix)
+     * when the persisted output file is exactly what the persisted input derives, so a cleared box round-trips as
+     * cleared; otherwise the explicit name the user chose.
+     */
+    private static String loadedBaseName(BasicSignerOptions opts) {
+        String storedName = baseNameOf(opts.getOutFile());
+        if (storedName == null) {
+            return null;
+        }
+        String derivedName = baseNameOf(BasicSignerOptions.composeOutFileName(
+                opts.getOutPathRaw(), null, opts.getInFile(), opts.getOutSuffix()));
+        return storedName.equals(derivedName) ? null : storedName;
     }
 
     private static String baseNameOf(String path) {
