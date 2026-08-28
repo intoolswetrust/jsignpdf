@@ -5,6 +5,7 @@ import static net.sf.jsignpdf.Constants.RES;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -159,10 +160,7 @@ public class PdfExtraInfo {
         PdfReader reader = null;
         try {
             reader = PdfUtils.getPdfReader(options.getInFile(), options.getPdfOwnerPwdStrX().getBytes());
-            final Rectangle page = reader.getPageSize(field.page());
-            return relativeRect(field.llx() - page.getLeft(), field.lly() - page.getBottom(),
-                    field.urx() - page.getLeft(), field.ury() - page.getBottom(), page.getWidth(), page.getHeight(),
-                    reader.getPageRotation(field.page()));
+            return relativeRect(reader, field);
         } catch (Exception e) {
             return null;
         } finally {
@@ -173,6 +171,52 @@ public class PdfExtraInfo {
                     // nothing to do
                 }
             }
+        }
+    }
+
+    /**
+     * Same as {@link #getFieldRelativeRect(SignatureFieldInfo)} for a whole list of fields, reading the
+     * document once instead of once per field.
+     *
+     * @param fields the fields to mark
+     * @return the relative rectangle of every field whose page geometry could be read, in the given order
+     */
+    public Map<SignatureFieldInfo, float[]> getFieldRelativeRects(List<SignatureFieldInfo> fields) {
+        if (fields == null || fields.isEmpty()) {
+            return Map.of();
+        }
+        final Map<SignatureFieldInfo, float[]> result = new LinkedHashMap<>();
+        PdfReader reader = null;
+        try {
+            reader = PdfUtils.getPdfReader(options.getInFile(), options.getPdfOwnerPwdStrX().getBytes());
+            for (SignatureFieldInfo field : fields) {
+                final float[] rect = relativeRect(reader, field);
+                if (rect != null) {
+                    result.put(field, rect);
+                }
+            }
+        } catch (Exception e) {
+            // nothing to do
+        } finally {
+            if (reader != null) {
+                try {
+                    reader.close();
+                } catch (Exception e) {
+                    // nothing to do
+                }
+            }
+        }
+        return result;
+    }
+
+    private static float[] relativeRect(PdfReader reader, SignatureFieldInfo field) {
+        try {
+            final Rectangle page = reader.getPageSize(field.page());
+            return relativeRect(field.llx() - page.getLeft(), field.lly() - page.getBottom(),
+                    field.urx() - page.getLeft(), field.ury() - page.getBottom(), page.getWidth(), page.getHeight(),
+                    reader.getPageRotation(field.page()));
+        } catch (Exception e) {
+            return null;
         }
     }
 

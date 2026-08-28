@@ -8,6 +8,7 @@ import static org.junit.Assert.fail;
 
 import java.io.File;
 import java.util.List;
+import java.util.Map;
 
 import net.sf.jsignpdf.TestPdfFields.FieldSpec;
 import net.sf.jsignpdf.types.SignatureFieldInfo;
@@ -177,6 +178,24 @@ public class SignatureFieldResolutionTest {
         // A4 is 595x842; the field's top edge is 842-760 = 82 points below the top of the page.
         assertNotNull(marker);
         assertRelativeRect("A4 field marker", marker, 70f / 595f, 82f / 842f, 230f / 595f, 60f / 842f);
+    }
+
+    /**
+     * The GUI marks every unsigned field of a page, so the batch read has to return them all with one open.
+     */
+    @Test
+    public void allFieldMarkersAreReadInOneGo() throws Exception {
+        File pdf = createPdf(2, FieldSpec.blank("Signature1", 1, 70, 700, 300, 760),
+                FieldSpec.blank("Signature2", 2, 70, 100, 300, 160));
+
+        List<SignatureFieldInfo> fields = extraInfo(pdf).getSignatureFields();
+        Map<SignatureFieldInfo, float[]> markers = extraInfo(pdf).getFieldRelativeRects(fields);
+
+        assertEquals(2, markers.size());
+        assertRelativeRect("page 1 field", markers.get(byName(fields, "Signature1")), 70f / 595f, 82f / 842f,
+                230f / 595f, 60f / 842f);
+        assertRelativeRect("page 2 field", markers.get(byName(fields, "Signature2")), 70f / 595f, 682f / 842f,
+                230f / 595f, 60f / 842f);
     }
 
     private static void assertRelativeRect(String message, float[] actual, float x, float y, float width,
