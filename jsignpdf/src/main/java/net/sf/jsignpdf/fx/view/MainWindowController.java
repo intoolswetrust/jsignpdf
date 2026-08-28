@@ -916,6 +916,21 @@ public class MainWindowController {
     }
 
     /**
+     * True when {@code baseName} is blank or is exactly the name the given previous input derives with the current
+     * suffix — i.e. not a name the user deliberately chose, so it is safe to refresh for a new document.
+     */
+    private boolean isDerivedBaseName(String baseName, String previousInFile) {
+        if (trimToNull(baseName) == null) {
+            return true;
+        }
+        if (trimToNull(previousInFile) == null) {
+            return false;
+        }
+        String derived = new File(suggestedOutFileFor(new File(previousInFile))).getName();
+        return baseName.equals(derived);
+    }
+
+    /**
      * Resolves the effective output path from the two user-facing fields — the output directory ({@code outPath}) and the
      * output file name ({@code outBaseName}) — plus the input file and suffix, and writes it to {@code outFile} (the value
      * the engines, the status-bar label and the sandbox portal check consume). A blank name means "use the name derived
@@ -1412,12 +1427,15 @@ public class MainWindowController {
             signingVM.visibleProperty().set(false);
             placementVM.reset();
 
-            options.setInFile(file.getAbsolutePath());
+            // A derived output name is refreshed for the new document; a name the user deliberately chose is kept, like
+            // the output directory. The two are told apart by comparing against the name the previous input derived —
+            // captured before setInFile below overwrites it. The path resolves via the document-file listener once
+            // documentVM is updated further down.
+            if (isDerivedBaseName(signingVM.outBaseNameProperty().get(), options.getInFile())) {
+                signingVM.outBaseNameProperty().set(null);
+            }
 
-            // A custom output name from the previous document is discarded so the new document derives its own; a
-            // deliberately chosen output directory is config-like and kept. The path resolves via the document-file
-            // listener once documentVM is updated below.
-            signingVM.outBaseNameProperty().set(null);
+            options.setInFile(file.getAbsolutePath());
 
             // Try to open PDF, prompting for owner password if needed
             int pages;
