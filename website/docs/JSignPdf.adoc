@@ -918,10 +918,14 @@ author pre-places an empty signature field for each signer ("Signature #1", "Sig
 fills their own box. JSignPdf can sign into such a field instead of creating a new one. The bundled
 `demo/service-agreement.pdf` carries one, so you can try this out right away -- see <<Demo files>>.
 
+Empty signature fields are shaded on the page preview as soon as a document is opened, so you can see where
+the boxes are before picking one. JSignPdf draws the shading itself, independently of the preview backend in
+use; fields with a zero-size or hidden widget are not shaded, because they are invisible in any viewer too.
+
 In the JavaFX UI, the _Signature field_ combo box at the top of the _Signature Appearance_ panel lists the
-empty signature fields of the opened document. Pick one and the signature goes there; the field is marked on
-the page preview and the position controls are switched off, because the field's own rectangle decides where
-the signature lands. _Visible signature_ is turned on and locked (in the panel, the toolbar and the menu
+empty signature fields of the opened document. Pick one and the signature goes there; the selected field gets
+a stronger marker on the page preview and the position controls are switched off, because the field's own
+rectangle decides where the signature lands. _Visible signature_ is turned on and locked (in the panel, the toolbar and the menu
 alike) for as long as a field is selected, because the appearance is always drawn into the field -- switch
 back to _(create new field)_ if you want an invisible signature, or pick a field whose rectangle has zero
 size, which gives one anyway. The combo stays on _(create new field)_ for documents without empty fields, and

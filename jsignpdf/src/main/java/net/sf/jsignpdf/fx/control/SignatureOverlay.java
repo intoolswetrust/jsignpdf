@@ -1,5 +1,8 @@
 package net.sf.jsignpdf.fx.control;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import javafx.scene.Cursor;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.Pane;
@@ -20,6 +23,11 @@ public class SignatureOverlay extends Pane {
     /** Read-only marker for the rectangle of a selected existing signature field (no drag handles). */
     private final Rectangle fieldRect = new Rectangle();
     private double fieldRelX, fieldRelY, fieldRelWidth, fieldRelHeight;
+    /**
+     * Read-only markers of the unsigned signature fields of the displayed page.
+     */
+    private final List<Rectangle> blankFieldRects = new ArrayList<>();
+    private final List<double[]> blankFieldMarkers = new ArrayList<>();
 
     // Drag state
     private double dragStartX, dragStartY;
@@ -97,6 +105,53 @@ public class SignatureOverlay extends Pane {
         fieldRect.setVisible(false);
     }
 
+    /**
+     * Marks the unsigned signature fields of the displayed page, each as {@code {x, y, width, height}} in
+     * relative (0..1) page coordinates with the origin in the top-left corner. The markers are display-only and
+     * are drawn underneath the placement rectangle. They replace the field shading that some preview backends
+     * paint themselves, so the fields show regardless of which backend rendered the page.
+     */
+    public void setBlankFieldMarkers(List<double[]> markers) {
+        getChildren().removeAll(blankFieldRects);
+        blankFieldRects.clear();
+        blankFieldMarkers.clear();
+        if (markers != null) {
+            for (double[] marker : markers) {
+                if (marker == null || marker.length < 4 || marker[2] <= 0 || marker[3] <= 0) {
+                    continue;
+                }
+                blankFieldMarkers.add(marker.clone());
+                final Rectangle rect = new Rectangle();
+                rect.getStyleClass().add("signature-field-blank-rect");
+                rect.setMouseTransparent(true);
+                blankFieldRects.add(rect);
+                getChildren().add(0, rect);
+            }
+        }
+        updateBlankFieldRectPositions();
+    }
+
+    /**
+     * Removes the unsigned-field markers (no document, or another page is shown).
+     */
+    public void clearBlankFieldMarkers() {
+        setBlankFieldMarkers(null);
+    }
+
+    private void updateBlankFieldRectPositions() {
+        final double w = getWidth();
+        final double h = getHeight();
+        if (w <= 0 || h <= 0) return;
+        for (int i = 0; i < blankFieldRects.size(); i++) {
+            final double[] marker = blankFieldMarkers.get(i);
+            final Rectangle rect = blankFieldRects.get(i);
+            rect.setX(marker[0] * w);
+            rect.setY(marker[1] * h);
+            rect.setWidth(marker[2] * w);
+            rect.setHeight(marker[3] * h);
+        }
+    }
+
     private void updateFieldRectPosition() {
         double w = getWidth();
         double h = getHeight();
@@ -109,6 +164,7 @@ public class SignatureOverlay extends Pane {
 
     private void updateRectPosition() {
         updateFieldRectPosition();
+        updateBlankFieldRectPositions();
         double w = getWidth();
         double h = getHeight();
         if (w <= 0 || h <= 0) return;

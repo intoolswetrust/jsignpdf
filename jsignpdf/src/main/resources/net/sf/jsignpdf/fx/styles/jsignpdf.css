@@ -142,6 +142,13 @@
     -fx-fill: rgba(46, 125, 50, 0.15);
 }
 
+/* Unsigned signature fields of the page - fainter than the selected field and the placement rectangle. */
+.signature-field-blank-rect {
+    -fx-stroke: #7986cb;
+    -fx-stroke-width: 1;
+    -fx-fill: rgba(121, 134, 203, 0.18);
+}
+
 /* Accordion in side panel */
 .titled-pane > .title {
     -fx-font-weight: bold;

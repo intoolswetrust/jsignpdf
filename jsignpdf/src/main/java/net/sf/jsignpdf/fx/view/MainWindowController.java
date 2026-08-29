@@ -2,7 +2,10 @@ package net.sf.jsignpdf.fx.view;
 
 import java.io.File;
 import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.logging.Level;
 
@@ -124,6 +127,10 @@ public class MainWindowController {
     private SignatureFieldInfo selectedSigField;
     /** Marker rectangle of {@link #selectedSigField}, relative to the displayed page (see PdfExtraInfo). */
     private float[] selectedSigFieldMarker;
+    /**
+     * Marker rectangles of the document's unsigned signature fields, relative to their own page.
+     */
+    private final Map<SignatureFieldInfo, float[]> blankSigFieldMarkers = new LinkedHashMap<>();
     /** Mirrors {@link #selectedSigField} for the bindings that lock the visible-signature toggles. */
     private final BooleanProperty sigFieldSelected = new SimpleBooleanProperty(false);
     /** True while no document is loaded, i.e. there is nothing to place a visible signature on. */
@@ -388,6 +395,7 @@ public class MainWindowController {
             capturePlacementToSigningVM();
             updateSigCoordsBadge();
             updateFieldHighlight(selectedSigField);
+            updateBlankFieldMarkers();
         });
 
         // Zoom combo box changes
@@ -1606,9 +1614,6 @@ public class MainWindowController {
      * the full inventory.
      */
     private void refreshSignatureFields() {
-        if (signatureSettingsController == null) {
-            return;
-        }
         List<SignatureFieldInfo> blankFields = List.of();
         try {
             blankFields = new PdfExtraInfo(options).getSignatureFields().stream().filter(SignatureFieldInfo::blank)
@@ -1616,7 +1621,46 @@ public class MainWindowController {
         } catch (Exception e) {
             LOGGER.log(Level.WARNING, "Unable to read the signature fields of the document", e);
         }
-        signatureSettingsController.setSignatureFields(blankFields);
+        if (signatureSettingsController != null) {
+            signatureSettingsController.setSignatureFields(blankFields);
+        }
+        refreshBlankFieldMarkers(blankFields);
+    }
+
+    /**
+     * Reads the rectangles of the blank signature fields once per document, so they can be marked on the page
+     * without reopening it on every page change. Fields the author made invisible - no rectangle, or a hidden
+     * widget - are left out: they show in no viewer either.
+     */
+    private void refreshBlankFieldMarkers(List<SignatureFieldInfo> blankFields) {
+        blankSigFieldMarkers.clear();
+        final List<SignatureFieldInfo> markable = blankFields.stream()
+                .filter(field -> field.page() >= 1 && field.hasVisibleRect() && !field.hidden()).toList();
+        if (options != null && !markable.isEmpty()) {
+            blankSigFieldMarkers.putAll(new PdfExtraInfo(options).getFieldRelativeRects(markable));
+        }
+        updateBlankFieldMarkers();
+    }
+
+    /**
+     * Draws the markers of the unsigned signature fields of the displayed page. The selected field is left out -
+     * {@link #updateFieldHighlight(SignatureFieldInfo)} marks it on its own.
+     */
+    private void updateBlankFieldMarkers() {
+        if (signatureOverlay == null) {
+            return;
+        }
+        final int page = documentVM.getCurrentPage();
+        final List<double[]> markers = new ArrayList<>();
+        for (Map.Entry<SignatureFieldInfo, float[]> entry : blankSigFieldMarkers.entrySet()) {
+            final SignatureFieldInfo field = entry.getKey();
+            if (field.page() != page || field.equals(selectedSigField)) {
+                continue;
+            }
+            final float[] rect = entry.getValue();
+            markers.add(new double[] { rect[0], rect[1], rect[2], rect[3] });
+        }
+        signatureOverlay.setBlankFieldMarkers(markers);
     }
 
     /**
@@ -1641,6 +1685,7 @@ public class MainWindowController {
                 // shows. The position options were reset with the selection, so this lands on the default spot.
                 autoPlaceVisibleSignature();
             }
+            updateBlankFieldMarkers();
             updateSigStateBadge();
             return;
         }
@@ -1660,6 +1705,7 @@ public class MainWindowController {
             documentVM.setCurrentPage(field.page());
         }
         updateFieldHighlight(field);
+        updateBlankFieldMarkers();
         updateSigStateBadge();
     }
 
@@ -1684,6 +1730,8 @@ public class MainWindowController {
         if (signatureSettingsController != null) {
             signatureSettingsController.setSignatureFields(List.of());
         }
+        blankSigFieldMarkers.clear();
+        signatureOverlay.clearBlankFieldMarkers();
         signatureOverlay.setVisible(false);
         if (options != null) {
             options.setInFile(null);
