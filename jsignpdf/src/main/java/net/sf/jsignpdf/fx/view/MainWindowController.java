@@ -11,6 +11,7 @@ import java.util.logging.Level;
 
 import javafx.animation.PauseTransition;
 import javafx.application.Platform;
+import javafx.beans.binding.BooleanBinding;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.fxml.FXML;
@@ -135,6 +136,10 @@ public class MainWindowController {
     private final BooleanProperty sigFieldSelected = new SimpleBooleanProperty(false);
     /** True while no document is loaded, i.e. there is nothing to place a visible signature on. */
     private final BooleanProperty noDocument = new SimpleBooleanProperty(true);
+    /** True while the running background operation is a document timestamp rather than a signature. */
+    private boolean timestampRun;
+    /** Output file of the running document timestamp, for the completion message. */
+    private String timestampOutFile;
     private PdfPageView pdfPageView;
     private SignatureOverlay signatureOverlay;
     /** Holds the side panel node while it's detached from the SplitPane (hidden). */
@@ -197,6 +202,8 @@ public class MainWindowController {
     @FXML private TitledPane signatureAppearanceAccordionPane;
     @FXML private TitledPane tsaAccordionPane;
     @FXML private TitledPane encryptionAccordionPane;
+    @FXML private Button btnTimestamp;
+    @FXML private MenuItem menuTimestamp;
     @FXML private ScrollPane scrollPane;
     @FXML private SignaturePreviewStackPane pdfArea;
     @FXML private Label lblDropHint;
@@ -449,15 +456,20 @@ public class MainWindowController {
             progressBar.setVisible(false);
             boolean success = signingService.getValue();
             if (success) {
-                updateStatus(RES.get("jfx.gui.status.signingOk"));
+                updateStatus(RES.get(timestampRun ? "jfx.gui.status.timestampOk" : "jfx.gui.status.signingOk"));
                 showAlert(Alert.AlertType.INFORMATION,
-                        RES.get("jfx.gui.dialog.signingComplete.title"),
-                        RES.get("jfx.gui.dialog.signingComplete.text"));
+                        RES.get(timestampRun ? "jfx.gui.dialog.timestampComplete.title"
+                                : "jfx.gui.dialog.signingComplete.title"),
+                        timestampRun ? RES.get("jfx.gui.dialog.timestampComplete.text", timestampOutFile)
+                                : RES.get("jfx.gui.dialog.signingComplete.text"));
             } else {
-                updateStatus(RES.get("jfx.gui.status.signingFailed"));
+                updateStatus(RES.get(timestampRun ? "jfx.gui.status.timestampFailed"
+                        : "jfx.gui.status.signingFailed"));
                 showAlert(Alert.AlertType.ERROR,
-                        RES.get("jfx.gui.dialog.signingFailed.title"),
-                        RES.get("jfx.gui.dialog.signingFailed.text"));
+                        RES.get(timestampRun ? "jfx.gui.dialog.timestampFailed.title"
+                                : "jfx.gui.dialog.signingFailed.title"),
+                        RES.get(timestampRun ? "jfx.gui.dialog.timestampFailed.text"
+                                : "jfx.gui.dialog.signingFailed.text"));
             }
         });
         signingService.setOnFailed(e -> {
@@ -493,6 +505,13 @@ public class MainWindowController {
         // is safe. (With OpenPDF — the only engine in phase 1 — every capability is present, so nothing
         // is disabled; the wiring exists for reduced-capability engines added in phase 2.)
         engineCapabilities.gate(btnTsa, Capability.TSA);
+        // A document timestamp needs both a loaded document and an engine that can append one. Bound as a
+        // single expression, because setDocumentControlsDisabled assigns disableProperty imperatively and a
+        // control cannot be both bound and set.
+        final BooleanBinding timestampDisabled = engineCapabilities.unsupported(Capability.DOC_TIMESTAMP)
+                .or(noDocument);
+        engineCapabilities.gate(btnTimestamp, timestampDisabled, Capability.DOC_TIMESTAMP);
+        menuTimestamp.disableProperty().bind(timestampDisabled);
         setupPadesLevelSelector();
         if (padesLevelAccordionPane != null) {
             engineCapabilities.gate(padesLevelAccordionPane, Capability.PADES_BASELINE_B);
@@ -1273,6 +1292,7 @@ public class MainWindowController {
         }
 
         // Start signing
+        timestampRun = false;
         signingService.cancel();
         signingService.reset();
         signingService.setOptions(options.createCopy());
@@ -1280,6 +1300,76 @@ public class MainWindowController {
         progressBar.setProgress(-1); // indeterminate
         updateStatus(RES.get("jfx.gui.status.signingInProgress"));
         signingService.start();
+    }
+
+    /**
+     * Appends a document timestamp instead of signing: no key material, no appearance, and none of the
+     * signature-only settings are consulted. The TSA URL is required regardless of the TSA toggle, which means
+     * "timestamp the signature I am about to make" - a different thing.
+     */
+    @FXML
+    private void onTimestamp() {
+        if (options == null || !documentVM.isDocumentLoaded()) {
+            showAlert(Alert.AlertType.WARNING,
+                    RES.get("jfx.gui.dialog.noDocument.title"),
+                    RES.get("jfx.gui.dialog.noDocument.text"));
+            return;
+        }
+        if (trimToNull(signingVM.tsaUrlProperty().get()) == null) {
+            expandTsaPane();
+            showAlert(Alert.AlertType.WARNING,
+                    RES.get("jfx.gui.dialog.missingTsaUrl.title"),
+                    RES.get("jfx.gui.dialog.missingTsaUrl.text"));
+            return;
+        }
+
+        String outDir = trimToNull(signingVM.outPathProperty().get());
+        if (Sandbox.isSandboxed() && outDir != null && !Sandbox.hasDirectoryGrant(outDir)) {
+            if (!promptForOutputDir()) {
+                return;
+            }
+        }
+
+        signingVM.syncToOptions(options);
+        options.setTimestampOnly(true);
+        // The view model derives the timestamp flag from the TSA toggle, and isTimestampX() gates the whole
+        // TSA plumbing - which this operation is nothing but.
+        options.setTimestamp(true);
+        options.setOutFile(timestampOutFileFor(documentVM.getDocumentFile()));
+
+        if (Sandbox.isDocPortalPath(options.getOutFile())) {
+            if (!promptForOutputFile()) {
+                return;
+            }
+            options.setOutFile(signingVM.outFileProperty().get());
+        }
+
+        timestampRun = true;
+        timestampOutFile = options.getOutFile();
+        final BasicSignerOptions timestampOptions = options.createCopy();
+        options.setTimestampOnly(false);
+
+        signingService.cancel();
+        signingService.reset();
+        signingService.setOptions(timestampOptions);
+        progressBar.setVisible(true);
+        progressBar.setProgress(-1); // indeterminate
+        updateStatus(RES.get("jfx.gui.status.timestampInProgress"));
+        signingService.start();
+    }
+
+    /**
+     * The output path of a document timestamp: the name typed into the output fields when there is one,
+     * otherwise the input name with the timestamp suffix ({@code output.suffix.timestamp}) rather than the
+     * signing one. An explicit suffix - including the empty one the suffix switch produces - is honoured.
+     */
+    private String timestampOutFileFor(File inputFile) {
+        if (trimToNull(signingVM.outBaseNameProperty().get()) != null) {
+            return signingVM.outFileProperty().get();
+        }
+        final String suffix = signingVM.outSuffixProperty().get();
+        return BasicSignerOptions.composeOutFileName(trimToNull(signingVM.outPathProperty().get()), null,
+                inputFile.getAbsolutePath(), suffix != null ? suffix : AppConfig.defaultTimestampSuffix());
     }
 
     /**

@@ -157,6 +157,14 @@ public final class AppConfig {
         return cfg().getNotEmptyProperty("output.suffix", Constants.DEFAULT_OUT_SUFFIX);
     }
 
+    /**
+     * Suffix appended to the input file name to build the default output file name of the append-only document
+     * timestamp operation ({@code --timestamp-only}), or {@value Constants#DEFAULT_TIMESTAMP_SUFFIX} when unset.
+     */
+    public static String defaultTimestampSuffix() {
+        return cfg().getNotEmptyProperty("output.suffix.timestamp", Constants.DEFAULT_TIMESTAMP_SUFFIX);
+    }
+
     public static boolean checkValidity() {
         return cfg().getAsBool("certificate.checkValidity", true);
     }

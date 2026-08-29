@@ -25,6 +25,31 @@ public class EngineMismatchValidatorTest {
     }
 
     @Test
+    public void timestampOnlyChecksOnlyWhatTheOperationReads() {
+        // Every keystore / appearance / encryption setting is ignored by a document timestamp, so an engine
+        // lacking those capabilities must not be reported for them - only DOC_TIMESTAMP and the TSA plumbing.
+        BasicSignerOptions opts = new BasicSignerOptions();
+        opts.setAdvanced(true);
+        opts.setTimestampOnly(true);
+        opts.setTimestamp(true);
+        opts.setVisible(true);
+        opts.setCertLevel(net.sf.jsignpdf.types.CertificationLevel.CERTIFIED_NO_CHANGES_ALLOWED);
+        StubSigningEngine engine = new StubSigningEngine("noTimestamp");
+        Set<Capability> reported = caps(EngineMismatchValidator.findMismatches(opts, engine));
+        assertEquals(EnumSet.of(Capability.DOC_TIMESTAMP, Capability.TSA), reported);
+    }
+
+    @Test
+    public void timestampOnlyIsSatisfiedByATimestampCapableEngine() {
+        BasicSignerOptions opts = new BasicSignerOptions();
+        opts.setAdvanced(true);
+        opts.setTimestampOnly(true);
+        opts.setTimestamp(true);
+        StubSigningEngine engine = new StubSigningEngine("ts", Capability.DOC_TIMESTAMP, Capability.TSA);
+        assertTrue(EngineMismatchValidator.findMismatches(opts, engine).isEmpty());
+    }
+
+    @Test
     public void defaultsProduceNoHashOrOverwriteMismatch() {
         // A fresh options object carries the global default hash (never explicitly chosen) and append
         // (incremental) mode on. An unchosen default is the engine's problem to honour/upgrade, and

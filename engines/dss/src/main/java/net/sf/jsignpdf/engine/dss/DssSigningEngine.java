@@ -77,9 +77,12 @@ import eu.europa.esig.dss.model.SignatureValue;
 import eu.europa.esig.dss.model.ToBeSigned;
 import eu.europa.esig.dss.pades.DSSFont;
 import eu.europa.esig.dss.pades.PAdESSignatureParameters;
+import eu.europa.esig.dss.pades.PAdESTimestampParameters;
 import eu.europa.esig.dss.pades.SignatureFieldParameters;
 import eu.europa.esig.dss.pades.SignatureImageTextParameters;
+import eu.europa.esig.dss.pades.signature.PAdESExtensionService;
 import eu.europa.esig.dss.pades.signature.PAdESService;
+import eu.europa.esig.dss.pades.timestamp.PAdESTimestampService;
 import eu.europa.esig.dss.pdf.PdfMemoryUsageSetting;
 import eu.europa.esig.dss.pdf.PdfSignatureFieldPositionChecker;
 import eu.europa.esig.dss.signature.resources.TempFileResourcesHandlerBuilder;
@@ -192,6 +195,7 @@ public class DssSigningEngine implements SigningEngine {
             Capability.SIGN_EXISTING_FIELD,
 
             Capability.TSA, Capability.TSA_POLICY_OID, Capability.TSA_BASIC_AUTH,
+            Capability.DOC_TIMESTAMP,
             Capability.OCSP_EMBED, Capability.CRL_EMBED,
 
             Capability.PROXY_SUPPORT,
@@ -405,7 +409,13 @@ public class DssSigningEngine implements SigningEngine {
                     // rejects the signature because that chain is not anchored, the untrusted-chain report can
                     // name the timestamp certificate instead of a bare fingerprint (issue #448).
                     tspSource = new CapturingTspSource(options.getTsaUrl(),
-                            buildTspSource(options, parameters, digestAlgorithm, proxyConfig, engineConfig));
+                            buildTspSource(options, proxyConfig, engineConfig));
+                    final DigestAlgorithm tsaDigest = tsaDigestAlgorithm(options);
+                    if (tsaDigest != null) {
+                        parameters.getContentTimestampParameters().setDigestAlgorithm(tsaDigest);
+                        parameters.getSignatureTimestampParameters().setDigestAlgorithm(tsaDigest);
+                        parameters.getArchiveTimestampParameters().setDigestAlgorithm(tsaDigest);
+                    }
                     service.setTspSource(tspSource);
                 }
 
@@ -459,6 +469,126 @@ public class DssSigningEngine implements SigningEngine {
     }
 
     /**
+     * Appends an ETSI.RFC3161 document timestamp without creating a signature. The two steps DSS's
+     * {@code PAdESService.timestamp()} performs are driven here rather than through that wrapper: the
+     * validation-data step is run against a verifier whose "someone else's signature" alerts are relaxed
+     * ({@link DssTrustConfigurer#relaxAlertsForDocumentTimestamp}) and is additionally caught, so an archived
+     * document whose signer certificate expired or whose chain is not anchored still gets its timestamp -
+     * exactly the input this operation exists for (issue #141).
+     */
+    @Override
+    public boolean timestamp(final BasicSignerOptions options, final EngineConfig engineConfig) {
+        final String outFile = options.getOutFileX();
+        boolean finished = false;
+        TempFileResourcesHandlerBuilder resourcesHandlerBuilder = null;
+        CapturingTspSource tspSource = null;
+        try {
+            final BufferingMode bufferingMode = AppConfig.bufferingMode();
+            final File bufferingTempDir;
+            if (bufferingMode == BufferingMode.TEMP) {
+                try {
+                    bufferingTempDir = AppConfig.bufferingTempDir();
+                } catch (IOException e) {
+                    LOGGER.severe(e.getMessage());
+                    return false;
+                }
+                LOGGER.info(RES.get("console.buffering.temp", bufferingTempDir != null
+                        ? bufferingTempDir.getAbsolutePath() : System.getProperty("java.io.tmpdir")));
+            } else {
+                bufferingTempDir = null;
+            }
+
+            final DssTrustConfigurer trustConfigurer = new DssTrustConfigurer(engineConfig);
+            final ProxyConfig proxyConfig = buildProxyConfig(options);
+            final CommonCertificateVerifier verifier;
+            try {
+                verifier = trustConfigurer.buildVerifier(proxyConfig);
+            } catch (Exception e) {
+                LOGGER.log(Level.SEVERE, RES.get("console.dss.trustConfigFailed"), e);
+                return false;
+            }
+            DssTrustConfigurer.relaxAlertsForDocumentTimestamp(verifier);
+            LOGGER.info(RES.get("console.dss.timestamp.relaxedAlerts"));
+            if (!trustConfigurer.isOnlineEnabled()) {
+                LOGGER.warning(RES.get("console.dss.timestamp.noTrustSource"));
+            }
+
+            final JSignPdfPdfObjFactory pdfObjFactory = new JSignPdfPdfObjFactory();
+            if (bufferingMode == BufferingMode.TEMP) {
+                resourcesHandlerBuilder = new TempFileResourcesHandlerBuilder();
+                resourcesHandlerBuilder.setFileNamePrefix("jsignpdf-dss-");
+                if (bufferingTempDir != null) {
+                    resourcesHandlerBuilder.setTempFileDirectory(bufferingTempDir);
+                }
+                pdfObjFactory.setResourcesHandlerBuilder(resourcesHandlerBuilder);
+                pdfObjFactory.setPdfMemoryUsageSetting(PdfMemoryUsageSetting.mixed(MIXED_THRESHOLD_BYTES));
+            }
+
+            final PAdESTimestampParameters parameters = new PAdESTimestampParameters();
+            final char[] ownerPwd = options.getPdfOwnerPwd();
+            if (ownerPwd != null && ownerPwd.length > 0) {
+                parameters.setPasswordProtection(ownerPwd);
+            }
+            final DigestAlgorithm tsaDigest = tsaDigestAlgorithm(options);
+            if (tsaDigest != null) {
+                parameters.setDigestAlgorithm(tsaDigest);
+            }
+
+            LOGGER.info(RES.get("console.creatingTsaClient"));
+            tspSource = new CapturingTspSource(options.getTsaUrl(),
+                    buildTspSource(options, proxyConfig, engineConfig));
+
+            final DSSDocument document = new FileDocument(new File(options.getInFile()));
+            DSSDocument toTimestamp = document;
+            try {
+                toTimestamp = new PAdESExtensionService(verifier, pdfObjFactory)
+                        .incorporateValidationData(document, parameters.getPasswordProtection());
+            } catch (eu.europa.esig.dss.alert.exception.AlertException e) {
+                // Whatever DSS refused to collect only costs validation data; the timestamp itself makes no
+                // claim about the signatures already in the document, so it is still appended (issue #141).
+                final String details = DssUntrustedChainReporter.describe(e, null,
+                        tspSource.getCapturedCertificates());
+                String message = RES.get("console.dss.timestamp.noValidationData",
+                        StringUtils.defaultString(e.getMessage()));
+                if (!details.isEmpty()) {
+                    message = message + System.lineSeparator() + details;
+                }
+                LOGGER.warning(message);
+            }
+
+            final int configuredContentSize = engineConfig.getInt(KEY_CONTENT_SIZE, 0);
+            final int initialContentSize = configuredContentSize > 0
+                    ? configuredContentSize
+                    : estimateContentSize(new Certificate[0], true);
+            final boolean retryOnUndersize = engineConfig.getBoolean(KEY_RETRY_ON_UNDERSIZE, true);
+            final PAdESTimestampService timestampService = new PAdESTimestampService(tspSource,
+                    pdfObjFactory.newSignatureTimestampService());
+            final DSSDocument documentToTimestamp = toTimestamp;
+            final DSSDocument timestamped = withContentSizeRetry(contentSize -> {
+                parameters.setContentSize(contentSize);
+                return timestampService.timestampDocument(documentToTimestamp, parameters);
+            }, initialContentSize, retryOnUndersize, resourcesHandlerBuilder);
+
+            LOGGER.info(RES.get("console.createOutPdf", outFile));
+            try (FileOutputStream fos = new FileOutputStream(outFile)) {
+                timestamped.writeTo(fos);
+            }
+            LOGGER.info(RES.get("console.dss.timestamp.done", outFile));
+            finished = true;
+        } catch (Exception e) {
+            final String httpHint = remoteHttpErrorHint(e);
+            LOGGER.log(Level.SEVERE, httpHint != null ? httpHint : RES.get("console.exception"), e);
+        } catch (OutOfMemoryError e) {
+            LOGGER.log(Level.SEVERE, RES.get("console.memoryError"), e);
+        } finally {
+            if (resourcesHandlerBuilder != null) {
+                resourcesHandlerBuilder.clear();
+            }
+        }
+        return finished;
+    }
+
+    /**
      * Estimates how many bytes to reserve in the PDF {@code /Contents} for the CMS signature. DSS uses a
      * fixed reservation (default {@value #MIN_CONTENT_SIZE}) that is too small for large certificate chains
      * (e.g. eID / qualified certificates) combined with an embedded signature timestamp, which is exactly the
@@ -492,43 +622,63 @@ public class DssSigningEngine implements SigningEngine {
     }
 
     /**
-     * Signs the document, reserving {@code initialContentSize} bytes for the CMS {@code /Contents}. The
-     * reserved size is fixed before the byte ranges are digested, so it cannot be derived from the produced
-     * signature; when {@code retryOnUndersize} is enabled and DSS reports the reservation was too small, this
-     * re-runs the whole signing operation with the exact size DSS reported (plus {@link #RETRY_MARGIN}). For
-     * timestamped levels each retry fetches a fresh TSA token, hence the {@link #MAX_CONTENT_SIZE_RETRIES} cap.
+     * Signs the document, reserving {@code initialContentSize} bytes for the CMS {@code /Contents} and growing
+     * it through {@link #withContentSizeRetry} when DSS reports the reservation was too small.
      */
     private DSSDocument signWithContentSize(PAdESService service, DSSDocument document,
             PAdESSignatureParameters parameters, PrivateKeySignatureToken token,
             int initialContentSize, boolean retryOnUndersize, TempFileResourcesHandlerBuilder resourcesHandlerBuilder) {
-        int contentSize = initialContentSize;
-        for (int attempt = 0;; attempt++) {
+        return withContentSizeRetry(contentSize -> {
             parameters.setContentSize(contentSize);
-            if (LOGGER.isLoggable(Level.FINE)) {
-                LOGGER.fine("Signing attempt " + attempt + " reserving " + contentSize + " bytes for /Contents");
-            }
             final ToBeSigned dataToSign = service.getDataToSign(document, parameters);
             // From the parameters, not the key: they disagree when a PKCS#11 key reports "RSA" under an
             // id-RSASSA-PSS certificate, and DSS rejects a SignatureValue that does not match.
             final SignatureValue signatureValue = token.sign(dataToSign, parameters.getSignatureAlgorithm(),
                     token.getKeyEntry());
+            return service.signDocument(document, parameters, signatureValue);
+        }, initialContentSize, retryOnUndersize, resourcesHandlerBuilder);
+    }
+
+    /**
+     * One attempt at producing a document with a fixed {@code /Contents} reservation. Both the signature and
+     * the document timestamp fail the same way when the reservation is too small, so the growth loop around
+     * them is shared.
+     */
+    @FunctionalInterface
+    private interface ContentSizedAttempt {
+        DSSDocument attempt(int contentSize);
+    }
+
+    /**
+     * Runs {@code attempt} with a growing {@code /Contents} reservation. The reserved size is fixed before the
+     * byte ranges are digested, so it cannot be derived from the produced signature or timestamp token; when
+     * {@code retryOnUndersize} is enabled and DSS reports the reservation was too small, the whole operation is
+     * repeated with the exact size DSS reported (plus {@link #RETRY_MARGIN}). Every retry fetches a fresh TSA
+     * token, hence the {@link #MAX_CONTENT_SIZE_RETRIES} cap.
+     */
+    private DSSDocument withContentSizeRetry(ContentSizedAttempt attempt, int initialContentSize,
+            boolean retryOnUndersize, TempFileResourcesHandlerBuilder resourcesHandlerBuilder) {
+        int contentSize = initialContentSize;
+        for (int attemptNo = 0;; attemptNo++) {
+            if (LOGGER.isLoggable(Level.FINE)) {
+                LOGGER.fine("Attempt " + attemptNo + " reserving " + contentSize + " bytes for /Contents");
+            }
             try {
-                return service.signDocument(document, parameters, signatureValue);
+                return attempt.attempt(contentSize);
             } catch (IllegalArgumentException e) {
                 final Integer required = parseRequiredContentSize(e.getMessage());
                 // Doubling is the fallback when the required size cannot be parsed; the guard below stops a
                 // non-growing loop in that case.
                 final int grown = required != null ? required + RETRY_MARGIN : contentSize * 2;
-                if (!retryOnUndersize || attempt >= MAX_CONTENT_SIZE_RETRIES || grown <= contentSize) {
+                if (!retryOnUndersize || attemptNo >= MAX_CONTENT_SIZE_RETRIES || grown <= contentSize) {
                     logUndersizeGuidance(contentSize, required, retryOnUndersize);
                     throw e;
                 }
                 LOGGER.info(RES.get("console.dss.contentSizeRetry", String.valueOf(contentSize),
                         String.valueOf(grown)));
                 if (resourcesHandlerBuilder != null) {
-                    // Each attempt stages a full copy of the document in getDataToSign() and another in
-                    // signDocument(); nothing from a failed attempt is reachable, so release it before
-                    // retrying rather than letting temp files pile up across the loop.
+                    // Each attempt stages full copies of the document; nothing from a failed attempt is
+                    // reachable, so release them before retrying rather than letting temp files pile up.
                     resourcesHandlerBuilder.clear();
                 }
                 contentSize = grown;
@@ -591,8 +741,8 @@ public class DssSigningEngine implements SigningEngine {
         return null;
     }
 
-    private OnlineTSPSource buildTspSource(BasicSignerOptions options, PAdESSignatureParameters parameters,
-            DigestAlgorithm digestAlgorithm, ProxyConfig proxyConfig, EngineConfig engineConfig) {
+    private OnlineTSPSource buildTspSource(BasicSignerOptions options, ProxyConfig proxyConfig,
+            EngineConfig engineConfig) {
         final String tsaUrl = options.getTsaUrl();
         final TimestampDataLoader tsDataLoader = new TimestampDataLoader();
         tsDataLoader.setProxyConfig(proxyConfig);
@@ -611,15 +761,25 @@ public class DssSigningEngine implements SigningEngine {
             LOGGER.info(RES.get("console.settingTsaPolicy", policyOid));
             tspSource.setPolicyOid(policyOid);
         }
-        final String tsaHashAlg = options.getTsaHashAlgWithFallback();
-        if (StringUtils.isNotEmpty(tsaHashAlg)) {
-            LOGGER.info(RES.get("console.settingTsaHashAlg", tsaHashAlg));
-            final DigestAlgorithm tsaDigest = DigestAlgorithm.forJavaName(tsaHashAlg);
-            parameters.getContentTimestampParameters().setDigestAlgorithm(tsaDigest);
-            parameters.getSignatureTimestampParameters().setDigestAlgorithm(tsaDigest);
-            parameters.getArchiveTimestampParameters().setDigestAlgorithm(tsaDigest);
-        }
         return tspSource;
+    }
+
+    /**
+     * Resolves the digest the TSA is asked to imprint. Kept apart from {@link #buildTspSource} because the
+     * signing path assigns it to the three timestamp parameter sets of a signature while the document
+     * timestamp path has a single parameter object of its own. Setting it is not optional: DSS defaults the
+     * timestamp digest to SHA-512, which real TSAs reject.
+     *
+     * @param options the signing options
+     * @return the digest algorithm to imprint with, or {@code null} when none is configured
+     */
+    private static DigestAlgorithm tsaDigestAlgorithm(BasicSignerOptions options) {
+        final String tsaHashAlg = options.getTsaHashAlgWithFallback();
+        if (StringUtils.isEmpty(tsaHashAlg)) {
+            return null;
+        }
+        LOGGER.info(RES.get("console.settingTsaHashAlg", tsaHashAlg));
+        return DigestAlgorithm.forJavaName(tsaHashAlg);
     }
 
     /** Resolves the port for basic-auth registration, defaulting from the scheme when none is given. */

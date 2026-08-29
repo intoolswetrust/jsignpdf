@@ -37,4 +37,16 @@ public interface SigningEngine {
      *         for unrecoverable problems
      */
     boolean sign(BasicSignerOptions options, EngineConfig engineConfig);
+
+    /**
+     * Appends a document timestamp to the file described by {@code options}, without creating a
+     * signature. Only called on engines declaring {@link Capability#DOC_TIMESTAMP}.
+     *
+     * @param options the signing options
+     * @param engineConfig engine-scoped view of the advanced configuration
+     * @return {@code true} on success, {@code false} on a recoverable error (already logged)
+     */
+    default boolean timestamp(BasicSignerOptions options, EngineConfig engineConfig) {
+        throw new UnsupportedOperationException();
+    }
 }

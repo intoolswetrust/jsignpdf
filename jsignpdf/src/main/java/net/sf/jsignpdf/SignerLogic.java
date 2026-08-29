@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.util.List;
 import java.util.logging.Level;
 
+import net.sf.jsignpdf.engine.Capability;
 import net.sf.jsignpdf.engine.DssLtTrustPreflight;
 import net.sf.jsignpdf.engine.EngineConfig;
 import net.sf.jsignpdf.engine.EngineMismatchValidator;
@@ -51,7 +52,17 @@ public class SignerLogic implements Runnable {
      */
     @Override
     public void run() {
-        signFile();
+        execute();
+    }
+
+    /**
+     * Runs the operation the options ask for: appending a document timestamp when
+     * {@link BasicSignerOptions#isTimestampOnly()} is set, signing otherwise.
+     *
+     * @return true when the operation finished successfully, false otherwise
+     */
+    public boolean execute() {
+        return options.isTimestampOnly() ? timestampFile() : signFile();
     }
 
     /**
@@ -116,6 +127,55 @@ public class SignerLogic implements Runnable {
             LOGGER.log(Level.SEVERE, RES.get("console.exception"), e);
         } finally {
             options.setResolvedSigFieldName(null);
+            LOGGER.info(RES.get("console.finished." + (finished ? "ok" : "error")));
+            options.fireSignerFinishedEvent(null);
+        }
+        return finished;
+    }
+
+    /**
+     * Appends a document timestamp to a single file. Shares the input/output validation, the engine resolution
+     * and the capability check with {@link #signFile()}; the signature-field resolution and the LT/LTA trust
+     * preflight do not apply, because no signature is created and missing trust material only costs validation
+     * data here.
+     *
+     * @return true when the timestamp was appended, false otherwise
+     */
+    private boolean timestampFile() {
+        final String outFile = options.getOutFileX();
+        if (!validateInOutFiles(options.getInFile(), outFile)) {
+            LOGGER.info(RES.get("console.skippingSigning"));
+            return false;
+        }
+
+        boolean finished = false;
+        try {
+            final SigningEngine engine;
+            try {
+                engine = EngineRegistry.getInstance().resolve(options);
+            } catch (RuntimeException e) {
+                LOGGER.severe(RES.get("console.engineNotFound", StringUtils.defaultString(options.getEngine())));
+                return false;
+            }
+
+            final List<Mismatch> mismatches = EngineMismatchValidator.findMismatches(options, engine);
+            if (!mismatches.isEmpty()) {
+                LOGGER.severe(RES.get("console.engineMismatch", engine.id()));
+                for (Mismatch m : mismatches) {
+                    LOGGER.severe(RES.get("console.engineMismatch.option", m.option(), m.capability().name()));
+                    if (m.capability() == Capability.DOC_TIMESTAMP) {
+                        LOGGER.severe(RES.get("console.timestampOnly.notSupported", engine.id(),
+                                Capability.DOC_TIMESTAMP.name()));
+                    }
+                }
+                return false;
+            }
+
+            LOGGER.info(RES.get("console.timestampOnly.starting", StringUtils.defaultString(options.getInFile())));
+            finished = engine.timestamp(options, AppConfig.engineConfigFor(engine.id()));
+        } catch (Exception e) {
+            LOGGER.log(Level.SEVERE, RES.get("console.exception"), e);
+        } finally {
             LOGGER.info(RES.get("console.finished." + (finished ? "ok" : "error")));
             options.fireSignerFinishedEvent(null);
         }

@@ -431,6 +431,97 @@ public class SignerOptionsFromCmdLineTest {
     }
 
     @Test
+    public void timestampOnly_isNotSwallowedAsTsaUrlAndImpliesTheTsaPlumbing() throws Exception {
+        Fixture f = new Fixture("");
+        f.opts.setCmdLine(new String[] { "-tso", "-ts", "http://tsa.example/tsa" });
+        f.opts.loadCmdLine();
+        assertTrue(f.opts.isTimestampOnly());
+        assertEquals("http://tsa.example/tsa", f.opts.getTsaUrl());
+        assertTrue("the flag must turn on the TSA plumbing", f.opts.isTimestampX());
+    }
+
+    @Test
+    public void timestampOnly_tsaUrlFromPropertiesFileIsEnough() throws Exception {
+        File props = tempFolder.newFile("tsa.properties");
+        Files.writeString(props.toPath(), "tsa.enabled=false\ntsa.url=http\\://tsa.example/tsa\n");
+        Fixture f = new Fixture("");
+        f.opts.setCmdLine(new String[] { "-lpf", props.getAbsolutePath(), "--timestamp-only" });
+        f.opts.loadCmdLine();
+        assertTrue(f.opts.isTimestampOnly());
+        assertTrue("a TSA URL loaded from a properties file must still enable the TSA plumbing",
+                f.opts.isTimestampX());
+    }
+
+    @Test
+    public void timestampOnly_withoutTsaUrlIsRejected() throws Exception {
+        Fixture f = new Fixture("");
+        f.opts.setCmdLine(new String[] { "--timestamp-only" });
+        try {
+            f.opts.loadCmdLine();
+            fail("expected ParseException for a missing TSA URL");
+        } catch (ParseException expected) {
+            assertTrue(expected.getMessage().contains("--tsa-server-url"));
+        }
+    }
+
+    @Test
+    public void timestampOnly_rejectsTheOptionsItCannotHonour() throws Exception {
+        assertTimestampOnlyRejects("--overwrite", "--overwrite");
+        assertTimestampOnlyRejects("--sig-field", "-sf", "Signature1");
+        assertTimestampOnlyRejects("--certification-level", "-cl", "CERTIFIED_NO_CHANGES_ALLOWED");
+    }
+
+    @Test
+    public void timestampOnly_certLevelFromAPropertiesFileIsNotRejected() throws Exception {
+        File props = tempFolder.newFile("certlevel.properties");
+        Files.writeString(props.toPath(), "certification.level=CERTIFIED_NO_CHANGES_ALLOWED\n");
+        Fixture f = new Fixture("");
+        f.opts.setCmdLine(new String[] { "-lpf", props.getAbsolutePath(), "-tso", "-ts", "http://tsa.example/tsa" });
+        f.opts.loadCmdLine();
+        assertTrue("only a typed flag is rejected, a reused properties file stays usable",
+                f.opts.isTimestampOnly());
+    }
+
+    @Test
+    public void timestampOnly_outSuffixFallsBackToTheTimestampKey() throws Exception {
+        net.sf.jsignpdf.utils.AdvancedConfig cfg = net.sf.jsignpdf.utils.PropertyStoreFactory.getInstance()
+                .advancedConfig();
+        cfg.setProperty("output.suffix", "_signedcfg");
+        cfg.setProperty("output.suffix.timestamp", "_stampedcfg");
+        try {
+            Fixture f = new Fixture("");
+            f.opts.setCmdLine(new String[] { "-tso", "-ts", "http://tsa.example/tsa" });
+            f.opts.loadCmdLine();
+            assertNull(f.opts.getOutSuffix());
+            assertEquals("output.suffix must not be consulted in this mode", "_stampedcfg", f.opts.getOutSuffixX());
+
+            f = new Fixture("");
+            f.opts.setCmdLine(new String[] { "-tso", "-ts", "http://tsa.example/tsa", "-os", "_explicit" });
+            f.opts.loadCmdLine();
+            assertEquals("an explicit suffix wins", "_explicit", f.opts.getOutSuffixX());
+        } finally {
+            cfg.removeProperty("output.suffix");
+            cfg.removeProperty("output.suffix.timestamp");
+        }
+    }
+
+    private void assertTimestampOnlyRejects(String expectedInMessage, String... offendingOption) throws Exception {
+        Fixture f = new Fixture("");
+        String[] base = { "-tso", "-ts", "http://tsa.example/tsa" };
+        String[] args = new String[base.length + offendingOption.length];
+        System.arraycopy(base, 0, args, 0, base.length);
+        System.arraycopy(offendingOption, 0, args, base.length, offendingOption.length);
+        f.opts.setCmdLine(args);
+        try {
+            f.opts.loadCmdLine();
+            fail("expected ParseException for " + expectedInMessage);
+        } catch (ParseException expected) {
+            assertTrue("the message must name the typed flag: " + expected.getMessage(),
+                    expected.getMessage().contains(expectedInMessage));
+        }
+    }
+
+    @Test
     public void sigFieldOptionIsParsed() throws Exception {
         Fixture f = new Fixture("");
         f.opts.setCmdLine(new String[] { "-sf", "Signature2" });

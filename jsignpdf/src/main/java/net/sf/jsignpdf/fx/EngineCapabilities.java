@@ -70,8 +70,21 @@ public final class EngineCapabilities {
      * @param caps the capabilities it requires
      */
     public void gate(Control control, Capability... caps) {
+        gate(control, unsupported(caps), caps);
+    }
+
+    /**
+     * Binds the control's {@code disableProperty} to {@code disabled} - which may combine the capability
+     * check with other conditions, e.g. "no document is loaded" - while the shared "not supported" tooltip
+     * still appears only for the capability half.
+     *
+     * @param control the control to gate
+     * @param disabled the full condition disabling the control
+     * @param caps the capabilities it requires
+     */
+    public void gate(Control control, BooleanBinding disabled, Capability... caps) {
         BooleanBinding unsupported = unsupported(caps);
-        control.disableProperty().bind(unsupported);
+        control.disableProperty().bind(disabled);
         // Show the shared "not supported" tooltip while disabled, otherwise keep whatever tooltip the
         // control already had (e.g. the informative tooltip declared in FXML).
         final Tooltip original = control.getTooltip();

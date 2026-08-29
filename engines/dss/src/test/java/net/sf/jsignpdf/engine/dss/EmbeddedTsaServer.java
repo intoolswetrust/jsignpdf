@@ -59,9 +59,21 @@ final class EmbeddedTsaServer {
     private String requiredUsername;
     private String requiredPassword;
     private volatile BigInteger lastRequestNonce;
+    private volatile String lastRequestImprintAlgOid;
+    private volatile int requestCount;
     private volatile boolean echoWrongNonce;
 
     /** @return the nonce carried by the most recent timestamp request, or {@code null} if it had none. */
+    /** @return the message-imprint digest algorithm OID of the last request, or {@code null} if none was made. */
+    String getLastRequestImprintAlgOid() {
+        return lastRequestImprintAlgOid;
+    }
+
+    /** @return how many timestamp requests this server has answered. */
+    int getRequestCount() {
+        return requestCount;
+    }
+
     BigInteger getLastRequestNonce() {
         return lastRequestNonce;
     }
@@ -160,6 +172,8 @@ final class EmbeddedTsaServer {
 
                 TimeStampRequest tsRequest = new TimeStampRequest(requestBytes);
                 lastRequestNonce = tsRequest.getNonce();
+                lastRequestImprintAlgOid = tsRequest.getMessageImprintAlgOID().getId();
+                requestCount++;
                 if (echoWrongNonce && tsRequest.getNonce() != null) {
                     TimeStampRequestGenerator regen = new TimeStampRequestGenerator();
                     regen.setCertReq(true);

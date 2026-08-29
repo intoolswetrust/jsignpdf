@@ -8,7 +8,7 @@ import net.sf.jsignpdf.BasicSignerOptions;
 import net.sf.jsignpdf.SignerLogic;
 
 /**
- * Background service that wraps SignerLogic.signFile() for JavaFX.
+ * Background service that wraps SignerLogic.execute() for JavaFX.
  *
  * <p>
  * Each run gets a brand-new daemon thread rather than a shared pooled one. Re-signing does
@@ -44,7 +44,7 @@ public class SigningService extends Service<Boolean> {
             @Override
             protected Boolean call() {
                 SignerLogic logic = new SignerLogic(taskOptions);
-                return logic.signFile();
+                return logic.execute();
             }
         };
     }

@@ -120,13 +120,27 @@ final class EmbeddedCa {
      * @return a JKS keystore holding the signing key and its chain
      */
     KeyStore issueSigningKeyStore(String alias, char[] keyPwd) throws Exception {
+        return issueSigningKeyStore(alias, keyPwd,
+                new Date(System.currentTimeMillis() - 24 * 60 * 60 * 1000L),
+                new Date(System.currentTimeMillis() + 365 * 24 * 60 * 60 * 1000L));
+    }
+
+    /**
+     * Same, with an explicit validity window - an already expired leaf is the normal state of an archived
+     * document being re-timestamped.
+     *
+     * @param alias     the key entry alias
+     * @param keyPwd    the password protecting the key entry (and, for the test, the store)
+     * @param notBefore start of the leaf's validity
+     * @param notAfter  end of the leaf's validity
+     * @return a JKS keystore holding the signing key and its chain
+     */
+    KeyStore issueSigningKeyStore(String alias, char[] keyPwd, Date notBefore, Date notAfter) throws Exception {
         KeyPairGenerator kpg = KeyPairGenerator.getInstance("RSA");
         kpg.initialize(2048);
         KeyPair leafKeyPair = kpg.generateKeyPair();
 
         X500Name leafName = new X500Name("CN=JSignPdf Test Signer, O=JSignPdf Test");
-        Date notBefore = new Date(System.currentTimeMillis() - 24 * 60 * 60 * 1000L);
-        Date notAfter = new Date(System.currentTimeMillis() + 365 * 24 * 60 * 60 * 1000L);
         BigInteger serial = BigInteger.valueOf(leafSerial.getAndIncrement());
 
         JcaX509ExtensionUtils extUtils = new JcaX509ExtensionUtils();

@@ -39,6 +39,7 @@ public class BasicSignerOptions {
     private String inFile;
     private String outFile;
     private String outSuffix;
+    private boolean timestampOnly;
     private String outPath;
     private String outPrefix;
     private String signerName;
@@ -442,13 +443,17 @@ public class BasicSignerOptions {
 
     /**
      * Returns the suffix appended to the input file name when no explicit output file is set. Falls back to the
-     * {@code output.suffix} advanced-config key and finally to {@link Constants#DEFAULT_OUT_SUFFIX} when this instance
-     * carries no suffix of its own.
+     * {@code output.suffix} advanced-config key ({@code output.suffix.timestamp} in {@link #isTimestampOnly()} mode)
+     * and finally to {@link Constants#DEFAULT_OUT_SUFFIX} / {@link Constants#DEFAULT_TIMESTAMP_SUFFIX} when this
+     * instance carries no suffix of its own.
      *
      * @return the effective output suffix, never {@code null}
      */
     public String getOutSuffixX() {
-        return outSuffix != null ? outSuffix : AppConfig.defaultOutSuffix();
+        if (outSuffix != null) {
+            return outSuffix;
+        }
+        return timestampOnly ? AppConfig.defaultTimestampSuffix() : AppConfig.defaultOutSuffix();
     }
 
     /**
@@ -465,6 +470,20 @@ public class BasicSignerOptions {
     }
 
     /**
+     * Returns whether this run appends a document timestamp instead of signing. It is an action rather than a
+     * setting, so it is intentionally not part of {@code loadFromStore} / {@code storeToStore}.
+     *
+     * @return true when only a document timestamp is appended
+     */
+    public boolean isTimestampOnly() {
+        return timestampOnly;
+    }
+
+    public void setTimestampOnly(final boolean timestampOnly) {
+        this.timestampOnly = timestampOnly;
+    }
+
+    /**
      * Returns output file name if filled or the name composed from the input file, the output directory
      * ({@code -op}), the prefix ({@code -opre}) and the effective output suffix.
      *
@@ -472,7 +491,7 @@ public class BasicSignerOptions {
      */
     public String getOutFileX() {
         String tmpOut = StringUtils.defaultIfBlank(outFile, null);
-        return tmpOut != null ? tmpOut : composeOutFileName(outPath, outPrefix, getInFile(), outSuffix);
+        return tmpOut != null ? tmpOut : composeOutFileName(outPath, outPrefix, getInFile(), getOutSuffixX());
     }
 
     /**
@@ -1493,6 +1512,10 @@ public class BasicSignerOptions {
         copy.setKeyPasswd(getKeyPasswd() != null ? getKeyPasswd().clone() : null);
         copy.setInFile(getInFile());
         copy.setOutFile(getOutFile());
+        copy.setOutSuffix(getOutSuffix());
+        copy.setOutPath(getOutPathRaw());
+        copy.setOutPrefix(getOutPrefix());
+        copy.setTimestampOnly(isTimestampOnly());
         copy.setSignerName(getSignerName());
         copy.setReason(getReason());
         copy.setLocation(getLocation());
