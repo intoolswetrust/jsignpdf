@@ -608,16 +608,25 @@ jobs:
           echo "Setting default=${platform} -> ${file}"
           ok=false
           for attempt in $(seq 1 5); do
-            resp="$(curl -sS -H 'Accept: application/json' -X PUT \
+            # On success SF returns HTTP 200 with the file object nested under
+            # .result, the new flags at .result.x_sf.default (comma-separated).
+            body="$(curl -sS -L -H 'Accept: application/json' -X PUT \
               --data-urlencode "default=${platform}" \
               --data-urlencode "api_key=${SF_API_KEY}" \
-              "${url}")" || resp=''
-            if [ -n "$resp" ] && ! echo "$resp" | jq -e 'has("error")' >/dev/null 2>&1; then
-              echo "$resp" | jq -c '{name, download_label, default}' 2>/dev/null || echo "$resp"
+              -w $'\n%{http_code}' \
+              "${url}")" || body=$'\n000'
+            code="${body##*$'\n'}"
+            resp="${body%$'\n'*}"
+            echo "  HTTP ${code}: ${resp}"
+            # Only accept a real success: 200 AND the platform now appears in
+            # result.x_sf.default. A null/redirect body must NOT pass.
+            if [ "$code" = "200" ] \
+               && echo "$resp" | jq -e --arg p "$platform" \
+                    '(.result.x_sf.default // "") | split(",") | index($p)' >/dev/null 2>&1; then
               ok=true
               break
             fi
-            echo "attempt ${attempt}/5 failed: ${resp:-<no response>}"
+            echo "  attempt ${attempt}/5 failed; retrying in 30s"
             sleep 30
           done
           if [ "$ok" != true ]; then
