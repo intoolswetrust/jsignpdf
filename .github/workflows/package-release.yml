@@ -579,12 +579,8 @@ jobs:
         rm -f private_key
 
     - name: Set SourceForge default downloads (final releases only)
-      # Without this, SourceForge's per-platform "Download Latest Version" flag
-      # stays wherever it was last set (it does NOT auto-follow new uploads), so
-      # visitors keep getting an ancient installer. The Release API sets the
-      # default per file; PUTting the flag onto the new file moves it off the old
-      # one. Skipped for pre-releases so ALPHA/BETA/RC never become "latest".
-      # See https://sourceforge.net/p/forge/documentation/Using%20the%20Release%20API/
+      # SourceForge's "Download Latest Version" flag does not auto-follow new uploads.
+      # https://sourceforge.net/p/forge/documentation/Using%20the%20Release%20API/
       if: needs.setup.outputs.is-prerelease == 'false'
       env:
         SF_API_KEY: ${{ secrets.SOURCEFORGE_API_KEY }}
@@ -595,7 +591,6 @@ jobs:
           exit 1
         fi
         DIR="stable/${{ steps.vars.outputs.full }}"
-        # One file per platform (SourceForge allows a single default per OS).
         declare -A DEFAULTS=(
           [windows]="jsignpdf-${VERSION}-windows-x64.msi"
           [mac]="jsignpdf-${VERSION}-macos-aarch64.dmg"
@@ -608,8 +603,6 @@ jobs:
           echo "Setting default=${platform} -> ${file}"
           ok=false
           for attempt in $(seq 1 5); do
-            # On success SF returns HTTP 200 with the file object nested under
-            # .result, the new flags at .result.x_sf.default (comma-separated).
             body="$(curl -sS -L -H 'Accept: application/json' -X PUT \
               --data-urlencode "default=${platform}" \
               --data-urlencode "api_key=${SF_API_KEY}" \
@@ -618,8 +611,6 @@ jobs:
             code="${body##*$'\n'}"
             resp="${body%$'\n'*}"
             echo "  HTTP ${code}: ${resp}"
-            # Only accept a real success: 200 AND the platform now appears in
-            # result.x_sf.default. A null/redirect body must NOT pass.
             if [ "$code" = "200" ] \
                && echo "$resp" | jq -e --arg p "$platform" \
                     '(.result.x_sf.default // "") | split(",") | index($p)' >/dev/null 2>&1; then
