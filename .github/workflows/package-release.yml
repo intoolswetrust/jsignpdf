@@ -480,8 +480,10 @@ jobs:
 
   publish-release:
     # Collects every asset, computes SHA-256 checksums, mirrors to SourceForge,
-    # and creates the GitHub Release. Flatpak is optional: if its job failed
-    # (e.g. SDK extension outage) we still publish the rest.
+    # points SourceForge's per-platform "Download Latest Version" defaults at the
+    # new files (final releases only), and creates the GitHub Release. Flatpak is
+    # optional: if its job failed (e.g. SDK extension outage) we still publish
+    # the rest.
     needs: [setup, fetch-zips, package, sign-windows, flatpak]
     # sign-windows is 'skipped' for pre-releases (unsigned Windows bits come
     # straight from the package job) and must be 'success' for final releases.
@@ -575,6 +577,54 @@ jobs:
         EOF
         cd ..
         rm -f private_key
+
+    - name: Set SourceForge default downloads (final releases only)
+      # SourceForge's "Download Latest Version" flag does not auto-follow new uploads.
+      # https://sourceforge.net/p/forge/documentation/Using%20the%20Release%20API/
+      if: needs.setup.outputs.is-prerelease == 'false'
+      env:
+        SF_API_KEY: ${{ secrets.SOURCEFORGE_API_KEY }}
+      run: |
+        set -euo pipefail
+        if [ -z "${SF_API_KEY:-}" ]; then
+          echo "::error::SOURCEFORGE_API_KEY secret is not set"
+          exit 1
+        fi
+        DIR="stable/${{ steps.vars.outputs.full }}"
+        declare -A DEFAULTS=(
+          [windows]="jsignpdf-${VERSION}-windows-x64.msi"
+          [mac]="jsignpdf-${VERSION}-macos-aarch64.dmg"
+          [linux]="jsignpdf-${VERSION}-linux-x64.deb"
+          [others]="jsignpdf-${VERSION}-full.zip"
+        )
+        for platform in windows mac linux others; do
+          file="${DEFAULTS[$platform]}"
+          url="https://sourceforge.net/projects/jsignpdf/files/${DIR}/${file}"
+          echo "Setting default=${platform} -> ${file}"
+          ok=false
+          for attempt in $(seq 1 5); do
+            body="$(curl -sS -L -H 'Accept: application/json' -X PUT \
+              --data-urlencode "default=${platform}" \
+              --data-urlencode "api_key=${SF_API_KEY}" \
+              -w $'\n%{http_code}' \
+              "${url}")" || body=$'\n000'
+            code="${body##*$'\n'}"
+            resp="${body%$'\n'*}"
+            echo "  HTTP ${code}: ${resp}"
+            if [ "$code" = "200" ] \
+               && echo "$resp" | jq -e --arg p "$platform" \
+                    '(.result.x_sf.default // "") | split(",") | index($p)' >/dev/null 2>&1; then
+              ok=true
+              break
+            fi
+            echo "  attempt ${attempt}/5 failed; retrying in 30s"
+            sleep 30
+          done
+          if [ "$ok" != true ]; then
+            echo "::error::Failed to set SourceForge default for ${platform} (${file})"
+            exit 1
+          fi
+        done
 
     - name: Create GitHub release with all assets
       env:
