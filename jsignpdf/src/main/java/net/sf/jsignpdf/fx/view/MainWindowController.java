@@ -1677,7 +1677,7 @@ public class MainWindowController {
         selectedSigFieldMarker = null;
         sigFieldSelected.set(field != null);
         if (field == null) {
-            signatureOverlay.clearFieldHighlight();
+            updateFieldHighlight(null);
             signatureOverlay.setMouseTransparent(false);
             if (hadField && signingVM.visibleProperty().get()) {
                 // The visible flag the field forced on survives its deselection, so the rectangle has to come
@@ -1716,10 +1716,13 @@ public class MainWindowController {
     private void updateFieldHighlight(SignatureFieldInfo field) {
         if (field == null || selectedSigFieldMarker == null || field.page() != documentVM.getCurrentPage()) {
             signatureOverlay.clearFieldHighlight();
+            pdfArea.clearFieldPreview();
             return;
         }
         signatureOverlay.setFieldHighlight(selectedSigFieldMarker[0], selectedSigFieldMarker[1],
                 selectedSigFieldMarker[2], selectedSigFieldMarker[3]);
+        pdfArea.setFieldPreview(selectedSigFieldMarker[0], selectedSigFieldMarker[1],
+                selectedSigFieldMarker[2], selectedSigFieldMarker[3], field.width(), field.height());
     }
 
     private void closeDocument() {
@@ -1733,6 +1736,7 @@ public class MainWindowController {
         blankSigFieldMarkers.clear();
         signatureOverlay.clearBlankFieldMarkers();
         signatureOverlay.setVisible(false);
+        pdfArea.clearFieldPreview();
         if (options != null) {
             options.setInFile(null);
         }

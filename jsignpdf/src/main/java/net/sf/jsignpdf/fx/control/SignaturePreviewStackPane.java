@@ -21,6 +21,7 @@ public final class SignaturePreviewStackPane extends StackPane {
     private SignaturePreviewPane preview;
     private SignatureOverlay overlay;
     private SignaturePlacementViewModel placementVM;
+    private double[] fieldRect;
 
     public SignaturePreviewStackPane() {
         super();
@@ -61,9 +62,38 @@ public final class SignaturePreviewStackPane extends StackPane {
         updateGeometry();
     }
 
+    /**
+     * Previews the appearance inside the rectangle of a selected existing signature field, given in relative
+     * (0..1) page coordinates with the origin in the top-left corner plus the field's size in PDF points. The
+     * field's own {@code /Rect} replaces the placement rectangle until {@link #clearFieldPreview()} is called.
+     */
+    public void setFieldPreview(double relX, double relY, double relWidth, double relHeight,
+                                double widthPt, double heightPt) {
+        fieldRect = new double[] { relX, relY, relWidth, relHeight };
+        if (preview != null) {
+            preview.setPointSizeOverride(widthPt, heightPt);
+        }
+        updateGeometry();
+        if (preview != null) {
+            preview.refresh();
+        }
+    }
+
+    /**
+     * Drops the field rectangle, so the preview follows the interactive placement rectangle again.
+     */
+    public void clearFieldPreview() {
+        fieldRect = null;
+        if (preview != null) {
+            preview.setPointSizeOverride(0.0, 0.0);
+        }
+        updateGeometry();
+    }
+
     private void updateGeometry() {
         if (preview == null) return;
-        if (!overlay.isVisible() || !placementVM.isPlaced()) {
+        double[] rect = fieldRect != null ? fieldRect : placementRect();
+        if (!overlay.isVisible() || rect == null) {
             preview.setVisible(false);
             return;
         }
@@ -73,8 +103,8 @@ public final class SignaturePreviewStackPane extends StackPane {
             preview.setVisible(false);
             return;
         }
-        double w = placementVM.getRelWidth() * ow;
-        double h = placementVM.getRelHeight() * oh;
+        double w = rect[2] * ow;
+        double h = rect[3] * oh;
         if (w <= 0.0 || h <= 0.0) {
             preview.setVisible(false);
             return;
@@ -82,9 +112,15 @@ public final class SignaturePreviewStackPane extends StackPane {
         // The overlay draws its rectangle at (relX*width, relY*height) in its own
         // coordinate space; the overlay's layoutX/Y place that space inside this
         // StackPane, so the same offsets position the preview on top of it.
-        double x = overlay.getLayoutX() + placementVM.getRelX() * ow;
-        double y = overlay.getLayoutY() + placementVM.getRelY() * oh;
+        double x = overlay.getLayoutX() + rect[0] * ow;
+        double y = overlay.getLayoutY() + rect[1] * oh;
         preview.setVisible(true);
         preview.updateBounds(x, y, w, h);
+    }
+
+    private double[] placementRect() {
+        if (!placementVM.isPlaced()) return null;
+        return new double[] { placementVM.getRelX(), placementVM.getRelY(),
+                placementVM.getRelWidth(), placementVM.getRelHeight() };
     }
 }

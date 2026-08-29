@@ -63,6 +63,9 @@ final class SignaturePreviewPane extends Pane {
     private final Pane textPane = new Pane();
     private final Rectangle clip = new Rectangle();
 
+    private double overridePointWidth;
+    private double overridePointHeight;
+
     private String loadedImagePath = "";
     private Image loadedImage;
     private String cachedSignerKey = "";
@@ -134,6 +137,15 @@ final class SignaturePreviewPane extends Pane {
         textPane.resizeRelocate(0, 0, width, height);
         layoutImage(width, height);
         renderText(width, height);
+    }
+
+    /**
+     * Overrides the PDF-point size the preview scales against, for a rectangle the signing view model does not
+     * hold - the {@code /Rect} of a selected existing signature field. Zero restores the view-model coordinates.
+     */
+    void setPointSizeOverride(double widthPt, double heightPt) {
+        overridePointWidth = widthPt;
+        overridePointHeight = heightPt;
     }
 
     void refresh() {
@@ -307,8 +319,10 @@ final class SignaturePreviewPane extends Pane {
      * Both are kept live by the placement listeners in {@code MainWindowController}.
      */
     private double getActualPointScale(double width, double height) {
-        double pdfWidth = signingVM.positionURXProperty().get() - signingVM.positionLLXProperty().get();
-        double pdfHeight = signingVM.positionURYProperty().get() - signingVM.positionLLYProperty().get();
+        double pdfWidth = overridePointWidth > 0.5 ? overridePointWidth
+                : signingVM.positionURXProperty().get() - signingVM.positionLLXProperty().get();
+        double pdfHeight = overridePointHeight > 0.5 ? overridePointHeight
+                : signingVM.positionURYProperty().get() - signingVM.positionLLYProperty().get();
         double sx = pdfWidth > 0.5 ? width / pdfWidth : Double.NaN;
         double sy = pdfHeight > 0.5 ? height / pdfHeight : Double.NaN;
         if (pdfWidth >= pdfHeight && Double.isFinite(sx) && sx > 0.0) return sx;

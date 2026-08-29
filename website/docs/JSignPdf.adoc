@@ -925,7 +925,8 @@ use; fields with a zero-size or hidden widget are not shaded, because they are i
 In the JavaFX UI, the _Signature field_ combo box at the top of the _Signature Appearance_ panel lists the
 empty signature fields of the opened document. Pick one and the signature goes there; the selected field gets
 a stronger marker on the page preview and the position controls are switched off, because the field's own
-rectangle decides where the signature lands. _Visible signature_ is turned on and locked (in the panel, the toolbar and the menu
+rectangle decides where the signature lands. The live appearance preview follows the selected field, so the
+signature text and image are rendered inside its rectangle just as they are for a rectangle you draw yourself. _Visible signature_ is turned on and locked (in the panel, the toolbar and the menu
 alike) for as long as a field is selected, because the appearance is always drawn into the field -- switch
 back to _(create new field)_ if you want an invisible signature, or pick a field whose rectangle has zero
 size, which gives one anyway. The combo stays on _(create new field)_ for documents without empty fields, and
