@@ -86,6 +86,7 @@ public class PreferencesController {
     @FXML private ChoiceBox<SigningEngine> cmbEngine;
     @FXML private CheckBox chkDebug;
     @FXML private TextField txtOutputSuffix;
+    @FXML private TextField txtOutputSuffixTimestamp;
 
     @FXML private TextField txtFontPath;
     @FXML private Button btnFontPathBrowse;
@@ -252,6 +253,7 @@ public class PreferencesController {
 
         chkDebug.selectedProperty().bindBidirectional(vm.debugProperty());
         txtOutputSuffix.textProperty().bindBidirectional(vm.outputSuffixProperty());
+        txtOutputSuffixTimestamp.textProperty().bindBidirectional(vm.outputSuffixTimestampProperty());
 
         txtFontPath.textProperty().bindBidirectional(vm.fontPathProperty());
         txtFontName.textProperty().bindBidirectional(vm.fontNameProperty());
@@ -417,6 +419,11 @@ public class PreferencesController {
         if (!OutputSuffixValidation.isValid(vm.outputSuffixProperty().get())) {
             tabPane.getSelectionModel().select(tabGeneral);
             showError(RES.get("jfx.gui.preferences.validation.outputSuffix"));
+            return false;
+        }
+        if (!OutputSuffixValidation.isValid(vm.outputSuffixTimestampProperty().get())) {
+            tabPane.getSelectionModel().select(tabGeneral);
+            showError(RES.get("jfx.gui.preferences.validation.outputSuffixTimestamp"));
             return false;
         }
         if (!PreferencesValidation.validateFontPath(vm.fontPathProperty().get())) {
