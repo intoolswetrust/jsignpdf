@@ -104,8 +104,8 @@ public class SignaturePropertiesControllerTest {
         });
         assertEquals("-DL", afterTyping.get());
         assertNull("A blank field must clear the suffix so the configured default applies", afterClearing.get());
-        assertEquals("The configured default is shown as the prompt text",
-                AppConfig.defaultOutSuffix(), promptText.get());
+        assertEquals("Both configured defaults (sign / timestamp) are shown as the prompt text",
+                AppConfig.defaultOutSuffix() + " / " + AppConfig.defaultTimestampSuffix(), promptText.get());
     }
 
     @Test
