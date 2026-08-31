@@ -1226,493 +1226,507 @@
   },
   {
     "type": "file",
-    "url": "https://repo1.maven.org/maven2/eu/europa/ec/joinup/sd-dss/dss-alert/6.4/dss-alert-6.4.jar",
-    "sha256": "0c93da9f3346b0a3f885b3e13a58c0f295c4d875c14f8653c60c8bcb39ca1e20",
-    "dest": "m2local/eu/europa/ec/joinup/sd-dss/dss-alert/6.4",
-    "dest-filename": "dss-alert-6.4.jar"
+    "url": "https://repo1.maven.org/maven2/eu/europa/ec/joinup/sd-dss/dss-alert/6.5/dss-alert-6.5.jar",
+    "sha256": "4e2e321a2d2e439867cf80156a3fa7ea76217d4d2666f13109e257f22fc42487",
+    "dest": "m2local/eu/europa/ec/joinup/sd-dss/dss-alert/6.5",
+    "dest-filename": "dss-alert-6.5.jar"
   },
   {
     "type": "file",
-    "url": "https://repo1.maven.org/maven2/eu/europa/ec/joinup/sd-dss/dss-alert/6.4/dss-alert-6.4.pom",
-    "sha256": "2c822de69e736566e41606fb22de18f7c82fe6d8337a91361d7ed2089fc8efff",
-    "dest": "m2local/eu/europa/ec/joinup/sd-dss/dss-alert/6.4",
-    "dest-filename": "dss-alert-6.4.pom"
+    "url": "https://repo1.maven.org/maven2/eu/europa/ec/joinup/sd-dss/dss-alert/6.5/dss-alert-6.5.pom",
+    "sha256": "b81038716903486f8ad966d30c1b9553a8839baf8ca81557a1beebe8db6c1fe4",
+    "dest": "m2local/eu/europa/ec/joinup/sd-dss/dss-alert/6.5",
+    "dest-filename": "dss-alert-6.5.pom"
   },
   {
     "type": "file",
-    "url": "https://repo1.maven.org/maven2/eu/europa/ec/joinup/sd-dss/dss-bom/6.4/dss-bom-6.4.pom",
-    "sha256": "d71e8cd4eb244ee154a15d9bdc7b6c1da343b470d2c55d49b8cd45fd5aae9e45",
-    "dest": "m2local/eu/europa/ec/joinup/sd-dss/dss-bom/6.4",
-    "dest-filename": "dss-bom-6.4.pom"
+    "url": "https://repo1.maven.org/maven2/eu/europa/ec/joinup/sd-dss/dss-bom/6.5/dss-bom-6.5.pom",
+    "sha256": "f68ecfe663ebf75a3c6ea76b2daf146ea6e0a47558a771cca82b00e6fdf57689",
+    "dest": "m2local/eu/europa/ec/joinup/sd-dss/dss-bom/6.5",
+    "dest-filename": "dss-bom-6.5.pom"
   },
   {
     "type": "file",
-    "url": "https://repo1.maven.org/maven2/eu/europa/ec/joinup/sd-dss/dss-cades/6.4/dss-cades-6.4.jar",
-    "sha256": "fcc84b0d766fbf4b770081c8b333b6b0abbed0dbd83bcac8190c30504b8f7b48",
-    "dest": "m2local/eu/europa/ec/joinup/sd-dss/dss-cades/6.4",
-    "dest-filename": "dss-cades-6.4.jar"
+    "url": "https://repo1.maven.org/maven2/eu/europa/ec/joinup/sd-dss/dss-cades/6.5/dss-cades-6.5.jar",
+    "sha256": "fcc5a1acac013c62f9265a9ff07a2c4c331d5ba6c287f8370cae4512df78bc1f",
+    "dest": "m2local/eu/europa/ec/joinup/sd-dss/dss-cades/6.5",
+    "dest-filename": "dss-cades-6.5.jar"
   },
   {
     "type": "file",
-    "url": "https://repo1.maven.org/maven2/eu/europa/ec/joinup/sd-dss/dss-cades/6.4/dss-cades-6.4.pom",
-    "sha256": "609259e1ab60bf1278b61a3a0553355df1864203cb21c38bf9c7d4b5b1425a73",
-    "dest": "m2local/eu/europa/ec/joinup/sd-dss/dss-cades/6.4",
-    "dest-filename": "dss-cades-6.4.pom"
+    "url": "https://repo1.maven.org/maven2/eu/europa/ec/joinup/sd-dss/dss-cades/6.5/dss-cades-6.5.pom",
+    "sha256": "076eb5f93838239b29d56d2f228888dbfd9c609c65a020723b17de2efedda722",
+    "dest": "m2local/eu/europa/ec/joinup/sd-dss/dss-cades/6.5",
+    "dest-filename": "dss-cades-6.5.pom"
   },
   {
     "type": "file",
-    "url": "https://repo1.maven.org/maven2/eu/europa/ec/joinup/sd-dss/dss-cms-object/6.4/dss-cms-object-6.4.jar",
-    "sha256": "dce387cbabf27e0d50b9c9c4094af6fe248e4441eee0bbae5469e6a3e342c8b4",
-    "dest": "m2local/eu/europa/ec/joinup/sd-dss/dss-cms-object/6.4",
-    "dest-filename": "dss-cms-object-6.4.jar"
+    "url": "https://repo1.maven.org/maven2/eu/europa/ec/joinup/sd-dss/dss-cms-object/6.5/dss-cms-object-6.5.jar",
+    "sha256": "38af348e3520aa393e7a72a04a3c410bf1f9a1574669ff088c8dee286c5da648",
+    "dest": "m2local/eu/europa/ec/joinup/sd-dss/dss-cms-object/6.5",
+    "dest-filename": "dss-cms-object-6.5.jar"
   },
   {
     "type": "file",
-    "url": "https://repo1.maven.org/maven2/eu/europa/ec/joinup/sd-dss/dss-cms-object/6.4/dss-cms-object-6.4.pom",
-    "sha256": "7b8d3b6ea0833a30471a93d119561c0d9f688ddd356b230f8415f2ec88a07289",
-    "dest": "m2local/eu/europa/ec/joinup/sd-dss/dss-cms-object/6.4",
-    "dest-filename": "dss-cms-object-6.4.pom"
+    "url": "https://repo1.maven.org/maven2/eu/europa/ec/joinup/sd-dss/dss-cms-object/6.5/dss-cms-object-6.5.pom",
+    "sha256": "c2e09ae47e84aff1e3209825106283625aeb1e7cd199805374ab44705d8a1715",
+    "dest": "m2local/eu/europa/ec/joinup/sd-dss/dss-cms-object/6.5",
+    "dest-filename": "dss-cms-object-6.5.pom"
   },
   {
     "type": "file",
-    "url": "https://repo1.maven.org/maven2/eu/europa/ec/joinup/sd-dss/dss-cms/6.4/dss-cms-6.4.jar",
-    "sha256": "9125926995640536e55e9ce42995fece6a113fcdb9fbce81342b1ad748473fe7",
-    "dest": "m2local/eu/europa/ec/joinup/sd-dss/dss-cms/6.4",
-    "dest-filename": "dss-cms-6.4.jar"
+    "url": "https://repo1.maven.org/maven2/eu/europa/ec/joinup/sd-dss/dss-cms/6.5/dss-cms-6.5.jar",
+    "sha256": "39c6f421e2db9b17e58eab80a74ea0a1f3d35198d39b57d96e4eb391523e0b32",
+    "dest": "m2local/eu/europa/ec/joinup/sd-dss/dss-cms/6.5",
+    "dest-filename": "dss-cms-6.5.jar"
   },
   {
     "type": "file",
-    "url": "https://repo1.maven.org/maven2/eu/europa/ec/joinup/sd-dss/dss-cms/6.4/dss-cms-6.4.pom",
-    "sha256": "4b787e2c7f513c514ec59c1cf7007be3c95a435ef4fd0e369ce88d1549a7b647",
-    "dest": "m2local/eu/europa/ec/joinup/sd-dss/dss-cms/6.4",
-    "dest-filename": "dss-cms-6.4.pom"
+    "url": "https://repo1.maven.org/maven2/eu/europa/ec/joinup/sd-dss/dss-cms/6.5/dss-cms-6.5.pom",
+    "sha256": "0dcd03d16fed8cd3ddc9a3d558ad1f528df67135a93776a036bc318c88b1cea3",
+    "dest": "m2local/eu/europa/ec/joinup/sd-dss/dss-cms/6.5",
+    "dest-filename": "dss-cms-6.5.pom"
   },
   {
     "type": "file",
-    "url": "https://repo1.maven.org/maven2/eu/europa/ec/joinup/sd-dss/dss-crl-parser-x509crl/6.4/dss-crl-parser-x509crl-6.4.jar",
-    "sha256": "35f6701af3ddd7f62d4c46f0bb95467264356d6c962e865a3259c2eba06bfecc",
-    "dest": "m2local/eu/europa/ec/joinup/sd-dss/dss-crl-parser-x509crl/6.4",
-    "dest-filename": "dss-crl-parser-x509crl-6.4.jar"
+    "url": "https://repo1.maven.org/maven2/eu/europa/ec/joinup/sd-dss/dss-crl-parser-x509crl/6.5/dss-crl-parser-x509crl-6.5.jar",
+    "sha256": "8b73565d5a1c1b5f0044ec7d018f7dc6eb5a636ad714611e7c3cdf343daaa6e4",
+    "dest": "m2local/eu/europa/ec/joinup/sd-dss/dss-crl-parser-x509crl/6.5",
+    "dest-filename": "dss-crl-parser-x509crl-6.5.jar"
   },
   {
     "type": "file",
-    "url": "https://repo1.maven.org/maven2/eu/europa/ec/joinup/sd-dss/dss-crl-parser-x509crl/6.4/dss-crl-parser-x509crl-6.4.pom",
-    "sha256": "674dd08d94aa4e8b3bb812f3b998965c35a3168e9e87b1f6cbdef9b313368947",
-    "dest": "m2local/eu/europa/ec/joinup/sd-dss/dss-crl-parser-x509crl/6.4",
-    "dest-filename": "dss-crl-parser-x509crl-6.4.pom"
+    "url": "https://repo1.maven.org/maven2/eu/europa/ec/joinup/sd-dss/dss-crl-parser-x509crl/6.5/dss-crl-parser-x509crl-6.5.pom",
+    "sha256": "08375ffa63cf7953066c68da3ec9dde34d84ffb60251a3a767d226c24afc912b",
+    "dest": "m2local/eu/europa/ec/joinup/sd-dss/dss-crl-parser-x509crl/6.5",
+    "dest-filename": "dss-crl-parser-x509crl-6.5.pom"
   },
   {
     "type": "file",
-    "url": "https://repo1.maven.org/maven2/eu/europa/ec/joinup/sd-dss/dss-crl-parser/6.4/dss-crl-parser-6.4.jar",
-    "sha256": "f1199d7c85cc4928852e70c72e9d483395b94210fda34eac4b99939b49e22dca",
-    "dest": "m2local/eu/europa/ec/joinup/sd-dss/dss-crl-parser/6.4",
-    "dest-filename": "dss-crl-parser-6.4.jar"
+    "url": "https://repo1.maven.org/maven2/eu/europa/ec/joinup/sd-dss/dss-crl-parser/6.5/dss-crl-parser-6.5.jar",
+    "sha256": "0a96a56a8d4a1387bc1abb43860a1d697b1e2926c67df17218f649581fbc6c61",
+    "dest": "m2local/eu/europa/ec/joinup/sd-dss/dss-crl-parser/6.5",
+    "dest-filename": "dss-crl-parser-6.5.jar"
   },
   {
     "type": "file",
-    "url": "https://repo1.maven.org/maven2/eu/europa/ec/joinup/sd-dss/dss-crl-parser/6.4/dss-crl-parser-6.4.pom",
-    "sha256": "2fa6e6e00dbc0eb2a8f549b2ffe68dbb1d30b995951482327a92446c09898993",
-    "dest": "m2local/eu/europa/ec/joinup/sd-dss/dss-crl-parser/6.4",
-    "dest-filename": "dss-crl-parser-6.4.pom"
+    "url": "https://repo1.maven.org/maven2/eu/europa/ec/joinup/sd-dss/dss-crl-parser/6.5/dss-crl-parser-6.5.pom",
+    "sha256": "c1c49f10b3d33571e3ff2015a71e136a823881fdeb0163eb4d9122be799fc103",
+    "dest": "m2local/eu/europa/ec/joinup/sd-dss/dss-crl-parser/6.5",
+    "dest-filename": "dss-crl-parser-6.5.pom"
   },
   {
     "type": "file",
-    "url": "https://repo1.maven.org/maven2/eu/europa/ec/joinup/sd-dss/dss-detailed-report-jaxb/6.4/dss-detailed-report-jaxb-6.4.jar",
-    "sha256": "0d9d5a9066a72c4b04266c6d845d753489fcae0f81ee581b91e89f1430ca67bd",
-    "dest": "m2local/eu/europa/ec/joinup/sd-dss/dss-detailed-report-jaxb/6.4",
-    "dest-filename": "dss-detailed-report-jaxb-6.4.jar"
+    "url": "https://repo1.maven.org/maven2/eu/europa/ec/joinup/sd-dss/dss-detailed-report-jaxb/6.5/dss-detailed-report-jaxb-6.5.jar",
+    "sha256": "3d8113b041dc941401fa373712df8341e0846f903196b207139a1b5c884cd3dd",
+    "dest": "m2local/eu/europa/ec/joinup/sd-dss/dss-detailed-report-jaxb/6.5",
+    "dest-filename": "dss-detailed-report-jaxb-6.5.jar"
   },
   {
     "type": "file",
-    "url": "https://repo1.maven.org/maven2/eu/europa/ec/joinup/sd-dss/dss-detailed-report-jaxb/6.4/dss-detailed-report-jaxb-6.4.pom",
-    "sha256": "75b1d17086fb60e382a59b45d3b588ea8b1ed010b981add5cdec24a566e05eeb",
-    "dest": "m2local/eu/europa/ec/joinup/sd-dss/dss-detailed-report-jaxb/6.4",
-    "dest-filename": "dss-detailed-report-jaxb-6.4.pom"
+    "url": "https://repo1.maven.org/maven2/eu/europa/ec/joinup/sd-dss/dss-detailed-report-jaxb/6.5/dss-detailed-report-jaxb-6.5.pom",
+    "sha256": "e71d35580041ab2752908666094931e519bc283d3b761194c3f25808678464e4",
+    "dest": "m2local/eu/europa/ec/joinup/sd-dss/dss-detailed-report-jaxb/6.5",
+    "dest-filename": "dss-detailed-report-jaxb-6.5.pom"
   },
   {
     "type": "file",
-    "url": "https://repo1.maven.org/maven2/eu/europa/ec/joinup/sd-dss/dss-diagnostic-jaxb/6.4/dss-diagnostic-jaxb-6.4.jar",
-    "sha256": "e8dcaee711736720f723e47b0fa04628bae4d0d98eef127c80aa09f393a950d1",
-    "dest": "m2local/eu/europa/ec/joinup/sd-dss/dss-diagnostic-jaxb/6.4",
-    "dest-filename": "dss-diagnostic-jaxb-6.4.jar"
+    "url": "https://repo1.maven.org/maven2/eu/europa/ec/joinup/sd-dss/dss-diagnostic-jaxb/6.5/dss-diagnostic-jaxb-6.5.jar",
+    "sha256": "5f70f1d6d72d83727513149b28d2404eef882f92b36920af741c523f61fd9117",
+    "dest": "m2local/eu/europa/ec/joinup/sd-dss/dss-diagnostic-jaxb/6.5",
+    "dest-filename": "dss-diagnostic-jaxb-6.5.jar"
   },
   {
     "type": "file",
-    "url": "https://repo1.maven.org/maven2/eu/europa/ec/joinup/sd-dss/dss-diagnostic-jaxb/6.4/dss-diagnostic-jaxb-6.4.pom",
-    "sha256": "62006440c70c9712e9026e3eec79938f88c5e1d74318578fd8e80c37879ab83c",
-    "dest": "m2local/eu/europa/ec/joinup/sd-dss/dss-diagnostic-jaxb/6.4",
-    "dest-filename": "dss-diagnostic-jaxb-6.4.pom"
+    "url": "https://repo1.maven.org/maven2/eu/europa/ec/joinup/sd-dss/dss-diagnostic-jaxb/6.5/dss-diagnostic-jaxb-6.5.pom",
+    "sha256": "a4ffba24fd1f8e8fd22efbd5457bc57955e95536e6c6834a47cd6ad7428525c0",
+    "dest": "m2local/eu/europa/ec/joinup/sd-dss/dss-diagnostic-jaxb/6.5",
+    "dest-filename": "dss-diagnostic-jaxb-6.5.pom"
   },
   {
     "type": "file",
-    "url": "https://repo1.maven.org/maven2/eu/europa/ec/joinup/sd-dss/dss-document/6.4/dss-document-6.4.jar",
-    "sha256": "756a0cf70210c8a569a37873ea0d93923d99fceecabe12ea2b51428e5622fc96",
-    "dest": "m2local/eu/europa/ec/joinup/sd-dss/dss-document/6.4",
-    "dest-filename": "dss-document-6.4.jar"
+    "url": "https://repo1.maven.org/maven2/eu/europa/ec/joinup/sd-dss/dss-document/6.5/dss-document-6.5.jar",
+    "sha256": "247b3bea616d9b40fd2920c5d0a1b535874d58dbd30285ca08a5ddb1dd0dd659",
+    "dest": "m2local/eu/europa/ec/joinup/sd-dss/dss-document/6.5",
+    "dest-filename": "dss-document-6.5.jar"
   },
   {
     "type": "file",
-    "url": "https://repo1.maven.org/maven2/eu/europa/ec/joinup/sd-dss/dss-document/6.4/dss-document-6.4.pom",
-    "sha256": "1bccdffeb91dd71a3dbda323f95209001b991659d8668c1ef669a928fe3d57c4",
-    "dest": "m2local/eu/europa/ec/joinup/sd-dss/dss-document/6.4",
-    "dest-filename": "dss-document-6.4.pom"
+    "url": "https://repo1.maven.org/maven2/eu/europa/ec/joinup/sd-dss/dss-document/6.5/dss-document-6.5.pom",
+    "sha256": "4d50c2e74060015fd7de2d4f5e32187e0c01a25d00eaecaba93e749fcfd1a841",
+    "dest": "m2local/eu/europa/ec/joinup/sd-dss/dss-document/6.5",
+    "dest-filename": "dss-document-6.5.pom"
   },
   {
     "type": "file",
-    "url": "https://repo1.maven.org/maven2/eu/europa/ec/joinup/sd-dss/dss-enumerations/6.4/dss-enumerations-6.4.jar",
-    "sha256": "b9a0e54f123fc4610f07b216c44b61e68ef1029ef723b2167fc55970df217038",
-    "dest": "m2local/eu/europa/ec/joinup/sd-dss/dss-enumerations/6.4",
-    "dest-filename": "dss-enumerations-6.4.jar"
+    "url": "https://repo1.maven.org/maven2/eu/europa/ec/joinup/sd-dss/dss-enumerations/6.5/dss-enumerations-6.5.jar",
+    "sha256": "e35a9d0e8eb2ade69301838f565044d318653ee7cdf464d8c5bbd70e32de0683",
+    "dest": "m2local/eu/europa/ec/joinup/sd-dss/dss-enumerations/6.5",
+    "dest-filename": "dss-enumerations-6.5.jar"
   },
   {
     "type": "file",
-    "url": "https://repo1.maven.org/maven2/eu/europa/ec/joinup/sd-dss/dss-enumerations/6.4/dss-enumerations-6.4.pom",
-    "sha256": "bc8f4156d59719c61dd8af5d36d95010ccba322a3455825150e1178d3a22680a",
-    "dest": "m2local/eu/europa/ec/joinup/sd-dss/dss-enumerations/6.4",
-    "dest-filename": "dss-enumerations-6.4.pom"
+    "url": "https://repo1.maven.org/maven2/eu/europa/ec/joinup/sd-dss/dss-enumerations/6.5/dss-enumerations-6.5.pom",
+    "sha256": "324058c46b360c45ca8bb7f51dd3f54d2e85e3a58a0f45d6342b16e5a32651ac",
+    "dest": "m2local/eu/europa/ec/joinup/sd-dss/dss-enumerations/6.5",
+    "dest-filename": "dss-enumerations-6.5.pom"
   },
   {
     "type": "file",
-    "url": "https://repo1.maven.org/maven2/eu/europa/ec/joinup/sd-dss/dss-i18n/6.4/dss-i18n-6.4.jar",
-    "sha256": "0b3adeb9488347e69ac4dd882bb1b8b6601a1ef8aa50b20372c3aed6622606e4",
-    "dest": "m2local/eu/europa/ec/joinup/sd-dss/dss-i18n/6.4",
-    "dest-filename": "dss-i18n-6.4.jar"
+    "url": "https://repo1.maven.org/maven2/eu/europa/ec/joinup/sd-dss/dss-i18n/6.5/dss-i18n-6.5.jar",
+    "sha256": "d97357ea34c62b19651d4d197a809ec9a8004992bcf2651726f6a75a9a6a2662",
+    "dest": "m2local/eu/europa/ec/joinup/sd-dss/dss-i18n/6.5",
+    "dest-filename": "dss-i18n-6.5.jar"
   },
   {
     "type": "file",
-    "url": "https://repo1.maven.org/maven2/eu/europa/ec/joinup/sd-dss/dss-i18n/6.4/dss-i18n-6.4.pom",
-    "sha256": "275439a0591ed92176467060b0a8a3f270bfd0ac615fc7dbd1f37c16cc288bba",
-    "dest": "m2local/eu/europa/ec/joinup/sd-dss/dss-i18n/6.4",
-    "dest-filename": "dss-i18n-6.4.pom"
+    "url": "https://repo1.maven.org/maven2/eu/europa/ec/joinup/sd-dss/dss-i18n/6.5/dss-i18n-6.5.pom",
+    "sha256": "9b74d3f0f31e26390422a66e091687c0d517b15bd40e09afe5d8ca70bfab56ca",
+    "dest": "m2local/eu/europa/ec/joinup/sd-dss/dss-i18n/6.5",
+    "dest-filename": "dss-i18n-6.5.pom"
   },
   {
     "type": "file",
-    "url": "https://repo1.maven.org/maven2/eu/europa/ec/joinup/sd-dss/dss-jaxb-common/6.4/dss-jaxb-common-6.4.jar",
-    "sha256": "04f551877ec4634e4a985c767ab316fa9ddb7021be79978fcf8c7c46098aa676",
-    "dest": "m2local/eu/europa/ec/joinup/sd-dss/dss-jaxb-common/6.4",
-    "dest-filename": "dss-jaxb-common-6.4.jar"
+    "url": "https://repo1.maven.org/maven2/eu/europa/ec/joinup/sd-dss/dss-jaxb-common/6.5/dss-jaxb-common-6.5.jar",
+    "sha256": "6de985cfa57b87849c270ccb363d246366705d99103b3a2438c706e1183fa15a",
+    "dest": "m2local/eu/europa/ec/joinup/sd-dss/dss-jaxb-common/6.5",
+    "dest-filename": "dss-jaxb-common-6.5.jar"
   },
   {
     "type": "file",
-    "url": "https://repo1.maven.org/maven2/eu/europa/ec/joinup/sd-dss/dss-jaxb-common/6.4/dss-jaxb-common-6.4.pom",
-    "sha256": "c3ff98b5da6604e4c1c5b0f65958bbddeec731d535849cbe5672de5bdfad751e",
-    "dest": "m2local/eu/europa/ec/joinup/sd-dss/dss-jaxb-common/6.4",
-    "dest-filename": "dss-jaxb-common-6.4.pom"
+    "url": "https://repo1.maven.org/maven2/eu/europa/ec/joinup/sd-dss/dss-jaxb-common/6.5/dss-jaxb-common-6.5.pom",
+    "sha256": "337802c5602105df17b3a5bbc3a15e3fba35b8f705245233b24259c164f63350",
+    "dest": "m2local/eu/europa/ec/joinup/sd-dss/dss-jaxb-common/6.5",
+    "dest-filename": "dss-jaxb-common-6.5.pom"
   },
   {
     "type": "file",
-    "url": "https://repo1.maven.org/maven2/eu/europa/ec/joinup/sd-dss/dss-jaxb-parsers/6.4/dss-jaxb-parsers-6.4.jar",
-    "sha256": "0136da914be7738f5ddc560238440187d38bed605bb3387d905fa44dc65f35de",
-    "dest": "m2local/eu/europa/ec/joinup/sd-dss/dss-jaxb-parsers/6.4",
-    "dest-filename": "dss-jaxb-parsers-6.4.jar"
+    "url": "https://repo1.maven.org/maven2/eu/europa/ec/joinup/sd-dss/dss-jaxb-parsers/6.5/dss-jaxb-parsers-6.5.jar",
+    "sha256": "e6c13447fec489c6535179ccd68c9850a6d5eb36244670379a601740b11628a6",
+    "dest": "m2local/eu/europa/ec/joinup/sd-dss/dss-jaxb-parsers/6.5",
+    "dest-filename": "dss-jaxb-parsers-6.5.jar"
   },
   {
     "type": "file",
-    "url": "https://repo1.maven.org/maven2/eu/europa/ec/joinup/sd-dss/dss-jaxb-parsers/6.4/dss-jaxb-parsers-6.4.pom",
-    "sha256": "a0c8a6a1787e55b67d63dcb2f1a422a8adfdd33785b1f94ec776217785ec2bce",
-    "dest": "m2local/eu/europa/ec/joinup/sd-dss/dss-jaxb-parsers/6.4",
-    "dest-filename": "dss-jaxb-parsers-6.4.pom"
+    "url": "https://repo1.maven.org/maven2/eu/europa/ec/joinup/sd-dss/dss-jaxb-parsers/6.5/dss-jaxb-parsers-6.5.pom",
+    "sha256": "7e2e6fc3e096fda8f859a7f76c1ddcc38e289a958487ea512d202cf910d53f49",
+    "dest": "m2local/eu/europa/ec/joinup/sd-dss/dss-jaxb-parsers/6.5",
+    "dest-filename": "dss-jaxb-parsers-6.5.pom"
   },
   {
     "type": "file",
-    "url": "https://repo1.maven.org/maven2/eu/europa/ec/joinup/sd-dss/dss-model/6.4/dss-model-6.4.jar",
-    "sha256": "fcfc83d125ec507947bb9cb79f7b9ba3a532f8326d115a65a4192b19729efb64",
-    "dest": "m2local/eu/europa/ec/joinup/sd-dss/dss-model/6.4",
-    "dest-filename": "dss-model-6.4.jar"
+    "url": "https://repo1.maven.org/maven2/eu/europa/ec/joinup/sd-dss/dss-model/6.5/dss-model-6.5.jar",
+    "sha256": "64c90e07fe1ee67b98b08946867a679db358823eb30a26178fd2e531f95e55e0",
+    "dest": "m2local/eu/europa/ec/joinup/sd-dss/dss-model/6.5",
+    "dest-filename": "dss-model-6.5.jar"
   },
   {
     "type": "file",
-    "url": "https://repo1.maven.org/maven2/eu/europa/ec/joinup/sd-dss/dss-model/6.4/dss-model-6.4.pom",
-    "sha256": "2bf34697fd49a92aa0fe96f87821ed099f3db916ea14beec60730a08c48d0be2",
-    "dest": "m2local/eu/europa/ec/joinup/sd-dss/dss-model/6.4",
-    "dest-filename": "dss-model-6.4.pom"
+    "url": "https://repo1.maven.org/maven2/eu/europa/ec/joinup/sd-dss/dss-model/6.5/dss-model-6.5.pom",
+    "sha256": "b0a8395e41aec41f195508cf160b4cbd8bb90a93d30a73647022cce7d5ca7c44",
+    "dest": "m2local/eu/europa/ec/joinup/sd-dss/dss-model/6.5",
+    "dest-filename": "dss-model-6.5.pom"
   },
   {
     "type": "file",
-    "url": "https://repo1.maven.org/maven2/eu/europa/ec/joinup/sd-dss/dss-pades-pdfbox/6.4/dss-pades-pdfbox-6.4.jar",
-    "sha256": "0c6181884a0e012419d95d27b7a5b6178c5cd2ba7193ebb852ed14677adfd64f",
-    "dest": "m2local/eu/europa/ec/joinup/sd-dss/dss-pades-pdfbox/6.4",
-    "dest-filename": "dss-pades-pdfbox-6.4.jar"
+    "url": "https://repo1.maven.org/maven2/eu/europa/ec/joinup/sd-dss/dss-pades-pdfbox/6.5/dss-pades-pdfbox-6.5.jar",
+    "sha256": "04f76aa2fb9b423252046f010685fdbb9ce9057cdf2abb22776b57cfa8faded2",
+    "dest": "m2local/eu/europa/ec/joinup/sd-dss/dss-pades-pdfbox/6.5",
+    "dest-filename": "dss-pades-pdfbox-6.5.jar"
   },
   {
     "type": "file",
-    "url": "https://repo1.maven.org/maven2/eu/europa/ec/joinup/sd-dss/dss-pades-pdfbox/6.4/dss-pades-pdfbox-6.4.pom",
-    "sha256": "292d8835876d17532b88cbbba071955ccd0650228bffb5e6fa89b78f76def692",
-    "dest": "m2local/eu/europa/ec/joinup/sd-dss/dss-pades-pdfbox/6.4",
-    "dest-filename": "dss-pades-pdfbox-6.4.pom"
+    "url": "https://repo1.maven.org/maven2/eu/europa/ec/joinup/sd-dss/dss-pades-pdfbox/6.5/dss-pades-pdfbox-6.5.pom",
+    "sha256": "bf5a8138edfcdcc14ebc56a4da68e094f8699fac6fad2d51fa4887b774268a8d",
+    "dest": "m2local/eu/europa/ec/joinup/sd-dss/dss-pades-pdfbox/6.5",
+    "dest-filename": "dss-pades-pdfbox-6.5.pom"
   },
   {
     "type": "file",
-    "url": "https://repo1.maven.org/maven2/eu/europa/ec/joinup/sd-dss/dss-pades/6.4/dss-pades-6.4.jar",
-    "sha256": "7a21306abddf80eaf7d6ff3df3b999fe2f6b78b3299fde6491eb1e3549932530",
-    "dest": "m2local/eu/europa/ec/joinup/sd-dss/dss-pades/6.4",
-    "dest-filename": "dss-pades-6.4.jar"
+    "url": "https://repo1.maven.org/maven2/eu/europa/ec/joinup/sd-dss/dss-pades/6.5/dss-pades-6.5.jar",
+    "sha256": "93eb79831fedd1d5cc7e7553fa8179d69c66de70d4ab6af712539aba89734c46",
+    "dest": "m2local/eu/europa/ec/joinup/sd-dss/dss-pades/6.5",
+    "dest-filename": "dss-pades-6.5.jar"
   },
   {
     "type": "file",
-    "url": "https://repo1.maven.org/maven2/eu/europa/ec/joinup/sd-dss/dss-pades/6.4/dss-pades-6.4.pom",
-    "sha256": "3cd375d3c76c2e595d78079430177885b3f3ef16d1ff695caf0a21dde152a6a0",
-    "dest": "m2local/eu/europa/ec/joinup/sd-dss/dss-pades/6.4",
-    "dest-filename": "dss-pades-6.4.pom"
+    "url": "https://repo1.maven.org/maven2/eu/europa/ec/joinup/sd-dss/dss-pades/6.5/dss-pades-6.5.pom",
+    "sha256": "78da6efc645d84cb105169c10a07beb2554aec53a9f4aaba2def5cb2759638dd",
+    "dest": "m2local/eu/europa/ec/joinup/sd-dss/dss-pades/6.5",
+    "dest-filename": "dss-pades-6.5.pom"
   },
   {
     "type": "file",
-    "url": "https://repo1.maven.org/maven2/eu/europa/ec/joinup/sd-dss/dss-policy-jaxb/6.4/dss-policy-jaxb-6.4.jar",
-    "sha256": "a33ed24d9dd933ac6aedee2def1fe15cfb34da59dae28d61d72d13997134d4d3",
-    "dest": "m2local/eu/europa/ec/joinup/sd-dss/dss-policy-jaxb/6.4",
-    "dest-filename": "dss-policy-jaxb-6.4.jar"
+    "url": "https://repo1.maven.org/maven2/eu/europa/ec/joinup/sd-dss/dss-policy-jaxb/6.5/dss-policy-jaxb-6.5.jar",
+    "sha256": "9b6b35ee80075efd3f3418d6e30fbd8c9ba4f0f3f2f63850ed5485023201ccd9",
+    "dest": "m2local/eu/europa/ec/joinup/sd-dss/dss-policy-jaxb/6.5",
+    "dest-filename": "dss-policy-jaxb-6.5.jar"
   },
   {
     "type": "file",
-    "url": "https://repo1.maven.org/maven2/eu/europa/ec/joinup/sd-dss/dss-policy-jaxb/6.4/dss-policy-jaxb-6.4.pom",
-    "sha256": "b0969ddaa4b70130429347e89fe1e6ddb35e6d68238b171395dd4328e93f41b7",
-    "dest": "m2local/eu/europa/ec/joinup/sd-dss/dss-policy-jaxb/6.4",
-    "dest-filename": "dss-policy-jaxb-6.4.pom"
+    "url": "https://repo1.maven.org/maven2/eu/europa/ec/joinup/sd-dss/dss-policy-jaxb/6.5/dss-policy-jaxb-6.5.pom",
+    "sha256": "0c47bf7baa00a74c3fc7e0ffaec8b91794584052c1094534efb706235a69e3d5",
+    "dest": "m2local/eu/europa/ec/joinup/sd-dss/dss-policy-jaxb/6.5",
+    "dest-filename": "dss-policy-jaxb-6.5.pom"
   },
   {
     "type": "file",
-    "url": "https://repo1.maven.org/maven2/eu/europa/ec/joinup/sd-dss/dss-service/6.4/dss-service-6.4.jar",
-    "sha256": "8000339a1bf178bfb402276169abef17f93142119cad3ceefc84dc67746b70ca",
-    "dest": "m2local/eu/europa/ec/joinup/sd-dss/dss-service/6.4",
-    "dest-filename": "dss-service-6.4.jar"
+    "url": "https://repo1.maven.org/maven2/eu/europa/ec/joinup/sd-dss/dss-service/6.5/dss-service-6.5.jar",
+    "sha256": "20321800cce247ed0f44f271ad841fee13b07fe3a0b3c38d30a3d96d9f81295e",
+    "dest": "m2local/eu/europa/ec/joinup/sd-dss/dss-service/6.5",
+    "dest-filename": "dss-service-6.5.jar"
   },
   {
     "type": "file",
-    "url": "https://repo1.maven.org/maven2/eu/europa/ec/joinup/sd-dss/dss-service/6.4/dss-service-6.4.pom",
-    "sha256": "c51dc59fa6a613dd2a027f93715b77407cb867f2ae841138727043e5fe34dbcb",
-    "dest": "m2local/eu/europa/ec/joinup/sd-dss/dss-service/6.4",
-    "dest-filename": "dss-service-6.4.pom"
+    "url": "https://repo1.maven.org/maven2/eu/europa/ec/joinup/sd-dss/dss-service/6.5/dss-service-6.5.pom",
+    "sha256": "c278aea85bd3c2845cf8ab6554e70cf3f0a096473e80d0a6500f42449ff0b0c7",
+    "dest": "m2local/eu/europa/ec/joinup/sd-dss/dss-service/6.5",
+    "dest-filename": "dss-service-6.5.pom"
   },
   {
     "type": "file",
-    "url": "https://repo1.maven.org/maven2/eu/europa/ec/joinup/sd-dss/dss-simple-certificate-report-jaxb/6.4/dss-simple-certificate-report-jaxb-6.4.jar",
-    "sha256": "d238a724c8740da450f33788777ade3a0755d09bfb974ea845dd77ce7be7dab0",
-    "dest": "m2local/eu/europa/ec/joinup/sd-dss/dss-simple-certificate-report-jaxb/6.4",
-    "dest-filename": "dss-simple-certificate-report-jaxb-6.4.jar"
+    "url": "https://repo1.maven.org/maven2/eu/europa/ec/joinup/sd-dss/dss-simple-certificate-report-jaxb/6.5/dss-simple-certificate-report-jaxb-6.5.jar",
+    "sha256": "1def0464e2c5daf9cef537c3994d22132a0531632277a319e40b51b2362988fd",
+    "dest": "m2local/eu/europa/ec/joinup/sd-dss/dss-simple-certificate-report-jaxb/6.5",
+    "dest-filename": "dss-simple-certificate-report-jaxb-6.5.jar"
   },
   {
     "type": "file",
-    "url": "https://repo1.maven.org/maven2/eu/europa/ec/joinup/sd-dss/dss-simple-certificate-report-jaxb/6.4/dss-simple-certificate-report-jaxb-6.4.pom",
-    "sha256": "ce216b153e82a9dade6077d17e37742b1f7b60920b0ccb5fb955972ae8ef808b",
-    "dest": "m2local/eu/europa/ec/joinup/sd-dss/dss-simple-certificate-report-jaxb/6.4",
-    "dest-filename": "dss-simple-certificate-report-jaxb-6.4.pom"
+    "url": "https://repo1.maven.org/maven2/eu/europa/ec/joinup/sd-dss/dss-simple-certificate-report-jaxb/6.5/dss-simple-certificate-report-jaxb-6.5.pom",
+    "sha256": "c8f1411c3332830855a33b62a7af47bd4c3a57e6aa05c5c84d6cf621097d0713",
+    "dest": "m2local/eu/europa/ec/joinup/sd-dss/dss-simple-certificate-report-jaxb/6.5",
+    "dest-filename": "dss-simple-certificate-report-jaxb-6.5.pom"
   },
   {
     "type": "file",
-    "url": "https://repo1.maven.org/maven2/eu/europa/ec/joinup/sd-dss/dss-simple-report-jaxb/6.4/dss-simple-report-jaxb-6.4.jar",
-    "sha256": "1dfb11982cffad3233691a3befb0281afa074ea54bac88f2560df4e3a8da5485",
-    "dest": "m2local/eu/europa/ec/joinup/sd-dss/dss-simple-report-jaxb/6.4",
-    "dest-filename": "dss-simple-report-jaxb-6.4.jar"
+    "url": "https://repo1.maven.org/maven2/eu/europa/ec/joinup/sd-dss/dss-simple-report-jaxb/6.5/dss-simple-report-jaxb-6.5.jar",
+    "sha256": "21f75e389e97a1b90a6331a9baa0498f683507eaf6f490afc91337850035abf6",
+    "dest": "m2local/eu/europa/ec/joinup/sd-dss/dss-simple-report-jaxb/6.5",
+    "dest-filename": "dss-simple-report-jaxb-6.5.jar"
   },
   {
     "type": "file",
-    "url": "https://repo1.maven.org/maven2/eu/europa/ec/joinup/sd-dss/dss-simple-report-jaxb/6.4/dss-simple-report-jaxb-6.4.pom",
-    "sha256": "5a0eb8462717c0bc8d35f0ff4ab62a3914c2a26ac79e4747cf88db38f3c57e8b",
-    "dest": "m2local/eu/europa/ec/joinup/sd-dss/dss-simple-report-jaxb/6.4",
-    "dest-filename": "dss-simple-report-jaxb-6.4.pom"
+    "url": "https://repo1.maven.org/maven2/eu/europa/ec/joinup/sd-dss/dss-simple-report-jaxb/6.5/dss-simple-report-jaxb-6.5.pom",
+    "sha256": "25f50cb7ed6b46260518d5a7e05b5008963560434dfe1807328fc989f635cb49",
+    "dest": "m2local/eu/europa/ec/joinup/sd-dss/dss-simple-report-jaxb/6.5",
+    "dest-filename": "dss-simple-report-jaxb-6.5.pom"
   },
   {
     "type": "file",
-    "url": "https://repo1.maven.org/maven2/eu/europa/ec/joinup/sd-dss/dss-spi/6.4/dss-spi-6.4.jar",
-    "sha256": "be95fa745d08237658344f1bcad4b75e6e871d8815b629928c97787311b292ad",
-    "dest": "m2local/eu/europa/ec/joinup/sd-dss/dss-spi/6.4",
-    "dest-filename": "dss-spi-6.4.jar"
+    "url": "https://repo1.maven.org/maven2/eu/europa/ec/joinup/sd-dss/dss-spi/6.5/dss-spi-6.5.jar",
+    "sha256": "9cefd7b2bf72843bc556706e3f541bd7ec75c03a64f9235b1ae8f27404212068",
+    "dest": "m2local/eu/europa/ec/joinup/sd-dss/dss-spi/6.5",
+    "dest-filename": "dss-spi-6.5.jar"
   },
   {
     "type": "file",
-    "url": "https://repo1.maven.org/maven2/eu/europa/ec/joinup/sd-dss/dss-spi/6.4/dss-spi-6.4.pom",
-    "sha256": "1c54d85909ec3074d14733e5da956ab2902f003a021620f73943ade8158acde2",
-    "dest": "m2local/eu/europa/ec/joinup/sd-dss/dss-spi/6.4",
-    "dest-filename": "dss-spi-6.4.pom"
+    "url": "https://repo1.maven.org/maven2/eu/europa/ec/joinup/sd-dss/dss-spi/6.5/dss-spi-6.5.pom",
+    "sha256": "ddc1e6c9dc1c3af5bb9a3e687fbf0760dfb4ea9c158372a6275d271cfed3234a",
+    "dest": "m2local/eu/europa/ec/joinup/sd-dss/dss-spi/6.5",
+    "dest-filename": "dss-spi-6.5.pom"
   },
   {
     "type": "file",
-    "url": "https://repo1.maven.org/maven2/eu/europa/ec/joinup/sd-dss/dss-token/6.4/dss-token-6.4.jar",
-    "sha256": "4ceb1c84cbefad6a21ddd26807dd16f0304f17d8363eaae7b7f0ccb957b4055d",
-    "dest": "m2local/eu/europa/ec/joinup/sd-dss/dss-token/6.4",
-    "dest-filename": "dss-token-6.4.jar"
+    "url": "https://repo1.maven.org/maven2/eu/europa/ec/joinup/sd-dss/dss-token/6.5/dss-token-6.5.jar",
+    "sha256": "03a5d2cc523de5ee12b3b9e3b861d58d1cef2a0293c1d71b71011655cfc42bfd",
+    "dest": "m2local/eu/europa/ec/joinup/sd-dss/dss-token/6.5",
+    "dest-filename": "dss-token-6.5.jar"
   },
   {
     "type": "file",
-    "url": "https://repo1.maven.org/maven2/eu/europa/ec/joinup/sd-dss/dss-token/6.4/dss-token-6.4.pom",
-    "sha256": "30775b95366799f1f6ca4541734032854fb62a9c649234c97e25075bb5eed821",
-    "dest": "m2local/eu/europa/ec/joinup/sd-dss/dss-token/6.4",
-    "dest-filename": "dss-token-6.4.pom"
+    "url": "https://repo1.maven.org/maven2/eu/europa/ec/joinup/sd-dss/dss-token/6.5/dss-token-6.5.pom",
+    "sha256": "6c69ea686f853d6deeabdf4bd42918b215e9e9e5b0fa3f70fb605775ae98edef",
+    "dest": "m2local/eu/europa/ec/joinup/sd-dss/dss-token/6.5",
+    "dest-filename": "dss-token-6.5.pom"
   },
   {
     "type": "file",
-    "url": "https://repo1.maven.org/maven2/eu/europa/ec/joinup/sd-dss/dss-tsl-validation/6.4/dss-tsl-validation-6.4.jar",
-    "sha256": "607934bfba444b13ce9569d230bd867bbe63708ca5e1ec313c01d2d1db85cf93",
-    "dest": "m2local/eu/europa/ec/joinup/sd-dss/dss-tsl-validation/6.4",
-    "dest-filename": "dss-tsl-validation-6.4.jar"
+    "url": "https://repo1.maven.org/maven2/eu/europa/ec/joinup/sd-dss/dss-tsl-validation/6.5/dss-tsl-validation-6.5.jar",
+    "sha256": "090c3c4a25461303e08eacbec10ced5152f5803ee78b908a2abe60f362e62060",
+    "dest": "m2local/eu/europa/ec/joinup/sd-dss/dss-tsl-validation/6.5",
+    "dest-filename": "dss-tsl-validation-6.5.jar"
   },
   {
     "type": "file",
-    "url": "https://repo1.maven.org/maven2/eu/europa/ec/joinup/sd-dss/dss-tsl-validation/6.4/dss-tsl-validation-6.4.pom",
-    "sha256": "7f5a9169bad8e3de17c84a465e2c64672cb21b27272233a1b5a86554c9f86ce3",
-    "dest": "m2local/eu/europa/ec/joinup/sd-dss/dss-tsl-validation/6.4",
-    "dest-filename": "dss-tsl-validation-6.4.pom"
+    "url": "https://repo1.maven.org/maven2/eu/europa/ec/joinup/sd-dss/dss-tsl-validation/6.5/dss-tsl-validation-6.5.pom",
+    "sha256": "2d13ce09f5222bf8890f8b7ce393c1e058085c5979a454b03aebf8030cec6b57",
+    "dest": "m2local/eu/europa/ec/joinup/sd-dss/dss-tsl-validation/6.5",
+    "dest-filename": "dss-tsl-validation-6.5.pom"
   },
   {
     "type": "file",
-    "url": "https://repo1.maven.org/maven2/eu/europa/ec/joinup/sd-dss/dss-utils-apache-commons/6.4/dss-utils-apache-commons-6.4.jar",
-    "sha256": "4c33be08d0155748f9060a6d71294a1c0cd78bbd0aa7f343bddb5298be92e04d",
-    "dest": "m2local/eu/europa/ec/joinup/sd-dss/dss-utils-apache-commons/6.4",
-    "dest-filename": "dss-utils-apache-commons-6.4.jar"
+    "url": "https://repo1.maven.org/maven2/eu/europa/ec/joinup/sd-dss/dss-utils-apache-commons/6.5/dss-utils-apache-commons-6.5.jar",
+    "sha256": "b032d1073fd5070067a58f2243ac10643170f7a732c62cef2d1467906aff1236",
+    "dest": "m2local/eu/europa/ec/joinup/sd-dss/dss-utils-apache-commons/6.5",
+    "dest-filename": "dss-utils-apache-commons-6.5.jar"
   },
   {
     "type": "file",
-    "url": "https://repo1.maven.org/maven2/eu/europa/ec/joinup/sd-dss/dss-utils-apache-commons/6.4/dss-utils-apache-commons-6.4.pom",
-    "sha256": "b06dc3b9e2cf0ef8af51b1a32f0daf3d5d4551ed3b4a08d20baf2fb59acb4226",
-    "dest": "m2local/eu/europa/ec/joinup/sd-dss/dss-utils-apache-commons/6.4",
-    "dest-filename": "dss-utils-apache-commons-6.4.pom"
+    "url": "https://repo1.maven.org/maven2/eu/europa/ec/joinup/sd-dss/dss-utils-apache-commons/6.5/dss-utils-apache-commons-6.5.pom",
+    "sha256": "b5b1b0c0b9d83048bc6844128880576ef437c873d43b49739387bf2586b93d9a",
+    "dest": "m2local/eu/europa/ec/joinup/sd-dss/dss-utils-apache-commons/6.5",
+    "dest-filename": "dss-utils-apache-commons-6.5.pom"
   },
   {
     "type": "file",
-    "url": "https://repo1.maven.org/maven2/eu/europa/ec/joinup/sd-dss/dss-utils/6.4/dss-utils-6.4.jar",
-    "sha256": "ab8698f2e1f57fd8511b718dadff54a1e26c5ebfac3addfb9792748a61a49a44",
-    "dest": "m2local/eu/europa/ec/joinup/sd-dss/dss-utils/6.4",
-    "dest-filename": "dss-utils-6.4.jar"
+    "url": "https://repo1.maven.org/maven2/eu/europa/ec/joinup/sd-dss/dss-utils/6.5/dss-utils-6.5.jar",
+    "sha256": "a3b4bcb0c6f266c69d1a1d02370c25f62964d6f26ee6fe7e545ae294b449734d",
+    "dest": "m2local/eu/europa/ec/joinup/sd-dss/dss-utils/6.5",
+    "dest-filename": "dss-utils-6.5.jar"
   },
   {
     "type": "file",
-    "url": "https://repo1.maven.org/maven2/eu/europa/ec/joinup/sd-dss/dss-utils/6.4/dss-utils-6.4.pom",
-    "sha256": "d2997997d7da2ff0a73341f4d522edf697102ce27c01a80bd47f185fd19c8ed8",
-    "dest": "m2local/eu/europa/ec/joinup/sd-dss/dss-utils/6.4",
-    "dest-filename": "dss-utils-6.4.pom"
+    "url": "https://repo1.maven.org/maven2/eu/europa/ec/joinup/sd-dss/dss-utils/6.5/dss-utils-6.5.pom",
+    "sha256": "dc2122710c9bc58af2beaf945e6d7a0092a68ece893a8c6c8ccf0752db70fc65",
+    "dest": "m2local/eu/europa/ec/joinup/sd-dss/dss-utils/6.5",
+    "dest-filename": "dss-utils-6.5.pom"
   },
   {
     "type": "file",
-    "url": "https://repo1.maven.org/maven2/eu/europa/ec/joinup/sd-dss/dss-validation/6.4/dss-validation-6.4.jar",
-    "sha256": "01e07b34c228d6580817cae575742224e05a528549a568e15534070a0ca9ee2f",
-    "dest": "m2local/eu/europa/ec/joinup/sd-dss/dss-validation/6.4",
-    "dest-filename": "dss-validation-6.4.jar"
+    "url": "https://repo1.maven.org/maven2/eu/europa/ec/joinup/sd-dss/dss-validation-job/6.5/dss-validation-job-6.5.jar",
+    "sha256": "9755c3af67528b4db9999ecc3d0c7678ec8d522022bc0c44af6dc73fc472eb59",
+    "dest": "m2local/eu/europa/ec/joinup/sd-dss/dss-validation-job/6.5",
+    "dest-filename": "dss-validation-job-6.5.jar"
   },
   {
     "type": "file",
-    "url": "https://repo1.maven.org/maven2/eu/europa/ec/joinup/sd-dss/dss-validation/6.4/dss-validation-6.4.pom",
-    "sha256": "e4450ec72c31dce0452d3f45c60925e9368d22a1053b097266b55fa1bdd68eb6",
-    "dest": "m2local/eu/europa/ec/joinup/sd-dss/dss-validation/6.4",
-    "dest-filename": "dss-validation-6.4.pom"
+    "url": "https://repo1.maven.org/maven2/eu/europa/ec/joinup/sd-dss/dss-validation-job/6.5/dss-validation-job-6.5.pom",
+    "sha256": "b8756526cbfb171606d24dd5377007c2a7c4997fa06d9c2874a00a8e8552ddc5",
+    "dest": "m2local/eu/europa/ec/joinup/sd-dss/dss-validation-job/6.5",
+    "dest-filename": "dss-validation-job-6.5.pom"
   },
   {
     "type": "file",
-    "url": "https://repo1.maven.org/maven2/eu/europa/ec/joinup/sd-dss/dss-xades/6.4/dss-xades-6.4.jar",
-    "sha256": "f772c28476865e7c390319a6f9cbfd71c3613e40da96b4c0a16e5db3ea39c9d4",
-    "dest": "m2local/eu/europa/ec/joinup/sd-dss/dss-xades/6.4",
-    "dest-filename": "dss-xades-6.4.jar"
+    "url": "https://repo1.maven.org/maven2/eu/europa/ec/joinup/sd-dss/dss-validation/6.5/dss-validation-6.5.jar",
+    "sha256": "14a9af420a7c1f5a51e89b3c5631f1e865262728345f5a5e5b087ab5ebc8cbd3",
+    "dest": "m2local/eu/europa/ec/joinup/sd-dss/dss-validation/6.5",
+    "dest-filename": "dss-validation-6.5.jar"
   },
   {
     "type": "file",
-    "url": "https://repo1.maven.org/maven2/eu/europa/ec/joinup/sd-dss/dss-xades/6.4/dss-xades-6.4.pom",
-    "sha256": "eb210a387aeb0e243de0362de50ea53fca1a58a4bccdc8debbb8f4500db3406e",
-    "dest": "m2local/eu/europa/ec/joinup/sd-dss/dss-xades/6.4",
-    "dest-filename": "dss-xades-6.4.pom"
+    "url": "https://repo1.maven.org/maven2/eu/europa/ec/joinup/sd-dss/dss-validation/6.5/dss-validation-6.5.pom",
+    "sha256": "d124ddf22ca64834e79c84d0cd7ff2a7868aa1530a6eebca1af74eebb0d4c155",
+    "dest": "m2local/eu/europa/ec/joinup/sd-dss/dss-validation/6.5",
+    "dest-filename": "dss-validation-6.5.pom"
   },
   {
     "type": "file",
-    "url": "https://repo1.maven.org/maven2/eu/europa/ec/joinup/sd-dss/dss-xml-common/6.4/dss-xml-common-6.4.jar",
-    "sha256": "dabd16ae5dbf17eb2b09b2440db67984f925cc126437ae679988e4dfa138a617",
-    "dest": "m2local/eu/europa/ec/joinup/sd-dss/dss-xml-common/6.4",
-    "dest-filename": "dss-xml-common-6.4.jar"
+    "url": "https://repo1.maven.org/maven2/eu/europa/ec/joinup/sd-dss/dss-xades/6.5/dss-xades-6.5.jar",
+    "sha256": "53df48a704e7f6ae2037a9b9d86c584628b6e81858dabff820bf39adc7600300",
+    "dest": "m2local/eu/europa/ec/joinup/sd-dss/dss-xades/6.5",
+    "dest-filename": "dss-xades-6.5.jar"
   },
   {
     "type": "file",
-    "url": "https://repo1.maven.org/maven2/eu/europa/ec/joinup/sd-dss/dss-xml-common/6.4/dss-xml-common-6.4.pom",
-    "sha256": "734871f5fad1ea35b3262e275495150a8598578a53ad1edcdcdf53d45d1b3e16",
-    "dest": "m2local/eu/europa/ec/joinup/sd-dss/dss-xml-common/6.4",
-    "dest-filename": "dss-xml-common-6.4.pom"
+    "url": "https://repo1.maven.org/maven2/eu/europa/ec/joinup/sd-dss/dss-xades/6.5/dss-xades-6.5.pom",
+    "sha256": "79f4d7551dd44a19325626bd32bbcb28a527ca9bfeae7aaec21d383f58120362",
+    "dest": "m2local/eu/europa/ec/joinup/sd-dss/dss-xades/6.5",
+    "dest-filename": "dss-xades-6.5.pom"
   },
   {
     "type": "file",
-    "url": "https://repo1.maven.org/maven2/eu/europa/ec/joinup/sd-dss/dss-xml-utils/6.4/dss-xml-utils-6.4.jar",
-    "sha256": "2c2f617941c3dba4aba9838b312854dbadae4849d09308d83e3bd1c7301aa11b",
-    "dest": "m2local/eu/europa/ec/joinup/sd-dss/dss-xml-utils/6.4",
-    "dest-filename": "dss-xml-utils-6.4.jar"
+    "url": "https://repo1.maven.org/maven2/eu/europa/ec/joinup/sd-dss/dss-xml-common/6.5/dss-xml-common-6.5.jar",
+    "sha256": "1174de1818d2ae22960c39ce4c5507c7d8c68c0ae20d00660ecc5f4c73f5f007",
+    "dest": "m2local/eu/europa/ec/joinup/sd-dss/dss-xml-common/6.5",
+    "dest-filename": "dss-xml-common-6.5.jar"
   },
   {
     "type": "file",
-    "url": "https://repo1.maven.org/maven2/eu/europa/ec/joinup/sd-dss/dss-xml-utils/6.4/dss-xml-utils-6.4.pom",
-    "sha256": "5a4b10ecd00911513aba2a550409e07a276c2f205b1450c284f59598518ca3d0",
-    "dest": "m2local/eu/europa/ec/joinup/sd-dss/dss-xml-utils/6.4",
-    "dest-filename": "dss-xml-utils-6.4.pom"
+    "url": "https://repo1.maven.org/maven2/eu/europa/ec/joinup/sd-dss/dss-xml-common/6.5/dss-xml-common-6.5.pom",
+    "sha256": "26b8bff5e25d6c4356f560e54ad61d1b2887dc3dc7d0cb3008d152b6ac6bab4b",
+    "dest": "m2local/eu/europa/ec/joinup/sd-dss/dss-xml-common/6.5",
+    "dest-filename": "dss-xml-common-6.5.pom"
   },
   {
     "type": "file",
-    "url": "https://repo1.maven.org/maven2/eu/europa/ec/joinup/sd-dss/sd-dss/6.4/sd-dss-6.4.pom",
-    "sha256": "dbf450e09c89717a86202341861109007affed3d15c0bc1e28d7ce4b4280c901",
-    "dest": "m2local/eu/europa/ec/joinup/sd-dss/sd-dss/6.4",
-    "dest-filename": "sd-dss-6.4.pom"
+    "url": "https://repo1.maven.org/maven2/eu/europa/ec/joinup/sd-dss/dss-xml-utils/6.5/dss-xml-utils-6.5.jar",
+    "sha256": "3c878886d08ae40fd7cd3cd98694dc7a278fe9eec9c55e29e1b7e74ec5dab2c6",
+    "dest": "m2local/eu/europa/ec/joinup/sd-dss/dss-xml-utils/6.5",
+    "dest-filename": "dss-xml-utils-6.5.jar"
   },
   {
     "type": "file",
-    "url": "https://repo1.maven.org/maven2/eu/europa/ec/joinup/sd-dss/specs-trusted-list-v211/6.4/specs-trusted-list-v211-6.4.jar",
-    "sha256": "cd8f3de91d71fcfe0574d68d0c5c96f6247aa962dac10612120e51ef20550af7",
-    "dest": "m2local/eu/europa/ec/joinup/sd-dss/specs-trusted-list-v211/6.4",
-    "dest-filename": "specs-trusted-list-v211-6.4.jar"
+    "url": "https://repo1.maven.org/maven2/eu/europa/ec/joinup/sd-dss/dss-xml-utils/6.5/dss-xml-utils-6.5.pom",
+    "sha256": "30569f514c72aa228c4332a3fb864a48a231f0795165474f41d9dd7bea91faf3",
+    "dest": "m2local/eu/europa/ec/joinup/sd-dss/dss-xml-utils/6.5",
+    "dest-filename": "dss-xml-utils-6.5.pom"
   },
   {
     "type": "file",
-    "url": "https://repo1.maven.org/maven2/eu/europa/ec/joinup/sd-dss/specs-trusted-list-v211/6.4/specs-trusted-list-v211-6.4.pom",
-    "sha256": "253b53cdb7acb046633daf8d2964d65e1367cca7e949a3d61fd4cdb66743147d",
-    "dest": "m2local/eu/europa/ec/joinup/sd-dss/specs-trusted-list-v211/6.4",
-    "dest-filename": "specs-trusted-list-v211-6.4.pom"
+    "url": "https://repo1.maven.org/maven2/eu/europa/ec/joinup/sd-dss/sd-dss/6.5/sd-dss-6.5.pom",
+    "sha256": "078e6c0405f49ebbfd4a48c6e4406d800cc3f887254e992429189e0de700808e",
+    "dest": "m2local/eu/europa/ec/joinup/sd-dss/sd-dss/6.5",
+    "dest-filename": "sd-dss-6.5.pom"
   },
   {
     "type": "file",
-    "url": "https://repo1.maven.org/maven2/eu/europa/ec/joinup/sd-dss/specs-trusted-list/6.4/specs-trusted-list-6.4.jar",
-    "sha256": "71f428692c48b86b089e9fff6128c2c7b48486a8b8ae236786f3fc91b129d282",
-    "dest": "m2local/eu/europa/ec/joinup/sd-dss/specs-trusted-list/6.4",
-    "dest-filename": "specs-trusted-list-6.4.jar"
+    "url": "https://repo1.maven.org/maven2/eu/europa/ec/joinup/sd-dss/specs-trusted-list-v211/6.5/specs-trusted-list-v211-6.5.jar",
+    "sha256": "0c6971d6fd620d9073c8bc645d33bb545bf50602ca7dded0bf35cec6a246cbbc",
+    "dest": "m2local/eu/europa/ec/joinup/sd-dss/specs-trusted-list-v211/6.5",
+    "dest-filename": "specs-trusted-list-v211-6.5.jar"
   },
   {
     "type": "file",
-    "url": "https://repo1.maven.org/maven2/eu/europa/ec/joinup/sd-dss/specs-trusted-list/6.4/specs-trusted-list-6.4.pom",
-    "sha256": "b9b6e815639d211e7dcb4016b56cc6b2a7bd45846d333125a1e0548ca8e5f990",
-    "dest": "m2local/eu/europa/ec/joinup/sd-dss/specs-trusted-list/6.4",
-    "dest-filename": "specs-trusted-list-6.4.pom"
+    "url": "https://repo1.maven.org/maven2/eu/europa/ec/joinup/sd-dss/specs-trusted-list-v211/6.5/specs-trusted-list-v211-6.5.pom",
+    "sha256": "f15c9ef943ea486d27af2c3767fa625417628d392c0173531d9b1c495048f9e7",
+    "dest": "m2local/eu/europa/ec/joinup/sd-dss/specs-trusted-list-v211/6.5",
+    "dest-filename": "specs-trusted-list-v211-6.5.pom"
   },
   {
     "type": "file",
-    "url": "https://repo1.maven.org/maven2/eu/europa/ec/joinup/sd-dss/specs-validation-report/6.4/specs-validation-report-6.4.jar",
-    "sha256": "9a11a1cc164dba4ce8671a2b387989fe198a110e5d76637365d0ff8023c36b80",
-    "dest": "m2local/eu/europa/ec/joinup/sd-dss/specs-validation-report/6.4",
-    "dest-filename": "specs-validation-report-6.4.jar"
+    "url": "https://repo1.maven.org/maven2/eu/europa/ec/joinup/sd-dss/specs-trusted-list/6.5/specs-trusted-list-6.5.jar",
+    "sha256": "fbeca668914035fd9ee4700b3318aa6a62cd3c4fdece745ab51afbdec642520d",
+    "dest": "m2local/eu/europa/ec/joinup/sd-dss/specs-trusted-list/6.5",
+    "dest-filename": "specs-trusted-list-6.5.jar"
   },
   {
     "type": "file",
-    "url": "https://repo1.maven.org/maven2/eu/europa/ec/joinup/sd-dss/specs-validation-report/6.4/specs-validation-report-6.4.pom",
-    "sha256": "6f4d4230eee04552ef721b900455be987beff3e14c3aa903df84753bbed1fbc5",
-    "dest": "m2local/eu/europa/ec/joinup/sd-dss/specs-validation-report/6.4",
-    "dest-filename": "specs-validation-report-6.4.pom"
+    "url": "https://repo1.maven.org/maven2/eu/europa/ec/joinup/sd-dss/specs-trusted-list/6.5/specs-trusted-list-6.5.pom",
+    "sha256": "7b2811ef554de554f5818f4639ee842bb4d6829ed6f6ace0e37a64c21df94795",
+    "dest": "m2local/eu/europa/ec/joinup/sd-dss/specs-trusted-list/6.5",
+    "dest-filename": "specs-trusted-list-6.5.pom"
   },
   {
     "type": "file",
-    "url": "https://repo1.maven.org/maven2/eu/europa/ec/joinup/sd-dss/specs-xades/6.4/specs-xades-6.4.jar",
-    "sha256": "b3c1fe12e6cb2a053dc359e780f815b4cca7909b12568914761cb659b260f9cf",
-    "dest": "m2local/eu/europa/ec/joinup/sd-dss/specs-xades/6.4",
-    "dest-filename": "specs-xades-6.4.jar"
+    "url": "https://repo1.maven.org/maven2/eu/europa/ec/joinup/sd-dss/specs-validation-report/6.5/specs-validation-report-6.5.jar",
+    "sha256": "8be2c3fb8f8f02c8337b08592ec2719bd1367db66a793109258b005992a338f5",
+    "dest": "m2local/eu/europa/ec/joinup/sd-dss/specs-validation-report/6.5",
+    "dest-filename": "specs-validation-report-6.5.jar"
   },
   {
     "type": "file",
-    "url": "https://repo1.maven.org/maven2/eu/europa/ec/joinup/sd-dss/specs-xades/6.4/specs-xades-6.4.pom",
-    "sha256": "20c558422294c5118d4efc8ae51a99e76f7e70e7c2c9b88bfd0611afc95310ef",
-    "dest": "m2local/eu/europa/ec/joinup/sd-dss/specs-xades/6.4",
-    "dest-filename": "specs-xades-6.4.pom"
+    "url": "https://repo1.maven.org/maven2/eu/europa/ec/joinup/sd-dss/specs-validation-report/6.5/specs-validation-report-6.5.pom",
+    "sha256": "75f9c0bc9d8b08a714598095ecb21c5f73b2a6df0641999ea41a61629bdd4af9",
+    "dest": "m2local/eu/europa/ec/joinup/sd-dss/specs-validation-report/6.5",
+    "dest-filename": "specs-validation-report-6.5.pom"
   },
   {
     "type": "file",
-    "url": "https://repo1.maven.org/maven2/eu/europa/ec/joinup/sd-dss/specs-xmldsig/6.4/specs-xmldsig-6.4.jar",
-    "sha256": "de0231899bb2e17729cba9dbe7709cd539e9983a5f10468bb7f7eee4afe73125",
-    "dest": "m2local/eu/europa/ec/joinup/sd-dss/specs-xmldsig/6.4",
-    "dest-filename": "specs-xmldsig-6.4.jar"
+    "url": "https://repo1.maven.org/maven2/eu/europa/ec/joinup/sd-dss/specs-xades/6.5/specs-xades-6.5.jar",
+    "sha256": "d0b8e1158795b6a1b4df77c4a354e6d66656daa5727b7f40281fdc12a641ffbc",
+    "dest": "m2local/eu/europa/ec/joinup/sd-dss/specs-xades/6.5",
+    "dest-filename": "specs-xades-6.5.jar"
   },
   {
     "type": "file",
-    "url": "https://repo1.maven.org/maven2/eu/europa/ec/joinup/sd-dss/specs-xmldsig/6.4/specs-xmldsig-6.4.pom",
-    "sha256": "7ac92e1b7d3490563fec9f6b4f18f5400ab612d0ff5030cc8a59dcc09dd82f32",
-    "dest": "m2local/eu/europa/ec/joinup/sd-dss/specs-xmldsig/6.4",
-    "dest-filename": "specs-xmldsig-6.4.pom"
+    "url": "https://repo1.maven.org/maven2/eu/europa/ec/joinup/sd-dss/specs-xades/6.5/specs-xades-6.5.pom",
+    "sha256": "b5647bf6f7c9b77bda67782e995f96d77b6cdec5b06c1a502a11ac24dbd57715",
+    "dest": "m2local/eu/europa/ec/joinup/sd-dss/specs-xades/6.5",
+    "dest-filename": "specs-xades-6.5.pom"
+  },
+  {
+    "type": "file",
+    "url": "https://repo1.maven.org/maven2/eu/europa/ec/joinup/sd-dss/specs-xmldsig/6.5/specs-xmldsig-6.5.jar",
+    "sha256": "4167ea546d7822167248a28f6db12939302cf683c508f9e9513f77ba6ed63c66",
+    "dest": "m2local/eu/europa/ec/joinup/sd-dss/specs-xmldsig/6.5",
+    "dest-filename": "specs-xmldsig-6.5.jar"
+  },
+  {
+    "type": "file",
+    "url": "https://repo1.maven.org/maven2/eu/europa/ec/joinup/sd-dss/specs-xmldsig/6.5/specs-xmldsig-6.5.pom",
+    "sha256": "6d5333d99b430edc7f65c6992fa36a812015bf88e8840d0c954a335b3b51cc71",
+    "dest": "m2local/eu/europa/ec/joinup/sd-dss/specs-xmldsig/6.5",
+    "dest-filename": "specs-xmldsig-6.5.pom"
   },
   {
     "type": "file",
@@ -1944,6 +1958,13 @@
     "sha256": "7a6506d3655f74a5a77ae00c6aafd907bd2ab7ed2000c35eb2a88e6ee4dd03bd",
     "dest": "m2local/io/netty/netty-transport/4.1.119.Final",
     "dest-filename": "netty-transport-4.1.119.Final.pom"
+  },
+  {
+    "type": "file",
+    "url": "https://repo1.maven.org/maven2/io/opentelemetry/opentelemetry-bom/1.49.0/opentelemetry-bom-1.49.0.pom",
+    "sha256": "44fcba73912b950d3ec88129e38e03c181b975f5b5ee73d7bab7866a4b376c50",
+    "dest": "m2local/io/opentelemetry/opentelemetry-bom/1.49.0",
+    "dest-filename": "opentelemetry-bom-1.49.0.pom"
   },
   {
     "type": "file",
@@ -2374,6 +2395,20 @@
   },
   {
     "type": "file",
+    "url": "https://repo1.maven.org/maven2/org/apache/commons/commons-collections4/4.6.0/commons-collections4-4.6.0.jar",
+    "sha256": "4e0d0896bac5356cead277bac0283f09813e14417e3e84e0c86b573b54d218a3",
+    "dest": "m2local/org/apache/commons/commons-collections4/4.6.0",
+    "dest-filename": "commons-collections4-4.6.0.jar"
+  },
+  {
+    "type": "file",
+    "url": "https://repo1.maven.org/maven2/org/apache/commons/commons-collections4/4.6.0/commons-collections4-4.6.0.pom",
+    "sha256": "94e5772ea3c7ba80f7c345a6950cc7a4015463f08a2a7be82e8ce8584c3978c3",
+    "dest": "m2local/org/apache/commons/commons-collections4/4.6.0",
+    "dest-filename": "commons-collections4-4.6.0.pom"
+  },
+  {
+    "type": "file",
     "url": "https://repo1.maven.org/maven2/org/apache/commons/commons-compress/1.10/commons-compress-1.10.jar",
     "sha256": "807c95293e41e8159477442077da6d0962a7f486d4b980be61f60a8db9cb290f",
     "dest": "m2local/org/apache/commons/commons-compress/1.10",
@@ -2553,6 +2588,13 @@
     "sha256": "1a3775fa4b265910941ca7f09c6b0df4b30f61e301f03dbebbfd35c49ca740af",
     "dest": "m2local/org/apache/commons/commons-parent/102",
     "dest-filename": "commons-parent-102.pom"
+  },
+  {
+    "type": "file",
+    "url": "https://repo1.maven.org/maven2/org/apache/commons/commons-parent/103/commons-parent-103.pom",
+    "sha256": "07407815f3c1441a078e16e5dde2deaf652a3dbdfbf2eba3b563d561210794bf",
+    "dest": "m2local/org/apache/commons/commons-parent/103",
+    "dest-filename": "commons-parent-103.pom"
   },
   {
     "type": "file",
@@ -2815,59 +2857,59 @@
   },
   {
     "type": "file",
-    "url": "https://repo1.maven.org/maven2/org/apache/httpcomponents/client5/httpclient5-parent/5.5.2/httpclient5-parent-5.5.2.pom",
-    "sha256": "a43ec4b7e275ac30680e169854a46a0c6291a137ff9424eac02fb17a98a28222",
-    "dest": "m2local/org/apache/httpcomponents/client5/httpclient5-parent/5.5.2",
-    "dest-filename": "httpclient5-parent-5.5.2.pom"
+    "url": "https://repo1.maven.org/maven2/org/apache/httpcomponents/client5/httpclient5-parent/5.6.4/httpclient5-parent-5.6.4.pom",
+    "sha256": "05305597e8208fdfcc826918db9dad36a42c7b1ddcb366008c2f0975ed2d7192",
+    "dest": "m2local/org/apache/httpcomponents/client5/httpclient5-parent/5.6.4",
+    "dest-filename": "httpclient5-parent-5.6.4.pom"
   },
   {
     "type": "file",
-    "url": "https://repo1.maven.org/maven2/org/apache/httpcomponents/client5/httpclient5/5.5.2/httpclient5-5.5.2.jar",
-    "sha256": "5aec3f3447ec816e593e380b59fbe3e42083318af6b215bc177386f7742f6146",
-    "dest": "m2local/org/apache/httpcomponents/client5/httpclient5/5.5.2",
-    "dest-filename": "httpclient5-5.5.2.jar"
+    "url": "https://repo1.maven.org/maven2/org/apache/httpcomponents/client5/httpclient5/5.6.4/httpclient5-5.6.4.jar",
+    "sha256": "bdef5f8841145cd76c4c605ff301bc840eea0d5292332b7b892a93316c0d8ee1",
+    "dest": "m2local/org/apache/httpcomponents/client5/httpclient5/5.6.4",
+    "dest-filename": "httpclient5-5.6.4.jar"
   },
   {
     "type": "file",
-    "url": "https://repo1.maven.org/maven2/org/apache/httpcomponents/client5/httpclient5/5.5.2/httpclient5-5.5.2.pom",
-    "sha256": "ed14f4a81c5a0ea10574d31c6e16ccec8ee94278bc969b15178caea8ee3fe184",
-    "dest": "m2local/org/apache/httpcomponents/client5/httpclient5/5.5.2",
-    "dest-filename": "httpclient5-5.5.2.pom"
+    "url": "https://repo1.maven.org/maven2/org/apache/httpcomponents/client5/httpclient5/5.6.4/httpclient5-5.6.4.pom",
+    "sha256": "dbc08440438d5e8a600041a9b61e249f0c7d9d86b998e72a9a03900b4c64aa44",
+    "dest": "m2local/org/apache/httpcomponents/client5/httpclient5/5.6.4",
+    "dest-filename": "httpclient5-5.6.4.pom"
   },
   {
     "type": "file",
-    "url": "https://repo1.maven.org/maven2/org/apache/httpcomponents/core5/httpcore5-h2/5.3.6/httpcore5-h2-5.3.6.jar",
-    "sha256": "479a8aa5e6f99030a2a446a68d1f62320698932746f811fc656a1ea06b94184d",
-    "dest": "m2local/org/apache/httpcomponents/core5/httpcore5-h2/5.3.6",
-    "dest-filename": "httpcore5-h2-5.3.6.jar"
+    "url": "https://repo1.maven.org/maven2/org/apache/httpcomponents/core5/httpcore5-h2/5.4.3/httpcore5-h2-5.4.3.jar",
+    "sha256": "c7db7026b8e2dea39132b04a6069f6671e2858309b20a146ec5c7dd6ed73a0b6",
+    "dest": "m2local/org/apache/httpcomponents/core5/httpcore5-h2/5.4.3",
+    "dest-filename": "httpcore5-h2-5.4.3.jar"
   },
   {
     "type": "file",
-    "url": "https://repo1.maven.org/maven2/org/apache/httpcomponents/core5/httpcore5-h2/5.3.6/httpcore5-h2-5.3.6.pom",
-    "sha256": "95812c2bfbcf3ec1d67228a5407179a89852a14afd8d32184059ea9d25424d5b",
-    "dest": "m2local/org/apache/httpcomponents/core5/httpcore5-h2/5.3.6",
-    "dest-filename": "httpcore5-h2-5.3.6.pom"
+    "url": "https://repo1.maven.org/maven2/org/apache/httpcomponents/core5/httpcore5-h2/5.4.3/httpcore5-h2-5.4.3.pom",
+    "sha256": "05a81bab0c695ff79a381e4a1df0a6f582ba556b2d8d60be84c4dc8a9c9f5027",
+    "dest": "m2local/org/apache/httpcomponents/core5/httpcore5-h2/5.4.3",
+    "dest-filename": "httpcore5-h2-5.4.3.pom"
   },
   {
     "type": "file",
-    "url": "https://repo1.maven.org/maven2/org/apache/httpcomponents/core5/httpcore5-parent/5.3.6/httpcore5-parent-5.3.6.pom",
-    "sha256": "de45574522b38fd0359095cd41d78a438217a10af90c20fd2c2a4780c47a730b",
-    "dest": "m2local/org/apache/httpcomponents/core5/httpcore5-parent/5.3.6",
-    "dest-filename": "httpcore5-parent-5.3.6.pom"
+    "url": "https://repo1.maven.org/maven2/org/apache/httpcomponents/core5/httpcore5-parent/5.4.3/httpcore5-parent-5.4.3.pom",
+    "sha256": "2aa0c3f69b379d49b696cc5978fbe15773ecc90a7b39106d7810e554d054778b",
+    "dest": "m2local/org/apache/httpcomponents/core5/httpcore5-parent/5.4.3",
+    "dest-filename": "httpcore5-parent-5.4.3.pom"
   },
   {
     "type": "file",
-    "url": "https://repo1.maven.org/maven2/org/apache/httpcomponents/core5/httpcore5/5.3.6/httpcore5-5.3.6.jar",
-    "sha256": "8fb4528d3e970aca440523a1bd698a389fa710ecfea4c5c6096698b86d1669ce",
-    "dest": "m2local/org/apache/httpcomponents/core5/httpcore5/5.3.6",
-    "dest-filename": "httpcore5-5.3.6.jar"
+    "url": "https://repo1.maven.org/maven2/org/apache/httpcomponents/core5/httpcore5/5.4.3/httpcore5-5.4.3.jar",
+    "sha256": "18bfbbabb478dfb67f31aeaf428c387f3c3df654582e1309f708ee1f3086830a",
+    "dest": "m2local/org/apache/httpcomponents/core5/httpcore5/5.4.3",
+    "dest-filename": "httpcore5-5.4.3.jar"
   },
   {
     "type": "file",
-    "url": "https://repo1.maven.org/maven2/org/apache/httpcomponents/core5/httpcore5/5.3.6/httpcore5-5.3.6.pom",
-    "sha256": "8e37043c6fc40289fe3f0cafd33d0d7e1a10ace4f74495bbc5be39586614718f",
-    "dest": "m2local/org/apache/httpcomponents/core5/httpcore5/5.3.6",
-    "dest-filename": "httpcore5-5.3.6.pom"
+    "url": "https://repo1.maven.org/maven2/org/apache/httpcomponents/core5/httpcore5/5.4.3/httpcore5-5.4.3.pom",
+    "sha256": "a483ef99599cc5fe2c6105a91e2aa7ac46c1c357b559beb76c7045326dcbd3d1",
+    "dest": "m2local/org/apache/httpcomponents/core5/httpcore5/5.4.3",
+    "dest-filename": "httpcore5-5.4.3.pom"
   },
   {
     "type": "file",
@@ -2903,13 +2945,6 @@
     "sha256": "a901f87b115c55070c7ee43efff63e20e7b02d30af2443ae292bf1f4e532d3aa",
     "dest": "m2local/org/apache/httpcomponents/httpcomponents-parent/11",
     "dest-filename": "httpcomponents-parent-11.pom"
-  },
-  {
-    "type": "file",
-    "url": "https://repo1.maven.org/maven2/org/apache/httpcomponents/httpcomponents-parent/13/httpcomponents-parent-13.pom",
-    "sha256": "e4287867035856c737420368dd586e5e57e702098135840cf3d73e9c8363d7b3",
-    "dest": "m2local/org/apache/httpcomponents/httpcomponents-parent/13",
-    "dest-filename": "httpcomponents-parent-13.pom"
   },
   {
     "type": "file",
@@ -6973,24 +7008,17 @@
   },
   {
     "type": "file",
-    "url": "https://repo1.maven.org/maven2/org/slf4j/slf4j-api/2.0.17/slf4j-api-2.0.17.jar",
-    "sha256": "7b751d952061954d5abfed7181c1f645d336091b679891591d63329c622eb832",
-    "dest": "m2local/org/slf4j/slf4j-api/2.0.17",
-    "dest-filename": "slf4j-api-2.0.17.jar"
+    "url": "https://repo1.maven.org/maven2/org/slf4j/slf4j-api/2.0.18/slf4j-api-2.0.18.jar",
+    "sha256": "44508fd1576500688c790b190acdd16fec4f8c79a3e0b900afd70503cf055f55",
+    "dest": "m2local/org/slf4j/slf4j-api/2.0.18",
+    "dest-filename": "slf4j-api-2.0.18.jar"
   },
   {
     "type": "file",
-    "url": "https://repo1.maven.org/maven2/org/slf4j/slf4j-api/2.0.17/slf4j-api-2.0.17.pom",
-    "sha256": "150c40287f7cecdc21b9380caac98e928c4f33c023db6b348df1c5ac977026bf",
-    "dest": "m2local/org/slf4j/slf4j-api/2.0.17",
-    "dest-filename": "slf4j-api-2.0.17.pom"
-  },
-  {
-    "type": "file",
-    "url": "https://repo1.maven.org/maven2/org/slf4j/slf4j-bom/2.0.17/slf4j-bom-2.0.17.pom",
-    "sha256": "f78d27b642b4b886eb839fc102b5cd9fe7f30f37599ffe68185be4e1609031e9",
-    "dest": "m2local/org/slf4j/slf4j-bom/2.0.17",
-    "dest-filename": "slf4j-bom-2.0.17.pom"
+    "url": "https://repo1.maven.org/maven2/org/slf4j/slf4j-api/2.0.18/slf4j-api-2.0.18.pom",
+    "sha256": "6c2c7f2c02774cc2b7b619fbd2df7873cdad29718926e44754b87f70d1eb43cb",
+    "dest": "m2local/org/slf4j/slf4j-api/2.0.18",
+    "dest-filename": "slf4j-api-2.0.18.pom"
   },
   {
     "type": "file",
@@ -7061,13 +7089,6 @@
     "sha256": "c43bc5a022dbfd9de82be232dffe46208cbc7de12c14385b5da824e331e535bb",
     "dest": "m2local/org/slf4j/slf4j-parent/1.7.5",
     "dest-filename": "slf4j-parent-1.7.5.pom"
-  },
-  {
-    "type": "file",
-    "url": "https://repo1.maven.org/maven2/org/slf4j/slf4j-parent/2.0.17/slf4j-parent-2.0.17.pom",
-    "sha256": "95cd71e852dfdb29126e58b7b939d57ec2b2e6024391852e0b545dee082bbf3b",
-    "dest": "m2local/org/slf4j/slf4j-parent/2.0.17",
-    "dest-filename": "slf4j-parent-2.0.17.pom"
   },
   {
     "type": "file",
