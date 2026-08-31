@@ -33,7 +33,7 @@
         <commons-cli.version>1.11.0</commons-cli.version>
         <commons-lang3.version>3.20.0</commons-lang3.version>
         <openpdf.version>3.0.5</openpdf.version>
-        <dss.version>6.4</dss.version>
+        <dss.version>6.5</dss.version>
         <junit.version>4.13.2</junit.version>
         <openjfx.version>21.0.12</openjfx.version>
         <dbus-java.version>5.2.0</dbus-java.version>
