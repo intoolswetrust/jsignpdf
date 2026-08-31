@@ -201,11 +201,12 @@ public class SignaturePropertiesController {
     }
 
     /**
-     * Refreshes the configured default shown as the prompt text of an empty field. Called after the Preferences dialog
-     * changes {@code output.suffix}.
+     * Refreshes the configured defaults shown as the prompt text of an empty field. The same field feeds both the
+     * "Sign" and the "Timestamp" operation, each falling back to its own configured suffix, so both are shown.
+     * Called after the Preferences dialog changes {@code output.suffix} / {@code output.suffix.timestamp}.
      */
     public void refreshDefaultSuffix() {
-        txtOutSuffix.setPromptText(AppConfig.defaultOutSuffix());
+        txtOutSuffix.setPromptText(AppConfig.defaultOutSuffix() + " / " + AppConfig.defaultTimestampSuffix());
     }
 
     private void showSuffix(String suffix) {

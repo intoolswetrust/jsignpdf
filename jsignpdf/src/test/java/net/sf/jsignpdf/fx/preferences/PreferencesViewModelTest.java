@@ -151,6 +151,31 @@ public class PreferencesViewModelTest {
     }
 
     @Test
+    public void outputSuffixTimestamp_roundTripsAndResetsToDefault() throws Exception {
+        Path file = tmp.newFolder().toPath().resolve("advanced.properties");
+        AdvancedConfig cfg = new AdvancedConfig(file, bundledDefaults);
+        PreferencesViewModel vm = new PreferencesViewModel();
+
+        // Bundled default.
+        vm.loadFrom(cfg, "");
+        assertEquals("_timestamped", vm.outputSuffixTimestampProperty().get());
+
+        // Change it and persist; it must be written under the 'output.suffix.timestamp' key.
+        vm.outputSuffixTimestampProperty().set("_ts");
+        vm.writeTo(cfg);
+        assertEquals("_ts", cfg.getProperty("output.suffix.timestamp"));
+
+        // Reload picks the persisted value back up.
+        PreferencesViewModel reloaded = new PreferencesViewModel();
+        reloaded.loadFrom(cfg, "");
+        assertEquals("_ts", reloaded.outputSuffixTimestampProperty().get());
+
+        // Reset-to-defaults for the General tab restores the bundled default.
+        reloaded.applyGeneralDefaults(new AdvancedConfig(null, bundledDefaults));
+        assertEquals("_timestamped", reloaded.outputSuffixTimestampProperty().get());
+    }
+
+    @Test
     public void uiLanguage_roundTripsEmptyRemovesKeyAndResets() throws Exception {
         Path file = tmp.newFolder().toPath().resolve("advanced.properties");
         AdvancedConfig cfg = new AdvancedConfig(file, bundledDefaults);

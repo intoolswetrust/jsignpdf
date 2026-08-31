@@ -53,6 +53,7 @@ public enum Capability {
     OCSP_EMBED,
     CRL_EMBED,
     DSS_DICTIONARY, // PAdES-LT/LTA prerequisite
+    DOC_TIMESTAMP, // append-only ETSI.RFC3161 document timestamp, no signature
 
     // transport
     PROXY_SUPPORT,

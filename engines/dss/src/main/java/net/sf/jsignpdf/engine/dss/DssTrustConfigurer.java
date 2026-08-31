@@ -198,6 +198,27 @@ final class DssTrustConfigurer {
         verifier.setAlertOnNoRevocationAfterBestSignatureTime(warn);
     }
 
+    /**
+     * Downgrades the alerts that judge the signatures already in a document to warnings, for the append-only
+     * document timestamp operation. A DocTimeStamp makes no claim about their validity - it only proves the
+     * bytes existed at a point in time - so an archived signer certificate that has expired, was revoked, or
+     * whose revocation data cannot be fetched must not abort the operation; DSS then embeds whatever
+     * validation data it can collect and logs the rest. Unlike {@link #KEY_ALLOW_UNTRUSTED} this is
+     * unconditional, because it never weakens anything about the token being produced.
+     *
+     * @param verifier the verifier used for the timestamp operation
+     */
+    static void relaxAlertsForDocumentTimestamp(CommonCertificateVerifier verifier) {
+        final LogOnStatusAlert warn = new LogOnStatusAlert(org.slf4j.event.Level.WARN);
+        verifier.setAlertOnMissingRevocationData(warn);
+        verifier.setAlertOnInvalidTimestamp(warn);
+        verifier.setAlertOnRevokedCertificate(warn);
+        verifier.setAlertOnExpiredCertificate(warn);
+        verifier.setAlertOnNotYetValidCertificate(warn);
+        verifier.setAlertOnNoRevocationAfterBestSignatureTime(warn);
+        verifier.setAlertOnUncoveredPOE(warn);
+    }
+
     CertificateSource[] createTrustedCertSources() throws Exception {
         List<CertificateSource> trustedSources = new ArrayList<>();
 

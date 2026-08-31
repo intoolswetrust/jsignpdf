@@ -79,6 +79,9 @@ public final class EngineMismatchValidator {
      * @return the (possibly empty) list of mismatches
      */
     public static List<Mismatch> findMismatches(BasicSignerOptions o, SigningEngine engine) {
+        if (o.isTimestampOnly()) {
+            return findTimestampMismatches(o, engine);
+        }
         final List<Mismatch> out = new ArrayList<>();
         final var caps = engine.capabilities();
 
@@ -205,6 +208,38 @@ public final class EngineMismatchValidator {
             out.add(new Mismatch("--key-store-type " + ksType, Capability.PKCS11_PROVIDER));
         }
 
+        return out;
+    }
+
+    /**
+     * The table for the append-only document timestamp operation ({@code --timestamp-only}). Only the options
+     * that operation actually reads are checked - every keystore, appearance and encryption setting it ignores
+     * would otherwise be reported as a mismatch on options that have no effect.
+     *
+     * @param o the populated signing options
+     * @param engine the engine that would append the timestamp
+     * @return the (possibly empty) list of mismatches
+     */
+    private static List<Mismatch> findTimestampMismatches(BasicSignerOptions o, SigningEngine engine) {
+        final List<Mismatch> out = new ArrayList<>();
+        final var caps = engine.capabilities();
+
+        if (!caps.contains(Capability.DOC_TIMESTAMP)) {
+            out.add(new Mismatch("--" + Constants.ARG_TIMESTAMP_ONLY_LONG, Capability.DOC_TIMESTAMP));
+        }
+        if (!caps.contains(Capability.TSA)) {
+            out.add(new Mismatch("--tsa-url", Capability.TSA));
+        } else {
+            if (StringUtils.isNotEmpty(o.getTsaPolicy()) && !caps.contains(Capability.TSA_POLICY_OID)) {
+                out.add(new Mismatch("--tsa-policy-oid", Capability.TSA_POLICY_OID));
+            }
+            if (o.getTsaServerAuthn() == ServerAuthentication.PASSWORD && !caps.contains(Capability.TSA_BASIC_AUTH)) {
+                out.add(new Mismatch("--tsa-authentication", Capability.TSA_BASIC_AUTH));
+            }
+        }
+        if (o.isAdvanced() && o.getProxyType() != java.net.Proxy.Type.DIRECT && !caps.contains(Capability.PROXY_SUPPORT)) {
+            out.add(new Mismatch("--proxy-type", Capability.PROXY_SUPPORT));
+        }
         return out;
     }
 

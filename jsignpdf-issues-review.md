@@ -57,7 +57,7 @@ All experts reviewed the same 47 issues against the code on disk, flagged duplic
 
 ## Executive summary
 
-- **The LTV compliance cluster is resolved** by the EU DSS (PAdES) signing engine (PR #422). Selecting `-eng dss` produces genuine PAdES B / B-T / B-LT / B-LTA output with a real DSS dictionary, full-chain revocation, and TSA-chain revocation material — something the OpenPDF engine structurally cannot satisfy. The single remaining piece is **#141** (standalone DocTimeStamp / LTA refresh).
+- **The LTV compliance cluster is resolved** by the EU DSS (PAdES) signing engine (PR #422). Selecting `-eng dss` produces genuine PAdES B / B-T / B-LT / B-LTA output with a real DSS dictionary, full-chain revocation, and TSA-chain revocation material — something the OpenPDF engine structurally cannot satisfy. The last piece, **#141** (standalone DocTimeStamp / LTA refresh), is delivered as `--timestamp-only` — see `design-doc/3.2-doc-timestamp.md`.
 - **The algorithm-agility cluster (#23, #33, #255) is fixed** and no longer tracked here — see `design-doc/3.2-algorithm-agility.md`. It turned out to be mostly already solved; only the PKCS#11 PSS shape and the DSS TSA nonce needed code.
 - **PKCS#11 stability** is the largest *support-traffic* cluster. Most are environment-specific; a dedicated PKCS#11 troubleshooting page plus better diagnostics would absorb the recurring tickets at low engineering cost.
 - **Visible-signature rendering** (timezone, alignment, width/height, font size, date format) is the largest remaining user-visible cluster. Bundling them into a single "Visible Signature v2" release would close several tickets and materially raise perceived quality vs. Adobe's output.
@@ -82,9 +82,9 @@ The historically dominant LTV cluster is resolved. With `-eng dss` (and `engine.
 
 | # | Aspect | State |
 |---|---|---|
-| **#141** | Append-only document timestamp | *Partial* — an archive timestamp is produced at LTA signing time, but a standalone `ETSI.RFC3161` DocTimeStamp and LTA refresh on an already-signed PDF remain out of scope. |
+| **#141** | Append-only document timestamp | *Done* — `--timestamp-only` appends an `ETSI.RFC3161` DocTimeStamp to any PDF (signed or not) with the DSS engine, embedding fresh validation data first where the document carries a timestamped signature, which also covers the LTA refresh. |
 
-**Remaining work:** #141. The DSS engine produces the timestamp inline at signing time; refreshing the LTA material on an existing signature is a separate, smaller feature on top of the DSS path.
+**Remaining work:** none.
 
 ---
 
@@ -143,7 +143,7 @@ Columns: **Status** — `close` (see quick-close list), `valid` (open, action ne
 | 99 | Font size ignored with signer name | cluster | M | P2 | Visible Signature v2; verify vs. OpenPDF 3. |
 | 139 | Comodo AAA auto-added | close? | S | P3 | Reporter silent; investigate once, add FAQ, close. |
 | 140 | Validate-only mode | valid | XL | P2 | Out of historical focus; if pursued, delegate to EU DSS or PDFBox rather than re-implement. |
-| 141 | Append-only timestamp | partial | L | P1 | DSS engine emits an archive timestamp at LTA signing; standalone DocTimeStamp / LTA refresh on an already-signed PDF still out of scope. |
+| 141 | Append-only timestamp | done | L | P1 | `--timestamp-only` on the DSS engine appends a standalone DocTimeStamp and refreshes LTA material on an already-signed PDF. |
 | 148 | Show equivalent CLI in GUI | valid | M | P2 | High-value learning aid; nice-to-have. |
 | 165 | Width/height for visible sig | cluster | S | P2 | Visible Signature v2. |
 | 180 | JCA provider support | cluster | M | P1 | Key-source pluggability — `--provider-class`/`--provider-arg`. |
@@ -157,7 +157,7 @@ Columns: **Status** — `close` (see quick-close list), `valid` (open, action ne
 
 ## Cross-cutting themes
 
-1. **LTV was the single most valuable engineering investment — now delivered.** Six tickets, from 2019 onward, converged on the same gap; the DSS engine (PR #422) closed five of them outright and partially covers #141.
+1. **LTV was the single most valuable engineering investment — now delivered.** Six tickets, from 2019 onward, converged on the same gap; the DSS engine (PR #422) closed five of them outright, and `--timestamp-only` closed the sixth (#141).
 2. **Error messages are the cheapest UX upgrade.** Several tickets surface stack traces where a one-line user-facing message would do (e.g. the residual #63 login noise). Adding a thin user-facing error layer pays off across dozens of tickets.
 3. **CLI ↔ GUI feature parity** (#30, #148) — the CLI has options the GUI lacks and vice versa. A small parity audit exposes most of them.
 4. **Packaging has quietly matured**: Flatpak, Windows jpackage with bundled JRE, macOS DMG. Several "it doesn't run" issues (#184, and #172 which was closed on these grounds) can be retired by steering users toward the bundled installer rather than `java -jar`.
@@ -170,10 +170,9 @@ Columns: **Status** — `close` (see quick-close list), `valid` (open, action ne
 
 | Milestone | Contents | Effort | Closes |
 |---|---|---|---|
-| **3.1 — DSS engine (PAdES)** | EU DSS signing engine: PAdES B / T / LT / LTA, DSS dictionary, full-chain + TSA-chain revocation, TSA hash hardening, `--pades-level`, `--overwrite` (PR #422) | delivered | LTV cluster (+ #141 partial) |
+| **3.1 — DSS engine (PAdES)** | EU DSS signing engine: PAdES B / T / LT / LTA, DSS dictionary, full-chain + TSA-chain revocation, TSA hash hardening, `--pades-level`, `--overwrite` (PR #422) | delivered | LTV cluster |
 | **3.2 — Algorithm agility + Key-source pluggability** | Algorithm agility delivered (#23, #33, #255 — see `design-doc/3.2-algorithm-agility.md`). Remaining: `--provider-class`/`--provider-arg` (#180), multi-PKCS#11 (#187), remote signing hook (#20) | ~1 week | #20, #180, #187 |
 | **3.3 — Visible Signature v2 + GUI parity** | #51, #55, #67, #99, #165, #231; JavaFX multi-select (#30); verbose CLI preview (#148) | ~1 week | several |
-| **3.4 — LTA refresh** | Standalone DocTimeStamp / LTA refresh on already-signed PDFs (#141) on top of the DSS engine | ~1 week | #141 |
 | **Ongoing / low** | #140 (validation mode), #243 (track OpenPDF), #63/#139 (retest & close), #349 (website i18n) | — | as PRs arrive |
 
 ---

@@ -30,6 +30,7 @@ public class AppConfigTest {
         assertNotNull(AppConfig.pdf2imageLibraries());
         assertNotNull(AppConfig.defaultTsaHashAlg());
         assertNotNull(AppConfig.defaultOutSuffix());
+        assertNotNull(AppConfig.defaultTimestampSuffix());
     }
 
     @Test
@@ -51,6 +52,30 @@ public class AppConfigTest {
                 cfg.setProperty("output.suffix", original);
             } else {
                 cfg.removeProperty("output.suffix");
+            }
+        }
+    }
+
+    @Test
+    public void defaultTimestampSuffixReadsItsOwnKey() {
+        AdvancedConfig cfg = PropertyStoreFactory.getInstance().advancedConfig();
+        String original = cfg.hasUserOverride("output.suffix.timestamp")
+                ? cfg.getProperty("output.suffix.timestamp") : null;
+        try {
+            cfg.setProperty("output.suffix", "_firmado");
+            cfg.setProperty("output.suffix.timestamp", "_sellado");
+            assertEquals("Accessor must read the output.suffix.timestamp key", "_sellado",
+                    AppConfig.defaultTimestampSuffix());
+
+            cfg.removeProperty("output.suffix.timestamp");
+            assertEquals("Without an override it falls back to the bundled default",
+                    Constants.DEFAULT_TIMESTAMP_SUFFIX, AppConfig.defaultTimestampSuffix());
+        } finally {
+            cfg.removeProperty("output.suffix");
+            if (original != null) {
+                cfg.setProperty("output.suffix.timestamp", original);
+            } else {
+                cfg.removeProperty("output.suffix.timestamp");
             }
         }
     }

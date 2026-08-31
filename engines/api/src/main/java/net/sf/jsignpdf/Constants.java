@@ -92,6 +92,10 @@ public class Constants {
     public static final String L2TEXT_PLACEHOLDER_CONTACT = "contact";
 
     public static final String DEFAULT_OUT_SUFFIX = "_signed";
+    /**
+     * Default output suffix of the append-only document timestamp operation ({@code --timestamp-only}).
+     */
+    public static final String DEFAULT_TIMESTAMP_SUFFIX = "_timestamped";
 
     public static final String KEYSTORE_TYPE_WINDOWS_MY = "WINDOWS-MY";
     public static final String KEYSTORE_TYPE_CLOUDFOXY = "CloudFoxy";
@@ -436,6 +440,9 @@ public class Constants {
     public static final String ARG_PROXY_TYPE_LONG = "proxy-type";
     public static final String ARG_PROXY_HOST_LONG = "proxy-host";
     public static final String ARG_PROXY_PORT_LONG = "proxy-port";
+
+    public static final String ARG_TIMESTAMP_ONLY = "tso";
+    public static final String ARG_TIMESTAMP_ONLY_LONG = "timestamp-only";
 
     public static final String ARG_GUI = "gui";
 

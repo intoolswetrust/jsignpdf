@@ -5,6 +5,7 @@ import static net.sf.jsignpdf.Constants.*;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.net.Proxy;
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -27,6 +28,7 @@ import org.apache.commons.cli.OptionBuilder;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.lang3.StringUtils;
 
 /**
  * This class parses and holds options from command line
@@ -235,12 +237,70 @@ public class SignerOptionsFromCmdLine extends BasicSignerOptions {
         if (line.hasOption(ARG_PROXY_PORT_LONG))
             setProxyPort(getInt(line.getParsedOptionValue(ARG_PROXY_PORT_LONG), getProxyPort()));
 
+        if (line.hasOption(ARG_TIMESTAMP_ONLY)) {
+            applyTimestampOnly(line);
+        }
+
         setGui(line.hasOption(ARG_GUI));
         if (ArrayUtils.isNotEmpty(files)) {
             setInFile(files[0]);
         }
 
         resolvePasswords(line);
+    }
+
+    /**
+     * Turns on the append-only document timestamp mode: rejects the options a DocTimeStamp can not honour, warns
+     * about those it ignores, and forces the TSA plumbing on (a TSA URL coming from a properties file does not set
+     * the timestamp flag the way {@code -ts} does).
+     *
+     * @param line the parsed command line
+     * @throws ParseException when an option incompatible with the operation is present
+     */
+    private void applyTimestampOnly(CommandLine line) throws ParseException {
+        final List<String> errors = new ArrayList<>();
+        if (line.hasOption(ARG_OVERWRITE_LONG)) {
+            errors.add(RES.get("console.timestampOnly.overwriteRejected"));
+        }
+        if (line.hasOption(ARG_SIG_FIELD)) {
+            errors.add(RES.get("console.timestampOnly.sigFieldRejected"));
+        }
+        if (line.hasOption(ARG_CERT_LEVEL)) {
+            errors.add(RES.get("console.timestampOnly.certLevelRejected"));
+        }
+        if (!errors.isEmpty()) {
+            throw new ParseException(String.join("\n", errors));
+        }
+
+        setTimestampOnly(true);
+        setTimestamp(true);
+
+        if (StringUtils.isEmpty(getTsaUrl())) {
+            throw new ParseException(RES.get("console.timestampOnly.tsaUrlMissing"));
+        }
+
+        warnIgnored(line, ARG_KS_TYPE_LONG, ARG_KS_FILE_LONG, ARG_KS_PWD_LONG, ARG_KEY_ALIAS_LONG, ARG_KEY_INDEX_LONG,
+                ARG_KEY_PWD_LONG);
+        warnIgnored(line, ARG_VISIBLE_LONG, ARG_PAGE_LONG, ARG_POS_LLX, ARG_POS_LLY, ARG_POS_URX, ARG_POS_URY,
+                ARG_BG_SCALE, ARG_RENDER_MODE, ARG_L2_TEXT_LONG, ARG_L2TEXT_FONT_SIZE_LONG, ARG_L4_TEXT_LONG,
+                ARG_IMG_PATH, ARG_BG_PATH);
+        warnIgnored(line, ARG_PADES_LEVEL_LONG, ARG_SIGNER_NAME_LONG, ARG_REASON_LONG, ARG_LOCATION_LONG,
+                ARG_CONTACT_LONG, ARG_OCSP_LONG, ARG_OCSP_SERVER_LONG, ARG_CRL_LONG);
+        if (line.hasOption(ARG_ENCRYPTION) || line.hasOption(ARG_ENCRYPTED)) {
+            LOGGER.warning(RES.get("console.timestampOnly.encryptionIgnored"));
+        }
+    }
+
+    /**
+     * Logs one warning per given option that is present on the command line but has no meaning for the
+     * document timestamp operation.
+     */
+    private void warnIgnored(CommandLine line, String... args) {
+        for (String arg : args) {
+            if (line.hasOption(arg)) {
+                LOGGER.warning(RES.get("console.timestampOnly.optionIgnored", arg));
+            }
+        }
     }
 
     /**
@@ -510,6 +570,9 @@ public class SignerOptionsFromCmdLine extends BasicSignerOptions {
                 .withArgName("responderUrl").create());
 
         OPTS.addOption(OptionBuilder.withLongOpt(ARG_CRL_LONG).withDescription(RES.get("hlp.crl")).create());
+
+        OPTS.addOption(OptionBuilder.withLongOpt(ARG_TIMESTAMP_ONLY_LONG).withDescription(RES.get("hlp.timestampOnly"))
+                .create(ARG_TIMESTAMP_ONLY));
 
         OPTS.addOption(OptionBuilder
                 .withDescription(RES.get("hlp.proxyType", DEFVAL_PROXY_TYPE.name(), getEnumValues(Proxy.Type.values())))

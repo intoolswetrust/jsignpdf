@@ -32,6 +32,7 @@ public class PreferencesViewModel {
     private final StringProperty engineId = new SimpleStringProperty(AppConfig.DEFAULT_ENGINE_ID);
     private final BooleanProperty debug = new SimpleBooleanProperty(false);
     private final StringProperty outputSuffix = new SimpleStringProperty(Constants.DEFAULT_OUT_SUFFIX);
+    private final StringProperty outputSuffixTimestamp = new SimpleStringProperty(Constants.DEFAULT_TIMESTAMP_SUFFIX);
 
     private final StringProperty fontPath = new SimpleStringProperty("");
     private final StringProperty fontName = new SimpleStringProperty("");
@@ -74,6 +75,7 @@ public class PreferencesViewModel {
         engineId.set(cfg.getNotEmptyProperty("engine", AppConfig.DEFAULT_ENGINE_ID));
         debug.set(cfg.getAsBool("debug", false));
         outputSuffix.set(cfg.getNotEmptyProperty("output.suffix", Constants.DEFAULT_OUT_SUFFIX));
+        outputSuffixTimestamp.set(cfg.getNotEmptyProperty("output.suffix.timestamp", Constants.DEFAULT_TIMESTAMP_SUFFIX));
         fontPath.set(orEmpty(cfg.getProperty("font.path")));
         fontName.set(orEmpty(cfg.getProperty("font.name")));
         fontEncoding.set(orEmpty(cfg.getProperty("font.encoding")));
@@ -109,6 +111,7 @@ public class PreferencesViewModel {
         cfg.setProperty("engine", orFallback(engineId.get(), AppConfig.DEFAULT_ENGINE_ID));
         cfg.setProperty("debug", debug.get());
         writeStringOrRemove(cfg, "output.suffix", outputSuffix.get());
+        writeStringOrRemove(cfg, "output.suffix.timestamp", outputSuffixTimestamp.get());
         writeStringOrRemove(cfg, "font.path", fontPath.get());
         writeStringOrRemove(cfg, "font.name", fontName.get());
         writeStringOrRemove(cfg, "font.encoding", fontEncoding.get());
@@ -148,6 +151,7 @@ public class PreferencesViewModel {
         engineId.set(orFallback(defaults.getBundledDefault("engine"), AppConfig.DEFAULT_ENGINE_ID));
         debug.set(parseBool(defaults.getBundledDefault("debug"), false));
         outputSuffix.set(orFallback(defaults.getBundledDefault("output.suffix"), Constants.DEFAULT_OUT_SUFFIX));
+        outputSuffixTimestamp.set(orFallback(defaults.getBundledDefault("output.suffix.timestamp"), Constants.DEFAULT_TIMESTAMP_SUFFIX));
     }
 
     public void applyFontDefaults(AdvancedConfig defaults) {
@@ -273,6 +277,7 @@ public class PreferencesViewModel {
     public StringProperty engineIdProperty() { return engineId; }
     public BooleanProperty debugProperty() { return debug; }
     public StringProperty outputSuffixProperty() { return outputSuffix; }
+    public StringProperty outputSuffixTimestampProperty() { return outputSuffixTimestamp; }
     public StringProperty fontPathProperty() { return fontPath; }
     public StringProperty fontNameProperty() { return fontName; }
     public StringProperty fontEncodingProperty() { return fontEncoding; }

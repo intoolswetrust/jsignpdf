@@ -340,8 +340,8 @@ usage: jsignpdf [file1.pdf [file2.pdf ...]] [-a] [--bg-path
        <hostname>] [--proxy-port <port>] [-pl <level>] [--proxy-type <type>] [-q] [-r
        <reason>] [--render-mode <mode>] [-sn <signer>] [-ta <method>] [-ts <URL>]
        [--tsa-policy-oid <policyOID>] [-tscf <file>] [-tscp <password>] [-tsct
-       <ks-type>] [-tsh <algorithm>] [-tsp <password>] [-tsu <username>] [-upwd
-       <password>] [-urx <position>] [-ury <position>] [-v] [-V]
+       <ks-type>] [-tsh <algorithm>] [-tso] [-tsp <password>] [-tsu <username>]
+       [-upwd <password>] [-urx <position>] [-ury <position>] [-v] [-V]
 ----
 
 === General options
@@ -466,7 +466,7 @@ See <<Signing properties>> for details.
 | Prefix for the signed filename. Default: empty.
 
 | `-os, --out-suffix <suffix>`
-| Suffix for the signed filename, used exactly as given. Default: the `output.suffix` key in `advanced.properties` (bundled default `_signed`), so `mydocument.pdf` becomes `mydocument_signed.pdf`.
+| Suffix for the signed filename, used exactly as given. Default: the `output.suffix` key in `advanced.properties` (bundled default `_signed`), so `mydocument.pdf` becomes `mydocument_signed.pdf`. With `--timestamp-only` the default comes from `output.suffix.timestamp` (bundled default `_timestamped`) instead.
 |===
 
 === Visible signature options
@@ -596,6 +596,9 @@ See <<TSA -- timestamps>> and <<Certificate revocation checking>> for details.
 
 | `-tsct, --tsa-cert-file-type <ks-type>`
 | Keystore type for TSA certificate authentication. Default: `PKCS12`.
+
+| `-tso, --timestamp-only`
+| Append a document timestamp (ETSI.RFC3161) instead of signing -- no key and no signature. Requires `-ts` and the DSS engine (`-eng dss`). See <<Adding a document timestamp>>.
 
 | `-tsh, --tsa-hash-algorithm <algorithm>`
 | Hash algorithm for TSA queries. Default: `SHA-1`.
@@ -979,6 +982,67 @@ _JavaFX panel: Timestamp & Validation_
 
 To add a timestamp to the signature you will need a timestamping authority (TSA). Fill the server address into the _TSA URL_ field and if the server requires authentication, choose the authentication type and fill either the _TSA User_ and _TSA Password_ fields or the path to the certificate's private key (it has to be a PKCS#12 keystore) and the password. You can also set _TSA Policy OID_, which will be sent to the TSA server in the request, but typically the server uses the right policy by itself.
 
+=== Adding a document timestamp
+
+A document timestamp (a `DocTimeStamp` with the `ETSI.RFC3161` subfilter) proves that the bytes of a PDF
+existed at a point in time. It is not a signature: no private key is involved, nothing is claimed about who
+the document belongs to, and no signature field is filled. JSignPdf appends one with the `--timestamp-only`
+flag:
+
+[source,shell]
+----
+$ jsignpdf -eng dss --timestamp-only -ts http://tsa.example/tsa contract.pdf
+----
+
+Two uses:
+
+* **Timestamping a document that carries none** -- signed or not. Any PDF can be given a trusted point in
+  time this way.
+* **Archival refresh ("digital continuity")** -- a PAdES B-LTA signature stays verifiable only while its
+  archive timestamp is; re-timestamp the document before that timestamp's TSA certificate expires, and the
+  chain of evidence continues. Every refresh covers everything before it, so the document can be kept
+  verifiable indefinitely by repeating this every few years.
+
+The operation needs the **DSS engine** -- add `-eng dss`, or set `engine=dss` in `advanced.properties` once.
+The OpenPDF engine cannot produce document timestamps and refuses the operation with a message naming the
+missing `DOC_TIMESTAMP` capability. `--tsa-server-url` is mandatory, and all the other TSA options
+(`--tsa-authentication`, `--tsa-user`, `--tsa-password`, `--tsa-policy-oid`, `--tsa-hash-algorithm`, the TSA
+certificate options and the proxy options) apply unchanged.
+
+In the JavaFX UI the same operation is the _Timestamp_ toolbar button and _Signing > Add Timestamp…_
+(`Ctrl+T` / `⌘T`). Both are enabled once a document is open and the DSS engine is selected; the certificate
+and appearance panels are not consulted. The _TSA URL_ field is required regardless of the TSA toggle, which
+means "timestamp the signature I am about to make" -- a different thing.
+
+Things worth knowing:
+
+* **The output is an incremental revision.** The original bytes are untouched, so existing signatures stay
+  valid. `--overwrite` is therefore refused, as are `--sig-field` (no field is filled) and
+  `--certification-level` (DocMDP is a property of a signature).
+* **The output file name uses the `output.suffix.timestamp` suffix** (bundled default `_timestamped`), so
+  `contract.pdf` becomes `contract_timestamped.pdf`. `-os`, `-d` and `-op` work as they do for signing.
+* **Validation data for what is already in the document is collected when it can be.** For a document that
+  carries a timestamped (T / LT / LTA) signature, JSignPdf first writes a DSS dictionary with fresh
+  validation data and then appends the new timestamp -- that is what makes an archival refresh a complete
+  one. This needs `engine.dss.online.enabled=true` and trust material (see <<PAdES & the DSS engine>>).
+* **No validity claim is made about the existing signatures.** An expired signer certificate, an untrusted
+  chain or unreachable revocation data is reported as a warning and the timestamp is appended anyway --
+  which is the point, since an archived document being refreshed usually has exactly those properties.
+* **The newest timestamp is only covered by validation data at the next refresh.** That is how every
+  long-term validation chain works, not a limitation of JSignPdf.
+* **An encrypted input keeps its encryption.** Use `--owner-password` to open it; `--encryption` / `-e` are
+  ignored (with a warning), because the incremental append preserves what the input already has.
+* **Several TSAs, several runs.** Each run appends another timestamp, so stacking timestamps from different
+  jurisdictions is just a matter of repeating the command:
++
+[source,shell]
+----
+$ jsignpdf -eng dss --timestamp-only -ts http://tsa-a.example/tsa contract.pdf
+$ jsignpdf -eng dss --timestamp-only -ts http://tsa-b.example/tsa -os '' -d out contract_timestamped.pdf
+----
+* Keystore, appearance, PAdES level, reason / location / contact and the OCSP / CRL flags are ignored (with a
+  warning), so a properties file or preset made for signing can be reused as it is.
+
 === Certificate revocation checking
 
 _JavaFX panel: Timestamp & Validation_
@@ -1202,6 +1266,8 @@ Application-wide tweaks beyond the per-document signing options live in `<config
 Set `debug=true` (bundled default `false`, the *Debug output* checkbox on the _General_ tab of the Preferences dialog) to log the verbose signing diagnostics -- the certificate chain, the loaded trust anchors, and every timestamp / OCSP / CRL / AIA network call. See <<Reading the signing diagnostics>>.
 
 Set `output.suffix` (bundled default `_signed`, the *Output file suffix* field on the _General_ tab of the Preferences dialog) to the text appended to the input file name when no output file is given -- for example `output.suffix=_firmado` produces `mydocument_firmado.pdf`. It is used exactly as configured, so it has to include the separator. It is the starting value for the _Output suffix_ field in the _Signature Properties_ panel and the default for the CLI `-os` option.
+
+Set `output.suffix.timestamp` (bundled default `_timestamped`, no Preferences control) to the suffix used by the append-only document timestamp operation (`--timestamp-only`), which adds no signature -- `_signed` would be a lie there. It is used exactly as configured and only applies when no suffix is set explicitly. See <<Adding a document timestamp>>.
 
 Set `ui.language` to a BCP-47 language tag (e.g. `de`, `fr`, `pt`, `zh-CN`) to pick the interface language explicitly instead of following the operating-system locale; the empty bundled default keeps *System default*. The value is read once at startup, so restart JSignPdf for a change to take effect. It is exposed as the *Language* selector on the _General_ tab of the Preferences dialog (which lists the bundled translations and writes this key), and on the command line as `-o ui.language=<tag>` -- for example `jsignpdf --help -o ui.language=de` prints the help in German. The choice affects the interface text only; number and date formatting (and therefore the signed output) keep following the OS locale.
 

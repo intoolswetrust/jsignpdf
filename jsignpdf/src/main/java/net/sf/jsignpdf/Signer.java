@@ -297,7 +297,7 @@ public class Signer {
         final SignerLogic tmpLogic = new SignerLogic(anOpts);
         if (ArrayUtils.isEmpty(anOpts.getFiles())) {
             // we've used -lp (loadproperties) parameter
-            if (!tmpLogic.signFile()) {
+            if (!tmpLogic.execute()) {
                 exit(Constants.EXIT_CODE_ALL_SIG_FAILED);
             }
             return;
@@ -315,7 +315,7 @@ public class Signer {
             anOpts.setInFile(tmpInFile);
             anOpts.setOutFile(BasicSignerOptions.composeOutFileName(
                     anOpts.getOutPath(), anOpts.getOutPrefix(), inputFile.getName(), anOpts.getOutSuffixX()));
-            if (tmpLogic.signFile()) {
+            if (tmpLogic.execute()) {
                 successCount++;
             } else {
                 failedCount++;

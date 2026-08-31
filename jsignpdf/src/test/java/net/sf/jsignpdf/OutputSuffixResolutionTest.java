@@ -28,6 +28,7 @@ public class OutputSuffixResolutionTest {
     @After
     public void tearDown() {
         cfg.removeProperty("output.suffix");
+        cfg.removeProperty("output.suffix.timestamp");
     }
 
     @Test
@@ -116,6 +117,46 @@ public class OutputSuffixResolutionTest {
         options.setOutPath("/out");
         options.setOutPrefix("signed-");
         assertEquals("/out/signed-drawing-DL.pdf", options.getOutFileX());
+    }
+
+    @Test
+    public void timestampOnlyFallsBackToTheTimestampSuffix() {
+        cfg.setProperty("output.suffix", "_firmado");
+        cfg.setProperty("output.suffix.timestamp", "_sellado");
+        BasicSignerOptions options = new BasicSignerOptions();
+        options.setInFile("/docs/drawing.pdf");
+        options.setTimestampOnly(true);
+        assertEquals("_sellado", options.getOutSuffixX());
+        assertEquals("/docs/drawing_sellado.pdf", options.getOutFileX());
+    }
+
+    @Test
+    public void timestampOnlyFallsBackToTheBundledDefaultWithoutConfiguredValue() {
+        BasicSignerOptions options = new BasicSignerOptions();
+        options.setInFile("/docs/drawing.pdf");
+        options.setTimestampOnly(true);
+        assertEquals("/docs/drawing" + Constants.DEFAULT_TIMESTAMP_SUFFIX + ".pdf", options.getOutFileX());
+    }
+
+    @Test
+    public void explicitSuffixWinsInTimestampOnlyMode() {
+        cfg.setProperty("output.suffix.timestamp", "_sellado");
+        BasicSignerOptions options = new BasicSignerOptions();
+        options.setInFile("/docs/drawing.pdf");
+        options.setTimestampOnly(true);
+        options.setOutSuffix("-DL");
+        assertEquals("/docs/drawing-DL.pdf", options.getOutFileX());
+    }
+
+    @Test
+    public void timestampOnlyHonoursTheOutputDirectoryAndPrefix() {
+        cfg.setProperty("output.suffix.timestamp", "_sellado");
+        BasicSignerOptions options = new BasicSignerOptions();
+        options.setInFile("/docs/drawing.pdf");
+        options.setTimestampOnly(true);
+        options.setOutPath("/out");
+        options.setOutPrefix("ts-");
+        assertEquals("/out/ts-drawing_sellado.pdf", options.getOutFileX());
     }
 
     @Test
