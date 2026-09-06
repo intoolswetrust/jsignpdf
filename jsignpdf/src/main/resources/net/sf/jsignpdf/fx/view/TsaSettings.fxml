@@ -15,12 +15,15 @@
     </padding>
 
     <!-- TSA Section -->
+    <!-- The TSA server URL is a shared resource: the checkbox below embeds a timestamp in the signature,
+         while the Timestamp button appends a document timestamp - both need this URL, so it stays visible
+         regardless of the checkbox. The advanced fields further down remain gated by the checkbox. -->
+    <Label text="%jfx.gui.tsa.serverUrl"/>
+    <TextField fx:id="txtTsaUrl"/>
+
     <CheckBox fx:id="chkTsaEnabled" text="%jfx.gui.tsa.enableTimestamp"/>
 
     <VBox fx:id="tsaDetailsPane" spacing="6">
-        <Label text="%jfx.gui.tsa.serverUrl"/>
-        <TextField fx:id="txtTsaUrl"/>
-
         <Label text="%jfx.gui.tsa.authentication"/>
         <ComboBox fx:id="cmbTsaAuthn" maxWidth="Infinity"/>
 
