@@ -201,10 +201,20 @@ public class FxTranslationsTest {
             assertEquals("Open button for " + locale,
                     bundle.getString("jfx.gui.toolbar.open"), openBtn.getText());
 
-            // Last item is the Sign button
-            Button signBtn = (Button) toolBar.getItems().get(toolBar.getItems().size() - 1);
-            assertEquals("Sign button for " + locale,
-                    bundle.getString("jfx.gui.toolbar.sign"), signBtn.getText());
+            // The Sign and Timestamp action buttons (both plain Buttons, not ToggleButtons)
+            // are present with translated text, Sign before Timestamp.
+            List<String> actionButtonTexts = new ArrayList<>();
+            for (Node n : toolBar.getItems()) {
+                if (n instanceof Button && !(n instanceof ToggleButton)) {
+                    actionButtonTexts.add(((Button) n).getText());
+                }
+            }
+            String signText = bundle.getString("jfx.gui.toolbar.sign");
+            String timestampText = bundle.getString("jfx.gui.toolbar.timestamp");
+            assertTrue("Sign button for " + locale, actionButtonTexts.contains(signText));
+            assertTrue("Timestamp button for " + locale, actionButtonTexts.contains(timestampText));
+            assertTrue("Sign button must come before Timestamp for " + locale,
+                    actionButtonTexts.indexOf(signText) < actionButtonTexts.indexOf(timestampText));
 
             // The toolbar must contain two icon-only ToggleButtons (visible
             // signature + TSA), each with a translated tooltip.
@@ -359,8 +369,11 @@ public class FxTranslationsTest {
             VBox root = (VBox) loadFxml("/net/sf/jsignpdf/fx/view/TsaSettings.fxml", bundle);
             assertNotNull("TsaSettings load failed for " + locale, root);
 
-            // First child is the "Enable Timestamp (TSA)" checkbox
-            CheckBox tsaEnabled = (CheckBox) root.getChildren().get(0);
+            // The TSA server URL label and field come first (always visible), then the checkbox.
+            Label urlLabel = (Label) root.getChildren().get(0);
+            assertEquals("TSA server URL label for " + locale,
+                    bundle.getString("jfx.gui.tsa.serverUrl"), urlLabel.getText());
+            CheckBox tsaEnabled = (CheckBox) root.getChildren().get(2);
             assertEquals("TSA checkbox for " + locale,
                     bundle.getString("jfx.gui.tsa.enableTimestamp"), tsaEnabled.getText());
         }
