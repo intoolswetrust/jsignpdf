@@ -14,7 +14,7 @@
 | PDF digital signatures | PAdES (B-B / B-T / B-LT / B-LTA), PKCS#7/CMS, RFC 3161 timestamping, OCSP/CRL, LTV, DSS/VRI, signature algorithms, eIDAS |
 | Documentation | User manual (`website/docs/JSignPdf.adoc`), CLI `--help`, website, troubleshooting / FAQ, i18n strings, release notes |
 
-All experts reviewed the same 47 issues against the code on disk, flagged duplicates, and gave a priority from their domain perspective. This document consolidates their verdicts — where the experts disagreed, the most informed domain wins (e.g. "is feature X in the code?" is decided by the Java or PDF-sig expert, not by UX).
+All experts reviewed the open issues against the code on disk, flagged duplicates, and gave a priority from their domain perspective (19 issues open as of the 2026-09-06 revision; #491 and #492 added then). This document consolidates their verdicts — where the experts disagreed, the most informed domain wins (e.g. "is feature X in the code?" is decided by the Java or PDF-sig expert, not by UX).
 
 ---
 
@@ -96,8 +96,19 @@ Largely environment-specific:
 | **#63** | Still needs a retest on 3.x |
 | **#184** | Windows batch-mode hang after unregister — real bug in `PKCS11Utils.unregisterProviders` (P1) |
 | **#187** | Multi-provider support (P2, see pluggability cluster) |
+| **#491** | End-to-end PKCS#11 GUI onboarding UX — the biggest, best-articulated UX report in this cluster (P1) |
 
 **Recommendation:** fix **#184** in code (this is a reproducible Windows bug, not user env) and invest in a dedicated **PKCS#11 troubleshooting chapter** (`docs/pkcs11.md`) covering driver paths per OS, headless servers, login modes, and common errors. This one doc page will absorb the majority of PKCS#11 support issues at low cost.
+
+**#491 — PKCS#11 onboarding UX (P1, M):** the single most actionable UX ticket in this cluster. A national-eID user (Croatian Certilia) got the tool working only after an LLM-assisted troubleshooting session. Concrete, mostly independent sub-asks, roughly in ROI order:
+
+1. **`.so`/`.dll` file picker + provider-config editor in Preferences** — today users hand-edit `conf/pkcs11.cfg` in a text editor; a native file chooser for the library path (platform-correct extension) plus name/slot fields removes the highest-friction step. Optionally seed a small **known-provider dropdown** (Certilia, Belgian eID, etc.) with default library paths per OS.
+2. **PKCS#11 startup must not be able to kill the GUI (#491.3)** — a wrong-arch or bad library path currently throws during provider registration and the GUI never opens; the user must run `jsignpdfc` to see the stack trace. `PKCS11Utils.initPkcs11Provider` should fail soft: catch, surface a GUI error, and let the app start. Overlaps the #184 lifecycle code and the "error messages" cross-cutting theme.
+3. **Always show a "PKCS11" keystore-type entry (#491.1)** — even unconfigured, marked "not configured" and linking to docs, so the feature is discoverable on first launch instead of appearing only after a valid `pkcs11.cfg` exists.
+4. **Hide the "Keystore file" picker when keystore type is PKCS#11 (#491.5)** and give "Load Keys" clear GUI success/failure feedback instead of console-only messages.
+5. **Clarify the two entries "PKCS11" vs "JSIGNPKCS11" (#491.4)** — document/label what each is (JVM built-in SunPKCS11 vs JSignPdf-registered provider) or collapse to one.
+
+Sub-asks 2–4 are small, high-impact Swing/FX changes; verify each against the JavaFX code path first. Best delivered as a bundled **"PKCS#11 onboarding" release** alongside the `docs/pkcs11.md` page.
 
 ---
 
@@ -124,6 +135,8 @@ Columns: **Status** — `close` (see quick-close list), `valid` (open, action ne
 | 231 | Date format | cluster | S | P2 | Visible Signature v2. Duplicate of #55 in spirit. |
 | 243 | `sun.misc.Unsafe` deprecation | valid | S | P2 | Track OpenPDF upstream; bump `openpdf.version` when fix lands. **Will be P0 on a future JDK.** |
 | 349 | Translate website | valid | M | P3 | Website i18n (Docusaurus i18n). Community-PR-friendly; not planned. |
+| 491 | PKCS#11 onboarding UX | cluster | M | P1 | See PKCS#11 cluster. Fail-soft provider load, file picker, discoverable keystore entry, hide file field, "Load Keys" feedback. |
+| 492 | Export/Import presets via GUI | valid | M | P2 | GUI wrapper over the existing properties-based config (load/save named preset files); optional bundled eIDAS/EU default presets. Pairs well with `-eng dss` PAdES defaults. |
 
 ---
 
@@ -145,7 +158,8 @@ Columns: **Status** — `close` (see quick-close list), `valid` (open, action ne
 | **3.1 — DSS engine (PAdES)** | EU DSS signing engine: PAdES B / T / LT / LTA, DSS dictionary, full-chain + TSA-chain revocation, TSA hash hardening, `--pades-level`, `--overwrite` (PR #422) | delivered | LTV cluster |
 | **3.2 — Algorithm agility + Key-source pluggability** | Algorithm agility delivered (#23, #33, #255 — see `design-doc/3.2-algorithm-agility.md`). Remaining: `--provider-class`/`--provider-arg` (#180), multi-PKCS#11 (#187), remote signing hook (#20) | ~1 week | #20, #180, #187 |
 | **3.3 — Visible Signature v2 + GUI parity** | #51, #55, #67, #99, #165, #231; JavaFX multi-select (#30); verbose CLI preview (#148) | ~1 week | several |
-| **Ongoing / low** | #140 (validation mode), #243 (track OpenPDF), #63/#139 (retest & close), #349 (website i18n) | — | as PRs arrive |
+| **3.4 — PKCS#11 onboarding** | Fail-soft provider load + GUI error (#491.3, overlaps #184); library file picker & provider-config editor (#491.2); discoverable/labeled keystore entries (#491.1, #491.4); hide file field + "Load Keys" feedback (#491.5); `docs/pkcs11.md` | ~1 week | #491 (+ absorbs support traffic) |
+| **Ongoing / low** | #140 (validation mode), #243 (track OpenPDF), #63/#139 (retest & close), #349 (website i18n), #492 (preset import/export) | — | as PRs arrive |
 
 ---
 
