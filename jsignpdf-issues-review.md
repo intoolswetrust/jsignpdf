@@ -1,30 +1,7 @@
 # JSignPdf — Open Issues Review and Action Plan
 
-**Date:** 2026-04-19 (revised 2026-08-08, 2026-08-09)
+**Date:** 2026-04-19 (revised 2026-08-08, 2026-08-09, 2026-09-06)
 **Scope:** open issues at https://github.com/intoolswetrust/jsignpdf/issues
-**Baseline:** `master` after OpenPDF 3 / Java 21 migration (commits `97c8fbe`, `b806893`, `158d4a7`)
-
-> **2026-08-08 revision.** All issues closed on GitHub have been removed from this
-> document, as have the issues fully resolved by the EU DSS (PAdES) signing engine
-> PR (#422). Issues that the DSS engine PR covers only *partially* are kept and
-> annotated inline.
->
-> This pass dropped **8** newly closed issues from the tracked list (#172, #178,
-> #179, #186, #223, #253, #259, #307), plus the 5 reference rows for the DSS-resolved
-> LTV cluster (#27, #46, #95, #247, #254), taking the list from 29 to **21**.
-> Cumulatively: of the 47 open issues in the original review, **27 have been
-> removed** (18 closed on GitHub, 9 resolved by the DSS engine); the remaining 20,
-> plus #349 (opened after the original review), make up the **21 issues tracked
-> below**.
->
-> **2026-08-09 revision.** The algorithm-agility cluster (#23, #33, #255) is
-> **fixed in code** and removed from this document, taking the list from 21 to
-> **18**. Three premises of the original review turned out to be wrong; the
-> corrected analysis, the delivered fixes, and the one deliberately deferred item
-> (an optional `--signature-algorithm` selector to force PSS on a plain
-> `rsaEncryption` certificate, §5b) are recorded in
-> `design-doc/3.2-algorithm-agility.md`, which is now the reference for this
-> cluster.
 
 ---
 
@@ -57,7 +34,7 @@ All experts reviewed the same 47 issues against the code on disk, flagged duplic
 
 ## Executive summary
 
-- **The LTV compliance cluster is resolved** by the EU DSS (PAdES) signing engine (PR #422). Selecting `-eng dss` produces genuine PAdES B / B-T / B-LT / B-LTA output with a real DSS dictionary, full-chain revocation, and TSA-chain revocation material — something the OpenPDF engine structurally cannot satisfy. The last piece, **#141** (standalone DocTimeStamp / LTA refresh), is delivered as `--timestamp-only` — see `design-doc/3.2-doc-timestamp.md`.
+- **The LTV compliance cluster is resolved** by the EU DSS (PAdES) signing engine (PR #422). Selecting `-eng dss` produces genuine PAdES B / B-T / B-LT / B-LTA output with a real DSS dictionary, full-chain revocation, and TSA-chain revocation material — something the OpenPDF engine structurally cannot satisfy. Standalone DocTimeStamp / LTA refresh is delivered as `--timestamp-only` — see `design-doc/3.2-doc-timestamp.md`.
 - **The algorithm-agility cluster (#23, #33, #255) is fixed** and no longer tracked here — see `design-doc/3.2-algorithm-agility.md`. It turned out to be mostly already solved; only the PKCS#11 PSS shape and the DSS TSA nonce needed code.
 - **PKCS#11 stability** is the largest *support-traffic* cluster. Most are environment-specific; a dedicated PKCS#11 troubleshooting page plus better diagnostics would absorb the recurring tickets at low engineering cost.
 - **Visible-signature rendering** (timezone, alignment, width/height, font size, date format) is the largest remaining user-visible cluster. Bundling them into a single "Visible Signature v2" release would close several tickets and materially raise perceived quality vs. Adobe's output.
@@ -76,13 +53,9 @@ Close-eligible conditional on verification (PR already merged or behaviour chang
 
 ---
 
-## LTV compliance — remaining work after the DSS engine (PR #422)
+## LTV compliance — after the DSS engine (PR #422)
 
-The historically dominant LTV cluster is resolved. With `-eng dss` (and `engine.dss.online.enabled=true` or local trust material for LT/LTA), JSignPdf now produces signatures that meet ETSI EN 319 142-1 baseline PAdES B-LT / B-LTA.
-
-| # | Aspect | State |
-|---|---|---|
-| **#141** | Append-only document timestamp | *Done* — `--timestamp-only` appends an `ETSI.RFC3161` DocTimeStamp to any PDF (signed or not) with the DSS engine, embedding fresh validation data first where the document carries a timestamped signature, which also covers the LTA refresh. |
+The historically dominant LTV cluster is resolved. With `-eng dss` (and `engine.dss.online.enabled=true` or local trust material for LT/LTA), JSignPdf now produces signatures that meet ETSI EN 319 142-1 baseline PAdES B-LT / B-LTA. Standalone document timestamping / LTA refresh is delivered as `--timestamp-only` (see `design-doc/3.2-doc-timestamp.md`).
 
 **Remaining work:** none.
 
@@ -143,7 +116,6 @@ Columns: **Status** — `close` (see quick-close list), `valid` (open, action ne
 | 99 | Font size ignored with signer name | cluster | M | P2 | Visible Signature v2; verify vs. OpenPDF 3. |
 | 139 | Comodo AAA auto-added | close? | S | P3 | Reporter silent; investigate once, add FAQ, close. |
 | 140 | Validate-only mode | valid | XL | P2 | Out of historical focus; if pursued, delegate to EU DSS or PDFBox rather than re-implement. |
-| 141 | Append-only timestamp | done | L | P1 | `--timestamp-only` on the DSS engine appends a standalone DocTimeStamp and refreshes LTA material on an already-signed PDF. |
 | 148 | Show equivalent CLI in GUI | valid | M | P2 | High-value learning aid; nice-to-have. |
 | 165 | Width/height for visible sig | cluster | S | P2 | Visible Signature v2. |
 | 180 | JCA provider support | cluster | M | P1 | Key-source pluggability — `--provider-class`/`--provider-arg`. |
@@ -157,7 +129,7 @@ Columns: **Status** — `close` (see quick-close list), `valid` (open, action ne
 
 ## Cross-cutting themes
 
-1. **LTV was the single most valuable engineering investment — now delivered.** Six tickets, from 2019 onward, converged on the same gap; the DSS engine (PR #422) closed five of them outright, and `--timestamp-only` closed the sixth (#141).
+1. **LTV was the single most valuable engineering investment — now delivered.** Six tickets, from 2019 onward, converged on the same gap; the DSS engine (PR #422) closed five of them outright, and `--timestamp-only` closed the last.
 2. **Error messages are the cheapest UX upgrade.** Several tickets surface stack traces where a one-line user-facing message would do (e.g. the residual #63 login noise). Adding a thin user-facing error layer pays off across dozens of tickets.
 3. **CLI ↔ GUI feature parity** (#30, #148) — the CLI has options the GUI lacks and vice versa. A small parity audit exposes most of them.
 4. **Packaging has quietly matured**: Flatpak, Windows jpackage with bundled JRE, macOS DMG. Several "it doesn't run" issues (#184, and #172 which was closed on these grounds) can be retired by steering users toward the bundled installer rather than `java -jar`.
