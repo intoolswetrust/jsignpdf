@@ -190,4 +190,50 @@
             <scope>test</scope>
         </dependency>
     </dependencies>
+
+    <profiles>
+        <!--
+          Manual screenshot refresh: renders the JavaFX UI off-screen through headless Monocle and
+          overwrites the guide/website images. Not part of any automated build.
+
+            mvn -pl jsignpdf -am -Pscreenshots test
+        -->
+        <profile>
+            <id>screenshots</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-surefire-plugin</artifactId>
+                        <configuration>
+                            <includes>
+                                <include>**/FxScreenshotGenerator.java</include>
+                            </includes>
+                            <argLine>
+                                ${argLine}
+                                -Dglass.platform=Monocle -Dmonocle.platform=Headless
+                                -Dprism.order=sw
+                                <!-- The headless screen must be at least as large as the window, or
+                                     every pulse throws BufferOverflowException out of the painter. -->
+                                -Dheadless.geometry=1920x1200
+                            </argLine>
+                            <systemPropertyVariables>
+                                <jsignpdf.screenshot.outDir>${project.basedir}/../website/docs/img/javafx</jsignpdf.screenshot.outDir>
+                                <jsignpdf.screenshot.siteDir>${project.basedir}/../website/static/img/screenshots</jsignpdf.screenshot.siteDir>
+                                <jsignpdf.screenshot.demoDir>${project.basedir}/../distribution/demo</jsignpdf.screenshot.demoDir>
+                                <!-- A config dir alone is not enough: an empty one is seeded from the legacy
+                                     ~/.JSignPdf file, which would drag the developer's own settings and recent
+                                     files into the images. -->
+                                <user.home>${project.build.directory}/screenshot-home</user.home>
+                            </systemPropertyVariables>
+                            <environmentVariables>
+                                <JSIGNPDF_CONFIG_DIR>${project.build.directory}/screenshot-home/config</JSIGNPDF_CONFIG_DIR>
+                            </environmentVariables>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
+
 </project>

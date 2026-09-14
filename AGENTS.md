@@ -14,7 +14,53 @@ JSignPdf is a Java application for adding digital signatures to PDF documents. I
 mvn clean install                    # Build everything (with tests)
 mvn clean install -DskipTests        # Build without tests
 mvn test -Dtest=BasicSigningTest     # Run a single test class
+
+mvn -pl jsignpdf -am -Pscreenshots test   # Regenerate the JavaFX screenshots, off-screen (manual)
+./website/capture-screenshots-x11.sh      # Same images, with window decorations (manual)
 ```
+
+Both paths walk the same states through `ScreenshotScenario` (test sources, excluded from every normal run)
+and overwrite the JavaFX images under `website/docs/img/javafx/` plus the copies the site serves from
+`website/static/img/screenshots/`. Fixtures come from `distribution/demo/`, staged into a neutral directory
+so no developer home path is baked into an image.
+
+| | `-Pscreenshots` (`FxScreenshotGenerator`) | `capture-screenshots-x11.sh` (`DecoratedScreenshotRunner`) |
+|---|---|---|
+| How | `Node.snapshot()` under headless Monocle | real window on X, grabbed with `xdotool` + ImageMagick |
+| Needs | nothing beyond the build | xdotool, x11-utils, imagemagick, a WM, Xvfb (unless `--no-xvfb`) |
+| Decorations | none | yes, whatever the window manager draws |
+| Reproducible | yes | depends on the WM, theme and fonts present |
+| Confirmation dialog | composited in | captured live, with its own chrome |
+
+Default to the off-screen path; reach for the script when the images should show the app as a user sees it.
+The two are not pixel-interchangeable, so regenerate a whole set with one of them rather than mixing.
+Review the diff before committing: the signature preview prints the current date, so every run produces
+slightly different pixels, and the decorated path additionally bakes the version into the title bar
+(`--version` overrides it). The Swing images are still captured by hand.
+
+Two options exist on both paths:
+
+- **Translations.** `-Djsignpdf.screenshot.locales=all` (or a comma-separated list of BCP-47 tags from
+  `SupportedLanguages`), `--locales all` for the script. Adds one empty main window per translation under
+  `website/static/img/screenshots/locales/`. Off by default — twenty images that do not need refreshing with
+  every UI change; the *Translations* section of `website/content/screenshots/_index.md` shows them. Each translation is captured in its own JVM
+  started in that language, because JavaFX builds its fontconfig fallback chain once per JVM from the startup
+  locale. **CJK needs JavaFX 23:** OpenJFX 21 (the build's `openjfx.version`) leaves CJK fonts out of that
+  chain, so ja / zh-CN / zh-TW show empty boxes. Add `-Dopenjfx.version=23.0.2` (Maven path) or
+  `--javafx-version 23.0.2` (script); `--app` against a DEB/RPM/Flatpak install already runs 23.
+- **Preferences dialog.** Always captured, General tab, as `preferences-general.png`.
+
+The script also takes `--app <path>` to point at an installed JSignPdf instead of the build. There is no
+handshake with a released binary, so that mode captures only what a cold start reaches — the main window and
+the Preferences dialog (via the `Ctrl+,` accelerator, so it works in any UI language), one launch per
+`--locales` tag. It drives the JVM through `JAVA_TOOL_OPTIONS`, which any launcher forwards: `user.language`
+for the locale (every release reads it, unlike the `-o ui.language=` override added in 3.2.0) and `user.home`
+for isolation. `HOME` alone is not enough — the JVM takes `user.home` from the password entry, so the app
+would still find the real `~/.JSignPdf`, migrate it, and put that user's keystore path and recent files into
+the images.
+
+Verified against 3.1.0-RC-2; older releases should work, since nothing in that mode depends on a flag this
+tree happens to have.
 
 ## Module Structure
 

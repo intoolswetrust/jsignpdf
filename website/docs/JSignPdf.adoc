@@ -211,11 +211,11 @@ The JavaFX interface is the default graphical frontend for JSignPdf. It uses a d
 
 When JSignPdf starts, the main window is empty and invites you to load a document. You can either drag and drop a PDF file onto the window or use _File > Open_ (or the _Open_ button in the toolbar).
 
-image:img/javafx/main-window-empty.png[JSignPdf main window,width=562,height=403]
+image:img/javafx/main-window-empty.png[JSignPdf main window,width=550,height=403]
 
 Once a PDF is loaded, the document preview appears on the right, and the configuration panels on the left become active. The status bar at the bottom shows the file name and page count.
 
-image:img/javafx/document-loaded.png[PDF document loaded,width=562,height=403]
+image:img/javafx/document-loaded.png[PDF document loaded,width=550,height=403]
 
 === Configuring signature options
 
@@ -227,7 +227,7 @@ The left sidebar contains five collapsible panels that expose all signing option
 * **Timestamp & Validation** -- TSA server, CRL, OCSP (see <<TSA -- timestamps>> and <<Certificate revocation checking>>)
 * **Encryption & Rights** -- encryption mode, passwords, certificate, document rights (see <<Encryption>>)
 
-image:img/javafx/signature-properties.png[Signature properties panel,width=562,height=403]
+image:img/javafx/signature-properties.png[Signature properties panel,width=550,height=403]
 
 At a minimum, you need to select a keystore and provide its password in the _Certificate_ panel. All other options have sensible defaults.
 
@@ -246,13 +246,13 @@ The mouse cursor changes according to the available operation. The preview also 
 
 The preview reproduces the appearance of the OpenPDF engine. It is an approximation of the final result: the DSS engine wraps and insets the signature text slightly differently, so with that engine the preview shows the right content and placement, but the text may not break across lines exactly as it does in the signed document.
 
-image:img/javafx/visible-signature-placement.png[Placing visible signature,width=562,height=403]
+image:img/javafx/visible-signature-placement.png[Placing visible signature,width=550,height=403]
 
 === Signing the document
 
 When you are ready, click the _Sign_ button in the toolbar. JSignPdf signs the document and displays the result in the Output Console at the bottom of the window.
 
-image:img/javafx/signing-result.png[Signing complete,width=562,height=400]
+image:img/javafx/signing-result.png[Signing complete,width=550,height=403]
 
 The signed PDF is saved to the output path shown in the _Signature Properties_ panel. By default, the input file name is combined with the _Output suffix_ from the same panel, so `document.pdf` becomes `document_signed.pdf`.
 
@@ -286,7 +286,11 @@ Presets are plain Java properties files under the <<Configuration directory,conf
 
 === Adjusting advanced preferences
 
-Open _File > Preferences..._ (shortcut `Ctrl+,` / `⌘,`) for application-wide tweaks that fall outside the per-document signing options. The dialog has the following tabs:
+Open _File > Preferences..._ (shortcut `Ctrl+,` / `⌘,`) for application-wide tweaks that fall outside the per-document signing options.
+
+image:img/javafx/preferences-general.png[Preferences dialog,width=360,height=280]
+
+The dialog has the following tabs:
 
 * **General** -- the interface language, the default signing engine, the *Output file suffix* used to derive output file names, and the *Debug output* toggle that enables the verbose signing diagnostics (see <<Reading the signing diagnostics>>)
 * **Visible Signature** -- font file, font name and encoding for the visible-signature L2 text
@@ -848,7 +852,7 @@ _JavaFX panel: Signature Appearance_
 
 Enabling the _Visible signature_ option allows you to create a visible field with signature directly in the signed PDF. You can configure parameters (position/texts/images) of the visible signature.
 
-image:img/javafx/visible-signature-panel.png[Signature Appearance panel,width=312,height=544]
+image:img/javafx/visible-signature-panel.png[Signature Appearance panel,width=304,height=560]
 
 ==== Page
 
