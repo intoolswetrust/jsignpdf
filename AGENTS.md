@@ -14,7 +14,29 @@ JSignPdf is a Java application for adding digital signatures to PDF documents. I
 mvn clean install                    # Build everything (with tests)
 mvn clean install -DskipTests        # Build without tests
 mvn test -Dtest=BasicSigningTest     # Run a single test class
+
+mvn -pl jsignpdf -am -Pscreenshots test   # Regenerate the JavaFX screenshots, off-screen (manual)
+./website/capture-screenshots-x11.sh      # Same images, with window decorations (manual)
 ```
+
+Both paths walk the same states through `ScreenshotScenario` (test sources, excluded from every normal run)
+and overwrite the JavaFX images under `website/docs/img/javafx/` plus the copies the site serves from
+`website/static/img/screenshots/`. Fixtures come from `distribution/demo/`, staged into a neutral directory
+so no developer home path is baked into an image.
+
+| | `-Pscreenshots` (`FxScreenshotGenerator`) | `capture-screenshots-x11.sh` (`DecoratedScreenshotRunner`) |
+|---|---|---|
+| How | `Node.snapshot()` under headless Monocle | real window on X, grabbed with `xdotool` + ImageMagick |
+| Needs | nothing beyond the build | xdotool, x11-utils, imagemagick, a WM, Xvfb (unless `--no-xvfb`) |
+| Decorations | none | yes, whatever the window manager draws |
+| Reproducible | yes | depends on the WM, theme and fonts present |
+| Confirmation dialog | composited in | captured live, with its own chrome |
+
+Default to the off-screen path; reach for the script when the images should show the app as a user sees it.
+The two are not pixel-interchangeable, so regenerate a whole set with one of them rather than mixing.
+Review the diff before committing: the signature preview prints the current date, so every run produces
+slightly different pixels, and the decorated path additionally bakes the current version into the title bar.
+The Swing images are still captured by hand.
 
 ## Module Structure
 
