@@ -7,7 +7,9 @@ import java.lang.reflect.Method;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
+import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.List;
 import java.util.Locale;
 import java.util.ResourceBundle;
 import java.util.concurrent.Callable;
@@ -31,14 +33,18 @@ import javafx.scene.control.TitledPane;
 import javafx.scene.image.Image;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
+import javafx.stage.Window;
 
 import net.sf.jsignpdf.BasicSignerOptions;
 import net.sf.jsignpdf.Constants;
+import net.sf.jsignpdf.fx.preferences.PreferencesController;
 import net.sf.jsignpdf.fx.view.MainWindowController;
 import net.sf.jsignpdf.fx.viewmodel.SignaturePlacementViewModel;
 import net.sf.jsignpdf.fx.viewmodel.SigningOptionsViewModel;
 import net.sf.jsignpdf.types.CertificationLevel;
 import net.sf.jsignpdf.types.HashAlgorithm;
+import net.sf.jsignpdf.utils.SupportedLanguages;
+import net.sf.jsignpdf.utils.UiLocale;
 
 /**
  * Builds the JavaFX main window and walks it through the states the documentation screenshots show, handing
@@ -58,23 +64,24 @@ public final class ScreenshotScenario {
     public interface ShotSink {
 
         /**
-         * Captures {@code node} - either the scene root (the whole window) or a region of it.
+         * Captures {@code node} - either the scene root (a whole window) or a region of it.
          *
-         * @param fileName the image file name, e.g. {@code document-loaded.png}
+         * @param path where the image goes, as {@code guide/...} (the user guide's image directory) or
+         *        {@code site/...} (the website's), e.g. {@code guide/document-loaded.png}
          * @param node the node whose bounds delimit the shot
          */
-        void shot(String fileName, Node node) throws Exception;
+        void shot(String path, Node node) throws Exception;
 
         /**
          * Captures the window while the signing-complete dialog is up. The dialog is already showing; it is a
          * separate stage, so an off-screen backend has to composite it while a screen-grabbing one gets it for
          * free.
          *
-         * @param fileName the image file name
+         * @param path where the image goes, rooted as in {@link #shot(String, Node)}
          * @param window the scene root of the main window
          * @param dialog the alert on top of it
          */
-        void dialogShot(String fileName, Node window, Alert dialog) throws Exception;
+        void dialogShot(String path, Node window, Alert dialog) throws Exception;
 
         /** Called once every shot has been taken, e.g. to mirror images into the website tree. */
         void finished() throws Exception;
@@ -92,7 +99,9 @@ public final class ScreenshotScenario {
     private static Path demoSigImage;
 
     private static Scene scene;
+    private static Stage stage;
     private static MainWindowController controller;
+    private static boolean decorated;
 
     private ScreenshotScenario() {
     }
@@ -118,7 +127,8 @@ public final class ScreenshotScenario {
      * @param decorated {@code true} for a normal, window-manager-decorated stage (screen capture),
      *        {@code false} for an undecorated one (off-screen snapshots, where chrome does not exist anyway)
      */
-    public static void buildWindow(boolean decorated) throws Exception {
+    public static void buildWindow(boolean wantDecorations) throws Exception {
+        decorated = wantDecorations;
         runFx(() -> {
             ResourceBundle bundle = ResourceBundle.getBundle(Constants.RESOURCE_BUNDLE_BASE, Locale.ENGLISH);
             FXMLLoader loader = new FXMLLoader(
@@ -131,7 +141,7 @@ public final class ScreenshotScenario {
             }
             controller = loader.getController();
 
-            Stage stage = new Stage();
+            stage = new Stage();
             if (!decorated) {
                 stage.initStyle(StageStyle.UNDECORATED);
             }
@@ -160,31 +170,118 @@ public final class ScreenshotScenario {
 
     /** Drives the UI through every documented state, handing each to {@code sink} in the order the guide uses. */
     public static void run(ShotSink sink) throws Exception {
-        sink.shot("main-window-empty.png", scene.getRoot());
+        sink.shot("guide/main-window-empty.png", scene.getRoot());
 
         openDocument(demoPdf.toFile());
-        sink.shot("document-loaded.png", scene.getRoot());
+        sink.shot("guide/document-loaded.png", scene.getRoot());
 
         signatureProperties();
-        sink.shot("signature-properties.png", scene.getRoot());
+        sink.shot("guide/signature-properties.png", scene.getRoot());
         // Back to 1:1 for the shots that follow, which are about the signature rectangle rather than the page.
         runFx(() -> controller.getDocumentViewModel().setZoomLevel(1.0));
 
         visibleSignature();
-        sink.shot("visible-signature-placement.png", scene.getRoot());
-        sink.shot("visible-signature-panel.png", lookup("#sidePanelAccordion"));
+        sink.shot("guide/visible-signature-placement.png", scene.getRoot());
+        sink.shot("guide/visible-signature-panel.png", lookup("#sidePanelAccordion"));
 
         sign();
         // The guide points at the output path in this panel right after the signing screenshot, and it keeps
         // the image from being a near-duplicate of the placement one.
         expandPane("jfx.gui.panel.signatureProperties");
-        sink.shot("signing-result.png", scene.getRoot());
+        sink.shot("guide/signing-result.png", scene.getRoot());
 
         Alert complete = showSigningCompleteAlert();
-        sink.dialogShot("jsignpdf-javafx-signed.png", scene.getRoot(), complete);
+        sink.dialogShot("site/jsignpdf-javafx-signed.png", scene.getRoot(), complete);
         runFx(complete::close);
 
+        preferences(sink);
+        localeGallery(sink, requestedLocales());
+
         sink.finished();
+    }
+
+    /**
+     * Captures the Preferences dialog on its General tab (the one it opens on).
+     *
+     * <p>
+     * {@link PreferencesController#show(Stage)} ends in {@code showAndWait()}, so it is posted to the FX thread
+     * without waiting for it: the nested event loop it enters still runs everything queued afterwards, which is
+     * what lets the shot be taken and the dialog closed again.
+     * </p>
+     */
+    private static void preferences(ShotSink sink) throws Exception {
+        final String title = Constants.RES.get("jfx.gui.preferences.title");
+        Platform.runLater(() -> PreferencesController.show(stage));
+        waitUntil("the Preferences dialog to open", () -> findWindow(title) != null);
+        settle();
+
+        AtomicReference<Stage> dialog = new AtomicReference<>();
+        runFx(() -> dialog.set(findWindow(title)));
+        sink.shot("guide/preferences-general.png", dialog.get().getScene().getRoot());
+
+        runFx(() -> dialog.get().hide());
+        settle();
+    }
+
+    /**
+     * Rebuilds the empty main window once per translation. The UI language is installed the way the
+     * application installs it - {@link UiLocale#init(String[])}, i.e. exactly what {@code -o ui.language=<tag>}
+     * on the command line does - so the shots show what a user of that language actually gets, including the
+     * strings {@code Constants.RES} resolves outside FXML.
+     */
+    private static void localeGallery(ShotSink sink, List<String> tags) throws Exception {
+        if (tags.isEmpty()) {
+            return;
+        }
+        for (String tag : tags) {
+            applyUiLanguage(tag);
+            runFx(() -> stage.close());
+            buildWindow(decorated);
+            sink.shot("site/locales/main-window-" + tag + ".png", scene.getRoot());
+        }
+        applyUiLanguage("en");
+    }
+
+    private static void applyUiLanguage(String tag) {
+        UiLocale.init(new String[] { "-o", "ui.language=" + tag });
+    }
+
+    /**
+     * The translations to include in the locale gallery: {@code -Djsignpdf.screenshot.locales=all} for every
+     * bundled one, a comma-separated list of BCP-47 tags for a subset, and nothing at all by default - the
+     * gallery is twenty extra images that do not need refreshing with every UI change.
+     */
+    private static List<String> requestedLocales() {
+        String value = System.getProperty("jsignpdf.screenshot.locales", "").trim();
+        if (value.isEmpty()) {
+            return List.of();
+        }
+        if ("all".equalsIgnoreCase(value)) {
+            return SupportedLanguages.tags();
+        }
+        List<String> tags = new ArrayList<>();
+        for (String tag : value.split(",")) {
+            String trimmed = tag.trim();
+            if (trimmed.isEmpty()) {
+                continue;
+            }
+            if (!SupportedLanguages.tags().contains(trimmed)) {
+                throw new IllegalArgumentException("No bundled translation for '" + trimmed + "'; known tags: "
+                        + SupportedLanguages.tags());
+            }
+            tags.add(trimmed);
+        }
+        return tags;
+    }
+
+    /** The showing stage with this exact title, or {@code null}. Must run on the FX thread. */
+    private static Stage findWindow(String title) {
+        for (Window window : Window.getWindows()) {
+            if (window instanceof Stage showing && window.isShowing() && title.equals(showing.getTitle())) {
+                return showing;
+            }
+        }
+        return null;
     }
 
     private static void signatureProperties() throws Exception {

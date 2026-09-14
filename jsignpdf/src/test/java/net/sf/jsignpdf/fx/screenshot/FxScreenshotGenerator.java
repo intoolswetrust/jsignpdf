@@ -81,15 +81,15 @@ public class FxScreenshotGenerator {
     private static final class SnapshotSink implements ScreenshotScenario.ShotSink {
 
         @Override
-        public void shot(String fileName, Node node) throws Exception {
-            write(capture(node), targetFor(fileName));
+        public void shot(String path, Node node) throws Exception {
+            write(capture(node), targetFor(path));
         }
 
         @Override
-        public void dialogShot(String fileName, Node window, Alert dialog) throws Exception {
+        public void dialogShot(String path, Node window, Alert dialog) throws Exception {
             BufferedImage background = capture(window);
             BufferedImage foreground = capture(dialog.getDialogPane());
-            write(overlayCentered(background, foreground), targetFor(fileName));
+            write(overlayCentered(background, foreground), targetFor(path));
         }
 
         @Override
@@ -100,8 +100,17 @@ public class FxScreenshotGenerator {
             }
         }
 
-        private static Path targetFor(String fileName) {
-            return (fileName.startsWith("jsignpdf-") ? siteDir : outDir).resolve(fileName);
+        private static Path targetFor(String path) throws IOException {
+            int slash = path.indexOf('/');
+            String root = path.substring(0, slash);
+            Path rootDir = switch (root) {
+                case "guide" -> outDir;
+                case "site" -> siteDir;
+                default -> throw new IllegalArgumentException("Unknown image root '" + root + "' in " + path);
+            };
+            Path target = rootDir.resolve(path.substring(slash + 1));
+            Files.createDirectories(target.getParent());
+            return target;
         }
     }
 

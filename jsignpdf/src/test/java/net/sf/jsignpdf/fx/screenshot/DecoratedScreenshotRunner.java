@@ -13,6 +13,8 @@ import javafx.application.Platform;
 import javafx.geometry.Bounds;
 import javafx.scene.Node;
 import javafx.scene.control.Alert;
+import javafx.stage.Stage;
+import javafx.stage.Window;
 
 /**
  * Shows the JavaFX main window on a real X display and walks it through the documented states, letting an
@@ -29,11 +31,17 @@ import javafx.scene.control.Alert;
  * </p>
  *
  * <ul>
- * <li>{@code <image>.png.ready} - written once the state is on screen. Its single line is either {@code full},
- * meaning "grab the whole decorated window", or {@code crop <x> <y> <w> <h>}, a rectangle in client-area
- * coordinates that the grabber offsets by the frame it measured.</li>
- * <li>{@code <image>.png.done} - written by the grabber once the file exists. The runner blocks on it, so the
- * UI never moves on mid-capture.</li>
+ * <li>{@code NNN.ready} - written once a state is on screen, numbered in capture order. Three keys:
+ * <ul>
+ * <li>{@code path} - where the image goes, as {@code guide/...} or {@code site/...};</li>
+ * <li>{@code region} - {@code full} for the whole decorated window, or {@code crop <x> <y> <w> <h>}, a
+ * rectangle in client-area coordinates that the grabber offsets by the frame it measured;</li>
+ * <li>{@code window} - the exact title of the window to grab, which is not always the main one (the
+ * Preferences dialog is its own window, and the main title changes when a document is open).</li>
+ * </ul>
+ * </li>
+ * <li>{@code NNN.done} - written by the grabber once the file exists. The runner blocks on it, so the UI never
+ * moves on mid-capture.</li>
  * <li>{@code finished} - written after the last shot. {@code error} - written instead, with the message, if
  * the run dies.</li>
  * </ul>
@@ -69,23 +77,24 @@ public final class DecoratedScreenshotRunner {
     private static final class HandshakeSink implements ScreenshotScenario.ShotSink {
 
         private final Path handshakeDir;
+        private int sequence;
 
         HandshakeSink(Path handshakeDir) {
             this.handshakeDir = handshakeDir;
         }
 
         @Override
-        public void shot(String fileName, Node node) throws Exception {
+        public void shot(String path, Node node) throws Exception {
             settle();
-            request(fileName, regionOf(node));
+            request(path, regionOf(node), titleOf(node));
         }
 
         @Override
-        public void dialogShot(String fileName, Node window, Alert dialog) throws Exception {
+        public void dialogShot(String path, Node window, Alert dialog) throws Exception {
             // The dialog is a separate stage physically on top of the window, so a screen grab of the window
             // rectangle already contains it - no compositing needed on this path.
             settle();
-            request(fileName, "full");
+            request(path, "full", titleOf(window));
         }
 
         @Override
@@ -93,13 +102,13 @@ public final class DecoratedScreenshotRunner {
             // Nothing to mirror: the grabber writes every image straight to its final location.
         }
 
-        /** {@code full} for the whole window, otherwise the node's rectangle in client-area coordinates. */
+        /** {@code full} for a whole window, otherwise the node's rectangle in client-area coordinates. */
         private static String regionOf(Node node) throws Exception {
-            if (node == ScreenshotScenario.scene().getRoot()) {
-                return "full";
-            }
-            AtomicReference<String> region = new AtomicReference<>();
+            AtomicReference<String> region = new AtomicReference<>("full");
             runFx(() -> {
+                if (node == node.getScene().getRoot()) {
+                    return;
+                }
                 Bounds bounds = node.localToScene(node.getLayoutBounds());
                 region.set(String.format("crop %d %d %d %d",
                         Math.round(bounds.getMinX()), Math.round(bounds.getMinY()),
@@ -108,16 +117,30 @@ public final class DecoratedScreenshotRunner {
             return region.get();
         }
 
-        private void request(String fileName, String region) throws Exception {
-            Path done = handshakeDir.resolve(fileName + ".done");
+        private static String titleOf(Node node) throws Exception {
+            AtomicReference<String> title = new AtomicReference<>();
+            runFx(() -> {
+                Window window = node.getScene().getWindow();
+                title.set(window instanceof Stage stage ? stage.getTitle() : null);
+            });
+            if (title.get() == null || title.get().isBlank()) {
+                throw new IllegalStateException("The window holding " + node + " has no title to search for");
+            }
+            return title.get();
+        }
+
+        private void request(String path, String region, String window) throws Exception {
+            String id = String.format("%03d", ++sequence);
+            Path done = handshakeDir.resolve(id + ".done");
             Files.deleteIfExists(done);
-            Files.writeString(handshakeDir.resolve(fileName + ".ready"), region + "\n");
-            System.out.println("[runner] waiting for " + fileName + " (" + region + ")");
+            Files.writeString(handshakeDir.resolve(id + ".ready"),
+                    "path=" + path + "\nregion=" + region + "\nwindow=" + window + "\n");
+            System.out.println("[runner] waiting for " + path + " (" + region + " of \"" + window + "\")");
 
             long deadline = System.currentTimeMillis() + TimeUnit.SECONDS.toMillis(CAPTURE_TIMEOUT_SECONDS);
             while (!Files.exists(done)) {
                 if (System.currentTimeMillis() > deadline) {
-                    throw new IllegalStateException("The screen grabber did not capture " + fileName
+                    throw new IllegalStateException("The screen grabber did not capture " + path
                             + " within " + CAPTURE_TIMEOUT_SECONDS + "s");
                 }
                 Thread.sleep(100);
