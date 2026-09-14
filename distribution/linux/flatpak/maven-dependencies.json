@@ -7029,6 +7029,13 @@
   },
   {
     "type": "file",
+    "url": "https://repo1.maven.org/maven2/org/slf4j/slf4j-bom/2.0.19/slf4j-bom-2.0.19.pom",
+    "sha256": "e14a9ab180f60247f347de369b7a44ccd591d0c47f4d96bc644056c4f83b51a0",
+    "dest": "m2local/org/slf4j/slf4j-bom/2.0.19",
+    "dest-filename": "slf4j-bom-2.0.19.pom"
+  },
+  {
+    "type": "file",
     "url": "https://repo1.maven.org/maven2/org/slf4j/slf4j-jdk14/1.5.6/slf4j-jdk14-1.5.6.jar",
     "sha256": "9b659d87e77ef601b0c564019b0d7fd1267c141f2d2dc55c9ba7613e63ca6786",
     "dest": "m2local/org/slf4j/slf4j-jdk14/1.5.6",
@@ -7043,17 +7050,17 @@
   },
   {
     "type": "file",
-    "url": "https://repo1.maven.org/maven2/org/slf4j/slf4j-jdk14/2.0.18/slf4j-jdk14-2.0.18.jar",
-    "sha256": "ab6ffe68caa8a0e3aed66022061b6cbabc76746784eff3c3ab4af0b0dd7dbb02",
-    "dest": "m2local/org/slf4j/slf4j-jdk14/2.0.18",
-    "dest-filename": "slf4j-jdk14-2.0.18.jar"
+    "url": "https://repo1.maven.org/maven2/org/slf4j/slf4j-jdk14/2.0.19/slf4j-jdk14-2.0.19.jar",
+    "sha256": "36bfc3585d19456821e27be56c98d376b355b9fc6e305eb7a105a9b389b8144d",
+    "dest": "m2local/org/slf4j/slf4j-jdk14/2.0.19",
+    "dest-filename": "slf4j-jdk14-2.0.19.jar"
   },
   {
     "type": "file",
-    "url": "https://repo1.maven.org/maven2/org/slf4j/slf4j-jdk14/2.0.18/slf4j-jdk14-2.0.18.pom",
-    "sha256": "746e8d58f3211e57f6eff5727fca3412bb55678da73d03a25d2a19f252550297",
-    "dest": "m2local/org/slf4j/slf4j-jdk14/2.0.18",
-    "dest-filename": "slf4j-jdk14-2.0.18.pom"
+    "url": "https://repo1.maven.org/maven2/org/slf4j/slf4j-jdk14/2.0.19/slf4j-jdk14-2.0.19.pom",
+    "sha256": "195fc895f076cf5b279256eef4b761db0871022c088d9396226d7954513786ad",
+    "dest": "m2local/org/slf4j/slf4j-jdk14/2.0.19",
+    "dest-filename": "slf4j-jdk14-2.0.19.pom"
   },
   {
     "type": "file",
@@ -7096,6 +7103,13 @@
     "sha256": "0b3896bedad2c9ed9697edcbea1da0c54cd238a723583a81358a83bfb782e9fa",
     "dest": "m2local/org/slf4j/slf4j-parent/2.0.18",
     "dest-filename": "slf4j-parent-2.0.18.pom"
+  },
+  {
+    "type": "file",
+    "url": "https://repo1.maven.org/maven2/org/slf4j/slf4j-parent/2.0.19/slf4j-parent-2.0.19.pom",
+    "sha256": "452831ef96fbebe64d855dd5c98ec6086d7478a9e568422c8343c6da00b2750d",
+    "dest": "m2local/org/slf4j/slf4j-parent/2.0.19",
+    "dest-filename": "slf4j-parent-2.0.19.pom"
   },
   {
     "type": "file",
