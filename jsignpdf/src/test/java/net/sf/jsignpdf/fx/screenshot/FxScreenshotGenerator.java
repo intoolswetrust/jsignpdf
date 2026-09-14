@@ -10,6 +10,9 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 
 import javax.imageio.ImageIO;
@@ -47,7 +50,9 @@ public class FxScreenshotGenerator {
 
     private static final double SCALE = Double.parseDouble(System.getProperty("jsignpdf.screenshot.scale", "1"));
 
-    /** Radius of the drop shadow painted under a composited dialog. */
+    /**
+     * Radius of the drop shadow painted under a composited dialog.
+     */
     private static final int SHADOW_SPREAD = 8;
 
     /**
@@ -75,9 +80,71 @@ public class FxScreenshotGenerator {
     @Test
     public void generateScreenshots() throws Exception {
         ScreenshotScenario.run(new SnapshotSink());
+        for (String tag : ScreenshotScenario.requestedLocales()) {
+            runGalleryJvm(tag);
+        }
     }
 
-    /** Writes each state with {@code Node.snapshot()}, compositing dialogs that live in their own stage. */
+    /**
+     * Entry point of a gallery JVM, started by {@link #runGalleryJvm(String)} in the language it captures.
+     *
+     * @param args the BCP-47 tag of the translation
+     */
+    public static void main(String[] args) {
+        int status = 0;
+        try {
+            requireMonocle();
+            outDir = ScreenshotScenario.requiredDir("jsignpdf.screenshot.outDir");
+            siteDir = ScreenshotScenario.requiredDir("jsignpdf.screenshot.siteDir");
+            ScreenshotScenario.prepareGallery(args[0]);
+            ScreenshotScenario.buildWindow(false);
+            ScreenshotScenario.galleryShot(new SnapshotSink(), args[0]);
+        } catch (Throwable t) {
+            status = 1;
+            t.printStackTrace();
+        } finally {
+            Platform.exit();
+        }
+        System.exit(status);
+    }
+
+    /**
+     * Captures one translation in a fresh JVM started in that language - JavaFX resolves its fallback fonts
+     * once per JVM, from the language it starts in. See {@link ScreenshotScenario#prepareGallery(String)}.
+     */
+    private static void runGalleryJvm(String tag) throws Exception {
+        List<String> command = new ArrayList<>();
+        command.add(Path.of(System.getProperty("java.home"), "bin", "java").toString());
+        for (String property : new String[] { "glass.platform", "monocle.platform", "prism.order", "headless.geometry",
+                "user.home", "jsignpdf.screenshot.outDir", "jsignpdf.screenshot.siteDir" }) {
+            String value = System.getProperty(property);
+            if (value != null) {
+                command.add("-D" + property + "=" + value);
+            }
+        }
+        command.addAll(ScreenshotScenario.jvmLocaleOptions(tag));
+        command.add("-cp");
+        command.add(System.getProperty("java.class.path"));
+        command.add(FxScreenshotGenerator.class.getName());
+        command.add(tag);
+
+        ProcessBuilder builder = new ProcessBuilder(command).inheritIO();
+        builder.environment().put("JSIGNPDF_CONFIG_DIR",
+                ScreenshotScenario.requiredConfigDir().resolveSibling("config-" + tag).toString());
+        Process process = builder.start();
+        if (!process.waitFor(ScreenshotScenario.FX_TIMEOUT_SECONDS, TimeUnit.SECONDS)) {
+            process.destroyForcibly();
+            throw new IllegalStateException("Gallery JVM for '" + tag + "' timed out");
+        }
+        if (process.exitValue() != 0) {
+            throw new IllegalStateException("Gallery JVM for '" + tag + "' failed with exit code "
+                    + process.exitValue());
+        }
+    }
+
+    /**
+     * Writes each state with {@code Node.snapshot()}, compositing dialogs that live in their own stage.
+     */
     private static final class SnapshotSink implements ScreenshotScenario.ShotSink {
 
         @Override
@@ -137,7 +204,9 @@ public class FxScreenshotGenerator {
         System.out.println("[screenshot] " + target + " (" + image.getWidth() + "x" + image.getHeight() + ")");
     }
 
-    /** Draws the dialog over the middle of the window, with a soft shadow so it reads as a separate surface. */
+    /**
+     * Draws the dialog over the middle of the window, with a soft shadow so it reads as a separate surface.
+     */
     private static BufferedImage overlayCentered(BufferedImage window, BufferedImage dialog) {
         BufferedImage composed = new BufferedImage(window.getWidth(), window.getHeight(),
                 BufferedImage.TYPE_INT_RGB);

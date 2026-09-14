@@ -43,7 +43,11 @@ Two options exist on both paths:
 - **Translations.** `-Djsignpdf.screenshot.locales=all` (or a comma-separated list of BCP-47 tags from
   `SupportedLanguages`), `--locales all` for the script. Adds one empty main window per translation under
   `website/static/img/screenshots/locales/`. Off by default — twenty images that do not need refreshing with
-  every UI change, and nothing on the site references them yet.
+  every UI change; the *Translations* section of `website/content/screenshots/_index.md` shows them. Each translation is captured in its own JVM
+  started in that language, because JavaFX builds its fontconfig fallback chain once per JVM from the startup
+  locale. **CJK needs JavaFX 23:** OpenJFX 21 (the build's `openjfx.version`) leaves CJK fonts out of that
+  chain, so ja / zh-CN / zh-TW show empty boxes. Add `-Dopenjfx.version=23.0.2` (Maven path) or
+  `--javafx-version 23.0.2` (script); `--app` against a DEB/RPM/Flatpak install already runs 23.
 - **Preferences dialog.** Always captured, General tab, as `preferences-general.png`.
 
 The script also takes `--app <path>` to point at an installed JSignPdf instead of the build. There is no

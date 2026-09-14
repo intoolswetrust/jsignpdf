@@ -26,6 +26,12 @@
 #   ./capture-screenshots-x11.sh --locales all          # plus one main window per bundled translation
 #   ./capture-screenshots-x11.sh --app /opt/jsignpdf/jsignpdf.sh --locales cs,de
 #   ./capture-screenshots-x11.sh --version 3.2.0              # title bar reads that version
+#   ./capture-screenshots-x11.sh --locales all --javafx-version 23.0.2
+#
+# Fonts: OpenJFX 21 puts no CJK font into its fontconfig fallback chain, so the ja / zh-CN / zh-TW windows
+# show empty boxes when the harness runs on the build's JavaFX 21. OpenJFX 23 picks Noto Sans CJK (or
+# whatever fontconfig prefers for the language) - use --javafx-version, or --app against a package that
+# bundles a newer JavaFX runtime.
 #   ./capture-screenshots-x11.sh --check                # only verify the required tools are installed
 #
 # Requires: xdotool, xprop, xwininfo, ImageMagick (import), a window manager, and Xvfb unless --no-xvfb.
@@ -47,6 +53,8 @@ APP=""
 LOCALES=""
 CAPTURE_PREFS=0
 APP_VERSION=""
+JAVAFX_VERSION=""
+MVN_EXTRA=()
 
 # Guide image -> the name the website serves it under. The third website card,
 # jsignpdf-javafx-signed.png, is captured directly because it has the confirmation dialog on top.
@@ -74,6 +82,7 @@ while [ $# -gt 0 ]; do
     --app)       APP="$2"; shift ;;
     --locales)   LOCALES="$2"; shift ;;
     --version)   APP_VERSION="$2"; shift ;;
+    --javafx-version) JAVAFX_VERSION="$2"; shift ;;
     --out-dir)   GUIDE_DIR="$2"; shift ;;
     --site-dir)  SITE_DIR="$2"; shift ;;
     --geometry)  GEOMETRY="$2"; shift ;;
@@ -148,6 +157,7 @@ if [ "$CHECK_ONLY" -eq 1 ]; then
 fi
 
 [ -z "$APP" ] || [ -x "$APP" ] || die "--app $APP is not an executable"
+[ -z "$JAVAFX_VERSION" ] || MVN_EXTRA+=("-Dopenjfx.version=$JAVAFX_VERSION")
 for dir in "$GUIDE_DIR" "$SITE_DIR" "$DEMO_DIR"; do
   [ -d "$dir" ] || die "$dir is not a directory"
 done
@@ -280,25 +290,29 @@ stamp_version() {
   log "window title version: $APP_VERSION"
 }
 
-run_harness() {
-  log "compiling test classes"
-  mvn -q -pl jsignpdf -am -DskipTests test-compile -f "$REPO/pom.xml"
-  stamp_version
+# JVM options that start a JVM in the language of a BCP-47 tag.
+locale_jvm_opts() { # tag
+  local opts="-Duser.language=${1%%-*}"
+  case "$1" in *-*) opts="$opts -Duser.country=${1##*-}" ;; esac
+  printf '%s' "$opts"
+}
 
-  # exec:exec forks a real JVM with the module's *test* class path, which is what carries the runner and the
-  # signing engines. (dependency:build-classpath silently drops test-scope artifacts here, and exec:java would
-  # run inside Maven's own JVM, where overriding user.home breaks ~/.m2 resolution.)
-  local locales_arg=""
-  [ ${#LOCALE_TAGS[@]} -eq 0 ] || locales_arg="-Djsignpdf.screenshot.locales=$(IFS=,; echo "${LOCALE_TAGS[*]}")"
-
-  log "launching the UI"
-  JSIGNPDF_CONFIG_DIR="$RUN_HOME/config" mvn -q -pl jsignpdf -f "$REPO/pom.xml" \
+# exec:exec forks a real JVM with the module's *test* class path, which is what carries the runner and the
+# signing engines. (dependency:build-classpath silently drops test-scope artifacts here, and exec:java would
+# run inside Maven's own JVM, where overriding user.home breaks ~/.m2 resolution.)
+launch_runner() { # extra JVM options
+  rm -rf "$HANDSHAKE"
+  mkdir -p "$HANDSHAKE"
+  JSIGNPDF_CONFIG_DIR="$RUN_HOME/config" mvn -q -pl jsignpdf -f "$REPO/pom.xml" ${MVN_EXTRA[@]+"${MVN_EXTRA[@]}"} \
     "org.codehaus.mojo:exec-maven-plugin:${EXEC_PLUGIN_VERSION}:exec" \
     -Dexec.executable=java -Dexec.classpathScope=test \
-    -Dexec.args="-Duser.home=$RUN_HOME -Djsignpdf.screenshot.demoDir=$DEMO_DIR -Djsignpdf.screenshot.handshakeDir=$HANDSHAKE $locales_arg -cp %classpath net.sf.jsignpdf.fx.screenshot.DecoratedScreenshotRunner" \
-    >"$WORK/runner.log" 2>&1 &
+    -Dexec.args="-Duser.home=$RUN_HOME -Djsignpdf.screenshot.demoDir=$DEMO_DIR -Djsignpdf.screenshot.handshakeDir=$HANDSHAKE $1 -cp %classpath net.sf.jsignpdf.fx.screenshot.DecoratedScreenshotRunner" \
+    >>"$WORK/runner.log" 2>&1 &
   RUNNER_PID=$!
+}
 
+# Answers the runner's markers until it reports `finished`.
+serve_handshake() {
   local deadline ready id path region window wid
   deadline=$(( $(date +%s) + 1800 ))
   while true; do
@@ -343,11 +357,31 @@ run_harness() {
 
   wait "$RUNNER_PID" || true
   RUNNER_PID=""
+}
+
+run_harness() {
+  log "compiling test classes"
+  mvn -q -pl jsignpdf -am -DskipTests test-compile -f "$REPO/pom.xml" ${MVN_EXTRA[@]+"${MVN_EXTRA[@]}"}
+  stamp_version
+  [ -z "$JAVAFX_VERSION" ] || log "JavaFX version: $JAVAFX_VERSION"
+
+  log "launching the UI"
+  launch_runner ""
+  serve_handshake
 
   local copy
   for copy in "${SITE_COPIES[@]}"; do
     cp "$GUIDE_DIR/${copy%%:*}" "$SITE_DIR/${copy##*:}"
     log "wrote $SITE_DIR/${copy##*:}"
+  done
+
+  # One JVM per translation, started in that language: JavaFX resolves its fontconfig fallback chain once per
+  # JVM, ordered by the startup language - what a user starting the app in that language gets.
+  local tag
+  for tag in "${LOCALE_TAGS[@]+"${LOCALE_TAGS[@]}"}"; do
+    log "launching the UI in $tag"
+    launch_runner "$(locale_jvm_opts "$tag") -Djsignpdf.screenshot.galleryLocale=$tag"
+    serve_handshake
   done
 }
 
@@ -363,10 +397,7 @@ capture_installed() { # locale-tag ("" for the app's own default) main-image-pat
   # The UI language rides along the same way - user.language is what every release reads, whereas the
   # -o ui.language=<tag> override only exists from 3.2.0 on.
   jvm_opts="-Duser.home=$RUN_HOME"
-  if [ -n "$tag" ]; then
-    jvm_opts="$jvm_opts -Duser.language=${tag%%-*}"
-    case "$tag" in *-*) jvm_opts="$jvm_opts -Duser.country=${tag##*-}" ;; esac
-  fi
+  [ -z "$tag" ] || jvm_opts="$jvm_opts $(locale_jvm_opts "$tag")"
 
   log "launching $APP${tag:+ (${tag})}"
   # setsid puts the launcher and the JVM it starts in one process group, so the fallback kill reaches both.

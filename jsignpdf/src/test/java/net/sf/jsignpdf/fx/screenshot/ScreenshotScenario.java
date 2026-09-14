@@ -60,7 +60,9 @@ import net.sf.jsignpdf.utils.UiLocale;
  */
 public final class ScreenshotScenario {
 
-    /** Receives one finished state. Implementations decide how the pixels are obtained and where they go. */
+    /**
+     * Receives one finished state. Implementations decide how the pixels are obtained and where they go.
+     */
     public interface ShotSink {
 
         /**
@@ -83,7 +85,9 @@ public final class ScreenshotScenario {
          */
         void dialogShot(String path, Node window, Alert dialog) throws Exception;
 
-        /** Called once every shot has been taken, e.g. to mirror images into the website tree. */
+        /**
+         * Called once every shot has been taken, e.g. to mirror images into the website tree.
+         */
         void finished() throws Exception;
     }
 
@@ -114,11 +118,51 @@ public final class ScreenshotScenario {
      * developer's own keystore, recent files and encryption mode into the images.
      */
     public static void prepare() throws Exception {
-        Locale.setDefault(Locale.ENGLISH);
+        applyUiLanguage("en");
         resolveDirectories();
         deleteRecursively(configDir);
         stageDemoFiles();
         startToolkit();
+    }
+
+    /**
+     * Prepares a JVM whose only job is one image of the translation gallery. It must have been started in that
+     * language ({@code -Duser.language}/{@code -Duser.country}): JavaFX asks fontconfig for its fallback chain
+     * once per JVM, for the locale current when the font system starts, and orders it by that language - which is
+     * what a user starting the application in that language gets, and the point of the gallery.
+     *
+     * <p>
+     * Even then, OpenJFX 21 leaves CJK fonts out of the chain entirely, so ja / zh-CN / zh-TW render as empty
+     * boxes; OpenJFX 23 picks the CJK font. Run the gallery with {@code -Dopenjfx.version=23.0.2} to get
+     * readable images of those translations.
+     * </p>
+     *
+     * @param tag a BCP-47 tag from {@link SupportedLanguages#tags()}
+     */
+    public static void prepareGallery(String tag) throws Exception {
+        Locale requested = Locale.forLanguageTag(tag);
+        if (!requested.getLanguage().equals(Locale.getDefault().getLanguage())) {
+            throw new IllegalStateException("The gallery shot for '" + tag + "' needs a JVM started with"
+                    + " -Duser.language=" + requested.getLanguage() + " (this one runs in " + Locale.getDefault()
+                    + "); JavaFX would otherwise have no fallback fonts for the script");
+        }
+        configDir = requiredConfigDir();
+        deleteRecursively(configDir);
+        applyUiLanguage(tag);
+        startToolkit();
+    }
+
+    /**
+     * JVM options that start a gallery JVM in the language of {@code tag}.
+     */
+    public static List<String> jvmLocaleOptions(String tag) {
+        Locale locale = Locale.forLanguageTag(tag);
+        List<String> options = new ArrayList<>();
+        options.add("-Duser.language=" + locale.getLanguage());
+        if (!locale.getCountry().isEmpty()) {
+            options.add("-Duser.country=" + locale.getCountry());
+        }
+        return options;
     }
 
     /**
@@ -130,7 +174,7 @@ public final class ScreenshotScenario {
     public static void buildWindow(boolean wantDecorations) throws Exception {
         decorated = wantDecorations;
         runFx(() -> {
-            ResourceBundle bundle = ResourceBundle.getBundle(Constants.RESOURCE_BUNDLE_BASE, Locale.ENGLISH);
+            ResourceBundle bundle = UiLocale.bundle();
             FXMLLoader loader = new FXMLLoader(
                     ScreenshotScenario.class.getResource("/net/sf/jsignpdf/fx/view/MainWindow.fxml"), bundle);
             Parent root;
@@ -149,7 +193,9 @@ public final class ScreenshotScenario {
 
             BasicSignerOptions options = new BasicSignerOptions();
             options.loadOptions();
-            options.setOutPath(workDir.toString());
+            if (workDir != null) {
+                options.setOutPath(workDir.toString());
+            }
             controller.initFromOptions(options);
 
             scene = new Scene(root, SCENE_WIDTH, SCENE_HEIGHT);
@@ -168,7 +214,9 @@ public final class ScreenshotScenario {
 
     // --- The state walk ---
 
-    /** Drives the UI through every documented state, handing each to {@code sink} in the order the guide uses. */
+    /**
+     * Drives the UI through every documented state, handing each to {@code sink} in the order the guide uses.
+     */
     public static void run(ShotSink sink) throws Exception {
         sink.shot("guide/main-window-empty.png", scene.getRoot());
 
@@ -195,7 +243,6 @@ public final class ScreenshotScenario {
         runFx(complete::close);
 
         preferences(sink);
-        localeGallery(sink, requestedLocales());
 
         sink.finished();
     }
@@ -224,22 +271,10 @@ public final class ScreenshotScenario {
     }
 
     /**
-     * Rebuilds the empty main window once per translation. The UI language is installed the way the
-     * application installs it - {@link UiLocale#init(String[])}, i.e. exactly what {@code -o ui.language=<tag>}
-     * on the command line does - so the shots show what a user of that language actually gets, including the
-     * strings {@code Constants.RES} resolves outside FXML.
+     * The one shot a gallery JVM exists for; see {@link #prepareGallery(String)}.
      */
-    private static void localeGallery(ShotSink sink, List<String> tags) throws Exception {
-        if (tags.isEmpty()) {
-            return;
-        }
-        for (String tag : tags) {
-            applyUiLanguage(tag);
-            runFx(() -> stage.close());
-            buildWindow(decorated);
-            sink.shot("site/locales/main-window-" + tag + ".png", scene.getRoot());
-        }
-        applyUiLanguage("en");
+    public static void galleryShot(ShotSink sink, String tag) throws Exception {
+        sink.shot("site/locales/main-window-" + tag + ".png", scene.getRoot());
     }
 
     private static void applyUiLanguage(String tag) {
@@ -249,9 +284,10 @@ public final class ScreenshotScenario {
     /**
      * The translations to include in the locale gallery: {@code -Djsignpdf.screenshot.locales=all} for every
      * bundled one, a comma-separated list of BCP-47 tags for a subset, and nothing at all by default - the
-     * gallery is twenty extra images that do not need refreshing with every UI change.
+     * gallery is twenty extra images that do not need refreshing with every UI change. Each one is taken in a
+     * JVM of its own; see {@link #prepareGallery(String)}.
      */
-    private static List<String> requestedLocales() {
+    public static List<String> requestedLocales() {
         String value = System.getProperty("jsignpdf.screenshot.locales", "").trim();
         if (value.isEmpty()) {
             return List.of();
@@ -274,7 +310,9 @@ public final class ScreenshotScenario {
         return tags;
     }
 
-    /** The showing stage with this exact title, or {@code null}. Must run on the FX thread. */
+    /**
+     * The showing stage with this exact title, or {@code null}. Must run on the FX thread.
+     */
     private static Stage findWindow(String title) {
         for (Window window : Window.getWindows()) {
             if (window instanceof Stage showing && window.isShowing() && title.equals(showing.getTitle())) {
@@ -333,7 +371,9 @@ public final class ScreenshotScenario {
         });
     }
 
-    /** Recreates the alert {@code MainWindowController.showAlert} pops after a successful run. */
+    /**
+     * Recreates the alert {@code MainWindowController.showAlert} pops after a successful run.
+     */
     private static Alert showSigningCompleteAlert() throws Exception {
         AtomicReference<Alert> alertRef = new AtomicReference<>();
         runFx(() -> {
@@ -401,7 +441,9 @@ public final class ScreenshotScenario {
         });
     }
 
-    /** Applies the toolbar's Fit action. Zoom only rescales the rendered page, so no re-render follows. */
+    /**
+     * Applies the toolbar's Fit action. Zoom only rescales the rendered page, so no re-render follows.
+     */
     private static void zoomToFit() throws Exception {
         Method onZoomFit = MainWindowController.class.getDeclaredMethod("onZoomFit");
         onZoomFit.setAccessible(true);
@@ -414,7 +456,9 @@ public final class ScreenshotScenario {
         });
     }
 
-    /** Scrolls the preview so the given page-relative vertical position sits in the middle of the viewport. */
+    /**
+     * Scrolls the preview so the given page-relative vertical position sits in the middle of the viewport.
+     */
     private static void scrollPreviewTo(double relY) throws Exception {
         runFx(() -> {
             ScrollPane preview = (ScrollPane) lookup("#scrollPane");
@@ -501,7 +545,9 @@ public final class ScreenshotScenario {
         throw new IllegalStateException("Timed out waiting for " + description);
     }
 
-    /** Waits for a page image that is not {@code previous}, so a re-render is not mistaken for the old one. */
+    /**
+     * Waits for a page image that is not {@code previous}, so a re-render is not mistaken for the old one.
+     */
     private static void waitForRenderedPage(Image previous) throws Exception {
         waitUntil("the page preview to render", () -> {
             Image current = controller.getDocumentViewModel().getCurrentPageImage();
@@ -510,7 +556,9 @@ public final class ScreenshotScenario {
         settle();
     }
 
-    /** Lets pending layout, bindings and CSS settle before a shot is taken. */
+    /**
+     * Lets pending layout, bindings and CSS settle before a shot is taken.
+     */
     static void settle() throws Exception {
         for (int i = 0; i < 4; i++) {
             runFx(() -> {
@@ -547,11 +595,15 @@ public final class ScreenshotScenario {
         demoKeystore = demoDir.resolve("jsmith.p12");
         demoSigImage = demoDir.resolve("jsmith-sig.png");
         workDir = Path.of(System.getProperty("java.io.tmpdir"), "jsignpdf-screenshots");
-        String configDirValue = System.getenv("JSIGNPDF_CONFIG_DIR");
-        if (configDirValue == null || configDirValue.isBlank()) {
+        configDir = requiredConfigDir();
+    }
+
+    static Path requiredConfigDir() {
+        String value = System.getenv("JSIGNPDF_CONFIG_DIR");
+        if (value == null || value.isBlank()) {
             throw new IllegalStateException("JSIGNPDF_CONFIG_DIR is not set");
         }
-        configDir = Path.of(configDirValue).toAbsolutePath().normalize();
+        return Path.of(value).toAbsolutePath().normalize();
     }
 
     private static void stageDemoFiles() throws IOException {

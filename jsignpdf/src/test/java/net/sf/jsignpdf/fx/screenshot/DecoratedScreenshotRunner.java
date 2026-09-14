@@ -58,9 +58,17 @@ public final class DecoratedScreenshotRunner {
         Path handshakeDir = null;
         try {
             handshakeDir = ScreenshotScenario.requiredDir("jsignpdf.screenshot.handshakeDir");
-            ScreenshotScenario.prepare();
-            ScreenshotScenario.buildWindow(true);
-            ScreenshotScenario.run(new HandshakeSink(handshakeDir));
+            String galleryLocale = System.getProperty("jsignpdf.screenshot.galleryLocale");
+            if (galleryLocale == null || galleryLocale.isBlank()) {
+                ScreenshotScenario.prepare();
+                ScreenshotScenario.buildWindow(true);
+                ScreenshotScenario.run(new HandshakeSink(handshakeDir));
+            } else {
+                // One translation per JVM; the script starts it in that language. See prepareGallery.
+                ScreenshotScenario.prepareGallery(galleryLocale);
+                ScreenshotScenario.buildWindow(true);
+                ScreenshotScenario.galleryShot(new HandshakeSink(handshakeDir), galleryLocale);
+            }
             Files.writeString(handshakeDir.resolve("finished"), "ok\n");
         } catch (Throwable t) {
             status = 1;
@@ -73,7 +81,9 @@ public final class DecoratedScreenshotRunner {
         System.exit(status);
     }
 
-    /** Announces each finished state to the grabber and waits for it to confirm the capture. */
+    /**
+     * Announces each finished state to the grabber and waits for it to confirm the capture.
+     */
     private static final class HandshakeSink implements ScreenshotScenario.ShotSink {
 
         private final Path handshakeDir;
@@ -102,7 +112,9 @@ public final class DecoratedScreenshotRunner {
             // Nothing to mirror: the grabber writes every image straight to its final location.
         }
 
-        /** {@code full} for a whole window, otherwise the node's rectangle in client-area coordinates. */
+        /**
+         * {@code full} for a whole window, otherwise the node's rectangle in client-area coordinates.
+         */
         private static String regionOf(Node node) throws Exception {
             AtomicReference<String> region = new AtomicReference<>("full");
             runFx(() -> {
