@@ -31,22 +31,19 @@
   </branding>
   <content_rating type="oars-1.1" />
   <releases>
-    <release version="3.1.0" date="2026-07-13">
-      <url type="details">https://github.com/intoolswetrust/jsignpdf/releases/tag/JSignPdf_3_1_0</url>
+    <release version="3.2.0" date="2026-09-14">
+      <url type="details">https://github.com/intoolswetrust/jsignpdf/releases/tag/JSignPdf_3_2_0</url>
       <description>
-        <p>Version 3.1.0</p>
-        <p>Packaging-focused release: the fat jar is gone and every supported platform ships a native installer with its own bundled Java runtime. Also introduces a pluggable signing-engine architecture with a new EU DSS (PAdES) engine.</p>
+        <p>Version 3.2.0</p>
+        <p>A feature release. You can now sign into a form's existing signature fields, add or refresh a document timestamp without signing at all, and see a live preview of the visible signature as you place it — plus more control over output, better diagnostics, and a batch of signing and appearance fixes.</p>
         <ul>
-          <li><em>Per-platform native installers</em> built with <code>jpackage</code> and a bundled Zulu+FX 21 runtime, so no system Java is required: Windows MSI, Linux DEB and RPM, and macOS DMG, each alongside a portable ZIP. Flatpak bundles are published for Linux x64 and aarch64.</li>
-          <li><em>Two cross-platform ZIPs</em> for users who already have Java 21: a <code>full</code> ZIP carrying JavaFX natives for all platforms (with a Swing fallback when none match) and a <code>minimal</code> ZIP without JavaFX for headless/CLI signing and downstream packagers.</li>
-          <li><em>Fat jar dropped</em> — the shaded all-in-one jar is no longer produced; the cross-platform ZIPs use <code>bin/jsignpdf.sh</code> and <code>bin\jsignpdf.cmd</code> launchers instead. The library jar published to Maven Central is unchanged.</li>
-          <li><em>Pluggable signing engines</em> selectable with the new <code>--list-engines</code> and <code>-eng</code> / <code>--engine</code> options or the Engine selector in Preferences. JSignPdf ships <em>OpenPDF</em> as the default engine.</li>
-          <li><em>New EU DSS (PAdES) engine</em> (id <code>dss</code>) producing PAdES signatures at the ETSI baseline levels B, T, LT, and LTA, which the OpenPDF engine cannot create.</li>
-          <li><em>Default hash algorithm is now SHA-256</em> (was SHA-1) for signing that relies on the implicit default. An explicit or saved <code>hash.algorithm</code> is untouched, and SHA-1 stays selectable for the OpenPDF engine.</li>
-          <li><em>CLI signatures now append by default</em>, matching the GUI. Use the new <code>--overwrite</code> flag to replace existing signatures; the legacy <code>--append</code> / <code>-a</code> flag is kept as a no-op.</li>
-          <li><em>Signed Windows installers</em> — the Windows MSI installers are Authenticode-signed via SignPath, so they install without an unknown-publisher warning. Pre-release builds ship unsigned.</li>
-          <li><em>Configurable default output suffix</em> — the <code>_signed</code> marker appended to the output file name can now be changed with the new <code>output.suffix</code> key in <code>advanced.properties</code>, so non-English users can localize it (e.g. <code>_firmado</code>). It feeds both GUIs and the default for the CLI <code>-os</code> / <code>--out-suffix</code> option.</li>
-          <li><em>Checksums for every artifact</em> — a <code>jsignpdf-&lt;version&gt;-SHA256SUMS.txt</code> file now covers all published release assets.</li>
+          <li><em>Sign into an existing signature field</em> — documents that pre-place a signature box per signer can now be signed into it instead of getting a new field on top. Pick it from the _Signature field_ combo in the JavaFX _Signature Appearance_ panel, or with <code>--sig-field</code> (<code>--list-sig-fields</code> prints what a document offers); the field's own rectangle and page are used. Both engines support it. See issue 223.</li>
+          <li><em>Append a document timestamp without signing</em> — <code>jsignpdf -eng dss --timestamp-only -ts &lt;URL&gt; doc.pdf</code> adds an ETSI.RFC3161 document timestamp to any PDF with no key, to give it a trusted point in time or to refresh a PAdES B-LTA archive timestamp before its TSA certificate expires. In the UI it's the _Timestamp_ toolbar button and _Signing &gt; Add Timestamp…_ (<code>Ctrl+T</code>). Needs the DSS engine. See issue 141.</li>
+          <li><em>Live preview of the visible signature</em> — the signature text and background image are rendered inside the rectangle on the page preview while you place, move and resize it, pages are rasterized at print resolution (300 DPI), and empty signature fields are shaded so you can see where a form author placed them. See issue 479.</li>
+          <li><em>Choose where the signed file goes</em> — the GUI gains an _Output directory_ field and a suffix on/off switch, with a warning when the resulting name would overwrite the input; under Flatpak the chosen directory is granted through the desktop portal. See issue 483.</li>
+          <li><em>PSS-only certificates sign correctly on hardware tokens (DSS engine)</em> — a certificate marked <code>id-RSASSA-PSS</code>, as eIDAS qualified certificates increasingly are, previously failed to sign on PKCS#11 tokens with a <code>SignatureAlgorithm ... does not match</code> error; the DSS engine now takes the algorithm from the certificate and produces real PSS. See issue 255.</li>
+          <li><em>New <code>debug</code> output for signing diagnostics</em> — enable it on the new _General_ tab of Preferences or with <code>-o debug=true</code> to log the signing certificate chain and, for the DSS engine, every AIA/CRL/OCSP request and the trust anchors it loaded. Off by default. See issue 452.</li>
+          <li><em>Other improvements</em> — pick the interface language with the new _Language_ selector (<code>ui.language</code>, issue 444); sign very large PDFs without a bigger heap via <code>buffering.mode=temp</code> (issue 178); the DSS engine now layers a background image behind the signature graphic and auto-scales text to fit the box (issue 433); DSS timestamp requests carry a nonce (issue 33); visible-signature images keep their aspect ratio on the DSS engine (issue 460) and description text fills the whole box on OpenPDF (issue 479); append mode no longer refuses to sign when it can't bump the declared PDF version (issue 467); clear the Recent files list on its own (issue 453); and the bundled Norwegian Bokmål translation now actually loads.</li>
         </ul>
       </description>
     </release>
