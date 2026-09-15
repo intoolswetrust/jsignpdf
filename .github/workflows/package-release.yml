@@ -270,7 +270,7 @@ jobs:
     - name: Submit signing request to SignPath (no wait)
       if: matrix.signpath && needs.setup.outputs.is-prerelease == 'false'
       id: submit-signing
-      uses: signpath/github-action-submit-signing-request@v2
+      uses: signpath/github-action-submit-signing-request@v3
       with:
         api-token: '${{ secrets.SIGNPATH_API_TOKEN }}'
         organization-id: '${{ env.SIGNPATH_ORG_ID }}'
