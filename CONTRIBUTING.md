@@ -15,7 +15,7 @@ Open an [issue](https://github.com/intoolswetrust/jsignpdf/issues). For a bug re
 - the full error message or the Output console content
 - a sample PDF when the document itself is the problem — only one you can share publicly
 
-Do not report security vulnerabilities in a public issue; email <josef@cacek.cz> instead.
+Security vulnerabilities go through [GitHub's private reporting](https://github.com/intoolswetrust/jsignpdf/security/advisories/new), never a public issue — see [SECURITY.md](SECURITY.md).
 
 ## Pull requests
 

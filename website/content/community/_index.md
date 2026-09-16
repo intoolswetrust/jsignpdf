@@ -29,8 +29,11 @@ Use the [issue tracker](https://github.com/intoolswetrust/jsignpdf/issues). A go
 
 Usage questions belong in the Google Group rather than the tracker.
 
-**Security vulnerabilities** are the exception: report them privately by e-mail to
-[josef@cacek.cz](mailto:josef@cacek.cz) instead of opening a public issue.
+**Security vulnerabilities** are the exception: report them privately through
+[GitHub security advisories](https://github.com/intoolswetrust/jsignpdf/security/advisories/new)
+rather than a public issue. The
+[security policy](https://github.com/intoolswetrust/jsignpdf/blob/master/SECURITY.md) says what to
+include and what is in scope.
 
 ## Contributing
 

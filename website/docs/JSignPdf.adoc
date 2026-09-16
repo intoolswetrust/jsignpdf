@@ -40,7 +40,7 @@ The author of JSignPdf is Czech developer Josef (kwart) Cacek. He works in Java 
 
 If you don't find the relevant information in this document or on the JSignPdf GitHub page ({url-repo}), ask the community in the https://groups.google.com/g/jsignpdf[JSignPdf Google Group].
 
-Report bugs and request features in the issue tracker ({url-repo}/issues). Please don't use it for usage questions -- the Google Group is the place for those. Security vulnerabilities should be reported privately by e-mail to josef@cacek.cz, not as a public issue.
+Report bugs and request features in the issue tracker ({url-repo}/issues). Please don't use it for usage questions -- the Google Group is the place for those. Security vulnerabilities must not be reported as a public issue -- use {url-repo}/security/advisories/new[GitHub's private vulnerability reporting] instead, as described in the {url-repo}/blob/master/SECURITY.md[security policy].
 
 === Contributing
 

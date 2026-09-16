@@ -69,6 +69,7 @@ Maven-Central-published artifacts (for embedding the signing engine in your own 
 - Questions and discussion: [JSignPdf Google Group](https://groups.google.com/g/jsignpdf)
 - Bugs and feature requests: [issue tracker](https://github.com/intoolswetrust/jsignpdf/issues)
 - Translations: [Weblate](https://hosted.weblate.org/projects/jsignpdf/messages/)
+- Security vulnerabilities: [report privately](https://github.com/intoolswetrust/jsignpdf/security/advisories/new), see [SECURITY.md](SECURITY.md)
 
 See [CONTRIBUTING.md](CONTRIBUTING.md) before opening an issue or a pull request.
 
