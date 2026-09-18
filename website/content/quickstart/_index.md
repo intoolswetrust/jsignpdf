@@ -19,6 +19,14 @@ Download the latest release from the [GitHub releases page](https://github.com/i
 
 If you grabbed a ZIP, extract it and run `bin/jsignpdf.sh` (POSIX) or `bin\jsignpdf.cmd` (Windows).
 
+On macOS and Linux you can also install it with [Homebrew](https://brew.sh/):
+
+```shell
+brew tap intoolswetrust/tap
+brew trust --tap intoolswetrust/tap
+brew install jsignpdf
+```
+
 ### 2. Get a keystore
 
 To sign a PDF you need a private key in a keystore file (`.p12`, `.pfx`, `.jks`, ...). For production, get a PKCS#12 file from a trusted Certificate Authority. For a quick test, generate a self-signed key with `keytool`:
@@ -61,3 +69,5 @@ Add `-ts https://freetsa.org/tsr -ha SHA256` to attach a trusted timestamp, or `
 ## Full documentation
 
 For every option, the JavaFX and Swing interfaces, hardware tokens, timestamping, encryption and troubleshooting, see the **[JSignPdf Guide](../docs/)**.
+
+Stuck, or found a bug? See [Community](../community/) for where to ask and how to report it.

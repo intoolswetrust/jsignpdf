@@ -44,6 +44,15 @@ All artifacts are published on [GitHub Releases](https://github.com/intoolswetru
 
 `jsignpdf-<version>-SHA256SUMS.txt` covers every artifact above.
 
+### Homebrew (macOS and Linux)
+
+```shell
+brew tap intoolswetrust/tap
+brew trust --tap intoolswetrust/tap
+brew install jsignpdf
+```
+
+The formula installs the cross-platform distribution against Homebrew's `openjdk@21`.
 
 Maven-Central-published artifacts (for embedding the signing engine in your own project) live under `com.github.kwart.jsign`.
 
@@ -53,11 +62,16 @@ Maven-Central-published artifacts (for embedding the signing engine in your own 
 - Release notes: [`distribution/doc/release-notes/`](distribution/doc/release-notes/)
 - Developer / architecture guide: [AGENTS.md](AGENTS.md)
 - Design notes: [`design-doc/`](design-doc/)
-- Issue tracker: <https://github.com/intoolswetrust/jsignpdf/issues>
+- Contributing: [CONTRIBUTING.md](CONTRIBUTING.md)
 
-## Translations
+## Community
 
-Help translate JSignPdf on Weblate: <https://hosted.weblate.org/projects/jsignpdf/messages/>
+- Questions and discussion: [JSignPdf Google Group](https://groups.google.com/g/jsignpdf)
+- Bugs and feature requests: [issue tracker](https://github.com/intoolswetrust/jsignpdf/issues)
+- Translations: [Weblate](https://hosted.weblate.org/projects/jsignpdf/messages/)
+- Security vulnerabilities: [report privately](https://github.com/intoolswetrust/jsignpdf/security/advisories/new), see [SECURITY.md](SECURITY.md)
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) before opening an issue or a pull request.
 
 ## Build from source
 
