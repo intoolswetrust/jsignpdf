@@ -4,6 +4,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.math.BigInteger;
@@ -139,7 +140,7 @@ public class OpenPdfEcSigningTest {
             byte[] hex = new byte[end - start];
             System.arraycopy(pdfBytes, start, hex, 0, hex.length);
             byte[] der = hexToBytes(new String(hex, "ISO-8859-1").trim());
-            CMSSignedData cms = new CMSSignedData(der);
+            CMSSignedData cms = new CMSSignedData(new ByteArrayInputStream(der));
             SignerInformation si = cms.getSignerInfos().getSigners().iterator().next();
             return si.getEncryptionAlgOID();
         } finally {

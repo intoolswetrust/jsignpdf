@@ -3,6 +3,7 @@ package net.sf.jsignpdf.engine.dss;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.math.BigInteger;
@@ -165,7 +166,7 @@ public class DssPssSigningTest {
         try (PDDocument doc = Loader.loadPDF(pdf)) {
             List<PDSignature> sigs = doc.getSignatureDictionaries();
             assertTrue("expected a signature dictionary", !sigs.isEmpty());
-            CMSSignedData cms = new CMSSignedData(sigs.get(0).getContents(bytes));
+            CMSSignedData cms = new CMSSignedData(new ByteArrayInputStream(sigs.get(0).getContents(bytes)));
             SignerInformation si = cms.getSignerInfos().getSigners().iterator().next();
             return si.getEncryptionAlgOID();
         }
