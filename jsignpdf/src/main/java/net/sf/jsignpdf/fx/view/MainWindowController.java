@@ -227,6 +227,14 @@ public class MainWindowController {
     public void initFromOptions(BasicSignerOptions opts) {
         this.options = opts;
         signingVM.syncFromOptions(opts);
+
+        // The persisted output file belongs to the previous document/session.
+        // Start each application run with a derived output name so the first
+        // opened document follows the current suffix instead of inheriting a
+        // stale explicit base name.
+        signingVM.outBaseNameProperty().set(null);
+        signingVM.outFileProperty().set(null);
+
         // No document is loaded at startup, so the visible-signature toggle must
         // start disabled. The persisted position coordinates on signingVM are
         // preserved so we can auto-place at the last-known location once a
@@ -650,10 +658,19 @@ public class MainWindowController {
         if (options == null) {
             options = new BasicSignerOptions();
         }
+        // Preserve whether the output filename is currently derived automatically.
+        // Loading a preset changes the suffix, and syncFromOptions() must not turn
+        // the previously derived filename into an explicit user-selected name.
+        boolean derivedOutputName = isDerivedBaseName(signingVM.outBaseNameProperty().get(), options.getInFile());
+
         // Flush any pending edits from the VM so that "load" is clearly "replace current".
         signingVM.syncToOptions(options);
         presetManager.load(preset, options);
         signingVM.syncFromOptions(options);
+
+        if (derivedOutputName) {
+            signingVM.outBaseNameProperty().set(null);
+        }
         resolveOutputFile();
         // Move the on-screen rectangle to match the preset's position.
         applySigningVMPositionToPlacement();
