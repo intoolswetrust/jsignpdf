@@ -232,38 +232,38 @@
   },
   {
     "type": "file",
-    "url": "https://repo1.maven.org/maven2/com/github/hypfvieh/dbus-java-core/5.2.0/dbus-java-core-5.2.0.jar",
-    "sha256": "9dfadd65bdfec2154ccf23039f9ae6239dc625735b933653d9403e11c2c9cf10",
-    "dest": "m2local/com/github/hypfvieh/dbus-java-core/5.2.0",
-    "dest-filename": "dbus-java-core-5.2.0.jar"
+    "url": "https://repo1.maven.org/maven2/com/github/hypfvieh/dbus-java-core/5.2.1/dbus-java-core-5.2.1.jar",
+    "sha256": "ee6b88e67f55c3fb08601cc14d831e895d2963bfb63f2d8190334c5655e8f46d",
+    "dest": "m2local/com/github/hypfvieh/dbus-java-core/5.2.1",
+    "dest-filename": "dbus-java-core-5.2.1.jar"
   },
   {
     "type": "file",
-    "url": "https://repo1.maven.org/maven2/com/github/hypfvieh/dbus-java-core/5.2.0/dbus-java-core-5.2.0.pom",
-    "sha256": "19305d6de9e0626d4412489d18458835c9dcfef6a9f28b5283c2d3e661ef865d",
-    "dest": "m2local/com/github/hypfvieh/dbus-java-core/5.2.0",
-    "dest-filename": "dbus-java-core-5.2.0.pom"
+    "url": "https://repo1.maven.org/maven2/com/github/hypfvieh/dbus-java-core/5.2.1/dbus-java-core-5.2.1.pom",
+    "sha256": "1dd486d42395ba523823a403dd8a4db92c2f50f5c763cfab33e229df3679ad21",
+    "dest": "m2local/com/github/hypfvieh/dbus-java-core/5.2.1",
+    "dest-filename": "dbus-java-core-5.2.1.pom"
   },
   {
     "type": "file",
-    "url": "https://repo1.maven.org/maven2/com/github/hypfvieh/dbus-java-parent/5.2.0/dbus-java-parent-5.2.0.pom",
-    "sha256": "29b1d9a3880d07ebd1acb62b6083884ce10d3fb392be9055d7e32411f7f77d1c",
-    "dest": "m2local/com/github/hypfvieh/dbus-java-parent/5.2.0",
-    "dest-filename": "dbus-java-parent-5.2.0.pom"
+    "url": "https://repo1.maven.org/maven2/com/github/hypfvieh/dbus-java-parent/5.2.1/dbus-java-parent-5.2.1.pom",
+    "sha256": "80e56b94083b98e42d43d0d87d33cfed25e64dac24c08f26a5fd03f8541099d1",
+    "dest": "m2local/com/github/hypfvieh/dbus-java-parent/5.2.1",
+    "dest-filename": "dbus-java-parent-5.2.1.pom"
   },
   {
     "type": "file",
-    "url": "https://repo1.maven.org/maven2/com/github/hypfvieh/dbus-java-transport-native-unixsocket/5.2.0/dbus-java-transport-native-unixsocket-5.2.0.jar",
-    "sha256": "efeb82fecd6e176e5e9f63fb6d6775f19c194584bf001fd579a1a5b560bbf061",
-    "dest": "m2local/com/github/hypfvieh/dbus-java-transport-native-unixsocket/5.2.0",
-    "dest-filename": "dbus-java-transport-native-unixsocket-5.2.0.jar"
+    "url": "https://repo1.maven.org/maven2/com/github/hypfvieh/dbus-java-transport-native-unixsocket/5.2.1/dbus-java-transport-native-unixsocket-5.2.1.jar",
+    "sha256": "69020073240c3497031ac1f9893b725fcdc2c2ee8cf0f480fc4b5df302dcb25e",
+    "dest": "m2local/com/github/hypfvieh/dbus-java-transport-native-unixsocket/5.2.1",
+    "dest-filename": "dbus-java-transport-native-unixsocket-5.2.1.jar"
   },
   {
     "type": "file",
-    "url": "https://repo1.maven.org/maven2/com/github/hypfvieh/dbus-java-transport-native-unixsocket/5.2.0/dbus-java-transport-native-unixsocket-5.2.0.pom",
-    "sha256": "32c6a36896c29f93787ef1a9aa5ee5106de443fe433bb5acc0250f2aeb57b265",
-    "dest": "m2local/com/github/hypfvieh/dbus-java-transport-native-unixsocket/5.2.0",
-    "dest-filename": "dbus-java-transport-native-unixsocket-5.2.0.pom"
+    "url": "https://repo1.maven.org/maven2/com/github/hypfvieh/dbus-java-transport-native-unixsocket/5.2.1/dbus-java-transport-native-unixsocket-5.2.1.pom",
+    "sha256": "f627774d030868321c5964735ac17acb94fc6c9ee6722663985680c19b10248e",
+    "dest": "m2local/com/github/hypfvieh/dbus-java-transport-native-unixsocket/5.2.1",
+    "dest-filename": "dbus-java-transport-native-unixsocket-5.2.1.pom"
   },
   {
     "type": "file",
@@ -4845,17 +4845,17 @@
   },
   {
     "type": "file",
-    "url": "https://repo1.maven.org/maven2/org/asciidoctor/asciidoctorj-pdf/2.3.23/asciidoctorj-pdf-2.3.23.jar",
-    "sha256": "6a0ca45ed24f2fe328dfd3481797d7ca2ef1d58b60651921fdae7c6b16bd2bb6",
-    "dest": "m2local/org/asciidoctor/asciidoctorj-pdf/2.3.23",
-    "dest-filename": "asciidoctorj-pdf-2.3.23.jar"
+    "url": "https://repo1.maven.org/maven2/org/asciidoctor/asciidoctorj-pdf/2.3.27/asciidoctorj-pdf-2.3.27.jar",
+    "sha256": "f7a3d702e7a4bc86d420c7b59a25d81a7e927dea1579a515c5a704341f3b5463",
+    "dest": "m2local/org/asciidoctor/asciidoctorj-pdf/2.3.27",
+    "dest-filename": "asciidoctorj-pdf-2.3.27.jar"
   },
   {
     "type": "file",
-    "url": "https://repo1.maven.org/maven2/org/asciidoctor/asciidoctorj-pdf/2.3.23/asciidoctorj-pdf-2.3.23.pom",
-    "sha256": "932af5be1811ad38697f517e02bedfe4463ba8e4ce8a76dd40f311f5f49073cd",
-    "dest": "m2local/org/asciidoctor/asciidoctorj-pdf/2.3.23",
-    "dest-filename": "asciidoctorj-pdf-2.3.23.pom"
+    "url": "https://repo1.maven.org/maven2/org/asciidoctor/asciidoctorj-pdf/2.3.27/asciidoctorj-pdf-2.3.27.pom",
+    "sha256": "c2afe28d0b848c44bfe794e3ceb197b3de5b1f27d0ebf390a23b1a137358fcb7",
+    "dest": "m2local/org/asciidoctor/asciidoctorj-pdf/2.3.27",
+    "dest-filename": "asciidoctorj-pdf-2.3.27.pom"
   },
   {
     "type": "file",
@@ -4992,17 +4992,17 @@
   },
   {
     "type": "file",
-    "url": "https://repo1.maven.org/maven2/org/codehaus/mojo/build-helper-maven-plugin/3.6.1/build-helper-maven-plugin-3.6.1.jar",
-    "sha256": "772765fc101dfd292a85541037096bd12daf9d5f657d6808bb85cf16ff9f4427",
-    "dest": "m2local/org/codehaus/mojo/build-helper-maven-plugin/3.6.1",
-    "dest-filename": "build-helper-maven-plugin-3.6.1.jar"
+    "url": "https://repo1.maven.org/maven2/org/codehaus/mojo/build-helper-maven-plugin/3.6.2/build-helper-maven-plugin-3.6.2.jar",
+    "sha256": "8f43ab676d423ed2dc3edfc63a592ec79690a72ee8ff0d2c2ad74c9f609f06af",
+    "dest": "m2local/org/codehaus/mojo/build-helper-maven-plugin/3.6.2",
+    "dest-filename": "build-helper-maven-plugin-3.6.2.jar"
   },
   {
     "type": "file",
-    "url": "https://repo1.maven.org/maven2/org/codehaus/mojo/build-helper-maven-plugin/3.6.1/build-helper-maven-plugin-3.6.1.pom",
-    "sha256": "dbdfd37ddb8f976a4f8f35327f12b033863feca8c55381ca94f6dce965b6a657",
-    "dest": "m2local/org/codehaus/mojo/build-helper-maven-plugin/3.6.1",
-    "dest-filename": "build-helper-maven-plugin-3.6.1.pom"
+    "url": "https://repo1.maven.org/maven2/org/codehaus/mojo/build-helper-maven-plugin/3.6.2/build-helper-maven-plugin-3.6.2.pom",
+    "sha256": "aa4d9cd68fb50d5443c0c3c916024d2ccae85dab1b4700fba5924aba6d65cd06",
+    "dest": "m2local/org/codehaus/mojo/build-helper-maven-plugin/3.6.2",
+    "dest-filename": "build-helper-maven-plugin-3.6.2.pom"
   },
   {
     "type": "file",
@@ -5027,17 +5027,17 @@
   },
   {
     "type": "file",
-    "url": "https://repo1.maven.org/maven2/org/codehaus/mojo/mojo-parent/91/mojo-parent-91.pom",
-    "sha256": "6c75af0e0cfae6a7e3fb4db3478771d6c5d65a9a238c35dc6410f153d81877b1",
-    "dest": "m2local/org/codehaus/mojo/mojo-parent/91",
-    "dest-filename": "mojo-parent-91.pom"
-  },
-  {
-    "type": "file",
     "url": "https://repo1.maven.org/maven2/org/codehaus/mojo/mojo-parent/95/mojo-parent-95.pom",
     "sha256": "4fdf1aa46d1fb722e15508b4edeb7b651344c6e29774cd2b76cbec3a84c23a11",
     "dest": "m2local/org/codehaus/mojo/mojo-parent/95",
     "dest-filename": "mojo-parent-95.pom"
+  },
+  {
+    "type": "file",
+    "url": "https://repo1.maven.org/maven2/org/codehaus/mojo/mojo-parent/97/mojo-parent-97.pom",
+    "sha256": "888b0162ad7fabdeb6ee34ff6123025bffe34e064761da962e87de5c8cce5d39",
+    "dest": "m2local/org/codehaus/mojo/mojo-parent/97",
+    "dest-filename": "mojo-parent-97.pom"
   },
   {
     "type": "file",
@@ -5626,6 +5626,20 @@
     "sha256": "35736658f3fe1efa395086c91df2592664fafa24c3f2608fdaba1136d17fd360",
     "dest": "m2local/org/codehaus/plexus/plexus-utils/4.0.3",
     "dest-filename": "plexus-utils-4.0.3.pom"
+  },
+  {
+    "type": "file",
+    "url": "https://repo1.maven.org/maven2/org/codehaus/plexus/plexus-utils/4.1.0/plexus-utils-4.1.0.jar",
+    "sha256": "6a2fe69e98301882bb2bb05afe36414eb82d6f7c63299cccdb2dc02b4358a968",
+    "dest": "m2local/org/codehaus/plexus/plexus-utils/4.1.0",
+    "dest-filename": "plexus-utils-4.1.0.jar"
+  },
+  {
+    "type": "file",
+    "url": "https://repo1.maven.org/maven2/org/codehaus/plexus/plexus-utils/4.1.0/plexus-utils-4.1.0.pom",
+    "sha256": "449f00ecf08a9e78ec67661ac3b155b6a4493c90aeb4dcb7e2869eef1f067127",
+    "dest": "m2local/org/codehaus/plexus/plexus-utils/4.1.0",
+    "dest-filename": "plexus-utils-4.1.0.pom"
   },
   {
     "type": "file",
@@ -6347,13 +6361,6 @@
     "sha256": "cef80fec86454f6806bfb0df24669b5c6f32e2cb728539ea859f47dfdc9bbc17",
     "dest": "m2local/org/junit/junit-bom/5.12.2",
     "dest-filename": "junit-bom-5.12.2.pom"
-  },
-  {
-    "type": "file",
-    "url": "https://repo1.maven.org/maven2/org/junit/junit-bom/5.13.0/junit-bom-5.13.0.pom",
-    "sha256": "d48f54bc0598dab0e91a0d975c7d7c954666eac4fee63941876e3f92ea1e59c6",
-    "dest": "m2local/org/junit/junit-bom/5.13.0",
-    "dest-filename": "junit-bom-5.13.0.pom"
   },
   {
     "type": "file",
