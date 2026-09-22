@@ -7,24 +7,72 @@ sdk: org.freedesktop.Sdk
 sdk-extensions:
   - org.freedesktop.Sdk.Extension.openjdk21
 
+command: jsignpdf
+
 finish-args:
+# Network is required for TSA (timestamps) functionality
   - --env=PATH=/app/jre/bin:/app/bin:/usr/bin
   - --share=network
+  - --share=ipc
+# Requires X11 to run
   - --socket=x11
-  - --socket=pulseaudio
+# Access to smart cards and YubiKey via pcscd
+  - --socket=pcsc
+# Access to USB devices (for YubiKey)
+  - --device=all
+
+cleanup:
+  - /etc/bash_completion.d
+  - /include
+  - /share/doc
+  - /share/man
 
 modules:
+  - name: pcsc-lite
+    # pcsc-lite 2.4+ is Meson-only; the autotools build is gone.
+    buildsystem: meson
+    cleanup:
+      - /bin
+      - /lib/pkgconfig
+      - /lib/*.a
+      - /lib/*.la
+      - /sbin
+    sources:
+      - type: archive
+        url: https://pcsclite.apdu.fr/files/pcsc-lite-2.5.1.tar.xz
+        sha256: bfcfe38a20afc49849c6bf55325e38f449fc4b26d3923fdc32b969ae41a8741b
+    config-opts:
+      # Without an explicit libdir meson picks lib64, and opensc's configure
+      # then cannot find libpcsclite.pc.
+      - -Dlibdir=lib
+      - -Ddefault_library=shared
+      - -Dlibsystemd=false
+      - -Dpolkit=false
+
+  - name: opensc
+    sources:
+      - type: archive
+        url: https://github.com/OpenSC/OpenSC/releases/download/0.26.0/opensc-0.26.0.tar.gz
+        sha256: 837baead45e1505260d868871056150ede6e73d35460a470f2595a9e5e75f82b
+    config-opts:
+      - --disable-static
+      - --enable-pcsc
+      - --enable-openssl
+      - --disable-strict
+
   - name: openjdk
     buildsystem: simple
     build-commands:
       - /usr/lib/sdk/openjdk21/install.sh
+      - mkdir -p ${FLATPAK_DEST}/share/licenses/${FLATPAK_ID}/openjdk
+      - cp -r /usr/lib/sdk/openjdk21/jvm/openjdk-21/legal/java.base/LICENSE ${FLATPAK_DEST}/share/licenses/${FLATPAK_ID}/openjdk/
 
   - name: jsignpdf
     buildsystem: simple
     sources:
+      # Staged next to this manifest by build-local.sh / the release workflow.
       - type: archive
-        url: https://downloads.sourceforge.net/project/jsignpdf/stable/JSignPdf-2.3.0/jsignpdf-2.3.0.zip
-        sha256: 8ea04172287296b4db63553751122149ad34ad0474e3a0cdbc6e32fbb77a5833
+        path: jsignpdf-full.zip
       # Shared desktop file from parent directory
       - type: file
         path: ../jsignpdf.desktop
@@ -45,6 +93,6 @@ modules:
       - install -Dm755 jsignpdf-flatpak.in ${FLATPAK_DEST}/bin/jsignpdf
       - install -Dm644 jsignpdf.desktop ${FLATPAK_DEST}/share/applications/io.github.intoolswetrust.JSignPdf.desktop
       - install -Dm644 io.github.intoolswetrust.JSignPdf.metainfo.xml ${FLATPAK_DEST}/share/metainfo/io.github.intoolswetrust.JSignPdf.metainfo.xml
-      - install -Dm644 jsignpdf.png ${FLATPAK_DEST}/share/icons/hicolor/256x256/apps/io.github.intoolswetrust.JSignPdf.png
+      - install -Dm644 jsignpdf.png ${FLATPAK_DEST}/share/icons/hicolor/512x512/apps/io.github.intoolswetrust.JSignPdf.png
       - mkdir -p ${FLATPAK_DEST}/share/licenses/io.github.intoolswetrust.JSignPdf
       - cp -r licenses/* ${FLATPAK_DEST}/share/licenses/io.github.intoolswetrust.JSignPdf/

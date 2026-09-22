@@ -34,7 +34,7 @@ Usage: $(basename "$0") [--release|--devel] [--skip-maven] [--keep-build] [-h]
                 offline maven-dependencies.json. Slower (Maven runs inside
                 the SDK) but exercises the offline manifest end-to-end.
 
-  --skip-maven  Reuse an existing distribution/target/jsignpdf-<v>.zip
+  --skip-maven  Reuse an existing distribution/target/jsignpdf-<v>-full.zip
                 (release mode only). The script falls back to running mvn
                 if no matching zip is found.
 
@@ -108,7 +108,7 @@ METAINFO_ABS="$REPO_ROOT/distribution/linux/io.github.intoolswetrust.JSignPdf.me
 case "$MODE" in
   release)
     APP_ID="io.github.intoolswetrust.JSignPdf"
-    ZIP_NAME="jsignpdf-${VERSION}.zip"
+    ZIP_NAME="jsignpdf-${VERSION}-full.zip"
     ZIP_PATH="$REPO_ROOT/distribution/target/$ZIP_NAME"
 
     if (( SKIP_MVN == 0 )) || [[ ! -f "$ZIP_PATH" ]]; then
@@ -119,20 +119,16 @@ case "$MODE" in
     fi
     [[ -f "$ZIP_PATH" ]] || { echo "missing zip: $ZIP_PATH" >&2; exit 1; }
 
-    SHA256=$(sha256sum "$ZIP_PATH" | awk '{print $1}')
-    cp "$ZIP_PATH"                          "$STAGE_DIR/"
+    cp "$ZIP_PATH"                          "$STAGE_DIR/jsignpdf-full.zip"
     cp "$SCRIPT_DIR/jsignpdf-flatpak.in"    "$STAGE_DIR/"
     cp "$SCRIPT_DIR/jsignpdf.png"           "$STAGE_DIR/"
 
     STAGED="$STAGE_DIR/${APP_ID}.local.yaml"
     sed \
-      -e "s|        url: https://downloads\\.sourceforge\\.net.*\\.zip|        path: ${ZIP_NAME}|" \
-      -e "s|sha256: [a-f0-9]\\{64\\}|sha256: ${SHA256}|" \
       -e "s|path: \\.\\./jsignpdf\\.desktop|path: ${DESKTOP_ABS}|" \
       -e "s|path: \\.\\./io\\.github\\.intoolswetrust\\.JSignPdf\\.metainfo\\.xml|path: ${METAINFO_ABS}|" \
       "$RELEASE_MANIFEST" > "$STAGED"
-    grep -q "path: ${ZIP_NAME}" "$STAGED"  || { echo "patch failed (zip path)" >&2; exit 1; }
-    grep -q "sha256: ${SHA256}" "$STAGED"  || { echo "patch failed (sha256)" >&2; exit 1; }
+    grep -q "path: jsignpdf-full.zip" "$STAGED" || { echo "patch failed (zip path)" >&2; exit 1; }
     BUNDLE="$BUILD_DIR/JSignPdf-${VERSION}-linux-x86_64.flatpak"
     ;;
 

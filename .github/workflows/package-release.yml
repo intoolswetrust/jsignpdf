@@ -440,23 +440,11 @@ jobs:
           org.freedesktop.Sdk//25.08 \
           org.freedesktop.Sdk.Extension.openjdk21//25.08
 
-    - name: Patch manifest to use local zip
+    - name: Stage the release zip next to the manifest
       run: |
         set -euo pipefail
-        MANIFEST=distribution/linux/flatpak/io.github.intoolswetrust.JSignPdf.yaml
-        ZIP_NAME=jsignpdf-${VERSION}-full.zip
-        SHA256=$(sha256sum "flatpak-input/${ZIP_NAME}" | awk '{print $1}')
-        cp "flatpak-input/${ZIP_NAME}" distribution/linux/flatpak/
-        sed -i \
-          "s|^        url:.*\.zip|        path: ${ZIP_NAME}|" \
-          "${MANIFEST}"
-        grep -q "path: ${ZIP_NAME}" "${MANIFEST}" \
-          || { echo "::error::URL sed patch did not match — check manifest indentation"; exit 1; }
-        sed -i \
-          "s|sha256: [a-f0-9]\{64\}|sha256: ${SHA256}|" \
-          "${MANIFEST}"
-        grep -q "sha256: ${SHA256}" "${MANIFEST}" \
-          || { echo "::error::sha256 sed patch did not match"; exit 1; }
+        cp "flatpak-input/jsignpdf-${VERSION}-full.zip" \
+          distribution/linux/flatpak/jsignpdf-full.zip
 
     - name: Build Flatpak bundle
       run: |
