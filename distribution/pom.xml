@@ -14,7 +14,7 @@
 
     <properties>
         <asciidoctor.maven.plugin.version>3.2.0</asciidoctor.maven.plugin.version>
-        <asciidoctorj.pdf.version>2.3.23</asciidoctorj.pdf.version>
+        <asciidoctorj.pdf.version>2.3.27</asciidoctorj.pdf.version>
         <staging.dir>${project.build.directory}/appassembler</staging.dir>
     </properties>
 
