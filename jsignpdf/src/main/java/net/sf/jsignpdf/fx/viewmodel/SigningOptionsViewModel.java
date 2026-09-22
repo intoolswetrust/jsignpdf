@@ -275,6 +275,20 @@ public class SigningOptionsViewModel {
     }
 
     /**
+     * Syncs from a BasicSignerOptions instance, keeping the output file name currently held by this ViewModel.
+     * <p>
+     * {@link #syncFromOptions(BasicSignerOptions)} has to tell a derived output name from a deliberately chosen one by
+     * comparing the stored path against the one the options derive — which misreads a derived name as chosen whenever
+     * the reload brings a different suffix or input file. Mid-session the ViewModel already knows which of the two it
+     * holds, so callers that reload live options (preset load, owner-password retry) keep that answer instead.
+     */
+    public void syncFromOptionsKeepingOutBaseName(BasicSignerOptions opts) {
+        String currentBaseName = outBaseName.get();
+        syncFromOptions(opts);
+        outBaseName.set(currentBaseName);
+    }
+
+    /**
      * Resets all ViewModel properties to their default values.
      */
     public void resetToDefaults() {
