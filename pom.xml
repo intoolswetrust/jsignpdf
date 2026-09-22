@@ -36,7 +36,7 @@
         <dss.version>6.5</dss.version>
         <junit.version>4.13.2</junit.version>
         <openjfx.version>21.0.12</openjfx.version>
-        <dbus-java.version>5.2.0</dbus-java.version>
+        <dbus-java.version>5.2.1</dbus-java.version>
     </properties>
 
     <modules>
