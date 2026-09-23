@@ -10,8 +10,8 @@ sdk-extensions:
 command: jsignpdf
 
 finish-args:
-# Network is required for TSA (timestamps) functionality
   - --env=PATH=/app/jre/bin:/app/bin:/usr/bin
+# Network is required for TSA (timestamps) functionality
   - --share=network
   - --share=ipc
 # Requires X11 to run

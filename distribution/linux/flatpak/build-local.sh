@@ -128,7 +128,11 @@ case "$MODE" in
       -e "s|path: \\.\\./jsignpdf\\.desktop|path: ${DESKTOP_ABS}|" \
       -e "s|path: \\.\\./io\\.github\\.intoolswetrust\\.JSignPdf\\.metainfo\\.xml|path: ${METAINFO_ABS}|" \
       "$RELEASE_MANIFEST" > "$STAGED"
-    grep -q "path: jsignpdf-full.zip" "$STAGED" || { echo "patch failed (zip path)" >&2; exit 1; }
+    # Only the desktop/metainfo rewrites can silently no-op; the zip is already
+    # a relative `path:` in the committed manifest and needs no patching.
+    grep -qF "path: $DESKTOP_ABS"  "$STAGED" || { echo "patch failed (desktop path)" >&2; exit 1; }
+    grep -qF "path: $METAINFO_ABS" "$STAGED" || { echo "patch failed (metainfo path)" >&2; exit 1; }
+    grep -qF "path: jsignpdf-full.zip" "$STAGED" || { echo "manifest lost the staged zip path" >&2; exit 1; }
     BUNDLE="$BUILD_DIR/JSignPdf-${VERSION}-linux-x86_64.flatpak"
     ;;
 
