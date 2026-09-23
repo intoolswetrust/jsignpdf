@@ -227,6 +227,13 @@ public class MainWindowController {
     public void initFromOptions(BasicSignerOptions opts) {
         this.options = opts;
         signingVM.syncFromOptions(opts);
+
+        // The output file name is session state: the persisted one names the document signed last time, so it is
+        // dropped (unlike the output directory and the suffix, which are settings) and every run starts derived.
+        opts.setOutFile(null);
+        signingVM.outBaseNameProperty().set(null);
+        resolveOutputFile();
+
         // No document is loaded at startup, so the visible-signature toggle must
         // start disabled. The persisted position coordinates on signingVM are
         // preserved so we can auto-place at the last-known location once a
@@ -652,8 +659,7 @@ public class MainWindowController {
         flushUiToViewModel();
         signingVM.syncToOptions(options);
         presetManager.load(preset, options);
-        signingVM.syncFromOptions(options);
-        resolveOutputFile();
+        reloadFromOptionsKeepingOutputName();
         // Move the on-screen rectangle to match the preset's position.
         applySigningVMPositionToPlacement();
         updateStatus(java.text.MessageFormat.format(
@@ -973,6 +979,16 @@ public class MainWindowController {
         }
         String derived = new File(suggestedOutFileFor(new File(previousInFile))).getName();
         return baseName.equals(derived);
+    }
+
+    /**
+     * Reloads the signing view model from {@code options} after they were changed behind its back (a preset load, an
+     * owner-password retry) and recomposes the output path. The output file name is carried over rather than re-read,
+     * because {@code options} hold it as a path composed with the suffix and input they had before the change.
+     */
+    private void reloadFromOptionsKeepingOutputName() {
+        signingVM.syncFromOptionsKeepingOutBaseName(options);
+        resolveOutputFile();
     }
 
     /**
@@ -1532,17 +1548,17 @@ public class MainWindowController {
         saveViewStateToConfig();
         try {
             if (options == null) {
-                options = new BasicSignerOptions();
-                options.loadOptions();
-                signingVM.syncFromOptions(options);
+                BasicSignerOptions opts = new BasicSignerOptions();
+                opts.loadOptions();
+                initFromOptions(opts);
             }
 
             // Reset visible signature and placement from previous document
             signingVM.visibleProperty().set(false);
             placementVM.reset();
 
-            // A derived output name is refreshed for the new document; a name the user deliberately chose is kept, like
-            // the output directory. The two are told apart by comparing against the name the previous input derived —
+            // A derived output name is refreshed for the new document; a name the user deliberately chose is kept for
+            // the rest of the session. The two are told apart by comparing against the name the previous input derived —
             // captured before setInFile below overwrites it. The path resolves via the document-file listener once
             // documentVM is updated further down.
             if (isDerivedBaseName(signingVM.outBaseNameProperty().get(), options.getInFile())) {
@@ -1613,7 +1629,7 @@ public class MainWindowController {
 
             options.setPdfOwnerPwd(password.get().toCharArray());
             options.setAdvanced(true);
-            signingVM.syncFromOptions(options);
+            reloadFromOptionsKeepingOutputName();
 
             try {
                 PdfExtraInfo extraInfo = new PdfExtraInfo(options);
