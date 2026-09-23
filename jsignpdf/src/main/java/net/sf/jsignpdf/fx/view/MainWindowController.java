@@ -236,7 +236,7 @@ public class MainWindowController {
 
     /**
      * Stores current UI state to BasicSignerOptions and persists to disk.
-     * Called on window close.
+     * Called on window close and on File -> Exit.
      */
     public void storeAndCleanup() {
         saveViewStateToConfig();
@@ -245,9 +245,7 @@ public class MainWindowController {
                 options = new BasicSignerOptions();
             }
 
-            // Sync placement rectangle coordinates to the signing ViewModel before persisting
-            capturePlacementToSigningVM();
-
+            flushUiToViewModel();
             signingVM.syncToOptions(options);
             options.storeOptions();
         } catch (Exception e) {
@@ -650,7 +648,8 @@ public class MainWindowController {
         if (options == null) {
             options = new BasicSignerOptions();
         }
-        // Flush any pending edits from the VM so that "load" is clearly "replace current".
+        // Flush any pending edits so that "load" is clearly "replace current".
+        flushUiToViewModel();
         signingVM.syncToOptions(options);
         presetManager.load(preset, options);
         signingVM.syncFromOptions(options);
@@ -659,6 +658,21 @@ public class MainWindowController {
         applySigningVMPositionToPlacement();
         updateStatus(java.text.MessageFormat.format(
                 RES.get("jfx.gui.status.presetLoaded"), preset.getDisplayName()));
+    }
+
+    /**
+     * Flushes the UI state that is not bound to the view model - the placement rectangle and the
+     * text fields that commit on Enter or focus loss - so that a following syncToOptions() persists
+     * what is on screen.
+     */
+    private void flushUiToViewModel() {
+        if (signatureSettingsController != null) {
+            signatureSettingsController.commitPendingEdits();
+        }
+        if (tsaSettingsController != null) {
+            tsaSettingsController.commitPendingEdits();
+        }
+        capturePlacementToSigningVM();
     }
 
     /**
@@ -698,7 +712,7 @@ public class MainWindowController {
         if (options == null) {
             options = new BasicSignerOptions();
         }
-        capturePlacementToSigningVM();
+        flushUiToViewModel();
         signingVM.syncToOptions(options);
 
         TextInputDialog dialog = new TextInputDialog();
@@ -733,7 +747,7 @@ public class MainWindowController {
         if (options == null) {
             options = new BasicSignerOptions();
         }
-        capturePlacementToSigningVM();
+        flushUiToViewModel();
         signingVM.syncToOptions(options);
         ManagePresetsDialog dialog = new ManagePresetsDialog(presetManager, options, stage);
         dialog.showAndWait();
@@ -1129,7 +1143,7 @@ public class MainWindowController {
 
     @FXML
     private void onFileExit() {
-        saveViewStateToConfig();
+        storeAndCleanup();
         stage.close();
     }
 
@@ -1283,8 +1297,7 @@ public class MainWindowController {
             }
         }
 
-        // Capture live placement into the signing VM, then sync VM → options.
-        capturePlacementToSigningVM();
+        flushUiToViewModel();
         signingVM.syncToOptions(options);
 
         options.setOutFile(options.getOutFileX());
@@ -1334,6 +1347,7 @@ public class MainWindowController {
             }
         }
 
+        flushUiToViewModel();
         signingVM.syncToOptions(options);
         options.setTimestampOnly(true);
         // The view model derives the timestamp flag from the TSA toggle, and isTimestampX() gates the whole
