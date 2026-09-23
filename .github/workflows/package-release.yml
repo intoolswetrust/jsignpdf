@@ -8,7 +8,8 @@ name: Package Release
 #      downloaded full ZIP (no source rebuild — the published bits are
 #      packaged verbatim),
 #   3. builds the Flatpak bundles,
-#   4. mirrors everything to SourceForge and creates the GitHub Release.
+#   4. mirrors everything to SourceForge and creates the GitHub Release,
+#   5. opens the Flathub update PR (final releases only).
 #
 # It is idempotent: re-dispatching it with the same release-version
 # re-downloads from Central and recreates the GitHub Release. Use this to
@@ -48,13 +49,15 @@ env:
 
 jobs:
   setup:
-    # Classify the version once. Pre-releases (ALPHA/BETA/RC/MILESTONE) skip
-    # Windows code signing entirely and are flagged --prerelease on GitHub.
+    # Classify the version once and derive the release tag once. Pre-releases
+    # (ALPHA/BETA/RC/MILESTONE) skip Windows code signing entirely, are flagged
+    # --prerelease on GitHub, and do not get a Flathub PR.
     runs-on: ubuntu-24.04
     outputs:
       is-prerelease: ${{ steps.check.outputs.is-prerelease }}
+      tag: ${{ steps.check.outputs.tag }}
     steps:
-    - name: Classify release version
+    - name: Classify release version and derive the tag
       id: check
       shell: bash
       env:
@@ -68,6 +71,7 @@ jobs:
         else
           echo "is-prerelease=false" >> "$GITHUB_OUTPUT"
         fi
+        echo "tag=JSignPdf_${VERSION//./_}" >> "$GITHUB_OUTPUT"
 
   fetch-zips:
     # Pull the published full/minimal ZIPs from Maven Central. release:perform
@@ -188,15 +192,10 @@ jobs:
     env:
       VERSION: ${{ inputs.release-version }}
     steps:
-    - name: Compute release tag
-      id: tag
-      shell: bash
-      run: echo "tag=JSignPdf_${VERSION//./_}" >> "$GITHUB_OUTPUT"
-
     - name: Checkout release tag
       uses: actions/checkout@v7
       with:
-        ref: ${{ steps.tag.outputs.tag }}
+        ref: ${{ needs.setup.outputs.tag }}
 
     # jpackage runs need JavaFX modules in the bundled runtime image, so we
     # consume Azul Zulu+FX (java-package: jdk+fx). Temurin does not ship JFX.
@@ -392,10 +391,10 @@ jobs:
 
   flatpak:
     # Builds Flatpak bundles for both x86_64 and aarch64 from the Central full
-    # ZIP. JavaFX lives inside the ZIP for the x86_64 case; aarch64 falls
-    # through to Swing because OpenJFX 21 does not publish linux-aarch64
-    # classifier jars on Maven Central.
-    needs: fetch-zips
+    # ZIP. The ZIP carries the JavaFX linux and linux-aarch64 classifier jars in
+    # lib/javafx/, so Bootstrap loads the JavaFX UI (and with it the XDG portal
+    # file chooser) on both architectures.
+    needs: [setup, fetch-zips]
     strategy:
       fail-fast: false
       matrix:
@@ -408,14 +407,10 @@ jobs:
     env:
       VERSION: ${{ inputs.release-version }}
     steps:
-    - name: Compute release tag
-      id: tag
-      run: echo "tag=JSignPdf_${VERSION//./_}" >> "$GITHUB_OUTPUT"
-
     - name: Checkout release tag
       uses: actions/checkout@v7
       with:
-        ref: ${{ steps.tag.outputs.tag }}
+        ref: ${{ needs.setup.outputs.tag }}
 
     - name: Download full ZIP from Maven Central job
       uses: actions/download-artifact@v8
@@ -440,23 +435,11 @@ jobs:
           org.freedesktop.Sdk//25.08 \
           org.freedesktop.Sdk.Extension.openjdk21//25.08
 
-    - name: Patch manifest to use local zip
+    - name: Stage the release zip next to the manifest
       run: |
         set -euo pipefail
-        MANIFEST=distribution/linux/flatpak/io.github.intoolswetrust.JSignPdf.yaml
-        ZIP_NAME=jsignpdf-${VERSION}-full.zip
-        SHA256=$(sha256sum "flatpak-input/${ZIP_NAME}" | awk '{print $1}')
-        cp "flatpak-input/${ZIP_NAME}" distribution/linux/flatpak/
-        sed -i \
-          "s|^        url:.*\.zip|        path: ${ZIP_NAME}|" \
-          "${MANIFEST}"
-        grep -q "path: ${ZIP_NAME}" "${MANIFEST}" \
-          || { echo "::error::URL sed patch did not match — check manifest indentation"; exit 1; }
-        sed -i \
-          "s|sha256: [a-f0-9]\{64\}|sha256: ${SHA256}|" \
-          "${MANIFEST}"
-        grep -q "sha256: ${SHA256}" "${MANIFEST}" \
-          || { echo "::error::sha256 sed patch did not match"; exit 1; }
+        cp "flatpak-input/jsignpdf-${VERSION}-full.zip" \
+          distribution/linux/flatpak/jsignpdf-full.zip
 
     - name: Build Flatpak bundle
       run: |
@@ -501,14 +484,13 @@ jobs:
     - name: Compute version-derived names
       id: vars
       run: |
-        echo "tag=JSignPdf_${VERSION//./_}" >> "$GITHUB_OUTPUT"
         echo "base=${VERSION%%-*}" >> "$GITHUB_OUTPUT"
         echo "full=JSignPdf-${VERSION}" >> "$GITHUB_OUTPUT"
 
     - name: Checkout release tag
       uses: actions/checkout@v7
       with:
-        ref: ${{ steps.vars.outputs.tag }}
+        ref: ${{ needs.setup.outputs.tag }}
 
     - name: Download cross-platform ZIPs from Maven Central job
       uses: actions/download-artifact@v8
@@ -629,9 +611,9 @@ jobs:
     - name: Create GitHub release with all assets
       env:
         GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        TAG: ${{ needs.setup.outputs.tag }}
       run: |
         set -euo pipefail
-        TAG="${{ steps.vars.outputs.tag }}"
         NOTES_FILE="distribution/doc/release-notes/${{ steps.vars.outputs.base }}.md"
         if [ ! -f "$NOTES_FILE" ]; then
           echo "::error::Release notes file not found at $NOTES_FILE"
@@ -658,3 +640,117 @@ jobs:
           --notes-file "$NOTES_FILE" \
           "${prerelease_flag[@]}" \
           "${assets[@]}"
+
+  flathub-pr:
+    # Opens the Flathub update PR for final releases. Flathub builds from the
+    # source tarball of the release tag, so the offline Maven manifest must be
+    # the one committed in that same tag — not the one on master, which may
+    # already have moved on.
+    #
+    # Needs FLATHUB_TOKEN: a PAT with `public_repo` on
+    # flathub/io.github.intoolswetrust.JSignPdf. GITHUB_TOKEN cannot push to
+    # another org. The job runs after the release is published, so a failure
+    # here never blocks the release — re-run just this job once the token is
+    # fixed.
+    #
+    # `flatpak` is in `needs` so a broken manifest stops here: the pcsc-lite,
+    # opensc and openjdk modules are shared with the Flathub manifest, so a
+    # failure there predicts a failing Flathub build. Drop it from `needs` if
+    # you want the PR opened regardless.
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    needs: [setup, flatpak, publish-release]
+    if: needs.setup.outputs.is-prerelease == 'false'
+    permissions:
+      contents: read
+    env:
+      VERSION: ${{ inputs.release-version }}
+      TAG: ${{ needs.setup.outputs.tag }}
+      FLATHUB_REPO: flathub/io.github.intoolswetrust.JSignPdf
+      GH_TOKEN: ${{ secrets.FLATHUB_TOKEN }}
+    steps:
+    - name: Check the Flathub token is present
+      run: |
+        set -euo pipefail
+        if [ -z "${GH_TOKEN}" ]; then
+          echo "::error::FLATHUB_TOKEN is not set — cannot open the Flathub PR."
+          exit 1
+        fi
+
+    - name: Checkout release tag
+      uses: actions/checkout@v7
+      with:
+        ref: ${{ needs.setup.outputs.tag }}
+        path: upstream
+
+    - name: Checkout the Flathub repo
+      run: |
+        set -euo pipefail
+        git clone "https://github.com/${FLATHUB_REPO}.git" flathub
+        # Keeps the token out of .git/config; gh reads it from GH_TOKEN.
+        git -C flathub config credential.helper '!gh auth git-credential'
+
+    - name: Update the manifest and the offline Maven manifest
+      env:
+        REPO: ${{ github.repository }}
+      run: |
+        set -euo pipefail
+        TARBALL="https://github.com/${REPO}/archive/refs/tags/${TAG}.tar.gz"
+        curl -fsSL "$TARBALL" -o source.tar.gz
+        SHA256=$(sha256sum source.tar.gz | awk '{print $1}')
+        cp upstream/distribution/linux/flatpak/maven-dependencies.json flathub/
+        # The rewrite asserts on the result itself rather than grepping for a
+        # fixed indentation afterwards, so a reindented Flathub manifest fails
+        # loudly instead of silently matching nothing.
+        python3 - "$TARBALL" "$SHA256" <<'PY'
+        import re, sys
+        tarball, sha = sys.argv[1], sys.argv[2]
+        path = "flathub/io.github.intoolswetrust.JSignPdf.yaml"
+        s = open(path).read()
+        pattern = re.compile(
+            r"(?P<indent>[ \t]*)url: https://github\.com/\S+/archive/refs/tags/\S+"
+            r"\n(?P=indent)sha256: [0-9a-f]{64}")
+        replacement = lambda m: (
+            f"{m.group('indent')}url: {tarball}\n"
+            f"{m.group('indent')}sha256: {sha}")
+        s, n = pattern.subn(replacement, s)
+        if n != 1:
+            sys.exit(f"expected one jsignpdf archive source, patched {n}")
+        open(path, "w").write(s)
+        if f"url: {tarball}\n" not in s or f"sha256: {sha}\n" not in s:
+            sys.exit("rewrite did not land the expected url/sha256")
+        PY
+
+    - name: Open or update the Flathub PR
+      working-directory: flathub
+      run: |
+        set -euo pipefail
+        BRANCH="update-${VERSION}"
+        git config user.name "github-actions[bot]"
+        git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+        # -A, not `git diff`: a manifest that grows a new file would otherwise
+        # leave it untracked and report the tree as clean.
+        git add -A
+        if git diff --cached --quiet; then
+          echo "Flathub is already at ${VERSION}; nothing to do."
+          exit 0
+        fi
+        git checkout -b "$BRANCH"
+        git commit -qm "Update to JSignPdf ${VERSION}"
+        git push -f -u origin "$BRANCH"
+        # Only an OPEN PR counts: `gh pr view <branch>` also resolves closed and
+        # merged ones, which would make a re-run push the branch and then exit
+        # without ever opening a PR.
+        open_pr=$(gh pr list --repo "$FLATHUB_REPO" --state open \
+          --head "$BRANCH" --json number --jq 'length')
+        if [ "$open_pr" != "0" ]; then
+          echo "PR for ${BRANCH} already open; pushed the updated commit."
+          exit 0
+        fi
+        gh pr create --repo "$FLATHUB_REPO" --base master --head "$BRANCH" \
+          --title "Update to JSignPdf ${VERSION}" \
+          --body "Automated update from the \`package-release\` workflow.
+
+        - source archive bumped to tag \`${TAG}\`
+        - \`maven-dependencies.json\` taken from that same tag, so the offline
+          Maven repo matches the poms in the pinned tarball"
