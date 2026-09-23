@@ -140,10 +140,14 @@ public class TsaSettingsController {
         // Proxy port: String <-> int
         viewModel.proxyPortProperty().addListener((obs, o, n) ->
                 txtProxyPort.setText(String.valueOf(n.intValue())));
-        txtProxyPort.setOnAction(e -> {
-            try {
-                viewModel.proxyPortProperty().set(Integer.parseInt(txtProxyPort.getText()));
-            } catch (NumberFormatException ignored) {
+        txtProxyPort.setOnAction(e -> commitProxyPort());
+        // Enter alone misses the common case of typing a value and then clicking elsewhere
+        // (e.g. Save, or another field) without pressing Enter first: the text field shows the
+        // typed value, but it is never written back to the model, so signing silently falls back
+        // to the last committed port (Constants.DEFVAL_PROXY_PORT, 80, if none was ever committed).
+        txtProxyPort.focusedProperty().addListener((obs, o, isFocused) -> {
+            if (!isFocused) {
+                commitProxyPort();
             }
         });
 
@@ -166,6 +170,16 @@ public class TsaSettingsController {
         txtProxyHost.setManaged(proxyOn);
         lblProxyPort.setManaged(proxyOn);
         txtProxyPort.setManaged(proxyOn);
+    }
+
+    private void commitProxyPort() {
+        try {
+            viewModel.proxyPortProperty().set(Integer.parseInt(txtProxyPort.getText()));
+        } catch (NumberFormatException ignored) {
+            // Invalid entry (empty, non-numeric): revert the field to the last committed
+            // value rather than silently keeping an un-persisted port on screen.
+            txtProxyPort.setText(String.valueOf(viewModel.proxyPortProperty().get()));
+        }
     }
 
     private void applyAuthVisibility(ServerAuthentication authn) {
