@@ -31,19 +31,17 @@
   </branding>
   <content_rating type="oars-1.1" />
   <releases>
-    <release version="3.2.0" date="2026-09-14">
-      <url type="details">https://github.com/intoolswetrust/jsignpdf/releases/tag/JSignPdf_3_2_0</url>
+    <release version="3.2.1" date="2026-09-26">
+      <url type="details">https://github.com/intoolswetrust/jsignpdf/releases/tag/JSignPdf_3_2_1</url>
       <description>
-        <p>Version 3.2.0</p>
-        <p>A feature release. You can now sign into a form's existing signature fields, add or refresh a document timestamp without signing at all, and see a live preview of the visible signature as you place it — plus more control over output, better diagnostics, and a batch of signing and appearance fixes.</p>
+        <p>Version 3.2.1</p>
+        <p>A bug-fix release for the JavaFX GUI, with two fixes contributed by the community. Thanks to Ladislav Nemec and Milos Jakubicek.</p>
         <ul>
-          <li><em>Sign into an existing signature field</em> — documents that pre-place a signature box per signer can now be signed into it instead of getting a new field on top. Pick it from the _Signature field_ combo in the JavaFX _Signature Appearance_ panel, or with <code>--sig-field</code> (<code>--list-sig-fields</code> prints what a document offers); the field's own rectangle and page are used. Both engines support it. See issue 223.</li>
-          <li><em>Append a document timestamp without signing</em> — <code>jsignpdf -eng dss --timestamp-only -ts &lt;URL&gt; doc.pdf</code> adds an ETSI.RFC3161 document timestamp to any PDF with no key, to give it a trusted point in time or to refresh a PAdES B-LTA archive timestamp before its TSA certificate expires. In the UI it's the _Timestamp_ toolbar button and _Signing &gt; Add Timestamp…_ (<code>Ctrl+T</code>). Needs the DSS engine. See issue 141.</li>
-          <li><em>Live preview of the visible signature</em> — the signature text and background image are rendered inside the rectangle on the page preview while you place, move and resize it, pages are rasterized at print resolution (300 DPI), and empty signature fields are shaded so you can see where a form author placed them. See issue 479.</li>
-          <li><em>Choose where the signed file goes</em> — the GUI gains an _Output directory_ field and a suffix on/off switch, with a warning when the resulting name would overwrite the input; under Flatpak the chosen directory is granted through the desktop portal. See issue 483.</li>
-          <li><em>PSS-only certificates sign correctly on hardware tokens (DSS engine)</em> — a certificate marked <code>id-RSASSA-PSS</code>, as eIDAS qualified certificates increasingly are, previously failed to sign on PKCS#11 tokens with a <code>SignatureAlgorithm ... does not match</code> error; the DSS engine now takes the algorithm from the certificate and produces real PSS. See issue 255.</li>
-          <li><em>New <code>debug</code> output for signing diagnostics</em> — enable it on the new _General_ tab of Preferences or with <code>-o debug=true</code> to log the signing certificate chain and, for the DSS engine, every AIA/CRL/OCSP request and the trust anchors it loaded. Off by default. See issue 452.</li>
-          <li><em>Other improvements</em> — pick the interface language with the new _Language_ selector (<code>ui.language</code>, issue 444); sign very large PDFs without a bigger heap via <code>buffering.mode=temp</code> (issue 178); the DSS engine now layers a background image behind the signature graphic and auto-scales text to fit the box (issue 433); DSS timestamp requests carry a nonce (issue 33); visible-signature images keep their aspect ratio on the DSS engine (issue 460) and description text fills the whole box on OpenPDF (issue 479); append mode no longer refuses to sign when it can't bump the declared PDF version (issue 467); clear the Recent files list on its own (issue 453); and the bundled Norwegian Bokmål translation now actually loads.</li>
+          <li><em>Output suffix no longer piles up when switching presets</em> — loading a preset with a different output suffix used to append it to the previous one (<code>document_EM.pdf</code> became <code>document_EM_DL.pdf</code> instead of <code>document_DL.pdf</code>). A derived output name is now recomputed with the new suffix, a name you typed yourself is kept, and a new session no longer starts with the output file name left over from the last run. See pull request 505.</li>
+          <li><em>Proxy port is saved even without pressing Enter</em> — a port typed into the <em>TSA / Validation</em> settings was only committed on Enter, so the DSS engine could quietly connect to the proxy on port 80. The field now commits on focus loss too, and out-of-range values are rejected. See pull request 512.</li>
+          <li><em>Unconfirmed field edits are no longer lost</em> — signing or timestamping via a keyboard shortcut, closing the window, and saving or loading a preset now pick up the proxy port and font size fields as shown on screen. <em>File &gt; Exit</em> (<code>Ctrl+Q</code>) now saves the signing options, as closing the window already did.</li>
+          <li><em>Linux Flatpak bundle on the GitHub release</em> — it is now built from the same manifest as the Flathub one, so smartcard and YubiKey signing work there too.</li>
+          <li><em>Dependency updates</em> — BouncyCastle 1.86 and other routine library bumps.</li>
         </ul>
       </description>
     </release>
