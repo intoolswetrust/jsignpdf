@@ -30,6 +30,7 @@ public class BasicSignerOptionsTest {
 
         // String fields
         original.setKsType("PKCS12");
+        original.setKsProvider("yubikey");
         original.setKsFile("/path/to/keystore");
         original.setKsPasswd("ksPass".toCharArray());
         original.setKeyAlias("myAlias");
@@ -223,6 +224,35 @@ public class BasicSignerOptionsTest {
             opts.loadOptions();
             assertEquals("append must reflect stored false", false, opts.isAppend());
             assertEquals("storePasswords must reflect stored false", false, opts.isStorePasswords());
+        } finally {
+            mainConfig.clear();
+        }
+    }
+
+    @Test
+    public void ksProvider_roundTripsThroughMainConfigAndPresets() {
+        PropertyProvider mainConfig = PropertyStoreFactory.getInstance().mainConfig();
+        mainConfig.clear();
+        try {
+            BasicSignerOptions opts = new BasicSignerOptions();
+            opts.setKsType("PKCS11");
+            opts.setKsProvider(" certilia ");
+            assertEquals("certilia", opts.getKsProvider());
+            opts.storeOptions();
+            BasicSignerOptions loaded = new BasicSignerOptions();
+            loaded.loadOptions();
+            assertEquals("certilia", loaded.getKsProvider());
+
+            PropertyProvider preset = new PropertyProvider(null);
+            opts.storeToPreset(preset);
+            BasicSignerOptions fromPreset = new BasicSignerOptions();
+            fromPreset.loadFromPreset(preset);
+            assertEquals("certilia", fromPreset.getKsProvider());
+
+            opts.setKsProvider("");
+            opts.storeToPreset(preset);
+            fromPreset.loadFromPreset(preset);
+            assertNull(fromPreset.getKsProvider());
         } finally {
             mainConfig.clear();
         }

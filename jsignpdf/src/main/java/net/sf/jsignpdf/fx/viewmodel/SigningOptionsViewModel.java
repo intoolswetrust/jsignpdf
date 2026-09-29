@@ -32,6 +32,7 @@ public class SigningOptionsViewModel {
 
     // Certificate settings
     private final StringProperty ksType = new SimpleStringProperty();
+    private final StringProperty ksProvider = new SimpleStringProperty();
     private final StringProperty ksFile = new SimpleStringProperty();
     private final StringProperty ksPassword = new SimpleStringProperty();
     private final StringProperty keyAlias = new SimpleStringProperty();
@@ -122,6 +123,7 @@ public class SigningOptionsViewModel {
         // so options must be in advanced mode for all features to take effect.
         opts.setAdvanced(true);
         opts.setKsType(ksType.get());
+        opts.setKsProvider(ksProvider.get());
         opts.setKsFile(ksFile.get());
         opts.setKsPasswd(toCharArray(ksPassword.get()));
         opts.setKeyAlias(keyAlias.get());
@@ -205,6 +207,7 @@ public class SigningOptionsViewModel {
      * Sync values from a BasicSignerOptions instance into this ViewModel.
      */
     public void syncFromOptions(BasicSignerOptions opts) {
+        ksProvider.set(opts.getKsProvider());
         ksType.set(opts.getKsType());
         ksFile.set(opts.getKsFile());
         ksPassword.set(fromCharArray(opts.getKsPasswd()));
@@ -279,6 +282,7 @@ public class SigningOptionsViewModel {
      */
     public void resetToDefaults() {
         // Certificate settings
+        ksProvider.set(null);
         ksType.set(KeyStore.getDefaultType());
         ksFile.set(null);
         ksPassword.set(null);
@@ -412,6 +416,7 @@ public class SigningOptionsViewModel {
 
     // --- Property accessors ---
     public StringProperty ksTypeProperty() { return ksType; }
+    public StringProperty ksProviderProperty() { return ksProvider; }
     public StringProperty ksFileProperty() { return ksFile; }
     public StringProperty ksPasswordProperty() { return ksPassword; }
     public StringProperty keyAliasProperty() { return keyAlias; }

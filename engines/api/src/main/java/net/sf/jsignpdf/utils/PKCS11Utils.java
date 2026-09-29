@@ -2,20 +2,16 @@ package net.sf.jsignpdf.utils;
 
 import static net.sf.jsignpdf.Constants.LOGGER;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.security.KeyStore;
 import java.security.Provider;
-import java.security.Security;
 import java.util.logging.Level;
 
-import org.apache.commons.lang3.StringUtils;
+import net.sf.jsignpdf.BasicSignerOptions;
+import net.sf.jsignpdf.pkcs11.Pkcs11Profiles;
 
 /**
- * Methods for handling PKCS#11 security providers.
+ * Methods for handling PKCS#11 security providers. Delegates to {@link Pkcs11Profiles}.
  *
  * @author Josef Cacek
  */
@@ -23,26 +19,15 @@ public class PKCS11Utils {
 
     private static final String SAMPLE_RESOURCE = "/net/sf/jsignpdf/conf/pkcs11.cfg.sample";
 
-    public static volatile Provider SUN_PROVIDER;
-    public static volatile Provider JSIGN_PROVIDER;
-
     /**
-     * Registers PKCS#11 providers from {@code <cfg>/pkcs11.cfg} when that file exists. No-op if the config dir is unresolved
-     * or the file is missing — matching the empty-path early-return in {@link #registerProviders(String)}.
+     * Parses the PKCS#11 profiles. No native library is loaded; providers register on first use.
      */
-    public static void registerProvidersFromDefaultLocation() {
-        Path cfgFile = ConfigLocationResolver.getInstance().getPkcs11ConfigFile();
-        if (cfgFile == null) {
-            return;
-        }
-        if (Files.isRegularFile(cfgFile)) {
-            registerProviders(cfgFile.toString());
-        }
+    public static void discoverProfiles() {
+        Pkcs11Profiles.getInstance();
     }
 
     /**
-     * Returns the bundled PKCS#11 sample as a String. Used by the Preferences PKCS#11 tab to populate the textarea on
-     * "Reset to bundled sample".
+     * Returns the bundled PKCS#11 sample as a String.
      */
     public static String getSampleConfig() {
         try (InputStream is = PKCS11Utils.class.getResourceAsStream(SAMPLE_RESOURCE)) {
@@ -58,105 +43,35 @@ public class PKCS11Utils {
     }
 
     /**
-     * Tries to register the sun.security.pkcs11.SunPKCS11 provider with configuration provided in the given file.
-     *
-     * @param configPath path to PKCS#11 provider configuration file
-     * @return newly registered PKCS#11 provider name if provider successfully registered; <code>null</code> otherwise
+     * Unregisters every PKCS#11 provider registered by the profiles.
+     * <p>
+     * Some tokens/card-readers hang during second usage of the program, they have to be unplugged and plugged again;
+     * this should prevent the issue.
+     * </p>
      */
-    public static void registerProviders(final String configPath) {
-        if (StringUtils.isEmpty(configPath)) {
-            return;
-        }
-        LOGGER.fine("Registering SunPKCS11 provider from configuration in " + configPath);
-        final File cfgFile = IOUtils.findFile(configPath);
-        final String absolutePath = cfgFile.getAbsolutePath();
-        if (cfgFile.isFile()) {
-            SUN_PROVIDER = initPkcs11Provider(absolutePath, "sun.security.pkcs11.SunPKCS11");
-            JSIGN_PROVIDER = initPkcs11Provider(absolutePath, "com.github.kwart.jsign.pkcs11.JSignPKCS11");
-        } else {
-            System.err.println("The PKCS#11 provider is not registered. Configuration file doesn't exist: " + absolutePath);
-        }
+    public static void unregisterProviders() {
+        Pkcs11Profiles.getInstance().unregisterAll();
+    }
+
+    public static boolean isPkcs11Type(String keyStoreType) {
+        return Pkcs11Profiles.isPkcs11Type(keyStoreType);
     }
 
     /**
-     * Unregisters PKCS11 security provider registered by {@link #registerProviders(String)} method.
-     * <p>
-     * Some tokens/card-readers hangs during second usage of the program, they have to be unplugged and plugged again following
-     * code should prevent this issue.
-     * </p>
+     * Returns the provider of the PKCS#11 profile selected in the options, registering it on first use, or
+     * {@code null} when the keystore type is not a PKCS#11 type.
      *
-     * @param providerName
+     * @throws net.sf.jsignpdf.pkcs11.Pkcs11Exception when the profile cannot be resolved or registered
      */
-    public static void unregisterProviders() {
-        SUN_PROVIDER = unregisterProvider(SUN_PROVIDER);
-        JSIGN_PROVIDER = unregisterProvider(JSIGN_PROVIDER);
-        // we should wait a little bit to de-register provider correctly (is it a driver
-        // issue?)
-        try {
-            Thread.sleep(1000);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+    public static Provider getProvider(BasicSignerOptions options) {
+        return Pkcs11Profiles.getInstance().provider(options.getKsProvider(), options.getKsType());
     }
 
-    public static String getProviderNameForKeystoreType(String type) {
-        if (type == null) {
-            return null;
-        }
-        String name = getProviderNameImpl(type, SUN_PROVIDER);
-        if (name == null) {
-            name = getProviderNameImpl(type, JSIGN_PROVIDER);
-        }
-        return name;
+    /**
+     * Name of the provider returned by {@link #getProvider(BasicSignerOptions)}, or {@code null}.
+     */
+    public static String getProviderName(BasicSignerOptions options) {
+        Provider p = getProvider(options);
+        return p == null ? null : p.getName();
     }
-
-    private static Provider initPkcs11Provider(String configPath, String className) {
-        Provider pkcs11Provider = null;
-        try {
-            Class<?> sunPkcs11Cls = Class.forName(className);
-            try {
-                pkcs11Provider = (Provider) sunPkcs11Cls.getConstructor(String.class).newInstance(configPath);
-            } catch (NoSuchMethodException e) {
-                pkcs11Provider = (Provider) sunPkcs11Cls.getConstructor().newInstance();
-                Class<Provider> provCls = Provider.class;
-                pkcs11Provider = (Provider) provCls.getMethod("configure", String.class).invoke(pkcs11Provider, configPath);
-            }
-            Security.addProvider(pkcs11Provider);
-            final String name = pkcs11Provider.getName();
-            LOGGER.fine("PKCS11 provider registered with name " + name);
-        } catch (Throwable e) {
-            LOGGER.log(Level.SEVERE, "Unable to register SunPKCS11 security provider.", e);
-        }
-        return pkcs11Provider;
-    }
-
-    private static Provider unregisterProvider(Provider provider) {
-        if (provider == null) {
-            return null;
-        }
-        String providerName = provider.getName();
-        LOGGER.fine("Removing security provider with name " + providerName);
-        try {
-            Security.removeProvider(providerName);
-        } catch (Exception e) {
-            LOGGER.log(Level.SEVERE, "Removing provider failed", e);
-        }
-        return null;
-    }
-
-    private static String getProviderNameImpl(String type, Provider provider) {
-        if (provider == null || type == null) {
-            return null;
-        }
-        String providerName = provider.getName();
-        try {
-            KeyStore.getInstance(type, provider);
-            LOGGER.fine("KeyStore type " + type + " is supported by the provider " + providerName);
-            return provider.getName();
-        } catch (Exception e) {
-            LOGGER.fine("KeyStore type " + type + " is not supported by the provider " + providerName);
-        }
-        return null;
-    }
-
 }

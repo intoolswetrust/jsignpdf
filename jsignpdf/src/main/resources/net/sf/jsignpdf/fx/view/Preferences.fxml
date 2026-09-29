@@ -146,18 +146,59 @@
     <Tab fx:id="tabPkcs11" text="%jfx.gui.preferences.section.pkcs11">
         <VBox spacing="8">
             <padding><Insets top="12" right="12" bottom="12" left="12"/></padding>
-            <Label fx:id="lblPkcs11Path" styleClass="pref-path-label" wrapText="true"/>
-            <Label text="%jfx.gui.preferences.restartHint" styleClass="pref-restart-hint" maxWidth="-Infinity">
-                <tooltip><Tooltip text="%jfx.gui.preferences.restartHint.tooltip"/></tooltip>
-            </Label>
-            <TextArea fx:id="txtPkcs11Body" wrapText="false" prefRowCount="20" prefColumnCount="80"
-                      VBox.vgrow="ALWAYS" styleClass="pref-monospace"/>
-            <Label text="%jfx.gui.preferences.pkcs11.help" styleClass="pref-help" wrapText="true"/>
-            <Label fx:id="lblPkcs11EmptyHint" text="%jfx.gui.preferences.pkcs11.emptyHint"
-                   styleClass="pref-help" wrapText="true"/>
-            <HBox spacing="6">
-                <Button fx:id="btnPkcs11ResetSample" text="%jfx.gui.preferences.pkcs11.resetSample"
-                        onAction="#onPkcs11ResetSample"/>
+            <Label fx:id="lblPkcs11Flatpak" text="%jfx.gui.preferences.pkcs11.flatpak" styleClass="pref-help"
+                   wrapText="true"/>
+            <HBox spacing="12" VBox.vgrow="ALWAYS">
+                <VBox spacing="6" prefWidth="220" minWidth="180">
+                    <Label text="%jfx.gui.preferences.pkcs11.profiles"/>
+                    <ListView fx:id="lstPkcs11Profiles" VBox.vgrow="ALWAYS"/>
+                    <FlowPane hgap="4" vgap="4">
+                        <Button fx:id="btnPkcs11Add" text="%jfx.gui.preferences.pkcs11.add" onAction="#onPkcs11Add"/>
+                        <Button fx:id="btnPkcs11Duplicate" text="%jfx.gui.preferences.pkcs11.duplicate"
+                                onAction="#onPkcs11Duplicate"/>
+                        <Button fx:id="btnPkcs11Rename" text="%jfx.gui.preferences.pkcs11.rename"
+                                onAction="#onPkcs11Rename"/>
+                        <Button fx:id="btnPkcs11Remove" text="%jfx.gui.preferences.pkcs11.remove"
+                                onAction="#onPkcs11Remove"/>
+                    </FlowPane>
+                    <FlowPane hgap="4" vgap="4">
+                        <Button fx:id="btnPkcs11Detect" text="%jfx.gui.preferences.pkcs11.detect"
+                                onAction="#onPkcs11Detect"/>
+                        <Button fx:id="btnPkcs11Catalog" text="%jfx.gui.preferences.pkcs11.fromCatalog"
+                                onAction="#onPkcs11Catalog"/>
+                    </FlowPane>
+                </VBox>
+                <VBox fx:id="boxPkcs11Editor" spacing="6" HBox.hgrow="ALWAYS">
+                    <Label fx:id="lblPkcs11Path" styleClass="pref-path-label" wrapText="true"/>
+                    <Label fx:id="lblPkcs11Status" styleClass="pref-help" wrapText="true"/>
+                    <GridPane hgap="8" vgap="6">
+                        <columnConstraints>
+                            <ColumnConstraints minWidth="80"/>
+                            <ColumnConstraints hgrow="ALWAYS"/>
+                        </columnConstraints>
+                        <Label text="%jfx.gui.preferences.pkcs11.label" GridPane.rowIndex="0" GridPane.columnIndex="0"/>
+                        <TextField fx:id="txtPkcs11Label" GridPane.rowIndex="0" GridPane.columnIndex="1"/>
+                        <Label text="%jfx.gui.preferences.pkcs11.provider" GridPane.rowIndex="1" GridPane.columnIndex="0"/>
+                        <ChoiceBox fx:id="cmbPkcs11Provider" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
+                        <Label text="%jfx.gui.preferences.pkcs11.library" GridPane.rowIndex="2" GridPane.columnIndex="0"/>
+                        <HBox spacing="4" GridPane.rowIndex="2" GridPane.columnIndex="1">
+                            <TextField fx:id="txtPkcs11Library" HBox.hgrow="ALWAYS"/>
+                            <Button fx:id="btnPkcs11LibraryBrowse" text="…" onAction="#onPkcs11BrowseLibrary"/>
+                        </HBox>
+                    </GridPane>
+                    <Label text="%jfx.gui.preferences.pkcs11.raw"/>
+                    <TextArea fx:id="txtPkcs11Body" wrapText="false" prefRowCount="12" prefColumnCount="60"
+                              VBox.vgrow="ALWAYS" styleClass="pref-monospace"/>
+                    <Label text="%jfx.gui.preferences.pkcs11.help" styleClass="pref-help" wrapText="true"/>
+                    <Label fx:id="lblPkcs11EmptyHint" text="%jfx.gui.preferences.pkcs11.emptyHint"
+                           styleClass="pref-help" wrapText="true"/>
+                    <HBox spacing="6">
+                        <Button fx:id="btnPkcs11ResetSample" text="%jfx.gui.preferences.pkcs11.resetSample"
+                                onAction="#onPkcs11ResetSample"/>
+                    </HBox>
+                </VBox>
+                <Label fx:id="lblPkcs11NoSelection" text="%jfx.gui.preferences.pkcs11.noSelection"
+                       styleClass="pref-help" wrapText="true" HBox.hgrow="ALWAYS"/>
             </HBox>
         </VBox>
     </Tab>

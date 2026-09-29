@@ -298,9 +298,9 @@ The dialog has the following tabs:
 * **Network** -- relax SSL security for TSA / OCSP / CRL traffic
 * **PDF Render** -- order and selection of preview backends (JPedal, Apache PDFBox, OpenPDF)
 * **TSA** -- default hash algorithm for timestamp requests
-* **PKCS#11** -- raw text of the SunPKCS11 provider configuration (see <<Using hardware tokens for signing>>)
+* **PKCS#11** -- the PKCS#11 profiles: add, duplicate, rename or remove them, pick the driver library, detect installed tokens and add entries from the bundled catalog (see <<Using hardware tokens for signing>>)
 
-Most settings apply immediately on _OK_. The two tabs marked _Takes effect after restart_ -- Network and PKCS#11 -- only take effect on the next launch. _Reset section to defaults_ restores the bundled defaults for the active tab only; other tabs keep their current values.
+Most settings apply immediately on _OK_, PKCS#11 profile changes included. The Network tab, marked _Takes effect after restart_, only takes effect on the next launch. _Reset section to defaults_ restores the bundled defaults for the active tab only; other tabs keep their current values.
 
 The values persist in `<config-dir>/advanced.properties` (see <<Advanced application configuration>>).
 
@@ -338,7 +338,7 @@ usage: jsignpdf [file1.pdf [file2.pdf ...]] [-a] [--bg-path
        [-ki <index>] [-kp <password>] [-ksf <file>] [-ksp <password>] [-kst
        <type>] [-l <location>] [--l2-text <text>] [--l4-text <text>] [-le] [-lk]
        [-lkt] [-llx <position>] [-lly <position>] [-lp] [-lpf <file>] [-o
-       <key=value>] [--ocsp]
+       <key=value>] [-kspr <profile>] [-lkp] [--ocsp]
        [--ocsp-server-url <responderUrl>] [-op <prefix>] [-opwd <password>] [-os
        <suffix>] [--overwrite] [-pe <mode>] [-pg <pageNumber>] [-pr <right>] [--proxy-host
        <hostname>] [--proxy-port <port>] [-pl <level>] [--proxy-type <type>] [-q] [-r
@@ -372,6 +372,9 @@ usage: jsignpdf [file1.pdf [file2.pdf ...]] [-a] [--bg-path
 | `-lk, --list-keys`
 | Lists keys in the chosen keystore.
 
+| `-lkp, --list-keystore-providers`
+| Lists the PKCS#11 profiles with their label, keystore types and state. Every profile is registered to report its state. See <<Using hardware tokens for signing>>.
+
 | `-le, --list-engines`
 | Lists the available signing engines (use as values for `-eng`). See <<Signing engines>>.
 
@@ -404,6 +407,9 @@ See <<Keystore selection>> and <<Key alias & key password>> for details.
 
 | `-kst, --keystore-type <type>`
 | Sets the keystore type. Use `-lkt` to list available types.
+
+| `-kspr, --keystore-provider <profile>`
+| PKCS#11 profile id used with the `PKCS11` and `JSIGNPKCS11` keystore types. Required when more than one profile provides the type. Ignored with a warning for other keystore types. Use `-lkp` to list the profiles.
 
 | `-ksf, --keystore-file <file>`
 | Path to the keystore file (`.p12`, `.pfx`, `.jks`, ...). Not needed for keystores without files (e.g. `WINDOWS-MY`).
@@ -769,6 +775,8 @@ By default, JSignPdf displays keystore types provided by Java Runtime itself and
 
 JSignPdf has been extended to support remote/external keystore types. The first entry is "CloudFoxy" (https://gitlab.com/cloudfoxy), which is a REST API for physical smart cards, initially developed to support eIDAS signatures.
 
+Hardware tokens appear as one entry per PKCS#11 profile, labelled `PKCS11 — <label>`. The keystore file field is hidden for them. A profile whose driver failed to load is shown greyed out with the reason as a tooltip. See <<Using hardware tokens for signing>>.
+
 If you use PKCS#12 or Java keystore types (JKS, JCEKS), you have to select the file where the keys are stored and provide the password of this file. Path to the keystore file can be inserted directly by typing or you can use the browse button to navigate through the file system with Open File Dialog.
 
 ==== Supported key types
@@ -1069,47 +1077,76 @@ If some "online" feature (TSA, CRL, OCSP) is enabled and JSignPdf runs behind a 
 
 == Using hardware tokens for signing
 
-Steps to sign documents using hardware tokens:
+JSignPdf reaches smart cards, USB tokens and HSMs through their PKCS#11 driver. Each token is described by a *PKCS#11 profile*: a SunPKCS11 configuration file (see https://docs.oracle.com/en/java/javase/21/security/pkcs11-reference-guide1.html[PKCS#11 Reference Guide]) plus a few JSignPdf metadata lines. Several profiles can be configured at once; you select one when signing.
 
-. Install PKCS#11 driver for your token. Check the vendor's documentation and install a proper driver for your system;
-. Place a configuration file at `<config-dir>/pkcs11.cfg` (see <<Configuration directory>>). It is used to configure a Java SunPKCS11 security provider (see https://docs.oracle.com/en/java/javase/11/security/pkcs11-reference-guide1.html[PKCS#11 Reference Guide]). The easiest way to create or edit it is via _File > Preferences > PKCS#11_ in the JavaFX UI. +
-The content depends on your driver, you can try to start with a simple 2 lines: +
-[source]
-----
-name=Test
-library=/path/to/your/PKCSDriver.so
-----
-. Try to run JSignPdf with PKCS11 debug enabled:
+. Install the PKCS#11 driver (middleware) for your token from the vendor. JSignPdf never ships or downloads drivers.
+. Create a profile. The easiest way is _File > Preferences > PKCS#11_ in the JavaFX UI:
+** _Detect tokens_ lists the known drivers found on this computer; pick one to create a profile.
+** _Add from catalog_ lists the drivers JSignPdf knows for your platform, found or not.
+** _Add_ creates a profile from a sample; use the _Library_ file chooser to point it at the driver (`.so`, `.dll` or `.dylib`).
++
+Nothing is written before you confirm and press _OK_. The confirmation shows the absolute library path and whether the file exists.
+. Select the profile in the _Certificate_ panel (`PKCS11 — <label>`), enter the PIN as the keystore password and press _Load Keys_. The result, or the reason for a failure, is shown under the button.
 
-[source]
-----
-JAVA_OPTS="-Djava.security.debug=pkcs11keystore -Djava.security.debug=sunpkcs11" \
-    bin/jsignpdf.sh
-----
-
-
-If it doesn't work, try to add parameter +slot+ or +slotListIndex+ into +pkcs11.cfg+ file, e.g.:
-[source]
-----
-name=Test
-library=/path/to/your/PKCSDriver.so
-slot=2
-----
-or
-[source]
-----
-name=Test
-library=/path/to/your/PKCSDriver.so
-slotListIndex=1
-----
-Value used for +slot+ or +slotListIndex+ depends on how many certificates you have installed.
-
-If the PKCS11 keystore type works properly in the GUI and you can use the certificate on your token, you're ready to use it also in the batch mode.
+=== Profile files
 
 [source]
 ----
-jsignpdf -kst PKCS11 -ksp 123456 document.pdf
+<config-dir>/
+  pkcs11.cfg            # read as the profile "default"
+  pkcs11/
+    opensc.cfg          # profile "opensc"
+    yubikey-piv.cfg     # profile "yubikey-piv"
 ----
+
+The profile id is the file name without `.cfg`: 1-32 characters from `A-Z`, `a-z`, `0-9`, `.`, `_` and `-`, compared case-insensitively. `pkcs11/default.cfg` is ignored because `default` is reserved for `<config-dir>/pkcs11.cfg`, which is read in place so a downgrade to 3.2 keeps working. Files that cannot be used (bad name, two names differing only by case, two profiles with the same `name=`) are listed as invalid with the reason.
+
+JSignPdf metadata is kept in comments, so SunPKCS11 still accepts the file:
+
+[source]
+----
+#jsignpdf:label=OpenSC (generic smart cards)
+#jsignpdf:provider=sun
+#jsignpdf:catalog=opensc@1
+name=opensc
+library=/usr/lib/x86_64-linux-gnu/opensc-pkcs11.so
+slotListIndex=0
+----
+
+* `label` -- the name shown in the keystore list; defaults to the profile id.
+* `provider` -- `sun` (default, keystore type `PKCS11`), `jsign` (the JSignPdf fork of the provider, keystore type `JSIGNPKCS11`) or `both`. A `pkcs11.cfg` without this line also accepts `JSIGNPKCS11`, so a 3.2 configuration that selected it keeps working.
+* `catalog` -- the catalog entry the profile was created from.
+
+Profiles written by JSignPdf get `name=<id>`; the provider is registered as `SunPKCS11-<name>` / `JSignPKCS11-<name>`. If the token is not found, add `slot` or `slotListIndex`; the value depends on the readers and tokens present.
+
+A driver is loaded only when its profile is first used (_Load Keys_, key listing or signing), so a missing or broken driver never prevents JSignPdf from starting. Changes made in Preferences take effect immediately.
+
+=== Command line
+
+[source,shell]
+----
+jsignpdf -lkp                                     # list profiles and their state
+jsignpdf -kst PKCS11 -kspr opensc -ksp 123456 -lk # list keys on the token
+jsignpdf -kst PKCS11 -kspr opensc -ksp 123456 document.pdf
+----
+
+With a single profile, `-kspr` can be omitted. With several, JSignPdf stops with an error naming them instead of picking one. The selected profile is also stored with the other settings and in presets; a preset naming a profile that does not exist on this computer is reported as an error on the command line and leaves the keystore entry unselected in the GUI.
+
+=== Catalog
+
+JSignPdf bundles a small, read-only catalog of known drivers (OpenSC, p11-kit proxy, YubiKey PIV, Belgian eID, SafeNet eToken) with their usual install paths per operating system. It is used by _Detect tokens_ and _Add from catalog_ and never applied automatically. Entries are structurally reviewed, not tested by the JSignPdf maintainers; the confirmation dialog shows how many users reported success.
+
+=== Flatpak
+
+Inside the Flatpak sandbox the host's driver libraries are not usable. Use the p11-kit proxy (`p11-kit-proxy.so` from the runtime), which reaches the tokens registered with p11-kit on the host through Flatpak's p11-kit forwarding; _Detect tokens_ offers only this entry there.
+
+=== Common errors
+
+* _The PKCS#11 library does not exist_ -- the `library=` path is wrong or the middleware is not installed.
+* _does not match the architecture of this Java runtime_ -- a 32-bit driver with a 64-bit Java, or an x86_64 driver on aarch64 (and the reverse).
+* _Several PKCS#11 profiles are configured_ -- add `-kspr <id>`.
+* _incorrect PIN_, _no token present in the reader_ -- reported by _Load Keys_ and when signing.
+* To see what the driver does, run JSignPdf with `JAVA_OPTS="-Djava.security.debug=sunpkcs11,pkcs11keystore"`.
 
 == Signing engines
 
@@ -1263,7 +1300,7 @@ Password-based PDF encryption combined with signing is likewise not honoured uni
 
 == Advanced application configuration
 
-Application-wide tweaks beyond the per-document signing options live in `<config-dir>/advanced.properties` and -- for hardware tokens -- `<config-dir>/pkcs11.cfg`. Both are plain text files; the easiest way to edit them is the JavaFX <<Adjusting advanced preferences,Preferences dialog>>, which writes them on _OK_. Power users can also hand-edit the files directly while JSignPdf is closed; the next launch picks up the changes.
+Application-wide tweaks beyond the per-document signing options live in `<config-dir>/advanced.properties` and -- for hardware tokens -- the PKCS#11 profiles `<config-dir>/pkcs11.cfg` and `<config-dir>/pkcs11/*.cfg`. They are plain text files; the easiest way to edit them is the JavaFX <<Adjusting advanced preferences,Preferences dialog>>, which writes them on _OK_. Power users can also hand-edit the files directly while JSignPdf is closed; the next launch picks up the changes.
 
 `advanced.properties` covers the same topics as the Preferences dialog (the signing engine, verbose `debug` output, visible-signature font, certificate-validation toggles, relaxed SSL, PDF preview backend order, default TSA hash algorithm) plus a few file-editable knobs. When a key is missing from `advanced.properties`, JSignPdf falls back to defaults bundled inside the application jar, so a fresh install needs no config file at all.
 
@@ -1294,7 +1331,7 @@ The 3.0.0 distribution no longer ships an `<install dir>/conf/` directory and th
 
 === Configuration directory
 
-Starting with JSignPdf 3.0.0, per-user state is stored in a platform-native configuration directory instead of a single file in your home folder. The directory holds the main config file (`config.properties`, which persists the last-used signing settings), a `presets/` subdirectory (see <<Using presets>>), and -- once you save changes from the Preferences dialog -- the advanced-config files `advanced.properties` and `pkcs11.cfg` (see <<Advanced application configuration>>).
+Starting with JSignPdf 3.0.0, per-user state is stored in a platform-native configuration directory instead of a single file in your home folder. The directory holds the main config file (`config.properties`, which persists the last-used signing settings), a `presets/` subdirectory (see <<Using presets>>), and -- once you save changes from the Preferences dialog -- the advanced-config file `advanced.properties` and the PKCS#11 profiles `pkcs11.cfg` and `pkcs11/` (see <<Advanced application configuration>> and <<Using hardware tokens for signing>>).
 
 The default location depends on your operating system:
 
@@ -1321,7 +1358,8 @@ You can override the default by setting the `JSIGNPDF_CONFIG_DIR` environment va
 <config-dir>/
   config.properties          # main configuration (last-used signing settings)
   advanced.properties        # advanced preferences (created on first save)
-  pkcs11.cfg                 # SunPKCS11 provider config (optional)
+  pkcs11.cfg                 # PKCS#11 profile "default" (optional)
+  pkcs11/                    # further PKCS#11 profiles, one <id>.cfg each (optional)
   presets/
     preset-1745270400123.properties
     preset-1745270500456.properties

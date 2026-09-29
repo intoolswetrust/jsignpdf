@@ -203,9 +203,10 @@ public final class EngineMismatchValidator {
         if (StringUtils.equalsIgnoreCase(ksType, Constants.KEYSTORE_TYPE_CLOUDFOXY)
                 && !caps.contains(Capability.EXTERNAL_DIGEST)) {
             out.add(new Mismatch("--key-store-type " + Constants.KEYSTORE_TYPE_CLOUDFOXY, Capability.EXTERNAL_DIGEST));
-        } else if (PKCS11Utils.getProviderNameForKeystoreType(ksType) != null
-                && !caps.contains(Capability.PKCS11_PROVIDER)) {
-            out.add(new Mismatch("--key-store-type " + ksType, Capability.PKCS11_PROVIDER));
+        } else if (PKCS11Utils.isPkcs11Type(ksType) && !caps.contains(Capability.PKCS11_PROVIDER)) {
+            out.add(new Mismatch(StringUtils.isNotEmpty(o.getKsProvider())
+                    ? "--keystore-provider " + o.getKsProvider()
+                    : "--key-store-type " + ksType, Capability.PKCS11_PROVIDER));
         }
 
         return out;

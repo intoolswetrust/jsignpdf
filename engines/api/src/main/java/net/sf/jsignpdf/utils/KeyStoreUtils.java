@@ -13,6 +13,7 @@ import java.security.KeyStoreException;
 import java.security.KeyStoreSpi;
 import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
+import java.security.Provider;
 import java.security.Security;
 import java.security.UnrecoverableKeyException;
 import java.security.cert.Certificate;
@@ -26,6 +27,7 @@ import java.util.Collection;
 import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
@@ -38,6 +40,9 @@ import net.sf.jsignpdf.Constants;
 import net.sf.jsignpdf.PrivateKeyInfo;
 
 import net.sf.jsignpdf.extcsp.CloudFoxy;
+import net.sf.jsignpdf.pkcs11.Pkcs11Exception;
+import net.sf.jsignpdf.pkcs11.Pkcs11Profile;
+import net.sf.jsignpdf.pkcs11.Pkcs11Profiles;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -62,6 +67,7 @@ public class KeyStoreUtils {
     public static SortedSet<String> getKeyStores() {
         final Set<String> tmpKeyStores = java.security.Security.getAlgorithms("KeyStore");
         TreeSet<String> result = new TreeSet<String>(tmpKeyStores);
+        result.addAll(Pkcs11Profiles.getInstance().offeredTypes());
         result.add(CloudFoxy.getInstance().getName()); // an external CSP
         return result;
     }
@@ -80,7 +86,7 @@ public class KeyStoreUtils {
         if (StringUtils.equalsIgnoreCase(options.getKsType(), Constants.KEYSTORE_TYPE_CLOUDFOXY)) {
             tmpResult = CloudFoxy.getInstance().getAliasesList(options);
         } else {
-            final KeyStore tmpKs = loadKeyStore(options.getKsType(), options.getKsFile(), options.getKsPasswd());
+            final KeyStore tmpKs = loadKeyStore(options);
             if (tmpKs == null) {
                 throw new NullPointerException(RES.get("error.keystoreNull"));
             }
@@ -180,7 +186,7 @@ public class KeyStoreUtils {
      * @return key alias
      */
     public static String getKeyAlias(final BasicSignerOptions options) {
-        final KeyStore tmpKs = loadKeyStore(options.getKsType(), options.getKsFile(), options.getKsPasswd());
+        final KeyStore tmpKs = loadKeyStore(options);
 
         String tmpResult = getKeyAliasInternal(options, tmpKs);
         return tmpResult;
@@ -259,6 +265,50 @@ public class KeyStoreUtils {
             tmpPass = aKsPasswd.toCharArray();
         }
         return loadKeyStore(aKsType, aKsFile, tmpPass);
+    }
+
+    /**
+     * Opens the keystore selected in the options. For a PKCS#11 type the keystore is loaded from the provider of the
+     * selected profile, which is registered on first use.
+     *
+     * @throws Pkcs11Exception when the PKCS#11 profile cannot be resolved, registered or opened
+     */
+    public static KeyStore loadKeyStore(final BasicSignerOptions options) {
+        final Provider provider = PKCS11Utils.getProvider(options);
+        if (provider == null) {
+            return loadKeyStore(options.getKsType(), options.getKsFile(), options.getKsPasswd());
+        }
+        try {
+            final KeyStore tmpKs = KeyStore.getInstance(options.getKsType().trim().toUpperCase(Locale.ROOT), provider);
+            tmpKs.load(null, options.getKsPasswd());
+            fixAliases(tmpKs);
+            return tmpKs;
+        } catch (Exception e) {
+            LOGGER.log(Level.FINE, "Loading the PKCS#11 keystore failed", e);
+            final Pkcs11Profile profile = Pkcs11Profiles.getInstance().resolve(options.getKsProvider(),
+                    options.getKsType());
+            throw new Pkcs11Exception(RES.get("console.pkcs11.loadFailed", profile.id(), describeTokenError(e)), e);
+        }
+    }
+
+    static String describeTokenError(Throwable e) {
+        String root = null;
+        for (Throwable t = e; t != null; t = t.getCause() == t ? null : t.getCause()) {
+            final String msg = t.getMessage();
+            if (msg != null) {
+                if (msg.contains("CKR_PIN_INCORRECT") || msg.contains("CKR_PIN_LEN_RANGE")) {
+                    return RES.get("console.pkcs11.pinIncorrect");
+                }
+                if (msg.contains("CKR_PIN_LOCKED")) {
+                    return RES.get("console.pkcs11.pinLocked");
+                }
+                if (msg.contains("CKR_TOKEN_NOT_PRESENT") || msg.contains("Token has been removed")) {
+                    return RES.get("console.pkcs11.tokenNotPresent");
+                }
+                root = msg;
+            }
+        }
+        return root != null ? root : e.getClass().getName();
     }
 
     /**
@@ -377,7 +427,7 @@ public class KeyStoreUtils {
      */
     public static PrivateKeyInfo getPkInfo(BasicSignerOptions options)
             throws UnrecoverableKeyException, KeyStoreException, NoSuchAlgorithmException {
-        final KeyStore tmpKs = loadKeyStore(options.getKsType(), options.getKsFile(), options.getKsPasswd());
+        final KeyStore tmpKs = loadKeyStore(options);
 
         String tmpAlias = getKeyAliasInternal(options, tmpKs);
         if (tmpAlias == null) {

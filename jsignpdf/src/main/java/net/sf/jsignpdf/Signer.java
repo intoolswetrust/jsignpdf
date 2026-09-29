@@ -1,5 +1,6 @@
 package net.sf.jsignpdf;
 
+import static net.sf.jsignpdf.Constants.EXIT_CODE_COMMON_ERROR;
 import static net.sf.jsignpdf.Constants.EXIT_CODE_NO_COMMAND;
 import static net.sf.jsignpdf.Constants.EXIT_CODE_PARSE_ERR;
 import static net.sf.jsignpdf.Constants.NEW_LINE;
@@ -30,6 +31,10 @@ import net.sf.jsignpdf.types.SignatureFieldInfo;
 import net.sf.jsignpdf.utils.AppConfig;
 import net.sf.jsignpdf.utils.GuiUtils;
 import net.sf.jsignpdf.utils.KeyStoreUtils;
+import net.sf.jsignpdf.pkcs11.Pkcs11Exception;
+import net.sf.jsignpdf.pkcs11.Pkcs11Profile;
+import net.sf.jsignpdf.pkcs11.Pkcs11Profiles;
+import net.sf.jsignpdf.pkcs11.ProfileStatus;
 import net.sf.jsignpdf.utils.PKCS11Utils;
 import net.sf.jsignpdf.utils.UiLocale;
 
@@ -106,6 +111,49 @@ public class Signer {
     }
 
     /**
+     * Prints every PKCS#11 profile with its state. Each usable profile is registered to report it. Used by the
+     * {@code --list-keystore-providers} command.
+     */
+    private static void listKeyStoreProviders() {
+        final Pkcs11Profiles profiles = Pkcs11Profiles.getInstance();
+        LOGGER.info(RES.get("console.keystoreProviders"));
+        for (Pkcs11Profile profile : profiles.list()) {
+            profiles.register(profile.id());
+        }
+        for (ProfileStatus status : profiles.statuses()) {
+            final Pkcs11Profile profile = profiles.find(status.id()).orElse(null);
+            final String label = profile != null ? profile.displayLabel() : status.id();
+            final String types = profile != null ? String.join(", ", profile.offeredTypes()) : "-";
+            String state = status.state().name();
+            if (status.message() != null) {
+                state = state + " - " + status.message();
+            }
+            System.out.println(RES.get("console.listKsProviders.line", status.id(), label, types, state));
+        }
+    }
+
+    /**
+     * Resolves the PKCS#11 profile before any key access, so a missing or ambiguous profile is reported plainly.
+     *
+     * @return {@code false} when the selection cannot be resolved (the reason has been printed)
+     */
+    static boolean checkPkcs11Selection(BasicSignerOptions opts) {
+        if (!PKCS11Utils.isPkcs11Type(opts.getKsType())) {
+            if (StringUtils.isNotEmpty(opts.getKsProvider())) {
+                System.err.println(RES.get("console.pkcs11.ignoredProvider", String.valueOf(opts.getKsType())));
+            }
+            return true;
+        }
+        try {
+            Pkcs11Profiles.getInstance().resolve(opts.getKsProvider(), opts.getKsType());
+            return true;
+        } catch (Pkcs11Exception e) {
+            System.err.println(e.getMessage());
+            return false;
+        }
+    }
+
+    /**
      * Main.
      *
      * @param args
@@ -131,7 +179,7 @@ public class Signer {
             LOGGER.log(Level.WARNING, "Unable to re-configure SSL layer", e);
         }
 
-        PKCS11Utils.registerProvidersFromDefaultLocation();
+        PKCS11Utils.discoverProfiles();
 
         traceInfo();
         boolean showGui = true;
@@ -153,7 +201,16 @@ public class Signer {
                 }
                 return;
             }
+            if (tmpOpts.isListKeyStoreProviders()) {
+                listKeyStoreProviders();
+                exit(0);
+                return;
+            }
             if (tmpOpts.isListKeys()) {
+                if (!checkPkcs11Selection(tmpOpts)) {
+                    exit(EXIT_CODE_COMMON_ERROR);
+                    return;
+                }
                 final String[] tmpKeyAliases = KeyStoreUtils.getKeyAliases(tmpOpts);
                 LOGGER.info(RES.get("console.keys"));
                 // list certificate aliases in the keystore
@@ -181,11 +238,16 @@ public class Signer {
                 showGui = true;
             } else if (ArrayUtils.isNotEmpty(tmpOpts.getFiles())
                     || (!StringUtils.isEmpty(tmpOpts.getInFile()) && !StringUtils.isEmpty(tmpOpts.getOutFile()))) {
+                if (!checkPkcs11Selection(tmpOpts)) {
+                    exit(EXIT_CODE_COMMON_ERROR);
+                    return;
+                }
                 signFiles(tmpOpts);
                 exit(0);
             } else {
                 final boolean tmpCommand = tmpOpts.isPrintVersion() || tmpOpts.isPrintHelp() || tmpOpts.isListKeyStores()
-                        || tmpOpts.isListKeys() || tmpOpts.isListEngines() || tmpOpts.isListSigFields();
+                        || tmpOpts.isListKeys() || tmpOpts.isListEngines() || tmpOpts.isListSigFields()
+                        || tmpOpts.isListKeyStoreProviders();
                 if (!tmpCommand) {
                     // no valid command provided - print help and exit
                     printHelp();

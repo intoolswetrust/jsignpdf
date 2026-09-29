@@ -406,7 +406,7 @@ public class OpenPdfSigningEngine implements SigningEngine {
             exc.put(PdfName.CONTENTS, new Integer(contentEstimated * 2 + 2));
             sap.preClose(exc);
 
-            String provider = PKCS11Utils.getProviderNameForKeystoreType(options.getKsType());
+            String provider = PKCS11Utils.getProviderName(options);
             PdfPKCS7 sgn = new PdfPKCS7(key, chain, crlInfo.getCrls(), hashAlgorithm.getAlgorithmName(), provider, false);
             InputStream data = sap.getRangeStream();
             final MessageDigest messageDigest = MessageDigest.getInstance(hashAlgorithm.getAlgorithmName());

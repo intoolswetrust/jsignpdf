@@ -747,6 +747,7 @@ public class MainWindowController {
             // persisted value so toolbar buttons and accordion sections re-gate immediately (no restart).
             refreshActiveEngineFromConfig();
             signaturePropertiesController.refreshDefaultSuffix();
+            certificateSettingsController.refreshKeystoreChoices();
             resolveOutputFile();
         }
     }
