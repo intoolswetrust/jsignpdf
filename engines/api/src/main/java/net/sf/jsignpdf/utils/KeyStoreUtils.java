@@ -382,6 +382,8 @@ public class KeyStoreUtils {
             }
             tmpKs.load(tmpIS, aKsPasswd);
             fixAliases(tmpKs);
+        } catch (Pkcs11Exception e) {
+            throw e;
         } catch (Exception e) {
             e.printStackTrace();
             return null;

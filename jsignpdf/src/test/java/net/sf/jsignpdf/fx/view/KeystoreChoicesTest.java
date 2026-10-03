@@ -95,4 +95,15 @@ public class KeystoreChoicesTest {
         assertEquals(List.of("JSIGNPKCS11 — default", "PKCS11 — default"),
                 pkcs11(CertificateSettingsController.buildChoices("JSIGNPKCS11", "default")));
     }
+
+    @Test
+    public void tsaTypesOfferPkcs11OnlyForASingleProfile() throws Exception {
+        write("pkcs11/a.cfg", "name=a\n");
+        Pkcs11Profiles profiles = load();
+        assertTrue(TsaSettingsController.tsaKeyStoreTypes().contains("PKCS11"));
+        write("pkcs11/b.cfg", "name=b\n");
+        profiles.reload();
+        assertFalse(TsaSettingsController.tsaKeyStoreTypes().contains("PKCS11"));
+        assertTrue(TsaSettingsController.tsaKeyStoreTypes().contains("PKCS12"));
+    }
 }

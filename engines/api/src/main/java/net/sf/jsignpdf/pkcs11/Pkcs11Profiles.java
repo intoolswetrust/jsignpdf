@@ -8,6 +8,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.security.AuthProvider;
 import java.security.Provider;
 import java.security.Security;
 import java.util.ArrayList;
@@ -367,19 +368,28 @@ public final class Pkcs11Profiles {
             }
             try {
                 checkLibrary(p);
+                if (p.cfgName() != null && Security.getProvider(backend.providerNamePrefix() + p.cfgName()) != null) {
+                    throw new Pkcs11Exception(RES.get("console.pkcs11.providerExists",
+                            backend.providerNamePrefix() + p.cfgName()));
+                }
                 Provider provider = factory.create(backend, p.file());
                 if (provider == null) {
                     throw new Pkcs11Exception(RES.get("console.pkcs11.registrationFailed", backend.providerClass()));
                 }
-                synchronized (this) {
-                    if (profiles.get(key) != p) {
-                        throw new Pkcs11Exception(RES.get("console.pkcs11.profileChanged", p.id()));
+                try {
+                    synchronized (this) {
+                        if (profiles.get(key) != p) {
+                            throw new Pkcs11Exception(RES.get("console.pkcs11.profileChanged", p.id()));
+                        }
+                        if (Security.getProvider(provider.getName()) != null) {
+                            throw new Pkcs11Exception(RES.get("console.pkcs11.providerExists", provider.getName()));
+                        }
+                        Security.addProvider(provider);
+                        registered.computeIfAbsent(key, k -> new EnumMap<>(Pkcs11Backend.class)).put(backend, provider);
                     }
-                    if (Security.getProvider(provider.getName()) != null) {
-                        throw new Pkcs11Exception(RES.get("console.pkcs11.providerExists", provider.getName()));
-                    }
-                    Security.addProvider(provider);
-                    registered.computeIfAbsent(key, k -> new EnumMap<>(Pkcs11Backend.class)).put(backend, provider);
+                } catch (Pkcs11Exception e) {
+                    discard(provider);
+                    throw e;
                 }
                 LOGGER.info(RES.get("console.pkcs11.registered", p.id(), provider.getName()));
                 return provider;
@@ -393,6 +403,21 @@ public final class Pkcs11Profiles {
                 throw new Pkcs11Exception(message, e);
             }
         }
+    }
+
+    /**
+     * Releases a configured provider that will not be registered. The native library stays loaded (the JVM cannot
+     * unload it); ending the token session is all that can be done.
+     */
+    private static void discard(Provider provider) {
+        if (provider instanceof AuthProvider auth) {
+            try {
+                auth.logout();
+            } catch (Exception | LinkageError e) {
+                LOGGER.log(Level.FINE, "Logout of the discarded provider " + provider.getName() + " failed", e);
+            }
+        }
+        provider.clear();
     }
 
     private synchronized void recordFailure(String key, Pkcs11Profile p, String message) {

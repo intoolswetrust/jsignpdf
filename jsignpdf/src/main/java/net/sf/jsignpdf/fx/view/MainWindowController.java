@@ -748,6 +748,7 @@ public class MainWindowController {
             refreshActiveEngineFromConfig();
             signaturePropertiesController.refreshDefaultSuffix();
             certificateSettingsController.refreshKeystoreChoices();
+            tsaSettingsController.refreshKeystoreTypes();
             resolveOutputFile();
         }
     }

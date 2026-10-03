@@ -1130,7 +1130,7 @@ jsignpdf -kst PKCS11 -kspr opensc -ksp 123456 -lk # list keys on the token
 jsignpdf -kst PKCS11 -kspr opensc -ksp 123456 document.pdf
 ----
 
-With a single profile, `-kspr` can be omitted. The same rule applies to a TSA client certificate kept on a token (`-tsct PKCS11`): it works when exactly one profile provides the type. With several, JSignPdf stops with an error naming them instead of picking one. The selected profile is also stored with the other settings and in presets; a preset naming a profile that does not exist on this computer is reported as an error on the command line and leaves the keystore entry unselected in the GUI.
+With a single profile, `-kspr` can be omitted. A TSA client certificate kept on a token (`-tsct PKCS11`) has no profile option: it works only while exactly one profile provides the type. With several, signing fails with the same error, and the JavaFX TSA panel does not offer the PKCS#11 type. With several, JSignPdf stops with an error naming them instead of picking one. The selected profile is also stored with the other settings and in presets; a preset naming a profile that does not exist on this computer is reported as an error on the command line and leaves the keystore entry unselected in the GUI.
 
 === Catalog
 

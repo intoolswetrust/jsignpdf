@@ -1,5 +1,9 @@
 package net.sf.jsignpdf.fx.view;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import net.sf.jsignpdf.pkcs11.Pkcs11Profiles;
 import java.io.File;
 
 import static net.sf.jsignpdf.Constants.RES;
@@ -54,11 +58,35 @@ public class TsaSettingsController {
 
     private SigningOptionsViewModel viewModel;
 
+    /**
+     * Keystore types usable for the TSA client certificate. It has no profile selector, so a PKCS#11 type is offered
+     * only while exactly one profile provides it.
+     */
+    static List<String> tsaKeyStoreTypes() {
+        Pkcs11Profiles profiles = Pkcs11Profiles.getInstance();
+        List<String> result = new ArrayList<>();
+        for (String type : KeyStoreUtils.getKeyStores()) {
+            if (Pkcs11Profiles.isPkcs11Type(type)
+                    && profiles.list().stream().filter(p -> p.accepts(type)).count() != 1) {
+                continue;
+            }
+            result.add(type);
+        }
+        return result;
+    }
+
+    /** Re-reads the keystore types after the PKCS#11 profiles changed, keeping the current value. */
+    public void refreshKeystoreTypes() {
+        String current = cmbTsaCertFileType.getValue();
+        cmbTsaCertFileType.getItems().setAll(tsaKeyStoreTypes());
+        cmbTsaCertFileType.setValue(current);
+    }
+
     @FXML
     private void initialize() {
         cmbTsaAuthn.setItems(FXCollections.observableArrayList(ServerAuthentication.values()));
         cmbTsaHashAlg.setItems(FXCollections.observableArrayList(HashAlgorithm.values()));
-        cmbTsaCertFileType.setItems(FXCollections.observableArrayList(KeyStoreUtils.getKeyStores()));
+        cmbTsaCertFileType.setItems(FXCollections.observableArrayList(tsaKeyStoreTypes()));
         cmbProxyType.setItems(FXCollections.observableArrayList(Proxy.Type.values()));
 
         // Toggle TSA details visibility

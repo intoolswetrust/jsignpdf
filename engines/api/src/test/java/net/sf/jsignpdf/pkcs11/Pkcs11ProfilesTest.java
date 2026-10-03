@@ -366,7 +366,25 @@ public class Pkcs11ProfilesTest {
 
         write("pkcs11/b.cfg", cfg("b"));
         profiles.reload();
-        assertNull(KeyStoreUtils.loadKeyStore("PKCS11", null, "1234"));
+        expectFailure(() -> KeyStoreUtils.loadKeyStore("PKCS11", null, "1234"), "a, b");
+    }
+
+    @Test
+    public void providerCreatedForAChangedProfile_isDiscarded() throws Exception {
+        write("pkcs11/race.cfg", cfg("race"));
+        java.util.concurrent.atomic.AtomicReference<Provider> created = new java.util.concurrent.atomic.AtomicReference<>();
+        profiles = new Pkcs11Profiles(cfgDir, (b, f) -> {
+            Provider p = factory.create(b, f);
+            created.set(p);
+            Files.writeString(f, Files.readString(f) + "slotListIndex=1\n");
+            profiles.reload();
+            return p;
+        });
+        profiles.setUnregisterDelayMillis(0);
+        expectFailure(() -> profiles.provider("race", "PKCS11"), "race");
+        assertNull(Security.getProvider("SunPKCS11-race"));
+        assertTrue(created.get().getServices().isEmpty());
+        assertEquals(ProfileStatus.State.NOT_LOADED, profiles.status("race").state());
     }
 
     @Test(timeout = 20000)
