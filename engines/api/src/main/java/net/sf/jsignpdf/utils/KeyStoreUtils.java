@@ -371,9 +371,14 @@ public class KeyStoreUtils {
         KeyStore tmpKs = null;
         InputStream tmpIS = null;
         try {
-            tmpKs = KeyStore.getInstance(aKsType);
-            if (StringUtils.isNotEmpty(aKsFile)) {
-                tmpIS = new FileInputStream(aKsFile);
+            final Provider tmpProvider = Pkcs11Profiles.getInstance().provider(null, aKsType);
+            if (tmpProvider != null) {
+                tmpKs = KeyStore.getInstance(aKsType.trim().toUpperCase(Locale.ROOT), tmpProvider);
+            } else {
+                tmpKs = KeyStore.getInstance(aKsType);
+                if (StringUtils.isNotEmpty(aKsFile)) {
+                    tmpIS = new FileInputStream(aKsFile);
+                }
             }
             tmpKs.load(tmpIS, aKsPasswd);
             fixAliases(tmpKs);

@@ -68,7 +68,8 @@ public class Pkcs11CatalogTest {
 
     @Test
     public void toProfileBody_producesAParsableProfile() {
-        Pkcs11Catalog c = Pkcs11Catalog.parse(doc(entry("vendor", "\"config\":{\"slotListIndex\":1},"
+        Pkcs11Catalog c = Pkcs11Catalog.parse(doc(entry("vendor", "\"config\":{\"slotListIndex\":1,"
+                + "\"description\":\"Card reader 1\"},"
                 + "\"provider\":\"both\",\"tested\":[{\"os\":\"linux\",\"osVersion\":\"Fedora 42\",\"date\":\"2026-04-11\"},"
                 + "{\"os\":\"windows\",\"date\":\"2025-01-01\"}]")));
         Pkcs11Catalog.Entry e = c.entries().get(0);
@@ -81,6 +82,7 @@ public class Pkcs11CatalogTest {
         assertEquals("C:/Program Files (x86)/V/p11.dll", p.library());
         assertTrue(body.contains("library=\"C:/Program Files (x86)/V/p11.dll\"\n"));
         assertTrue(body.contains("slotListIndex=1\n"));
+        assertTrue(body.contains("description=\"Card reader 1\"\n"));
         assertFalse(body.contains("\\"));
         assertEquals("Fedora 42", Pkcs11Catalog.latestAttestation(e).osVersion());
     }

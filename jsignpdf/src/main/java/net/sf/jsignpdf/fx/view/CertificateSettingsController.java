@@ -78,7 +78,7 @@ public class CertificateSettingsController {
                 } else {
                     setText(item.display());
                     setDisable(!item.isEnabled());
-                    setTooltip(item.isEnabled() ? null : new Tooltip(item.disabledReason()));
+                    setTooltip(item.note() == null ? null : new Tooltip(item.note()));
                 }
             }
         });
@@ -130,7 +130,8 @@ public class CertificateSettingsController {
     public void refreshKeystoreChoices() {
         String type = viewModel == null ? null : viewModel.ksTypeProperty().get();
         String provider = viewModel == null ? null : viewModel.ksProviderProperty().get();
-        String renamed = Pkcs11Profiles.getInstance().renamedTo(provider);
+        Pkcs11Profiles profiles = Pkcs11Profiles.getInstance();
+        String renamed = provider == null || profiles.find(provider).isPresent() ? null : profiles.renamedTo(provider);
         if (renamed != null && viewModel != null) {
             provider = renamed;
             syncing = true;
@@ -164,24 +165,14 @@ public class CertificateSettingsController {
                     continue;
                 }
                 ProfileStatus st = profiles.status(p.id());
-                String reason = st != null && st.state() == ProfileStatus.State.FAILED ? st.message() : null;
-                result.add(new KeystoreChoice(type, p.id(), p.displayLabel(), reason));
-            }
-            if (Pkcs11Backend.SUN.keyStoreType().equalsIgnoreCase(type)) {
-                for (ProfileStatus st : profiles.statuses()) {
-                    if (st.state() == ProfileStatus.State.INVALID) {
-                        result.add(new KeystoreChoice(type, st.id(), st.id(), st.message()));
-                    }
-                }
+                String note = st != null && st.state() == ProfileStatus.State.FAILED
+                        ? RES.get("jfx.gui.cert.pkcs11.failed", st.message()) : null;
+                result.add(new KeystoreChoice(type, p.id(), p.displayLabel(), note, true));
             }
         }
-        if (Pkcs11Profiles.isPkcs11Type(currentType) && profiles.list().stream().anyMatch(p -> p.accepts(currentType))
-                && result.stream().noneMatch(c -> c.type().equalsIgnoreCase(currentType))) {
-            for (Pkcs11Profile p : profiles.list()) {
-                if (p.accepts(currentType)) {
-                    result.add(new KeystoreChoice(currentType.toUpperCase(java.util.Locale.ROOT), p.id(),
-                            p.displayLabel(), null));
-                }
+        for (ProfileStatus st : profiles.statuses()) {
+            if (st.state() == ProfileStatus.State.INVALID) {
+                result.add(new KeystoreChoice(Pkcs11Backend.SUN.keyStoreType(), st.id(), st.id(), st.message(), false));
             }
         }
         return result;

@@ -71,9 +71,7 @@ public class Pkcs11DetectorTest {
         assertEquals(older, found.get(1).library());
 
         Pkcs11Detector flatpak = new Pkcs11Detector("linux", "x86_64", env::get, null, true);
-        List<Pkcs11Detector.Candidate> inSandbox = flatpak.detect(catalog);
-        assertEquals(1, inSandbox.size());
-        assertEquals(Pkcs11Detector.FLATPAK_ENTRY_ID, inSandbox.get(0).entry().id());
-        assertTrue(flatpak.applicableEntries(catalog).stream().allMatch(e -> e.id().equals("p11-kit-proxy")));
+        assertTrue(flatpak.detect(catalog).isEmpty());
+        assertTrue(flatpak.applicableEntries(catalog).isEmpty());
     }
 }

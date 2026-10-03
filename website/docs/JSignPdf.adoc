@@ -775,7 +775,7 @@ By default, JSignPdf displays keystore types provided by Java Runtime itself and
 
 JSignPdf has been extended to support remote/external keystore types. The first entry is "CloudFoxy" (https://gitlab.com/cloudfoxy), which is a REST API for physical smart cards, initially developed to support eIDAS signatures.
 
-Hardware tokens appear as one entry per PKCS#11 profile, labelled `PKCS11 — <label>`. The keystore file field is hidden for them. A profile whose driver failed to load is shown greyed out with the reason as a tooltip. See <<Using hardware tokens for signing>>.
+Hardware tokens appear as one entry per PKCS#11 profile, labelled `PKCS11 — <label>`. The keystore file field is hidden for them. A profile file that cannot be used is shown greyed out with the reason as a tooltip; a profile whose driver failed to load stays selectable, so _Load Keys_ can retry. See <<Using hardware tokens for signing>>.
 
 If you use PKCS#12 or Java keystore types (JKS, JCEKS), you have to select the file where the keys are stored and provide the password of this file. Path to the keystore file can be inserted directly by typing or you can use the browse button to navigate through the file system with Open File Dialog.
 
@@ -1130,15 +1130,15 @@ jsignpdf -kst PKCS11 -kspr opensc -ksp 123456 -lk # list keys on the token
 jsignpdf -kst PKCS11 -kspr opensc -ksp 123456 document.pdf
 ----
 
-With a single profile, `-kspr` can be omitted. With several, JSignPdf stops with an error naming them instead of picking one. The selected profile is also stored with the other settings and in presets; a preset naming a profile that does not exist on this computer is reported as an error on the command line and leaves the keystore entry unselected in the GUI.
+With a single profile, `-kspr` can be omitted. The same rule applies to a TSA client certificate kept on a token (`-tsct PKCS11`): it works when exactly one profile provides the type. With several, JSignPdf stops with an error naming them instead of picking one. The selected profile is also stored with the other settings and in presets; a preset naming a profile that does not exist on this computer is reported as an error on the command line and leaves the keystore entry unselected in the GUI.
 
 === Catalog
 
-JSignPdf bundles a small, read-only catalog of known drivers (OpenSC, p11-kit proxy, YubiKey PIV, Belgian eID, SafeNet eToken) with their usual install paths per operating system. It is used by _Detect tokens_ and _Add from catalog_ and never applied automatically. Entries are structurally reviewed, not tested by the JSignPdf maintainers; the confirmation dialog shows how many users reported success.
+JSignPdf bundles a small, read-only catalog of known drivers (OpenSC, the p11-kit proxy, YubiKey PIV, Belgian eID, SafeNet eToken) with their usual install paths per operating system. It is used by _Detect tokens_ and _Add from catalog_ and never applied automatically. Entries are structurally reviewed, not tested by the JSignPdf maintainers; the confirmation dialog shows how many users reported success.
 
 === Flatpak
 
-Inside the Flatpak sandbox the host's driver libraries are not usable. Use the p11-kit proxy (`p11-kit-proxy.so` from the runtime), which reaches the tokens registered with p11-kit on the host through Flatpak's p11-kit forwarding; _Detect tokens_ offers only this entry there.
+Hardware tokens are not supported in the Flatpak build. Host driver libraries cannot be loaded inside the sandbox and the smart-card service is not reachable from it, so _Detect tokens_ and _Add from catalog_ offer nothing there. Use a native package (DEB, RPM, ZIP) for signing with a token.
 
 === Common errors
 

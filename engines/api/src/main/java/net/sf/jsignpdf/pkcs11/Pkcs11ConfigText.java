@@ -113,11 +113,17 @@ public final class Pkcs11ConfigText {
      * does not accept in a bare word.
      */
     public static String formatLibraryValue(String path) {
-        String p = path.replace('\\', '/');
-        if (p.matches("[A-Za-z0-9:._/$*+~-]+")) {
-            return p;
+        return quoteIfNeeded(path.replace('\\', '/'));
+    }
+
+    /**
+     * Wraps a value in double quotes unless it is a single word for the SunPKCS11 parser.
+     */
+    public static String quoteIfNeeded(String value) {
+        if (value.matches("[A-Za-z0-9:._/$*+~-]+")) {
+            return value;
         }
-        return "\"" + p.replace("\"", "") + "\"";
+        return "\"" + value.replace("\"", "") + "\"";
     }
 
     private static int firstNonMetadataIndex(List<String> lines) {

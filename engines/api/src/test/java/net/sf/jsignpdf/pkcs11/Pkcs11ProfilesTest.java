@@ -320,11 +320,77 @@ public class Pkcs11ProfilesTest {
         write("pkcs11/bad name.cfg", cfg("bad"));
         load();
         assertNotNull(profiles.validateEdits(List.of(new Pkcs11Profiles.ProfileEdit(null, "bad id", ""))));
-        assertNotNull(profiles.validateEdits(List.of(new Pkcs11Profiles.ProfileEdit(null, "default", ""))));
+        assertNull(profiles.validateEdits(List.of(new Pkcs11Profiles.ProfileEdit(null, "default", ""))));
         assertNotNull(profiles.validateEdits(List.of(new Pkcs11Profiles.ProfileEdit(null, "x", ""),
                 new Pkcs11Profiles.ProfileEdit(null, "X", ""))));
         assertNotNull(profiles.validateEdits(List.of(new Pkcs11Profiles.ProfileEdit(null, "taken", ""))));
         assertNull(profiles.validateEdits(List.of(new Pkcs11Profiles.ProfileEdit("taken", "taken", ""))));
+    }
+
+    @Test
+    public void defaultProfile_canBeRecreatedButNotRenamed() throws Exception {
+        load();
+        profiles.applyEdits(List.of(new Pkcs11Profiles.ProfileEdit(null, "default", cfg("JSignPdf"))));
+        assertEquals(cfg("JSignPdf"), Files.readString(cfgDir.resolve("pkcs11.cfg")));
+        assertEquals(List.of("default"), ids(profiles.list()));
+        assertNotNull(profiles.validateEdits(List.of(new Pkcs11Profiles.ProfileEdit("default", "other", ""))));
+    }
+
+    @Test
+    public void rename_isForgottenWhenTheOldIdIsReused() throws Exception {
+        write("pkcs11/a.cfg", cfg("a"));
+        load();
+        profiles.applyEdits(List.of(new Pkcs11Profiles.ProfileEdit("a", "b", cfg("a"))));
+        assertEquals("b", profiles.renamedTo("a"));
+        profiles.applyEdits(List.of(new Pkcs11Profiles.ProfileEdit("b", "b", cfg("b")),
+                new Pkcs11Profiles.ProfileEdit(null, "a", cfg("a"))));
+        assertNull(profiles.renamedTo("a"));
+    }
+
+    @Test
+    public void offeredTypes_includeJsignForLegacyFileWithoutProviderLine() throws Exception {
+        write("pkcs11.cfg", cfg("JSignPdf"));
+        load();
+        assertEquals(List.of("PKCS11", "JSIGNPKCS11"), List.copyOf(profiles.offeredTypes()));
+        write("pkcs11.cfg", "#jsignpdf:provider=sun\n" + cfg("JSignPdf"));
+        profiles.reload();
+        assertEquals(List.of("PKCS11"), List.copyOf(profiles.offeredTypes()));
+    }
+
+    @Test
+    public void typeOnlyKeyStoreLoading_usesTheSingleProfile() throws Exception {
+        write("pkcs11/a.cfg", cfg("a"));
+        Pkcs11Profiles.setInstance(load());
+        KeyStore ks = KeyStoreUtils.loadKeyStore("PKCS11", null, "1234");
+        assertEquals("SunPKCS11-a", ks.getProvider().getName());
+
+        write("pkcs11/b.cfg", cfg("b"));
+        profiles.reload();
+        assertNull(KeyStoreUtils.loadKeyStore("PKCS11", null, "1234"));
+    }
+
+    @Test(timeout = 20000)
+    public void hangingDriver_doesNotBlockListingOrStatus() throws Exception {
+        write("pkcs11/slow.cfg", cfg("slow"));
+        java.util.concurrent.CountDownLatch entered = new java.util.concurrent.CountDownLatch(1);
+        java.util.concurrent.CountDownLatch release = new java.util.concurrent.CountDownLatch(1);
+        profiles = new Pkcs11Profiles(cfgDir, (b, f) -> {
+            entered.countDown();
+            release.await();
+            return factory.create(b, f);
+        });
+        profiles.setUnregisterDelayMillis(0);
+        Thread loader = new Thread(() -> profiles.register("slow"));
+        loader.start();
+        assertTrue(entered.await(10, java.util.concurrent.TimeUnit.SECONDS));
+        try {
+            assertEquals(List.of("slow"), ids(profiles.list()));
+            assertEquals(ProfileStatus.State.NOT_LOADED, profiles.status("slow").state());
+        } finally {
+            release.countDown();
+            loader.join();
+        }
+        assertEquals(ProfileStatus.State.OK, profiles.status("slow").state());
     }
 
     private static void expectFailure(Runnable r, String messagePart) {

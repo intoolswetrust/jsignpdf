@@ -40,7 +40,7 @@
       ],
       "config": { "slotListIndex": 0 },
       "provider": "sun",
-      "notes": "Exposes every module registered with p11-kit. Inside Flatpak it reaches host tokens through p11-kit forwarding.",
+      "notes": "Exposes every module registered with p11-kit on this system.",
       "tested": []
     },
     {

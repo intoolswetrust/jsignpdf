@@ -21,9 +21,6 @@ import java.util.regex.Pattern;
  */
 public final class Pkcs11Detector {
 
-    /** The only catalog entry offered inside Flatpak, where host library paths are not usable. */
-    public static final String FLATPAK_ENTRY_ID = "p11-kit-proxy";
-
     private static final Pattern WIN_VAR = Pattern.compile("%([A-Za-z0-9_()]+)%");
     private static final Pattern UNIX_VAR = Pattern.compile("\\$\\{([A-Za-z0-9_]+)\\}|\\$([A-Za-z0-9_]+)");
 
@@ -83,14 +80,14 @@ public final class Pkcs11Detector {
     }
 
     /**
-     * Catalog entries usable on this platform (only {@link #FLATPAK_ENTRY_ID} inside Flatpak).
+     * Catalog entries usable on this platform. None inside Flatpak, where host driver libraries cannot be loaded.
      */
     public List<Pkcs11Catalog.Entry> applicableEntries(Pkcs11Catalog catalog) {
         List<Pkcs11Catalog.Entry> result = new ArrayList<>();
+        if (flatpak) {
+            return result;
+        }
         for (Pkcs11Catalog.Entry e : catalog.entries()) {
-            if (flatpak && !FLATPAK_ENTRY_ID.equals(e.id())) {
-                continue;
-            }
             if (!e.librariesFor(os, arch).isEmpty()) {
                 result.add(e);
             }

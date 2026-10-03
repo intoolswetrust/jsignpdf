@@ -246,7 +246,10 @@ public final class Pkcs11Catalog {
         sb.append("name=").append(profileId).append('\n');
         sb.append("library=").append(Pkcs11ConfigText.formatLibraryValue(libraryPath)).append('\n');
         for (Map.Entry<String, Object> e : entry.config().entrySet()) {
-            sb.append(e.getKey()).append('=').append(e.getValue()).append('\n');
+            Object v = e.getValue();
+            sb.append(e.getKey()).append('=')
+                    .append(v instanceof String str ? Pkcs11ConfigText.quoteIfNeeded(str) : String.valueOf(v))
+                    .append('\n');
         }
         return sb.toString();
     }

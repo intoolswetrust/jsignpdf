@@ -211,7 +211,14 @@ public class Signer {
                     exit(EXIT_CODE_COMMON_ERROR);
                     return;
                 }
-                final String[] tmpKeyAliases = KeyStoreUtils.getKeyAliases(tmpOpts);
+                final String[] tmpKeyAliases;
+                try {
+                    tmpKeyAliases = KeyStoreUtils.getKeyAliases(tmpOpts);
+                } catch (Pkcs11Exception e) {
+                    System.err.println(e.getMessage());
+                    exit(EXIT_CODE_COMMON_ERROR);
+                    return;
+                }
                 LOGGER.info(RES.get("console.keys"));
                 // list certificate aliases in the keystore
                 for (String tmpCert : tmpKeyAliases) {

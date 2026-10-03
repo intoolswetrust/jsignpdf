@@ -534,10 +534,6 @@ public class PreferencesController {
                 return RES.get("console.pkcs11.caseCollision", id, d.id());
             }
         }
-        if (Pkcs11Profiles.DEFAULT_ID.equalsIgnoreCase(id) && (self == null || !self.isDefault())
-                && vm.pkcs11Profiles().stream().anyMatch(Pkcs11ProfileDraft::isDefault)) {
-            return RES.get("console.pkcs11.reservedId", id);
-        }
         return null;
     }
 
@@ -583,7 +579,7 @@ public class PreferencesController {
             return;
         }
         if (selectedDraft.isDefault()) {
-            showError(RES.get("jfx.gui.preferences.pkcs11.defaultNoRename"));
+            showError(RES.get("console.pkcs11.defaultRename"));
             return;
         }
         String id = askPkcs11Id(selectedDraft.id(), selectedDraft);

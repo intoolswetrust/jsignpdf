@@ -56,6 +56,7 @@ public final class Pkcs11Profiles {
     private final Path configDir;
     private final ProviderFactory factory;
     private long unregisterDelayMillis = 1000L;
+    private final Object registrationLock = new Object();
 
     private final Map<String, Pkcs11Profile> profiles = new LinkedHashMap<>();
     private final Map<String, ProfileStatus> invalid = new LinkedHashMap<>();
@@ -253,12 +254,17 @@ public final class Pkcs11Profiles {
     }
 
     /**
-     * Keystore types offered by at least one usable profile.
+     * Keystore types accepted by at least one usable profile, including {@code JSIGNPKCS11} for a legacy file without
+     * a {@code provider} metadata line.
      */
     public synchronized Set<String> offeredTypes() {
         Set<String> types = new LinkedHashSet<>();
         for (Pkcs11Profile p : profiles.values()) {
-            types.addAll(p.offeredTypes());
+            for (Pkcs11Backend b : Pkcs11Backend.values()) {
+                if (p.accepts(b.keyStoreType())) {
+                    types.add(b.keyStoreType());
+                }
+            }
         }
         return types;
     }
@@ -319,7 +325,7 @@ public final class Pkcs11Profiles {
      * Resolves the profile and returns its registered provider for the keystore type, registering it on first use.
      * Returns {@code null} when the type is not a PKCS#11 type.
      */
-    public synchronized Provider provider(String profileId, String keyStoreType) {
+    public Provider provider(String profileId, String keyStoreType) {
         Pkcs11Profile p = resolve(profileId, keyStoreType);
         if (p == null) {
             return null;
@@ -330,8 +336,8 @@ public final class Pkcs11Profiles {
     /**
      * Registers every provider of the profile. Returns the resulting status; never throws.
      */
-    public synchronized ProfileStatus register(String id) {
-        Pkcs11Profile p = profiles.get(key(id));
+    public ProfileStatus register(String id) {
+        Pkcs11Profile p = find(id).orElse(null);
         if (p == null) {
             return status(id);
         }
@@ -345,34 +351,53 @@ public final class Pkcs11Profiles {
         return status(id);
     }
 
+    /**
+     * The driver is loaded under {@link #registrationLock} only, so a hanging driver blocks other registrations but not
+     * {@link #list()} or {@link #status(String)}.
+     */
     private Provider register(Pkcs11Profile p, Pkcs11Backend backend) {
         String key = key(p.id());
-        Map<Pkcs11Backend, Provider> byBackend = registered.get(key);
-        if (byBackend != null && byBackend.containsKey(backend)) {
-            return byBackend.get(backend);
+        synchronized (registrationLock) {
+            synchronized (this) {
+                Map<Pkcs11Backend, Provider> byBackend = registered.get(key);
+                if (byBackend != null && byBackend.containsKey(backend)) {
+                    return byBackend.get(backend);
+                }
+                failures.remove(key);
+            }
+            try {
+                checkLibrary(p);
+                Provider provider = factory.create(backend, p.file());
+                if (provider == null) {
+                    throw new Pkcs11Exception(RES.get("console.pkcs11.registrationFailed", backend.providerClass()));
+                }
+                synchronized (this) {
+                    if (profiles.get(key) != p) {
+                        throw new Pkcs11Exception(RES.get("console.pkcs11.profileChanged", p.id()));
+                    }
+                    if (Security.getProvider(provider.getName()) != null) {
+                        throw new Pkcs11Exception(RES.get("console.pkcs11.providerExists", provider.getName()));
+                    }
+                    Security.addProvider(provider);
+                    registered.computeIfAbsent(key, k -> new EnumMap<>(Pkcs11Backend.class)).put(backend, provider);
+                }
+                LOGGER.info(RES.get("console.pkcs11.registered", p.id(), provider.getName()));
+                return provider;
+            } catch (Pkcs11Exception e) {
+                recordFailure(key, p, e.getMessage());
+                throw e;
+            } catch (Throwable e) {
+                String message = describe(p, e);
+                LOGGER.log(Level.FINE, message, e);
+                recordFailure(key, p, message);
+                throw new Pkcs11Exception(message, e);
+            }
         }
-        failures.remove(key);
-        try {
-            checkLibrary(p);
-            Provider provider = factory.create(backend, p.file());
-            if (provider == null) {
-                throw new Pkcs11Exception(RES.get("console.pkcs11.registrationFailed", backend.providerClass()));
-            }
-            if (Security.getProvider(provider.getName()) != null) {
-                throw new Pkcs11Exception(RES.get("console.pkcs11.providerExists", provider.getName()));
-            }
-            Security.addProvider(provider);
-            registered.computeIfAbsent(key, k -> new EnumMap<>(Pkcs11Backend.class)).put(backend, provider);
-            LOGGER.info(RES.get("console.pkcs11.registered", p.id(), provider.getName()));
-            return provider;
-        } catch (Pkcs11Exception e) {
-            failures.put(key, e.getMessage());
-            throw e;
-        } catch (Throwable e) {
-            String message = describe(p, e);
-            LOGGER.log(Level.FINE, message, e);
+    }
+
+    private synchronized void recordFailure(String key, Pkcs11Profile p, String message) {
+        if (profiles.get(key) == p) {
             failures.put(key, message);
-            throw new Pkcs11Exception(message, e);
         }
     }
 
@@ -403,7 +428,7 @@ public final class Pkcs11Profiles {
             return RES.get("console.pkcs11.archMismatch", String.valueOf(p.library()),
                     System.getProperty("os.arch", "?"));
         }
-        if (text.contains("slotlistindex") || text.contains("slot")) {
+        if (text.contains("slotlistindex") || text.contains("slot id") || text.contains("no slot")) {
             return RES.get("console.pkcs11.noSlot", String.valueOf(root));
         }
         return RES.get("console.pkcs11.registrationFailed",
@@ -475,9 +500,8 @@ public final class Pkcs11Profiles {
             if (!isValidId(e.id())) {
                 return RES.get("console.pkcs11.invalidId", String.valueOf(e.id()));
             }
-            boolean wasDefault = DEFAULT_ID.equalsIgnoreCase(e.originalId());
-            if (DEFAULT_ID.equalsIgnoreCase(e.id()) != wasDefault) {
-                return RES.get("console.pkcs11.reservedId", e.id());
+            if (DEFAULT_ID.equalsIgnoreCase(e.originalId()) && !DEFAULT_ID.equalsIgnoreCase(e.id())) {
+                return RES.get("console.pkcs11.defaultRename");
             }
             String previous = seen.putIfAbsent(key(e.id()), e.id());
             if (previous != null) {
@@ -494,33 +518,20 @@ public final class Pkcs11Profiles {
     }
 
     /**
-     * Writes a full set of edited profiles: profiles missing from the list are deleted, renamed ones are moved, and
-     * every other one is written with {@code name=<id>} forced (except the legacy file). Invalid profile files are left
-     * alone. Reloads afterwards, which unregisters every changed profile.
+     * Writes a full set of edited profiles: every profile is written with {@code name=<id>} forced (except the legacy
+     * file), then the files of removed and renamed profiles are deleted. Invalid profile files are left alone. Reloads
+     * afterwards, which unregisters every changed profile.
      */
     public synchronized void applyEdits(List<ProfileEdit> edits) throws IOException {
         if (configDir == null) {
             return;
         }
-        Set<String> kept = edits.stream().map(ProfileEdit::originalId).filter(Objects::nonNull).map(Pkcs11Profiles::key)
-                .collect(Collectors.toSet());
-        for (Pkcs11Profile p : new ArrayList<>(profiles.values())) {
-            if (!kept.contains(key(p.id()))) {
-                Files.deleteIfExists(p.file());
-            }
-        }
-        for (ProfileEdit e : edits) {
-            Pkcs11Profile old = e.originalId() == null ? null : profiles.get(key(e.originalId()));
-            if (old != null && !old.file().equals(fileFor(e.id()))) {
-                Files.deleteIfExists(old.file());
-            }
-        }
+        List<Path> written = new ArrayList<>();
         for (ProfileEdit e : edits) {
             Path target = fileFor(e.id());
             boolean legacy = DEFAULT_ID.equalsIgnoreCase(e.id());
             String body = e.body() == null ? "" : e.body();
             if (legacy && body.isBlank()) {
-                Files.deleteIfExists(target);
                 continue;
             }
             if (!legacy) {
@@ -531,11 +542,25 @@ public final class Pkcs11Profiles {
             if (old == null || !old.file().equals(target) || !old.body().equals(body)) {
                 Files.writeString(target, body, StandardCharsets.UTF_8);
             }
+            written.add(target);
             if (e.originalId() != null && !key(e.originalId()).equals(key(e.id()))) {
                 recordRename(e.originalId(), e.id());
             }
         }
+        for (Pkcs11Profile p : new ArrayList<>(profiles.values())) {
+            boolean kept = false;
+            for (Path w : written) {
+                if (Files.exists(p.file()) && Files.isSameFile(p.file(), w)) {
+                    kept = true;
+                    break;
+                }
+            }
+            if (!kept) {
+                Files.deleteIfExists(p.file());
+            }
+        }
         reload();
+        renames.keySet().removeIf(profiles::containsKey);
     }
 
     private String availableIds() {

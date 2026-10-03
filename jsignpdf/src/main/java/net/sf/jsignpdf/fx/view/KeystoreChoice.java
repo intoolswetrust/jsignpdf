@@ -8,16 +8,17 @@ import java.util.Objects;
  * @param type the keystore type
  * @param profileId the PKCS#11 profile id, {@code null} for other types
  * @param label the profile label shown next to the type
- * @param disabledReason why the entry cannot be selected, {@code null} when it can
+ * @param note tooltip text: why the entry is disabled, or the last registration failure of a selectable one
+ * @param enabled {@code false} for a profile file that cannot be used
  */
-public record KeystoreChoice(String type, String profileId, String label, String disabledReason) {
+public record KeystoreChoice(String type, String profileId, String label, String note, boolean enabled) {
 
     public static KeystoreChoice plain(String type) {
-        return new KeystoreChoice(type, null, null, null);
+        return new KeystoreChoice(type, null, null, null, true);
     }
 
     public boolean isEnabled() {
-        return disabledReason == null;
+        return enabled;
     }
 
     public boolean matches(String otherType, String otherProfileId) {

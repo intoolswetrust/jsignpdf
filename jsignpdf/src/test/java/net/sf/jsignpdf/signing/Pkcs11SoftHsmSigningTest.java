@@ -2,6 +2,7 @@ package net.sf.jsignpdf.signing;
 
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assume.assumeTrue;
 
@@ -61,10 +62,13 @@ public class Pkcs11SoftHsmSigningTest extends SigningTestBase {
         assumeTrue("SOFTHSM2_CONF not set", conf != null);
         assumeTrue("SoftHSM2 library not found", library != null && Files.isRegularFile(Path.of(library)));
 
-        Path confFile = Path.of(conf);
+        Path confFile = Path.of(conf).toAbsolutePath().normalize();
         Path base = confFile.getParent();
+        assumeTrue("SOFTHSM2_CONF is not the build's target/softhsm/softhsm2.conf, not touching it: " + confFile,
+                isBuildScratchConf(confFile));
         Path tokens = base.resolve("tokens");
-        deleteRecursively(base);
+        deleteRecursively(tokens);
+        deleteRecursively(base.resolve("cfg"));
         Files.createDirectories(tokens);
         Files.writeString(confFile, "directories.tokendir = " + tokens.toAbsolutePath() + "\nobjectstore.backend = file\n");
 
@@ -104,18 +108,44 @@ public class Pkcs11SoftHsmSigningTest extends SigningTestBase {
     }
 
     @Test
-    public void signingUsesTheSelectedProfile() throws Exception {
+    public void openPdfSigningUsesTheSelectedProfile() throws Exception {
+        assertSignedWithTokenB("openpdf");
+    }
+
+    @Test
+    public void dssSigningUsesTheSelectedProfile() throws Exception {
+        assertSignedWithTokenB("dss");
+    }
+
+    @Test
+    public void scratchConfGuardRejectsForeignPaths() {
+        assertTrue(isBuildScratchConf(Path.of("/work/jsignpdf/target/softhsm/softhsm2.conf")));
+        assertFalse(isBuildScratchConf(Path.of("/home/dev/softhsm2.conf")));
+        assertFalse(isBuildScratchConf(Path.of("/etc/softhsm/softhsm2.conf")));
+        assertFalse(isBuildScratchConf(Path.of("softhsm2.conf")));
+    }
+
+    private void assertSignedWithTokenB(String engine) throws Exception {
         File inFile = new File(tempFolder.getRoot(), "input.pdf");
         Files.copy(getUnsignedPdf().toPath(), inFile.toPath());
         BasicSignerOptions options = new BasicSignerOptions();
         options.setKsType("PKCS11");
         options.setKsProvider("b");
+        options.setEngine(engine);
         options.setKsPasswd(PIN.toCharArray());
         options.setInFile(inFile.getAbsolutePath());
         options.setOutFile(new File(tempFolder.getRoot(), "output.pdf").getAbsolutePath());
         ValidationResult result = signAndValidate(options);
         assertTrue(result.signatureValid);
         assertTrue(result.signerCertificateSubject, result.signerCertificateSubject.contains("Token B"));
+    }
+
+    /** Only a conf file the surefire configuration points into {@code target/softhsm/} is written or cleaned. */
+    static boolean isBuildScratchConf(Path confFile) {
+        Path dir = confFile.getParent();
+        return dir != null && dir.getParent() != null && "softhsm2.conf".equals(confFile.getFileName().toString())
+                && "softhsm".equals(dir.getFileName().toString())
+                && "target".equals(dir.getParent().getFileName().toString());
     }
 
     private static long initToken(String util, String library, Path conf, String label) throws Exception {
