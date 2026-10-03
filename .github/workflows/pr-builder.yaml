@@ -25,6 +25,9 @@ jobs:
           java-version: 21
           distribution: 'temurin'
           cache: 'maven'
+      - name: Install SoftHSM2 for the PKCS#11 integration test
+        if: runner.os == 'Linux'
+        run: sudo apt-get update && sudo apt-get install -y --no-install-recommends softhsm2
       - name: Build with Maven
         run: mvn --batch-mode --update-snapshots verify
       - name: Upload surefire reports

@@ -1,0 +1,108 @@
+{
+  "schemaVersion": 1,
+  "updated": "2026-09-29",
+  "entries": [
+    {
+      "id": "opensc",
+      "revision": 1,
+      "label": "OpenSC (generic smart cards)",
+      "vendor": "OpenSC Project",
+      "infoUrl": "https://github.com/OpenSC/OpenSC/wiki",
+      "minSchemaVersion": 1,
+      "libraries": [
+        { "os": "linux", "arch": ["x86_64"], "paths": [
+          "/usr/lib/x86_64-linux-gnu/opensc-pkcs11.so", "/usr/lib64/opensc-pkcs11.so",
+          "/usr/lib64/pkcs11/opensc-pkcs11.so", "/usr/lib/opensc-pkcs11.so", "/usr/lib/pkcs11/opensc-pkcs11.so" ] },
+        { "os": "linux", "arch": ["aarch64"], "paths": [
+          "/usr/lib/aarch64-linux-gnu/opensc-pkcs11.so", "/usr/lib64/opensc-pkcs11.so",
+          "/usr/lib64/pkcs11/opensc-pkcs11.so", "/usr/lib/opensc-pkcs11.so" ] },
+        { "os": "windows", "arch": ["x86_64", "aarch64"], "paths": [
+          "%ProgramFiles%\\OpenSC Project\\OpenSC\\pkcs11\\opensc-pkcs11.dll" ] },
+        { "os": "macos", "arch": ["x86_64", "aarch64"], "paths": [
+          "/Library/OpenSC/lib/opensc-pkcs11.so", "/opt/homebrew/lib/opensc-pkcs11.so",
+          "/usr/local/lib/opensc-pkcs11.so" ] }
+      ],
+      "config": { "slotListIndex": 0 },
+      "provider": "sun",
+      "notes": "Covers many national eID cards and PIV tokens. Use slotListIndex to pick another reader.",
+      "tested": []
+    },
+    {
+      "id": "p11-kit-proxy",
+      "revision": 1,
+      "label": "p11-kit proxy (all system PKCS#11 modules)",
+      "vendor": "p11-kit",
+      "infoUrl": "https://p11-glue.github.io/p11-glue/p11-kit.html",
+      "minSchemaVersion": 1,
+      "libraries": [
+        { "os": "linux", "arch": ["x86_64", "aarch64"], "paths": [
+          "/usr/lib/*-linux-gnu/p11-kit-proxy.so", "/usr/lib64/p11-kit-proxy.so", "/usr/lib/p11-kit-proxy.so" ] }
+      ],
+      "config": { "slotListIndex": 0 },
+      "provider": "sun",
+      "notes": "Exposes every module registered with p11-kit on this system.",
+      "tested": []
+    },
+    {
+      "id": "yubikey-piv",
+      "revision": 1,
+      "label": "YubiKey PIV (ykcs11)",
+      "vendor": "Yubico",
+      "infoUrl": "https://developers.yubico.com/yubico-piv-tool/YKCS11/",
+      "minSchemaVersion": 1,
+      "libraries": [
+        { "os": "linux", "arch": ["x86_64", "aarch64"], "paths": [
+          "/usr/lib/*-linux-gnu/libykcs11.so", "/usr/lib64/libykcs11.so", "/usr/lib/libykcs11.so",
+          "/usr/local/lib/libykcs11.so" ] },
+        { "os": "windows", "arch": ["x86_64"], "paths": [
+          "%ProgramFiles%\\Yubico\\Yubico PIV Tool\\bin\\libykcs11.dll" ] },
+        { "os": "macos", "arch": ["x86_64", "aarch64"], "paths": [
+          "/usr/local/lib/libykcs11.dylib", "/opt/homebrew/lib/libykcs11.dylib" ] }
+      ],
+      "config": { "slotListIndex": 0 },
+      "provider": "sun",
+      "notes": "Requires yubico-piv-tool. The PIN is the PIV PIN.",
+      "tested": []
+    },
+    {
+      "id": "be-eid",
+      "revision": 1,
+      "label": "Belgian eID",
+      "vendor": "BOSA",
+      "infoUrl": "https://eid.belgium.be/",
+      "minSchemaVersion": 1,
+      "libraries": [
+        { "os": "linux", "arch": ["x86_64", "aarch64"], "paths": [
+          "/usr/lib/*-linux-gnu/libbeidpkcs11.so.0", "/usr/lib64/libbeidpkcs11.so.0", "/usr/lib/libbeidpkcs11.so.0" ] },
+        { "os": "windows", "arch": ["x86_64"], "paths": [
+          "%SystemRoot%\\System32\\beidpkcs11.dll" ] },
+        { "os": "macos", "arch": ["x86_64", "aarch64"], "paths": [
+          "/Library/Belgium Identity Card/Pkcs11/beid-pkcs11.bundle/Contents/MacOS/libbeidpkcs11.dylib" ] }
+      ],
+      "config": { "slotListIndex": 0 },
+      "provider": "sun",
+      "notes": "Requires the eID middleware from eid.belgium.be.",
+      "tested": []
+    },
+    {
+      "id": "safenet-etoken",
+      "revision": 1,
+      "label": "SafeNet eToken / Thales Authentication Client",
+      "vendor": "Thales",
+      "infoUrl": "https://cpl.thalesgroup.com/access-management/security-applications/authentication-client-token-management",
+      "minSchemaVersion": 1,
+      "libraries": [
+        { "os": "linux", "arch": ["x86_64"], "paths": [
+          "/usr/lib/libeToken.so", "/usr/lib64/libeToken.so", "/usr/lib/libeTPkcs11.so" ] },
+        { "os": "windows", "arch": ["x86_64"], "paths": [
+          "%SystemRoot%\\System32\\eTPKCS11.dll" ] },
+        { "os": "macos", "arch": ["x86_64", "aarch64"], "paths": [
+          "/usr/local/lib/libeTPkcs11.dylib", "/Library/Frameworks/eToken.framework/Versions/Current/libeToken.dylib" ] }
+      ],
+      "config": { "slotListIndex": 0 },
+      "provider": "sun",
+      "notes": "Requires SafeNet Authentication Client.",
+      "tested": []
+    }
+  ]
+}
