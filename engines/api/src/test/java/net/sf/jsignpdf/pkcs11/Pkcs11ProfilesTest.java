@@ -7,6 +7,7 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+import static org.junit.Assume.assumeTrue;
 
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -90,17 +91,29 @@ public class Pkcs11ProfilesTest {
     public void discovery_invalidFilesAreReportedNotListed() throws Exception {
         write("pkcs11/bad name.cfg", cfg("bad"));
         write("pkcs11/default.cfg", cfg("dflt"));
-        write("pkcs11/Token.cfg", cfg("Token"));
-        write("pkcs11/token.cfg", cfg("token2"));
         write("pkcs11/one.cfg", cfg("same"));
         write("pkcs11/two.cfg", cfg("same"));
         load();
-        assertEquals(List.of("one", "Token"), ids(profiles.list()));
+        assertEquals(List.of("one"), ids(profiles.list()));
         List<ProfileStatus> invalid = profiles.statuses().stream()
                 .filter(s -> s.state() == ProfileStatus.State.INVALID).collect(Collectors.toList());
-        assertEquals(4, invalid.size());
+        assertEquals(3, invalid.size());
         assertEquals(ProfileStatus.State.INVALID, profiles.status("two").state());
         assertTrue(profiles.status("two").message().contains("one"));
+    }
+
+    @Test
+    public void discovery_stemsDifferingOnlyByCaseCollide() throws Exception {
+        write("pkcs11/Token.cfg", cfg("Token"));
+        write("pkcs11/token.cfg", cfg("token2"));
+        assumeTrue("needs a case-sensitive file system", Files.exists(cfgDir.resolve("pkcs11/Token.cfg"))
+                && Files.readString(cfgDir.resolve("pkcs11/Token.cfg")).contains("name=Token\n"));
+        load();
+        assertEquals(List.of("Token"), ids(profiles.list()));
+        ProfileStatus collided = profiles.statuses().stream()
+                .filter(s -> s.state() == ProfileStatus.State.INVALID).findFirst().orElseThrow();
+        assertEquals("token", collided.id());
+        assertTrue(collided.message().contains("Token"));
     }
 
     @Test
