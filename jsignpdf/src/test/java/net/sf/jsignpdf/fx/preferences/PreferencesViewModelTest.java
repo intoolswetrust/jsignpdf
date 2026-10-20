@@ -7,7 +7,12 @@ import static org.junit.Assert.assertTrue;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Path;
+import java.util.List;
 import java.util.Properties;
+
+import net.sf.jsignpdf.pkcs11.Pkcs11Profile;
+import net.sf.jsignpdf.pkcs11.Pkcs11Profiles;
+import net.sf.jsignpdf.pkcs11.ProviderMode;
 
 import net.sf.jsignpdf.utils.AdvancedConfig;
 
@@ -40,7 +45,7 @@ public class PreferencesViewModelTest {
         Path file = tmp.newFolder().toPath().resolve("advanced.properties");
         AdvancedConfig cfg = new AdvancedConfig(file, bundledDefaults);
         PreferencesViewModel vm = new PreferencesViewModel();
-        vm.loadFrom(cfg, "");
+        vm.loadFrom(cfg);
         assertEquals("", vm.fontPathProperty().get());
         assertEquals("", vm.fontNameProperty().get());
         assertEquals("", vm.fontEncodingProperty().get());
@@ -58,7 +63,7 @@ public class PreferencesViewModelTest {
         AdvancedConfig cfg = new AdvancedConfig(file, bundledDefaults);
         cfg.setProperty("font.path", "/some/path");
         PreferencesViewModel vm = new PreferencesViewModel();
-        vm.loadFrom(cfg, "");
+        vm.loadFrom(cfg);
         // VM round-trips the value.
         assertEquals("/some/path", vm.fontPathProperty().get());
         // User clears the field.
@@ -72,7 +77,7 @@ public class PreferencesViewModelTest {
     public void encodePdfLibraries_default_isFullOrderedCsv() throws Exception {
         PreferencesViewModel vm = new PreferencesViewModel();
         Path file = tmp.newFolder().toPath().resolve("advanced.properties");
-        vm.loadFrom(new AdvancedConfig(file, bundledDefaults), "");
+        vm.loadFrom(new AdvancedConfig(file, bundledDefaults));
         assertEquals("pdfbox,jpedal,openpdf", vm.encodePdfLibraries());
     }
 
@@ -102,12 +107,28 @@ public class PreferencesViewModelTest {
     }
 
     @Test
-    public void pkcs11Body_roundTripsExactly() throws Exception {
-        Path file = tmp.newFolder().toPath().resolve("advanced.properties");
-        PreferencesViewModel vm = new PreferencesViewModel();
+    public void pkcs11Profiles_roundTripBodyExactly() throws Exception {
         String body = "name=JSignPdf\n  library = /usr/lib/lib.so  \nslot=1\n\n";
-        vm.loadFrom(new AdvancedConfig(file, bundledDefaults), body);
-        assertEquals(body, vm.pkcs11BodyProperty().get());
+        PreferencesViewModel vm = new PreferencesViewModel();
+        vm.loadPkcs11Profiles(List.of(new Pkcs11Profile("default", Path.of("pkcs11.cfg"), true, body)), id -> null);
+        assertEquals(1, vm.pkcs11Profiles().size());
+        Pkcs11Profiles.ProfileEdit edit = vm.pkcs11Edits().get(0);
+        assertEquals("default", edit.originalId());
+        assertEquals("default", edit.id());
+        assertEquals(body, edit.body());
+    }
+
+    @Test
+    public void pkcs11Draft_editsFieldsInBody() {
+        Pkcs11ProfileDraft d = new Pkcs11ProfileDraft(null, "token", "name=token\nslotListIndex=0\n", null);
+        d.setLabel("My token");
+        d.setProvider(ProviderMode.BOTH);
+        d.setLibrary("C:\\Program Files (x86)\\Vendor\\p11.dll");
+        assertEquals("My token", d.label());
+        assertEquals(ProviderMode.BOTH, d.provider());
+        assertEquals("C:/Program Files (x86)/Vendor/p11.dll", d.library());
+        assertTrue(d.body().startsWith("#jsignpdf:label=My token\n#jsignpdf:provider=both\nname=token\n"));
+        assertTrue(d.body().contains("library=\"C:/Program Files (x86)/Vendor/p11.dll\"\n"));
     }
 
     @Test
@@ -117,7 +138,7 @@ public class PreferencesViewModelTest {
         cfg.setProperty("relax.ssl.security", true);
         cfg.setProperty("tsa.hashAlgorithm", "SHA-1");
         PreferencesViewModel vm = new PreferencesViewModel();
-        vm.loadFrom(cfg, "");
+        vm.loadFrom(cfg);
         assertTrue(vm.relaxSslSecurityProperty().get());
         assertEquals("SHA-1", vm.tsaHashAlgorithmProperty().get());
         vm.applyDefaults(new AdvancedConfig(null, bundledDefaults));
@@ -132,7 +153,7 @@ public class PreferencesViewModelTest {
         PreferencesViewModel vm = new PreferencesViewModel();
 
         // Bundled default is off.
-        vm.loadFrom(cfg, "");
+        vm.loadFrom(cfg);
         assertFalse(vm.debugProperty().get());
 
         // Turn it on and persist; it must be written under the 'debug' key.
@@ -142,7 +163,7 @@ public class PreferencesViewModelTest {
 
         // Reload picks the persisted value back up.
         PreferencesViewModel reloaded = new PreferencesViewModel();
-        reloaded.loadFrom(cfg, "");
+        reloaded.loadFrom(cfg);
         assertTrue(reloaded.debugProperty().get());
 
         // Reset-to-defaults for the General tab clears it.
@@ -157,7 +178,7 @@ public class PreferencesViewModelTest {
         PreferencesViewModel vm = new PreferencesViewModel();
 
         // Bundled default.
-        vm.loadFrom(cfg, "");
+        vm.loadFrom(cfg);
         assertEquals("_timestamped", vm.outputSuffixTimestampProperty().get());
 
         // Change it and persist; it must be written under the 'output.suffix.timestamp' key.
@@ -167,7 +188,7 @@ public class PreferencesViewModelTest {
 
         // Reload picks the persisted value back up.
         PreferencesViewModel reloaded = new PreferencesViewModel();
-        reloaded.loadFrom(cfg, "");
+        reloaded.loadFrom(cfg);
         assertEquals("_ts", reloaded.outputSuffixTimestampProperty().get());
 
         // Reset-to-defaults for the General tab restores the bundled default.
@@ -182,7 +203,7 @@ public class PreferencesViewModelTest {
         PreferencesViewModel vm = new PreferencesViewModel();
 
         // Bundled default is empty (follow the OS locale).
-        vm.loadFrom(cfg, "");
+        vm.loadFrom(cfg);
         assertEquals("", vm.uiLanguageProperty().get());
 
         // Set a language and persist under the 'ui.language' key.
@@ -193,7 +214,7 @@ public class PreferencesViewModelTest {
 
         // Reload picks the persisted value up.
         PreferencesViewModel reloaded = new PreferencesViewModel();
-        reloaded.loadFrom(cfg, "");
+        reloaded.loadFrom(cfg);
         assertEquals("de", reloaded.uiLanguageProperty().get());
 
         // Clearing the field removes the user override (falls back to the empty bundled default).
@@ -214,7 +235,7 @@ public class PreferencesViewModelTest {
         cfg.setProperty("engine.dss.trust.systemStore", true);
         cfg.setProperty("engine.dss.trust.lotlMraSupport", true);
         PreferencesViewModel vm = new PreferencesViewModel();
-        vm.loadFrom(cfg, "");
+        vm.loadFrom(cfg);
         assertTrue(vm.dssSystemStoreProperty().get());
         assertTrue(vm.dssLotlMraSupportProperty().get());
 

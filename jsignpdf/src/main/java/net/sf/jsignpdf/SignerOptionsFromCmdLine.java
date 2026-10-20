@@ -48,6 +48,7 @@ public class SignerOptionsFromCmdLine extends BasicSignerOptions {
     private boolean printHelp = true;
     private boolean printVersion;
     private boolean listKeyStores;
+    private boolean listKeyStoreProviders;
     private boolean listKeys;
     private boolean listEngines;
     private boolean listSigFields;
@@ -114,6 +115,7 @@ public class SignerOptionsFromCmdLine extends BasicSignerOptions {
         setPrintHelp(line.hasOption(ARG_HELP));
         setPrintVersion(line.hasOption(ARG_VERSION));
         setListKeyStores(line.hasOption(ARG_LIST_KS_TYPES));
+        setListKeyStoreProviders(line.hasOption(ARG_LIST_KS_PROVIDERS));
         setListKeys(line.hasOption(ARG_LIST_KEYS));
         setListEngines(line.hasOption(ARG_LIST_ENGINES));
         setListSigFields(line.hasOption(ARG_LIST_SIG_FIELDS));
@@ -127,6 +129,8 @@ public class SignerOptionsFromCmdLine extends BasicSignerOptions {
         // basic options
         if (line.hasOption(ARG_KS_TYPE))
             setKsType(line.getOptionValue(ARG_KS_TYPE));
+        if (line.hasOption(ARG_KS_PROVIDER))
+            setKsProvider(line.getOptionValue(ARG_KS_PROVIDER));
         if (line.hasOption(ARG_KS_FILE))
             setKsFile(line.getOptionValue(ARG_KS_FILE));
         if (line.hasOption(ARG_KEY_ALIAS))
@@ -421,6 +425,8 @@ public class SignerOptionsFromCmdLine extends BasicSignerOptions {
                 .hasArg().withArgName("key=value").create(ARG_OPTION));
         OPTS.addOption(OptionBuilder.withLongOpt(ARG_LIST_KS_TYPES_LONG).withDescription(RES.get("hlp.listKsTypes"))
                 .create(ARG_LIST_KS_TYPES));
+        OPTS.addOption(OptionBuilder.withLongOpt(ARG_LIST_KS_PROVIDERS_LONG).withDescription(RES.get("hlp.listKsProviders"))
+                .create(ARG_LIST_KS_PROVIDERS));
         OPTS.addOption(
                 OptionBuilder.withLongOpt(ARG_LIST_KEYS_LONG).withDescription(RES.get("hlp.listKeys")).create(ARG_LIST_KEYS));
         OPTS.addOption(OptionBuilder.withLongOpt(ARG_LIST_ENGINES_LONG).withDescription(RES.get("hlp.listEngines"))
@@ -435,6 +441,8 @@ public class SignerOptionsFromCmdLine extends BasicSignerOptions {
         // keystore and key configuration options
         OPTS.addOption(OptionBuilder.withLongOpt(ARG_KS_TYPE_LONG).withDescription(RES.get("hlp.ksType")).hasArg()
                 .withArgName("type").create(ARG_KS_TYPE));
+        OPTS.addOption(OptionBuilder.withLongOpt(ARG_KS_PROVIDER_LONG).withDescription(RES.get("hlp.ksProvider")).hasArg()
+                .withArgName("profile").create(ARG_KS_PROVIDER));
         OPTS.addOption(OptionBuilder.withLongOpt(ARG_KS_FILE_LONG).withDescription(RES.get("hlp.ksFile")).hasArg()
                 .withArgName("file").create(ARG_KS_FILE));
         OPTS.addOption(OptionBuilder.withLongOpt(ARG_KS_PWD_LONG).withDescription(RES.get("hlp.ksPwd")).hasArg()
@@ -661,6 +669,14 @@ public class SignerOptionsFromCmdLine extends BasicSignerOptions {
      */
     public void setListKeyStores(boolean listKeyStores) {
         this.listKeyStores = listKeyStores;
+    }
+
+    public boolean isListKeyStoreProviders() {
+        return listKeyStoreProviders;
+    }
+
+    public void setListKeyStoreProviders(boolean listKeyStoreProviders) {
+        this.listKeyStoreProviders = listKeyStoreProviders;
     }
 
     /**

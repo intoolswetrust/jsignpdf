@@ -266,4 +266,23 @@ public class EngineMismatchValidatorTest {
                 .filter(m -> m.capability() == Capability.VISIBLE_SIGNATURE).findFirst().orElseThrow();
         assertEquals("--visible-signature", visible.option());
     }
+
+    @Test
+    public void pkcs11TypeFlaggedWithoutRegisteredProvider() {
+        BasicSignerOptions opts = new BasicSignerOptions();
+        opts.setKsType("PKCS11");
+        StubSigningEngine engine = new StubSigningEngine("noP11");
+        Mismatch m = EngineMismatchValidator.findMismatches(opts, engine).stream()
+                .filter(x -> x.capability() == Capability.PKCS11_PROVIDER).findFirst().orElseThrow();
+        assertEquals("--key-store-type PKCS11", m.option());
+
+        opts.setKsType("JSIGNPKCS11");
+        opts.setKsProvider("yubikey");
+        m = EngineMismatchValidator.findMismatches(opts, engine).stream()
+                .filter(x -> x.capability() == Capability.PKCS11_PROVIDER).findFirst().orElseThrow();
+        assertEquals("--keystore-provider yubikey", m.option());
+
+        StubSigningEngine capable = new StubSigningEngine("p11", Capability.PKCS11_PROVIDER);
+        assertFalse(caps(EngineMismatchValidator.findMismatches(opts, capable)).contains(Capability.PKCS11_PROVIDER));
+    }
 }
