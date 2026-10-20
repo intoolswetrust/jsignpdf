@@ -118,4 +118,5 @@ toc: false
     Download from GitHub Releases
   </a>
   <small>Binaries and installers for every platform — see <a href="releases/">what changed</a></small>
+  <small>Questions, bug reports or a translation you'd like to contribute? Start on the <a href="community/">community page</a>.</small>
 </div>

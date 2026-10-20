@@ -30,6 +30,8 @@ import java.net.Proxy;
 public class TsaSettingsController {
 
     private static final String STYLE_VALIDATION_ERROR = "-fx-border-color: red; -fx-border-width: 1;";
+    private static final int MIN_PROXY_PORT = 1;
+    private static final int MAX_PROXY_PORT = 65535;
 
     @FXML private CheckBox chkTsaEnabled;
     @FXML private TextField txtTsaUrl;
@@ -168,10 +170,11 @@ public class TsaSettingsController {
         // Proxy port: String <-> int
         viewModel.proxyPortProperty().addListener((obs, o, n) ->
                 txtProxyPort.setText(String.valueOf(n.intValue())));
-        txtProxyPort.setOnAction(e -> {
-            try {
-                viewModel.proxyPortProperty().set(Integer.parseInt(txtProxyPort.getText()));
-            } catch (NumberFormatException ignored) {
+        txtProxyPort.setText(String.valueOf(viewModel.proxyPortProperty().get()));
+        txtProxyPort.setOnAction(e -> commitProxyPort());
+        txtProxyPort.focusedProperty().addListener((obs, o, isFocused) -> {
+            if (!isFocused) {
+                commitProxyPort();
             }
         });
 
@@ -194,6 +197,34 @@ public class TsaSettingsController {
         txtProxyHost.setManaged(proxyOn);
         lblProxyPort.setManaged(proxyOn);
         txtProxyPort.setManaged(proxyOn);
+    }
+
+    /**
+     * Writes the proxy port field to the view model. Enter and focus loss already do this, but
+     * neither fires for a menu accelerator or the window close request, both of which persist
+     * the view model straight away.
+     */
+    public void commitPendingEdits() {
+        commitProxyPort();
+    }
+
+    private void commitProxyPort() {
+        int port = parseProxyPort(txtProxyPort.getText());
+        if (port < 0) {
+            // Revert rather than leave a value on screen that was never persisted.
+            txtProxyPort.setText(String.valueOf(viewModel.proxyPortProperty().get()));
+            return;
+        }
+        viewModel.proxyPortProperty().set(port);
+    }
+
+    private static int parseProxyPort(String text) {
+        try {
+            int port = Integer.parseInt(text.trim());
+            return port >= MIN_PROXY_PORT && port <= MAX_PROXY_PORT ? port : -1;
+        } catch (NumberFormatException e) {
+            return -1;
+        }
     }
 
     private void applyAuthVisibility(ServerAuthentication authn) {

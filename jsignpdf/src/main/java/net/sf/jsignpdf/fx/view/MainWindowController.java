@@ -227,6 +227,13 @@ public class MainWindowController {
     public void initFromOptions(BasicSignerOptions opts) {
         this.options = opts;
         signingVM.syncFromOptions(opts);
+
+        // The output file name is session state: the persisted one names the document signed last time, so it is
+        // dropped (unlike the output directory and the suffix, which are settings) and every run starts derived.
+        opts.setOutFile(null);
+        signingVM.outBaseNameProperty().set(null);
+        resolveOutputFile();
+
         // No document is loaded at startup, so the visible-signature toggle must
         // start disabled. The persisted position coordinates on signingVM are
         // preserved so we can auto-place at the last-known location once a
@@ -236,7 +243,7 @@ public class MainWindowController {
 
     /**
      * Stores current UI state to BasicSignerOptions and persists to disk.
-     * Called on window close.
+     * Called on window close and on File -> Exit.
      */
     public void storeAndCleanup() {
         saveViewStateToConfig();
@@ -245,9 +252,7 @@ public class MainWindowController {
                 options = new BasicSignerOptions();
             }
 
-            // Sync placement rectangle coordinates to the signing ViewModel before persisting
-            capturePlacementToSigningVM();
-
+            flushUiToViewModel();
             signingVM.syncToOptions(options);
             options.storeOptions();
         } catch (Exception e) {
@@ -650,15 +655,30 @@ public class MainWindowController {
         if (options == null) {
             options = new BasicSignerOptions();
         }
-        // Flush any pending edits from the VM so that "load" is clearly "replace current".
+        // Flush any pending edits so that "load" is clearly "replace current".
+        flushUiToViewModel();
         signingVM.syncToOptions(options);
         presetManager.load(preset, options);
-        signingVM.syncFromOptions(options);
-        resolveOutputFile();
+        reloadFromOptionsKeepingOutputName();
         // Move the on-screen rectangle to match the preset's position.
         applySigningVMPositionToPlacement();
         updateStatus(java.text.MessageFormat.format(
                 RES.get("jfx.gui.status.presetLoaded"), preset.getDisplayName()));
+    }
+
+    /**
+     * Flushes the UI state that is not bound to the view model - the placement rectangle and the
+     * text fields that commit on Enter or focus loss - so that a following syncToOptions() persists
+     * what is on screen.
+     */
+    private void flushUiToViewModel() {
+        if (signatureSettingsController != null) {
+            signatureSettingsController.commitPendingEdits();
+        }
+        if (tsaSettingsController != null) {
+            tsaSettingsController.commitPendingEdits();
+        }
+        capturePlacementToSigningVM();
     }
 
     /**
@@ -698,7 +718,7 @@ public class MainWindowController {
         if (options == null) {
             options = new BasicSignerOptions();
         }
-        capturePlacementToSigningVM();
+        flushUiToViewModel();
         signingVM.syncToOptions(options);
 
         TextInputDialog dialog = new TextInputDialog();
@@ -733,7 +753,7 @@ public class MainWindowController {
         if (options == null) {
             options = new BasicSignerOptions();
         }
-        capturePlacementToSigningVM();
+        flushUiToViewModel();
         signingVM.syncToOptions(options);
         ManagePresetsDialog dialog = new ManagePresetsDialog(presetManager, options, stage);
         dialog.showAndWait();
@@ -964,6 +984,16 @@ public class MainWindowController {
     }
 
     /**
+     * Reloads the signing view model from {@code options} after they were changed behind its back (a preset load, an
+     * owner-password retry) and recomposes the output path. The output file name is carried over rather than re-read,
+     * because {@code options} hold it as a path composed with the suffix and input they had before the change.
+     */
+    private void reloadFromOptionsKeepingOutputName() {
+        signingVM.syncFromOptionsKeepingOutBaseName(options);
+        resolveOutputFile();
+    }
+
+    /**
      * Resolves the effective output path from the two user-facing fields — the output directory ({@code outPath}) and the
      * output file name ({@code outBaseName}) — plus the input file and suffix, and writes it to {@code outFile} (the value
      * the engines, the status-bar label and the sandbox portal check consume). A blank name means "use the name derived
@@ -1131,7 +1161,7 @@ public class MainWindowController {
 
     @FXML
     private void onFileExit() {
-        saveViewStateToConfig();
+        storeAndCleanup();
         stage.close();
     }
 
@@ -1285,8 +1315,7 @@ public class MainWindowController {
             }
         }
 
-        // Capture live placement into the signing VM, then sync VM → options.
-        capturePlacementToSigningVM();
+        flushUiToViewModel();
         signingVM.syncToOptions(options);
 
         options.setOutFile(options.getOutFileX());
@@ -1336,6 +1365,7 @@ public class MainWindowController {
             }
         }
 
+        flushUiToViewModel();
         signingVM.syncToOptions(options);
         options.setTimestampOnly(true);
         // The view model derives the timestamp flag from the TSA toggle, and isTimestampX() gates the whole
@@ -1520,17 +1550,17 @@ public class MainWindowController {
         saveViewStateToConfig();
         try {
             if (options == null) {
-                options = new BasicSignerOptions();
-                options.loadOptions();
-                signingVM.syncFromOptions(options);
+                BasicSignerOptions opts = new BasicSignerOptions();
+                opts.loadOptions();
+                initFromOptions(opts);
             }
 
             // Reset visible signature and placement from previous document
             signingVM.visibleProperty().set(false);
             placementVM.reset();
 
-            // A derived output name is refreshed for the new document; a name the user deliberately chose is kept, like
-            // the output directory. The two are told apart by comparing against the name the previous input derived —
+            // A derived output name is refreshed for the new document; a name the user deliberately chose is kept for
+            // the rest of the session. The two are told apart by comparing against the name the previous input derived —
             // captured before setInFile below overwrites it. The path resolves via the document-file listener once
             // documentVM is updated further down.
             if (isDerivedBaseName(signingVM.outBaseNameProperty().get(), options.getInFile())) {
@@ -1601,7 +1631,7 @@ public class MainWindowController {
 
             options.setPdfOwnerPwd(password.get().toCharArray());
             options.setAdvanced(true);
-            signingVM.syncFromOptions(options);
+            reloadFromOptionsKeepingOutputName();
 
             try {
                 PdfExtraInfo extraInfo = new PdfExtraInfo(options);

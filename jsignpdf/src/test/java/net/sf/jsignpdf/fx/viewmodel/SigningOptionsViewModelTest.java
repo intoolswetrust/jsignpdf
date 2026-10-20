@@ -351,4 +351,60 @@ public class SigningOptionsViewModelTest {
         assertEquals("A deliberately chosen name must survive the round trip",
                 "final.pdf", vm.outBaseNameProperty().get());
     }
+
+    /**
+     * Loading a preset replaces the suffix, which leaves the output path in the options composed with the old one.
+     * A cleared name must stay cleared so it is recomposed with the new suffix instead of accumulating both.
+     */
+    @Test
+    public void syncFromOptionsKeepingOutBaseName_clearedNameStaysCleared() {
+        BasicSignerOptions opts = new BasicSignerOptions();
+        opts.setInFile("/docs/drawing.pdf");
+        opts.setOutSuffix("_EM");
+        opts.setOutFile(opts.getOutFileX());
+
+        SigningOptionsViewModel vm = new SigningOptionsViewModel();
+        vm.syncFromOptions(opts);
+        opts.setOutSuffix("_DL");
+        vm.syncFromOptionsKeepingOutBaseName(opts);
+
+        assertNull("The loaded suffix must not turn a derived name into a chosen one",
+                vm.outBaseNameProperty().get());
+    }
+
+    /**
+     * The owner-password retry re-syncs while the options already name the new input but still hold the output path
+     * of the previous document.
+     */
+    @Test
+    public void syncFromOptionsKeepingOutBaseName_staleOutputOfPreviousInputIsIgnored() {
+        BasicSignerOptions opts = new BasicSignerOptions();
+        opts.setInFile("/docs/drawing.pdf");
+        opts.setOutSuffix("_signed");
+        opts.setOutFile(opts.getOutFileX());
+
+        SigningOptionsViewModel vm = new SigningOptionsViewModel();
+        vm.syncFromOptions(opts);
+        opts.setInFile("/docs/encrypted.pdf");
+        vm.syncFromOptionsKeepingOutBaseName(opts);
+
+        assertNull("The previous document's output name must not become the new document's chosen name",
+                vm.outBaseNameProperty().get());
+    }
+
+    @Test
+    public void syncFromOptionsKeepingOutBaseName_chosenNameSurvives() {
+        BasicSignerOptions opts = new BasicSignerOptions();
+        opts.setInFile("/docs/drawing.pdf");
+        opts.setOutSuffix("_EM");
+        opts.setOutFile("/docs/final.pdf");
+
+        SigningOptionsViewModel vm = new SigningOptionsViewModel();
+        vm.syncFromOptions(opts);
+        opts.setOutSuffix("_DL");
+        vm.syncFromOptionsKeepingOutBaseName(opts);
+
+        assertEquals("A deliberately chosen name must survive a preset load",
+                "final.pdf", vm.outBaseNameProperty().get());
+    }
 }

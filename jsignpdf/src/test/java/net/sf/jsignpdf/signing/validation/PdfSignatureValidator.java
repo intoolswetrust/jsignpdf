@@ -139,7 +139,8 @@ public class PdfSignatureValidator {
             byte[] contents = sig.getContents(fileBytes);
             byte[] signedContent = sig.getSignedContent(fileBytes);
 
-            CMSSignedData cmsData = new CMSSignedData(new CMSProcessableByteArray(signedContent), contents);
+            CMSSignedData cmsData = new CMSSignedData(new CMSProcessableByteArray(signedContent),
+                    new ByteArrayInputStream(contents));
             SignerInformationStore signerStore = cmsData.getSignerInfos();
             Collection<SignerInformation> signers = signerStore.getSigners();
             result.cmsSignerCount = signers.size();

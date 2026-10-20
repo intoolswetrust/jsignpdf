@@ -76,5 +76,5 @@
     <TextField fx:id="txtProxyHost"/>
 
     <Label fx:id="lblProxyPort" text="%jfx.gui.tsa.proxyPort"/>
-    <TextField fx:id="txtProxyPort" text="80"/>
+    <TextField fx:id="txtProxyPort"/>
 </VBox>

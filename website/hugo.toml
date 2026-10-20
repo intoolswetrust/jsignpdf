@@ -73,8 +73,12 @@ hasCJKLanguage    = false
     pageRef  = "/releases"
     weight   = 4
   [[menu.main]]
-    name     = "GitHub"
+    name     = "Community"
+    pageRef  = "/community"
     weight   = 5
+  [[menu.main]]
+    name     = "GitHub"
+    weight   = 6
     url      = "https://github.com/intoolswetrust/jsignpdf"
     [menu.main.params]
       icon = "github"

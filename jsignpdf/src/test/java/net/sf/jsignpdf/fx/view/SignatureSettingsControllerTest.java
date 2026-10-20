@@ -123,6 +123,25 @@ public class SignatureSettingsControllerTest {
         assertNull(selected.get());
     }
 
+    /** Signing is reachable by accelerator, with the font size field never losing focus. */
+    @Test
+    public void aTypedFontSizeIsCommittedOnRequest() throws Exception {
+        AtomicReference<Float> size = new AtomicReference<>();
+        AtomicReference<Float> afterUnusable = new AtomicReference<>();
+        runOnFxThread(() -> {
+            Fixture f = new Fixture();
+            f.fontSize.setText(" 14 ");
+            f.controller.commitPendingEdits();
+            size.set(f.vm.l2TextFontSizeProperty().get());
+
+            f.fontSize.setText("0");
+            f.controller.commitPendingEdits();
+            afterUnusable.set(f.vm.l2TextFontSizeProperty().get());
+        });
+        assertEquals(14f, size.get(), 0f);
+        assertEquals("a font size of zero renders nothing", 14f, afterUnusable.get(), 0f);
+    }
+
     private static String name(SignatureFieldInfo field) {
         return field == null ? null : field.name();
     }
@@ -132,6 +151,7 @@ public class SignatureSettingsControllerTest {
         final SigningOptionsViewModel vm = new SigningOptionsViewModel();
         final SignatureSettingsController controller;
         private final javafx.scene.control.ComboBox<SignatureFieldInfo> combo;
+        private final javafx.scene.control.TextField fontSize;
 
         @SuppressWarnings("unchecked")
         Fixture() {
@@ -142,6 +162,7 @@ public class SignatureSettingsControllerTest {
                 javafx.scene.Parent root = loader.load();
                 controller = loader.getController();
                 combo = (javafx.scene.control.ComboBox<SignatureFieldInfo>) root.lookup("#cmbSigField");
+                fontSize = (javafx.scene.control.TextField) root.lookup("#txtFontSize");
             } catch (Exception e) {
                 throw new IllegalStateException(e);
             }

@@ -38,9 +38,15 @@ The author of JSignPdf is Czech developer Josef (kwart) Cacek. He works in Java 
 
 === Getting support
 
-If you don't find the relevant information in this document or on the JSignPdf GitHub page ({url-repo}), use the JSignPdf Google Group to ask the community.
+If you don't find the relevant information in this document or on the JSignPdf GitHub page ({url-repo}), ask the community in the https://groups.google.com/g/jsignpdf[JSignPdf Google Group].
 
-https://groups.google.com/g/jsignpdf[JSignPdf Google Group]
+Report bugs and request features in the issue tracker ({url-repo}/issues). Please don't use it for usage questions -- the Google Group is the place for those. Security vulnerabilities must not be reported as a public issue -- use {url-repo}/security/advisories/new[GitHub's private vulnerability reporting] instead, as described in the {url-repo}/blob/master/SECURITY.md[security policy].
+
+=== Contributing
+
+Pull requests are welcome; {url-repo}/blob/master/CONTRIBUTING.md[CONTRIBUTING.md] covers what to include in a bug report and what a pull request needs to pass.
+
+Translations are maintained on https://hosted.weblate.org/projects/jsignpdf/messages/[Weblate] and new languages are always welcome -- no development environment required.
 
 == Installation and prerequisites
 
@@ -97,6 +103,22 @@ Each release provides per-platform installers (each bundles its own Java 21 runt
 |`jsignpdf-${VERSION}-minimal.zip`
 |Cross-platform ZIP without JavaFX. Suitable for headless / CLI signing, Linux aarch64 (where OpenJFX has no native classifier), or as the basis for downstream packagers (Debian, Homebrew). The GUI falls back to the legacy Swing UI automatically when invoked.
 |===
+
+.Package managers
+[cols="1,3"]
+|===
+|Platform |Command
+
+|macOS, Linux (Homebrew)
+|`brew tap intoolswetrust/tap` +
+`brew trust --tap intoolswetrust/tap` +
+`brew install jsignpdf`
+
+|Linux (Flatpak)
+|`flatpak install jsignpdf-${VERSION}-linux-x86_64.flatpak`
+|===
+
+The Homebrew formula installs the cross-platform distribution against Homebrew's `openjdk@21` package and puts `jsignpdf` on the `PATH` for both the GUI and the CLI. The `brew trust` step is required because Homebrew refuses to load formulae from third-party taps until they are trusted.
 
 `jsignpdf-${VERSION}-SHA256SUMS.txt` covers every artifact above. Releases are also mirrored on https://sourceforge.net/projects/jsignpdf/files/[SourceForge].
 

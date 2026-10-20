@@ -209,11 +209,31 @@ public class SignatureSettingsController {
         txtFontSize.focusedProperty().addListener((obs, o, n) -> { if (!n) commitFontSize(); });
     }
 
+    /**
+     * Writes the font size field to the view model. Enter and focus loss already do this, but
+     * neither fires for a menu accelerator or the window close request, both of which persist
+     * the view model straight away.
+     */
+    public void commitPendingEdits() {
+        commitFontSize();
+    }
+
     private void commitFontSize() {
-        try {
-            viewModel.l2TextFontSizeProperty().set(Float.parseFloat(txtFontSize.getText()));
-        } catch (NumberFormatException ignored) {
+        float size = parseFontSize(txtFontSize.getText());
+        if (size <= 0) {
+            // Revert rather than leave a value on screen that was never persisted.
             txtFontSize.setText(String.valueOf(viewModel.l2TextFontSizeProperty().get()));
+            return;
+        }
+        viewModel.l2TextFontSizeProperty().set(size);
+    }
+
+    private static float parseFontSize(String text) {
+        try {
+            float size = Float.parseFloat(text.trim());
+            return Float.isFinite(size) ? size : -1;
+        } catch (NumberFormatException e) {
+            return -1;
         }
     }
 
