@@ -31,6 +31,7 @@ public class BasicSignerOptions {
     private String propertiesFilePath;
 
     private String ksType;
+    private String ksProvider;
     private String ksFile;
     private char[] ksPasswd;
     private String keyAlias;
@@ -148,6 +149,7 @@ public class BasicSignerOptions {
      */
     private void loadFromStore(PropertyProvider store, boolean includeAllConfig) {
         setKsType(store.getProperty(Constants.PROPERTY_KSTYPE));
+        setKsProvider(store.getProperty(Constants.PROPERTY_KSPROVIDER));
         setAdvanced(store.getAsBool(Constants.PROPERTY_ADVANCED));
         setKsFile(store.getProperty(Constants.PROPERTY_KEYSTORE));
         setKeyAlias(store.getProperty(Constants.PROPERTY_ALIAS));
@@ -278,6 +280,7 @@ public class BasicSignerOptions {
      */
     private void storeToStore(PropertyProvider store, boolean includeAllConfig) {
         store.setProperty(Constants.PROPERTY_KSTYPE, getKsType());
+        store.setProperty(Constants.PROPERTY_KSPROVIDER, getKsProvider());
         store.setProperty(Constants.PROPERTY_ADVANCED, isAdvanced());
         store.setProperty(Constants.PROPERTY_KEYSTORE, getKsFile());
         store.setProperty(Constants.PROPERTY_ALIAS, getKeyAlias());
@@ -403,6 +406,17 @@ public class BasicSignerOptions {
 
     public void setKsType(final String ksType) {
         this.ksType = ksType;
+    }
+
+    /**
+     * The PKCS#11 profile id used for the {@code PKCS11} / {@code JSIGNPKCS11} keystore types; {@code null} when not set.
+     */
+    public String getKsProvider() {
+        return ksProvider;
+    }
+
+    public void setKsProvider(final String ksProvider) {
+        this.ksProvider = StringUtils.trimToNull(ksProvider);
     }
 
     public String getKsFile() {
@@ -1505,6 +1519,7 @@ public class BasicSignerOptions {
     public BasicSignerOptions createCopy() {
         BasicSignerOptions copy = new BasicSignerOptions();
         copy.setKsType(getKsType());
+        copy.setKsProvider(getKsProvider());
         copy.setKsFile(getKsFile());
         copy.setKsPasswd(getKsPasswd() != null ? getKsPasswd().clone() : null);
         copy.setKeyAlias(getKeyAlias());
@@ -1583,7 +1598,7 @@ public class BasicSignerOptions {
         result = prime * result + Arrays.hashCode(pdfOwnerPwd);
         result = prime * result + Arrays.hashCode(pdfUserPwd);
         result = prime * result + Objects.hash(acro6Layers, advanced, append, bgImgPath, bgImgScale, certLevel, contact,
-                crlEnabled, encryptor, hashAlgorithm, imgPath, inFile, keyAlias, keyIndex, ksFile, ksType, l2Text,
+                crlEnabled, encryptor, hashAlgorithm, imgPath, inFile, keyAlias, keyIndex, ksFile, ksProvider, ksType, l2Text,
                 l2TextFontSize, l4Text, listener, location, ocspEnabled, ocspServerUrl, outFile, page, pdfEncryption,
                 padesLevel, pdfEncryptionCertFile, positionLLX, positionLLY, positionURX, positionURY, propertiesFilePath,
                 props, proxyHost,
@@ -1611,7 +1626,8 @@ public class BasicSignerOptions {
                 && Objects.equals(inFile, other.inFile) && Objects.equals(keyAlias, other.keyAlias)
                 && keyIndex == other.keyIndex && Arrays.equals(keyPasswd, other.keyPasswd)
                 && Objects.equals(ksFile, other.ksFile) && Arrays.equals(ksPasswd, other.ksPasswd)
-                && Objects.equals(ksType, other.ksType) && Objects.equals(l2Text, other.l2Text)
+                && Objects.equals(ksType, other.ksType) && Objects.equals(ksProvider, other.ksProvider)
+                && Objects.equals(l2Text, other.l2Text)
                 && Float.floatToIntBits(l2TextFontSize) == Float.floatToIntBits(other.l2TextFontSize)
                 && Objects.equals(l4Text, other.l4Text) && Objects.equals(listener, other.listener)
                 && Objects.equals(location, other.location) && ocspEnabled == other.ocspEnabled
