@@ -1,10 +1,14 @@
-# Sample file for registering PKCS#11 security provider in JSignPdf
-# Feel free to edit it and then set path to the file in the conf.properties configuration file.
+# Sample PKCS#11 profile for JSignPdf.
+# Lines starting with #jsignpdf: are JSignPdf metadata; SunPKCS11 treats them as comments.
+#   label    - name shown in the keystore list
+#   provider - sun (default), jsign or both
 
-# Look for full list of possible attributes at
-# http://download.oracle.com/javase/8/docs/technotes/guides/security/p11guide.html#ATTRS
+# Look for the full list of possible attributes at
+# https://docs.oracle.com/en/java/javase/21/security/pkcs11-reference-guide1.html
 
+#jsignpdf:label=My token
+#jsignpdf:provider=sun
 name=JSignPdf
 
 library=/usr/lib/libeToken.so
-slot=1
+slotListIndex=0

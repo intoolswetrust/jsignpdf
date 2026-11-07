@@ -140,6 +140,7 @@ public class Constants {
     public static final String EPROPERTY_USER_PWD = "enc.pdfUserPwd";
 
     public static final String PROPERTY_KSTYPE = "keystore.type";
+    public static final String PROPERTY_KSPROVIDER = "keystore.provider";
     public static final String PROPERTY_ADVANCED = "view.advanced";
     public static final String PROPERTY_ALIAS = "keystore.alias";
     public static final String PROPERTY_KEY_INDEX = "keystore.keyIndex";
@@ -295,6 +296,12 @@ public class Constants {
 
     public static final String ARG_KS_TYPE_LONG = "keystore-type";
     public static final String ARG_KS_TYPE = "kst";
+
+    public static final String ARG_KS_PROVIDER_LONG = "keystore-provider";
+    public static final String ARG_KS_PROVIDER = "kspr";
+
+    public static final String ARG_LIST_KS_PROVIDERS_LONG = "list-keystore-providers";
+    public static final String ARG_LIST_KS_PROVIDERS = "lkp";
 
     public static final String ARG_KS_FILE_LONG = "keystore-file";
     public static final String ARG_KS_FILE = "ksf";

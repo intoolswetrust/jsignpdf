@@ -32,6 +32,7 @@
                          default engine and sign with it. -->
                     <environmentVariables>
                         <JSIGNPDF_CONFIG_DIR>${project.build.directory}/test-config</JSIGNPDF_CONFIG_DIR>
+                        <SOFTHSM2_CONF>${project.build.directory}/softhsm/softhsm2.conf</SOFTHSM2_CONF>
                     </environmentVariables>
                 </configuration>
             </plugin>

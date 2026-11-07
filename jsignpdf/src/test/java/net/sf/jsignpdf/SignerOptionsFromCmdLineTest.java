@@ -589,6 +589,22 @@ public class SignerOptionsFromCmdLineTest {
     }
 
     /** Convenience wiring: captures warnings and feeds a canned stdin reader with no Console. */
+    @Test
+    public void keystoreProviderOptions_areParsed() throws Exception {
+        Fixture f = new Fixture("");
+        f.opts.setCmdLine(new String[] { "-kst", "PKCS11", "--keystore-provider", "yubikey", "-lk" });
+        f.opts.loadCmdLine();
+        assertEquals("PKCS11", f.opts.getKsType());
+        assertEquals("yubikey", f.opts.getKsProvider());
+        assertFalse(f.opts.isListKeyStoreProviders());
+
+        Fixture g = new Fixture("");
+        g.opts.setCmdLine(new String[] { "-kspr", "a", "-lkp" });
+        g.opts.loadCmdLine();
+        assertEquals("a", g.opts.getKsProvider());
+        assertTrue(g.opts.isListKeyStoreProviders());
+    }
+
     private static final class Fixture {
         final SignerOptionsFromCmdLine opts = new SignerOptionsFromCmdLine();
         final ByteArrayOutputStream warningBytes = new ByteArrayOutputStream();
