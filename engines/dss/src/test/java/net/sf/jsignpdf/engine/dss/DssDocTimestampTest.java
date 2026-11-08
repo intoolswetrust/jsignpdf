@@ -1,5 +1,6 @@
 package net.sf.jsignpdf.engine.dss;
 
+import static net.sf.jsignpdf.Constants.RES;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -14,6 +15,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Pattern;
 import java.util.logging.Handler;
 import java.util.logging.LogRecord;
 import java.util.logging.Logger;
@@ -254,7 +256,9 @@ public class DssDocTimestampTest {
         } finally {
             logger.removeHandler(handler);
         }
-        assertTrue("the retry must be reported", handler.allMessages().contains("was too small"));
+        String retryMessage = RES.get("console.dss.contentSizeRetry", String.valueOf(TOO_SMALL_CONTENT_SIZE), "@GROWN@");
+        Pattern retryPattern = Pattern.compile(Pattern.quote(retryMessage).replace("@GROWN@", "\\E\\d+\\Q"));
+        assertTrue("the retry must be reported", retryPattern.matcher(handler.allMessages()).find());
         assertEquals(List.of(SUBFILTER_DOC_TIMESTAMP), subFilters(outputFile));
     }
 

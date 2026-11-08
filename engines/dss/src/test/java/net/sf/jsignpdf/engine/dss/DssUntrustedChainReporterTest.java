@@ -1,5 +1,6 @@
 package net.sf.jsignpdf.engine.dss;
 
+import static net.sf.jsignpdf.Constants.RES;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -77,7 +78,7 @@ public class DssUntrustedChainReporterTest {
 
         String details = DssUntrustedChainReporter.describe(error, chain, null);
 
-        assertTrue("must name the signer role", details.contains("Signer chain certificate"));
+        assertTrue("must name the signer role", details.contains(RES.get("console.dss.untrustedChainRoleSigner")));
         assertTrue("must include the subject CN", details.contains("JSignPdf Test Signer"));
         assertTrue("must include the issuer CN", details.contains("JSignPdf Test Root CA"));
         assertTrue("must keep the fingerprint as a secondary identifier", details.contains(id));
@@ -94,7 +95,7 @@ public class DssUntrustedChainReporterTest {
 
         String details = DssUntrustedChainReporter.describe(error, chain, List.of(tsaCert));
 
-        assertTrue("must name the timestamp role", details.contains("Timestamp chain certificate"));
+        assertTrue("must name the timestamp role", details.contains(RES.get("console.dss.untrustedChainRoleTsa")));
         assertTrue("must include the timestamp cert CN", details.contains("JSignPdf Test Signer"));
     }
 
@@ -147,7 +148,7 @@ public class DssUntrustedChainReporterTest {
 
         String details = DssUntrustedChainReporter.describe(error, new Certificate[] { cert }, null);
 
-        assertTrue("must name the signer role", details.contains("Signer chain certificate"));
+        assertTrue("must name the signer role", details.contains(RES.get("console.dss.untrustedChainRoleSigner")));
         assertTrue("must include the subject CN", details.contains("Leading Zero Digest"));
         assertTrue("must keep the fingerprint as a secondary identifier", details.contains(id));
     }
