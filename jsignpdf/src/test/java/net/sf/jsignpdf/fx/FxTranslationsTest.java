@@ -40,7 +40,7 @@ import javafx.scene.layout.VBox;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import net.sf.jsignpdf.Constants;
+import net.sf.jsignpdf.utils.UiLocale;
 
 /**
  * Tests that the JavaFX UI loads correctly with different locales and that
@@ -48,7 +48,6 @@ import net.sf.jsignpdf.Constants;
  */
 public class FxTranslationsTest {
 
-    private static final String BUNDLE_BASE = Constants.RESOURCE_BUNDLE_BASE;
 
     private static final Locale[] TEST_LOCALES = {
             Locale.ENGLISH,
@@ -76,7 +75,7 @@ public class FxTranslationsTest {
     @Test
     public void testMainWindowLoadsWithAllLocales() throws Exception {
         for (Locale locale : TEST_LOCALES) {
-            ResourceBundle bundle = ResourceBundle.getBundle(BUNDLE_BASE, locale);
+            ResourceBundle bundle = UiLocale.bundle(locale);
             Parent root = loadFxml("/net/sf/jsignpdf/fx/view/MainWindow.fxml", bundle);
             assertNotNull("MainWindow failed to load for locale " + locale, root);
         }
@@ -85,7 +84,7 @@ public class FxTranslationsTest {
     @Test
     public void testMenuTextsMatchTranslations() throws Exception {
         for (Locale locale : TEST_LOCALES) {
-            ResourceBundle bundle = ResourceBundle.getBundle(BUNDLE_BASE, locale);
+            ResourceBundle bundle = UiLocale.bundle(locale);
             BorderPane root = (BorderPane) loadFxml("/net/sf/jsignpdf/fx/view/MainWindow.fxml", bundle);
             MenuBar menuBar = getMenuBar(root);
 
@@ -105,7 +104,7 @@ public class FxTranslationsTest {
     @Test
     public void testMenuItemTextsMatchTranslations() throws Exception {
         for (Locale locale : TEST_LOCALES) {
-            ResourceBundle bundle = ResourceBundle.getBundle(BUNDLE_BASE, locale);
+            ResourceBundle bundle = UiLocale.bundle(locale);
             BorderPane root = (BorderPane) loadFxml("/net/sf/jsignpdf/fx/view/MainWindow.fxml", bundle);
             Menu fileMenu = getMenuBar(root).getMenus().get(0);
 
@@ -123,7 +122,7 @@ public class FxTranslationsTest {
     @Test
     public void testSigningMenuItemTextsMatchTranslations() throws Exception {
         for (Locale locale : TEST_LOCALES) {
-            ResourceBundle bundle = ResourceBundle.getBundle(BUNDLE_BASE, locale);
+            ResourceBundle bundle = UiLocale.bundle(locale);
             BorderPane root = (BorderPane) loadFxml("/net/sf/jsignpdf/fx/view/MainWindow.fxml", bundle);
             Menu signingMenu = getMenuBar(root).getMenus().get(2);
 
@@ -154,7 +153,7 @@ public class FxTranslationsTest {
     @Test
     public void testPreferencesLoadsWithAllLocalesAndHasLanguageLabel() throws Exception {
         for (Locale locale : TEST_LOCALES) {
-            ResourceBundle bundle = ResourceBundle.getBundle(BUNDLE_BASE, locale);
+            ResourceBundle bundle = UiLocale.bundle(locale);
             Parent root = loadFxml("/net/sf/jsignpdf/fx/view/Preferences.fxml", bundle);
             assertNotNull("Preferences failed to load for locale " + locale, root);
 
@@ -192,7 +191,7 @@ public class FxTranslationsTest {
     @Test
     public void testToolbarTextsMatchTranslations() throws Exception {
         for (Locale locale : TEST_LOCALES) {
-            ResourceBundle bundle = ResourceBundle.getBundle(BUNDLE_BASE, locale);
+            ResourceBundle bundle = UiLocale.bundle(locale);
             BorderPane root = (BorderPane) loadFxml("/net/sf/jsignpdf/fx/view/MainWindow.fxml", bundle);
             List<Node> toolBarItems = getToolBarItems(root);
 
@@ -247,7 +246,7 @@ public class FxTranslationsTest {
     @Test
     public void testStatusBarBadgeAndOutputLabelExist() throws Exception {
         for (Locale locale : TEST_LOCALES) {
-            ResourceBundle bundle = ResourceBundle.getBundle(BUNDLE_BASE, locale);
+            ResourceBundle bundle = UiLocale.bundle(locale);
             BorderPane root = (BorderPane) loadFxml("/net/sf/jsignpdf/fx/view/MainWindow.fxml", bundle);
             HBox statusBar = (HBox) root.getBottom();
             assertNotNull("Status bar missing for " + locale, statusBar);
@@ -271,7 +270,7 @@ public class FxTranslationsTest {
     @Test
     public void testAccordionPanelTitlesMatchTranslations() throws Exception {
         for (Locale locale : TEST_LOCALES) {
-            ResourceBundle bundle = ResourceBundle.getBundle(BUNDLE_BASE, locale);
+            ResourceBundle bundle = UiLocale.bundle(locale);
             BorderPane root = (BorderPane) loadFxml("/net/sf/jsignpdf/fx/view/MainWindow.fxml", bundle);
             Accordion accordion = getAccordion(root);
             assertNotNull("Accordion not found for " + locale, accordion);
@@ -300,7 +299,7 @@ public class FxTranslationsTest {
     @Test
     public void testDropHintMatchesTranslation() throws Exception {
         for (Locale locale : TEST_LOCALES) {
-            ResourceBundle bundle = ResourceBundle.getBundle(BUNDLE_BASE, locale);
+            ResourceBundle bundle = UiLocale.bundle(locale);
             BorderPane root = (BorderPane) loadFxml("/net/sf/jsignpdf/fx/view/MainWindow.fxml", bundle);
             Label dropHint = getDropHintLabel(root);
             assertNotNull("Drop hint not found for " + locale, dropHint);
@@ -312,7 +311,7 @@ public class FxTranslationsTest {
     @Test
     public void testCertificateSettingsLabels() throws Exception {
         for (Locale locale : TEST_LOCALES) {
-            ResourceBundle bundle = ResourceBundle.getBundle(BUNDLE_BASE, locale);
+            ResourceBundle bundle = UiLocale.bundle(locale);
             VBox root = (VBox) loadFxml("/net/sf/jsignpdf/fx/view/CertificateSettings.fxml", bundle);
             assertNotNull("CertificateSettings load failed for " + locale, root);
 
@@ -331,7 +330,7 @@ public class FxTranslationsTest {
     @Test
     public void testSignatureSettingsLabels() throws Exception {
         for (Locale locale : TEST_LOCALES) {
-            ResourceBundle bundle = ResourceBundle.getBundle(BUNDLE_BASE, locale);
+            ResourceBundle bundle = UiLocale.bundle(locale);
             VBox root = (VBox) loadFxml("/net/sf/jsignpdf/fx/view/SignatureSettings.fxml", bundle);
             assertNotNull("SignatureSettings load failed for " + locale, root);
 
@@ -348,7 +347,7 @@ public class FxTranslationsTest {
     @Test
     public void testSignaturePropertiesLabels() throws Exception {
         for (Locale locale : TEST_LOCALES) {
-            ResourceBundle bundle = ResourceBundle.getBundle(BUNDLE_BASE, locale);
+            ResourceBundle bundle = UiLocale.bundle(locale);
             VBox root = (VBox) loadFxml("/net/sf/jsignpdf/fx/view/SignatureProperties.fxml", bundle);
             assertNotNull("SignatureProperties load failed for " + locale, root);
 
@@ -365,7 +364,7 @@ public class FxTranslationsTest {
     @Test
     public void testTsaSettingsLabels() throws Exception {
         for (Locale locale : TEST_LOCALES) {
-            ResourceBundle bundle = ResourceBundle.getBundle(BUNDLE_BASE, locale);
+            ResourceBundle bundle = UiLocale.bundle(locale);
             VBox root = (VBox) loadFxml("/net/sf/jsignpdf/fx/view/TsaSettings.fxml", bundle);
             assertNotNull("TsaSettings load failed for " + locale, root);
 
@@ -382,7 +381,7 @@ public class FxTranslationsTest {
     @Test
     public void testEncryptionSettingsLabels() throws Exception {
         for (Locale locale : TEST_LOCALES) {
-            ResourceBundle bundle = ResourceBundle.getBundle(BUNDLE_BASE, locale);
+            ResourceBundle bundle = UiLocale.bundle(locale);
             VBox root = (VBox) loadFxml("/net/sf/jsignpdf/fx/view/EncryptionSettings.fxml", bundle);
             assertNotNull("EncryptionSettings load failed for " + locale, root);
 
@@ -395,7 +394,7 @@ public class FxTranslationsTest {
 
     @Test
     public void testEnglishSpecificTexts() throws Exception {
-        ResourceBundle bundle = ResourceBundle.getBundle(BUNDLE_BASE, Locale.ENGLISH);
+        ResourceBundle bundle = UiLocale.bundle(Locale.ENGLISH);
         BorderPane root = (BorderPane) loadFxml("/net/sf/jsignpdf/fx/view/MainWindow.fxml", bundle);
         MenuBar menuBar = getMenuBar(root);
 
@@ -409,7 +408,7 @@ public class FxTranslationsTest {
 
     @Test
     public void testGermanSpecificTexts() throws Exception {
-        ResourceBundle bundle = ResourceBundle.getBundle(BUNDLE_BASE, new Locale("de"));
+        ResourceBundle bundle = UiLocale.bundle(new Locale("de"));
         BorderPane root = (BorderPane) loadFxml("/net/sf/jsignpdf/fx/view/MainWindow.fxml", bundle);
         MenuBar menuBar = getMenuBar(root);
 
@@ -422,7 +421,7 @@ public class FxTranslationsTest {
 
     @Test
     public void testCzechSpecificTexts() throws Exception {
-        ResourceBundle bundle = ResourceBundle.getBundle(BUNDLE_BASE, new Locale("cs"));
+        ResourceBundle bundle = UiLocale.bundle(new Locale("cs"));
         BorderPane root = (BorderPane) loadFxml("/net/sf/jsignpdf/fx/view/MainWindow.fxml", bundle);
         MenuBar menuBar = getMenuBar(root);
         Accordion accordion = getAccordion(root);

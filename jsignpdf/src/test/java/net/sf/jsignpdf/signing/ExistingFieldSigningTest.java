@@ -217,7 +217,7 @@ public class ExistingFieldSigningTest extends SigningTestBase {
         List<String> messages = captureSevere(() -> assertFalse(new SignerLogic(options).signFile()));
 
         assertTrue("The refusal must name encryption, not --overwrite: " + messages,
-                messages.stream().anyMatch(m -> m.contains("encryption")));
+                messages.contains(Constants.RES.get("console.sigField.encryptionNotSupported", "Signature1")));
     }
 
     /** The position options are ignored (with a warning) - the field's rectangle decides. */
