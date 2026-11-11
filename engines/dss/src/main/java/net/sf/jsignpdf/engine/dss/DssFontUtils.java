@@ -32,7 +32,7 @@ final class DssFontUtils {
             dssFont.setEmbedFontSubset(true);
             return dssFont;
         } catch (Exception e) {
-            Constants.LOGGER.log(Level.SEVERE, Constants.RES.get("console.dss.fontLoadFailed", font.getName()), e);
+            Constants.LOGGER.log(Level.SEVERE, Constants.RES.get("console.font.loadFailed", font.getName()), e);
         }
         return null;
     }

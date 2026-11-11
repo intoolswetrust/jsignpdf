@@ -1009,7 +1009,7 @@ public class DssSigningEngine implements SigningEngine {
         textParams.setBackgroundColor(null);
         final L2Font l2Font = FontUtils.getL2Font(text);
         if (l2Font == null) {
-            LOGGER.severe(RES.get("console.dss.fontLoadFailed",
+            LOGGER.severe(RES.get("console.font.loadFailed",
                     StringUtils.defaultString(AppConfig.fontPath(), L2TEXT_FONT_PATH)));
             return false;
         }

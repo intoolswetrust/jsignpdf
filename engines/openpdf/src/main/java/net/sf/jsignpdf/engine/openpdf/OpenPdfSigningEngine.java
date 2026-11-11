@@ -353,7 +353,7 @@ public class OpenPdfSigningEngine implements SigningEngine {
                 final L2Font l2Font = FontUtils.getL2Font(l2text);
                 final org.openpdf.text.pdf.BaseFont l2BaseFont = OpenPdfFonts.getL2BaseFont(l2Font);
                 if (l2BaseFont == null) {
-                    LOGGER.severe(RES.get("console.dss.fontLoadFailed", l2Font != null ? l2Font.getName()
+                    LOGGER.severe(RES.get("console.font.loadFailed", l2Font != null ? l2Font.getName()
                             : StringUtils.defaultString(AppConfig.fontPath(), L2TEXT_FONT_PATH)));
                     return false;
                 }
