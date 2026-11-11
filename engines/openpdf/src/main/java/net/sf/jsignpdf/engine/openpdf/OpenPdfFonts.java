@@ -1,14 +1,16 @@
 package net.sf.jsignpdf.engine.openpdf;
 
-import net.sf.jsignpdf.utils.FontUtils;
+import java.util.logging.Level;
+
+import net.sf.jsignpdf.Constants;
 import net.sf.jsignpdf.utils.FontUtils.L2Font;
 
 import org.openpdf.text.pdf.BaseFont;
 
 /**
  * Builds the OpenPDF {@link BaseFont} for the visible-signature L2 text from the backend-neutral font
- * data resolved by {@link FontUtils}. Kept inside the OpenPDF engine module so the shared core stays
- * free of any OpenPDF dependency.
+ * data resolved by {@link net.sf.jsignpdf.utils.FontUtils}. Kept inside the OpenPDF engine module so the
+ * shared core stays free of any OpenPDF dependency.
  *
  * @author Josef Cacek
  */
@@ -18,26 +20,21 @@ final class OpenPdfFonts {
     }
 
     /**
-     * Returns the BaseFont for the visible-signature L2 text, embedding the given font and
-     * falling back to a non-embedded Helvetica if it cannot be built.
+     * Returns the embedded BaseFont for the visible-signature L2 text.
      *
-     * @param font the font data resolved by {@link FontUtils}, may be {@code null}
-     * @return the L2 BaseFont, or {@code null} if even the fallback fails
+     * @param font the font data resolved by {@link net.sf.jsignpdf.utils.FontUtils}, may be {@code null}
+     * @return the L2 BaseFont, or {@code null} if the font is missing or can not be built
      */
     static synchronized BaseFont getL2BaseFont(L2Font font) {
-        if (font != null) {
-            try {
-                return BaseFont.createFont(font.getName(), font.getEncoding(), BaseFont.EMBEDDED, BaseFont.CACHED,
-                        font.getData(), null);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
+        if (font == null) {
+            return null;
         }
         try {
-            return BaseFont.createFont(BaseFont.HELVETICA, BaseFont.WINANSI, BaseFont.EMBEDDED);
-        } catch (Exception ex) {
-            // where is the problem, dear Watson?
+            return BaseFont.createFont(font.getName(), font.getEncoding(), BaseFont.EMBEDDED, BaseFont.CACHED,
+                    font.getData(), null);
+        } catch (Exception e) {
+            Constants.LOGGER.log(Level.FINE, "Unable to build font " + font.getName(), e);
+            return null;
         }
-        return null;
     }
 }

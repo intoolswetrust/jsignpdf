@@ -6,6 +6,7 @@ import static net.sf.jsignpdf.Constants.L2TEXT_PLACEHOLDER_REASON;
 import static net.sf.jsignpdf.Constants.L2TEXT_PLACEHOLDER_SIGNER;
 import static net.sf.jsignpdf.Constants.L2TEXT_PLACEHOLDER_TIMESTAMP;
 import static net.sf.jsignpdf.Constants.L2TEXT_PLACEHOLDER_CERTIFICATE;
+import static net.sf.jsignpdf.Constants.L2TEXT_FONT_PATH;
 import static net.sf.jsignpdf.Constants.RES;
 import static net.sf.jsignpdf.Constants.LOGGER;
 
@@ -350,18 +351,20 @@ public class OpenPdfSigningEngine implements SigningEngine {
                 }
                 sap.setLayer2Text(l2text);
                 final L2Font l2Font = FontUtils.getL2Font(l2text);
-                if (l2Font != null) {
-                    final String missing = l2Font.missingCharacters(l2text);
-                    if (!missing.isEmpty()) {
-                        LOGGER.severe(RES.get("console.font.missingGlyphs", l2Font.getName(), missing));
-                        return false;
-                    }
-                    LOGGER.info(RES.get("console.setL2Font", l2Font.getName()));
-                }
                 final org.openpdf.text.pdf.BaseFont l2BaseFont = OpenPdfFonts.getL2BaseFont(l2Font);
-                if (l2BaseFont != null) {
-                    sap.setLayer2Font(new Font(l2BaseFont, options.getL2TextFontSize()));
+                if (l2BaseFont == null) {
+                    LOGGER.severe(RES.get("console.dss.fontLoadFailed", l2Font != null ? l2Font.getName()
+                            : StringUtils.defaultString(AppConfig.fontPath(), L2TEXT_FONT_PATH)));
+                    return false;
                 }
+                // A non-Identity encoding makes a simple font, which drops characters outside the encoding.
+                final String missing = l2Font.missingCharacters(l2text);
+                if (!missing.isEmpty()) {
+                    LOGGER.severe(RES.get("console.font.missingGlyphs", l2Font.getName(), missing));
+                    return false;
+                }
+                LOGGER.info(RES.get("console.setL2Font", l2Font.getName()));
+                sap.setLayer2Font(new Font(l2BaseFont, options.getL2TextFontSize()));
                 LOGGER.info(RES.get("console.setL4Text"));
                 sap.setLayer4Text(options.getL4Text());
                 LOGGER.info(RES.get("console.setRender"));

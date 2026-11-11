@@ -1011,23 +1011,25 @@ public class DssSigningEngine implements SigningEngine {
         if (l2Font == null) {
             LOGGER.severe(RES.get("console.dss.fontLoadFailed",
                     StringUtils.defaultString(AppConfig.fontPath(), L2TEXT_FONT_PATH)));
-        } else {
-            final String missing = l2Font.missingGlyphs(text);
-            if (!missing.isEmpty()) {
-                LOGGER.severe(RES.get("console.font.missingGlyphs", l2Font.getName(), missing));
-                return false;
-            }
-            LOGGER.info(RES.get("console.setL2Font", l2Font.getName()));
+            return false;
         }
-        final DSSFont font = l2Font != null ? DssFontUtils.toDssFont(l2Font) : null;
-        if (font != null) {
-            float fontSize = options.getL2TextFontSize();
-            if (fontSize <= 0f) {
-                fontSize = net.sf.jsignpdf.Constants.DEFVAL_L2_FONT_SIZE;
-            }
-            font.setSize(fontSize);
-            textParams.setFont(font);
+        // DSS always embeds the font as a CID font, so the configured encoding does not limit the characters.
+        final String missing = l2Font.missingGlyphs(text);
+        if (!missing.isEmpty()) {
+            LOGGER.severe(RES.get("console.font.missingGlyphs", l2Font.getName(), missing));
+            return false;
         }
+        LOGGER.info(RES.get("console.setL2Font", l2Font.getName()));
+        final DSSFont font = DssFontUtils.toDssFont(l2Font);
+        if (font == null) {
+            return false;
+        }
+        float fontSize = options.getL2TextFontSize();
+        if (fontSize <= 0f) {
+            fontSize = net.sf.jsignpdf.Constants.DEFVAL_L2_FONT_SIZE;
+        }
+        font.setSize(fontSize);
+        textParams.setFont(font);
         imageParams.setTextParameters(textParams);
 
         // The foreground graphic has no scale option of its own, so it always keeps its aspect ratio.
