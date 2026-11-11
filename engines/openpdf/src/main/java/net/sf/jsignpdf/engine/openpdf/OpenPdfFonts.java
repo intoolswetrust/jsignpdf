@@ -18,13 +18,13 @@ final class OpenPdfFonts {
     }
 
     /**
-     * Returns the BaseFont for the visible-signature L2 text, embedding the configured font and
-     * falling back to a non-embedded Helvetica if the configured font cannot be built.
+     * Returns the BaseFont for the visible-signature L2 text, embedding the given font and
+     * falling back to a non-embedded Helvetica if it cannot be built.
      *
+     * @param font the font data resolved by {@link FontUtils}, may be {@code null}
      * @return the L2 BaseFont, or {@code null} if even the fallback fails
      */
-    static synchronized BaseFont getL2BaseFont() {
-        final L2Font font = FontUtils.getL2Font();
+    static synchronized BaseFont getL2BaseFont(L2Font font) {
         if (font != null) {
             try {
                 return BaseFont.createFont(font.getName(), font.getEncoding(), BaseFont.EMBEDDED, BaseFont.CACHED,
