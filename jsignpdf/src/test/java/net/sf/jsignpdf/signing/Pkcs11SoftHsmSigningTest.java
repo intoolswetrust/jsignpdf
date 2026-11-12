@@ -18,6 +18,7 @@ import java.security.KeyStore;
 import java.security.Provider;
 import java.security.cert.Certificate;
 import java.security.cert.X509Certificate;
+import java.security.spec.ECGenParameterSpec;
 import java.util.Date;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -37,7 +38,9 @@ import net.sf.jsignpdf.signing.validation.PdfSignatureValidator.ValidationResult
 import net.sf.jsignpdf.utils.KeyStoreUtils;
 
 /**
- * Two SoftHSM2 tokens as two PKCS#11 profiles: key listing and signing must hit the selected one. Skipped unless
+ * Two SoftHSM2 tokens as two PKCS#11 profiles: key listing and signing must hit the selected one. A third token, on a
+ * profile with both providers, signs through {@code JSIGNPKCS11}, which needs the launchers' {@code --add-exports}
+ * (mirrored in the surefire {@code argLine}). Skipped unless
  * SoftHSM2 is installed and {@code SOFTHSM2_CONF} (set by the surefire configuration) is present. The library and the
  * {@code softhsm2-util} binary can be overridden with the {@code softhsm2.library} / {@code softhsm2.util} system
  * properties.
@@ -48,6 +51,14 @@ public class Pkcs11SoftHsmSigningTest extends SigningTestBase {
     private static final List<String> LIBRARY_CANDIDATES = List.of("/usr/lib/softhsm/libsofthsm2.so",
             "/usr/lib/x86_64-linux-gnu/softhsm/libsofthsm2.so", "/usr/lib64/pkcs11/libsofthsm2.so",
             "/usr/local/lib/softhsm/libsofthsm2.so", "/opt/homebrew/lib/softhsm/libsofthsm2.so");
+
+    /**
+     * Hides the hash-and-sign mechanisms, as many smart cards lack them, so the provider hashes in Java and signs raw.
+     */
+    private static final String SMART_CARD_MECHANISMS = "disabledMechanisms = {\n"
+            + "  CKM_SHA1_RSA_PKCS CKM_SHA224_RSA_PKCS CKM_SHA256_RSA_PKCS CKM_SHA384_RSA_PKCS CKM_SHA512_RSA_PKCS\n"
+            + "  CKM_ECDSA_SHA1 CKM_ECDSA_SHA224 CKM_ECDSA_SHA256 CKM_ECDSA_SHA384 CKM_ECDSA_SHA512\n"
+            + "}\n";
 
     private static Pkcs11Profiles profiles;
 
@@ -74,6 +85,7 @@ public class Pkcs11SoftHsmSigningTest extends SigningTestBase {
 
         long slotA = initToken(util, library, confFile, "token-a");
         long slotB = initToken(util, library, confFile, "token-b");
+        long slotC = initToken(util, library, confFile, "token-c");
 
         Path cfgDir = base.resolve("cfg");
         Files.createDirectories(cfgDir.resolve("pkcs11"));
@@ -81,11 +93,15 @@ public class Pkcs11SoftHsmSigningTest extends SigningTestBase {
                 + "\nslot=" + slotA + "\n");
         Files.writeString(cfgDir.resolve("pkcs11/b.cfg"), "#jsignpdf:label=Token B\nname=b\nlibrary=" + library
                 + "\nslot=" + slotB + "\n");
+        Files.writeString(cfgDir.resolve("pkcs11/c.cfg"), "#jsignpdf:label=Token C\n#jsignpdf:provider=both\nname=c\n"
+                + "library=" + library + "\nslot=" + slotC + "\n" + SMART_CARD_MECHANISMS);
         profiles = new Pkcs11Profiles(cfgDir);
         Pkcs11Profiles.setInstance(profiles);
 
-        storeKey(profiles.provider("a", "PKCS11"), "key-a", "CN=Token A");
-        storeKey(profiles.provider("b", "PKCS11"), "key-b", "CN=Token B");
+        storeKey(profiles.provider("a", "PKCS11"), "key-a", "CN=Token A", "RSA");
+        storeKey(profiles.provider("b", "PKCS11"), "key-b", "CN=Token B", "RSA");
+        storeKey(profiles.provider("c", "PKCS11"), "key-rsa", "CN=Token C RSA", "RSA");
+        storeKey(profiles.provider("c", "PKCS11"), "key-ec", "CN=Token C EC", "EC");
     }
 
     @AfterClass
@@ -118,6 +134,26 @@ public class Pkcs11SoftHsmSigningTest extends SigningTestBase {
     }
 
     @Test
+    public void jsignProviderSignsWithRsaKeyInOpenPdf() throws Exception {
+        assertSignedWithJsignProvider("openpdf", "key-rsa", "Token C RSA");
+    }
+
+    @Test
+    public void jsignProviderSignsWithEcKeyInOpenPdf() throws Exception {
+        assertSignedWithJsignProvider("openpdf", "key-ec", "Token C EC");
+    }
+
+    @Test
+    public void jsignProviderSignsWithRsaKeyInDss() throws Exception {
+        assertSignedWithJsignProvider("dss", "key-rsa", "Token C RSA");
+    }
+
+    @Test
+    public void jsignProviderSignsWithEcKeyInDss() throws Exception {
+        assertSignedWithJsignProvider("dss", "key-ec", "Token C EC");
+    }
+
+    @Test
     public void scratchConfGuardRejectsForeignPaths() {
         assertTrue(isBuildScratchConf(Path.of("/work/jsignpdf/target/softhsm/softhsm2.conf")));
         assertFalse(isBuildScratchConf(Path.of("/home/dev/softhsm2.conf")));
@@ -126,18 +162,31 @@ public class Pkcs11SoftHsmSigningTest extends SigningTestBase {
     }
 
     private void assertSignedWithTokenB(String engine) throws Exception {
+        assertSigned(engine, "PKCS11", "b", null, "Token B");
+    }
+
+    private void assertSignedWithJsignProvider(String engine, String alias, String subject) throws Exception {
+        assertSigned(engine, "JSIGNPKCS11", "c", alias, subject);
+    }
+
+    private void assertSigned(String engine, String ksType, String profile, String alias, String subject)
+            throws Exception {
         File inFile = new File(tempFolder.getRoot(), "input.pdf");
         Files.copy(getUnsignedPdf().toPath(), inFile.toPath());
         BasicSignerOptions options = new BasicSignerOptions();
-        options.setKsType("PKCS11");
-        options.setKsProvider("b");
+        options.setKsType(ksType);
+        options.setKsProvider(profile);
+        if (alias != null) {
+            options.setAdvanced(true);
+            options.setKeyAlias(alias);
+        }
         options.setEngine(engine);
         options.setKsPasswd(PIN.toCharArray());
         options.setInFile(inFile.getAbsolutePath());
         options.setOutFile(new File(tempFolder.getRoot(), "output.pdf").getAbsolutePath());
         ValidationResult result = signAndValidate(options);
         assertTrue(result.signatureValid);
-        assertTrue(result.signerCertificateSubject, result.signerCertificateSubject.contains("Token B"));
+        assertTrue(result.signerCertificateSubject, result.signerCertificateSubject.contains(subject));
     }
 
     /** Only a conf file the surefire configuration points into {@code target/softhsm/} is written or cleaned. */
@@ -167,18 +216,23 @@ public class Pkcs11SoftHsmSigningTest extends SigningTestBase {
         return Long.parseLong(m.group(1));
     }
 
-    private static void storeKey(Provider provider, String alias, String dn) throws Exception {
+    private static void storeKey(Provider provider, String alias, String dn, String algorithm) throws Exception {
         KeyStore ks = KeyStore.getInstance("PKCS11", provider);
         ks.load(null, PIN.toCharArray());
-        KeyPairGenerator kpg = KeyPairGenerator.getInstance("RSA", provider);
-        kpg.initialize(2048);
+        KeyPairGenerator kpg = KeyPairGenerator.getInstance(algorithm, provider);
+        if ("EC".equals(algorithm)) {
+            kpg.initialize(new ECGenParameterSpec("secp256r1"));
+        } else {
+            kpg.initialize(2048);
+        }
         KeyPair kp = kpg.generateKeyPair();
         X500Name name = new X500Name(dn);
         Date now = new Date();
         JcaX509v3CertificateBuilder builder = new JcaX509v3CertificateBuilder(name, BigInteger.ONE,
                 new Date(now.getTime() - 60_000L), new Date(now.getTime() + 86_400_000L), name, kp.getPublic());
         X509Certificate cert = new JcaX509CertificateConverter()
-                .getCertificate(builder.build(new JcaContentSignerBuilder("SHA256withRSA").setProvider(provider)
+                .getCertificate(builder.build(new JcaContentSignerBuilder("EC".equals(algorithm) ? "SHA256withECDSA"
+                        : "SHA256withRSA").setProvider(provider)
                         .build(kp.getPrivate())));
         ks.setKeyEntry(alias, kp.getPrivate(), null, new Certificate[] { cert });
     }

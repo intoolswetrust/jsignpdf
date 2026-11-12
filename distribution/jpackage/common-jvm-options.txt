@@ -8,8 +8,4 @@
 #     at build time, concatenating these options with the Swing-specific ones.
 #
 # Format: one option per line; blank lines and lines starting with '#' are ignored.
---add-exports=jdk.crypto.cryptoki/sun.security.pkcs11=ALL-UNNAMED
 --add-exports=jdk.crypto.cryptoki/sun.security.pkcs11.wrapper=ALL-UNNAMED
---add-exports=java.base/sun.security.action=ALL-UNNAMED
---add-exports=java.base/sun.security.rsa=ALL-UNNAMED
---add-opens=java.base/sun.security.util=ALL-UNNAMED

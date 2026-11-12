@@ -25,7 +25,7 @@
         <build.helper.plugin.version>3.7.0</build.helper.plugin.version>
 
         <bouncycastle.version>1.86</bouncycastle.version>
-        <jsign.pkcs11.version>1.1.0</jsign.pkcs11.version>
+        <jsign.pkcs11.version>1.2.0</jsign.pkcs11.version>
         <jsign.jpedal.version>4.92.13</jsign.jpedal.version>
         <pdfbox.version>3.0.8</pdfbox.version>
         <jbig2-imageio.version>3.0.5</jbig2-imageio.version>
@@ -37,6 +37,9 @@
         <junit.version>4.13.2</junit.version>
         <openjfx.version>21.0.13</openjfx.version>
         <dbus-java.version>5.2.2</dbus-java.version>
+
+        <!-- Keep in sync with distribution/jpackage/common-jvm-options.txt and the Flatpak launcher. -->
+        <jsignpdf.jvm.access>--add-exports=jdk.crypto.cryptoki/sun.security.pkcs11.wrapper=ALL-UNNAMED</jsignpdf.jvm.access>
     </properties>
 
     <modules>
