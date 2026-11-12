@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.function.Function;
 
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.IntegerProperty;
@@ -12,7 +13,12 @@ import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import net.sf.jsignpdf.Constants;
+import net.sf.jsignpdf.pkcs11.Pkcs11Profile;
+import net.sf.jsignpdf.pkcs11.Pkcs11Profiles;
+import net.sf.jsignpdf.pkcs11.ProfileStatus;
 import net.sf.jsignpdf.utils.AdvancedConfig;
 import net.sf.jsignpdf.utils.AppConfig;
 import net.sf.jsignpdf.utils.UiLocale;
@@ -66,10 +72,10 @@ public class PreferencesViewModel {
     private final BooleanProperty dssSystemStore = new SimpleBooleanProperty(false);
     private final BooleanProperty dssAllowUntrusted = new SimpleBooleanProperty(false);
 
-    private final StringProperty pkcs11Body = new SimpleStringProperty("");
+    private final ObservableList<Pkcs11ProfileDraft> pkcs11Profiles = FXCollections.observableArrayList();
 
-    /** Loads the VM from the given snapshot of {@link AdvancedConfig} and a pkcs11 file body. */
-    public void loadFrom(AdvancedConfig cfg, String pkcs11FileBody) {
+    /** Loads the VM from the given snapshot of {@link AdvancedConfig}. */
+    public void loadFrom(AdvancedConfig cfg) {
         // Canonicalised so a hand-edited zh_CN / de-AT shows up as the selector item it actually loads.
         uiLanguage.set(UiLocale.canonicalTag(cfg.getProperty("ui.language")));
         engineId.set(cfg.getNotEmptyProperty("engine", AppConfig.DEFAULT_ENGINE_ID));
@@ -101,8 +107,23 @@ public class PreferencesViewModel {
         dssTruststorePassword.set(orEmpty(cfg.getProperty("engine.dss.trust.truststorePassword")));
         dssSystemStore.set(cfg.getAsBool("engine.dss.trust.systemStore", false));
         dssAllowUntrusted.set(cfg.getAsBool("engine.dss.trust.allowUntrusted", false));
+    }
 
-        pkcs11Body.set(pkcs11FileBody == null ? "" : pkcs11FileBody);
+    /** Loads the PKCS#11 profiles to edit. */
+    public void loadPkcs11Profiles(List<Pkcs11Profile> profiles, Function<String, ProfileStatus> statusLookup) {
+        pkcs11Profiles.clear();
+        for (Pkcs11Profile p : profiles) {
+            pkcs11Profiles.add(new Pkcs11ProfileDraft(p.id(), p.id(), p.body(), statusLookup.apply(p.id())));
+        }
+    }
+
+    /** The edited profiles as a full set, in list order. */
+    public List<Pkcs11Profiles.ProfileEdit> pkcs11Edits() {
+        List<Pkcs11Profiles.ProfileEdit> edits = new ArrayList<>();
+        for (Pkcs11ProfileDraft d : pkcs11Profiles) {
+            edits.add(d.toEdit());
+        }
+        return edits;
     }
 
     /** Writes the VM back into the given {@link AdvancedConfig} (does not persist; caller should call {@code save()}). */
@@ -303,7 +324,7 @@ public class PreferencesViewModel {
     public StringProperty dssTruststorePasswordProperty() { return dssTruststorePassword; }
     public BooleanProperty dssSystemStoreProperty() { return dssSystemStore; }
     public BooleanProperty dssAllowUntrustedProperty() { return dssAllowUntrusted; }
-    public StringProperty pkcs11BodyProperty() { return pkcs11Body; }
+    public ObservableList<Pkcs11ProfileDraft> pkcs11Profiles() { return pkcs11Profiles; }
 
     /** Move the given library one slot up (order--), swapping with the lib currently at that order. */
     public void moveUp(String lib) {

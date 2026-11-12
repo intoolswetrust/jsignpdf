@@ -17,8 +17,8 @@
     <Label text="%jfx.gui.cert.keystoreType"/>
     <ComboBox fx:id="cmbKeystoreType" maxWidth="Infinity"/>
 
-    <Label text="%jfx.gui.cert.keystoreFile"/>
-    <HBox spacing="4">
+    <Label fx:id="lblKeystoreFile" text="%jfx.gui.cert.keystoreFile"/>
+    <HBox fx:id="boxKeystoreFile" spacing="4">
         <TextField fx:id="txtKeystoreFile" HBox.hgrow="ALWAYS"/>
         <Button fx:id="btnBrowseKeystore" onAction="#onBrowseKeystore"
                 minWidth="30">
@@ -37,6 +37,7 @@
             <Image url="@/net/sf/jsignpdf/refresh16.png"/>
         </ImageView></graphic>
     </Button>
+    <Label fx:id="lblLoadKeysStatus" wrapText="true" styleClass="pref-help"/>
 
     <Label text="%jfx.gui.cert.keyAlias"/>
     <ComboBox fx:id="cmbKeyAlias" maxWidth="Infinity"/>
