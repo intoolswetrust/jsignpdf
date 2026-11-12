@@ -35,7 +35,7 @@ public class PKCS11Utils {
                 LOGGER.warning("Bundled PKCS#11 sample missing: " + SAMPLE_RESOURCE);
                 return "";
             }
-            return new String(is.readAllBytes(), java.nio.charset.StandardCharsets.UTF_8);
+            return new String(is.readAllBytes(), java.nio.charset.StandardCharsets.UTF_8).replace("\r\n", "\n");
         } catch (IOException e) {
             LOGGER.log(Level.WARNING, "Failed to read bundled PKCS#11 sample", e);
             return "";

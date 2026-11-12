@@ -161,7 +161,8 @@ public final class Pkcs11ProfileDraft {
     }
 
     /**
-     * {@code true} for an absolute library path that does not point to a file.
+     * {@code true} for a library path with a root (absolute, or starting with a separator) that does not point to a
+     * file.
      */
     public static boolean isLibraryMissing(String library) {
         if (StringUtils.isBlank(library)) {
@@ -169,7 +170,7 @@ public final class Pkcs11ProfileDraft {
         }
         try {
             Path p = Path.of(library);
-            return p.isAbsolute() && !p.toFile().isFile();
+            return p.getRoot() != null && !p.toFile().isFile();
         } catch (InvalidPathException e) {
             return true;
         }
