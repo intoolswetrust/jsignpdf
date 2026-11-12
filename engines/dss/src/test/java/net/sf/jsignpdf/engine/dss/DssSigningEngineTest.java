@@ -1,5 +1,6 @@
 package net.sf.jsignpdf.engine.dss;
 
+import static net.sf.jsignpdf.Constants.RES;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -350,7 +351,7 @@ public class DssSigningEngineTest {
         }
 
         String severe = handler.severeMessages();
-        assertTrue("must name the signer-chain role", severe.contains("Signer chain certificate"));
+        assertTrue("must name the signer-chain role", severe.contains(RES.get("console.dss.untrustedChainRoleSigner")));
         assertTrue("must name the signer certificate subject", severe.contains("JSignPdf Test Signer"));
         assertTrue("must name the issuing CA to add", severe.contains("JSignPdf Test Root CA"));
     }

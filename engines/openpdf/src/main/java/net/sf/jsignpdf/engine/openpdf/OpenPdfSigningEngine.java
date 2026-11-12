@@ -6,6 +6,7 @@ import static net.sf.jsignpdf.Constants.L2TEXT_PLACEHOLDER_REASON;
 import static net.sf.jsignpdf.Constants.L2TEXT_PLACEHOLDER_SIGNER;
 import static net.sf.jsignpdf.Constants.L2TEXT_PLACEHOLDER_TIMESTAMP;
 import static net.sf.jsignpdf.Constants.L2TEXT_PLACEHOLDER_CERTIFICATE;
+import static net.sf.jsignpdf.Constants.L2TEXT_FONT_PATH;
 import static net.sf.jsignpdf.Constants.RES;
 import static net.sf.jsignpdf.Constants.LOGGER;
 
@@ -44,6 +45,8 @@ import net.sf.jsignpdf.types.PdfVersion;
 import net.sf.jsignpdf.types.RenderMode;
 import net.sf.jsignpdf.types.ServerAuthentication;
 import net.sf.jsignpdf.utils.AppConfig;
+import net.sf.jsignpdf.utils.FontUtils;
+import net.sf.jsignpdf.utils.FontUtils.L2Font;
 import net.sf.jsignpdf.utils.KeyStoreUtils;
 import net.sf.jsignpdf.utils.PKCS11Utils;
 import net.sf.jsignpdf.utils.TextTimestampSubstitutor;
@@ -326,6 +329,7 @@ public class OpenPdfSigningEngine implements SigningEngine {
                 final String certificate = PdfPKCS7.getSubjectFields((X509Certificate) chain[0]).toString();
                 final Date signDate = sap.getSignDateNullSafe().getTime();
                 final String timestamp = new SimpleDateFormat("yyyy.MM.dd HH:mm:ss z").format(signDate);
+                final String l2text;
                 if (options.getL2Text() == null) {
                     final StringBuilder buf = new StringBuilder();
                     buf.append(RES.get("default.l2text.signedBy")).append(" ").append(signer).append('\n');
@@ -334,7 +338,7 @@ public class OpenPdfSigningEngine implements SigningEngine {
                         buf.append('\n').append(RES.get("default.l2text.reason")).append(" ").append(reason);
                     if (StringUtils.isNotEmpty(location))
                         buf.append('\n').append(RES.get("default.l2text.location")).append(" ").append(location);
-                    sap.setLayer2Text(buf.toString());
+                    l2text = buf.toString();
                 } else {
                     final Map<String, String> replacements = new HashMap<String, String>();
                     replacements.put(L2TEXT_PLACEHOLDER_SIGNER, StringUtils.defaultString(signer));
@@ -343,13 +347,24 @@ public class OpenPdfSigningEngine implements SigningEngine {
                     replacements.put(L2TEXT_PLACEHOLDER_LOCATION, StringUtils.defaultString(location));
                     replacements.put(L2TEXT_PLACEHOLDER_REASON, StringUtils.defaultString(reason));
                     replacements.put(L2TEXT_PLACEHOLDER_CONTACT, StringUtils.defaultString(contact));
-                    final String l2text = TextTimestampSubstitutor.replace(options.getL2Text(), replacements, signDate);
-                    sap.setLayer2Text(l2text);
+                    l2text = TextTimestampSubstitutor.replace(options.getL2Text(), replacements, signDate);
                 }
-                final org.openpdf.text.pdf.BaseFont l2BaseFont = OpenPdfFonts.getL2BaseFont();
-                if (l2BaseFont != null) {
-                    sap.setLayer2Font(new Font(l2BaseFont, options.getL2TextFontSize()));
+                sap.setLayer2Text(l2text);
+                final L2Font l2Font = FontUtils.getL2Font(l2text);
+                final org.openpdf.text.pdf.BaseFont l2BaseFont = OpenPdfFonts.getL2BaseFont(l2Font);
+                if (l2BaseFont == null) {
+                    LOGGER.severe(RES.get("console.font.loadFailed", l2Font != null ? l2Font.getName()
+                            : StringUtils.defaultString(AppConfig.fontPath(), L2TEXT_FONT_PATH)));
+                    return false;
                 }
+                // A non-Identity encoding makes a simple font, which drops characters outside the encoding.
+                final String missing = l2Font.missingCharacters(l2text);
+                if (!missing.isEmpty()) {
+                    LOGGER.severe(RES.get("console.font.missingGlyphs", l2Font.getName(), missing));
+                    return false;
+                }
+                LOGGER.info(RES.get("console.setL2Font", l2Font.getName()));
+                sap.setLayer2Font(new Font(l2BaseFont, options.getL2TextFontSize()));
                 LOGGER.info(RES.get("console.setL4Text"));
                 sap.setLayer4Text(options.getL4Text());
                 LOGGER.info(RES.get("console.setRender"));

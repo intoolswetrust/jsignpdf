@@ -6,6 +6,7 @@ import static net.sf.jsignpdf.Constants.L2TEXT_PLACEHOLDER_REASON;
 import static net.sf.jsignpdf.Constants.L2TEXT_PLACEHOLDER_SIGNER;
 import static net.sf.jsignpdf.Constants.L2TEXT_PLACEHOLDER_TIMESTAMP;
 import static net.sf.jsignpdf.Constants.L2TEXT_PLACEHOLDER_CERTIFICATE;
+import static net.sf.jsignpdf.Constants.L2TEXT_FONT_PATH;
 import static net.sf.jsignpdf.Constants.LOGGER;
 import static net.sf.jsignpdf.Constants.RES;
 
@@ -46,6 +47,8 @@ import net.sf.jsignpdf.types.PrintRight;
 import net.sf.jsignpdf.types.RenderMode;
 import net.sf.jsignpdf.types.ServerAuthentication;
 import net.sf.jsignpdf.utils.AppConfig;
+import net.sf.jsignpdf.utils.FontUtils;
+import net.sf.jsignpdf.utils.FontUtils.L2Font;
 import net.sf.jsignpdf.utils.KeyStoreUtils;
 import net.sf.jsignpdf.utils.TextTimestampSubstitutor;
 
@@ -341,8 +344,10 @@ public class DssSigningEngine implements SigningEngine {
 
                 if (options.isVisible()) {
                     LOGGER.info(RES.get("console.configureVisible"));
-                    configureVisibleSignature(parameters, options, chain, signingCal, effectiveInFile,
-                            streamCache(bufferingMode, bufferingTempDir));
+                    if (!configureVisibleSignature(parameters, options, chain, signingCal, effectiveInFile,
+                            streamCache(bufferingMode, bufferingTempDir))) {
+                        return false;
+                    }
                 }
 
                 // Certificate verifier + trust material (LT/LTA).
@@ -902,7 +907,7 @@ public class DssSigningEngine implements SigningEngine {
         return ap;
     }
 
-    private void configureVisibleSignature(PAdESSignatureParameters parameters, BasicSignerOptions options,
+    private boolean configureVisibleSignature(PAdESSignatureParameters parameters, BasicSignerOptions options,
             Certificate[] chain, Calendar signingCal, File inFile, StreamCacheCreateFunction streamCache)
             throws Exception {
         final JSignPdfSignatureImageParameters imageParams = new JSignPdfSignatureImageParameters();
@@ -990,7 +995,8 @@ public class DssSigningEngine implements SigningEngine {
 
         LOGGER.info(RES.get("console.setL2Text"));
         final SignatureImageTextParameters textParams = new SignatureImageTextParameters();
-        textParams.setText(buildSignatureText(options, chain, signingCal));
+        final String text = buildSignatureText(options, chain, signingCal);
+        textParams.setText(text);
         // FILL_BOX_AND_LINEBREAK: DSS auto-calculates the largest font that fits the signature rectangle,
         // wrapping lines as needed, so text is never clipped on a small box. The configured font size stays
         // an upper bound — both drawers returned by JSignPdfSignatureDrawerFactory cap the computed size at
@@ -1001,15 +1007,29 @@ public class DssSigningEngine implements SigningEngine {
         // Transparent text background so the background image shows through.
         // (DSS defaults to solid white which would paint over the image.)
         textParams.setBackgroundColor(null);
-        final DSSFont font = DssFontUtils.getVisibleSignatureFont();
-        if (font != null) {
-            float fontSize = options.getL2TextFontSize();
-            if (fontSize <= 0f) {
-                fontSize = net.sf.jsignpdf.Constants.DEFVAL_L2_FONT_SIZE;
-            }
-            font.setSize(fontSize);
-            textParams.setFont(font);
+        final L2Font l2Font = FontUtils.getL2Font(text);
+        if (l2Font == null) {
+            LOGGER.severe(RES.get("console.font.loadFailed",
+                    StringUtils.defaultString(AppConfig.fontPath(), L2TEXT_FONT_PATH)));
+            return false;
         }
+        // DSS always embeds the font as a CID font, so the configured encoding does not limit the characters.
+        final String missing = l2Font.missingGlyphs(text);
+        if (!missing.isEmpty()) {
+            LOGGER.severe(RES.get("console.font.missingGlyphs", l2Font.getName(), missing));
+            return false;
+        }
+        LOGGER.info(RES.get("console.setL2Font", l2Font.getName()));
+        final DSSFont font = DssFontUtils.toDssFont(l2Font);
+        if (font == null) {
+            return false;
+        }
+        float fontSize = options.getL2TextFontSize();
+        if (fontSize <= 0f) {
+            fontSize = net.sf.jsignpdf.Constants.DEFVAL_L2_FONT_SIZE;
+        }
+        font.setSize(fontSize);
+        textParams.setFont(font);
         imageParams.setTextParameters(textParams);
 
         // The foreground graphic has no scale option of its own, so it always keeps its aspect ratio.
@@ -1017,6 +1037,7 @@ public class DssSigningEngine implements SigningEngine {
         imageParams.setImageScaling(ImageScaling.ZOOM_AND_CENTER);
 
         parameters.setImageParameters(imageParams);
+        return true;
     }
 
     /**
