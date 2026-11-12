@@ -24,7 +24,9 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Pos;
+import javafx.scene.Node;
 import javafx.scene.Parent;
+import javafx.scene.input.KeyCode;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonBar.ButtonData;
@@ -33,8 +35,14 @@ import javafx.scene.control.CheckBox;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.ChoiceDialog;
-import javafx.scene.control.ListCell;
-import javafx.scene.control.ListView;
+import javafx.scene.control.ContextMenu;
+import javafx.scene.control.MenuItem;
+import javafx.scene.control.ScrollPane;
+import javafx.scene.control.SeparatorMenuItem;
+import javafx.scene.control.TableCell;
+import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableView;
+import javafx.scene.control.TitledPane;
 import javafx.scene.control.TextInputDialog;
 import javafx.scene.control.Tooltip;
 import javafx.scene.control.Dialog;
@@ -131,17 +139,24 @@ public class PreferencesController {
     @FXML private CheckBox chkDssAllowUntrusted;
 
     @FXML private Label lblPkcs11Flatpak;
-    @FXML private ListView<Pkcs11ProfileDraft> lstPkcs11Profiles;
+    @FXML private TableView<Pkcs11ProfileDraft> tblPkcs11Profiles;
+    @FXML private TableColumn<Pkcs11ProfileDraft, String> colPkcs11Label;
+    @FXML private TableColumn<Pkcs11ProfileDraft, String> colPkcs11Id;
+    @FXML private TableColumn<Pkcs11ProfileDraft, String> colPkcs11Library;
+    @FXML private TableColumn<Pkcs11ProfileDraft, Pkcs11ProfileDraft.Display> colPkcs11Status;
     @FXML private Button btnPkcs11Duplicate;
-    @FXML private Button btnPkcs11Rename;
+    @FXML private Button btnPkcs11ChangeId;
     @FXML private Button btnPkcs11Remove;
-    @FXML private VBox boxPkcs11Editor;
+    @FXML private ScrollPane scrPkcs11Editor;
     @FXML private Label lblPkcs11NoSelection;
     @FXML private Label lblPkcs11Path;
     @FXML private Label lblPkcs11Status;
     @FXML private TextField txtPkcs11Label;
     @FXML private ChoiceBox<ProviderMode> cmbPkcs11Provider;
     @FXML private TextField txtPkcs11Library;
+    @FXML private Label lblPkcs11LibraryMissing;
+    @FXML private Label lblPkcs11CliHint;
+    @FXML private TitledPane ttlPkcs11Advanced;
     @FXML private TextArea txtPkcs11Body;
     @FXML private Label lblPkcs11EmptyHint;
     @FXML private Button btnPkcs11ResetSample;
@@ -193,12 +208,12 @@ public class PreferencesController {
         cmbPkcs11Provider.setConverter(new StringConverter<ProviderMode>() {
             @Override
             public String toString(ProviderMode mode) {
-                return mode == null ? "" : mode.value();
+                return mode == null ? "" : RES.get("jfx.gui.preferences.pkcs11.provider." + mode.value());
             }
 
             @Override
             public ProviderMode fromString(String s) {
-                return ProviderMode.parse(s);
+                return null;
             }
         });
         boolean flatpak = Sandbox.isLinux() && Sandbox.isSandboxed();
@@ -390,31 +405,84 @@ public class PreferencesController {
     }
 
     private void bindPkcs11() {
-        lstPkcs11Profiles.setItems(vm.pkcs11Profiles());
-        lstPkcs11Profiles.setCellFactory(lv -> new ListCell<Pkcs11ProfileDraft>() {
+        tblPkcs11Profiles.setItems(vm.pkcs11Profiles());
+        tblPkcs11Profiles.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY_FLEX_LAST_COLUMN);
+        colPkcs11Label.setCellValueFactory(c -> Bindings.createStringBinding(
+                () -> StringUtils.defaultString(c.getValue().label()), c.getValue().bodyProperty()));
+        colPkcs11Id.setCellValueFactory(c -> c.getValue().idProperty());
+        colPkcs11Library.setCellValueFactory(c -> Bindings.createStringBinding(
+                () -> StringUtils.defaultString(c.getValue().library()), c.getValue().bodyProperty()));
+        colPkcs11Library.setCellFactory(col -> new TableCell<>() {
             @Override
-            protected void updateItem(Pkcs11ProfileDraft item, boolean empty) {
-                super.updateItem(item, empty);
-                if (empty || item == null) {
+            protected void updateItem(String library, boolean empty) {
+                super.updateItem(library, empty);
+                if (empty || StringUtils.isEmpty(library)) {
                     setText(null);
                     setTooltip(null);
-                } else {
-                    String text = item.displayLabel();
-                    ProfileStatus st = item.status();
-                    if (st != null && st.state() != ProfileStatus.State.NOT_LOADED) {
-                        text = text + " [" + RES.get("jfx.gui.preferences.pkcs11.status." + st.state().name()) + "]";
-                    }
-                    setText(text);
-                    setTooltip(st != null && st.message() != null ? new Tooltip(st.message()) : null);
+                    return;
                 }
+                boolean missing = Pkcs11ProfileDraft.isLibraryMissing(library);
+                String name = Pkcs11ProfileDraft.libraryFileName(library);
+                setText(missing ? "⚠ " + name : name);
+                setTooltip(new Tooltip(missing ? RES.get("jfx.gui.preferences.pkcs11.library.missing", library)
+                        : library));
             }
         });
-        lstPkcs11Profiles.getSelectionModel().selectedItemProperty()
+        colPkcs11Status.setCellValueFactory(c -> Bindings.createObjectBinding(c.getValue()::display,
+                c.getValue().bodyProperty(), c.getValue().idProperty()));
+        colPkcs11Status.setCellFactory(col -> new TableCell<>() {
+            @Override
+            protected void updateItem(Pkcs11ProfileDraft.Display display, boolean empty) {
+                super.updateItem(display, empty);
+                getStyleClass().removeIf(c -> c.startsWith("pkcs11-status-"));
+                if (empty || display == null) {
+                    setText(null);
+                    setTooltip(null);
+                    return;
+                }
+                setText(statusText(display));
+                getStyleClass().add(statusStyle(display));
+                ProfileStatus st = getTableRow() == null || getTableRow().getItem() == null ? null
+                        : getTableRow().getItem().status();
+                boolean showCause = (display == Pkcs11ProfileDraft.Display.FAILED
+                        || display == Pkcs11ProfileDraft.Display.INVALID) && st != null && st.message() != null;
+                setTooltip(showCause ? new Tooltip(st.message()) : null);
+            }
+        });
+        tblPkcs11Profiles.getSelectionModel().selectedItemProperty()
                 .addListener((obs, oldD, newD) -> selectPkcs11Draft(newD));
+        tblPkcs11Profiles.setOnKeyPressed(e -> {
+            if (e.getCode() == KeyCode.DELETE && selectedDraft != null) {
+                onPkcs11Remove();
+                e.consume();
+            } else if (e.getCode() == KeyCode.F2 && selectedDraft != null) {
+                txtPkcs11Label.requestFocus();
+                txtPkcs11Label.selectAll();
+                e.consume();
+            }
+        });
+        MenuItem miDuplicate = new MenuItem(RES.get("jfx.gui.preferences.pkcs11.duplicate"));
+        miDuplicate.setOnAction(e -> onPkcs11Duplicate());
+        MenuItem miChangeId = new MenuItem(RES.get("jfx.gui.preferences.pkcs11.changeId"));
+        miChangeId.setOnAction(e -> onPkcs11ChangeId());
+        MenuItem miRemove = new MenuItem(RES.get("jfx.gui.preferences.pkcs11.remove"));
+        miRemove.setOnAction(e -> onPkcs11Remove());
+        ContextMenu menu = new ContextMenu(miDuplicate, miChangeId, new SeparatorMenuItem(), miRemove);
+        menu.setOnShowing(e -> {
+            miDuplicate.setDisable(selectedDraft == null);
+            miRemove.setDisable(selectedDraft == null);
+            miChangeId.setDisable(selectedDraft == null || selectedDraft.isDefault());
+        });
+        tblPkcs11Profiles.setContextMenu(menu);
         txtPkcs11Label.textProperty().addListener((obs, o, n) -> {
             if (!pkcs11Syncing && selectedDraft != null) {
-                editPkcs11(() -> selectedDraft.setLabel(n));
-                lstPkcs11Profiles.refresh();
+                editPkcs11(() -> {
+                    selectedDraft.setLabel(n);
+                    if (selectedDraft.idFollowsLabel() && !selectedDraft.isDefault()) {
+                        selectedDraft.changeId(uniquePkcs11Id(Pkcs11ProfileDraft.idFromLabel(n), selectedDraft));
+                    }
+                });
+                refreshPkcs11Derived();
             }
         });
         cmbPkcs11Provider.valueProperty().addListener((obs, o, n) -> {
@@ -425,13 +493,13 @@ public class PreferencesController {
         txtPkcs11Library.textProperty().addListener((obs, o, n) -> {
             if (!pkcs11Syncing && selectedDraft != null) {
                 editPkcs11(() -> selectedDraft.setLibrary(n));
+                refreshPkcs11Derived();
             }
         });
         txtPkcs11Body.textProperty().addListener((obs, o, n) -> {
             if (!pkcs11Syncing && selectedDraft != null) {
                 selectedDraft.bodyProperty().set(n == null ? "" : n);
                 refreshPkcs11Fields(false);
-                lstPkcs11Profiles.refresh();
             }
         });
         lblPkcs11EmptyHint.visibleProperty().bind(Bindings.createBooleanBinding(
@@ -440,10 +508,29 @@ public class PreferencesController {
                 txtPkcs11Body.textProperty()));
         lblPkcs11EmptyHint.managedProperty().bind(lblPkcs11EmptyHint.visibleProperty());
         if (!vm.pkcs11Profiles().isEmpty()) {
-            lstPkcs11Profiles.getSelectionModel().selectFirst();
+            tblPkcs11Profiles.getSelectionModel().selectFirst();
         } else {
             selectPkcs11Draft(null);
         }
+    }
+
+    private static String statusText(Pkcs11ProfileDraft.Display display) {
+        String text = RES.get("jfx.gui.preferences.pkcs11.status." + display.name());
+        return switch (display) {
+            case OK -> "✓ " + text;
+            case FAILED -> "✗ " + text;
+            case INVALID -> "⚠ " + text;
+            default -> text;
+        };
+    }
+
+    private static String statusStyle(Pkcs11ProfileDraft.Display display) {
+        return switch (display) {
+            case OK -> "pkcs11-status-ok";
+            case FAILED, INVALID -> "pkcs11-status-error";
+            case NEW, EDITED -> "pkcs11-status-pending";
+            default -> "pkcs11-status-idle";
+        };
     }
 
     private void editPkcs11(Runnable edit) {
@@ -459,14 +546,21 @@ public class PreferencesController {
     private void selectPkcs11Draft(Pkcs11ProfileDraft draft) {
         selectedDraft = draft;
         boolean has = draft != null;
-        boxPkcs11Editor.setVisible(has);
-        boxPkcs11Editor.setManaged(has);
+        scrPkcs11Editor.setVisible(has);
         lblPkcs11NoSelection.setVisible(!has);
-        lblPkcs11NoSelection.setManaged(!has);
         btnPkcs11Duplicate.setDisable(!has);
         btnPkcs11Remove.setDisable(!has);
-        btnPkcs11Rename.setDisable(!has || draft.isDefault());
+        btnPkcs11ChangeId.setDisable(!has || draft.isDefault());
         refreshPkcs11Fields(true);
+        if (has && needsAdvanced(draft)) {
+            ttlPkcs11Advanced.setExpanded(true);
+        }
+    }
+
+    private static boolean needsAdvanced(Pkcs11ProfileDraft d) {
+        ProfileStatus st = d.status();
+        return StringUtils.isBlank(d.body()) || d.provider() != ProviderMode.SUN
+                || (st != null && st.state() == ProfileStatus.State.INVALID);
     }
 
     private void refreshPkcs11Fields(boolean includeBody) {
@@ -480,6 +574,8 @@ public class PreferencesController {
                 txtPkcs11Body.setText("");
                 lblPkcs11Path.setText("");
                 lblPkcs11Status.setText("");
+                setShown(lblPkcs11LibraryMissing, false);
+                lblPkcs11CliHint.setText("");
                 return;
             }
             txtPkcs11Label.setText(StringUtils.defaultString(d.label()));
@@ -488,20 +584,42 @@ public class PreferencesController {
             if (includeBody) {
                 txtPkcs11Body.setText(d.body());
             }
-            Path file = Pkcs11Profiles.getInstance().fileFor(d.id());
-            String displayed = file == null ? "—" : file.toAbsolutePath().toString();
-            lblPkcs11Path.setText(MessageFormat.format(RES.get("jfx.gui.preferences.pkcs11.pathLabel"), displayed));
-            ProfileStatus st = d.status();
-            String status = st == null ? "" : RES.get("jfx.gui.preferences.pkcs11.status." + st.state().name());
-            if (st != null && st.message() != null) {
-                status = status + ": " + st.message();
-            }
-            lblPkcs11Status.setText(status);
-            lblPkcs11Status.setVisible(!status.isEmpty());
-            lblPkcs11Status.setManaged(!status.isEmpty());
         } finally {
             pkcs11Syncing = false;
         }
+        refreshPkcs11Derived();
+    }
+
+    private void refreshPkcs11Derived() {
+        Pkcs11ProfileDraft d = selectedDraft;
+        if (d == null) {
+            return;
+        }
+        Path file = Pkcs11Profiles.getInstance().fileFor(d.id());
+        String displayed = file == null ? "—" : file.toAbsolutePath().toString();
+        lblPkcs11Path.setText(MessageFormat.format(RES.get("jfx.gui.preferences.pkcs11.pathLabel"), displayed));
+        ProfileStatus st = d.status();
+        String status = st == null || st.state() == ProfileStatus.State.NOT_LOADED ? ""
+                : statusText(Pkcs11ProfileDraft.Display.valueOf(st.state().name()));
+        if (!status.isEmpty() && st.message() != null) {
+            status = status + ": " + st.message();
+        }
+        lblPkcs11Status.setText(status);
+        lblPkcs11Status.getStyleClass().removeIf(c -> c.startsWith("pkcs11-status-"));
+        if (!status.isEmpty()) {
+            lblPkcs11Status.getStyleClass().add(statusStyle(Pkcs11ProfileDraft.Display.valueOf(st.state().name())));
+        }
+        setShown(lblPkcs11Status, !status.isEmpty());
+        String library = d.library();
+        boolean missing = Pkcs11ProfileDraft.isLibraryMissing(library);
+        lblPkcs11LibraryMissing.setText(missing ? RES.get("jfx.gui.preferences.pkcs11.library.missing", library) : "");
+        setShown(lblPkcs11LibraryMissing, missing);
+        lblPkcs11CliHint.setText(RES.get("jfx.gui.preferences.pkcs11.cliHint", d.id()));
+    }
+
+    private static void setShown(Node node, boolean shown) {
+        node.setVisible(shown);
+        node.setManaged(shown);
     }
 
     private String askPkcs11Id(String initial, Pkcs11ProfileDraft self) {
@@ -537,29 +655,38 @@ public class PreferencesController {
         return null;
     }
 
-    private String uniquePkcs11Id(String base) {
-        String id = base;
+    /**
+     * A free id derived from {@code base}, never {@code default}; {@code self} does not count as taken.
+     */
+    private String uniquePkcs11Id(String base, Pkcs11ProfileDraft self) {
+        String b = Pkcs11Profiles.isValidId(base) ? base : Pkcs11ProfileDraft.idFromLabel(base);
+        String id = b;
         int n = 2;
-        while (pkcs11IdProblem(id, null) != null) {
-            id = base + "-" + n++;
+        while (Pkcs11Profiles.DEFAULT_ID.equalsIgnoreCase(id) || pkcs11IdProblem(id, self) != null) {
+            String suffix = "-" + n++;
+            id = StringUtils.left(b, Pkcs11ProfileDraft.MAX_ID_LENGTH - suffix.length()) + suffix;
         }
         return id;
     }
 
     private void addPkcs11Draft(String id, String body) {
-        String b = Pkcs11Profiles.DEFAULT_ID.equalsIgnoreCase(id) ? body
-                : Pkcs11ConfigText.withValue(body, Pkcs11ConfigText.KEY_NAME, id);
+        String b = Pkcs11ConfigText.withValue(body, Pkcs11ConfigText.KEY_NAME, id);
         Pkcs11ProfileDraft d = new Pkcs11ProfileDraft(null, id, b, null);
         vm.pkcs11Profiles().add(d);
-        lstPkcs11Profiles.getSelectionModel().select(d);
+        tblPkcs11Profiles.getSelectionModel().select(d);
+        tblPkcs11Profiles.scrollTo(d);
+        txtPkcs11Label.requestFocus();
+        txtPkcs11Label.selectAll();
+    }
+
+    private void addPkcs11DraftWithLabel(String label, String body) {
+        addPkcs11Draft(uniquePkcs11Id(Pkcs11ProfileDraft.idFromLabel(label), null),
+                Pkcs11ConfigText.withMetadata(body, Pkcs11ConfigText.META_LABEL, label));
     }
 
     @FXML
     private void onPkcs11Add() {
-        String id = askPkcs11Id("", null);
-        if (id != null) {
-            addPkcs11Draft(id, PKCS11Utils.getSampleConfig());
-        }
+        addPkcs11DraftWithLabel(RES.get("jfx.gui.preferences.pkcs11.newLabel"), PKCS11Utils.getSampleConfig());
     }
 
     @FXML
@@ -567,14 +694,12 @@ public class PreferencesController {
         if (selectedDraft == null) {
             return;
         }
-        String id = askPkcs11Id(uniquePkcs11Id(selectedDraft.id() + "-copy"), null);
-        if (id != null) {
-            addPkcs11Draft(id, selectedDraft.body());
-        }
+        String base = StringUtils.defaultIfBlank(selectedDraft.label(), selectedDraft.id());
+        addPkcs11DraftWithLabel(RES.get("jfx.gui.preferences.pkcs11.copyLabel", base), selectedDraft.body());
     }
 
     @FXML
-    private void onPkcs11Rename() {
+    private void onPkcs11ChangeId() {
         if (selectedDraft == null) {
             return;
         }
@@ -584,8 +709,11 @@ public class PreferencesController {
         }
         String id = askPkcs11Id(selectedDraft.id(), selectedDraft);
         if (id != null) {
-            selectedDraft.idProperty().set(id);
-            lstPkcs11Profiles.refresh();
+            Pkcs11ProfileDraft d = selectedDraft;
+            editPkcs11(() -> {
+                d.changeId(id);
+                d.setIdFollowsLabel(false);
+            });
             refreshPkcs11Fields(false);
         }
     }
@@ -670,7 +798,7 @@ public class PreferencesController {
     }
 
     private void createFromCatalog(Pkcs11Catalog.Entry entry, String library) {
-        String id = uniquePkcs11Id(entry.id());
+        String id = uniquePkcs11Id(entry.id(), null);
         StringBuilder text = new StringBuilder();
         text.append(RES.get("jfx.gui.preferences.pkcs11.confirm.library", library)).append('\n');
         boolean exists = !library.isEmpty() && Files.isRegularFile(Path.of(library));

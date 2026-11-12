@@ -320,7 +320,7 @@ The dialog has the following tabs:
 * **Network** -- relax SSL security for TSA / OCSP / CRL traffic
 * **PDF Render** -- order and selection of preview backends (JPedal, Apache PDFBox, OpenPDF)
 * **TSA** -- default hash algorithm for timestamp requests
-* **PKCS#11** -- the PKCS#11 profiles: add, duplicate, rename or remove them, pick the driver library, detect installed tokens and add entries from the bundled catalog (see <<Using hardware tokens for signing>>)
+* **Hardware tokens (PKCS#11)** -- a table of the PKCS#11 profiles with their label, id, driver library and status. Add, duplicate, change the id of or remove a profile, pick the driver library, detect installed tokens and add entries from the bundled catalog. The provider choice and the raw configuration are under _Advanced_ (see <<Using hardware tokens for signing>>)
 
 Most settings apply immediately on _OK_, PKCS#11 profile changes included. The Network tab, marked _Takes effect after restart_, only takes effect on the next launch. _Reset section to defaults_ restores the bundled defaults for the active tab only; other tabs keep their current values.
 
@@ -1102,10 +1102,12 @@ If some "online" feature (TSA, CRL, OCSP) is enabled and JSignPdf runs behind a 
 JSignPdf reaches smart cards, USB tokens and HSMs through their PKCS#11 driver. Each token is described by a *PKCS#11 profile*: a SunPKCS11 configuration file (see https://docs.oracle.com/en/java/javase/21/security/pkcs11-reference-guide1.html[PKCS#11 Reference Guide]) plus a few JSignPdf metadata lines. Several profiles can be configured at once; you select one when signing.
 
 . Install the PKCS#11 driver (middleware) for your token from the vendor. JSignPdf never ships or downloads drivers.
-. Create a profile. The easiest way is _File > Preferences > PKCS#11_ in the JavaFX UI:
+. Create a profile. The easiest way is _File > Preferences > Hardware tokens (PKCS#11)_ in the JavaFX UI:
 ** _Detect tokens_ lists the known drivers found on this computer; pick one to create a profile.
 ** _Add from catalog_ lists the drivers JSignPdf knows for your platform, found or not.
 ** _Add_ creates a profile from a sample; use the _Library_ file chooser to point it at the driver (`.so`, `.dll` or `.dylib`).
++
+A new profile takes its id from the label as you type it (`My SafeNet` becomes `my-safenet`) until you press _OK_ or set the id with _Change id…_. The form shows the matching command-line option, for example `--keystore-provider my-safenet`. A library path that does not exist is marked in the table and under the _Library_ field. The _Status_ column shows whether a profile was loaded in this session or failed (hover for the reason), and marks new and edited profiles.
 +
 Nothing is written before you confirm and press _OK_. The confirmation shows the absolute library path and whether the file exists.
 . Select the profile in the _Certificate_ panel (`PKCS11 — <label>`), enter the PIN as the keystore password and press _Load Keys_. The result, or the reason for a failure, is shown under the button.

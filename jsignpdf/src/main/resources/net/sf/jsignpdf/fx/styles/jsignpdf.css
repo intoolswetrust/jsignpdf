@@ -182,6 +182,29 @@
     -fx-font-size: 12px;
 }
 
+.pkcs11-status-ok {
+    -fx-text-fill: #2e7d32;
+}
+
+.pkcs11-status-error {
+    -fx-text-fill: #c62828;
+}
+
+.pkcs11-status-pending {
+    -fx-text-fill: #b06000;
+}
+
+.pkcs11-status-idle {
+    -fx-text-fill: #666666;
+}
+
+.table-row-cell:selected .pkcs11-status-ok,
+.table-row-cell:selected .pkcs11-status-error,
+.table-row-cell:selected .pkcs11-status-pending,
+.table-row-cell:selected .pkcs11-status-idle {
+    -fx-text-fill: -fx-selection-bar-text;
+}
+
 .pref-path-label {
     -fx-text-fill: #555555;
     -fx-font-family: "Monospaced", "Menlo", "Consolas", monospace;

@@ -8,6 +8,7 @@ import java.io.InputStream;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Properties;
 import java.util.ResourceBundle;
 import java.util.concurrent.CountDownLatch;
@@ -17,13 +18,13 @@ import java.util.stream.Collectors;
 
 import javafx.application.Platform;
 import javafx.fxml.FXMLLoader;
-import javafx.scene.Node;
 import javafx.scene.control.Button;
 import javafx.scene.control.ChoiceBox;
-import javafx.scene.control.ListView;
-import javafx.scene.control.TabPane;
+import javafx.scene.control.Label;
+import javafx.scene.control.TableView;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
+import javafx.scene.control.TitledPane;
 
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -65,12 +66,12 @@ public class PreferencesPkcs11EditorTest {
         AtomicReference<Boolean> renameDisabledForA = new AtomicReference<>();
         runOnFxThread(() -> {
             Fixture f = new Fixture();
-            renameDisabledForDefault.set(f.rename.isDisable());
-            f.list.getSelectionModel().select(1);
+            renameDisabledForDefault.set(f.changeId.isDisable());
+            f.table.getSelectionModel().select(1);
             label.set(f.label.getText());
             library.set(f.library.getText());
             provider.set(f.provider.getValue());
-            renameDisabledForA.set(f.rename.isDisable());
+            renameDisabledForA.set(f.changeId.isDisable());
         });
         assertEquals("Card A", label.get());
         assertEquals("/usr/lib/a.so", library.get());
@@ -85,7 +86,7 @@ public class PreferencesPkcs11EditorTest {
         AtomicReference<String> raw = new AtomicReference<>();
         runOnFxThread(() -> {
             Fixture f = new Fixture();
-            f.list.getSelectionModel().select(1);
+            f.table.getSelectionModel().select(1);
             f.label.setText("Renamed card");
             f.provider.setValue(ProviderMode.BOTH);
             f.library.setText("C:\\Program Files\\Vendor\\p11.dll");
@@ -105,7 +106,7 @@ public class PreferencesPkcs11EditorTest {
         AtomicReference<String> library = new AtomicReference<>();
         runOnFxThread(() -> {
             Fixture f = new Fixture();
-            f.list.getSelectionModel().select(1);
+            f.table.getSelectionModel().select(1);
             f.body.setText("#jsignpdf:label=Typed\nname=a\nlibrary=/opt/typed.so\n");
             label.set(f.label.getText());
             library.set(f.library.getText());
@@ -119,7 +120,7 @@ public class PreferencesPkcs11EditorTest {
         AtomicReference<List<String>> ids = new AtomicReference<>();
         runOnFxThread(() -> {
             Fixture f = new Fixture();
-            f.list.getSelectionModel().select(1);
+            f.table.getSelectionModel().select(1);
             f.remove.fire();
             ids.set(f.vm.pkcs11Edits().stream().map(Pkcs11Profiles.ProfileEdit::id).collect(Collectors.toList()));
         });
@@ -131,7 +132,7 @@ public class PreferencesPkcs11EditorTest {
         AtomicReference<String> body = new AtomicReference<>();
         runOnFxThread(() -> {
             Fixture f = new Fixture();
-            f.list.getSelectionModel().select(1);
+            f.table.getSelectionModel().select(1);
             f.resetSample.fire();
             body.set(f.vm.pkcs11Edits().get(1).body());
         });
@@ -139,15 +140,84 @@ public class PreferencesPkcs11EditorTest {
         assertFalse(body.get(), body.get().contains("name=JSignPdf"));
     }
 
+    @Test
+    public void addedProfileTakesItsIdFromTheLabel() throws Exception {
+        AtomicReference<String> initialId = new AtomicReference<>();
+        AtomicReference<Pkcs11Profiles.ProfileEdit> edit = new AtomicReference<>();
+        AtomicReference<String> hint = new AtomicReference<>();
+        runOnFxThread(() -> {
+            Fixture f = new Fixture();
+            f.add.fire();
+            initialId.set(f.vm.pkcs11Profiles().get(2).id());
+            f.label.setText("Česká karta");
+            edit.set(f.vm.pkcs11Edits().get(2));
+            hint.set(f.cliHint.getText());
+        });
+        assertEquals("new-token", initialId.get());
+        assertEquals("ceska-karta", edit.get().id());
+        assertTrue(edit.get().body(), edit.get().body().contains("#jsignpdf:label=Česká karta\n"));
+        assertTrue(edit.get().body(), edit.get().body().contains("\nname=ceska-karta\n"));
+        assertEquals("Command line: --keystore-provider ceska-karta", hint.get());
+    }
+
+    @Test
+    public void existingProfileKeepsItsIdWhenTheLabelChanges() throws Exception {
+        AtomicReference<String> id = new AtomicReference<>();
+        runOnFxThread(() -> {
+            Fixture f = new Fixture();
+            f.table.getSelectionModel().select(1);
+            f.label.setText("Something else");
+            id.set(f.vm.pkcs11Edits().get(1).id());
+        });
+        assertEquals("a", id.get());
+    }
+
+    @Test
+    public void duplicateGetsACopyLabelAndAFreeId() throws Exception {
+        AtomicReference<Pkcs11Profiles.ProfileEdit> edit = new AtomicReference<>();
+        runOnFxThread(() -> {
+            Fixture f = new Fixture();
+            f.table.getSelectionModel().select(1);
+            f.duplicate.fire();
+            f.table.getSelectionModel().select(1);
+            f.duplicate.fire();
+            edit.set(f.vm.pkcs11Edits().get(3));
+        });
+        assertEquals("card-a-copy-2", edit.get().id());
+        assertTrue(edit.get().body(), edit.get().body().contains("#jsignpdf:label=Card A (copy)\n"));
+        assertTrue(edit.get().body(), edit.get().body().contains("\nname=card-a-copy-2\n"));
+    }
+
+    @Test
+    public void advancedSectionOpensOnlyWhenNeeded() throws Exception {
+        AtomicReference<Boolean> forSun = new AtomicReference<>();
+        AtomicReference<Boolean> forBoth = new AtomicReference<>();
+        runOnFxThread(() -> {
+            Fixture f = new Fixture();
+            f.table.getSelectionModel().select(1);
+            forSun.set(f.advanced.isExpanded());
+            f.vm.pkcs11Profiles().add(new Pkcs11ProfileDraft("b", "b",
+                    "#jsignpdf:provider=both\nname=b\nlibrary=/usr/lib/b.so\n", null));
+            f.table.getSelectionModel().select(2);
+            forBoth.set(f.advanced.isExpanded());
+        });
+        assertFalse(forSun.get());
+        assertTrue(forBoth.get());
+    }
+
     /** The Preferences FXML bound to a view model holding the legacy profile and one named profile. */
     private static final class Fixture {
         final PreferencesViewModel vm = new PreferencesViewModel();
-        final ListView<Pkcs11ProfileDraft> list;
+        final TableView<Pkcs11ProfileDraft> table;
         final TextField label;
         final TextField library;
         final ChoiceBox<ProviderMode> provider;
         final TextArea body;
-        final Button rename;
+        final Button changeId;
+        final Button add;
+        final Button duplicate;
+        final TitledPane advanced;
+        final Label cliHint;
         final Button remove;
         final Button resetSample;
 
@@ -156,7 +226,7 @@ public class PreferencesPkcs11EditorTest {
             try {
                 FXMLLoader loader = new FXMLLoader(getClass().getResource("/net/sf/jsignpdf/fx/view/Preferences.fxml"),
                         ResourceBundle.getBundle(Constants.RESOURCE_BUNDLE_BASE, Locale.ENGLISH));
-                TabPane tabs = loader.load();
+                loader.load();
                 PreferencesController controller = loader.getController();
                 Properties defaults = new Properties();
                 try (InputStream is = getClass().getResourceAsStream("/net/sf/jsignpdf/conf/advanced.default.properties")) {
@@ -167,16 +237,19 @@ public class PreferencesPkcs11EditorTest {
                         new Pkcs11Profile("default", Path.of("pkcs11.cfg"), true, BODY_DEFAULT),
                         new Pkcs11Profile("a", Path.of("pkcs11", "a.cfg"), false, BODY_A)), id -> null);
                 controller.bind(vm);
-                Node tab = tabs.getTabs().stream().filter(t -> "tabPkcs11".equals(t.getId())).findFirst().orElseThrow()
-                        .getContent();
-                list = (ListView<Pkcs11ProfileDraft>) tab.lookup("#lstPkcs11Profiles");
-                label = (TextField) tab.lookup("#txtPkcs11Label");
-                library = (TextField) tab.lookup("#txtPkcs11Library");
-                provider = (ChoiceBox<ProviderMode>) tab.lookup("#cmbPkcs11Provider");
-                body = (TextArea) tab.lookup("#txtPkcs11Body");
-                rename = (Button) tab.lookup("#btnPkcs11Rename");
-                remove = (Button) tab.lookup("#btnPkcs11Remove");
-                resetSample = (Button) tab.lookup("#btnPkcs11ResetSample");
+                Map<String, Object> ns = loader.getNamespace();
+                table = (TableView<Pkcs11ProfileDraft>) ns.get("tblPkcs11Profiles");
+                label = (TextField) ns.get("txtPkcs11Label");
+                library = (TextField) ns.get("txtPkcs11Library");
+                provider = (ChoiceBox<ProviderMode>) ns.get("cmbPkcs11Provider");
+                body = (TextArea) ns.get("txtPkcs11Body");
+                changeId = (Button) ns.get("btnPkcs11ChangeId");
+                add = (Button) ns.get("btnPkcs11Add");
+                duplicate = (Button) ns.get("btnPkcs11Duplicate");
+                advanced = (TitledPane) ns.get("ttlPkcs11Advanced");
+                cliHint = (Label) ns.get("lblPkcs11CliHint");
+                remove = (Button) ns.get("btnPkcs11Remove");
+                resetSample = (Button) ns.get("btnPkcs11ResetSample");
             } catch (Exception e) {
                 throw new IllegalStateException(e);
             }
