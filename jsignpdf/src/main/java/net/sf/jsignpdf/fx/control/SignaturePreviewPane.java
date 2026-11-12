@@ -82,9 +82,7 @@ final class SignaturePreviewPane extends Pane {
     private String pendingAlias = "";
 
     // Same font source and metrics used by the OpenPDF signing engine.
-    private byte[] l2FontData;
-    private String l2FontName;
-    private String l2FontEncoding;
+    private L2Font l2Font;
     private String fxFontFullName;
     private BaseFont openPdfBaseFont;
 
@@ -209,7 +207,7 @@ final class SignaturePreviewPane extends Pane {
         double pointScale = getActualPointScale(width, height);
         if (!(pointScale > 0.0) || !Double.isFinite(pointScale)) pointScale = 1.0;
 
-        ensureExactFont();
+        ensureExactFont(text);
         double maxWidthPt = width / pointScale;
 
         // A configured size of 0 means auto-fit; reproduce OpenPDF's fitText over
@@ -339,23 +337,24 @@ final class SignaturePreviewPane extends Pane {
     }
 
     /**
-     * Registers the L2 font once, because {@link Font#loadFont(java.io.InputStream, double)} re-parses the
-     * face on every call and repaints resize the text continuously while the rectangle is dragged.
+     * Registers the L2 font the engines would pick for this text, and only when that choice changes, because
+     * {@link Font#loadFont(java.io.InputStream, double)} re-parses the face on every call and repaints resize
+     * the text continuously while the rectangle is dragged.
      */
-    private void ensureExactFont() {
-        if (l2FontData != null && fxFontFullName != null && openPdfBaseFont != null) return;
+    private void ensureExactFont(String text) {
+        L2Font resolved = FontUtils.getL2Font(text);
+        if (resolved == l2Font && fxFontFullName != null && openPdfBaseFont != null) return;
+        l2Font = resolved;
+        fxFontFullName = null;
+        openPdfBaseFont = null;
         try {
-            L2Font l2 = FontUtils.getL2Font();
-            if (l2 != null) {
-                l2FontData = l2.getData();
-                l2FontName = l2.getName();
-                l2FontEncoding = l2.getEncoding();
-                Font loaded = Font.loadFont(new ByteArrayInputStream(l2FontData), DEFAULT_FONT_SIZE);
+            if (resolved != null) {
+                Font loaded = Font.loadFont(new ByteArrayInputStream(resolved.getData()), DEFAULT_FONT_SIZE);
                 if (loaded != null) {
                     fxFontFullName = loaded.getName();
                 }
-                openPdfBaseFont = BaseFont.createFont(l2FontName, l2FontEncoding,
-                        BaseFont.EMBEDDED, BaseFont.CACHED, l2FontData, null);
+                openPdfBaseFont = BaseFont.createFont(resolved.getName(), resolved.getEncoding(),
+                        BaseFont.EMBEDDED, BaseFont.CACHED, resolved.getData(), null);
             }
         } catch (Exception ignored) {
             // Fall back to the same built-in face OpenPDF uses.
