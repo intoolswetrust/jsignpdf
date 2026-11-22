@@ -540,7 +540,7 @@ See <<Visible signature options>> for details.
 | Status text.
 
 | `-fs, --font-size <size>`
-| Font size for signature text. Default: `10.0`.
+| Font size for signature text. Default: `10.0`. A value of `0` (or less) auto-fits the text to the signature box instead. With `SIGNAME_AND_DESCRIPTION` this also keeps the description from being drawn at the fitted signer-name size.
 
 | `--img-path <file>`
 | Image path for the visible signature.

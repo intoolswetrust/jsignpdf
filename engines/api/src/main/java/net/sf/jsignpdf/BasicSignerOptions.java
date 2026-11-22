@@ -993,12 +993,13 @@ public class BasicSignerOptions {
     }
 
     /**
-     * @return the l2TextFontSize
+     * Size of the visible-signature text. A non-positive value requests auto-fitting and is passed through
+     * unchanged: the OpenPDF engine relies on it to reset the font it shares between the signer name and the
+     * description (see issue #548), and the DSS engine falls back to the default for such values itself.
+     *
+     * @return the l2TextFontSize, or a non-positive value when auto-fit was requested
      */
     public float getL2TextFontSize() {
-        if (l2TextFontSize <= 0f) {
-            l2TextFontSize = Constants.DEFVAL_L2_FONT_SIZE;
-        }
         return l2TextFontSize;
     }
 

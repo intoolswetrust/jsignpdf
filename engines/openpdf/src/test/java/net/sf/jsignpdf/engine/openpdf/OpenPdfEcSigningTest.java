@@ -23,6 +23,7 @@ import java.util.Map;
 import net.sf.jsignpdf.BasicSignerOptions;
 import net.sf.jsignpdf.engine.EngineConfig;
 import net.sf.jsignpdf.types.HashAlgorithm;
+import net.sf.jsignpdf.types.RenderMode;
 
 import org.bouncycastle.asn1.x500.X500Name;
 import org.bouncycastle.asn1.x509.BasicConstraints;
@@ -45,6 +46,7 @@ import org.openpdf.text.Document;
 import org.openpdf.text.Paragraph;
 import org.openpdf.text.pdf.AcroFields;
 import org.openpdf.text.pdf.PdfArray;
+import org.openpdf.text.pdf.PdfDictionary;
 import org.openpdf.text.pdf.PdfName;
 import org.openpdf.text.pdf.PdfPKCS7;
 import org.openpdf.text.pdf.PdfReader;
@@ -124,6 +126,48 @@ public class OpenPdfEcSigningTest {
         }
 
         assertEquals("SignerInfo signatureAlgorithm OID", ID_EC_PUBLIC_KEY, signerInfoAlgOid(outputFile));
+    }
+
+    /**
+     * Regression coverage for issue #548: {@code SIGNAME_AND_DESCRIPTION} reuses the fitted signer-name size for
+     * the description because OpenPDF fits by mutating the shared font. The only workaround JSignPdf can offer is
+     * to let a non-positive size through so OpenPDF auto-fits and resets the font, which used to be clamped to 10.
+     */
+    @Test
+    public void nonPositiveVisibleFontSizeIsKeptForAutoFit() throws Exception {
+        File ksFile = createEcKeyStore();
+
+        BasicSignerOptions o = new BasicSignerOptions();
+        o.setAdvanced(true);
+        o.setHashAlgorithm(HashAlgorithm.SHA256);
+        o.setKsType("JKS");
+        o.setKsFile(ksFile.getAbsolutePath());
+        o.setKsPasswd(PWD);
+        o.setKeyAlias(ALIAS);
+        o.setKeyPasswd(PWD);
+        o.setInFile(inputFile.getAbsolutePath());
+        o.setOutFile(outputFile.getAbsolutePath());
+        o.setVisible(true);
+        o.setPage(1);
+        o.setPositionLLX(50f);
+        o.setPositionLLY(500f);
+        o.setPositionURX(350f);
+        o.setPositionURY(580f);
+        o.setRenderMode(RenderMode.SIGNAME_AND_DESCRIPTION);
+        o.setL2Text("Digitally signed by ${signer}\nDate: ${timestamp}");
+        o.setL2TextFontSize(0f);
+
+        assertEquals("0 must reach the engine as auto-fit, not be replaced by the default",
+                0f, o.getL2TextFontSize(), 0.0f);
+        assertTrue("signing with auto-fit must succeed", new OpenPdfSigningEngine().sign(o, EMPTY_CONFIG));
+        assertTrue("output PDF should exist", outputFile.isFile());
+
+        PdfReader reader = new PdfReader(outputFile.getAbsolutePath());
+        try {
+            assertEquals("expected exactly one signature", 1, reader.getAcroFields().getSignedFieldNames().size());
+        } finally {
+            reader.close();
+        }
     }
 
     /** Reads the SignerInfo signatureAlgorithm OID out of the signed PDF's CMS blob. */
