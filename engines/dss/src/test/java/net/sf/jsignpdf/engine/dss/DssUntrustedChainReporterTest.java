@@ -154,7 +154,7 @@ public class DssUntrustedChainReporterTest {
     }
 
     /**
-     * Mines a certificate whose DER SHA-256 starts with a {@code 0x00} byte (about one attempt in 256) by
+     * Mines a certificate whose DER SHA-256 starts with exactly two zero hex digits (about one attempt in 273) by
      * re-signing with a single key pair and only varying the serial number, which keeps this cheap.
      */
     private static X509Certificate withLeadingZeroDigestByte() throws Exception {
@@ -171,7 +171,8 @@ public class DssUntrustedChainReporterTest {
         for (int serial = 1; serial < 20000; serial++) {
             X509CertificateHolder holder = new JcaX509v3CertificateBuilder(name, BigInteger.valueOf(serial),
                     notBefore, notAfter, name, keyPair.getPublic()).build(signer);
-            if (sha256.digest(holder.getEncoded())[0] == 0) {
+            byte[] digest = sha256.digest(holder.getEncoded());
+            if (digest[0] == 0 && (digest[1] & 0xF0) != 0) {
                 return new JcaX509CertificateConverter().setProvider(BouncyCastleProvider.PROVIDER_NAME)
                         .getCertificate(holder);
             }
